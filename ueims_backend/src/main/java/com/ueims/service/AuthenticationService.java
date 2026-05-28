@@ -1,0 +1,301 @@
+package com.ueims.service;
+
+import java.text.ParseException;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
+import java.util.List;
+import java.util.StringJoiner;
+import java.util.UUID;
+
+import jakarta.transaction.Transactional;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
+import com.nimbusds.jose.*;
+import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jose.crypto.MACVerifier;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
+import com.ueims.dto.request.AuthenticationRequest;
+import com.ueims.dto.request.IntrospectRequest;
+import com.ueims.dto.request.LogoutRequest;
+import com.ueims.dto.request.RefreshRequest;
+import com.ueims.dto.request.ChangePasswordRequest;
+import org.springframework.security.core.context.SecurityContextHolder;
+import com.ueims.dto.response.AuthenticationResponse;
+import com.ueims.dto.response.IntrospectResponse;
+import com.ueims.exception.AppException;
+import com.ueims.exception.ErrorCode;
+import com.ueims.model.entity.InvalidatedToken;
+import com.ueims.model.entity.User;
+import com.ueims.model.entity.UserSession;
+import com.ueims.repository.InvalidatedTokenRepository;
+import com.ueims.repository.UserRepository;
+import com.ueims.repository.UserSessionRepository;
+
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
+import lombok.extern.slf4j.Slf4j;
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+public class AuthenticationService {
+    UserRepository userRepository;
+    InvalidatedTokenRepository invalidatedTokenRepository;
+    UserSessionRepository userSessionRepository;
+    PasswordEncoder passwordEncoder;
+
+    @NonFinal
+    @Value("${jwt.signerKey}")
+    protected String SIGNER_KEY;
+
+    @NonFinal
+    @Value("${jwt.valid-duration}")
+    protected long VALID_DURATION;
+
+    @NonFinal
+    @Value("${jwt.refreshable-duration}")
+    protected long REFRESHABLE_DURATION;
+
+    public IntrospectResponse introspect(IntrospectRequest request) throws JOSEException, ParseException {
+        var token = request.getToken();
+        boolean isValid = true;
+
+        try {
+            verifyToken(token, false);
+        } catch (AppException e) {
+            isValid = false;
+        }
+
+        return IntrospectResponse.builder().valid(isValid).build();
+    }
+
+    @Transactional
+    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+        log.info("SignKey: {}", SIGNER_KEY);
+
+        var user = userRepository
+                .findByEmail(request.getEmail())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        if ("BANNED".equals(user.getStatus())) {
+            throw new AppException(ErrorCode.USER_BANNED);
+        }
+
+        boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
+
+        if (!authenticated) {
+            user.setFailedLoginAttempts(user.getFailedLoginAttempts() + 1);
+            if (user.getFailedLoginAttempts() >= 5) {
+                user.setStatus("BANNED");
+                userRepository.save(user);
+                throw new AppException(ErrorCode.USER_BANNED);
+            }
+            userRepository.save(user);
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
+
+        if (user.getFailedLoginAttempts() > 0) {
+            user.setFailedLoginAttempts(0);
+            userRepository.save(user);
+        }
+
+        // BR-02: Simultaneous Session Control - Invalidate old sessions
+        List<UserSession> oldSessions = userSessionRepository.findByEmail(user.getEmail());
+        if (!CollectionUtils.isEmpty(oldSessions)) {
+            List<InvalidatedToken> invalidTokens = oldSessions.stream()
+                    .map(s -> InvalidatedToken.builder()
+                            .tokenId(s.getTokenId())
+                            .expiresAt(s.getExpiresAt())
+                            .build())
+                    .toList();
+            invalidatedTokenRepository.saveAll(invalidTokens);
+            userSessionRepository.deleteAll(oldSessions);
+        }
+
+        var token = generateToken(user);
+
+        // Save new session
+        try {
+            SignedJWT signedJWT = SignedJWT.parse(token);
+            UserSession session = UserSession.builder()
+                    .tokenId(signedJWT.getJWTClaimsSet().getJWTID())
+                    .email(user.getEmail())
+                    .expiresAt(signedJWT
+                            .getJWTClaimsSet()
+                            .getExpirationTime()
+                            .toInstant()
+                            .atZone(ZoneId.systemDefault())
+                            .toLocalDateTime())
+                    .build();
+            userSessionRepository.save(session);
+        } catch (ParseException e) {
+            log.error("Failed to parse generated token", e);
+        }
+
+        return AuthenticationResponse.builder().token(token).authenticated(true).mustChangePassword(user.getMustChangePassword()).build();
+    }
+
+    public void logout(LogoutRequest request) throws ParseException, JOSEException {
+        try {
+            var signToken = verifyToken(request.getToken(), true);
+
+            String jit = signToken.getJWTClaimsSet().getJWTID();
+            Date expiryTime = signToken.getJWTClaimsSet().getExpirationTime();
+
+            InvalidatedToken invalidatedToken = InvalidatedToken.builder()
+                    .tokenId(jit)
+                    .expiresAt(expiryTime
+                            .toInstant()
+                            .atZone(java.time.ZoneId.systemDefault())
+                            .toLocalDateTime())
+                    .build();
+
+            invalidatedTokenRepository.save(invalidatedToken);
+            userSessionRepository.findById(jit).ifPresent(userSessionRepository::delete);
+        } catch (AppException exception) {
+            log.info("Token already expired");
+        }
+    }
+
+    @Transactional
+    public AuthenticationResponse refreshToken(RefreshRequest request) throws ParseException, JOSEException {
+        var signedJWT = verifyToken(request.getToken(), true);
+
+        var jit = signedJWT.getJWTClaimsSet().getJWTID();
+        var expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+
+        InvalidatedToken invalidatedToken = InvalidatedToken.builder()
+                .tokenId(jit)
+                .expiresAt(expiryTime
+                        .toInstant()
+                        .atZone(java.time.ZoneId.systemDefault())
+                        .toLocalDateTime())
+                .build();
+
+        invalidatedTokenRepository.save(invalidatedToken);
+        userSessionRepository.findById(jit).ifPresent(userSessionRepository::delete);
+
+        var email = signedJWT.getJWTClaimsSet().getSubject();
+
+        var user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
+
+        var token = generateToken(user);
+
+        try {
+            SignedJWT parsedToken = SignedJWT.parse(token);
+            UserSession session = UserSession.builder()
+                    .tokenId(parsedToken.getJWTClaimsSet().getJWTID())
+                    .email(user.getEmail())
+                    .expiresAt(parsedToken
+                            .getJWTClaimsSet()
+                            .getExpirationTime()
+                            .toInstant()
+                            .atZone(ZoneId.systemDefault())
+                            .toLocalDateTime())
+                    .build();
+            userSessionRepository.save(session);
+        } catch (ParseException e) {
+            log.error("Failed to parse generated token", e);
+        }
+
+        return AuthenticationResponse.builder().token(token).authenticated(true).build();
+    }
+
+    private String generateToken(User user) {
+        JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
+
+        JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
+                .subject(user.getEmail())
+                .issuer("ueims.com")
+                .issueTime(new Date())
+                .expirationTime(new Date(
+                        Instant.now().plus(VALID_DURATION, ChronoUnit.SECONDS).toEpochMilli()))
+                .jwtID(UUID.randomUUID().toString())
+                .claim("scope", buildScope(user))
+                .claim("must_change_password", user.getMustChangePassword())
+                .build();
+
+        Payload payload = new Payload(jwtClaimsSet.toJSONObject());
+
+        JWSObject jwsObject = new JWSObject(header, payload);
+
+        try {
+            jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
+            return jwsObject.serialize();
+        } catch (JOSEException e) {
+            log.error("Cannot create token", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    private SignedJWT verifyToken(String token, boolean isRefresh) throws JOSEException, ParseException {
+        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
+
+        SignedJWT signedJWT = SignedJWT.parse(token);
+
+        Date expiryTime = (isRefresh)
+                ? new Date(signedJWT
+                        .getJWTClaimsSet()
+                        .getIssueTime()
+                        .toInstant()
+                        .plus(REFRESHABLE_DURATION, ChronoUnit.SECONDS)
+                        .toEpochMilli())
+                : signedJWT.getJWTClaimsSet().getExpirationTime();
+
+        var verified = signedJWT.verify(verifier);
+
+        if (!(verified && expiryTime.after(new Date()))) throw new AppException(ErrorCode.UNAUTHENTICATED);
+
+        if (invalidatedTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID()))
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+
+        return signedJWT;
+    }
+
+    private String buildScope(User user) {
+        StringJoiner stringJoiner = new StringJoiner(" ");
+
+        if (!CollectionUtils.isEmpty(user.getRoles()))
+            user.getRoles().forEach(userRole -> {
+                stringJoiner.add("ROLE_" + userRole.getRole().getRoleName());
+                if (!CollectionUtils.isEmpty(userRole.getRole().getRolePermissions())) {
+                    userRole.getRole().getRolePermissions().forEach(rolePermission -> {
+                        stringJoiner.add(rolePermission.getPermission().getPermissionName());
+                    });
+                }
+            });
+
+        return stringJoiner.toString();
+    }
+
+    @Transactional
+    public void changePassword(ChangePasswordRequest request) {
+        var context = SecurityContextHolder.getContext();
+        String email = context.getAuthentication().getName();
+
+        var user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            throw new AppException(ErrorCode.WRONG_OLD_PASSWORD);
+        }
+
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            throw new AppException(ErrorCode.PASSWORDS_NOT_MATCH);
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        user.setMustChangePassword(false);
+        userRepository.save(user);
+    }
+}

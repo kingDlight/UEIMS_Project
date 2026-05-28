@@ -1,12 +1,19 @@
 package com.ueims.service.impl;
 
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+
+import com.ueims.dto.response.UserResponse;
+import com.ueims.exception.AppException;
+import com.ueims.exception.ErrorCode;
 import com.ueims.model.entity.User;
 import com.ueims.repository.UserRepository;
 import com.ueims.service.UserService;
-import org.springframework.stereotype.Service;
+
 import lombok.RequiredArgsConstructor;
-import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -14,14 +21,38 @@ public class UserServiceImpl implements UserService {
     private final UserRepository repository;
 
     @Override
-    public List<User> findAll() { return repository.findAll(); }
+    public List<User> findAll() {
+        return repository.findAll();
+    }
 
     @Override
-    public User findById(UUID id) { return repository.findById(id).orElse(null); }
+    public User findById(UUID id) {
+        return repository.findById(id).orElse(null);
+    }
 
     @Override
-    public User save(User entity) { return repository.save(entity); }
+    public User save(User entity) {
+        return repository.save(entity);
+    }
 
     @Override
-    public void deleteById(UUID id) { repository.deleteById(id); }
+    public void deleteById(UUID id) {
+        repository.deleteById(id);
+    }
+
+    @Override
+    public UserResponse getMyInfo() {
+        var context = SecurityContextHolder.getContext();
+        String email = context.getAuthentication().getName();
+
+        User user = repository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        return UserResponse.builder()
+                .userId(user.getUserId())
+                .email(user.getEmail())
+                .fullName(user.getFullName())
+                .phone(user.getPhone())
+                .status(user.getStatus())
+                .build();
+    }
 }

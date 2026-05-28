@@ -1,10 +1,10 @@
 package com.ueims.model.entity;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.*;
+
 import lombok.*;
-import java.time.*;
-import java.util.*;
-import java.math.BigDecimal;
 
 @Entity
 @Table(name = "training_warnings")
@@ -16,24 +16,27 @@ public class TrainingWarning {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "warning_id")
-    private UUID warningId;
+    private java.util.UUID warningId;
 
-    @Column(name = "tm_id")
-    private UUID tmId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tm_id", nullable = false)
+    private User tm;
 
-    @Column(name = "student_id")
-    private UUID studentId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "student_id", nullable = false)
+    private User student;
 
-    @Column(name = "semester_id")
-    private UUID semesterId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "semester_id", nullable = false)
+    private Semester semester;
 
-    @Column(name = "week_number")
+    @Column(name = "week_number", nullable = false)
     private Integer weekNumber;
 
-    @Column(name = "warning_message")
+    @Column(name = "warning_message", nullable = false, columnDefinition = "TEXT")
     private String warningMessage;
 
-    @Column(name = "sent_at")
-    private LocalDateTime sentAt;
-
+    @Column(name = "sent_at", nullable = false)
+    @Builder.Default
+    private LocalDateTime sentAt = LocalDateTime.now();
 }

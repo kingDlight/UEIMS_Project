@@ -1,10 +1,9 @@
 package com.ueims.repository;
 
-import com.ueims.model.entity.RolePermission;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import java.util.UUID;
+
+import com.ueims.model.entity.*;
 
 @Repository
-public interface RolePermissionRepository extends JpaRepository<RolePermission, UUID> {
-}
+public interface RolePermissionRepository extends JpaRepository<RolePermission, RolePermissionId> {}

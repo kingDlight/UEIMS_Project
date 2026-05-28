@@ -1,10 +1,12 @@
 package com.ueims.model.entity;
 
+import java.time.LocalDateTime;
+import java.util.Set;
+import java.util.UUID;
+
 import jakarta.persistence.*;
+
 import lombok.*;
-import java.time.*;
-import java.util.*;
-import java.math.BigDecimal;
 
 @Entity
 @Table(name = "enterprises")
@@ -12,64 +14,71 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode(exclude = {"approvedBy", "users", "jobPosts"})
+@ToString(exclude = {"approvedBy", "users", "jobPosts"})
 public class Enterprise {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "enterprise_id")
     private UUID enterpriseId;
 
-    @Column(name = "company_name")
+    @Column(name = "company_name", nullable = false, length = 500)
     private String companyName;
 
-    @Column(name = "tax_code")
+    @Column(name = "tax_code", nullable = false, unique = true, length = 50)
     private String taxCode;
 
-    @Column(name = "industry")
+    @Column(name = "website", length = 255)
+    private String website;
+
+    @Column(name = "industry", length = 100)
     private String industry;
 
-    @Column(name = "company_size")
-    private String companySize;
-
-    @Column(name = "description")
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "address")
+    @Column(name = "address", length = 500)
     private String address;
 
-    @Column(name = "logo_url")
+    @Column(name = "logo_url", length = 500)
     private String logoUrl;
 
-    @Column(name = "contact_person_name")
-    private String contactPersonName;
+    @Column(name = "status", nullable = false, length = 20)
+    @Builder.Default
+    private String status = "PENDING";
 
-    @Column(name = "contact_person_email")
-    private String contactPersonEmail;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "approved_by")
+    private User approvedBy;
 
-    @Column(name = "contact_person_phone")
-    private String contactPersonPhone;
-
-    @Column(name = "approval_status")
-    private String approvalStatus;
-
-    @Column(name = "rejection_reason")
+    @Column(name = "rejection_reason", columnDefinition = "TEXT")
     private String rejectionReason;
 
-    @Column(name = "approved_by")
-    private UUID approvedBy;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
 
-    @Column(name = "approved_at")
-    private LocalDateTime approvedAt;
-
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    @Column(name = "updated_at", nullable = false)
+    @Builder.Default
+    private LocalDateTime updatedAt = LocalDateTime.now();
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
-    @Column(name = "approval_status")
-    private String approvalStatus;
+    @OneToMany(mappedBy = "enterprise")
+    private Set<User> users;
 
+    @OneToMany(mappedBy = "enterprise", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<JobPost> jobPosts;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }

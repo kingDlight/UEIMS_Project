@@ -1,10 +1,11 @@
 package com.ueims.repository;
 
-import com.ueims.model.entity.StudentProfile;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 import java.util.UUID;
 
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import com.ueims.model.entity.*;
+
 @Repository
-public interface StudentProfileRepository extends JpaRepository<StudentProfile, UUID> {
-}
+public interface StudentProfileRepository extends JpaRepository<StudentProfile, UUID> {}

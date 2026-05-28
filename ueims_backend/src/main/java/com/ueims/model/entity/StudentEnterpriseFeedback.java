@@ -1,10 +1,10 @@
 package com.ueims.model.entity;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.*;
+
 import lombok.*;
-import java.time.*;
-import java.util.*;
-import java.math.BigDecimal;
 
 @Entity
 @Table(name = "student_enterprise_feedbacks")
@@ -16,39 +16,42 @@ public class StudentEnterpriseFeedback {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "feedback_id")
-    private UUID feedbackId;
+    private java.util.UUID feedbackId;
 
-    @Column(name = "student_id")
-    private UUID studentId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "student_id", nullable = false)
+    private User student;
 
-    @Column(name = "enterprise_id")
-    private UUID enterpriseId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "enterprise_id", nullable = false)
+    private Enterprise enterprise;
 
-    @Column(name = "semester_id")
-    private UUID semesterId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "semester_id", nullable = false)
+    private Semester semester;
 
-    @Column(name = "training_quality_score")
+    @Column(name = "training_quality_score", nullable = false)
     private Integer trainingQualityScore;
 
-    @Column(name = "supervisor_support_score")
+    @Column(name = "supervisor_support_score", nullable = false)
     private Integer supervisorSupportScore;
 
-    @Column(name = "work_environment_score")
+    @Column(name = "work_environment_score", nullable = false)
     private Integer workEnvironmentScore;
 
-    @Column(name = "overall_score")
+    @Column(name = "overall_score", nullable = false)
     private Integer overallScore;
 
-    @Column(name = "positive_feedback")
+    @Column(name = "positive_feedback", columnDefinition = "TEXT")
     private String positiveFeedback;
 
-    @Column(name = "improvement_feedback")
+    @Column(name = "improvement_feedback", columnDefinition = "TEXT")
     private String improvementFeedback;
 
-    @Column(name = "additional_comments")
+    @Column(name = "additional_comments", columnDefinition = "TEXT")
     private String additionalComments;
 
-    @Column(name = "submitted_at")
-    private LocalDateTime submittedAt;
-
+    @Column(name = "submitted_at", nullable = false)
+    @Builder.Default
+    private LocalDateTime submittedAt = LocalDateTime.now();
 }

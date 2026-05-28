@@ -1,10 +1,10 @@
 package com.ueims.model.entity;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.*;
+
 import lombok.*;
-import java.time.*;
-import java.util.*;
-import java.math.BigDecimal;
 
 @Entity
 @Table(name = "audit_logs")
@@ -16,33 +16,39 @@ public class AuditLog {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "log_id")
-    private UUID logId;
+    private java.util.UUID logId;
 
-    @Column(name = "user_id")
-    private UUID userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 
-    @Column(name = "action")
+    @Column(name = "action", nullable = false, length = 100)
     private String action;
 
-    @Column(name = "target_entity")
+    @Column(name = "target_entity", length = 100)
     private String targetEntity;
 
     @Column(name = "target_id")
-    private UUID targetId;
+    private java.util.UUID targetId;
 
-    @Column(name = "old_value")
+    @Column(name = "old_value", columnDefinition = "TEXT")
     private String oldValue;
 
-    @Column(name = "new_value")
+    @Column(name = "new_value", columnDefinition = "TEXT")
     private String newValue;
 
-    @Column(name = "ip_address")
+    @Column(name = "ip_address", length = 45)
     private String ipAddress;
 
-    @Column(name = "user_agent")
+    @Column(name = "user_agent", length = 500)
     private String userAgent;
 
-    @Column(name = "timestamp")
-    private LocalDateTime timestamp;
+    @Column(name = "timestamp", nullable = false, updatable = false)
+    @Builder.Default
+    private LocalDateTime timestamp = LocalDateTime.now();
 
+    @PrePersist
+    protected void onCreate() {
+        timestamp = LocalDateTime.now();
+    }
 }

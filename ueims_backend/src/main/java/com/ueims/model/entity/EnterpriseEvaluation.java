@@ -1,10 +1,11 @@
 package com.ueims.model.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
-import java.time.*;
-import java.util.*;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+import jakarta.persistence.*;
+
+import lombok.*;
 
 @Entity
 @Table(name = "enterprise_evaluations")
@@ -16,42 +17,46 @@ public class EnterpriseEvaluation {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "evaluation_id")
-    private UUID evaluationId;
+    private java.util.UUID evaluationId;
 
-    @Column(name = "assignment_id")
-    private UUID assignmentId;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "assignment_id", nullable = false, unique = true)
+    private EnterpriseAssignment assignment;
 
-    @Column(name = "attitude_score")
+    @Column(name = "attitude_score", nullable = false, precision = 4, scale = 2)
     private BigDecimal attitudeScore;
 
-    @Column(name = "professionalism_score")
+    @Column(name = "professionalism_score", nullable = false, precision = 4, scale = 2)
     private BigDecimal professionalismScore;
 
-    @Column(name = "soft_skills_score")
+    @Column(name = "soft_skills_score", nullable = false, precision = 4, scale = 2)
     private BigDecimal softSkillsScore;
 
-    @Column(name = "progress_score")
+    @Column(name = "progress_score", nullable = false, precision = 4, scale = 2)
     private BigDecimal progressScore;
 
-    @Column(name = "total_score")
+    // Computed field in DB, mapped as read-only here
+    @Column(name = "total_score", insertable = false, updatable = false)
     private BigDecimal totalScore;
 
-    @Column(name = "ROUND(attitude_score")
-    private String ROUND(attitudeScore;
-
-    @Column(name = ")")
-    private String );
-
-    @Column(name = "overall_comments")
+    @Column(name = "overall_comments", columnDefinition = "TEXT")
     private String overallComments;
 
-    @Column(name = "is_locked")
-    private Boolean isLocked;
+    @Column(name = "is_locked", nullable = false)
+    @Builder.Default
+    private Boolean isLocked = true;
 
-    @Column(name = "submitted_at")
-    private LocalDateTime submittedAt;
+    @Column(name = "submitted_at", nullable = false)
+    @Builder.Default
+    private LocalDateTime submittedAt = LocalDateTime.now();
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
 
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        if (submittedAt == null) submittedAt = LocalDateTime.now();
+    }
 }

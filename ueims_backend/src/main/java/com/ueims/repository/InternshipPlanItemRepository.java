@@ -1,10 +1,11 @@
 package com.ueims.repository;
 
-import com.ueims.model.entity.InternshipPlanItem;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 import java.util.UUID;
 
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import com.ueims.model.entity.*;
+
 @Repository
-public interface InternshipPlanItemRepository extends JpaRepository<InternshipPlanItem, UUID> {
-}
+public interface InternshipPlanItemRepository extends JpaRepository<InternshipPlanItem, UUID> {}

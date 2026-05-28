@@ -1,10 +1,10 @@
 package com.ueims.model.entity;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.*;
+
 import lombok.*;
-import java.time.*;
-import java.util.*;
-import java.math.BigDecimal;
 
 @Entity
 @Table(name = "interviews")
@@ -16,54 +16,54 @@ public class Interview {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "interview_id")
-    private UUID interviewId;
+    private java.util.UUID interviewId;
 
-    @Column(name = "application_id")
-    private UUID applicationId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "application_id", nullable = false)
+    private Application application;
 
-    @Column(name = "scheduled_datetime")
-    private LocalDateTime scheduledDatetime;
+    @Column(name = "scheduled_time", nullable = false)
+    private LocalDateTime scheduledTime;
 
-    @Column(name = "duration_minutes")
-    private Integer durationMinutes;
-
-    @Column(name = "location")
+    @Column(name = "location", length = 500)
     private String location;
 
-    @Column(name = "meeting_link")
+    @Column(name = "meeting_link", length = 500)
     private String meetingLink;
 
-    @Column(name = "status")
-    private String status;
+    @Column(name = "status", nullable = false, length = 20)
+    @Builder.Default
+    private String status = "SCHEDULED";
 
     @Column(name = "student_confirmed")
     private Boolean studentConfirmed;
 
-    @Column(name = "confirmed_at")
-    private LocalDateTime confirmedAt;
-
-    @Column(name = "student_decline_reason")
-    private String studentDeclineReason;
-
-    @Column(name = "result")
+    @Column(name = "result", length = 20)
     private String result;
 
-    @Column(name = "result_note")
-    private String resultNote;
+    @Column(name = "feedback", columnDefinition = "TEXT")
+    private String feedback;
 
-    @Column(name = "decided_by")
-    private UUID decidedBy;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "decided_by")
+    private User decidedBy;
 
-    @Column(name = "decided_at")
-    private LocalDateTime decidedAt;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    @Column(name = "updated_at", nullable = false)
+    @Builder.Default
+    private LocalDateTime updatedAt = LocalDateTime.now();
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
 
-    @Column(name = "OR")
-    private String OR;
-
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }

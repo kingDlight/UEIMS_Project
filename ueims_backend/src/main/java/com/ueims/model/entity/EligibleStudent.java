@@ -1,10 +1,12 @@
 package com.ueims.model.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
-import java.time.*;
-import java.util.*;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+import jakarta.persistence.*;
+
+import lombok.*;
 
 @Entity
 @Table(name = "eligible_students")
@@ -12,61 +14,79 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode(exclude = {"semester", "user", "cancelledBy"})
+@ToString(exclude = {"semester", "user", "cancelledBy"})
 public class EligibleStudent {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "eligible_id")
     private UUID eligibleId;
 
-    @Column(name = "semester_id")
-    private UUID semesterId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "semester_id", nullable = false)
+    private Semester semester;
 
-    @Column(name = "user_id")
-    private UUID userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 
-    @Column(name = "student_code")
+    @Column(name = "student_code", nullable = false, length = 20)
     private String studentCode;
 
-    @Column(name = "full_name")
+    @Column(name = "full_name", nullable = false)
     private String fullName;
 
     @Column(name = "email")
     private String email;
 
-    @Column(name = "major")
+    @Column(name = "major", nullable = false)
     private String major;
 
-    @Column(name = "gpa")
+    @Column(name = "gpa", nullable = false, precision = 3, scale = 2)
     private BigDecimal gpa;
 
-    @Column(name = "current_semester")
+    @Column(name = "current_semester", nullable = false)
     private Integer currentSemester;
 
-    @Column(name = "status")
-    private String status;
+    @Column(name = "status", nullable = false, length = 20)
+    @Builder.Default
+    private String status = "ELIGIBLE";
 
-    @Column(name = "is_locked")
-    private Boolean isLocked;
+    @Column(name = "is_locked", nullable = false)
+    @Builder.Default
+    private Boolean isLocked = false;
 
-    @Column(name = "imported_at")
-    private LocalDateTime importedAt;
+    @Column(name = "imported_at", nullable = false)
+    @Builder.Default
+    private LocalDateTime importedAt = LocalDateTime.now();
 
     @Column(name = "approved_at")
     private LocalDateTime approvedAt;
 
-    @Column(name = "cancelled_reason")
+    @Column(name = "cancelled_reason", columnDefinition = "TEXT")
     private String cancelledReason;
 
-    @Column(name = "cancelled_by")
-    private UUID cancelledBy;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cancelled_by")
+    private User cancelledBy;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    @Column(name = "updated_at", nullable = false)
+    @Builder.Default
+    private LocalDateTime updatedAt = LocalDateTime.now();
 
-    @Column(name = "status")
-    private String status;
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+        if (importedAt == null) importedAt = LocalDateTime.now();
+    }
 
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }

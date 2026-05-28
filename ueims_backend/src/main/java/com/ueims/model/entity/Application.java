@@ -1,10 +1,10 @@
 package com.ueims.model.entity;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.*;
+
 import lombok.*;
-import java.time.*;
-import java.util.*;
-import java.math.BigDecimal;
 
 @Entity
 @Table(name = "applications")
@@ -16,45 +16,55 @@ public class Application {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "application_id")
-    private UUID applicationId;
+    private java.util.UUID applicationId;
 
-    @Column(name = "job_post_id")
-    private UUID jobPostId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "job_post_id", nullable = false)
+    private JobPost jobPost;
 
-    @Column(name = "student_id")
-    private UUID studentId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "student_id", nullable = false)
+    private User student;
 
-    @Column(name = "cv_file_url")
+    @Column(name = "cv_file_url", nullable = false, length = 500)
     private String cvFileUrl;
 
-    @Column(name = "cv_snapshot_url")
+    @Column(name = "cv_snapshot_url", length = 500)
     private String cvSnapshotUrl;
 
-    @Column(name = "status")
-    private String status;
+    @Column(name = "cover_letter", columnDefinition = "TEXT")
+    private String coverLetter;
 
-    @Column(name = "'INTERVIEW_SCHEDULED',")
-    private String 'INTERVIEWScheduled',;
+    @Column(name = "status", nullable = false, length = 30)
+    @Builder.Default
+    private String status = "PENDING";
 
-    @Column(name = "screening_note")
-    private String screeningNote;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "screened_by")
+    private User screenedBy;
 
-    @Column(name = "screened_by")
-    private UUID screenedBy;
+    @Column(name = "rejection_reason", columnDefinition = "TEXT")
+    private String rejectionReason;
 
-    @Column(name = "screened_at")
-    private LocalDateTime screenedAt;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
 
-    @Column(name = "withdrawn_at")
-    private LocalDateTime withdrawnAt;
-
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    @Column(name = "updated_at", nullable = false)
+    @Builder.Default
+    private LocalDateTime updatedAt = LocalDateTime.now();
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }

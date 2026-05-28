@@ -1,10 +1,10 @@
 package com.ueims.model.entity;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.*;
+
 import lombok.*;
-import java.time.*;
-import java.util.*;
-import java.math.BigDecimal;
 
 @Entity
 @Table(name = "student_profiles")
@@ -16,42 +16,52 @@ public class StudentProfile {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "profile_id")
-    private UUID profileId;
+    private java.util.UUID profileId;
 
-    @Column(name = "user_id")
-    private UUID userId;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    private User user;
 
-    @Column(name = "student_code")
+    @Column(name = "student_code", nullable = false, unique = true, length = 20)
     private String studentCode;
 
-    @Column(name = "university")
-    private String university;
-
-    @Column(name = "major")
+    @Column(name = "major", nullable = false, length = 255)
     private String major;
 
-    @Column(name = "gpa")
-    private BigDecimal gpa;
+    @Column(name = "cv_url", length = 500)
+    private String cvUrl;
 
-    @Column(name = "skills")
+    @Column(name = "skills", columnDefinition = "TEXT")
     private String skills;
 
-    @Column(name = "bio")
+    @Column(name = "linkedin_url", length = 500)
+    private String linkedinUrl;
+
+    @Column(name = "github_url", length = 500)
+    private String githubUrl;
+
+    @Column(name = "portfolio_url", length = 500)
+    private String portfolioUrl;
+
+    @Column(name = "bio", columnDefinition = "TEXT")
     private String bio;
 
-    @Column(name = "cv_file_url")
-    private String cvFileUrl;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
 
-    @Column(name = "cv_file_size")
-    private Integer cvFileSize;
+    @Column(name = "updated_at", nullable = false)
+    @Builder.Default
+    private LocalDateTime updatedAt = LocalDateTime.now();
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
-
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }

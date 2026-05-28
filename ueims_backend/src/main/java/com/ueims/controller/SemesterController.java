@@ -1,12 +1,15 @@
 package com.ueims.controller;
 
-import com.ueims.model.entity.Semester;
-import com.ueims.service.SemesterService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import lombok.RequiredArgsConstructor;
 import java.util.List;
 import java.util.UUID;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import com.ueims.model.entity.Semester;
+import com.ueims.service.SemesterService;
+
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/semesters")
@@ -33,5 +36,15 @@ public class SemesterController {
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         service.deleteById(id);
         return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{id}/open")
+    public ResponseEntity<Semester> openSemester(@PathVariable UUID id) {
+        return ResponseEntity.ok(service.openSemester(id));
+    }
+
+    @PutMapping("/{id}/close")
+    public ResponseEntity<Semester> closeSemester(@PathVariable UUID id) {
+        return ResponseEntity.ok(service.closeSemester(id));
     }
 }

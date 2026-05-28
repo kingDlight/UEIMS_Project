@@ -1,10 +1,10 @@
 package com.ueims.model.entity;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.*;
+
 import lombok.*;
-import java.time.*;
-import java.util.*;
-import java.math.BigDecimal;
 
 @Entity
 @Table(name = "report_feedbacks")
@@ -16,21 +16,28 @@ public class ReportFeedback {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "feedback_id")
-    private UUID feedbackId;
+    private java.util.UUID feedbackId;
 
-    @Column(name = "report_id")
-    private UUID reportId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "report_id", nullable = false)
+    private WeeklyReport report;
 
-    @Column(name = "reviewer_id")
-    private UUID reviewerId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "reviewer_id", nullable = false)
+    private User reviewer;
 
-    @Column(name = "feedback_text")
+    @Column(name = "feedback_text", columnDefinition = "TEXT")
     private String feedbackText;
 
-    @Column(name = "action")
+    @Column(name = "action", nullable = false, length = 20)
     private String action;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
 
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
 }

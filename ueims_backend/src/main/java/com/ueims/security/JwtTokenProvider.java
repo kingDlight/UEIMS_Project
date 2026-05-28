@@ -8,7 +8,7 @@ public class JwtTokenProvider {
     public String generateToken(String username) {
         return "mock-jwt-token";
     }
-    
+
     public boolean validateToken(String token) {
         return true;
     }

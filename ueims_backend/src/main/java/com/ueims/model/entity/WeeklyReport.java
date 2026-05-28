@@ -1,10 +1,10 @@
 package com.ueims.model.entity;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.*;
+
 import lombok.*;
-import java.time.*;
-import java.util.*;
-import java.math.BigDecimal;
 
 @Entity
 @Table(name = "weekly_reports")
@@ -16,42 +16,53 @@ public class WeeklyReport {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "report_id")
-    private UUID reportId;
+    private java.util.UUID reportId;
 
-    @Column(name = "assignment_id")
-    private UUID assignmentId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "assignment_id", nullable = false)
+    private EnterpriseAssignment assignment;
 
-    @Column(name = "week_number")
+    @Column(name = "week_number", nullable = false)
     private Integer weekNumber;
 
-    @Column(name = "tasks_completed")
+    @Column(name = "tasks_completed", columnDefinition = "TEXT")
     private String tasksCompleted;
 
-    @Column(name = "issues_challenges")
+    @Column(name = "issues_challenges", columnDefinition = "TEXT")
     private String issuesChallenges;
 
-    @Column(name = "lessons_learned")
+    @Column(name = "lessons_learned", columnDefinition = "TEXT")
     private String lessonsLearned;
 
-    @Column(name = "plan_next_week")
+    @Column(name = "plan_next_week", columnDefinition = "TEXT")
     private String planNextWeek;
 
-    @Column(name = "attachment_urls")
+    @Column(name = "attachment_urls", columnDefinition = "JSONB")
     private String attachmentUrls;
 
-    @Column(name = "status")
-    private String status;
+    @Column(name = "status", nullable = false, length = 20)
+    @Builder.Default
+    private String status = "NOT_SUBMITTED";
 
     @Column(name = "submitted_at")
     private LocalDateTime submittedAt;
 
-    @Column(name = "late_override_by")
-    private UUID lateOverrideBy;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    @Column(name = "updated_at", nullable = false)
+    @Builder.Default
+    private LocalDateTime updatedAt = LocalDateTime.now();
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
 
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }

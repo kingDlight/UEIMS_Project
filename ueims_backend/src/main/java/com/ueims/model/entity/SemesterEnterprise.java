@@ -1,10 +1,10 @@
 package com.ueims.model.entity;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.*;
+
 import lombok.*;
-import java.time.*;
-import java.util.*;
-import java.math.BigDecimal;
 
 @Entity
 @Table(name = "semester_enterprises")
@@ -12,34 +12,49 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode(exclude = {"semester", "enterprise", "reviewedBy"})
+@ToString(exclude = {"semester", "enterprise", "reviewedBy"})
 public class SemesterEnterprise {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "semester_enterprise_id")
-    private UUID semesterEnterpriseId;
+    @EmbeddedId
+    private SemesterEnterpriseId id;
 
-    @Column(name = "semester_id")
-    private UUID semesterId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("semesterId")
+    @JoinColumn(name = "semester_id")
+    private Semester semester;
 
-    @Column(name = "enterprise_id")
-    private UUID enterpriseId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("enterpriseId")
+    @JoinColumn(name = "enterprise_id")
+    private Enterprise enterprise;
 
-    @Column(name = "registration_status")
-    private String registrationStatus;
+    @Column(name = "status", nullable = false, length = 20)
+    @Builder.Default
+    private String status = "PENDING";
 
-    @Column(name = "rejection_reason")
+    @Column(name = "rejection_reason", columnDefinition = "TEXT")
     private String rejectionReason;
 
-    @Column(name = "reviewed_by")
-    private UUID reviewedBy;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "reviewed_by")
+    private User reviewedBy;
 
-    @Column(name = "reviewed_at")
-    private LocalDateTime reviewedAt;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
 
-    @Column(name = "registered_at")
-    private LocalDateTime registeredAt;
+    @Column(name = "updated_at", nullable = false)
+    @Builder.Default
+    private LocalDateTime updatedAt = LocalDateTime.now();
 
-    @Column(name = "registration_status")
-    private String registrationStatus;
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
 
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }

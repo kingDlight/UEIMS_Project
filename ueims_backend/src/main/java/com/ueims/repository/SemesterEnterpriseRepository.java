@@ -1,10 +1,9 @@
 package com.ueims.repository;
 
-import com.ueims.model.entity.SemesterEnterprise;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import java.util.UUID;
+
+import com.ueims.model.entity.*;
 
 @Repository
-public interface SemesterEnterpriseRepository extends JpaRepository<SemesterEnterprise, UUID> {
-}
+public interface SemesterEnterpriseRepository extends JpaRepository<SemesterEnterprise, SemesterEnterpriseId> {}

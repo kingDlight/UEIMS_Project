@@ -1,10 +1,8 @@
 package com.ueims.model.entity;
 
 import jakarta.persistence.*;
+
 import lombok.*;
-import java.time.*;
-import java.util.*;
-import java.math.BigDecimal;
 
 @Entity
 @Table(name = "users_roles")
@@ -13,12 +11,16 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Builder
 public class UserRole {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "user_id")
-    private UUID userId;
+    @EmbeddedId
+    private UserRoleId id;
 
-    @Column(name = "role_name")
-    private String roleName;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("userId")
+    @JoinColumn(name = "user_id")
+    private User user;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("roleName")
+    @JoinColumn(name = "role_name")
+    private Role role;
 }
