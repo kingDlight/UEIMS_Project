@@ -37,4 +37,14 @@ public class SemesterController {
         service.deleteById(id);
         return ResponseEntity.ok().build();
     }
+
+    @PutMapping("/{id}/open")
+    public ResponseEntity<Semester> openSemester(@PathVariable UUID id) {
+        return ResponseEntity.ok(service.openSemester(id));
+    }
+
+    @PutMapping("/{id}/close")
+    public ResponseEntity<Semester> closeSemester(@PathVariable UUID id) {
+        return ResponseEntity.ok(service.closeSemester(id));
+    }
 }

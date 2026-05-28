@@ -1,6 +1,7 @@
 package com.ueims.configuration;
 
 import java.text.ParseException;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -13,7 +14,10 @@ import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.stereotype.Component;
 
+import com.ueims.model.entity.InvalidatedToken;
+import com.ueims.model.entity.UserSession;
 import com.ueims.repository.InvalidatedTokenRepository;
+import com.ueims.repository.UserSessionRepository;
 
 @Component
 public class CustomJwtDecoder implements JwtDecoder {
@@ -22,6 +26,9 @@ public class CustomJwtDecoder implements JwtDecoder {
 
     @Autowired
     private InvalidatedTokenRepository invalidatedTokenRepository;
+
+    @Autowired
+    private UserSessionRepository userSessionRepository;
 
     private NimbusJwtDecoder nimbusJwtDecoder = null;
 
@@ -33,6 +40,25 @@ public class CustomJwtDecoder implements JwtDecoder {
             if (jit != null && invalidatedTokenRepository.existsById(jit)) {
                 throw new JwtException("Token is invalidated");
             }
+
+            if (jit != null) {
+                UserSession session = userSessionRepository
+                        .findById(jit)
+                        .orElseThrow(() -> new JwtException("Session not found or invalidated by another login"));
+
+                if (session.getLastActivity().plusMinutes(15).isBefore(LocalDateTime.now())) {
+                    invalidatedTokenRepository.save(InvalidatedToken.builder()
+                            .tokenId(session.getTokenId())
+                            .expiresAt(session.getExpiresAt())
+                            .build());
+                    userSessionRepository.delete(session);
+                    throw new JwtException("Token expired due to inactivity");
+                }
+
+                session.setLastActivity(LocalDateTime.now());
+                userSessionRepository.save(session);
+            }
+
         } catch (ParseException e) {
             throw new JwtException("Invalid token format", e);
         }

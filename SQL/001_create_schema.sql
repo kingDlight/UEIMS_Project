@@ -1406,3 +1406,13 @@ CREATE TRIGGER trg_lock_semester_enterprises BEFORE INSERT OR UPDATE OR DELETE O
 --   Views:      2
 --   Triggers:  31
 -- ============================================================
+
+-- ============================================================
+-- ADDED FOR OAUTH2 STATEFUL SESSIONS (BR-02 & BR-03)
+-- ============================================================
+CREATE TABLE user_sessions (
+    token_id VARCHAR(36) PRIMARY KEY,
+    email VARCHAR(100) NOT NULL,
+    last_activity TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP NOT NULL
+);

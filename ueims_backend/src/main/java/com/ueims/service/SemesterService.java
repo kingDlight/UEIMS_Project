@@ -13,4 +13,8 @@ public interface SemesterService {
     Semester save(Semester entity);
 
     void deleteById(UUID id);
+
+    Semester openSemester(UUID id);
+
+    Semester closeSemester(UUID id);
 }

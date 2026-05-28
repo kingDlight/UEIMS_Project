@@ -1,12 +1,12 @@
 /BdOxexcRjHDZeHtPLpR5aibFMx/8dhcuV3HGhgE3so=
-src\main\java\com\ueims\configuration\CustomJwtDecoder.java 2026-05-28T07:52:28.468239200Z
+src\main\java\com\ueims\configuration\CustomJwtDecoder.java 2026-05-28T15:44:46.798303600Z
 src\main\java\com\ueims\configuration\JwtAuthenticationEntryPoint.java 2026-05-28T07:52:28.535390Z
 src\main\java\com\ueims\configuration\SecurityConfig.java 2026-05-28T14:17:44.608126600Z
 src\main\java\com\ueims\config\CorsConfig.java 2026-05-28T04:20:11.302900300Z
 src\main\java\com\ueims\controller\ApplicationController.java 2026-05-28T07:52:28.760193400Z
 src\main\java\com\ueims\controller\AuditLogController.java 2026-05-28T07:52:28.812811900Z
 src\main\java\com\ueims\controller\AuthenticationController.java 2026-05-28T07:52:28.890729700Z
-src\main\java\com\ueims\controller\EligibleStudentController.java 2026-05-28T07:52:28.931309700Z
+src\main\java\com\ueims\controller\EligibleStudentController.java 2026-05-28T15:30:26.386003500Z
 src\main\java\com\ueims\controller\EnterpriseAssignmentController.java 2026-05-28T07:52:28.972083900Z
 src\main\java\com\ueims\controller\EnterpriseController.java 2026-05-28T07:52:29.008160400Z
 src\main\java\com\ueims\controller\EnterpriseEvaluationController.java 2026-05-28T07:52:29.050149200Z
@@ -23,7 +23,7 @@ src\main\java\com\ueims\controller\PasswordResetTokenController.java 2026-05-28T
 src\main\java\com\ueims\controller\PermissionController.java 2026-05-28T07:52:29.508317200Z
 src\main\java\com\ueims\controller\ReportFeedbackController.java 2026-05-28T07:52:29.535177500Z
 src\main\java\com\ueims\controller\RoleController.java 2026-05-28T07:52:29.561521900Z
-src\main\java\com\ueims\controller\SemesterController.java 2026-05-28T07:52:29.583541300Z
+src\main\java\com\ueims\controller\SemesterController.java 2026-05-28T15:26:27.085374500Z
 src\main\java\com\ueims\controller\StudentEnterpriseFeedbackController.java 2026-05-28T07:52:29.604925Z
 src\main\java\com\ueims\controller\StudentProfileController.java 2026-05-28T07:52:29.627628700Z
 src\main\java\com\ueims\controller\SystemAnnouncementController.java 2026-05-28T07:52:29.655713700Z
@@ -43,8 +43,8 @@ src\main\java\com\ueims\dto\response\AuthenticationResponse.java 2026-05-28T07:5
 src\main\java\com\ueims\dto\response\IntrospectResponse.java 2026-05-28T07:52:29.974162Z
 src\main\java\com\ueims\dto\response\UserResponse.java 2026-05-28T07:52:29.993135500Z
 src\main\java\com\ueims\exception\AppException.java 2026-05-28T07:52:30.009325400Z
-src\main\java\com\ueims\exception\ErrorCode.java 2026-05-28T07:52:30.033927800Z
-src\main\java\com\ueims\exception\GlobalExceptionHandler.java 2026-05-28T14:49:52.715120100Z
+src\main\java\com\ueims\exception\ErrorCode.java 2026-05-28T15:25:43.416132900Z
+src\main\java\com\ueims\exception\GlobalExceptionHandler.java 2026-05-28T15:29:50.162902600Z
 src\main\java\com\ueims\exception\ResourceNotFoundException.java 2026-05-28T04:20:11.311187200Z
 src\main\java\com\ueims\model\entity\Application.java 2026-05-28T07:52:30.111305400Z
 src\main\java\com\ueims\model\entity\AuditLog.java 2026-05-28T07:52:30.137541Z
@@ -77,6 +77,7 @@ src\main\java\com\ueims\model\entity\TrainingWarning.java 2026-05-28T07:52:30.78
 src\main\java\com\ueims\model\entity\User.java 2026-05-28T14:36:40.177324800Z
 src\main\java\com\ueims\model\entity\UserRole.java 2026-05-28T07:52:30.832290500Z
 src\main\java\com\ueims\model\entity\UserRoleId.java 2026-05-28T07:52:30.853319600Z
+src\main\java\com\ueims\model\entity\UserSession.java 2026-05-28T15:44:49.087114800Z
 src\main\java\com\ueims\model\entity\WeeklyReport.java 2026-05-28T07:52:30.878390Z
 src\main\java\com\ueims\repository\ApplicationRepository.java 2026-05-28T07:52:30.893125500Z
 src\main\java\com\ueims\repository\AuditLogRepository.java 2026-05-28T07:52:30.908230Z
@@ -106,11 +107,12 @@ src\main\java\com\ueims\repository\SystemAnnouncementRepository.java 2026-05-28T
 src\main\java\com\ueims\repository\TrainingWarningRepository.java 2026-05-28T07:52:31.249699300Z
 src\main\java\com\ueims\repository\UserRepository.java 2026-05-28T07:52:31.263812700Z
 src\main\java\com\ueims\repository\UserRoleRepository.java 2026-05-28T07:52:31.284384200Z
+src\main\java\com\ueims\repository\UserSessionRepository.java 2026-05-28T15:44:49.727551200Z
 src\main\java\com\ueims\repository\WeeklyReportRepository.java 2026-05-28T07:52:31.294368700Z
 src\main\java\com\ueims\service\ApplicationService.java 2026-05-28T07:52:31.315433900Z
 src\main\java\com\ueims\service\AuditLogService.java 2026-05-28T07:52:31.329717100Z
-src\main\java\com\ueims\service\AuthenticationService.java 2026-05-28T13:56:31.815722600Z
-src\main\java\com\ueims\service\EligibleStudentService.java 2026-05-28T07:52:31.426725800Z
+src\main\java\com\ueims\service\AuthenticationService.java 2026-05-28T15:44:50.786958100Z
+src\main\java\com\ueims\service\EligibleStudentService.java 2026-05-28T15:27:29.461624200Z
 src\main\java\com\ueims\service\EnterpriseAssignmentService.java 2026-05-28T07:52:31.437736200Z
 src\main\java\com\ueims\service\EnterpriseEvaluationService.java 2026-05-28T07:52:31.449454100Z
 src\main\java\com\ueims\service\EnterpriseService.java 2026-05-28T07:52:31.459288700Z
@@ -118,7 +120,7 @@ src\main\java\com\ueims\service\FinalGradeService.java 2026-05-28T07:52:31.47008
 src\main\java\com\ueims\service\FinalReportService.java 2026-05-28T07:52:31.480962700Z
 src\main\java\com\ueims\service\impl\ApplicationServiceImpl.java 2026-05-28T07:52:31.493876900Z
 src\main\java\com\ueims\service\impl\AuditLogServiceImpl.java 2026-05-28T07:52:31.505791600Z
-src\main\java\com\ueims\service\impl\EligibleStudentServiceImpl.java 2026-05-28T07:52:31.524157Z
+src\main\java\com\ueims\service\impl\EligibleStudentServiceImpl.java 2026-05-28T15:30:29.098189700Z
 src\main\java\com\ueims\service\impl\EnterpriseAssignmentServiceImpl.java 2026-05-28T07:52:31.538799600Z
 src\main\java\com\ueims\service\impl\EnterpriseEvaluationServiceImpl.java 2026-05-28T07:52:31.556403500Z
 src\main\java\com\ueims\service\impl\EnterpriseServiceImpl.java 2026-05-28T07:52:31.573828600Z
@@ -137,7 +139,7 @@ src\main\java\com\ueims\service\impl\ReportFeedbackServiceImpl.java 2026-05-28T0
 src\main\java\com\ueims\service\impl\RolePermissionServiceImpl.java 2026-05-28T07:52:31.805554800Z
 src\main\java\com\ueims\service\impl\RoleServiceImpl.java 2026-05-28T07:52:31.823792Z
 src\main\java\com\ueims\service\impl\SemesterEnterpriseServiceImpl.java 2026-05-28T07:52:31.840581Z
-src\main\java\com\ueims\service\impl\SemesterServiceImpl.java 2026-05-28T07:52:31.857297600Z
+src\main\java\com\ueims\service\impl\SemesterServiceImpl.java 2026-05-28T15:30:29.668267500Z
 src\main\java\com\ueims\service\impl\StudentEnterpriseFeedbackServiceImpl.java 2026-05-28T07:52:31.873791200Z
 src\main\java\com\ueims\service\impl\StudentProfileServiceImpl.java 2026-05-28T07:52:31.892965700Z
 src\main\java\com\ueims\service\impl\SystemAnnouncementServiceImpl.java 2026-05-28T07:52:31.914012800Z
@@ -158,7 +160,7 @@ src\main\java\com\ueims\service\ReportFeedbackService.java 2026-05-28T07:52:32.0
 src\main\java\com\ueims\service\RolePermissionService.java 2026-05-28T07:52:32.100976500Z
 src\main\java\com\ueims\service\RoleService.java 2026-05-28T07:52:32.111269300Z
 src\main\java\com\ueims\service\SemesterEnterpriseService.java 2026-05-28T07:52:32.125392700Z
-src\main\java\com\ueims\service\SemesterService.java 2026-05-28T07:52:32.133790200Z
+src\main\java\com\ueims\service\SemesterService.java 2026-05-28T15:25:49.661602100Z
 src\main\java\com\ueims\service\StudentEnterpriseFeedbackService.java 2026-05-28T07:52:32.145776100Z
 src\main\java\com\ueims\service\StudentProfileService.java 2026-05-28T07:52:32.157864700Z
 src\main\java\com\ueims\service\SystemAnnouncementService.java 2026-05-28T07:52:32.170067200Z
@@ -167,3 +169,4 @@ src\main\java\com\ueims\service\UserRoleService.java 2026-05-28T07:52:32.1872861
 src\main\java\com\ueims\service\UserService.java 2026-05-28T14:52:40.437003200Z
 src\main\java\com\ueims\service\WeeklyReportService.java 2026-05-28T07:52:32.207955400Z
 src\main\java\com\ueims\UeimsBackendApplication.java 2026-05-28T04:20:11.301860800Z
+src\main\java\com\ueims\util\ExcelImportUtil.java 2026-05-28T15:30:31.000445900Z

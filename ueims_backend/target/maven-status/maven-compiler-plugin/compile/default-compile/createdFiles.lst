@@ -70,6 +70,7 @@ com\ueims\dto\response\UserResponse.class
 com\ueims\model\entity\PasswordResetToken.class
 com\ueims\model\entity\Application.class
 com\ueims\controller\SystemAnnouncementController.class
+com\ueims\repository\UserSessionRepository.class
 com\ueims\service\impl\SemesterServiceImpl.class
 com\ueims\service\IncidentService.class
 com\ueims\service\impl\SemesterEnterpriseServiceImpl.class
@@ -165,8 +166,10 @@ com\ueims\dto\request\UserUpdateRequest$UserUpdateRequestBuilder.class
 com\ueims\repository\SemesterEnterpriseRepository.class
 com\ueims\service\SemesterEnterpriseService.class
 com\ueims\model\entity\RolePermission$RolePermissionBuilder.class
+com\ueims\model\entity\UserSession$UserSessionBuilder.class
 com\ueims\service\impl\AuditLogServiceImpl.class
 com\ueims\model\entity\FinalGrade.class
+com\ueims\model\entity\UserSession.class
 com\ueims\dto\response\ApiResponse.class
 com\ueims\dto\request\TrainingWarningRequest.class
 com\ueims\service\StudentEnterpriseFeedbackService.class
@@ -182,6 +185,7 @@ com\ueims\repository\EnterpriseRepository.class
 com\ueims\service\TrainingWarningService.class
 com\ueims\service\JobPostService.class
 com\ueims\config\CorsConfig$1.class
+com\ueims\util\ExcelImportUtil.class
 com\ueims\exception\ResourceNotFoundException.class
 com\ueims\service\impl\StudentEnterpriseFeedbackServiceImpl.class
 com\ueims\service\InternshipPlanItemService.class

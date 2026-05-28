@@ -1,7 +1,7 @@
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **UEIMS_Project** (1710 symbols, 3427 relationships, 8 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+This project is indexed by GitNexus as **UEIMS_Project** (1775 symbols, 3580 relationships, 14 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 
@@ -39,8 +39,8 @@ This project is indexed by GitNexus as **UEIMS_Project** (1710 symbols, 3427 rel
 | Rename / extract / split / refactor | `.claude/skills/gitnexus/gitnexus-refactoring/SKILL.md` |
 | Tools, resources, schema reference | `.claude/skills/gitnexus/gitnexus-guide/SKILL.md` |
 | Index, status, clean, wiki CLI commands | `.claude/skills/gitnexus/gitnexus-cli/SKILL.md` |
-| Work in the Controller area (306 symbols) | `.claude/skills/generated/controller/SKILL.md` |
-| Work in the Service area (70 symbols) | `.claude/skills/generated/service/SKILL.md` |
+| Work in the Controller area (324 symbols) | `.claude/skills/generated/controller/SKILL.md` |
+| Work in the Service area (67 symbols) | `.claude/skills/generated/service/SKILL.md` |
 | Work in the Entity area (10 symbols) | `.claude/skills/generated/entity/SKILL.md` |
 | Work in the Exception area (6 symbols) | `.claude/skills/generated/exception/SKILL.md` |
 | Work in the Configuration area (3 symbols) | `.claude/skills/generated/configuration/SKILL.md` |

@@ -2,10 +2,14 @@ package com.ueims.service;
 
 import java.text.ParseException;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.List;
 import java.util.StringJoiner;
 import java.util.UUID;
+
+import jakarta.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,8 +31,10 @@ import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
 import com.ueims.model.entity.InvalidatedToken;
 import com.ueims.model.entity.User;
+import com.ueims.model.entity.UserSession;
 import com.ueims.repository.InvalidatedTokenRepository;
 import com.ueims.repository.UserRepository;
+import com.ueims.repository.UserSessionRepository;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -43,6 +49,7 @@ import lombok.extern.slf4j.Slf4j;
 public class AuthenticationService {
     UserRepository userRepository;
     InvalidatedTokenRepository invalidatedTokenRepository;
+    UserSessionRepository userSessionRepository;
     PasswordEncoder passwordEncoder;
 
     @NonFinal
@@ -70,6 +77,7 @@ public class AuthenticationService {
         return IntrospectResponse.builder().valid(isValid).build();
     }
 
+    @Transactional
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         log.info("SignKey: {}", SIGNER_KEY);
 
@@ -79,9 +87,41 @@ public class AuthenticationService {
 
         boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
 
-        if (!authenticated) throw new AppException(ErrorCode.UNAUTHENTICATED);
+        if (!authenticated)
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+
+        // BR-02: Simultaneous Session Control - Invalidate old sessions
+        List<UserSession> oldSessions = userSessionRepository.findByEmail(user.getEmail());
+        if (!CollectionUtils.isEmpty(oldSessions)) {
+            List<InvalidatedToken> invalidTokens = oldSessions.stream()
+                    .map(s -> InvalidatedToken.builder()
+                            .tokenId(s.getTokenId())
+                            .expiresAt(s.getExpiresAt())
+                            .build())
+                    .toList();
+            invalidatedTokenRepository.saveAll(invalidTokens);
+            userSessionRepository.deleteAll(oldSessions);
+        }
 
         var token = generateToken(user);
+
+        // Save new session
+        try {
+            SignedJWT signedJWT = SignedJWT.parse(token);
+            UserSession session = UserSession.builder()
+                    .tokenId(signedJWT.getJWTClaimsSet().getJWTID())
+                    .email(user.getEmail())
+                    .expiresAt(signedJWT
+                            .getJWTClaimsSet()
+                            .getExpirationTime()
+                            .toInstant()
+                            .atZone(ZoneId.systemDefault())
+                            .toLocalDateTime())
+                    .build();
+            userSessionRepository.save(session);
+        } catch (ParseException e) {
+            log.error("Failed to parse generated token", e);
+        }
 
         return AuthenticationResponse.builder().token(token).authenticated(true).build();
     }
@@ -102,11 +142,13 @@ public class AuthenticationService {
                     .build();
 
             invalidatedTokenRepository.save(invalidatedToken);
+            userSessionRepository.findById(jit).ifPresent(userSessionRepository::delete);
         } catch (AppException exception) {
             log.info("Token already expired");
         }
     }
 
+    @Transactional
     public AuthenticationResponse refreshToken(RefreshRequest request) throws ParseException, JOSEException {
         var signedJWT = verifyToken(request.getToken(), true);
 
@@ -122,12 +164,30 @@ public class AuthenticationService {
                 .build();
 
         invalidatedTokenRepository.save(invalidatedToken);
+        userSessionRepository.findById(jit).ifPresent(userSessionRepository::delete);
 
         var email = signedJWT.getJWTClaimsSet().getSubject();
 
         var user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
 
         var token = generateToken(user);
+
+        try {
+            SignedJWT parsedToken = SignedJWT.parse(token);
+            UserSession session = UserSession.builder()
+                    .tokenId(parsedToken.getJWTClaimsSet().getJWTID())
+                    .email(user.getEmail())
+                    .expiresAt(parsedToken
+                            .getJWTClaimsSet()
+                            .getExpirationTime()
+                            .toInstant()
+                            .atZone(ZoneId.systemDefault())
+                            .toLocalDateTime())
+                    .build();
+            userSessionRepository.save(session);
+        } catch (ParseException e) {
+            log.error("Failed to parse generated token", e);
+        }
 
         return AuthenticationResponse.builder().token(token).authenticated(true).build();
     }
@@ -174,7 +234,8 @@ public class AuthenticationService {
 
         var verified = signedJWT.verify(verifier);
 
-        if (!(verified && expiryTime.after(new Date()))) throw new AppException(ErrorCode.UNAUTHENTICATED);
+        if (!(verified && expiryTime.after(new Date())))
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
 
         if (invalidatedTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID()))
             throw new AppException(ErrorCode.UNAUTHENTICATED);
