@@ -142,15 +142,11 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
 
-<<<<<<< HEAD
-# /ueims
 target/
 .idea/
 .vscode/
 node_modules/
 *.class
-=======
 target/
 .claude
 *.md
->>>>>>> a08ae4ec21b5574357170aaaf3993427f7b4fddc

@@ -37,4 +37,24 @@ public class SemesterController {
         service.deleteById(id);
         return ResponseEntity.ok().build();
     }
+
+    @PutMapping("/{id}/open")
+    public ResponseEntity<Semester> openSemester(@PathVariable UUID id) {
+        return ResponseEntity.ok(service.openSemester(id));
+    }
+
+    @PutMapping("/{id}/active")
+    public ResponseEntity<Semester> activeSemester(@PathVariable UUID id) {
+        return ResponseEntity.ok(service.activeSemester(id));
+    }
+
+    @PutMapping("/{id}/close")
+    public ResponseEntity<Semester> closeSemester(@PathVariable UUID id) {
+        return ResponseEntity.ok(service.closeSemester(id));
+    }
+
+    @PutMapping("/{id}/lock")
+    public ResponseEntity<Semester> lockSemester(@PathVariable UUID id) {
+        return ResponseEntity.ok(service.lockSemester(id));
+    }
 }
