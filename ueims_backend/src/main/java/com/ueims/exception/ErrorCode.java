@@ -16,6 +16,13 @@ public enum ErrorCode {
     UNAUTHENTICATED(1006, "Unauthenticated", HttpStatus.UNAUTHORIZED),
     UNAUTHORIZED(1007, "You do not have permission", HttpStatus.FORBIDDEN),
     INVALID_DOB(1008, "Your age must be at least {min}", HttpStatus.BAD_REQUEST),
+    INVALID_EXCEL_FORMAT(
+            1009, "Invalid Excel file format. Please check required columns and data types.", HttpStatus.BAD_REQUEST),
+    SEMESTER_INVALID_DATE(1010, "Semester start date must be before end date", HttpStatus.BAD_REQUEST),
+    SEMESTER_LOCKED_DATE(1011, "Cannot modify dates of an ACTIVE, CLOSED, or LOCKED semester", HttpStatus.BAD_REQUEST),
+    USER_BANNED(1012, "Tài khoản của bạn đã bị khóa do nhập sai mật khẩu quá 5 lần", HttpStatus.FORBIDDEN),
+    WRONG_OLD_PASSWORD(1013, "Mật khẩu cũ không chính xác", HttpStatus.BAD_REQUEST),
+    PASSWORDS_NOT_MATCH(1014, "Mật khẩu mới và xác nhận không khớp", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

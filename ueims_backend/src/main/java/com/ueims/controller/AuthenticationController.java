@@ -50,4 +50,10 @@ public class AuthenticationController {
         authenticationService.logout(request);
         return ApiResponse.<Void>builder().build();
     }
+
+    @PostMapping("/change-password")
+    public ApiResponse<Void> changePassword(@RequestBody ChangePasswordRequest request) {
+        authenticationService.changePassword(request);
+        return ApiResponse.<Void>builder().build();
+    }
 }
