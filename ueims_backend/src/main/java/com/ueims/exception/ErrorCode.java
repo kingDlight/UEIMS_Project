@@ -27,6 +27,9 @@ public enum ErrorCode {
             1014,
             "Invalid semester status transition. Allowed: DRAFT→OPEN, OPEN→ACTIVE, ACTIVE→CLOSED, CLOSED→LOCKED",
             HttpStatus.UNPROCESSABLE_ENTITY),
+    USER_BANNED(1012, "Tài khoản của bạn đã bị khóa do nhập sai mật khẩu quá 5 lần", HttpStatus.FORBIDDEN),
+    WRONG_OLD_PASSWORD(1013, "Mật khẩu cũ không chính xác", HttpStatus.BAD_REQUEST),
+    PASSWORDS_NOT_MATCH(1014, "Mật khẩu mới và xác nhận không khớp", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

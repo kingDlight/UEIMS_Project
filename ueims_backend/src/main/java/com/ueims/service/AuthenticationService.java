@@ -25,6 +25,8 @@ import com.ueims.dto.request.AuthenticationRequest;
 import com.ueims.dto.request.IntrospectRequest;
 import com.ueims.dto.request.LogoutRequest;
 import com.ueims.dto.request.RefreshRequest;
+import com.ueims.dto.request.ChangePasswordRequest;
+import org.springframework.security.core.context.SecurityContextHolder;
 import com.ueims.dto.response.AuthenticationResponse;
 import com.ueims.dto.response.IntrospectResponse;
 import com.ueims.exception.AppException;
@@ -85,9 +87,40 @@ public class AuthenticationService {
                 .findByEmail(request.getEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
+        if ("BANNED".equals(user.getStatus())) {
+            throw new AppException(ErrorCode.USER_BANNED);
+        }
+
         boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
 
-        if (!authenticated) throw new AppException(ErrorCode.UNAUTHENTICATED);
+        if (!authenticated) {
+            user.setFailedLoginAttempts(user.getFailedLoginAttempts() + 1);
+            if (user.getFailedLoginAttempts() >= 5) {
+                user.setStatus("BANNED");
+                userRepository.save(user);
+                throw new AppException(ErrorCode.USER_BANNED);
+            }
+            userRepository.save(user);
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
+
+        if (user.getFailedLoginAttempts() > 0) {
+            user.setFailedLoginAttempts(0);
+            userRepository.save(user);
+        }
+
+        // BR-02: Simultaneous Session Control - Invalidate old sessions
+        List<UserSession> oldSessions = userSessionRepository.findByEmail(user.getEmail());
+        if (!CollectionUtils.isEmpty(oldSessions)) {
+            List<InvalidatedToken> invalidTokens = oldSessions.stream()
+                    .map(s -> InvalidatedToken.builder()
+                            .tokenId(s.getTokenId())
+                            .expiresAt(s.getExpiresAt())
+                            .build())
+                    .toList();
+            invalidatedTokenRepository.saveAll(invalidTokens);
+            userSessionRepository.deleteAll(oldSessions);
+        }
 
         // BR-02: Simultaneous Session Control - Invalidate old sessions
         List<UserSession> oldSessions = userSessionRepository.findByEmail(user.getEmail());
@@ -122,7 +155,7 @@ public class AuthenticationService {
             log.error("Failed to parse generated token", e);
         }
 
-        return AuthenticationResponse.builder().token(token).authenticated(true).build();
+        return AuthenticationResponse.builder().token(token).authenticated(true).mustChangePassword(user.getMustChangePassword()).build();
     }
 
     public void logout(LogoutRequest request) throws ParseException, JOSEException {
@@ -202,6 +235,7 @@ public class AuthenticationService {
                         Instant.now().plus(VALID_DURATION, ChronoUnit.SECONDS).toEpochMilli()))
                 .jwtID(UUID.randomUUID().toString())
                 .claim("scope", buildScope(user))
+                .claim("must_change_password", user.getMustChangePassword())
                 .build();
 
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
@@ -255,5 +289,26 @@ public class AuthenticationService {
             });
 
         return stringJoiner.toString();
+    }
+
+    @Transactional
+    public void changePassword(ChangePasswordRequest request) {
+        var context = SecurityContextHolder.getContext();
+        String email = context.getAuthentication().getName();
+
+        var user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            throw new AppException(ErrorCode.WRONG_OLD_PASSWORD);
+        }
+
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            throw new AppException(ErrorCode.PASSWORDS_NOT_MATCH);
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        user.setMustChangePassword(false);
+        userRepository.save(user);
     }
 }
