@@ -4,6 +4,9 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.*;
 
 import lombok.*;
@@ -24,10 +27,12 @@ public class EligibleStudent {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "semester_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "eligibleStudents", "jobPosts", "systemAnnouncements"})
     private Semester semester;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "roles", "enterprise"})
     private User user;
 
     @Column(name = "student_code", nullable = false, length = 20)
@@ -68,6 +73,7 @@ public class EligibleStudent {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cancelled_by")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "roles", "enterprise"})
     private User cancelledBy;
 
     @Column(name = "created_at", nullable = false, updatable = false)

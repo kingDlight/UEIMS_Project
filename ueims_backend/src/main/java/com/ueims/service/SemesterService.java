@@ -16,5 +16,9 @@ public interface SemesterService {
 
     Semester openSemester(UUID id);
 
+    Semester activeSemester(UUID id);
+
     Semester closeSemester(UUID id);
+
+    Semester lockSemester(UUID id);
 }

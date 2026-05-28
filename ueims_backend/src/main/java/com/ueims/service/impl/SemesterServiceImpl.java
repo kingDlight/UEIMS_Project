@@ -60,15 +60,45 @@ public class SemesterServiceImpl implements SemesterService {
 
     @Override
     public Semester openSemester(UUID id) {
-        Semester semester = repository.findById(id).orElseThrow(() -> new RuntimeException("Semester not found"));
+        Semester semester = repository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.SEMESTER_NOT_FOUND));
+        if (!"DRAFT".equals(semester.getStatus())) {
+            throw new AppException(ErrorCode.SEMESTER_INVALID_TRANSITION);
+        }
         semester.setStatus("OPEN");
         return repository.save(semester);
     }
 
     @Override
+    public Semester activeSemester(UUID id) {
+        Semester semester = repository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.SEMESTER_NOT_FOUND));
+        if (!"OPEN".equals(semester.getStatus())) {
+            throw new AppException(ErrorCode.SEMESTER_INVALID_TRANSITION);
+        }
+        semester.setStatus("ACTIVE");
+        return repository.save(semester);
+    }
+
+    @Override
     public Semester closeSemester(UUID id) {
-        Semester semester = repository.findById(id).orElseThrow(() -> new RuntimeException("Semester not found"));
+        Semester semester = repository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.SEMESTER_NOT_FOUND));
+        if (!"ACTIVE".equals(semester.getStatus())) {
+            throw new AppException(ErrorCode.SEMESTER_INVALID_TRANSITION);
+        }
         semester.setStatus("CLOSED");
+        return repository.save(semester);
+    }
+
+    @Override
+    public Semester lockSemester(UUID id) {
+        Semester semester = repository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.SEMESTER_NOT_FOUND));
+        if (!"CLOSED".equals(semester.getStatus())) {
+            throw new AppException(ErrorCode.SEMESTER_INVALID_TRANSITION);
+        }
+        semester.setStatus("LOCKED");
         return repository.save(semester);
     }
 }

@@ -20,6 +20,9 @@ public enum ErrorCode {
             1009, "Invalid Excel file format. Please check required columns and data types.", HttpStatus.BAD_REQUEST),
     SEMESTER_INVALID_DATE(1010, "Semester start date must be before end date", HttpStatus.BAD_REQUEST),
     SEMESTER_LOCKED_DATE(1011, "Cannot modify dates of an ACTIVE, CLOSED, or LOCKED semester", HttpStatus.BAD_REQUEST),
+    DUPLICATE_STUDENT_IN_SEMESTER(1012, "Some students were skipped because they already exist in this semester", HttpStatus.OK),
+    SEMESTER_NOT_FOUND(1013, "Semester not found", HttpStatus.NOT_FOUND),
+    SEMESTER_INVALID_TRANSITION(1014, "Invalid semester status transition. Allowed: DRAFT→OPEN, OPEN→ACTIVE, ACTIVE→CLOSED, CLOSED→LOCKED", HttpStatus.UNPROCESSABLE_ENTITY),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

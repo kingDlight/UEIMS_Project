@@ -7,9 +7,13 @@ import jakarta.validation.ConstraintViolation;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.MultipartException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 import com.ueims.dto.response.ApiResponse;
 
@@ -20,6 +24,22 @@ import lombok.extern.slf4j.Slf4j;
 public class GlobalExceptionHandler {
 
     private static final String MIN_ATTRIBUTE = "min";
+
+    @ExceptionHandler(value = JpaSystemException.class)
+    ResponseEntity<ApiResponse> handlingJpaSystemException(JpaSystemException exception) {
+        String message = exception.getMostSpecificCause().getMessage();
+        log.warn("DB constraint violation: {}", message);
+        ErrorCode errorCode = ErrorCode.SEMESTER_INVALID_TRANSITION;
+        // Extract the readable DB trigger message (after "ERROR: ")
+        String userMessage = message != null && message.contains("ERROR: ")
+                ? message.substring(message.indexOf("ERROR: ") + 7).split("\n")[0]
+                : errorCode.getMessage();
+        return ResponseEntity.status(errorCode.getStatusCode())
+                .body(ApiResponse.builder()
+                        .code(errorCode.getCode())
+                        .message(userMessage)
+                        .build());
+    }
 
     @ExceptionHandler(value = Exception.class)
     ResponseEntity<ApiResponse> handlingRuntimeException(Exception exception) {
@@ -51,6 +71,39 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.builder()
                         .code(errorCode.getCode())
                         .message(errorCode.getMessage())
+                        .build());
+    }
+
+    @ExceptionHandler(value = MissingServletRequestPartException.class)
+    ResponseEntity<ApiResponse> handlingMissingPart(MissingServletRequestPartException exception) {
+        log.warn("Missing multipart part: {}", exception.getRequestPartName());
+        ErrorCode errorCode = ErrorCode.INVALID_EXCEL_FORMAT;
+        return ResponseEntity.status(errorCode.getStatusCode())
+                .body(ApiResponse.builder()
+                        .code(errorCode.getCode())
+                        .message("Required file part '" + exception.getRequestPartName() + "' is missing. Please attach the file in form-data.")
+                        .build());
+    }
+
+    @ExceptionHandler(value = MultipartException.class)
+    ResponseEntity<ApiResponse> handlingMultipartException(MultipartException exception) {
+        log.warn("Multipart error: {}", exception.getMessage());
+        ErrorCode errorCode = ErrorCode.INVALID_EXCEL_FORMAT;
+        return ResponseEntity.status(errorCode.getStatusCode())
+                .body(ApiResponse.builder()
+                        .code(errorCode.getCode())
+                        .message("Invalid multipart request. Make sure Content-Type is multipart/form-data and the file is attached.")
+                        .build());
+    }
+
+    @ExceptionHandler(value = MaxUploadSizeExceededException.class)
+    ResponseEntity<ApiResponse> handlingMaxUploadSize(MaxUploadSizeExceededException exception) {
+        log.warn("File too large: {}", exception.getMessage());
+        ErrorCode errorCode = ErrorCode.INVALID_EXCEL_FORMAT;
+        return ResponseEntity.status(errorCode.getStatusCode())
+                .body(ApiResponse.builder()
+                        .code(errorCode.getCode())
+                        .message("Uploaded file exceeds the maximum allowed size.")
                         .build());
     }
 
