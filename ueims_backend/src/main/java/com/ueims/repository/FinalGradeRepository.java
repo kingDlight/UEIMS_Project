@@ -1,0 +1,10 @@
+package com.ueims.repository;
+
+import com.ueims.model.entity.FinalGrade;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import java.util.UUID;
+
+@Repository
+public interface FinalGradeRepository extends JpaRepository<FinalGrade, UUID> {
+}
