@@ -143,3 +143,8 @@ vite.config.ts.timestamp-*
 .vite/
 
 # /ueims
+target/
+.idea/
+.vscode/
+node_modules/
+*.class
