@@ -6,6 +6,8 @@ import java.util.UUID;
 
 import jakarta.persistence.*;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import lombok.*;
 
 @Entity
@@ -24,10 +26,13 @@ public class EligibleStudent {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "semester_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "eligibleStudents", "jobPosts", "systemAnnouncements"
+    })
     private Semester semester;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "roles", "enterprise"})
     private User user;
 
     @Column(name = "student_code", nullable = false, length = 20)
@@ -68,6 +73,7 @@ public class EligibleStudent {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cancelled_by")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "roles", "enterprise"})
     private User cancelledBy;
 
     @Column(name = "created_at", nullable = false, updatable = false)

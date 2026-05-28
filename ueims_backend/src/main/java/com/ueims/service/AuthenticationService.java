@@ -122,6 +122,19 @@ public class AuthenticationService {
             userSessionRepository.deleteAll(oldSessions);
         }
 
+        // BR-02: Simultaneous Session Control - Invalidate old sessions
+        List<UserSession> oldSessions = userSessionRepository.findByEmail(user.getEmail());
+        if (!CollectionUtils.isEmpty(oldSessions)) {
+            List<InvalidatedToken> invalidTokens = oldSessions.stream()
+                    .map(s -> InvalidatedToken.builder()
+                            .tokenId(s.getTokenId())
+                            .expiresAt(s.getExpiresAt())
+                            .build())
+                    .toList();
+            invalidatedTokenRepository.saveAll(invalidTokens);
+            userSessionRepository.deleteAll(oldSessions);
+        }
+
         var token = generateToken(user);
 
         // Save new session
