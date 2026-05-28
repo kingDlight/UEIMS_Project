@@ -1,12 +1,12 @@
 package com.ueims.service;
 
 import com.ueims.model.entity.RolePermission;
+import com.ueims.model.entity.RolePermissionId;
 import java.util.List;
-import java.util.UUID;
 
 public interface RolePermissionService {
     List<RolePermission> findAll();
-    RolePermission findById(UUID id);
+    RolePermission findById(RolePermissionId id);
     RolePermission save(RolePermission entity);
-    void deleteById(UUID id);
+    void deleteById(RolePermissionId id);
 }

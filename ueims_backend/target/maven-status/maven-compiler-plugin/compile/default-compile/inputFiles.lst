@@ -4,7 +4,6 @@ C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\reposito
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\service\EnterpriseAssignmentService.java
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\model\entity\TrainingWarning.java
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\repository\EnterpriseEvaluationRepository.java
-C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\controller\RolePermissionController.java
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\controller\PermissionController.java
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\repository\AuditLogRepository.java
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\controller\RoleController.java
@@ -21,10 +20,8 @@ C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\model\en
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\service\impl\FinalReportServiceImpl.java
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\service\ApplicationService.java
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\controller\StudentProfileController.java
-C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\security\SecurityConfig.java
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\service\impl\StudentEnterpriseFeedbackServiceImpl.java
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\controller\FinalGradeController.java
-C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\security\UserDetailsImpl.java
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\service\impl\WeeklyReportServiceImpl.java
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\UeimsBackendApplication.java
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\controller\SystemAnnouncementController.java
@@ -38,6 +35,7 @@ C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\reposito
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\repository\PasswordResetTokenRepository.java
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\service\UserService.java
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\model\entity\InternshipPlan.java
+C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\configuration\JwtAuthenticationEntryPoint.java
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\model\entity\InvalidatedToken.java
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\model\entity\FinalGrade.java
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\controller\EnterpriseEvaluationController.java
@@ -71,6 +69,7 @@ C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\controll
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\model\entity\PasswordResetToken.java
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\service\impl\InternshipPlanServiceImpl.java
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\service\impl\NotificationServiceImpl.java
+C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\configuration\CustomJwtDecoder.java
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\service\impl\EnterpriseEvaluationServiceImpl.java
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\model\entity\SystemAnnouncement.java
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\repository\EnterpriseAssignmentRepository.java
@@ -108,6 +107,7 @@ C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\exceptio
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\model\entity\UserRole.java
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\service\impl\StudentProfileServiceImpl.java
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\service\SystemAnnouncementService.java
+C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\configuration\SecurityConfig.java
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\service\InternshipPlanService.java
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\service\ReportFeedbackService.java
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\model\entity\InternshipPlanItem.java
@@ -118,11 +118,9 @@ C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\model\en
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\repository\ReportFeedbackRepository.java
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\service\impl\FinalGradeServiceImpl.java
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\repository\StudentEnterpriseFeedbackRepository.java
-C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\security\JwtAuthenticationFilter.java
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\service\impl\InvalidatedTokenServiceImpl.java
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\service\impl\RolePermissionServiceImpl.java
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\controller\NotificationController.java
-C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\controller\SemesterEnterpriseController.java
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\model\entity\RolePermissionId.java
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\service\UserRoleService.java
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\controller\TrainingWarningController.java
@@ -137,7 +135,6 @@ C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\service\
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\model\entity\Role.java
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\service\impl\ReportFeedbackServiceImpl.java
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\service\PasswordResetTokenService.java
-C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\controller\UserRoleController.java
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\exception\AppException.java
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\model\entity\Semester.java
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\controller\PasswordResetTokenController.java
@@ -154,7 +151,5 @@ C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\reposito
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\repository\InternshipPlanRepository.java
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\model\entity\SemesterEnterprise.java
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\controller\ReportFeedbackController.java
-C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\security\CustomUserDetailsService.java
-C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\security\JwtTokenProvider.java
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\service\NotificationService.java
 C:\FPT\SWP391\ueims\UEIMS_Project\ueims_backend\src\main\java\com\ueims\service\impl\PasswordResetTokenServiceImpl.java

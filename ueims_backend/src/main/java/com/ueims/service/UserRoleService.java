@@ -1,12 +1,12 @@
 package com.ueims.service;
 
 import com.ueims.model.entity.UserRole;
+import com.ueims.model.entity.UserRoleId;
 import java.util.List;
-import java.util.UUID;
 
 public interface UserRoleService {
     List<UserRole> findAll();
-    UserRole findById(UUID id);
+    UserRole findById(UserRoleId id);
     UserRole save(UserRole entity);
-    void deleteById(UUID id);
+    void deleteById(UserRoleId id);
 }
