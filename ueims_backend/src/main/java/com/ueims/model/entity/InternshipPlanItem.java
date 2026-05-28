@@ -2,9 +2,8 @@ package com.ueims.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.*;
-import java.util.*;
-import java.math.BigDecimal;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "internship_plan_items")
@@ -16,33 +15,45 @@ public class InternshipPlanItem {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "plan_item_id")
-    private UUID planItemId;
+    private java.util.UUID planItemId;
 
-    @Column(name = "plan_id")
-    private UUID planId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "plan_id", nullable = false)
+    private InternshipPlan plan;
 
-    @Column(name = "week_number")
+    @Column(name = "week_number", nullable = false)
     private Integer weekNumber;
 
-    @Column(name = "task_description")
+    @Column(name = "task_description", nullable = false, columnDefinition = "TEXT")
     private String taskDescription;
 
-    @Column(name = "training_objective")
-    private String trainingObjective;
+    @Column(name = "target_date", nullable = false)
+    private java.time.LocalDate targetDate;
 
-    @Column(name = "target_date")
-    private LocalDate targetDate;
+    @Column(name = "status", nullable = false, length = 20)
+    @Builder.Default
+    private String status = "PENDING";
 
-    @Column(name = "status")
-    private String status;
+    @Column(name = "order_index", nullable = false)
+    @Builder.Default
+    private Integer orderIndex = 0;
 
-    @Column(name = "order_index")
-    private Integer orderIndex;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    @Column(name = "updated_at", nullable = false)
+    @Builder.Default
+    private LocalDateTime updatedAt = LocalDateTime.now();
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
 
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }

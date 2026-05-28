@@ -2,9 +2,8 @@ package com.ueims.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.*;
-import java.util.*;
-import java.math.BigDecimal;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "notifications")
@@ -16,33 +15,37 @@ public class Notification {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "notification_id")
-    private UUID notificationId;
+    private java.util.UUID notificationId;
 
-    @Column(name = "recipient_id")
-    private UUID recipientId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "recipient_id", nullable = false)
+    private User recipient;
 
-    @Column(name = "title")
+    @Column(name = "title", nullable = false, length = 500)
     private String title;
 
-    @Column(name = "message")
+    @Column(name = "message", nullable = false, columnDefinition = "TEXT")
     private String message;
 
-    @Column(name = "type")
+    @Column(name = "type", nullable = false, length = 30)
     private String type;
 
-    @Column(name = "'SYSTEM_ANNOUNCEMENT',")
-    private String 'SYSTEMAnnouncement',;
-
-    @Column(name = "reference_entity")
+    @Column(name = "reference_entity", length = 100)
     private String referenceEntity;
 
     @Column(name = "reference_id")
-    private UUID referenceId;
+    private java.util.UUID referenceId;
 
-    @Column(name = "is_read")
-    private Boolean isRead;
+    @Column(name = "is_read", nullable = false)
+    @Builder.Default
+    private Boolean isRead = false;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
+    @Column(name = "created_at", nullable = false, updatable = false)
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
+    
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
 }

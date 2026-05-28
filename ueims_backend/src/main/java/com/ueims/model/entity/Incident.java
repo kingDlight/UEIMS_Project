@@ -2,9 +2,8 @@ package com.ueims.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.*;
-import java.util.*;
-import java.math.BigDecimal;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "incidents")
@@ -16,45 +15,55 @@ public class Incident {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "incident_id")
-    private UUID incidentId;
+    private java.util.UUID incidentId;
 
-    @Column(name = "assignment_id")
-    private UUID assignmentId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "assignment_id", nullable = false)
+    private EnterpriseAssignment assignment;
 
-    @Column(name = "reported_by")
-    private UUID reportedBy;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "reported_by", nullable = false)
+    private User reportedBy;
 
-    @Column(name = "category")
+    @Column(name = "category", nullable = false, length = 50)
     private String category;
 
-    @Column(name = "'POOR_ATTITUDE',")
-    private String 'POORAttitude',;
-
-    @Column(name = "description")
+    @Column(name = "description", nullable = false, columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "evidence_urls")
+    @Column(name = "evidence_urls", columnDefinition = "JSONB")
     private String evidenceUrls;
 
-    @Column(name = "status")
-    private String status;
+    @Column(name = "status", nullable = false, length = 20)
+    @Builder.Default
+    private String status = "OPEN";
 
-    @Column(name = "resolution_note")
+    @Column(name = "resolution_note", columnDefinition = "TEXT")
     private String resolutionNote;
 
-    @Column(name = "resolved_by")
-    private UUID resolvedBy;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "resolved_by")
+    private User resolvedBy;
 
     @Column(name = "resolved_at")
     private LocalDateTime resolvedAt;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    @Column(name = "updated_at", nullable = false)
+    @Builder.Default
+    private LocalDateTime updatedAt = LocalDateTime.now();
 
-    @Column(name = "status")
-    private String status;
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
 
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }

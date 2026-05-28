@@ -2,9 +2,9 @@ package com.ueims.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.*;
-import java.util.*;
-import java.math.BigDecimal;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "password_reset_tokens")
@@ -12,25 +12,34 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode(exclude = "user")
+@ToString(exclude = "user")
 public class PasswordResetToken {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "token_id")
     private UUID tokenId;
 
-    @Column(name = "user_id")
-    private UUID userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    @Column(name = "token_hash")
+    @Column(name = "token_hash", nullable = false)
     private String tokenHash;
 
-    @Column(name = "expires_at")
+    @Column(name = "expires_at", nullable = false)
     private LocalDateTime expiresAt;
 
-    @Column(name = "is_used")
-    private Boolean isUsed;
+    @Column(name = "is_used", nullable = false)
+    @Builder.Default
+    private Boolean isUsed = false;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
+    @Column(name = "created_at", nullable = false, updatable = false)
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
+    
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
 }

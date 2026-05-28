@@ -2,9 +2,9 @@ package com.ueims.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.*;
-import java.util.*;
-import java.math.BigDecimal;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "system_announcements")
@@ -12,37 +12,54 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode(exclude = {"semester", "createdBy"})
+@ToString(exclude = {"semester", "createdBy"})
 public class SystemAnnouncement {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "announcement_id")
     private UUID announcementId;
 
-    @Column(name = "semester_id")
-    private UUID semesterId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "semester_id")
+    private Semester semester;
 
-    @Column(name = "title")
+    @Column(name = "title", nullable = false, length = 500)
     private String title;
 
-    @Column(name = "content")
+    @Column(name = "content", nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    @Column(name = "status")
-    private String status;
+    @Column(name = "status", nullable = false, length = 20)
+    @Builder.Default
+    private String status = "DRAFT";
 
-    @Column(name = "created_by")
-    private UUID createdBy;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by", nullable = false)
+    private User createdBy;
 
     @Column(name = "published_at")
     private LocalDateTime publishedAt;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    @Column(name = "updated_at", nullable = false)
+    @Builder.Default
+    private LocalDateTime updatedAt = LocalDateTime.now();
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }

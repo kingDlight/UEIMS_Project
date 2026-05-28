@@ -2,9 +2,12 @@ package com.ueims.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.*;
-import java.util.*;
-import java.math.BigDecimal;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Table(name = "semesters")
@@ -12,46 +15,69 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode(exclude = {"createdBy", "eligibleStudents", "jobPosts", "systemAnnouncements"})
+@ToString(exclude = {"createdBy", "eligibleStudents", "jobPosts", "systemAnnouncements"})
 public class Semester {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "semester_id")
     private UUID semesterId;
 
-    @Column(name = "semester_code")
+    @Column(name = "semester_code", nullable = false, unique = true, length = 20)
     private String semesterCode;
 
-    @Column(name = "name")
+    @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "start_date")
+    @Column(name = "start_date", nullable = false)
     private LocalDate startDate;
 
-    @Column(name = "end_date")
+    @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
 
-    @Column(name = "weekly_report_deadline_day")
-    private String weeklyReportDeadlineDay;
+    @Column(name = "weekly_report_deadline_day", length = 10)
+    @Builder.Default
+    private String weeklyReportDeadlineDay = "SUNDAY";
 
     @Column(name = "weekly_report_deadline_time")
     private LocalTime weeklyReportDeadlineTime;
 
-    @Column(name = "final_report_deadline")
-    private LocalDateTime finalReportDeadline;
+    @Column(name = "status", nullable = false, length = 20)
+    @Builder.Default
+    private String status = "DRAFT";
 
-    @Column(name = "status")
-    private String status;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by", nullable = false)
+    private User createdBy;
 
-    @Column(name = "created_by")
-    private UUID createdBy;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    @Column(name = "updated_at", nullable = false)
+    @Builder.Default
+    private LocalDateTime updatedAt = LocalDateTime.now();
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
+    @OneToMany(mappedBy = "semester", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<EligibleStudent> eligibleStudents;
+
+    @OneToMany(mappedBy = "semester", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<JobPost> jobPosts;
+
+    @OneToMany(mappedBy = "semester", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<SystemAnnouncement> systemAnnouncements;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }

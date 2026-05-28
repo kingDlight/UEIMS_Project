@@ -2,9 +2,6 @@ package com.ueims.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.*;
-import java.util.*;
-import java.math.BigDecimal;
 
 @Entity
 @Table(name = "role_permissions")
@@ -13,10 +10,16 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Builder
 public class RolePermission {
-    @Column(name = "role_name")
-    private String roleName;
+    @EmbeddedId
+    private RolePermissionId id;
 
-    @Column(name = "permission_name")
-    private String permissionName;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("roleName")
+    @JoinColumn(name = "role_name")
+    private Role role;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("permissionName")
+    @JoinColumn(name = "permission_name")
+    private Permission permission;
 }

@@ -2,9 +2,8 @@ package com.ueims.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.*;
-import java.util.*;
-import java.math.BigDecimal;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "enterprise_assignments")
@@ -16,39 +15,53 @@ public class EnterpriseAssignment {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "assignment_id")
-    private UUID assignmentId;
+    private java.util.UUID assignmentId;
 
-    @Column(name = "enterprise_id")
-    private UUID enterpriseId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "enterprise_id", nullable = false)
+    private Enterprise enterprise;
 
-    @Column(name = "student_id")
-    private UUID studentId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "student_id", nullable = false)
+    private User student;
 
-    @Column(name = "semester_id")
-    private UUID semesterId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "semester_id", nullable = false)
+    private Semester semester;
 
-    @Column(name = "supervisor_name")
+    @Column(name = "status", nullable = false, length = 20)
+    @Builder.Default
+    private String status = "ACTIVE";
+
+    @Column(name = "supervisor_name", length = 255)
     private String supervisorName;
 
-    @Column(name = "supervisor_email")
+    @Column(name = "supervisor_email", length = 255)
     private String supervisorEmail;
 
-    @Column(name = "supervisor_phone")
+    @Column(name = "supervisor_phone", length = 20)
     private String supervisorPhone;
 
-    @Column(name = "assigned_by")
-    private UUID assignedBy;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "assigned_by", nullable = false)
+    private User assignedBy;
 
-    @Column(name = "status")
-    private String status;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
 
-    @Column(name = "assigned_at")
-    private LocalDateTime assignedAt;
+    @Column(name = "updated_at", nullable = false)
+    @Builder.Default
+    private LocalDateTime updatedAt = LocalDateTime.now();
+    
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }

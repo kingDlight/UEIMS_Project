@@ -2,9 +2,9 @@ package com.ueims.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.*;
-import java.util.*;
+
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "final_grades")
@@ -16,42 +16,54 @@ public class FinalGrade {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "grade_id")
-    private UUID gradeId;
+    private java.util.UUID gradeId;
 
-    @Column(name = "student_id")
-    private UUID studentId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "student_id", nullable = false)
+    private User student;
 
-    @Column(name = "tm_id")
-    private UUID tmId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tm_id", nullable = false)
+    private User tm;
 
-    @Column(name = "semester_id")
-    private UUID semesterId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "semester_id", nullable = false)
+    private Semester semester;
 
-    @Column(name = "enterprise_total_score")
+    @Column(name = "enterprise_total_score", precision = 4, scale = 2)
     private BigDecimal enterpriseTotalScore;
 
-    @Column(name = "final_grade")
+    @Column(name = "final_grade", nullable = false, precision = 3, scale = 1)
     private BigDecimal finalGrade;
 
-    @Column(name = "overall_status")
+    @Column(name = "overall_status", nullable = false, length = 20)
     private String overallStatus;
 
-    @Column(name = "is_locked")
-    private Boolean isLocked;
+    @Column(name = "is_locked", nullable = false)
+    @Builder.Default
+    private Boolean isLocked = true;
 
-    @Column(name = "cancelled_reason")
+    @Column(name = "cancelled_reason", columnDefinition = "TEXT")
     private String cancelledReason;
 
-    @Column(name = "cancelled_by")
-    private UUID cancelledBy;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cancelled_by")
+    private User cancelledBy;
 
     @Column(name = "cancelled_at")
     private LocalDateTime cancelledAt;
 
-    @Column(name = "graded_at")
-    private LocalDateTime gradedAt;
+    @Column(name = "graded_at", nullable = false)
+    @Builder.Default
+    private LocalDateTime gradedAt = LocalDateTime.now();
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
+    @Column(name = "created_at", nullable = false, updatable = false)
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
+    
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        if (gradedAt == null) gradedAt = LocalDateTime.now();
+    }
 }

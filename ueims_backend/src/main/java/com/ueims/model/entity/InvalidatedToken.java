@@ -2,9 +2,8 @@ package com.ueims.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.*;
-import java.util.*;
-import java.math.BigDecimal;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "invalidated_tokens")
@@ -17,10 +16,10 @@ public class InvalidatedToken {
     @Column(name = "token_id")
     private String tokenId;
 
-    @Column(name = "expires_at")
+    @Column(name = "expires_at", nullable = false)
     private LocalDateTime expiresAt;
 
-    @Column(name = "invalidated_at")
-    private LocalDateTime invalidatedAt;
-
+    @Column(name = "invalidated_at", nullable = false)
+    @Builder.Default
+    private LocalDateTime invalidatedAt = LocalDateTime.now();
 }
