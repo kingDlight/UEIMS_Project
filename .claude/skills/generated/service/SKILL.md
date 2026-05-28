@@ -1,11 +1,11 @@
 ---
 name: service
-description: "Skill for the Service area of UEIMS_Project. 84 symbols across 69 files."
+description: "Skill for the Service area of UEIMS_Project. 70 symbols across 61 files."
 ---
 
 # Service
 
-84 symbols | 69 files | Cohesion: 95%
+70 symbols | 61 files | Cohesion: 99%
 
 ## When to Use
 
@@ -17,72 +17,64 @@ description: "Skill for the Service area of UEIMS_Project. 84 symbols across 69 
 
 | File | Symbols |
 |------|---------|
-| `ueims/src/main/java/com/swp/ueims/service/AuthenticationService.java` | introspect, logout, verifyToken, authenticate, refreshToken (+2) |
-| `ueims/src/test/java/com/swp/ueims/service/UserServiceTest.java` | createUser_validRequest_success, createUser_userExisted_fail, getMyInfo_valid_success, getMyInfo_userNotFound_error |
-| `ueims/src/main/resources/AuthenticationController.java` | authenticate, logout, authenticate, authenticate |
-| `ueims/src/main/java/com/swp/ueims/controller/UserController.java` | createUser, getMyInfo |
-| `ueims/src/main/java/com/swp/ueims/repository/UserRepository.java` | existsByUsername, findByUsername |
-| `ueims/src/main/java/com/swp/ueims/service/UserService.java` | createUser, getMyInfo |
-| `ueims/src/main/java/com/swp/ueims/exception/AppException.java` | getErrorCode |
-| `ueims/src/main/java/com/swp/ueims/mapper/UserMapper.java` | toUser |
-| `ueims/src/test/java/com/swp/ueims/controller/UserControllerTest.java` | createUser_validRequest_success |
-| `ueims/src/main/java/com/swp/ueims/configuration/ApplicationInitConfig.java` | applicationRunner |
+| `ueims_backend/src/main/java/com/ueims/service/AuthenticationService.java` | authenticate, refreshToken, generateToken, buildScope, introspect (+2) |
+| `ueims_backend/src/main/java/com/ueims/controller/AuthenticationController.java` | authenticate, refreshToken, introspect, logout |
+| `ueims_backend/src/main/java/com/ueims/repository/UserRepository.java` | findByEmail |
+| `ueims_backend/src/main/java/com/ueims/service/ApplicationService.java` | ApplicationService |
+| `ueims_backend/src/main/java/com/ueims/service/impl/ApplicationServiceImpl.java` | ApplicationServiceImpl |
+| `ueims_backend/src/main/java/com/ueims/service/AuditLogService.java` | AuditLogService |
+| `ueims_backend/src/main/java/com/ueims/service/impl/AuditLogServiceImpl.java` | AuditLogServiceImpl |
+| `ueims_backend/src/main/java/com/ueims/service/EligibleStudentService.java` | EligibleStudentService |
+| `ueims_backend/src/main/java/com/ueims/service/impl/EligibleStudentServiceImpl.java` | EligibleStudentServiceImpl |
+| `ueims_backend/src/main/java/com/ueims/service/EnterpriseAssignmentService.java` | EnterpriseAssignmentService |
 
 ## Entry Points
 
 Start here when exploring this area:
 
-- **`ApplicationServiceImpl`** (Class) — `ueims_backend/src/main/java/com/ueims/service/impl/ApplicationServiceImpl.java:10`
-- **`AuditLogServiceImpl`** (Class) — `ueims_backend/src/main/java/com/ueims/service/impl/AuditLogServiceImpl.java:10`
-- **`EligibleStudentServiceImpl`** (Class) — `ueims_backend/src/main/java/com/ueims/service/impl/EligibleStudentServiceImpl.java:10`
-- **`EnterpriseAssignmentServiceImpl`** (Class) — `ueims_backend/src/main/java/com/ueims/service/impl/EnterpriseAssignmentServiceImpl.java:10`
-- **`EnterpriseEvaluationServiceImpl`** (Class) — `ueims_backend/src/main/java/com/ueims/service/impl/EnterpriseEvaluationServiceImpl.java:10`
+- **`ApplicationServiceImpl`** (Class) — `ueims_backend/src/main/java/com/ueims/service/impl/ApplicationServiceImpl.java:13`
+- **`AuditLogServiceImpl`** (Class) — `ueims_backend/src/main/java/com/ueims/service/impl/AuditLogServiceImpl.java:13`
+- **`EligibleStudentServiceImpl`** (Class) — `ueims_backend/src/main/java/com/ueims/service/impl/EligibleStudentServiceImpl.java:13`
+- **`EnterpriseAssignmentServiceImpl`** (Class) — `ueims_backend/src/main/java/com/ueims/service/impl/EnterpriseAssignmentServiceImpl.java:13`
+- **`EnterpriseEvaluationServiceImpl`** (Class) — `ueims_backend/src/main/java/com/ueims/service/impl/EnterpriseEvaluationServiceImpl.java:13`
 
 ## Key Symbols
 
 | Symbol | Type | File | Line |
 |--------|------|------|------|
-| `ApplicationServiceImpl` | Class | `ueims_backend/src/main/java/com/ueims/service/impl/ApplicationServiceImpl.java` | 10 |
-| `AuditLogServiceImpl` | Class | `ueims_backend/src/main/java/com/ueims/service/impl/AuditLogServiceImpl.java` | 10 |
-| `EligibleStudentServiceImpl` | Class | `ueims_backend/src/main/java/com/ueims/service/impl/EligibleStudentServiceImpl.java` | 10 |
-| `EnterpriseAssignmentServiceImpl` | Class | `ueims_backend/src/main/java/com/ueims/service/impl/EnterpriseAssignmentServiceImpl.java` | 10 |
-| `EnterpriseEvaluationServiceImpl` | Class | `ueims_backend/src/main/java/com/ueims/service/impl/EnterpriseEvaluationServiceImpl.java` | 10 |
-| `EnterpriseServiceImpl` | Class | `ueims_backend/src/main/java/com/ueims/service/impl/EnterpriseServiceImpl.java` | 10 |
-| `FinalGradeServiceImpl` | Class | `ueims_backend/src/main/java/com/ueims/service/impl/FinalGradeServiceImpl.java` | 10 |
-| `FinalReportServiceImpl` | Class | `ueims_backend/src/main/java/com/ueims/service/impl/FinalReportServiceImpl.java` | 10 |
-| `IncidentServiceImpl` | Class | `ueims_backend/src/main/java/com/ueims/service/impl/IncidentServiceImpl.java` | 10 |
-| `InternshipPlanItemServiceImpl` | Class | `ueims_backend/src/main/java/com/ueims/service/impl/InternshipPlanItemServiceImpl.java` | 10 |
-| `InternshipPlanServiceImpl` | Class | `ueims_backend/src/main/java/com/ueims/service/impl/InternshipPlanServiceImpl.java` | 10 |
-| `InterviewServiceImpl` | Class | `ueims_backend/src/main/java/com/ueims/service/impl/InterviewServiceImpl.java` | 10 |
-| `InvalidatedTokenServiceImpl` | Class | `ueims_backend/src/main/java/com/ueims/service/impl/InvalidatedTokenServiceImpl.java` | 9 |
-| `JobPostServiceImpl` | Class | `ueims_backend/src/main/java/com/ueims/service/impl/JobPostServiceImpl.java` | 10 |
-| `NotificationServiceImpl` | Class | `ueims_backend/src/main/java/com/ueims/service/impl/NotificationServiceImpl.java` | 10 |
-| `PasswordResetTokenServiceImpl` | Class | `ueims_backend/src/main/java/com/ueims/service/impl/PasswordResetTokenServiceImpl.java` | 10 |
-| `PermissionServiceImpl` | Class | `ueims_backend/src/main/java/com/ueims/service/impl/PermissionServiceImpl.java` | 9 |
-| `ReportFeedbackServiceImpl` | Class | `ueims_backend/src/main/java/com/ueims/service/impl/ReportFeedbackServiceImpl.java` | 10 |
-| `RolePermissionServiceImpl` | Class | `ueims_backend/src/main/java/com/ueims/service/impl/RolePermissionServiceImpl.java` | 10 |
-| `RoleServiceImpl` | Class | `ueims_backend/src/main/java/com/ueims/service/impl/RoleServiceImpl.java` | 9 |
+| `ApplicationServiceImpl` | Class | `ueims_backend/src/main/java/com/ueims/service/impl/ApplicationServiceImpl.java` | 13 |
+| `AuditLogServiceImpl` | Class | `ueims_backend/src/main/java/com/ueims/service/impl/AuditLogServiceImpl.java` | 13 |
+| `EligibleStudentServiceImpl` | Class | `ueims_backend/src/main/java/com/ueims/service/impl/EligibleStudentServiceImpl.java` | 13 |
+| `EnterpriseAssignmentServiceImpl` | Class | `ueims_backend/src/main/java/com/ueims/service/impl/EnterpriseAssignmentServiceImpl.java` | 13 |
+| `EnterpriseEvaluationServiceImpl` | Class | `ueims_backend/src/main/java/com/ueims/service/impl/EnterpriseEvaluationServiceImpl.java` | 13 |
+| `EnterpriseServiceImpl` | Class | `ueims_backend/src/main/java/com/ueims/service/impl/EnterpriseServiceImpl.java` | 13 |
+| `FinalGradeServiceImpl` | Class | `ueims_backend/src/main/java/com/ueims/service/impl/FinalGradeServiceImpl.java` | 13 |
+| `FinalReportServiceImpl` | Class | `ueims_backend/src/main/java/com/ueims/service/impl/FinalReportServiceImpl.java` | 13 |
+| `IncidentServiceImpl` | Class | `ueims_backend/src/main/java/com/ueims/service/impl/IncidentServiceImpl.java` | 13 |
+| `InternshipPlanItemServiceImpl` | Class | `ueims_backend/src/main/java/com/ueims/service/impl/InternshipPlanItemServiceImpl.java` | 13 |
+| `InternshipPlanServiceImpl` | Class | `ueims_backend/src/main/java/com/ueims/service/impl/InternshipPlanServiceImpl.java` | 13 |
+| `InterviewServiceImpl` | Class | `ueims_backend/src/main/java/com/ueims/service/impl/InterviewServiceImpl.java` | 13 |
+| `InvalidatedTokenServiceImpl` | Class | `ueims_backend/src/main/java/com/ueims/service/impl/InvalidatedTokenServiceImpl.java` | 12 |
+| `JobPostServiceImpl` | Class | `ueims_backend/src/main/java/com/ueims/service/impl/JobPostServiceImpl.java` | 13 |
+| `NotificationServiceImpl` | Class | `ueims_backend/src/main/java/com/ueims/service/impl/NotificationServiceImpl.java` | 13 |
+| `PasswordResetTokenServiceImpl` | Class | `ueims_backend/src/main/java/com/ueims/service/impl/PasswordResetTokenServiceImpl.java` | 13 |
+| `PermissionServiceImpl` | Class | `ueims_backend/src/main/java/com/ueims/service/impl/PermissionServiceImpl.java` | 12 |
+| `ReportFeedbackServiceImpl` | Class | `ueims_backend/src/main/java/com/ueims/service/impl/ReportFeedbackServiceImpl.java` | 13 |
+| `RolePermissionServiceImpl` | Class | `ueims_backend/src/main/java/com/ueims/service/impl/RolePermissionServiceImpl.java` | 13 |
+| `RoleServiceImpl` | Class | `ueims_backend/src/main/java/com/ueims/service/impl/RoleServiceImpl.java` | 12 |
 
 ## Execution Flows
 
 | Flow | Type | Steps |
 |------|------|-------|
 | `Authenticate → BuildScope` | intra_community | 4 |
-| `Authenticate → AppException` | intra_community | 4 |
-| `Authenticate → AppException` | cross_community | 4 |
-| `Authenticate → BuildScope` | intra_community | 4 |
+| `Introspect → AppException` | intra_community | 4 |
+| `RefreshToken → AppException` | cross_community | 4 |
+| `RefreshToken → BuildScope` | intra_community | 4 |
 | `Logout → AppException` | intra_community | 4 |
-| `Decode → AppException` | intra_community | 4 |
-| `CreateUser → ExistsByUsername` | intra_community | 3 |
-| `CreateUser → AppException` | intra_community | 3 |
-| `CreateUser → ToUser` | intra_community | 3 |
-| `CreateUser → ToUserResponse` | cross_community | 3 |
-
-## Connected Areas
-
-| Area | Connections |
-|------|-------------|
-| Controller | 2 calls |
+| `Authenticate → FindByEmail` | intra_community | 3 |
+| `Authenticate → AppException` | intra_community | 3 |
+| `RefreshToken → FindByEmail` | intra_community | 3 |
 
 ## How to Explore
 

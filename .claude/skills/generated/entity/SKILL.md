@@ -32,26 +32,26 @@ description: "Skill for the Entity area of UEIMS_Project. 10 symbols across 10 f
 
 Start here when exploring this area:
 
-- **`FinalGrade`** (Class) — `ueims_backend/src/main/java/com/ueims/model/entity/FinalGrade.java:8`
-- **`User`** (Class) — `ueims_backend/src/main/java/com/ueims/model/entity/User.java:9`
-- **`Semester`** (Class) — `ueims_backend/src/main/java/com/ueims/model/entity/Semester.java:11`
-- **`TrainingWarning`** (Class) — `ueims_backend/src/main/java/com/ueims/model/entity/TrainingWarning.java:7`
-- **`create`** (Method) — `ueims_backend/src/main/java/com/ueims/controller/FinalGradeController.java:29`
+- **`FinalGrade`** (Class) — `ueims_backend/src/main/java/com/ueims/model/entity/FinalGrade.java:9`
+- **`User`** (Class) — `ueims_backend/src/main/java/com/ueims/model/entity/User.java:10`
+- **`Semester`** (Class) — `ueims_backend/src/main/java/com/ueims/model/entity/Semester.java:12`
+- **`TrainingWarning`** (Class) — `ueims_backend/src/main/java/com/ueims/model/entity/TrainingWarning.java:8`
+- **`create`** (Method) — `ueims_backend/src/main/java/com/ueims/controller/FinalGradeController.java:32`
 
 ## Key Symbols
 
 | Symbol | Type | File | Line |
 |--------|------|------|------|
-| `FinalGrade` | Class | `ueims_backend/src/main/java/com/ueims/model/entity/FinalGrade.java` | 8 |
-| `User` | Class | `ueims_backend/src/main/java/com/ueims/model/entity/User.java` | 9 |
-| `Semester` | Class | `ueims_backend/src/main/java/com/ueims/model/entity/Semester.java` | 11 |
-| `TrainingWarning` | Class | `ueims_backend/src/main/java/com/ueims/model/entity/TrainingWarning.java` | 7 |
-| `create` | Method | `ueims_backend/src/main/java/com/ueims/controller/FinalGradeController.java` | 29 |
-| `save` | Method | `ueims_backend/src/main/java/com/ueims/service/FinalGradeService.java` | 9 |
-| `save` | Method | `ueims_backend/src/main/java/com/ueims/service/impl/FinalGradeServiceImpl.java` | 21 |
-| `create` | Method | `ueims_backend/src/main/java/com/ueims/controller/TrainingWarningController.java` | 29 |
-| `save` | Method | `ueims_backend/src/main/java/com/ueims/service/TrainingWarningService.java` | 9 |
-| `save` | Method | `ueims_backend/src/main/java/com/ueims/service/impl/TrainingWarningServiceImpl.java` | 21 |
+| `FinalGrade` | Class | `ueims_backend/src/main/java/com/ueims/model/entity/FinalGrade.java` | 9 |
+| `User` | Class | `ueims_backend/src/main/java/com/ueims/model/entity/User.java` | 10 |
+| `Semester` | Class | `ueims_backend/src/main/java/com/ueims/model/entity/Semester.java` | 12 |
+| `TrainingWarning` | Class | `ueims_backend/src/main/java/com/ueims/model/entity/TrainingWarning.java` | 8 |
+| `create` | Method | `ueims_backend/src/main/java/com/ueims/controller/FinalGradeController.java` | 32 |
+| `save` | Method | `ueims_backend/src/main/java/com/ueims/service/FinalGradeService.java` | 12 |
+| `save` | Method | `ueims_backend/src/main/java/com/ueims/service/impl/FinalGradeServiceImpl.java` | 28 |
+| `create` | Method | `ueims_backend/src/main/java/com/ueims/controller/TrainingWarningController.java` | 32 |
+| `save` | Method | `ueims_backend/src/main/java/com/ueims/service/TrainingWarningService.java` | 12 |
+| `save` | Method | `ueims_backend/src/main/java/com/ueims/service/impl/TrainingWarningServiceImpl.java` | 28 |
 
 ## How to Explore
 

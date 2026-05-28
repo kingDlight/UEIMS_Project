@@ -3,8 +3,12 @@ package com.ueims.service.impl;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import com.ueims.dto.response.UserResponse;
+import com.ueims.exception.AppException;
+import com.ueims.exception.ErrorCode;
 import com.ueims.model.entity.User;
 import com.ueims.repository.UserRepository;
 import com.ueims.service.UserService;
@@ -34,5 +38,21 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteById(UUID id) {
         repository.deleteById(id);
+    }
+
+    @Override
+    public UserResponse getMyInfo() {
+        var context = SecurityContextHolder.getContext();
+        String email = context.getAuthentication().getName();
+
+        User user = repository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        return UserResponse.builder()
+                .userId(user.getUserId())
+                .email(user.getEmail())
+                .fullName(user.getFullName())
+                .phone(user.getPhone())
+                .status(user.getStatus())
+                .build();
     }
 }

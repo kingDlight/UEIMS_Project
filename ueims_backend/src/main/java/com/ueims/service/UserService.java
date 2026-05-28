@@ -3,6 +3,7 @@ package com.ueims.service;
 import java.util.List;
 import java.util.UUID;
 
+import com.ueims.dto.response.UserResponse;
 import com.ueims.model.entity.User;
 
 public interface UserService {
@@ -13,4 +14,6 @@ public interface UserService {
     User save(User entity);
 
     void deleteById(UUID id);
+
+    UserResponse getMyInfo();
 }
