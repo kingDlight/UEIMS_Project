@@ -1,11 +1,14 @@
 package com.ueims.controller;
 
-import com.ueims.model.entity.Permission;
-import com.ueims.service.PermissionService;
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import com.ueims.model.entity.Permission;
+import com.ueims.service.PermissionService;
+
 import lombok.RequiredArgsConstructor;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/permissions")

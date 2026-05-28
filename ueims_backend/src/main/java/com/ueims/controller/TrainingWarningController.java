@@ -1,15 +1,18 @@
 package com.ueims.controller;
 
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import com.ueims.dto.request.TrainingWarningRequest;
 import com.ueims.model.entity.Semester;
 import com.ueims.model.entity.TrainingWarning;
 import com.ueims.model.entity.User;
-import com.ueims.dto.request.TrainingWarningRequest;
 import com.ueims.service.TrainingWarningService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+
 import lombok.RequiredArgsConstructor;
-import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/training-warnings")

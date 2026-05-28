@@ -1,15 +1,18 @@
 package com.ueims.controller;
 
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import com.ueims.dto.request.FinalGradeRequest;
 import com.ueims.model.entity.FinalGrade;
 import com.ueims.model.entity.Semester;
 import com.ueims.model.entity.User;
-import com.ueims.dto.request.FinalGradeRequest;
 import com.ueims.service.FinalGradeService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+
 import lombok.RequiredArgsConstructor;
-import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/final-grades")
@@ -33,25 +36,25 @@ public class FinalGradeController {
         entity.setEnterpriseTotalScore(request.getEnterpriseTotalScore());
         entity.setFinalGrade(request.getFinalGrade());
         entity.setOverallStatus(request.getOverallStatus());
-        
+
         if (request.getStudentId() != null) {
             User student = new User();
             student.setUserId(request.getStudentId());
             entity.setStudent(student);
         }
-        
+
         if (request.getTmId() != null) {
             User tm = new User();
             tm.setUserId(request.getTmId());
             entity.setTm(tm);
         }
-        
+
         if (request.getSemesterId() != null) {
             Semester semester = new Semester();
             semester.setSemesterId(request.getSemesterId());
             entity.setSemester(semester);
         }
-        
+
         return ResponseEntity.ok(service.save(entity));
     }
 

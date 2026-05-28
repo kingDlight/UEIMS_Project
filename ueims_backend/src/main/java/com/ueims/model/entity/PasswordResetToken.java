@@ -1,10 +1,11 @@
 package com.ueims.model.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
-
 import java.time.LocalDateTime;
 import java.util.UUID;
+
+import jakarta.persistence.*;
+
+import lombok.*;
 
 @Entity
 @Table(name = "password_reset_tokens")
@@ -37,7 +38,7 @@ public class PasswordResetToken {
     @Column(name = "created_at", nullable = false, updatable = false)
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
-    
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

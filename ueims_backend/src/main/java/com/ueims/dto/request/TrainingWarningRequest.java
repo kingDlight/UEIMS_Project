@@ -1,7 +1,8 @@
 package com.ueims.dto.request;
 
-import lombok.Data;
 import java.util.UUID;
+
+import lombok.Data;
 
 @Data
 public class TrainingWarningRequest {

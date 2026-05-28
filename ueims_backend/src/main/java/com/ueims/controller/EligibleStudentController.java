@@ -1,12 +1,15 @@
 package com.ueims.controller;
 
-import com.ueims.model.entity.EligibleStudent;
-import com.ueims.service.EligibleStudentService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import lombok.RequiredArgsConstructor;
 import java.util.List;
 import java.util.UUID;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import com.ueims.model.entity.EligibleStudent;
+import com.ueims.service.EligibleStudentService;
+
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/eligible-students")

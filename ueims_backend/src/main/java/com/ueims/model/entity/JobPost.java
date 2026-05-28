@@ -1,9 +1,10 @@
 package com.ueims.model.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
-
 import java.time.LocalDateTime;
+
+import jakarta.persistence.*;
+
+import lombok.*;
 
 @Entity
 @Table(name = "job_posts")
@@ -60,7 +61,7 @@ public class JobPost {
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
-    
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

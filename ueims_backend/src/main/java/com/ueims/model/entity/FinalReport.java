@@ -1,9 +1,10 @@
 package com.ueims.model.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
-
 import java.time.LocalDateTime;
+
+import jakarta.persistence.*;
+
+import lombok.*;
 
 @Entity
 @Table(name = "final_reports")
@@ -38,7 +39,7 @@ public class FinalReport {
     @Column(name = "created_at", nullable = false, updatable = false)
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
-    
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

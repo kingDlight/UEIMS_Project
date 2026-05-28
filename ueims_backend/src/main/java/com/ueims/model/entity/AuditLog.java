@@ -1,9 +1,10 @@
 package com.ueims.model.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
-
 import java.time.LocalDateTime;
+
+import jakarta.persistence.*;
+
+import lombok.*;
 
 @Entity
 @Table(name = "audit_logs")
@@ -45,7 +46,7 @@ public class AuditLog {
     @Column(name = "timestamp", nullable = false, updatable = false)
     @Builder.Default
     private LocalDateTime timestamp = LocalDateTime.now();
-    
+
     @PrePersist
     protected void onCreate() {
         timestamp = LocalDateTime.now();
