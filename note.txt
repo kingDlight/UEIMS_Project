@@ -1,0 +1,19 @@
+1. Quy chuẩn Đặt Tên Nhánh (Branch Naming)
+Không được đặt tên nhánh kiểu bừa bãi như nhanh-cua-tri hay code-xong-roi. Tên nhánh phải nói lên loại công việc và tên tính năng.
+
+Làm tính năng mới: feat/tên-tính-năng
+Ví dụ: feat/login, feat/job-post, feat/import-excel
+Sửa lỗi (Bug): bugfix/tên-lỗi (hoặc fix/tên-lỗi)
+Ví dụ: bugfix/login-error, fix/crash-dashboard
+Viết tài liệu/Cấu hình: docs/tên-tài-liệu hoặc chore/cấu-hình
+Ví dụ: docs/update-readme, chore/setup-database
+2. Quy chuẩn Viết Commit Message (Conventional Commits)
+Lúc gõ lệnh git commit -m "...", phần chữ trong ngoặc kép cũng phải tuân theo cú pháp: <Loại_Commit>: <Mô tả ngắn gọn bằng tiếng Anh hoặc tiếng Việt>
+
+Các Loại Commit phổ biến:
+
+feat: Khi thêm tính năng mới.
+fix: Khi sửa một cái lỗi nào đó.
+refactor: Khi cấu trúc lại code cho đẹp hơn (không đổi chức năng).
+style: Khi sửa giao diện, CSS, màu sắc.
+docs: Khi sửa file tài liệu (Markdown, Word).
