@@ -60,8 +60,7 @@ public class SemesterServiceImpl implements SemesterService {
 
     @Override
     public Semester openSemester(UUID id) {
-        Semester semester = repository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.SEMESTER_NOT_FOUND));
+        Semester semester = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.SEMESTER_NOT_FOUND));
         if (!"DRAFT".equals(semester.getStatus())) {
             throw new AppException(ErrorCode.SEMESTER_INVALID_TRANSITION);
         }
@@ -71,8 +70,7 @@ public class SemesterServiceImpl implements SemesterService {
 
     @Override
     public Semester activeSemester(UUID id) {
-        Semester semester = repository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.SEMESTER_NOT_FOUND));
+        Semester semester = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.SEMESTER_NOT_FOUND));
         if (!"OPEN".equals(semester.getStatus())) {
             throw new AppException(ErrorCode.SEMESTER_INVALID_TRANSITION);
         }
@@ -82,8 +80,7 @@ public class SemesterServiceImpl implements SemesterService {
 
     @Override
     public Semester closeSemester(UUID id) {
-        Semester semester = repository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.SEMESTER_NOT_FOUND));
+        Semester semester = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.SEMESTER_NOT_FOUND));
         if (!"ACTIVE".equals(semester.getStatus())) {
             throw new AppException(ErrorCode.SEMESTER_INVALID_TRANSITION);
         }
@@ -93,8 +90,7 @@ public class SemesterServiceImpl implements SemesterService {
 
     @Override
     public Semester lockSemester(UUID id) {
-        Semester semester = repository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.SEMESTER_NOT_FOUND));
+        Semester semester = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.SEMESTER_NOT_FOUND));
         if (!"CLOSED".equals(semester.getStatus())) {
             throw new AppException(ErrorCode.SEMESTER_INVALID_TRANSITION);
         }

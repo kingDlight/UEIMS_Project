@@ -6,8 +6,8 @@ import java.util.Objects;
 import jakarta.validation.ConstraintViolation;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.orm.jpa.JpaSystemException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -81,7 +81,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(errorCode.getStatusCode())
                 .body(ApiResponse.builder()
                         .code(errorCode.getCode())
-                        .message("Required file part '" + exception.getRequestPartName() + "' is missing. Please attach the file in form-data.")
+                        .message("Required file part '" + exception.getRequestPartName()
+                                + "' is missing. Please attach the file in form-data.")
                         .build());
     }
 
@@ -92,7 +93,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(errorCode.getStatusCode())
                 .body(ApiResponse.builder()
                         .code(errorCode.getCode())
-                        .message("Invalid multipart request. Make sure Content-Type is multipart/form-data and the file is attached.")
+                        .message(
+                                "Invalid multipart request. Make sure Content-Type is multipart/form-data and the file is attached.")
                         .build());
     }
 
