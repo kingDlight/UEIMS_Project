@@ -20,7 +20,7 @@ export const LoginPage: React.FC = () => {
         'ADMIN'
       );
       message.success('Đăng nhập thành công!');
-      navigate('/app/dashboard');
+      navigate('/dashboard');
     } else {
       message.error('Sai email hoặc mật khẩu!');
     }

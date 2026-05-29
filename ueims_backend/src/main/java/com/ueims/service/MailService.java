@@ -17,8 +17,9 @@ public class MailService {
     public void sendPasswordResetMail(String to, String token) {
         String resetUrl = "http://localhost:3000/reset-password?token=" + token;
         String subject = "UEIMS - Đặt lại mật khẩu";
-        String text = "Xin chào,\n\nBạn đã yêu cầu đặt lại mật khẩu. Vui lòng nhấp vào liên kết dưới đây để thiết lập mật khẩu mới (có hiệu lực trong 15 phút):\n\n"
-                + resetUrl + "\n\nNếu bạn không yêu cầu điều này, vui lòng bỏ qua email này.";
+        String text =
+                "Xin chào,\n\nBạn đã yêu cầu đặt lại mật khẩu. Vui lòng nhấp vào liên kết dưới đây để thiết lập mật khẩu mới (có hiệu lực trong 15 phút):\n\n"
+                        + resetUrl + "\n\nNếu bạn không yêu cầu điều này, vui lòng bỏ qua email này.";
 
         if (javaMailSender != null) {
             try {
@@ -33,7 +34,7 @@ public class MailService {
                 log.error("Lỗi khi gửi email qua SMTP, chuyển sang chế độ Mock. Lỗi: {}", e.getMessage());
             }
         }
-        
+
         // Fallback to Mock Mail if SMTP is not configured or fails
         log.warn("=== MOCK MAIL SENDER ===");
         log.warn("Gửi đến: {}", to);

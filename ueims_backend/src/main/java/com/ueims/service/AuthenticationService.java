@@ -328,7 +328,8 @@ public class AuthenticationService {
 
     @Transactional
     public void forgotPassword(com.ueims.dto.request.ForgotPasswordRequest request) {
-        var user = userRepository.findByEmail(request.getEmail())
+        var user = userRepository
+                .findByEmail(request.getEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         String tokenRaw = UUID.randomUUID().toString();
@@ -351,7 +352,8 @@ public class AuthenticationService {
             throw new AppException(ErrorCode.PASSWORDS_NOT_MATCH);
         }
 
-        var resetToken = passwordResetTokenRepository.findByTokenHash(request.getToken())
+        var resetToken = passwordResetTokenRepository
+                .findByTokenHash(request.getToken())
                 .orElseThrow(() -> new AppException(ErrorCode.INVALID_KEY)); // Reusing INVALID_KEY for invalid token
 
         if (resetToken.getIsUsed()) {
@@ -369,7 +371,7 @@ public class AuthenticationService {
 
         resetToken.setIsUsed(true);
         passwordResetTokenRepository.save(resetToken);
-        
+
         // Invalidate all old sessions so they have to login again
         invalidateOldSessions(user.getEmail());
     }

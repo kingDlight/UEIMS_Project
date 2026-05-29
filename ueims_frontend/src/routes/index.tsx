@@ -1,29 +1,24 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { LoginPage } from '@/pages/auth/LoginPage';
-import { HomePage } from '@/pages/home/HomePage';
 import { ProtectedRoute } from '@/components/guards/ProtectedRoute';
 
 export const router = createBrowserRouter([
-  {
-    path: '/',
-    element: <HomePage />,
-  },
   {
     path: '/login',
     element: <LoginPage />,
   },
   {
-    path: '/app',
+    path: '/',
     element: <ProtectedRoute />,
     children: [
       {
-        path: '/app',
+        path: '/',
         element: <AppLayout />,
         children: [
           {
             index: true,
-            element: <Navigate to="/app/dashboard" replace />,
+            element: <Navigate to="/dashboard" replace />,
           },
           {
             path: 'dashboard',
