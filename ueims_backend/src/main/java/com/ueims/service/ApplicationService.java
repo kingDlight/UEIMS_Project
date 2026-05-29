@@ -3,14 +3,15 @@ package com.ueims.service;
 import java.util.List;
 import java.util.UUID;
 
-import com.ueims.model.entity.Application;
+import com.ueims.dto.request.ApplicationRequest;
+import com.ueims.dto.response.ApplicationResponse;
 
 public interface ApplicationService {
-    List<Application> findAll();
+    List<ApplicationResponse> findAll();
 
-    Application findById(UUID id);
+    ApplicationResponse findById(UUID id);
 
-    Application save(Application entity);
+    ApplicationResponse applyForJob(ApplicationRequest request);
 
     void deleteById(UUID id);
 }

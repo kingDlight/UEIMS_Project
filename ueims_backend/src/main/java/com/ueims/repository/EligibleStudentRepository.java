@@ -11,4 +11,6 @@ import com.ueims.model.entity.*;
 public interface EligibleStudentRepository extends JpaRepository<EligibleStudent, UUID> {
 
     boolean existsByStudentCodeAndSemester_SemesterId(String studentCode, UUID semesterId);
+
+    java.util.Optional<EligibleStudent> findByUser_UserIdAndSemester_SemesterId(UUID userId, UUID semesterId);
 }

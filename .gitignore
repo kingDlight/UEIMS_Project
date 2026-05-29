@@ -143,5 +143,10 @@ vite.config.ts.timestamp-*
 .vite/
 
 target/
+.idea/
+.vscode/
+node_modules/
+*.class
+target/
 .claude
 *.md
