@@ -2,6 +2,8 @@ package com.ueims.controller;
 
 import java.util.List;
 
+import jakarta.validation.Valid;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,7 +29,7 @@ public class PermissionController {
     }
 
     @PostMapping
-    public ResponseEntity<Permission> create(@RequestBody Permission entity) {
+    public ResponseEntity<Permission> create(@Valid @RequestBody Permission entity) {
         return ResponseEntity.ok(service.save(entity));
     }
 

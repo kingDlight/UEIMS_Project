@@ -3,6 +3,8 @@ package com.ueims.controller;
 import java.util.List;
 import java.util.UUID;
 
+import jakarta.validation.Valid;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,7 +33,7 @@ public class FinalGradeController {
     }
 
     @PostMapping
-    public ResponseEntity<FinalGrade> create(@RequestBody FinalGradeRequest request) {
+    public ResponseEntity<FinalGrade> create(@Valid @RequestBody FinalGradeRequest request) {
         FinalGrade entity = new FinalGrade();
         entity.setEnterpriseTotalScore(request.getEnterpriseTotalScore());
         entity.setFinalGrade(request.getFinalGrade());

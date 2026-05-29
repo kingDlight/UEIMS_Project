@@ -1,16 +1,24 @@
 package com.ueims.dto.request;
 
+import jakarta.validation.constraints.Size;
+
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class ChangePasswordRequest {
-    private String oldPassword;
-    private String newPassword;
-    private String confirmPassword;
+    String oldPassword;
+
+    @Size(min = 8, message = "INVALID_PASSWORD")
+    String newPassword;
+
+    String confirmPassword;
 }

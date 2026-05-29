@@ -46,7 +46,8 @@ public class CustomJwtDecoder implements JwtDecoder {
                         .findById(jit)
                         .orElseThrow(() -> new JwtException("Session not found or invalidated by another login"));
 
-                if (session.getLastActivity().plusMinutes(15).isBefore(LocalDateTime.now())) {
+                if (session.getLastActivity() != null
+                        && session.getLastActivity().plusMinutes(15).isBefore(LocalDateTime.now())) {
                     invalidatedTokenRepository.save(InvalidatedToken.builder()
                             .tokenId(session.getTokenId())
                             .expiresAt(session.getExpiresAt())

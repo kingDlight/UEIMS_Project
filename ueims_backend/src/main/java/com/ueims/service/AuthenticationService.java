@@ -9,12 +9,11 @@ import java.util.List;
 import java.util.StringJoiner;
 import java.util.UUID;
 
-import jakarta.transaction.Transactional;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import com.nimbusds.jose.*;
@@ -52,6 +51,9 @@ public class AuthenticationService {
     UserRepository userRepository;
     InvalidatedTokenRepository invalidatedTokenRepository;
     UserSessionRepository userSessionRepository;
+    com.ueims.repository.AuditLogRepository auditLogRepository;
+    com.ueims.repository.PasswordResetTokenRepository passwordResetTokenRepository;
+    MailService mailService;
     PasswordEncoder passwordEncoder;
 
     @NonFinal
@@ -79,7 +81,6 @@ public class AuthenticationService {
         return IntrospectResponse.builder().valid(isValid).build();
     }
 
-    @Transactional
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         log.info("SignKey: {}", SIGNER_KEY);
 
@@ -87,40 +88,31 @@ public class AuthenticationService {
                 .findByEmail(request.getEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-        if ("BANNED".equals(user.getStatus())) {
+        if ("LOCKED".equals(user.getStatus())) {
             throw new AppException(ErrorCode.USER_BANNED);
         }
 
         boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
 
         if (!authenticated) {
-            user.setFailedLoginAttempts(user.getFailedLoginAttempts() + 1);
-            if (user.getFailedLoginAttempts() >= 5) {
-                user.setStatus("BANNED");
-                userRepository.save(user);
+            // Tăng bộ đếm và lưu TRỰC TIẾP bằng SQL, bỏ qua Hibernate
+            int attempts = user.getFailedLoginAttempts() + 1;
+            String newStatus = attempts >= 5 ? "LOCKED" : user.getStatus();
+            userRepository.updateLoginAttemptsAndStatus(user.getUserId(), attempts, newStatus);
+
+            if (attempts >= 5) {
                 throw new AppException(ErrorCode.USER_BANNED);
             }
-            userRepository.save(user);
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
 
+        // Đăng nhập thành công → Reset bộ đếm
         if (user.getFailedLoginAttempts() > 0) {
-            user.setFailedLoginAttempts(0);
-            userRepository.save(user);
+            userRepository.updateLoginAttemptsAndStatus(user.getUserId(), 0, "ACTIVE");
         }
 
         // BR-02: Simultaneous Session Control - Invalidate old sessions
-        List<UserSession> oldSessions = userSessionRepository.findByEmail(user.getEmail());
-        if (!CollectionUtils.isEmpty(oldSessions)) {
-            List<InvalidatedToken> invalidTokens = oldSessions.stream()
-                    .map(s -> InvalidatedToken.builder()
-                            .tokenId(s.getTokenId())
-                            .expiresAt(s.getExpiresAt())
-                            .build())
-                    .toList();
-            invalidatedTokenRepository.saveAll(invalidTokens);
-            userSessionRepository.deleteAll(oldSessions);
-        }
+        invalidateOldSessions(user.getEmail());
 
         var token = generateToken(user);
 
@@ -138,10 +130,47 @@ public class AuthenticationService {
                             .toLocalDateTime())
                     .build();
             userSessionRepository.save(session);
+
+            // BR-05 / Security: Log the successful login
+            jakarta.servlet.http.HttpServletRequest httpRequest =
+                    ((org.springframework.web.context.request.ServletRequestAttributes)
+                                    org.springframework.web.context.request.RequestContextHolder.getRequestAttributes())
+                            .getRequest();
+
+            com.ueims.model.entity.AuditLog auditLog = com.ueims.model.entity.AuditLog.builder()
+                    .user(user)
+                    .action("LOGIN_SUCCESS")
+                    .targetEntity("User")
+                    .targetId(user.getUserId())
+                    .ipAddress(httpRequest.getRemoteAddr())
+                    .userAgent(httpRequest.getHeader("User-Agent"))
+                    .build();
+            auditLogRepository.save(auditLog);
+
         } catch (ParseException e) {
             log.error("Failed to parse generated token", e);
         }
 
+        return AuthenticationResponse.builder()
+                .token(token)
+                .authenticated(true)
+                .mustChangePassword(user.getMustChangePassword())
+                .build();
+    }
+
+    @Transactional
+    protected void invalidateOldSessions(String email) {
+        List<UserSession> oldSessions = userSessionRepository.findByEmail(email);
+        if (!CollectionUtils.isEmpty(oldSessions)) {
+            List<InvalidatedToken> invalidTokens = oldSessions.stream()
+                    .map(s -> InvalidatedToken.builder()
+                            .tokenId(s.getTokenId())
+                            .expiresAt(s.getExpiresAt())
+                            .build())
+                    .toList();
+            invalidatedTokenRepository.saveAll(invalidTokens);
+            userSessionRepository.deleteAll(oldSessions);
+        }
         return AuthenticationResponse.builder()
                 .token(token)
                 .authenticated(true)
@@ -288,6 +317,7 @@ public class AuthenticationService {
         String email = context.getAuthentication().getName();
 
         var user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        var user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
             throw new AppException(ErrorCode.WRONG_OLD_PASSWORD);
@@ -300,5 +330,55 @@ public class AuthenticationService {
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         user.setMustChangePassword(false);
         userRepository.save(user);
+    }
+
+    @Transactional
+    public void forgotPassword(com.ueims.dto.request.ForgotPasswordRequest request) {
+        var user = userRepository
+                .findByEmail(request.getEmail())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        String tokenRaw = UUID.randomUUID().toString();
+
+        com.ueims.model.entity.PasswordResetToken resetToken = com.ueims.model.entity.PasswordResetToken.builder()
+                .user(user)
+                .tokenHash(tokenRaw)
+                .expiresAt(java.time.LocalDateTime.now().plusMinutes(15))
+                .isUsed(false)
+                .build();
+
+        passwordResetTokenRepository.save(resetToken);
+
+        mailService.sendPasswordResetMail(user.getEmail(), tokenRaw);
+    }
+
+    @Transactional
+    public void resetPassword(com.ueims.dto.request.ResetPasswordRequest request) {
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            throw new AppException(ErrorCode.PASSWORDS_NOT_MATCH);
+        }
+
+        var resetToken = passwordResetTokenRepository
+                .findByTokenHash(request.getToken())
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_KEY)); // Reusing INVALID_KEY for invalid token
+
+        if (resetToken.getIsUsed()) {
+            throw new AppException(ErrorCode.INVALID_KEY);
+        }
+
+        if (resetToken.getExpiresAt().isBefore(java.time.LocalDateTime.now())) {
+            throw new AppException(ErrorCode.INVALID_KEY);
+        }
+
+        var user = resetToken.getUser();
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        user.setMustChangePassword(false);
+        userRepository.save(user);
+
+        resetToken.setIsUsed(true);
+        passwordResetTokenRepository.save(resetToken);
+
+        // Invalidate all old sessions so they have to login again
+        invalidateOldSessions(user.getEmail());
     }
 }

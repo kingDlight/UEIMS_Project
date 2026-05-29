@@ -2,6 +2,8 @@ package com.ueims.controller;
 
 import java.util.List;
 
+import jakarta.validation.Valid;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,7 +29,7 @@ public class RoleController {
     }
 
     @PostMapping
-    public ResponseEntity<Role> create(@RequestBody Role entity) {
+    public ResponseEntity<Role> create(@Valid @RequestBody Role entity) {
         return ResponseEntity.ok(service.save(entity));
     }
 
