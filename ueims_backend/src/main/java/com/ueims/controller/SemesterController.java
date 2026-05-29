@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.ueims.dto.request.SemesterCreationRequest;
+import com.ueims.dto.response.SemesterResponse;
 import com.ueims.model.entity.Semester;
 import com.ueims.service.SemesterService;
 
@@ -19,17 +20,18 @@ public class SemesterController {
     private final SemesterService service;
 
     @GetMapping
-    public ResponseEntity<List<Semester>> getAll() {
-        return ResponseEntity.ok(service.findAll());
+    public ResponseEntity<List<SemesterResponse>> getAll() {
+        return ResponseEntity.ok(
+                service.findAll().stream().map(SemesterResponse::fromEntity).toList());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Semester> getById(@PathVariable UUID id) {
-        return ResponseEntity.ok(service.findById(id));
+    public ResponseEntity<SemesterResponse> getById(@PathVariable UUID id) {
+        return ResponseEntity.ok(SemesterResponse.fromEntity(service.findById(id)));
     }
 
     @PostMapping
-    public ResponseEntity<Semester> create(@RequestBody SemesterCreationRequest request) {
+    public ResponseEntity<SemesterResponse> create(@RequestBody SemesterCreationRequest request) {
         Semester entity = Semester.builder()
                 .semesterCode(request.getSemesterCode())
                 .name(request.getName())
@@ -39,7 +41,7 @@ public class SemesterController {
                         request.getWeeklyReportDeadlineDay() != null ? request.getWeeklyReportDeadlineDay() : "SUNDAY")
                 .weeklyReportDeadlineTime(request.getWeeklyReportDeadlineTime())
                 .build();
-        return ResponseEntity.ok(service.save(entity));
+        return ResponseEntity.ok(SemesterResponse.fromEntity(service.save(entity)));
     }
 
     @DeleteMapping("/{id}")
@@ -49,22 +51,22 @@ public class SemesterController {
     }
 
     @PutMapping("/{id}/open")
-    public ResponseEntity<Semester> openSemester(@PathVariable UUID id) {
-        return ResponseEntity.ok(service.openSemester(id));
+    public ResponseEntity<SemesterResponse> openSemester(@PathVariable UUID id) {
+        return ResponseEntity.ok(SemesterResponse.fromEntity(service.openSemester(id)));
     }
 
     @PutMapping("/{id}/active")
-    public ResponseEntity<Semester> activeSemester(@PathVariable UUID id) {
-        return ResponseEntity.ok(service.activeSemester(id));
+    public ResponseEntity<SemesterResponse> activeSemester(@PathVariable UUID id) {
+        return ResponseEntity.ok(SemesterResponse.fromEntity(service.activeSemester(id)));
     }
 
     @PutMapping("/{id}/close")
-    public ResponseEntity<Semester> closeSemester(@PathVariable UUID id) {
-        return ResponseEntity.ok(service.closeSemester(id));
+    public ResponseEntity<SemesterResponse> closeSemester(@PathVariable UUID id) {
+        return ResponseEntity.ok(SemesterResponse.fromEntity(service.closeSemester(id)));
     }
 
     @PutMapping("/{id}/lock")
-    public ResponseEntity<Semester> lockSemester(@PathVariable UUID id) {
-        return ResponseEntity.ok(service.lockSemester(id));
+    public ResponseEntity<SemesterResponse> lockSemester(@PathVariable UUID id) {
+        return ResponseEntity.ok(SemesterResponse.fromEntity(service.lockSemester(id)));
     }
 }
