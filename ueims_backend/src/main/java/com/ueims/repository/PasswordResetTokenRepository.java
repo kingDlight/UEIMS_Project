@@ -7,5 +7,9 @@ import org.springframework.stereotype.Repository;
 
 import com.ueims.model.entity.*;
 
+import java.util.Optional;
+
 @Repository
-public interface PasswordResetTokenRepository extends JpaRepository<PasswordResetToken, UUID> {}
+public interface PasswordResetTokenRepository extends JpaRepository<PasswordResetToken, UUID> {
+    Optional<PasswordResetToken> findByTokenHash(String tokenHash);
+}
