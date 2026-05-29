@@ -1,5 +1,7 @@
 package com.ueims.controller;
 
+import jakarta.validation.Valid;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -29,7 +31,7 @@ public class EligibleStudentController {
     }
 
     @PostMapping
-    public ResponseEntity<EligibleStudent> create(@RequestBody EligibleStudent entity) {
+    public ResponseEntity<EligibleStudent> create(@Valid @RequestBody EligibleStudent entity) {
         return ResponseEntity.ok(service.save(entity));
     }
 

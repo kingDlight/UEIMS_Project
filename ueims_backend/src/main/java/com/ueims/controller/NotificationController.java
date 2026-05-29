@@ -1,5 +1,7 @@
 package com.ueims.controller;
 
+import jakarta.validation.Valid;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -28,7 +30,7 @@ public class NotificationController {
     }
 
     @PostMapping
-    public ResponseEntity<Notification> create(@RequestBody Notification entity) {
+    public ResponseEntity<Notification> create(@Valid @RequestBody Notification entity) {
         return ResponseEntity.ok(service.save(entity));
     }
 

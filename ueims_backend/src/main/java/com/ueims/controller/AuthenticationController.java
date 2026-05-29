@@ -34,21 +34,21 @@ public class AuthenticationController {
     }
 
     @PostMapping("/introspect")
-    public ApiResponse<IntrospectResponse> introspect(@RequestBody IntrospectRequest request)
+    public ApiResponse<IntrospectResponse> introspect(@Valid @RequestBody IntrospectRequest request)
             throws ParseException, JOSEException {
         var result = authenticationService.introspect(request);
         return ApiResponse.<IntrospectResponse>builder().result(result).build();
     }
 
     @PostMapping("/refresh")
-    public ApiResponse<AuthenticationResponse> refreshToken(@RequestBody RefreshRequest request)
+    public ApiResponse<AuthenticationResponse> refreshToken(@Valid @RequestBody RefreshRequest request)
             throws ParseException, JOSEException {
         var result = authenticationService.refreshToken(request);
         return ApiResponse.<AuthenticationResponse>builder().result(result).build();
     }
 
     @PostMapping("/logout")
-    public ApiResponse<Void> logout(@RequestBody LogoutRequest request) throws ParseException, JOSEException {
+    public ApiResponse<Void> logout(@Valid @RequestBody LogoutRequest request) throws ParseException, JOSEException {
         authenticationService.logout(request);
         return ApiResponse.<Void>builder().build();
     }
@@ -58,15 +58,14 @@ public class AuthenticationController {
         authenticationService.changePassword(request);
         return ApiResponse.<Void>builder().build();
     }
-
     @PostMapping("/forgot-password")
-    public ApiResponse<Void> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+    public ApiResponse<Void> forgotPassword(@RequestBody @Valid ForgotPasswordRequest request) {
         authenticationService.forgotPassword(request);
         return ApiResponse.<Void>builder().build();
     }
 
     @PostMapping("/reset-password")
-    public ApiResponse<Void> resetPassword(@RequestBody ResetPasswordRequest request) {
+    public ApiResponse<Void> resetPassword(@RequestBody @Valid ResetPasswordRequest request) {
         authenticationService.resetPassword(request);
         return ApiResponse.<Void>builder().build();
     }

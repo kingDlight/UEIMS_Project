@@ -1,5 +1,7 @@
 package com.ueims.controller;
 
+import jakarta.validation.Valid;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -28,7 +30,7 @@ public class PasswordResetTokenController {
     }
 
     @PostMapping
-    public ResponseEntity<PasswordResetToken> create(@RequestBody PasswordResetToken entity) {
+    public ResponseEntity<PasswordResetToken> create(@Valid @RequestBody PasswordResetToken entity) {
         return ResponseEntity.ok(service.save(entity));
     }
 

@@ -1,5 +1,7 @@
 package com.ueims.controller;
 
+import jakarta.validation.Valid;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -28,7 +30,7 @@ public class InterviewController {
     }
 
     @PostMapping
-    public ResponseEntity<Interview> create(@RequestBody Interview entity) {
+    public ResponseEntity<Interview> create(@Valid @RequestBody Interview entity) {
         return ResponseEntity.ok(service.save(entity));
     }
 

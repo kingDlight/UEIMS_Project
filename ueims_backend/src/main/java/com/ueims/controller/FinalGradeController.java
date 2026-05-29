@@ -1,5 +1,7 @@
 package com.ueims.controller;
 
+import jakarta.validation.Valid;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -31,7 +33,7 @@ public class FinalGradeController {
     }
 
     @PostMapping
-    public ResponseEntity<FinalGrade> create(@RequestBody FinalGradeRequest request) {
+    public ResponseEntity<FinalGrade> create(@Valid @RequestBody FinalGradeRequest request) {
         FinalGrade entity = new FinalGrade();
         entity.setEnterpriseTotalScore(request.getEnterpriseTotalScore());
         entity.setFinalGrade(request.getFinalGrade());

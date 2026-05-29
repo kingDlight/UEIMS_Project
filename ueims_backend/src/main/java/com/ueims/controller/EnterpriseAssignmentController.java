@@ -1,5 +1,7 @@
 package com.ueims.controller;
 
+import jakarta.validation.Valid;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -28,7 +30,7 @@ public class EnterpriseAssignmentController {
     }
 
     @PostMapping
-    public ResponseEntity<EnterpriseAssignment> create(@RequestBody EnterpriseAssignment entity) {
+    public ResponseEntity<EnterpriseAssignment> create(@Valid @RequestBody EnterpriseAssignment entity) {
         return ResponseEntity.ok(service.save(entity));
     }
 

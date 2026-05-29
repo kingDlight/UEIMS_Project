@@ -1,5 +1,7 @@
 package com.ueims.controller;
 
+import jakarta.validation.Valid;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -31,7 +33,7 @@ public class TrainingWarningController {
     }
 
     @PostMapping
-    public ResponseEntity<TrainingWarning> create(@RequestBody TrainingWarningRequest request) {
+    public ResponseEntity<TrainingWarning> create(@Valid @RequestBody TrainingWarningRequest request) {
         TrainingWarning entity = new TrainingWarning();
         entity.setWeekNumber(request.getWeekNumber());
         entity.setWarningMessage(request.getWarningMessage());

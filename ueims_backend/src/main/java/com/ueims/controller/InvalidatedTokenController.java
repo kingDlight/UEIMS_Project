@@ -1,5 +1,7 @@
 package com.ueims.controller;
 
+import jakarta.validation.Valid;
+
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -27,7 +29,7 @@ public class InvalidatedTokenController {
     }
 
     @PostMapping
-    public ResponseEntity<InvalidatedToken> create(@RequestBody InvalidatedToken entity) {
+    public ResponseEntity<InvalidatedToken> create(@Valid @RequestBody InvalidatedToken entity) {
         return ResponseEntity.ok(service.save(entity));
     }
 
