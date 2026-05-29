@@ -28,7 +28,7 @@ public class AuthenticationController {
     AuthenticationService authenticationService;
 
     @PostMapping("/token")
-    public ApiResponse<AuthenticationResponse> authenticate(@RequestBody @Valid AuthenticationRequest request) {
+    public ApiResponse<AuthenticationResponse> authenticate(@Valid @RequestBody AuthenticationRequest request) {
         var result = authenticationService.authenticate(request);
         return ApiResponse.<AuthenticationResponse>builder().result(result).build();
     }
@@ -54,18 +54,19 @@ public class AuthenticationController {
     }
 
     @PostMapping("/change-password")
-    public ApiResponse<Void> changePassword(@RequestBody @Valid ChangePasswordRequest request) {
+    public ApiResponse<Void> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
         authenticationService.changePassword(request);
         return ApiResponse.<Void>builder().build();
     }
+
     @PostMapping("/forgot-password")
-    public ApiResponse<Void> forgotPassword(@RequestBody @Valid ForgotPasswordRequest request) {
+    public ApiResponse<Void> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
         authenticationService.forgotPassword(request);
         return ApiResponse.<Void>builder().build();
     }
 
     @PostMapping("/reset-password")
-    public ApiResponse<Void> resetPassword(@RequestBody @Valid ResetPasswordRequest request) {
+    public ApiResponse<Void> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
         authenticationService.resetPassword(request);
         return ApiResponse.<Void>builder().build();
     }

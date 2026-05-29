@@ -33,7 +33,7 @@ public class SemesterController {
     }
 
     @PostMapping
-    public ResponseEntity<SemesterResponse> create(@RequestBody @Valid SemesterCreationRequest request) {
+    public ResponseEntity<SemesterResponse> create(@Valid @RequestBody SemesterCreationRequest request) {
         Semester entity = Semester.builder()
                 .semesterCode(request.getSemesterCode())
                 .name(request.getName())
