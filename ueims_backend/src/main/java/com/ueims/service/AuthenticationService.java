@@ -12,6 +12,7 @@ import java.util.UUID;
 import jakarta.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -22,11 +23,10 @@ import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.ueims.dto.request.AuthenticationRequest;
+import com.ueims.dto.request.ChangePasswordRequest;
 import com.ueims.dto.request.IntrospectRequest;
 import com.ueims.dto.request.LogoutRequest;
 import com.ueims.dto.request.RefreshRequest;
-import com.ueims.dto.request.ChangePasswordRequest;
-import org.springframework.security.core.context.SecurityContextHolder;
 import com.ueims.dto.response.AuthenticationResponse;
 import com.ueims.dto.response.IntrospectResponse;
 import com.ueims.exception.AppException;
@@ -142,7 +142,11 @@ public class AuthenticationService {
             log.error("Failed to parse generated token", e);
         }
 
-        return AuthenticationResponse.builder().token(token).authenticated(true).mustChangePassword(user.getMustChangePassword()).build();
+        return AuthenticationResponse.builder()
+                .token(token)
+                .authenticated(true)
+                .mustChangePassword(user.getMustChangePassword())
+                .build();
     }
 
     public void logout(LogoutRequest request) throws ParseException, JOSEException {
@@ -283,8 +287,7 @@ public class AuthenticationService {
         var context = SecurityContextHolder.getContext();
         String email = context.getAuthentication().getName();
 
-        var user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        var user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
             throw new AppException(ErrorCode.WRONG_OLD_PASSWORD);

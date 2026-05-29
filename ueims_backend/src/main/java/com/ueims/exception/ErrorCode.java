@@ -23,21 +23,27 @@ public enum ErrorCode {
     CV_SIZE_EXCEEDED(1013, "CV size must be under 5MB", HttpStatus.BAD_REQUEST),
     DUPLICATE_APPLICATION(1014, "You have already applied for this job post", HttpStatus.BAD_REQUEST),
     JOB_POST_CLOSED(1015, "Cannot apply to a CLOSED job post", HttpStatus.BAD_REQUEST),
-    APPLICATION_DEADLINE_EXPIRED(1016, "This job posting has reached its deadline and is closed for registration", HttpStatus.BAD_REQUEST),
+    APPLICATION_DEADLINE_EXPIRED(
+            1016, "This job posting has reached its deadline and is closed for registration", HttpStatus.BAD_REQUEST),
     MAX_APPLICATIONS_LIMIT_REACHED(1017, "You can submit at most 3 CV applications", HttpStatus.BAD_REQUEST),
     JOB_POST_ID_MANDATORY(1018, "Job post ID is mandatory", HttpStatus.BAD_REQUEST),
     STUDENT_ID_MANDATORY(1019, "Student ID is mandatory", HttpStatus.BAD_REQUEST),
     STUDENT_NOT_ELIGIBLE(1020, "Student is not registered or not eligible in this semester", HttpStatus.BAD_REQUEST),
     STUDENT_NOT_IN_SEMESTER_5(1021, "Only Semester 5 students are permitted to apply for jobs", HttpStatus.BAD_REQUEST),
-    INVALID_FINAL_GRADE(1022, "Final grade must be at least 5.0 to pass", HttpStatus.BAD_REQUEST),
+    INVALID_FINAL_GRADE(1015, "Final grade must be at least 5.0 to pass", HttpStatus.BAD_REQUEST),
 
     // Semester / import related errors (from remote)
-    INVALID_EXCEL_FORMAT(1009, "Invalid Excel file format. Please check required columns and data types.", HttpStatus.BAD_REQUEST),
+    INVALID_EXCEL_FORMAT(
+            1009, "Invalid Excel file format. Please check required columns and data types.", HttpStatus.BAD_REQUEST),
     SEMESTER_INVALID_DATE(1010, "Semester start date must be before end date", HttpStatus.BAD_REQUEST),
     SEMESTER_LOCKED_DATE(1011, "Cannot modify dates of an ACTIVE, CLOSED, or LOCKED semester", HttpStatus.BAD_REQUEST),
-    DUPLICATE_STUDENT_IN_SEMESTER(1012, "Some students were skipped because they already exist in this semester", HttpStatus.OK),
+    DUPLICATE_STUDENT_IN_SEMESTER(
+            1012, "Some students were skipped because they already exist in this semester", HttpStatus.OK),
     SEMESTER_NOT_FOUND(1013, "Semester not found", HttpStatus.NOT_FOUND),
-    SEMESTER_INVALID_TRANSITION(1014, "Invalid semester status transition. Allowed: DRAFT→OPEN, OPEN→ACTIVE, ACTIVE→CLOSED, CLOSED→LOCKED", HttpStatus.UNPROCESSABLE_ENTITY),
+    SEMESTER_INVALID_TRANSITION(
+            1014,
+            "Invalid semester status transition. Allowed: DRAFT→OPEN, OPEN→ACTIVE, ACTIVE→CLOSED, CLOSED→LOCKED",
+            HttpStatus.UNPROCESSABLE_ENTITY),
 
     // Application related
     APPLICATION_NOT_FOUND(1023, "Application not found", HttpStatus.NOT_FOUND),

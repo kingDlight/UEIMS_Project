@@ -20,7 +20,9 @@ public class ApplicationRequest {
     @NotNull(message = "STUDENT_ID_MANDATORY")
     private UUID studentId;
 
+    @NotNull(message = "CV_FILE_URL_MANDATORY")
     private String cvFileUrl;
+
     private Long cvFileSize;
     private String coverLetter;
 }

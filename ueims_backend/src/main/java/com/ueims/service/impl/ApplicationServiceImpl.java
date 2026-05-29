@@ -14,6 +14,7 @@ import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
 import com.ueims.mapper.ApplicationMapper;
 import com.ueims.model.entity.*;
+import com.ueims.model.entity.ApplicationStatus;
 import com.ueims.repository.*;
 import com.ueims.service.ApplicationService;
 
@@ -25,7 +26,6 @@ public class ApplicationServiceImpl implements ApplicationService {
     private final ApplicationRepository repository;
     private final JobPostRepository jobPostRepository;
     private final UserRepository userRepository;
-    private final StudentProfileRepository studentProfileRepository;
     private final EligibleStudentRepository eligibleStudentRepository;
     private final ApplicationMapper mapper;
 
@@ -38,9 +38,8 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     @Transactional(readOnly = true)
     public ApplicationResponse findById(UUID id) {
-        Application application = repository
-                .findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.APPLICATION_NOT_FOUND));
+        Application application =
+                repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.APPLICATION_NOT_FOUND));
         return mapper.toApplicationResponse(application);
     }
 
@@ -79,32 +78,26 @@ public class ApplicationServiceImpl implements ApplicationService {
         // 6. Verify no active application for this job post
         boolean hasActiveApplication =
                 repository.existsByJobPost_JobPostIdAndStudent_UserIdAndStatusNotAndDeletedAtIsNull(
-                        jobPost.getJobPostId(), student.getUserId(), "WITHDRAWN");
+                        jobPost.getJobPostId(), student.getUserId(), ApplicationStatus.WITHDRAWN);
         if (hasActiveApplication) {
             throw new AppException(ErrorCode.DUPLICATE_APPLICATION);
         }
 
         // 7. Verify max 3 applications per student
-        long activeCount = repository.countByStudent_UserIdAndStatusNotAndDeletedAtIsNull(student.getUserId(), "WITHDRAWN");
+        long activeCount = repository.countByStudent_UserIdAndStatusNotAndDeletedAtIsNull(
+                student.getUserId(), ApplicationStatus.WITHDRAWN);
         if (activeCount >= 3) {
             throw new AppException(ErrorCode.MAX_APPLICATIONS_LIMIT_REACHED);
         }
 
-        // 8. Resolve CV File Url & Size
+        // 8. Validate CV File Url & optional size
         String cvUrl = request.getCvFileUrl();
         Long cvSize = request.getCvFileSize();
 
         if (cvUrl == null || cvUrl.trim().isEmpty()) {
-            StudentProfile profile = studentProfileRepository
-                    .findByUser_UserId(student.getUserId())
-                    .orElseThrow(() -> new AppException(ErrorCode.STUDENT_PROFILE_NOT_FOUND));
-            cvUrl = profile.getCvUrl();
-            cvSize = profile.getCvFileSize();
-
-            if (cvUrl == null || cvUrl.trim().isEmpty()) {
-                throw new AppException(ErrorCode.CV_NOT_UPLOADED);
-            }
+            throw new AppException(ErrorCode.CV_NOT_UPLOADED);
         }
+        cvUrl = cvUrl.trim();
 
         // Validate CV format (Strictly PDF)
         if (!cvUrl.toLowerCase().endsWith(".pdf")) {
@@ -121,9 +114,8 @@ public class ApplicationServiceImpl implements ApplicationService {
                 .jobPost(jobPost)
                 .student(student)
                 .cvFileUrl(cvUrl)
-                .cvFileSize(cvSize)
                 .coverLetter(request.getCoverLetter())
-                .status("PENDING")
+                .status(ApplicationStatus.PENDING)
                 .build();
 
         Application saved = repository.save(entity);
