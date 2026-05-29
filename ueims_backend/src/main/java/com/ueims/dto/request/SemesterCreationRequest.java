@@ -5,29 +5,31 @@ import java.time.LocalTime;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class SemesterCreationRequest {
     @NotBlank(message = "FIELD_REQUIRED")
-    private String semesterCode;
+    String semesterCode;
 
     @NotBlank(message = "FIELD_REQUIRED")
-    private String name;
+    String name;
 
     @NotNull(message = "FIELD_REQUIRED")
-    private LocalDate startDate;
+    LocalDate startDate;
 
     @NotNull(message = "FIELD_REQUIRED")
-    private LocalDate endDate;
+    LocalDate endDate;
 
-    private String weeklyReportDeadlineDay;
-    private LocalTime weeklyReportDeadlineTime;
+    String weeklyReportDeadlineDay;
+    LocalTime weeklyReportDeadlineTime;
 }

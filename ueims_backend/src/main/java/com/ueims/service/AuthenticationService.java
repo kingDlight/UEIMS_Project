@@ -52,6 +52,8 @@ public class AuthenticationService {
     InvalidatedTokenRepository invalidatedTokenRepository;
     UserSessionRepository userSessionRepository;
     com.ueims.repository.AuditLogRepository auditLogRepository;
+    com.ueims.repository.PasswordResetTokenRepository passwordResetTokenRepository;
+    MailService mailService;
     PasswordEncoder passwordEncoder;
 
     @NonFinal
@@ -322,5 +324,55 @@ public class AuthenticationService {
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         user.setMustChangePassword(false);
         userRepository.save(user);
+    }
+
+    @Transactional
+    public void forgotPassword(com.ueims.dto.request.ForgotPasswordRequest request) {
+        var user = userRepository
+                .findByEmail(request.getEmail())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        String tokenRaw = UUID.randomUUID().toString();
+
+        com.ueims.model.entity.PasswordResetToken resetToken = com.ueims.model.entity.PasswordResetToken.builder()
+                .user(user)
+                .tokenHash(tokenRaw)
+                .expiresAt(java.time.LocalDateTime.now().plusMinutes(15))
+                .isUsed(false)
+                .build();
+
+        passwordResetTokenRepository.save(resetToken);
+
+        mailService.sendPasswordResetMail(user.getEmail(), tokenRaw);
+    }
+
+    @Transactional
+    public void resetPassword(com.ueims.dto.request.ResetPasswordRequest request) {
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            throw new AppException(ErrorCode.PASSWORDS_NOT_MATCH);
+        }
+
+        var resetToken = passwordResetTokenRepository
+                .findByTokenHash(request.getToken())
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_KEY)); // Reusing INVALID_KEY for invalid token
+
+        if (resetToken.getIsUsed()) {
+            throw new AppException(ErrorCode.INVALID_KEY);
+        }
+
+        if (resetToken.getExpiresAt().isBefore(java.time.LocalDateTime.now())) {
+            throw new AppException(ErrorCode.INVALID_KEY);
+        }
+
+        var user = resetToken.getUser();
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        user.setMustChangePassword(false);
+        userRepository.save(user);
+
+        resetToken.setIsUsed(true);
+        passwordResetTokenRepository.save(resetToken);
+
+        // Invalidate all old sessions so they have to login again
+        invalidateOldSessions(user.getEmail());
     }
 }
