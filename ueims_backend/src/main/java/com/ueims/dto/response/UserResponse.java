@@ -2,19 +2,22 @@ package com.ueims.dto.response;
 
 import java.util.UUID;
 
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserResponse {
-    private UUID userId;
-    private String email;
-    private String fullName;
-    private String phone;
-    private String status;
+    UUID userId;
+    String email;
+    String fullName;
+    String phone;
+    String status;
 }

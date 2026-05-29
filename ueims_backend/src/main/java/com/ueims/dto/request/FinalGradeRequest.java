@@ -3,14 +3,17 @@ package com.ueims.dto.request;
 import java.math.BigDecimal;
 import java.util.UUID;
 
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.experimental.FieldDefaults;
 
 @Data
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class FinalGradeRequest {
-    private UUID studentId;
-    private UUID tmId;
-    private UUID semesterId;
-    private BigDecimal enterpriseTotalScore;
-    private BigDecimal finalGrade;
-    private String overallStatus;
+    UUID studentId;
+    UUID tmId;
+    UUID semesterId;
+    BigDecimal enterpriseTotalScore;
+    BigDecimal finalGrade;
+    String overallStatus;
 }
