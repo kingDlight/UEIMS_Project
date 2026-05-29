@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.ueims.dto.request.SemesterCreationRequest;
 import com.ueims.model.entity.Semester;
 import com.ueims.service.SemesterService;
 
@@ -28,7 +29,16 @@ public class SemesterController {
     }
 
     @PostMapping
-    public ResponseEntity<Semester> create(@RequestBody Semester entity) {
+    public ResponseEntity<Semester> create(@RequestBody SemesterCreationRequest request) {
+        Semester entity = Semester.builder()
+                .semesterCode(request.getSemesterCode())
+                .name(request.getName())
+                .startDate(request.getStartDate())
+                .endDate(request.getEndDate())
+                .weeklyReportDeadlineDay(
+                        request.getWeeklyReportDeadlineDay() != null ? request.getWeeklyReportDeadlineDay() : "SUNDAY")
+                .weeklyReportDeadlineTime(request.getWeeklyReportDeadlineTime())
+                .build();
         return ResponseEntity.ok(service.save(entity));
     }
 

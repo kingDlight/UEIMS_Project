@@ -16,6 +16,12 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class SemesterServiceImpl implements SemesterService {
+    private static final String STATUS_DRAFT = "DRAFT";
+    private static final String STATUS_OPEN = "OPEN";
+    private static final String STATUS_ACTIVE = "ACTIVE";
+    private static final String STATUS_CLOSED = "CLOSED";
+    private static final String STATUS_LOCKED = "LOCKED";
+
     private final SemesterRepository repository;
 
     @Override
@@ -37,11 +43,10 @@ public class SemesterServiceImpl implements SemesterService {
             throw new AppException(ErrorCode.SEMESTER_INVALID_DATE);
         }
 
-        // BR-12: Cannot modify dates if status is ACTIVE, CLOSED, or LOCKED
         if (entity.getSemesterId() != null) {
             Semester existing = repository.findById(entity.getSemesterId()).orElse(null);
             if (existing != null) {
-                if (List.of("ACTIVE", "CLOSED", "LOCKED").contains(existing.getStatus())) {
+                if (List.of(STATUS_ACTIVE, STATUS_CLOSED, STATUS_LOCKED).contains(existing.getStatus())) {
                     if (!existing.getStartDate().equals(entity.getStartDate())
                             || !existing.getEndDate().equals(entity.getEndDate())) {
                         throw new AppException(ErrorCode.SEMESTER_LOCKED_DATE);
@@ -61,40 +66,40 @@ public class SemesterServiceImpl implements SemesterService {
     @Override
     public Semester openSemester(UUID id) {
         Semester semester = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.SEMESTER_NOT_FOUND));
-        if (!"DRAFT".equals(semester.getStatus())) {
+        if (!STATUS_DRAFT.equals(semester.getStatus())) {
             throw new AppException(ErrorCode.SEMESTER_INVALID_TRANSITION);
         }
-        semester.setStatus("OPEN");
+        semester.setStatus(STATUS_OPEN);
         return repository.save(semester);
     }
 
     @Override
     public Semester activeSemester(UUID id) {
         Semester semester = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.SEMESTER_NOT_FOUND));
-        if (!"OPEN".equals(semester.getStatus())) {
+        if (!STATUS_OPEN.equals(semester.getStatus())) {
             throw new AppException(ErrorCode.SEMESTER_INVALID_TRANSITION);
         }
-        semester.setStatus("ACTIVE");
+        semester.setStatus(STATUS_ACTIVE);
         return repository.save(semester);
     }
 
     @Override
     public Semester closeSemester(UUID id) {
         Semester semester = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.SEMESTER_NOT_FOUND));
-        if (!"ACTIVE".equals(semester.getStatus())) {
+        if (!STATUS_ACTIVE.equals(semester.getStatus())) {
             throw new AppException(ErrorCode.SEMESTER_INVALID_TRANSITION);
         }
-        semester.setStatus("CLOSED");
+        semester.setStatus(STATUS_CLOSED);
         return repository.save(semester);
     }
 
     @Override
     public Semester lockSemester(UUID id) {
         Semester semester = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.SEMESTER_NOT_FOUND));
-        if (!"CLOSED".equals(semester.getStatus())) {
+        if (!STATUS_CLOSED.equals(semester.getStatus())) {
             throw new AppException(ErrorCode.SEMESTER_INVALID_TRANSITION);
         }
-        semester.setStatus("LOCKED");
+        semester.setStatus(STATUS_LOCKED);
         return repository.save(semester);
     }
 }
