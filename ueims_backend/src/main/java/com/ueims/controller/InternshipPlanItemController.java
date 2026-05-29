@@ -3,6 +3,8 @@ package com.ueims.controller;
 import java.util.List;
 import java.util.UUID;
 
+import jakarta.validation.Valid;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,7 +30,7 @@ public class InternshipPlanItemController {
     }
 
     @PostMapping
-    public ResponseEntity<InternshipPlanItem> create(@RequestBody InternshipPlanItem entity) {
+    public ResponseEntity<InternshipPlanItem> create(@Valid @RequestBody InternshipPlanItem entity) {
         return ResponseEntity.ok(service.save(entity));
     }
 

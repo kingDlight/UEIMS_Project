@@ -3,6 +3,8 @@ package com.ueims.controller;
 import java.util.List;
 import java.util.UUID;
 
+import jakarta.validation.Valid;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,7 +30,7 @@ public class ReportFeedbackController {
     }
 
     @PostMapping
-    public ResponseEntity<ReportFeedback> create(@RequestBody ReportFeedback entity) {
+    public ResponseEntity<ReportFeedback> create(@Valid @RequestBody ReportFeedback entity) {
         return ResponseEntity.ok(service.save(entity));
     }
 
