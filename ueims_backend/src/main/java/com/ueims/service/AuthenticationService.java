@@ -171,11 +171,6 @@ public class AuthenticationService {
             invalidatedTokenRepository.saveAll(invalidTokens);
             userSessionRepository.deleteAll(oldSessions);
         }
-        return AuthenticationResponse.builder()
-                .token(token)
-                .authenticated(true)
-                .mustChangePassword(user.getMustChangePassword())
-                .build();
     }
 
     public void logout(LogoutRequest request) throws ParseException, JOSEException {
@@ -316,7 +311,6 @@ public class AuthenticationService {
         var context = SecurityContextHolder.getContext();
         String email = context.getAuthentication().getName();
 
-        var user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         var user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
