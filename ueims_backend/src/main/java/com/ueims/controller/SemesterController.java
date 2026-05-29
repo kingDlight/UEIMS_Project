@@ -3,6 +3,8 @@ package com.ueims.controller;
 import java.util.List;
 import java.util.UUID;
 
+import jakarta.validation.Valid;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,7 +31,7 @@ public class SemesterController {
     }
 
     @PostMapping
-    public ResponseEntity<Semester> create(@RequestBody SemesterCreationRequest request) {
+    public ResponseEntity<Semester> create(@RequestBody @Valid SemesterCreationRequest request) {
         Semester entity = Semester.builder()
                 .semesterCode(request.getSemesterCode())
                 .name(request.getName())

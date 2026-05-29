@@ -9,12 +9,11 @@ import java.util.List;
 import java.util.StringJoiner;
 import java.util.UUID;
 
-import org.springframework.transaction.annotation.Transactional;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import com.nimbusds.jose.*;
@@ -98,7 +97,7 @@ public class AuthenticationService {
             int attempts = user.getFailedLoginAttempts() + 1;
             String newStatus = attempts >= 5 ? "LOCKED" : user.getStatus();
             userRepository.updateLoginAttemptsAndStatus(user.getUserId(), attempts, newStatus);
-            
+
             if (attempts >= 5) {
                 throw new AppException(ErrorCode.USER_BANNED);
             }
@@ -129,11 +128,13 @@ public class AuthenticationService {
                             .toLocalDateTime())
                     .build();
             userSessionRepository.save(session);
-            
+
             // BR-05 / Security: Log the successful login
-            jakarta.servlet.http.HttpServletRequest httpRequest = 
-                ((org.springframework.web.context.request.ServletRequestAttributes) org.springframework.web.context.request.RequestContextHolder.getRequestAttributes()).getRequest();
-            
+            jakarta.servlet.http.HttpServletRequest httpRequest =
+                    ((org.springframework.web.context.request.ServletRequestAttributes)
+                                    org.springframework.web.context.request.RequestContextHolder.getRequestAttributes())
+                            .getRequest();
+
             com.ueims.model.entity.AuditLog auditLog = com.ueims.model.entity.AuditLog.builder()
                     .user(user)
                     .action("LOGIN_SUCCESS")
@@ -143,7 +144,7 @@ public class AuthenticationService {
                     .userAgent(httpRequest.getHeader("User-Agent"))
                     .build();
             auditLogRepository.save(auditLog);
-            
+
         } catch (ParseException e) {
             log.error("Failed to parse generated token", e);
         }

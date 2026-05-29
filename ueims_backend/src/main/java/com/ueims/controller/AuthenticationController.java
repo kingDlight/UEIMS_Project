@@ -2,6 +2,8 @@ package com.ueims.controller;
 
 import java.text.ParseException;
 
+import jakarta.validation.Valid;
+
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,7 +28,7 @@ public class AuthenticationController {
     AuthenticationService authenticationService;
 
     @PostMapping("/token")
-    public ApiResponse<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request) {
+    public ApiResponse<AuthenticationResponse> authenticate(@RequestBody @Valid AuthenticationRequest request) {
         var result = authenticationService.authenticate(request);
         return ApiResponse.<AuthenticationResponse>builder().result(result).build();
     }
@@ -52,7 +54,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/change-password")
-    public ApiResponse<Void> changePassword(@RequestBody ChangePasswordRequest request) {
+    public ApiResponse<Void> changePassword(@RequestBody @Valid ChangePasswordRequest request) {
         authenticationService.changePassword(request);
         return ApiResponse.<Void>builder().build();
     }
