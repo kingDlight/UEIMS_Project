@@ -31,7 +31,7 @@ export const AppLayout: React.FC = () => {
 
   // Mock Sidebar Items based on Role (will expand later)
   const sidebarItems = [
-    { key: '/dashboard', icon: <DashboardOutlined />, label: 'Dashboard', onClick: () => navigate('/dashboard') },
+    { key: '/app/dashboard', icon: <DashboardOutlined />, label: 'Dashboard', onClick: () => navigate('/app/dashboard') },
   ];
 
   return (
@@ -40,7 +40,7 @@ export const AppLayout: React.FC = () => {
         <div style={{ height: 64, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: 18, borderBottom: '1px solid #f0f0f0' }}>
           {collapsed ? 'UE' : 'UEIMS System'}
         </div>
-        <Menu mode="inline" defaultSelectedKeys={['/dashboard']} items={sidebarItems} />
+        <Menu mode="inline" defaultSelectedKeys={['/app/dashboard']} items={sidebarItems} />
       </Sider>
       <Layout>
         <Header style={{ padding: 0, background: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingRight: 24 }}>
