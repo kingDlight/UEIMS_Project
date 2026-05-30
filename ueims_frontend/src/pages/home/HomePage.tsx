@@ -4,23 +4,17 @@ import {
   MenuOutlined,
   CloseOutlined,
   ArrowRightOutlined,
-  TeamOutlined,
-  ApartmentOutlined,
-  FileProtectOutlined,
-  AuditOutlined,
-  ScheduleOutlined,
-  BarChartOutlined,
 } from '@ant-design/icons';
 
-// Fresh Modern Color Palette
-const PRIMARY = '#3B82F6';
-const SECONDARY = '#10B981';
-const ACCENT = '#06B6D4';
-const DARK = '#0F172A';
-const DARK_BLUE = '#1E3A5F';
-const LIGHT_BG = '#F8FAFC';
-const GRAY = '#64748B';
-const WHITE = '#FFFFFF';
+// FPT Orange Gradient Theme
+const FPT_ORANGE = '#E67E22';
+const FPT_ORANGE_LIGHT = '#F39C12';
+const FPT_ORANGE_DARK = '#D35400';
+const FPT_WHITE = '#FFFFFF';
+const FPT_DARK = '#1A1A2E';
+const FPT_GRAY = '#6B7280';
+const FPT_LIGHT_BG = '#F9FAFB';
+const FPT_BORDER = '#E5E7EB';
 
 const navLinks = [
   { label: 'Giới thiệu', href: '#about' },
@@ -30,83 +24,47 @@ const navLinks = [
 ];
 
 const stats = [
-  { value: '2,500+', label: 'Sinh viên thực tập', emoji: '🎓' },
-  { value: '350+', label: 'Doanh nghiệp đối tác', emoji: '🏢' },
-  { value: '95%', label: 'Tỷ lệ hài lòng', emoji: '⭐' },
-  { value: '12+', label: 'Năm kinh nghiệm', emoji: '🏆' },
+  { value: '2,500+', label: 'Sinh viên thực tập' },
+  { value: '350+', label: 'Doanh nghiệp đối tác' },
+  { value: '95%', label: 'Tỷ lệ hài lòng' },
+  { value: '12+', label: 'Năm kinh nghiệm' },
 ];
 
 const features = [
   {
-    icon: <AuditOutlined style={{ fontSize: 28, color: PRIMARY }} />,
+    icon: '🎓',
     title: 'Quản lý Kỳ OJT',
     desc: 'Tạo và quản lý toàn bộ chu trình thực tập: từ phân bổ sinh viên, theo dõi tiến độ đến chấm điểm cuối kỳ.',
-    color: PRIMARY,
   },
   {
-    icon: <TeamOutlined style={{ fontSize: 28, color: SECONDARY }} />,
+    icon: '🏢',
     title: 'Kết nối Doanh nghiệp',
     desc: 'Nền tảng kết nối trực tiếp giữa nhà trường và doanh nghiệp, đăng tin tuyển dụng và lọc ứng viên hiệu quả.',
-    color: SECONDARY,
   },
   {
-    icon: <FileProtectOutlined style={{ fontSize: 28, color: ACCENT }} />,
+    icon: '📊',
     title: 'Báo cáo & Đánh giá',
     desc: 'Sinh viên nộp báo cáo tuần, mentor đánh giá rubric, giảng viên chấm điểm — tất cả được số hóa và minh bạch.',
-    color: ACCENT,
   },
   {
-    icon: <ApartmentOutlined style={{ fontSize: 28, color: '#8B5CF6' }} />,
+    icon: '🔐',
     title: 'Phân quyền đa cấp',
     desc: 'Hệ thống phân quyền chặt chẽ theo 6 vai trò: Admin, Training Manager, Enterprise, Mentor, Lecturer và Student.',
-    color: '#8B5CF6',
   },
   {
-    icon: <ScheduleOutlined style={{ fontSize: 28, color: '#F59E0B' }} />,
+    icon: '📅',
     title: 'Lịch Phỏng vấn',
     desc: 'Doanh nghiệp đặt lịch phỏng vấn trực tiếp, kiểm tra chồng lịch tự động và gửi thông báo tức thì.',
-    color: '#F59E0B',
   },
   {
-    icon: <BarChartOutlined style={{ fontSize: 28, color: '#EC4899' }} />,
+    icon: '📈',
     title: 'Thống kê Tổng quan',
     desc: 'Dashboard thời gian thực với biểu đồ thống kê số lượng sinh viên, điểm trung bình và tình trạng thực tập.',
-    color: '#EC4899',
   },
 ];
 
-// Animated Counter
-const AnimatedCounter: React.FC<{ value: string; delay?: number }> = ({ value, delay = 0 }) => {
-  const [visible, setVisible] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setTimeout(() => setVisible(true), delay);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.3 }
-    );
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [delay]);
-
-  return (
-    <div ref={ref} style={{
-      opacity: visible ? 1 : 0,
-      transform: visible ? 'translateY(0)' : 'translateY(20px)',
-      transition: 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
-    }}>
-      {value}
-    </div>
-  );
-};
-
-// Fade In Section
-const FadeIn: React.FC<{ children: React.ReactNode; delay?: number; className?: string }> = ({ children, delay = 0, className }) => {
+// Fade In Animation Component
+const FadeIn: React.FC<{ children: React.ReactNode; delay?: number }> = ({ children, delay = 0 }) => {
   const [visible, setVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -125,9 +83,9 @@ const FadeIn: React.FC<{ children: React.ReactNode; delay?: number; className?: 
   }, [delay]);
 
   return (
-    <div ref={ref} className={className} style={{
+    <div ref={ref} style={{
       opacity: visible ? 1 : 0,
-      transform: visible ? 'translateY(0)' : 'translateY(40px)',
+      transform: visible ? 'translateY(0)' : 'translateY(30px)',
       transition: 'all 0.7s cubic-bezier(0.4, 0, 0.2, 1)',
     }}>
       {children}
@@ -156,32 +114,8 @@ export const HomePage: React.FC = () => {
     <div style={{
       fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
       overflowX: 'hidden',
-      background: LIGHT_BG,
+      background: FPT_LIGHT_BG,
     }}>
-      
-      {/* ============ BACKGROUND DECORATIONS ============ */}
-      <div style={{
-        position: 'fixed',
-        width: 700,
-        height: 700,
-        borderRadius: '50%',
-        background: `radial-gradient(circle, ${PRIMARY}15 0%, transparent 70%)`,
-        top: -300,
-        right: -200,
-        zIndex: 0,
-        animation: 'float 12s ease-in-out infinite',
-      }} />
-      <div style={{
-        position: 'fixed',
-        width: 500,
-        height: 500,
-        borderRadius: '50%',
-        background: `radial-gradient(circle, ${SECONDARY}15 0%, transparent 70%)`,
-        bottom: -200,
-        left: -150,
-        zIndex: 0,
-        animation: 'float 15s ease-in-out infinite reverse',
-      }} />
 
       {/* ============ NAVBAR ============ */}
       <nav style={{
@@ -195,10 +129,10 @@ export const HomePage: React.FC = () => {
         alignItems: 'center',
         justifyContent: 'space-between',
         height: 72,
-        background: scrolled ? 'rgba(255, 255, 255, 0.9)' : 'transparent',
-        backdropFilter: scrolled ? 'blur(20px)' : 'none',
-        WebkitBackdropFilter: scrolled ? 'blur(20px)' : 'none',
-        borderBottom: scrolled ? '1px solid rgba(0,0,0,0.05)' : 'none',
+        background: scrolled ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.8)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        borderBottom: scrolled ? '1px solid rgba(230, 126, 34, 0.1)' : '1px solid transparent',
         transition: 'all 0.3s ease',
       }}>
         {/* Logo */}
@@ -208,41 +142,42 @@ export const HomePage: React.FC = () => {
             width: 44,
             height: 44,
             borderRadius: 12,
-            background: `linear-gradient(135deg, ${PRIMARY}, ${SECONDARY})`,
+            background: `linear-gradient(135deg, ${FPT_ORANGE} 0%, ${FPT_ORANGE_DARK} 100%)`,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             fontWeight: 800,
-            color: WHITE,
+            color: FPT_WHITE,
             fontSize: 20,
-            boxShadow: `0 4px 14px ${PRIMARY}30`,
+            boxShadow: `0 4px 14px ${FPT_ORANGE}40`,
           }}>
             U
           </div>
-          <span style={{ fontWeight: 800, fontSize: 20, color: DARK }}>UEIMS</span>
+          <span style={{ fontWeight: 800, fontSize: 20, color: FPT_DARK }}>UEIMS</span>
         </div>
 
         {/* Desktop Nav */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }} className="desktop-nav">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }} className="desktop-nav">
           {navLinks.map((link) => (
-            <a key={link.label} href={link.href} onClick={(e) => { e.preventDefault(); scrollToSection(link.href); }}
-              style={{
-                color: scrolled ? DARK : WHITE,
-                fontSize: 14,
-                fontWeight: 500,
-                padding: '8px 16px',
-                borderRadius: 8,
-                textDecoration: 'none',
-                transition: 'all 0.2s',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = scrolled ? `${PRIMARY}10` : 'rgba(255,255,255,0.1)';
-                e.currentTarget.style.color = PRIMARY;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'transparent';
-                e.currentTarget.style.color = scrolled ? DARK : WHITE;
-              }}
+            <a key={link.label} href={link.href}
+               onClick={(e) => { e.preventDefault(); scrollToSection(link.href); }}
+               style={{
+                 color: FPT_DARK,
+                 fontSize: 14,
+                 fontWeight: 500,
+                 padding: '8px 16px',
+                 borderRadius: 8,
+                 textDecoration: 'none',
+                 transition: 'all 0.2s',
+               }}
+               onMouseEnter={(e) => {
+                 e.currentTarget.style.background = `${FPT_ORANGE}10`;
+                 e.currentTarget.style.color = FPT_ORANGE;
+               }}
+               onMouseLeave={(e) => {
+                 e.currentTarget.style.background = 'transparent';
+                 e.currentTarget.style.color = FPT_DARK;
+               }}
             >
               {link.label}
             </a>
@@ -251,62 +186,65 @@ export const HomePage: React.FC = () => {
 
         {/* Actions */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <button onClick={() => navigate('/login')} style={{
-            background: 'transparent',
-            border: `2px solid ${scrolled ? '#E2E8F0' : 'rgba(255,255,255,0.3)'}`,
-            color: scrolled ? DARK : WHITE,
-            borderRadius: 25,
-            padding: '10px 24px',
-            fontSize: 14,
-            fontWeight: 600,
-            cursor: 'pointer',
-            transition: 'all 0.3s',
-          }}
+          <button onClick={() => navigate('/login')}
+            style={{
+              background: 'transparent',
+              border: `2px solid ${FPT_BORDER}`,
+              color: FPT_DARK,
+              borderRadius: 25,
+              padding: '10px 24px',
+              fontSize: 14,
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'all 0.3s',
+            }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = PRIMARY;
-              e.currentTarget.style.color = PRIMARY;
+              e.currentTarget.style.borderColor = FPT_ORANGE;
+              e.currentTarget.style.color = FPT_ORANGE;
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = scrolled ? '#E2E8F0' : 'rgba(255,255,255,0.3)';
-              e.currentTarget.style.color = scrolled ? DARK : WHITE;
+              e.currentTarget.style.borderColor = FPT_BORDER;
+              e.currentTarget.style.color = FPT_DARK;
             }}
           >
             Đăng nhập
           </button>
-          <button onClick={() => navigate('/login')} style={{
-            background: `linear-gradient(135deg, ${PRIMARY}, ${SECONDARY})`,
-            border: 'none',
-            color: WHITE,
-            borderRadius: 25,
-            padding: '10px 24px',
-            fontSize: 14,
-            fontWeight: 700,
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            boxShadow: `0 4px 14px ${PRIMARY}40`,
-            transition: 'all 0.3s',
-          }}
+          <button onClick={() => navigate('/login')}
+            style={{
+              background: `linear-gradient(135deg, ${FPT_ORANGE} 0%, ${FPT_ORANGE_DARK} 100%)`,
+              border: 'none',
+              color: FPT_WHITE,
+              borderRadius: 25,
+              padding: '10px 24px',
+              fontSize: 14,
+              fontWeight: 700,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              boxShadow: `0 4px 14px ${FPT_ORANGE}40`,
+              transition: 'all 0.3s',
+            }}
             onMouseEnter={(e) => {
               e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = `0 6px 20px ${PRIMARY}50`;
+              e.currentTarget.style.boxShadow = `0 6px 20px ${FPT_ORANGE}50`;
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = `0 4px 14px ${PRIMARY}40`;
+              e.currentTarget.style.boxShadow = `0 4px 14px ${FPT_ORANGE}40`;
             }}
           >
             Vào hệ thống <ArrowRightOutlined />
           </button>
-          <button onClick={() => setMenuOpen(!menuOpen)} className="mobile-menu-btn" style={{
-            background: 'none',
-            border: 'none',
-            color: scrolled ? DARK : WHITE,
-            cursor: 'pointer',
-            fontSize: 24,
-            padding: 8,
-          }}>
+          <button onClick={() => setMenuOpen(!menuOpen)} className="mobile-menu-btn"
+            style={{
+              background: 'none',
+              border: 'none',
+              color: FPT_DARK,
+              cursor: 'pointer',
+              fontSize: 24,
+              padding: 8,
+            }}>
             {menuOpen ? <CloseOutlined /> : <MenuOutlined />}
           </button>
         </div>
@@ -320,68 +258,99 @@ export const HomePage: React.FC = () => {
         justifyContent: 'center',
         position: 'relative',
         padding: '120px 60px 80px',
-        background: `linear-gradient(135deg, ${DARK} 0%, ${DARK_BLUE} 50%, #2D4A6F 100%)`,
+        background: `linear-gradient(135deg, ${FPT_DARK} 0%, #2D3748 100%)`,
         overflow: 'hidden',
       }}>
-        {/* Decorative shapes */}
+        {/* Orange Glow Background */}
         <div style={{
           position: 'absolute',
-          width: 400,
-          height: 400,
+          width: 600,
+          height: 600,
           borderRadius: '50%',
-          background: `radial-gradient(circle, ${PRIMARY}30 0%, transparent 70%)`,
-          top: '10%',
-          right: '10%',
-          animation: 'float 10s ease-in-out infinite',
-        }} />
-        <div style={{
-          position: 'absolute',
-          width: 300,
-          height: 300,
-          borderRadius: '50%',
-          background: `radial-gradient(circle, ${SECONDARY}20 0%, transparent 70%)`,
-          bottom: '10%',
-          left: '5%',
-          animation: 'float 12s ease-in-out infinite reverse',
+          background: `radial-gradient(circle, ${FPT_ORANGE}30 0%, transparent 70%)`,
+          top: -100,
+          right: -100,
+          animation: 'pulse 8s ease-in-out infinite',
         }} />
         
-        {/* Floating shapes */}
+        {/* Floating Decorative Shapes */}
         <div style={{
           position: 'absolute',
           width: 100,
           height: 100,
           borderRadius: 24,
-          border: `2px solid ${PRIMARY}40`,
+          border: `3px solid ${FPT_ORANGE}40`,
           top: '20%',
-          left: '15%',
+          left: '10%',
           transform: 'rotate(15deg)',
-          animation: 'float 9s ease-in-out infinite',
+          animation: 'float1 7s ease-in-out infinite',
         }} />
+        
         <div style={{
           position: 'absolute',
           width: 60,
           height: 60,
-          borderRadius: 16,
-          background: `${SECONDARY}30`,
-          bottom: '25%',
-          right: '20%',
-          animation: 'float 11s ease-in-out infinite reverse',
+          borderRadius: 15,
+          background: `${FPT_ORANGE}25`,
+          top: '30%',
+          right: '15%',
+          animation: 'float2 9s ease-in-out infinite',
         }} />
+        
+        <div style={{
+          position: 'absolute',
+          width: 80,
+          height: 80,
+          borderRadius: 20,
+          border: `2px solid ${FPT_ORANGE_LIGHT}50`,
+          bottom: '25%',
+          left: '20%',
+          transform: 'rotate(-10deg)',
+          animation: 'float3 8s ease-in-out infinite',
+        }} />
+        
+        <div style={{
+          position: 'absolute',
+          width: 50,
+          height: 50,
+          borderRadius: 12,
+          background: `${FPT_ORANGE_LIGHT}30`,
+          bottom: '30%',
+          right: '25%',
+          animation: 'float1 10s ease-in-out infinite reverse',
+        }} />
+        
+        {/* Small dots */}
+        {[...Array(10)].map((_, i) => (
+          <div key={i} style={{
+            position: 'absolute',
+            width: 8,
+            height: 8,
+            borderRadius: '50%',
+            background: FPT_ORANGE,
+            opacity: 0.3 + (i % 3) * 0.1,
+            top: `${15 + i * 8}%`,
+            left: `${5 + (i % 4) * 10}%`,
+            animation: `float${(i % 3) + 1} ${5 + i * 0.3}s ease-in-out infinite`,
+            animationDelay: `${i * 0.3}s`,
+          }} />
+        ))}
 
         <div style={{ maxWidth: 1200, textAlign: 'center', position: 'relative', zIndex: 1 }}>
           <FadeIn delay={200}>
+            {/* Badge */}
             <div style={{
               display: 'inline-flex',
               alignItems: 'center',
               gap: 8,
-              background: 'rgba(255, 255, 255, 0.1)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
+              background: `${FPT_ORANGE}20`,
+              border: `1px solid ${FPT_ORANGE}40`,
               borderRadius: 50,
               padding: '8px 20px',
               marginBottom: 24,
             }}>
               <span style={{ fontSize: 16 }}>🎓</span>
-              <span style={{ color: 'rgba(255,255,255,0.8)', fontWeight: 500, fontSize: 13 }}>
+              <span style={{ color: FPT_ORANGE, fontWeight: 600, fontSize: 13 }}>
                 University-Enterprise Internship Management
               </span>
             </div>
@@ -391,14 +360,14 @@ export const HomePage: React.FC = () => {
             <h1 style={{
               fontSize: 'clamp(40px, 6vw, 72px)',
               fontWeight: 800,
-              color: WHITE,
+              color: FPT_WHITE,
               margin: '0 0 24px',
               lineHeight: 1.1,
               letterSpacing: '-2px',
             }}>
-              Kết nối <span style={{ color: PRIMARY }}>Nhà trường</span>
+              Kết nối <span style={{ color: FPT_ORANGE }}>Nhà trường</span>
               <br />
-              với <span style={{ color: SECONDARY }}>Doanh nghiệp</span>
+              với <span style={{ color: FPT_ORANGE_LIGHT }}>Doanh nghiệp</span>
             </h1>
           </FadeIn>
 
@@ -418,9 +387,9 @@ export const HomePage: React.FC = () => {
           <FadeIn delay={800}>
             <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
               <button onClick={() => navigate('/login')} style={{
-                background: `linear-gradient(135deg, ${PRIMARY}, ${SECONDARY})`,
+                background: `linear-gradient(135deg, ${FPT_ORANGE} 0%, ${FPT_ORANGE_DARK} 100%)`,
                 border: 'none',
-                color: WHITE,
+                color: FPT_WHITE,
                 borderRadius: 30,
                 padding: '16px 36px',
                 fontSize: 16,
@@ -429,16 +398,16 @@ export const HomePage: React.FC = () => {
                 display: 'flex',
                 alignItems: 'center',
                 gap: 10,
-                boxShadow: `0 8px 25px ${PRIMARY}40`,
+                boxShadow: `0 8px 25px ${FPT_ORANGE}40`,
                 transition: 'all 0.3s',
               }}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.transform = 'translateY(-3px) scale(1.02)';
-                  e.currentTarget.style.boxShadow = `0 12px 35px ${PRIMARY}50`;
+                  e.currentTarget.style.boxShadow = `0 12px 35px ${FPT_ORANGE}50`;
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = 'translateY(0) scale(1)';
-                  e.currentTarget.style.boxShadow = `0 8px 25px ${PRIMARY}40`;
+                  e.currentTarget.style.boxShadow = `0 8px 25px ${FPT_ORANGE}40`;
                 }}
               >
                 Bắt đầu ngay <ArrowRightOutlined />
@@ -446,7 +415,7 @@ export const HomePage: React.FC = () => {
               <button onClick={() => scrollToSection('#features')} style={{
                 background: 'transparent',
                 border: '2px solid rgba(255, 255, 255, 0.2)',
-                color: WHITE,
+                color: FPT_WHITE,
                 borderRadius: 30,
                 padding: '16px 36px',
                 fontSize: 16,
@@ -455,7 +424,7 @@ export const HomePage: React.FC = () => {
                 transition: 'all 0.3s',
               }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = WHITE;
+                  e.currentTarget.style.borderColor = FPT_WHITE;
                   e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
                 }}
                 onMouseLeave={(e) => {
@@ -480,12 +449,16 @@ export const HomePage: React.FC = () => {
             }} className="stats-grid">
               {stats.map((stat, index) => (
                 <div key={index} style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: 'clamp(32px, 4vw, 48px)', fontWeight: 800, color: PRIMARY, marginBottom: 8 }}>
-                    <AnimatedCounter value={stat.value} delay={1000 + index * 150} />
+                  <div style={{
+                    fontSize: 'clamp(32px, 4vw, 48px)',
+                    fontWeight: 800,
+                    color: FPT_ORANGE,
+                    marginBottom: 8,
+                  }}>
+                    {stat.value}
                   </div>
-                  <div style={{ fontSize: 16 }}>
-                    <span style={{ fontSize: 24, marginRight: 8 }}>{stat.emoji}</span>
-                    <span style={{ color: 'rgba(255,255,255,0.6)', fontWeight: 500 }}>{stat.label}</span>
+                  <div style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: 14, fontWeight: 500 }}>
+                    {stat.label}
                   </div>
                 </div>
               ))}
@@ -495,12 +468,12 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* ============ FEATURES SECTION ============ */}
-      <section id="features" style={{ padding: '100px 60px', background: WHITE }}>
+      <section id="features" style={{ padding: '100px 60px', background: FPT_WHITE }}>
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
           <FadeIn>
             <div style={{ textAlign: 'center', marginBottom: 60 }}>
               <span style={{
-                color: PRIMARY,
+                color: FPT_ORANGE,
                 fontWeight: 700,
                 fontSize: 14,
                 textTransform: 'uppercase',
@@ -511,12 +484,12 @@ export const HomePage: React.FC = () => {
               <h2 style={{
                 fontSize: 'clamp(32px, 4vw, 48px)',
                 fontWeight: 800,
-                color: DARK,
+                color: FPT_DARK,
                 margin: '12px 0 16px',
               }}>
                 Giải pháp toàn diện cho OJT
               </h2>
-              <p style={{ color: GRAY, fontSize: 18, maxWidth: 600, margin: '0 auto' }}>
+              <p style={{ color: FPT_GRAY, fontSize: 18, maxWidth: 600, margin: '0 auto' }}>
                 Tất cả những gì bạn cần để quản lý kỳ thực tập doanh nghiệp một cách hiệu quả
               </p>
             </div>
@@ -530,40 +503,34 @@ export const HomePage: React.FC = () => {
             {features.map((feature, index) => (
               <FadeIn key={index} delay={index * 100}>
                 <div style={{
-                  background: LIGHT_BG,
+                  background: FPT_LIGHT_BG,
                   borderRadius: 20,
                   padding: 32,
-                  border: '1px solid #E2E8F0',
+                  border: '1px solid #E5E7EB',
                   transition: 'all 0.4s',
                   cursor: 'default',
                 }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.transform = 'translateY(-8px)';
-                    e.currentTarget.style.borderColor = feature.color;
-                    e.currentTarget.style.boxShadow = `0 20px 40px ${feature.color}15`;
+                    e.currentTarget.style.borderColor = FPT_ORANGE;
+                    e.currentTarget.style.boxShadow = `0 20px 40px ${FPT_ORANGE}15`;
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.borderColor = '#E2E8F0';
+                    e.currentTarget.style.borderColor = '#E5E7EB';
                     e.currentTarget.style.boxShadow = 'none';
                   }}
                 >
                   <div style={{
-                    width: 64,
-                    height: 64,
-                    borderRadius: 16,
-                    background: `${feature.color}15`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
+                    fontSize: 48,
                     marginBottom: 20,
                   }}>
                     {feature.icon}
                   </div>
-                  <h3 style={{ fontSize: 20, fontWeight: 700, color: DARK, margin: '0 0 12px' }}>
+                  <h3 style={{ fontSize: 20, fontWeight: 700, color: FPT_DARK, margin: '0 0 12px' }}>
                     {feature.title}
                   </h3>
-                  <p style={{ color: GRAY, fontSize: 15, lineHeight: 1.7, margin: 0 }}>
+                  <p style={{ color: FPT_GRAY, fontSize: 15, lineHeight: 1.7, margin: 0 }}>
                     {feature.desc}
                   </p>
                 </div>
@@ -576,7 +543,7 @@ export const HomePage: React.FC = () => {
       {/* ============ CTA SECTION ============ */}
       <section style={{
         padding: '100px 60px',
-        background: `linear-gradient(135deg, ${DARK} 0%, ${DARK_BLUE} 100%)`,
+        background: `linear-gradient(135deg, ${FPT_DARK} 0%, #2D3748 100%)`,
         position: 'relative',
         overflow: 'hidden',
       }}>
@@ -585,7 +552,7 @@ export const HomePage: React.FC = () => {
           width: 500,
           height: 500,
           borderRadius: '50%',
-          background: `radial-gradient(circle, ${PRIMARY}25 0%, transparent 70%)`,
+          background: `radial-gradient(circle, ${FPT_ORANGE}30 0%, transparent 70%)`,
           top: -200,
           left: '50%',
           transform: 'translateX(-50%)',
@@ -596,12 +563,12 @@ export const HomePage: React.FC = () => {
             <h2 style={{
               fontSize: 'clamp(32px, 4vw, 48px)',
               fontWeight: 800,
-              color: WHITE,
+              color: FPT_WHITE,
               margin: '0 0 20px',
             }}>
               Sẵn sàng nâng cấp
               <br />
-              <span style={{ color: PRIMARY }}>Quy trình thực tập</span> của bạn?
+              <span style={{ color: FPT_ORANGE }}>Quy trình thực tập</span> của bạn?
             </h2>
             <p style={{
               fontSize: 18,
@@ -613,9 +580,9 @@ export const HomePage: React.FC = () => {
               để quản lý kỳ thực tập doanh nghiệp hiệu quả hơn.
             </p>
             <button onClick={() => navigate('/login')} style={{
-              background: `linear-gradient(135deg, ${PRIMARY}, ${SECONDARY})`,
+              background: `linear-gradient(135deg, ${FPT_ORANGE} 0%, ${FPT_ORANGE_DARK} 100%)`,
               border: 'none',
-              color: WHITE,
+              color: FPT_WHITE,
               borderRadius: 30,
               padding: '18px 48px',
               fontSize: 18,
@@ -624,16 +591,16 @@ export const HomePage: React.FC = () => {
               display: 'inline-flex',
               alignItems: 'center',
               gap: 12,
-              boxShadow: `0 8px 30px ${PRIMARY}50`,
+              boxShadow: `0 8px 30px ${FPT_ORANGE}50`,
               transition: 'all 0.3s',
             }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-4px) scale(1.03)';
-                e.currentTarget.style.boxShadow = `0 12px 40px ${PRIMARY}60`;
+                e.currentTarget.style.boxShadow = `0 12px 40px ${FPT_ORANGE}60`;
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = 'translateY(0) scale(1)';
-                e.currentTarget.style.boxShadow = `0 8px 30px ${PRIMARY}50`;
+                e.currentTarget.style.boxShadow = `0 8px 30px ${FPT_ORANGE}50`;
               }}
             >
               Đăng nhập ngay <ArrowRightOutlined />
@@ -643,7 +610,7 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* ============ FOOTER ============ */}
-      <footer id="contact" style={{ background: DARK, padding: '60px 60px 40px' }}>
+      <footer id="contact" style={{ background: '#111827', padding: '60px 60px 40px' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
           <div style={{
             display: 'grid',
@@ -657,17 +624,17 @@ export const HomePage: React.FC = () => {
                   width: 44,
                   height: 44,
                   borderRadius: 12,
-                  background: `linear-gradient(135deg, ${PRIMARY}, ${SECONDARY})`,
+                  background: `linear-gradient(135deg, ${FPT_ORANGE} 0%, ${FPT_ORANGE_DARK} 100%)`,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   fontWeight: 800,
-                  color: WHITE,
+                  color: FPT_WHITE,
                   fontSize: 20,
                 }}>
                   U
                 </div>
-                <span style={{ color: WHITE, fontWeight: 800, fontSize: 20 }}>UEIMS</span>
+                <span style={{ color: FPT_WHITE, fontWeight: 800, fontSize: 20 }}>UEIMS</span>
               </div>
               <p style={{ color: 'rgba(255, 255, 255, 0.5)', fontSize: 14, lineHeight: 1.7, margin: 0 }}>
                 University-Enterprise Internship Management System. Nền tảng quản lý thực tập doanh nghiệp hàng đầu tại Việt Nam.
@@ -676,7 +643,7 @@ export const HomePage: React.FC = () => {
 
             {['Về UEIMS', 'Hỗ trợ', 'Kết nối'].map((title, i) => (
               <div key={i}>
-                <h4 style={{ color: WHITE, fontWeight: 700, marginBottom: 20 }}>{title}</h4>
+                <h4 style={{ color: FPT_WHITE, fontWeight: 700, marginBottom: 20 }}>{title}</h4>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                   {['Giới thiệu', 'Tính năng', 'Đội ngũ', 'Liên hệ'].map((item) => (
                     <a key={item} href="#" style={{
@@ -685,7 +652,7 @@ export const HomePage: React.FC = () => {
                       fontSize: 14,
                       transition: 'color 0.2s',
                     }}
-                      onMouseEnter={(e) => (e.currentTarget.style.color = PRIMARY)}
+                      onMouseEnter={(e) => (e.currentTarget.style.color = FPT_ORANGE)}
                       onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255, 255, 255, 0.5)')}
                     >
                       {item}
@@ -708,7 +675,7 @@ export const HomePage: React.FC = () => {
             <span style={{ color: 'rgba(255, 255, 255, 0.4)', fontSize: 13 }}>
               © 2026 UEIMS - FPT University. All rights reserved.
             </span>
-            <span style={{ color: PRIMARY, fontSize: 13, fontWeight: 600 }}>
+            <span style={{ color: FPT_ORANGE, fontSize: 13, fontWeight: 600 }}>
               Nhóm 7 - SE20A05
             </span>
           </div>
@@ -717,9 +684,24 @@ export const HomePage: React.FC = () => {
 
       {/* ============ STYLES ============ */}
       <style>{`
-        @keyframes float {
+        @keyframes float1 {
           0%, 100% { transform: translateY(0) rotate(0deg); }
-          50% { transform: translateY(-30px) rotate(5deg); }
+          50% { transform: translateY(-20px) rotate(3deg); }
+        }
+        
+        @keyframes float2 {
+          0%, 100% { transform: translateY(0) rotate(0deg); }
+          50% { transform: translateY(-25px) rotate(-5deg); }
+        }
+        
+        @keyframes float3 {
+          0%, 100% { transform: translateY(0) rotate(-10deg); }
+          50% { transform: translateY(-15px) rotate(0deg); }
+        }
+        
+        @keyframes pulse {
+          0%, 100% { transform: scale(1); opacity: 0.3; }
+          50% { transform: scale(1.1); opacity: 0.5; }
         }
         
         .desktop-nav { display: flex !important; }
@@ -739,10 +721,10 @@ export const HomePage: React.FC = () => {
         
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: ${PRIMARY}; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: ${SECONDARY}; }
+        ::-webkit-scrollbar-thumb { background: ${FPT_ORANGE}; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: ${FPT_ORANGE_DARK}; }
         
-        ::selection { background: ${PRIMARY}30; }
+        ::selection { background: ${FPT_ORANGE}40; }
       `}</style>
     </div>
   );
