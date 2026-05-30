@@ -1,5 +1,8 @@
 package com.ueims.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,8 +16,12 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserCreationRequest {
+    @NotBlank(message = "FIELD_REQUIRED")
     String email;
+
+    @Size(min = 8, message = "INVALID_PASSWORD")
     String password;
+
     String fullName;
     String phone;
 }

@@ -3,6 +3,8 @@ package com.ueims.controller;
 import java.util.List;
 import java.util.UUID;
 
+import jakarta.validation.Valid;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,7 +31,7 @@ public class EligibleStudentController {
     }
 
     @PostMapping
-    public ResponseEntity<EligibleStudent> create(@RequestBody EligibleStudent entity) {
+    public ResponseEntity<EligibleStudent> create(@Valid @RequestBody EligibleStudent entity) {
         return ResponseEntity.ok(service.save(entity));
     }
 
