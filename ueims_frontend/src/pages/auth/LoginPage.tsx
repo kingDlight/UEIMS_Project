@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Form, Input, Button, message } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { AuthService } from '@/services/AuthService';
 
-// FPT Orange Theme Colors
 const FPT_ORANGE = '#E67E22';
 const FPT_ORANGE_DARK = '#D35400';
 const FPT_WHITE = '#FFFFFF';
@@ -12,61 +12,57 @@ const FPT_GRAY = '#6B7280';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const login = useAuthStore((state) => state.login);
+  const loginWithToken = useAuthStore((state) => state.loginWithToken);
   const [loading, setLoading] = useState(false);
 
   const onFinish = async (values: { email: string; password: string }) => {
     setLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 1200));
-    
-    if (values.email === 'admin@ueims.edu' && values.password === '123456') {
-      login(
-        { id: '1', email: values.email, fullName: 'System Admin', roles: ['ADMIN'] },
-        'mock-jwt-token-123456',
-        'ADMIN'
-      );
+    try {
+      const result = await AuthService.login({
+        email: values.email,
+        password: values.password,
+      });
+
+      if (result.mustChangePassword) {
+        loginWithToken(result.token);
+        message.warning('Bạn cần đổi mật khẩu trước khi tiếp tục!');
+        navigate('/change-password');
+        return;
+      }
+
+      loginWithToken(result.token);
       message.success('Đăng nhập thành công!');
       navigate('/app/dashboard');
-    } else if (values.email === 'tm@ueims.edu' && values.password === '123456') {
-      login(
-        { id: '2', email: values.email, fullName: 'Training Manager', roles: ['TRAINING_MANAGER'] },
-        'mock-jwt-token-123456',
-        'TRAINING_MANAGER'
-      );
-      message.success('Đăng nhập thành công!');
-      navigate('/app/dashboard');
-    } else if (values.email === 'student@ueims.edu' && values.password === '123456') {
-      login(
-        { id: '3', email: values.email, fullName: 'Nguyễn Văn A', roles: ['STUDENT'] },
-        'mock-jwt-token-123456',
-        'STUDENT'
-      );
-      message.success('Đăng nhập thành công!');
-      navigate('/app/dashboard');
-    } else if (values.email === 'enterprise@ueims.edu' && values.password === '123456') {
-      login(
-        { id: '4', email: values.email, fullName: 'FPT Software', roles: ['ENTERPRISE'] },
-        'mock-jwt-token-123456',
-        'ENTERPRISE'
-      );
-      message.success('Đăng nhập thành công!');
-      navigate('/app/dashboard');
-    } else {
-      message.error('Sai email hoặc mật khẩu!');
+    } catch (error: any) {
+      const code = error.response?.data?.code;
+      const errorMsg = error.response?.data?.message;
+
+      if (code === 2001) {
+        message.error('Tài khoản bị khóa do nhập sai mật khẩu 5 lần. Vui lòng thử lại sau 30 phút.');
+      } else if (code === 1006) {
+        message.error('Xác thực thất bại. Vui lòng kiểm tra lại thông tin đăng nhập.');
+      } else if (code === 1005) {
+        message.error('Tài khoản không tồn tại trong hệ thống.');
+      } else if (errorMsg) {
+        message.error(errorMsg);
+      } else {
+        message.error('Đăng nhập thất bại. Vui lòng thử lại!');
+      }
+    } finally {
+      setLoading(false);
     }
-    
-    setLoading(false);
   };
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      background: '#f6f6f6',
-      overflow: 'hidden',
-      height: '100vh',
-    }}>
-      {/* SVG Definitions */}
+    <div
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        background: '#f6f6f6',
+        overflow: 'hidden',
+        height: '100vh',
+      }}
+    >
       <svg style={{ position: 'absolute', width: 0, height: 0 }}>
         <defs>
           <clipPath id="humps" clipPathUnits="objectBoundingBox">
@@ -81,58 +77,63 @@ export const LoginPage: React.FC = () => {
         </defs>
       </svg>
 
-      {/* ============ LEFT SIDE - FORM ============ */}
-      <div style={{
-        width: '40%',
-        paddingLeft: 90,
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        position: 'relative',
-        zIndex: 2,
-        height: '100vh',
-      }}>
-        {/* Logo Dot */}
-        <div style={{
-          width: 42,
-          height: 42,
-          borderRadius: '50%',
-          background: FPT_ORANGE,
-          marginBottom: 70,
-        }} />
+      {/* LEFT SIDE - FORM */}
+      <div
+        style={{
+          width: '40%',
+          paddingLeft: 90,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          position: 'relative',
+          zIndex: 2,
+          height: '100vh',
+        }}
+      >
+        <div
+          style={{
+            width: 42,
+            height: 42,
+            borderRadius: '50%',
+            background: FPT_ORANGE,
+            marginBottom: 70,
+          }}
+        />
 
-        {/* Subtitle */}
-        <div style={{
-          color: FPT_ORANGE,
-          fontSize: 18,
-          fontWeight: 600,
-          marginBottom: 8,
-        }}>
+        <div
+          style={{
+            color: FPT_ORANGE,
+            fontSize: 18,
+            fontWeight: 600,
+            marginBottom: 8,
+          }}
+        >
           Welcome to
         </div>
 
-        {/* Logo */}
-        <div style={{
-          fontSize: 62,
-          fontWeight: 800,
-          color: FPT_DARK,
-          marginBottom: 60,
-          letterSpacing: '-2px',
-        }}>
+        <div
+          style={{
+            fontSize: 62,
+            fontWeight: 800,
+            color: FPT_DARK,
+            marginBottom: 60,
+            letterSpacing: '-2px',
+          }}
+        >
           UEIMS
         </div>
 
-        {/* Form */}
         <Form onFinish={onFinish}>
-          {/* Email Field */}
           <div style={{ width: 340, marginBottom: 40 }}>
-            <label style={{
-              display: 'block',
-              color: FPT_ORANGE,
-              fontSize: 18,
-              fontWeight: 600,
-              marginBottom: 10,
-            }}>
+            <label
+              style={{
+                display: 'block',
+                color: FPT_ORANGE,
+                fontSize: 18,
+                fontWeight: 600,
+                marginBottom: 10,
+              }}
+            >
               Email
             </label>
             <Form.Item
@@ -159,15 +160,16 @@ export const LoginPage: React.FC = () => {
             </Form.Item>
           </div>
 
-          {/* Password Field */}
           <div style={{ width: 340, marginBottom: 40 }}>
-            <label style={{
-              display: 'block',
-              color: FPT_ORANGE,
-              fontSize: 18,
-              fontWeight: 600,
-              marginBottom: 10,
-            }}>
+            <label
+              style={{
+                display: 'block',
+                color: FPT_ORANGE,
+                fontSize: 18,
+                fontWeight: 600,
+                marginBottom: 10,
+              }}
+            >
               Password
             </label>
             <Form.Item
@@ -191,7 +193,6 @@ export const LoginPage: React.FC = () => {
             </Form.Item>
           </div>
 
-          {/* Login Button */}
           <Form.Item style={{ margin: 0 }}>
             <Button
               htmlType="submit"
@@ -223,64 +224,90 @@ export const LoginPage: React.FC = () => {
           </Form.Item>
         </Form>
 
-        {/* Signup Link */}
-        <div style={{
-          marginTop: 140,
-          color: FPT_GRAY,
-          fontSize: 18,
-        }}>
+        {/* Forgot Password Link */}
+        <div style={{ marginTop: 16 }}>
+          <a
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              navigate('/forgot-password');
+            }}
+            style={{
+              color: FPT_ORANGE,
+              textDecoration: 'none',
+              fontSize: 16,
+              fontWeight: 500,
+            }}
+          >
+            Quên mật khẩu?
+          </a>
+        </div>
+
+        <div
+          style={{
+            marginTop: 140,
+            color: FPT_GRAY,
+            fontSize: 18,
+          }}
+        >
           Don't have an account?{' '}
-          <a href="#" style={{
-            color: FPT_ORANGE,
-            textDecoration: 'none',
-            fontWeight: 700,
-          }}>
+          <a
+            href="#"
+            style={{
+              color: FPT_ORANGE,
+              textDecoration: 'none',
+              fontWeight: 700,
+            }}
+          >
             Sign up
           </a>
         </div>
       </div>
 
-      {/* ============ RIGHT SIDE - IMAGE WITH HUMP CURVES ============ */}
-      <div style={{
-        width: '60%',
-        position: 'relative',
-        overflow: 'hidden',
-        height: '100vh',
-      }}>
-        {/* Background Image with rounded humps */}
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          backgroundImage: 'url(https://daihoc.fpt.edu.vn/wp-content/uploads/2024/03/dai-hoc-fpt-da-nang-2-1024x663.jpeg)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          clipPath: 'url(#humps)',
-        }} />
-        
-        {/* Overlay */}
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          background: `linear-gradient(135deg, ${FPT_ORANGE}15 0%, ${FPT_ORANGE_DARK}30 100%)`,
-          clipPath: 'url(#humps)',
-          pointerEvents: 'none',
-        }} />
+      {/* RIGHT SIDE - IMAGE */}
+      <div
+        style={{
+          width: '60%',
+          position: 'relative',
+          overflow: 'hidden',
+          height: '100vh',
+        }}
+      >
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            backgroundImage:
+              'url(https://daihoc.fpt.edu.vn/wp-content/uploads/2024/03/dai-hoc-fpt-da-nang-2-1024x663.jpeg)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            clipPath: 'url(#humps)',
+          }}
+        />
+
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%',
+            background: `linear-gradient(135deg, ${FPT_ORANGE}15 0%, ${FPT_ORANGE_DARK}30 100%)`,
+            clipPath: 'url(#humps)',
+            pointerEvents: 'none',
+          }}
+        />
       </div>
 
-      {/* ============ STYLES ============ */}
       <style>{`
         .ant-input {
           background: transparent !important;
           border: none !important;
           font-size: 18px !important;
         }
-        
         .ant-input-affix-wrapper {
           background: transparent !important;
           border: none !important;
@@ -288,13 +315,11 @@ export const LoginPage: React.FC = () => {
           border-radius: 0 !important;
           padding: 10px 0 !important;
         }
-        
         .ant-input-affix-wrapper:hover,
         .ant-input-affix-wrapper-focused {
           border-color: ${FPT_ORANGE} !important;
           box-shadow: none !important;
         }
-        
         .ant-input:focus {
           box-shadow: none !important;
         }
