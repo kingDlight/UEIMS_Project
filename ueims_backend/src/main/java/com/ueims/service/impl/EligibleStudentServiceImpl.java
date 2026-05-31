@@ -15,6 +15,8 @@ import com.ueims.repository.EligibleStudentRepository;
 import com.ueims.repository.SemesterRepository;
 import com.ueims.service.EligibleStudentService;
 import com.ueims.util.ExcelImportUtil;
+import com.ueims.dto.response.EligibleStudentResponse;
+import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,7 +49,7 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
     }
 
     @Override
-    public List<EligibleStudent> importFromExcel(MultipartFile file, UUID semesterId) {
+    public List<EligibleStudentResponse> importFromExcel(MultipartFile file, UUID semesterId) {
         Semester semester = semesterRepository
                 .findById(semesterId)
                 .orElseThrow(() -> new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION));
@@ -77,6 +79,17 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
             log.warn("Skipped {} duplicate student(s) already in semester {}", skipped, semesterId);
         }
 
-        return repository.saveAll(toInsert);
+        List<EligibleStudent> savedStudents = repository.saveAll(toInsert);
+        
+        return savedStudents.stream()
+                .map(s -> EligibleStudentResponse.builder()
+                        .studentCode(s.getStudentCode())
+                        .fullName(s.getFullName())
+                        .email(s.getEmail())
+                        .major(s.getMajor())
+                        .gpa(s.getGpa())
+                        .currentSemester(s.getCurrentSemester())
+                        .build())
+                .collect(Collectors.toList());
     }
 }
