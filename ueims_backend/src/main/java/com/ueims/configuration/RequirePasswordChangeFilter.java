@@ -27,7 +27,7 @@ public class RequirePasswordChangeFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
 
         // Skip check for auth endpoints except change-password
-        if (path.startsWith("/auth/") && !path.equals("/auth/change-password")) {
+        if (path.startsWith("/api/auth/") && !path.equals("/api/auth/change-password")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -37,7 +37,7 @@ public class RequirePasswordChangeFilter extends OncePerRequestFilter {
         if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
             Boolean mustChange = jwt.getClaim("must_change_password");
 
-            if (Boolean.TRUE.equals(mustChange) && !path.equals("/auth/change-password")) {
+            if (Boolean.TRUE.equals(mustChange) && !path.equals("/api/auth/change-password")) {
                 response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                 response.setContentType("application/json");
                 response.setCharacterEncoding("UTF-8");

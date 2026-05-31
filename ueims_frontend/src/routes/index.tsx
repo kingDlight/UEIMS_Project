@@ -1,11 +1,13 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { LoginPage } from '@/pages/auth/LoginPage';
+import { ForgotPasswordPage } from '@/pages/auth/ForgotPasswordPage';
+import { ResetPasswordPage } from '@/pages/auth/ResetPasswordPage';
+import { ChangePasswordPage } from '@/pages/auth/ChangePasswordPage';
 import { HomePage } from '@/pages/home/HomePage';
 import { ProtectedRoute } from '@/components/guards/ProtectedRoute';
 
 export const router = createBrowserRouter([
-  // Public routes
   {
     path: '/',
     element: <HomePage />,
@@ -14,7 +16,18 @@ export const router = createBrowserRouter([
     path: '/login',
     element: <LoginPage />,
   },
-  // Protected routes (require login)
+  {
+    path: '/forgot-password',
+    element: <ForgotPasswordPage />,
+  },
+  {
+    path: '/reset-password',
+    element: <ResetPasswordPage />,
+  },
+  {
+    path: '/change-password',
+    element: <ChangePasswordPage />,
+  },
   {
     path: '/app',
     element: <ProtectedRoute />,
@@ -31,7 +44,6 @@ export const router = createBrowserRouter([
             path: 'dashboard',
             element: <div>Trang Dashboard Module (Sẽ code ở Phase sau)</div>,
           },
-          // Thêm các routes module ở đây (semesters, enterprises,...)
         ],
       },
     ],

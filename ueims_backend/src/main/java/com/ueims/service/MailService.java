@@ -15,7 +15,7 @@ public class MailService {
     private JavaMailSender javaMailSender;
 
     public void sendPasswordResetMail(String to, String token) {
-        String resetUrl = "http://localhost:3000/reset-password?token=" + token;
+        String resetUrl = "http://localhost:5173/reset-password?token=" + token;
         String subject = "UEIMS - Đặt lại mật khẩu";
         String text =
                 "Xin chào,\n\nBạn đã yêu cầu đặt lại mật khẩu. Vui lòng nhấp vào liên kết dưới đây để thiết lập mật khẩu mới (có hiệu lực trong 15 phút):\n\n"

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Form, Input, Button, message } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { useAuthStore } from '@/stores/useAuthStore';
 import { AuthService } from '@/services/AuthService';
 
 const FPT_ORANGE = '#E67E22';
@@ -10,43 +9,21 @@ const FPT_WHITE = '#FFFFFF';
 const FPT_DARK = '#1A1A2E';
 const FPT_GRAY = '#6B7280';
 
-export const LoginPage: React.FC = () => {
+export const ForgotPasswordPage: React.FC = () => {
   const navigate = useNavigate();
-  const loginWithToken = useAuthStore((state) => state.loginWithToken);
   const [loading, setLoading] = useState(false);
 
-  const onFinish = async (values: { email: string; password: string }) => {
+  const onFinish = async (values: { email: string }) => {
     setLoading(true);
     try {
-      const result = await AuthService.login({
-        email: values.email,
-        password: values.password,
-      });
-
-      if (result.mustChangePassword) {
-        loginWithToken(result.token);
-        message.warning('Bạn cần đổi mật khẩu trước khi tiếp tục!');
-        navigate('/change-password');
-        return;
-      }
-
-      loginWithToken(result.token);
-      message.success('Đăng nhập thành công!');
-      navigate('/app/dashboard');
+      await AuthService.forgotPassword({ email: values.email });
+      message.success('Vui lòng kiểm tra email để đặt lại mật khẩu!');
     } catch (error: any) {
       const code = error.response?.data?.code;
-      const errorMsg = error.response?.data?.message;
-
-      if (code === 2001) {
-        message.error('Tài khoản bị khóa do nhập sai mật khẩu 5 lần. Vui lòng thử lại sau 30 phút.');
-      } else if (code === 1006) {
-        message.error('Xác thực thất bại. Vui lòng kiểm tra lại thông tin đăng nhập.');
-      } else if (code === 1005) {
-        message.error('Tài khoản không tồn tại trong hệ thống.');
-      } else if (errorMsg) {
-        message.error(errorMsg);
+      if (code === 1005) {
+        message.error('Email không tồn tại trong hệ thống.');
       } else {
-        message.error('Đăng nhập thất bại. Vui lòng thử lại!');
+        message.error('Gửi yêu cầu thất bại. Vui lòng thử lại!');
       }
     } finally {
       setLoading(false);
@@ -108,23 +85,33 @@ export const LoginPage: React.FC = () => {
             marginBottom: 8,
           }}
         >
-          Welcome to
+          UEIMS
         </div>
 
         <div
           style={{
-            fontSize: 62,
+            fontSize: 36,
             fontWeight: 800,
             color: FPT_DARK,
-            marginBottom: 60,
-            letterSpacing: '-2px',
+            marginBottom: 16,
           }}
         >
-          UEIMS
+          Quên mật khẩu
+        </div>
+
+        <div
+          style={{
+            fontSize: 16,
+            color: FPT_GRAY,
+            marginBottom: 48,
+            lineHeight: 1.6,
+          }}
+        >
+          Nhập email đã đăng ký. Chúng tôi sẽ gửi link khôi phục mật khẩu đến hộp thư của bạn.
         </div>
 
         <Form onFinish={onFinish}>
-          <div style={{ width: 340, marginBottom: 40 }}>
+          <div style={{ width: 380, marginBottom: 40 }}>
             <label
               style={{
                 display: 'block',
@@ -160,77 +147,34 @@ export const LoginPage: React.FC = () => {
             </Form.Item>
           </div>
 
-          <div style={{ width: 340, marginBottom: 40 }}>
-            <label
-              style={{
-                display: 'block',
-                color: FPT_ORANGE,
-                fontSize: 18,
-                fontWeight: 600,
-                marginBottom: 10,
-              }}
-            >
-              Password
-            </label>
-            <Form.Item
-              name="password"
-              rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
-              style={{ margin: 0 }}
-            >
-              <Input.Password
-                placeholder="••••••••"
-                style={{
-                  width: '100%',
-                  border: 'none',
-                  borderBottom: '1px solid #a8a8a8',
-                  background: 'transparent',
-                  padding: '10px 0',
-                  fontSize: 18,
-                  outline: 'none',
-                  borderRadius: 0,
-                }}
-              />
-            </Form.Item>
-          </div>
-
           <Form.Item style={{ margin: 0 }}>
             <Button
               htmlType="submit"
               loading={loading}
               style={{
-                width: 170,
+                width: 220,
                 height: 54,
                 border: 'none',
                 borderRadius: 40,
                 color: FPT_WHITE,
-                fontSize: 20,
+                fontSize: 18,
                 fontWeight: 700,
                 cursor: 'pointer',
                 background: `linear-gradient(90deg, ${FPT_ORANGE}, ${FPT_ORANGE_DARK})`,
                 boxShadow: `0 10px 20px ${FPT_ORANGE}40`,
-                transition: 'all 0.3s',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'scale(1.05)';
-                e.currentTarget.style.boxShadow = `0 15px 30px ${FPT_ORANGE}50`;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'scale(1)';
-                e.currentTarget.style.boxShadow = `0 10px 20px ${FPT_ORANGE}40`;
               }}
             >
-              LOGIN
+              Gửi Link Khôi Phục
             </Button>
           </Form.Item>
         </Form>
 
-        {/* Forgot Password Link */}
-        <div style={{ marginTop: 16 }}>
+        <div style={{ marginTop: 32 }}>
           <a
             href="#"
             onClick={(e) => {
               e.preventDefault();
-              navigate('/forgot-password');
+              navigate('/login');
             }}
             style={{
               color: FPT_ORANGE,
@@ -239,27 +183,7 @@ export const LoginPage: React.FC = () => {
               fontWeight: 500,
             }}
           >
-            Quên mật khẩu?
-          </a>
-        </div>
-
-        <div
-          style={{
-            marginTop: 140,
-            color: FPT_GRAY,
-            fontSize: 18,
-          }}
-        >
-          Don't have an account?{' '}
-          <a
-            href="#"
-            style={{
-              color: FPT_ORANGE,
-              textDecoration: 'none',
-              fontWeight: 700,
-            }}
-          >
-            Sign up
+            ← Quay lại trang đăng nhập
           </a>
         </div>
       </div>
@@ -287,7 +211,6 @@ export const LoginPage: React.FC = () => {
             clipPath: 'url(#humps)',
           }}
         />
-
         <div
           style={{
             position: 'absolute',
