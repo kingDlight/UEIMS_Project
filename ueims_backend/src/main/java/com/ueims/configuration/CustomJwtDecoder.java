@@ -38,13 +38,16 @@ public class CustomJwtDecoder implements JwtDecoder {
             com.nimbusds.jwt.SignedJWT signedJWT = com.nimbusds.jwt.SignedJWT.parse(token);
             String jit = signedJWT.getJWTClaimsSet().getJWTID();
             if (jit != null && invalidatedTokenRepository.existsById(jit)) {
-                throw new JwtException("Token is invalidated");
+                return null;
             }
 
             if (jit != null) {
-                UserSession session = userSessionRepository
-                        .findById(jit)
-                        .orElseThrow(() -> new JwtException("Session not found or invalidated by another login"));
+                var sessionOpt = userSessionRepository.findById(jit);
+                if (sessionOpt.isEmpty()) {
+                    return null;
+                }
+
+                UserSession session = sessionOpt.get();
 
                 if (session.getLastActivity() != null
                         && session.getLastActivity().plusMinutes(15).isBefore(LocalDateTime.now())) {
@@ -53,7 +56,7 @@ public class CustomJwtDecoder implements JwtDecoder {
                             .expiresAt(session.getExpiresAt())
                             .build());
                     userSessionRepository.delete(session);
-                    throw new JwtException("Token expired due to inactivity");
+                    return null;
                 }
 
                 session.setLastActivity(LocalDateTime.now());
