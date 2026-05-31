@@ -30,30 +30,31 @@ public enum ErrorCode {
     STUDENT_ID_MANDATORY(1019, "Student ID is mandatory", HttpStatus.BAD_REQUEST),
     STUDENT_NOT_ELIGIBLE(1020, "Student is not registered or not eligible in this semester", HttpStatus.BAD_REQUEST),
     STUDENT_NOT_IN_SEMESTER_5(1021, "Only Semester 5 students are permitted to apply for jobs", HttpStatus.BAD_REQUEST),
-    INVALID_FINAL_GRADE(1015, "Final grade must be at least 5.0 to pass", HttpStatus.BAD_REQUEST),
+    INVALID_FINAL_GRADE(1024, "Final grade must be at least 5.0 to pass", HttpStatus.BAD_REQUEST),
 
-    // Semester / import related errors (from remote)
+    // Semester / import related errors
     INVALID_EXCEL_FORMAT(
-            1009, "Invalid Excel file format. Please check required columns and data types.", HttpStatus.BAD_REQUEST),
-    SEMESTER_INVALID_DATE(1010, "Semester start date must be before end date", HttpStatus.BAD_REQUEST),
-    SEMESTER_LOCKED_DATE(1011, "Cannot modify dates of an ACTIVE, CLOSED, or LOCKED semester", HttpStatus.BAD_REQUEST),
+            1025, "Invalid Excel file format. Please check required columns and data types.", HttpStatus.BAD_REQUEST),
+    SEMESTER_INVALID_DATE(1026, "Semester start date must be before end date", HttpStatus.BAD_REQUEST),
+    SEMESTER_LOCKED_DATE(1027, "Cannot modify dates of an ACTIVE, CLOSED, or LOCKED semester", HttpStatus.BAD_REQUEST),
     DUPLICATE_STUDENT_IN_SEMESTER(
-            1012, "Some students were skipped because they already exist in this semester", HttpStatus.OK),
-    SEMESTER_NOT_FOUND(1013, "Semester not found", HttpStatus.NOT_FOUND),
+            1028, "Some students were skipped because they already exist in this semester", HttpStatus.OK),
+    SEMESTER_NOT_FOUND(1029, "Semester not found", HttpStatus.NOT_FOUND),
     SEMESTER_INVALID_TRANSITION(
-            1014,
-            "Invalid semester status transition. Allowed: DRAFT→OPEN, OPEN→ACTIVE, ACTIVE→CLOSED, CLOSED→LOCKED",
+            1030,
+            "Invalid semester status transition. Allowed: DRAFT\u2192OPEN, OPEN\u2192ACTIVE, ACTIVE\u2192CLOSED, CLOSED\u2192LOCKED",
             HttpStatus.UNPROCESSABLE_ENTITY),
-    SEMESTER_EXISTED(1022, "Semester code already exists", HttpStatus.BAD_REQUEST),
+    SEMESTER_EXISTED(1031, "Semester code already exists", HttpStatus.BAD_REQUEST),
 
     // Application related
-    APPLICATION_NOT_FOUND(1023, "Application not found", HttpStatus.NOT_FOUND),
+    APPLICATION_NOT_FOUND(1032, "Application not found", HttpStatus.NOT_FOUND),
 
     // Account related
     USER_BANNED(2001, "Tài khoản của bạn đã bị khóa do nhập sai mật khẩu quá 5 lần", HttpStatus.FORBIDDEN),
     WRONG_OLD_PASSWORD(2002, "Mật khẩu cũ không chính xác", HttpStatus.BAD_REQUEST),
     PASSWORDS_NOT_MATCH(2003, "Mật khẩu mới và xác nhận không khớp", HttpStatus.BAD_REQUEST),
-    FIELD_REQUIRED(1015, "This field is required", HttpStatus.BAD_REQUEST),
+    USER_ALREADY_HAS_ROLE(2004, "Người dùng đã có vai trò. Chỉ được gán một vai trò duy nhất.", HttpStatus.BAD_REQUEST),
+    FIELD_REQUIRED(1033, "This field is required", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
