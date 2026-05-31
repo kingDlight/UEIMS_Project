@@ -12,7 +12,9 @@ import com.ueims.repository.SemesterRepository;
 import com.ueims.service.SemesterService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SemesterServiceImpl implements SemesterService {
