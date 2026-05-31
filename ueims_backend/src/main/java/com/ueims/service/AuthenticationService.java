@@ -92,13 +92,24 @@ public class AuthenticationService {
             throw new AppException(ErrorCode.USER_BANNED);
         }
 
+        if (user.getLockedUntil() != null && user.getLockedUntil().isAfter(java.time.LocalDateTime.now())) {
+            throw new AppException(ErrorCode.USER_BANNED);
+        } else if (user.getLockedUntil() != null) {
+            user.setFailedLoginAttempts(0);
+            user.setLockedUntil(null);
+            userRepository.updateLoginAttemptsAndStatus(user.getUserId(), 0, user.getStatus(), null);
+        }
+
         boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
 
         if (!authenticated) {
             // Tăng bộ đếm và lưu TRỰC TIẾP bằng SQL, bỏ qua Hibernate
             int attempts = user.getFailedLoginAttempts() + 1;
-            String newStatus = attempts >= 5 ? "LOCKED" : user.getStatus();
-            userRepository.updateLoginAttemptsAndStatus(user.getUserId(), attempts, newStatus);
+            java.time.LocalDateTime lockedUntil = null;
+            if (attempts >= 5) {
+                lockedUntil = java.time.LocalDateTime.now().plusMinutes(30);
+            }
+            userRepository.updateLoginAttemptsAndStatus(user.getUserId(), attempts, user.getStatus(), lockedUntil);
 
             if (attempts >= 5) {
                 throw new AppException(ErrorCode.USER_BANNED);
@@ -108,7 +119,7 @@ public class AuthenticationService {
 
         // Đăng nhập thành công → Reset bộ đếm
         if (user.getFailedLoginAttempts() > 0) {
-            userRepository.updateLoginAttemptsAndStatus(user.getUserId(), 0, "ACTIVE");
+            userRepository.updateLoginAttemptsAndStatus(user.getUserId(), 0, user.getStatus(), null);
         }
 
         // BR-02: Simultaneous Session Control - Invalidate old sessions

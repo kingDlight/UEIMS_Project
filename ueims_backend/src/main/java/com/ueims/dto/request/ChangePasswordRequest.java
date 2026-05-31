@@ -1,5 +1,6 @@
 package com.ueims.dto.request;
 
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import lombok.AccessLevel;
@@ -18,6 +19,7 @@ public class ChangePasswordRequest {
     String oldPassword;
 
     @Size(min = 8, message = "INVALID_PASSWORD")
+    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&]).{8,}$", message = "INVALID_PASSWORD")
     String newPassword;
 
     String confirmPassword;

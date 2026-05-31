@@ -15,7 +15,7 @@ const { Header, Sider, Content } = Layout;
 export const AppLayout: React.FC = () => {
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
-  const { user, currentRole, logout } = useAuthStore();
+  const { user, logout } = useAuthStore();
 
   const handleLogout = () => {
     logout();
