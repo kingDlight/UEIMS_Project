@@ -6,6 +6,7 @@ import java.util.UUID;
 import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import com.ueims.dto.request.SemesterCreationRequest;
@@ -16,7 +17,6 @@ import com.ueims.model.entity.Semester;
 import com.ueims.model.entity.User;
 import com.ueims.repository.UserRepository;
 import com.ueims.service.SemesterService;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,7 +44,7 @@ public class SemesterController {
     public ResponseEntity<SemesterResponse> create(@Valid @RequestBody SemesterCreationRequest request) {
         System.out.println("request: " + request);
         log.info("info request: ", request);
-        
+
         var context = SecurityContextHolder.getContext();
         String email = context.getAuthentication().getName();
         User user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));

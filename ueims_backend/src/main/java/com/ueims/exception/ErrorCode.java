@@ -44,6 +44,7 @@ public enum ErrorCode {
             1014,
             "Invalid semester status transition. Allowed: DRAFT→OPEN, OPEN→ACTIVE, ACTIVE→CLOSED, CLOSED→LOCKED",
             HttpStatus.UNPROCESSABLE_ENTITY),
+    SEMESTER_EXISTED(1022, "Semester code already exists", HttpStatus.BAD_REQUEST),
 
     // Application related
     APPLICATION_NOT_FOUND(1023, "Application not found", HttpStatus.NOT_FOUND),

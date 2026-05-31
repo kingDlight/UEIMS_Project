@@ -45,9 +45,17 @@ public class SemesterServiceImpl implements SemesterService {
             throw new AppException(ErrorCode.SEMESTER_INVALID_DATE);
         }
 
-        if (entity.getSemesterId() != null) {
+        if (entity.getSemesterId() == null) {
+            if (repository.existsBySemesterCode(entity.getSemesterCode())) {
+                throw new AppException(ErrorCode.SEMESTER_EXISTED);
+            }
+        } else {
             Semester existing = repository.findById(entity.getSemesterId()).orElse(null);
             if (existing != null) {
+                if (!existing.getSemesterCode().equals(entity.getSemesterCode()) 
+                        && repository.existsBySemesterCode(entity.getSemesterCode())) {
+                    throw new AppException(ErrorCode.SEMESTER_EXISTED);
+                }
                 if (List.of(STATUS_ACTIVE, STATUS_CLOSED, STATUS_LOCKED).contains(existing.getStatus())) {
                     if (!existing.getStartDate().equals(entity.getStartDate())
                             || !existing.getEndDate().equals(entity.getEndDate())) {
