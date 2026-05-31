@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.ueims.model.entity.EligibleStudent;
 import com.ueims.service.EligibleStudentService;
+import com.ueims.dto.response.EligibleStudentResponse;
 
 import lombok.RequiredArgsConstructor;
 
@@ -42,7 +43,7 @@ public class EligibleStudentController {
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<List<EligibleStudent>> uploadExcel(
+    public ResponseEntity<List<EligibleStudentResponse>> uploadExcel(
             @RequestParam("file") MultipartFile file, @RequestParam("semesterId") UUID semesterId) {
         return ResponseEntity.ok(service.importFromExcel(file, semesterId));
     }

@@ -16,5 +16,5 @@ public interface EligibleStudentService {
 
     void deleteById(UUID id);
 
-    List<EligibleStudent> importFromExcel(MultipartFile file, UUID semesterId);
+    List<com.ueims.dto.response.EligibleStudentResponse> importFromExcel(MultipartFile file, UUID semesterId);
 }
