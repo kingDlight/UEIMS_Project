@@ -12,7 +12,6 @@ const FPT_GRAY = '#6B7280';
 
 export const ChangePasswordPage: React.FC = () => {
   const navigate = useNavigate();
-  const token = useAuthStore((state) => state.token);
   const logout = useAuthStore((state) => state.logout);
   const [loading, setLoading] = useState(false);
 

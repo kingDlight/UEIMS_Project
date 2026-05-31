@@ -6,6 +6,7 @@ import { ResetPasswordPage } from '@/pages/auth/ResetPasswordPage';
 import { ChangePasswordPage } from '@/pages/auth/ChangePasswordPage';
 import { HomePage } from '@/pages/home/HomePage';
 import { ProtectedRoute } from '@/components/guards/ProtectedRoute';
+import { EmailPreviewPage } from '@/pages/dev/EmailPreviewPage';
 
 export const router = createBrowserRouter([
   {
@@ -47,6 +48,10 @@ export const router = createBrowserRouter([
         ],
       },
     ],
+  },
+  {
+    path: '/dev/email-preview',
+    element: <EmailPreviewPage />,
   },
   {
     path: '*',

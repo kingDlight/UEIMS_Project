@@ -354,7 +354,7 @@ public class AuthenticationService {
 
         passwordResetTokenRepository.save(resetToken);
 
-        mailService.sendPasswordResetMail(user.getEmail(), tokenRaw);
+        mailService.sendPasswordResetMail(user.getEmail(), user.getFullName(), tokenRaw);
     }
 
     @Transactional

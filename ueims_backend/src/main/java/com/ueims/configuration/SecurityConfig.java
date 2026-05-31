@@ -29,7 +29,8 @@ public class SecurityConfig {
         "/api/auth/logout",
         "/api/auth/refresh",
         "/api/auth/forgot-password",
-        "/api/auth/reset-password"
+        "/api/auth/reset-password",
+        "/api/test/**"
     };
 
     @Autowired

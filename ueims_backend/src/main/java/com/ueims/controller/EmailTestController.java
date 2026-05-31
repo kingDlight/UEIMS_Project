@@ -1,0 +1,48 @@
+package com.ueims.controller;
+
+import java.util.Map;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import com.ueims.service.MailService;
+
+import lombok.RequiredArgsConstructor;
+
+@RestController
+@RequestMapping("/api/test")
+@RequiredArgsConstructor
+public class EmailTestController {
+
+    private final MailService mailService;
+
+    /**
+     * POST /api/test/email/password-reset
+     * Body: { "to": "test@example.com", "fullName": "Nguyen Van A" }
+     */
+    @PostMapping("/email/password-reset")
+    public ResponseEntity<Map<String, String>> testPasswordReset(@RequestBody Map<String, String> body) {
+        mailService.sendPasswordResetMail(body.get("to"), body.get("fullName"), "test-token-123456");
+        return ResponseEntity.ok(Map.of("status", "sent", "template", "password-reset"));
+    }
+
+    /**
+     * POST /api/test/email/welcome
+     * Body: { "to": "test@example.com", "fullName": "Nguyen Van A", "tempPassword": "TmpP@ss123" }
+     */
+    @PostMapping("/email/welcome")
+    public ResponseEntity<Map<String, String>> testWelcome(@RequestBody Map<String, String> body) {
+        mailService.sendWelcomeMail(body.get("to"), body.get("fullName"), body.get("tempPassword"));
+        return ResponseEntity.ok(Map.of("status", "sent", "template", "welcome"));
+    }
+
+    /**
+     * POST /api/test/email/password-changed
+     * Body: { "to": "test@example.com", "fullName": "Nguyen Van A", "changedAt": "01/06/2026 10:15" }
+     */
+    @PostMapping("/email/password-changed")
+    public ResponseEntity<Map<String, String>> testPasswordChanged(@RequestBody Map<String, String> body) {
+        mailService.sendPasswordChangedMail(body.get("to"), body.get("fullName"), body.get("changedAt"));
+        return ResponseEntity.ok(Map.of("status", "sent", "template", "password-changed"));
+    }
+}

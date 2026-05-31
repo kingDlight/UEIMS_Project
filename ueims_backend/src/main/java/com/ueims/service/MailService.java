@@ -1,45 +1,96 @@
 package com.ueims.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.stereotype.Service;
+import jakarta.mail.internet.MimeMessage;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
+
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class MailService {
 
-    @Autowired(required = false)
-    private JavaMailSender javaMailSender;
+    private final JavaMailSender javaMailSender;
+    private final TemplateEngine templateEngine;
 
-    public void sendPasswordResetMail(String to, String token) {
-        String resetUrl = "http://localhost:5173/reset-password?token=" + token;
-        String subject = "UEIMS - Đặt lại mật khẩu";
-        String text =
-                "Xin chào,\n\nBạn đã yêu cầu đặt lại mật khẩu. Vui lòng nhấp vào liên kết dưới đây để thiết lập mật khẩu mới (có hiệu lực trong 15 phút):\n\n"
-                        + resetUrl + "\n\nNếu bạn không yêu cầu điều này, vui lòng bỏ qua email này.";
+    @Value("${app.base-url:http://localhost:5173}")
+    private String appBaseUrl;
 
-        if (javaMailSender != null) {
-            try {
-                SimpleMailMessage message = new SimpleMailMessage();
-                message.setTo(to);
-                message.setSubject(subject);
-                message.setText(text);
-                javaMailSender.send(message);
-                log.info("Email đặt lại mật khẩu đã được gửi thành công đến: {}", to);
-                return;
-            } catch (Exception e) {
-                log.error("Lỗi khi gửi email qua SMTP, chuyển sang chế độ Mock. Lỗi: {}", e.getMessage());
-            }
+    // ===== Password Reset (VI) =====
+    public void sendPasswordResetMail(String to, String fullName, String token) {
+        String resetUrl = appBaseUrl + "/reset-password?token=" + token;
+        String subject = "Yêu cầu đặt lại mật khẩu — UEIMS";
+
+        Context ctx = new Context();
+        ctx.setVariable("fullName", fullName);
+        ctx.setVariable("resetUrl", resetUrl);
+        ctx.setVariable("subject", subject);
+
+        String html = templateEngine.process("password-reset", ctx);
+        sendHtml(to, subject, html);
+
+        log.info("Email đặt lại mật khẩu đã được gửi đến: {}", to);
+    }
+
+    // ===== Welcome Email (VI) =====
+    public void sendWelcomeMail(String to, String fullName, String tempPassword) {
+        String loginUrl = appBaseUrl + "/login";
+        String subject = "Chào mừng bạn đến với UEIMS";
+
+        Context ctx = new Context();
+        ctx.setVariable("fullName", fullName);
+        ctx.setVariable("email", to);
+        ctx.setVariable("tempPassword", tempPassword);
+        ctx.setVariable("loginUrl", loginUrl);
+        ctx.setVariable("subject", subject);
+
+        String html = templateEngine.process("welcome", ctx);
+        sendHtml(to, subject, html);
+
+        log.info("Email chào mừng đã được gửi đến: {}", to);
+    }
+
+    // ===== Password Changed (VI) =====
+    public void sendPasswordChangedMail(String to, String fullName, String changedAt) {
+        String loginUrl = appBaseUrl + "/login";
+        String subject = "Mật khẩu đã được thay đổi — UEIMS";
+
+        Context ctx = new Context();
+        ctx.setVariable("fullName", fullName);
+        ctx.setVariable("changedAt", changedAt);
+        ctx.setVariable("loginUrl", loginUrl);
+        ctx.setVariable("subject", subject);
+
+        String html = templateEngine.process("password-changed", ctx);
+        sendHtml(to, subject, html);
+
+        log.info("Email thông báo đổi mật khẩu đã được gửi đến: {}", to);
+    }
+
+    // ===== Internal sender =====
+    private void sendHtml(String to, String subject, String htmlBody) {
+        try {
+            MimeMessage message = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(htmlBody, true);
+            javaMailSender.send(message);
+        } catch (Exception e) {
+            log.error("Gửi email thất bại đến {}: {}", to, e.getMessage());
+            // Log body để debug
+            log.warn("=== EMAIL BODY (fallback log) ===");
+            log.warn("Gửi đến: {}", to);
+            log.warn("Tiêu đề: {}", subject);
+            log.warn("Body:\n{}", htmlBody);
+            log.warn("==================================");
         }
-
-        // Fallback to Mock Mail if SMTP is not configured or fails
-        log.warn("=== MOCK MAIL SENDER ===");
-        log.warn("Gửi đến: {}", to);
-        log.warn("Tiêu đề: {}", subject);
-        log.warn("Nội dung:\n{}", text);
-        log.warn("========================");
     }
 }
