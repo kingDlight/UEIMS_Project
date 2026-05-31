@@ -18,7 +18,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     @Modifying
     @Transactional
-    @Query("UPDATE User u SET u.failedLoginAttempts = :attempts, u.status = :status WHERE u.userId = :userId")
+    @Query("UPDATE User u SET u.failedLoginAttempts = :attempts, u.status = :status, u.lockedUntil = :lockedUntil WHERE u.userId = :userId")
     void updateLoginAttemptsAndStatus(
-            @Param("userId") UUID userId, @Param("attempts") int attempts, @Param("status") String status);
+            @Param("userId") UUID userId, @Param("attempts") int attempts, @Param("status") String status, @Param("lockedUntil") java.time.LocalDateTime lockedUntil);
 }
