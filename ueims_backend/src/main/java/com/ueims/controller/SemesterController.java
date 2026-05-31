@@ -10,16 +10,24 @@ import org.springframework.web.bind.annotation.*;
 
 import com.ueims.dto.request.SemesterCreationRequest;
 import com.ueims.dto.response.SemesterResponse;
+import com.ueims.exception.AppException;
+import com.ueims.exception.ErrorCode;
 import com.ueims.model.entity.Semester;
+import com.ueims.model.entity.User;
+import com.ueims.repository.UserRepository;
 import com.ueims.service.SemesterService;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/semesters")
 @RequiredArgsConstructor
 public class SemesterController {
     private final SemesterService service;
+    private final UserRepository userRepository;
 
     @GetMapping
     public ResponseEntity<List<SemesterResponse>> getAll() {
@@ -34,6 +42,13 @@ public class SemesterController {
 
     @PostMapping
     public ResponseEntity<SemesterResponse> create(@Valid @RequestBody SemesterCreationRequest request) {
+        System.out.println("request: " + request);
+        log.info("info request: ", request);
+        
+        var context = SecurityContextHolder.getContext();
+        String email = context.getAuthentication().getName();
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
         Semester entity = Semester.builder()
                 .semesterCode(request.getSemesterCode())
                 .name(request.getName())
@@ -42,7 +57,10 @@ public class SemesterController {
                 .weeklyReportDeadlineDay(
                         request.getWeeklyReportDeadlineDay() != null ? request.getWeeklyReportDeadlineDay() : "SUNDAY")
                 .weeklyReportDeadlineTime(request.getWeeklyReportDeadlineTime())
+                .status(request.getStatus() != null ? request.getStatus() : "DRAFT")
+                .createdBy(user)
                 .build();
+
         return ResponseEntity.ok(SemesterResponse.fromEntity(service.save(entity)));
     }
 

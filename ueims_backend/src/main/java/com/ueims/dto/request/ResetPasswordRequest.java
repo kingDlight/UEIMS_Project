@@ -18,5 +18,6 @@ public class ResetPasswordRequest {
     @Size(min = 8, message = "INVALID_PASSWORD")
     @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&]).{8,}$", message = "INVALID_PASSWORD")
     private String newPassword;
+
     private String confirmPassword;
 }

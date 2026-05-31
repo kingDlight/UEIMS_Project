@@ -33,4 +33,5 @@ public class SemesterCreationRequest {
 
     String weeklyReportDeadlineDay;
     LocalTime weeklyReportDeadlineTime;
+    String status;
 }
