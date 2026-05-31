@@ -58,13 +58,13 @@ const templates: EmailMeta[] = [
 ];
 
 const defaultData = {
-  resetPassword: { fullName: 'Nguyen Van A', resetUrl: 'https://ueims.edu.vn/reset?token=eyJhbGciOiJIUzI1NiJ9' },
-  passwordReset: { fullName: 'Nguyen Van A', resetUrl: 'https://ueims.edu.vn/reset?token=eyJhbGciOiJIUzI1NiJ9' },
+  resetPassword: { fullName: 'Nguyen Van A', resetUrl: 'https://ueims.edu.vn/reset?token=dummy-token-12345' },
+  passwordReset: { fullName: 'Nguyen Van A', resetUrl: 'https://ueims.edu.vn/reset?token=dummy-token-12345' },
   passwordChanged: { fullName: 'Nguyen Van A', changedAt: '01/06/2026 lúc 10:15', loginUrl: 'https://ueims.edu.vn/login' },
   welcome: {
     fullName: 'Nguyen Van A',
     email: 'a.nguyen@example.com',
-    tempPassword: 'TmpP@ss123',
+    tempPassword: 'temporary-password',
     loginUrl: 'https://ueims.edu.vn/login',
   },
 };

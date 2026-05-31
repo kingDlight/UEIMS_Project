@@ -52,7 +52,7 @@ public class SemesterServiceImpl implements SemesterService {
         } else {
             Semester existing = repository.findById(entity.getSemesterId()).orElse(null);
             if (existing != null) {
-                if (!existing.getSemesterCode().equals(entity.getSemesterCode()) 
+                if (!existing.getSemesterCode().equals(entity.getSemesterCode())
                         && repository.existsBySemesterCode(entity.getSemesterCode())) {
                     throw new AppException(ErrorCode.SEMESTER_EXISTED);
                 }

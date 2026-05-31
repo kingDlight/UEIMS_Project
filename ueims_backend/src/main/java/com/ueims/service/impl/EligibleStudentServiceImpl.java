@@ -3,10 +3,12 @@ package com.ueims.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.ueims.dto.response.EligibleStudentResponse;
 import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
 import com.ueims.model.entity.EligibleStudent;
@@ -15,8 +17,6 @@ import com.ueims.repository.EligibleStudentRepository;
 import com.ueims.repository.SemesterRepository;
 import com.ueims.service.EligibleStudentService;
 import com.ueims.util.ExcelImportUtil;
-import com.ueims.dto.response.EligibleStudentResponse;
-import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -80,7 +80,7 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
         }
 
         List<EligibleStudent> savedStudents = repository.saveAll(toInsert);
-        
+
         return savedStudents.stream()
                 .map(s -> EligibleStudentResponse.builder()
                         .studentCode(s.getStudentCode())
