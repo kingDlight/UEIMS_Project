@@ -8,4 +8,6 @@ import org.springframework.stereotype.Repository;
 import com.ueims.model.entity.*;
 
 @Repository
-public interface SemesterRepository extends JpaRepository<Semester, UUID> {}
+public interface SemesterRepository extends JpaRepository<Semester, UUID> {
+    boolean existsBySemesterCode(String semesterCode);
+}
