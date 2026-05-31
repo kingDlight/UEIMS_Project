@@ -24,12 +24,12 @@ import org.springframework.web.filter.CorsFilter;
 public class SecurityConfig {
     private final String[] PUBLIC_ENDPOINTS = {
         "/api/users",
-        "/auth/token",
-        "/auth/introspect",
-        "/auth/logout",
-        "/auth/refresh",
-        "/auth/forgot-password",
-        "/auth/reset-password"
+        "/api/auth/token",
+        "/api/auth/introspect",
+        "/api/auth/logout",
+        "/api/auth/refresh",
+        "/api/auth/forgot-password",
+        "/api/auth/reset-password"
     };
 
     @Autowired
@@ -50,6 +50,7 @@ public class SecurityConfig {
                         .jwtAuthenticationConverter(jwtAuthenticationConverter()))
                 .authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
         httpSecurity.csrf(AbstractHttpConfigurer::disable);
+        httpSecurity.cors(cors -> {});
 
         httpSecurity.addFilterAfter(requirePasswordChangeFilter, BearerTokenAuthenticationFilter.class);
 
