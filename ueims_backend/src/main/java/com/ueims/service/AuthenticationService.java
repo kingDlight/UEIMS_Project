@@ -335,6 +335,11 @@ public class AuthenticationService {
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         user.setMustChangePassword(false);
         userRepository.save(user);
+
+        java.time.format.DateTimeFormatter formatter =
+                java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+        String changedAt = java.time.LocalDateTime.now().format(formatter);
+        mailService.sendPasswordChangedMail(user.getEmail(), user.getFullName(), changedAt);
     }
 
     @Transactional
@@ -382,6 +387,10 @@ public class AuthenticationService {
 
         resetToken.setIsUsed(true);
         passwordResetTokenRepository.save(resetToken);
+
+        java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+        String changedAt = java.time.LocalDateTime.now().format(formatter);
+        mailService.sendPasswordChangedMail(user.getEmail(), user.getFullName(), changedAt);
 
         // Invalidate all old sessions so they have to login again
         invalidateOldSessions(user.getEmail());
