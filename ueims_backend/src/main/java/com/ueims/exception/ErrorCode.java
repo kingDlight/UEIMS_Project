@@ -59,7 +59,8 @@ public enum ErrorCode {
     // Enterprise registration
     ENTERPRISE_EXISTED(1034, "Doanh nghiệp với mã số thuế này đã tồn tại trong hệ thống", HttpStatus.BAD_REQUEST),
     TAX_CODE_EXISTED(1035, "Mã số thuế đã được sử dụng bởi doanh nghiệp khác", HttpStatus.BAD_REQUEST),
-    ENTERPRISE_REGISTRATION_SUCCESS(1036, "Đăng ký thành công. Tài khoản sẽ được kích hoạt sau khi Training Manager phê duyệt.", HttpStatus.OK),
+    ENTERPRISE_REGISTRATION_SUCCESS(
+            1036, "Đăng ký thành công. Tài khoản sẽ được kích hoạt sau khi Training Manager phê duyệt.", HttpStatus.OK),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
