@@ -75,6 +75,7 @@ public class MailService {
     }
 
     // ===== Late Report Warning (VI) =====
+    @org.springframework.scheduling.annotation.Async
     public void sendLateReportWarningMail(String to, String fullName, Integer weekNumber) {
         String loginUrl = appBaseUrl + "/login";
         String subject = "Cảnh báo: Trễ hạn nộp báo cáo tuần " + weekNumber + " — UEIMS";

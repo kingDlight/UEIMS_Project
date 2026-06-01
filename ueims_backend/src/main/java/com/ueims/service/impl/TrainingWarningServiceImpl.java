@@ -14,15 +14,19 @@ import com.ueims.repository.WeeklyReportRepository;
 import com.ueims.service.MailService;
 import com.ueims.service.TrainingWarningService;
 
+import org.springframework.transaction.annotation.Transactional;
+import java.util.ArrayList;
+import com.ueims.model.entity.EnterpriseAssignment;
+import com.ueims.repository.EnterpriseAssignmentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class TrainingWarningServiceImpl implements TrainingWarningService {
     private final TrainingWarningRepository repository;
     private final WeeklyReportRepository weeklyReportRepository;
+    private final EnterpriseAssignmentRepository enterpriseAssignmentRepository;
     private final MailService mailService;
 
     @Override
@@ -45,13 +49,13 @@ public class TrainingWarningServiceImpl implements TrainingWarningService {
         repository.deleteById(id);
     }
 
+    @Transactional
     @Override
     public int scanAndSendLateWarnings(UUID semesterId, Integer weekNumber, UUID tmId) {
-        List<WeeklyReport> lateReports =
-                weeklyReportRepository.findByAssignment_Semester_SemesterIdAndWeekNumberAndStatus(
-                        semesterId, weekNumber, "NOT_SUBMITTED");
+        List<EnterpriseAssignment> lateAssignments =
+                enterpriseAssignmentRepository.findAssignmentsWithLateReports(semesterId, weekNumber);
 
-        if (lateReports.isEmpty()) {
+        if (lateAssignments.isEmpty()) {
             return 0;
         }
 
@@ -61,9 +65,11 @@ public class TrainingWarningServiceImpl implements TrainingWarningService {
         User tm = new User();
         tm.setUserId(tmId);
 
+        List<TrainingWarning> warningsToSave = new ArrayList<>();
         int count = 0;
-        for (WeeklyReport report : lateReports) {
-            User student = report.getAssignment().getStudent();
+        
+        for (EnterpriseAssignment assignment : lateAssignments) {
+            User student = assignment.getStudent();
 
             TrainingWarning warning = new TrainingWarning();
             warning.setSemester(semester);
@@ -72,7 +78,7 @@ public class TrainingWarningServiceImpl implements TrainingWarningService {
             warning.setWeekNumber(weekNumber);
             warning.setWarningMessage("Bạn chưa nộp báo cáo tuần " + weekNumber + " đúng hạn.");
 
-            repository.save(warning);
+            warningsToSave.add(warning);
 
             String fullName = student.getFullName();
             String email = student.getEmail();
@@ -82,6 +88,8 @@ public class TrainingWarningServiceImpl implements TrainingWarningService {
             }
             count++;
         }
+
+        repository.saveAll(warningsToSave);
 
         log.info("Sent {} late report warnings for week {} in semester {}", count, weekNumber, semesterId);
         return count;
