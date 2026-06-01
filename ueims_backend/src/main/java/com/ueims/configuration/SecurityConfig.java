@@ -30,6 +30,7 @@ public class SecurityConfig {
         "/api/auth/refresh",
         "/api/auth/forgot-password",
         "/api/auth/reset-password",
+        "/api/auth/register-enterprise",
         "/api/test/**"
     };
 
