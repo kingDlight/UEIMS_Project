@@ -1,3 +1,4 @@
+import logoUeims from '@/assets/logo_ueims.png';
 import React, { useState } from 'react';
 import { Form, Input, Button, message } from 'antd';
 import { useNavigate } from 'react-router-dom';
@@ -184,14 +185,7 @@ export const ForgotPasswordPage: React.FC = () => {
               marginBottom: 40,
             }}
           >
-            <div
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: '50%',
-                background: FPT_ORANGE,
-              }}
-            />
+            <img src={logoUeims} alt="UEIMS Logo" style={{ height: 36, objectFit: 'contain' }} />
             <span
               style={{
                 color: FPT_ORANGE,

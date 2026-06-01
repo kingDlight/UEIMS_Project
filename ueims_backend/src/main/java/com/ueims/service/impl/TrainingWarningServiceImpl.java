@@ -1,25 +1,25 @@
 package com.ueims.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.ueims.model.entity.EnterpriseAssignment;
 import com.ueims.model.entity.Semester;
 import com.ueims.model.entity.TrainingWarning;
 import com.ueims.model.entity.User;
-import com.ueims.model.entity.WeeklyReport;
+import com.ueims.repository.EnterpriseAssignmentRepository;
 import com.ueims.repository.TrainingWarningRepository;
 import com.ueims.repository.WeeklyReportRepository;
 import com.ueims.service.MailService;
 import com.ueims.service.TrainingWarningService;
 
-import org.springframework.transaction.annotation.Transactional;
-import java.util.ArrayList;
-import com.ueims.model.entity.EnterpriseAssignment;
-import com.ueims.repository.EnterpriseAssignmentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -67,7 +67,7 @@ public class TrainingWarningServiceImpl implements TrainingWarningService {
 
         List<TrainingWarning> warningsToSave = new ArrayList<>();
         int count = 0;
-        
+
         for (EnterpriseAssignment assignment : lateAssignments) {
             User student = assignment.getStudent();
 

@@ -1,3 +1,4 @@
+import logoUeims from '@/assets/logo_ueims.png';
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -138,21 +139,7 @@ export const HomePage: React.FC = () => {
         {/* Logo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}
              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-          <div style={{
-            width: 44,
-            height: 44,
-            borderRadius: 12,
-            background: `linear-gradient(135deg, ${FPT_ORANGE} 0%, ${FPT_ORANGE_DARK} 100%)`,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontWeight: 800,
-            color: FPT_WHITE,
-            fontSize: 20,
-            boxShadow: `0 4px 14px ${FPT_ORANGE}40`,
-          }}>
-            U
-          </div>
+          <img src={logoUeims} alt="UEIMS Logo" style={{ height: 44, objectFit: 'contain' }} />
           <span style={{ fontWeight: 800, fontSize: 20, color: FPT_DARK }}>UEIMS</span>
         </div>
 
@@ -620,20 +607,7 @@ export const HomePage: React.FC = () => {
           }} className="footer-grid">
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-                <div style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: 12,
-                  background: `linear-gradient(135deg, ${FPT_ORANGE} 0%, ${FPT_ORANGE_DARK} 100%)`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontWeight: 800,
-                  color: FPT_WHITE,
-                  fontSize: 20,
-                }}>
-                  U
-                </div>
+                <img src={logoUeims} alt="UEIMS Logo" style={{ height: 44, objectFit: 'contain' }} />
                 <span style={{ color: FPT_WHITE, fontWeight: 800, fontSize: 20 }}>UEIMS</span>
               </div>
               <p style={{ color: 'rgba(255, 255, 255, 0.5)', fontSize: 14, lineHeight: 1.7, margin: 0 }}>

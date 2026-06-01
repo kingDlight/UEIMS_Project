@@ -1,3 +1,4 @@
+import logoUeims from '@/assets/logo_ueims.png';
 import React, { useState } from 'react';
 import { Form, Input, Button, message } from 'antd';
 import { useNavigate } from 'react-router-dom';
@@ -118,6 +119,10 @@ export const LoginPage: React.FC = () => {
             </svg>
             Quay về trang chủ
           </a>
+        </div>
+
+        <div style={{ marginBottom: 12 }}>
+          <img src={logoUeims} alt="UEIMS Logo" style={{ height: 48, objectFit: 'contain' }} />
         </div>
 
         <div
