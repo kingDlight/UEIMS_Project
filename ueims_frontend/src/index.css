@@ -68,7 +68,7 @@ html {
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Times New Roman', Times, serif;
   font-size: 1rem;
   line-height: 1.6;
   color: var(--fpt-dark);
@@ -91,7 +91,7 @@ body {
    Typography
    ============================================ */
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'Times New Roman', Times, serif;
   font-weight: 700;
   color: var(--fpt-dark);
   line-height: 1.2;

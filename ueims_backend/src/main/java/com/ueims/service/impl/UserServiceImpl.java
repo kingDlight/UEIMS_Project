@@ -19,6 +19,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository repository;
+    private final com.ueims.service.MailService mailService;
+    private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 
     @Override
     public List<User> findAll() {
@@ -33,6 +35,22 @@ public class UserServiceImpl implements UserService {
     @Override
     public User save(User entity) {
         return repository.save(entity);
+    }
+
+    @Override
+    public User createUser(com.ueims.dto.request.UserCreationRequest request) {
+        String randomPassword = java.util.UUID.randomUUID().toString().replace("-", "").substring(0, 12);
+        User user = User.builder()
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(randomPassword))
+                .fullName(request.getFullName())
+                .phone(request.getPhone())
+                .status("ACTIVE")
+                .mustChangePassword(true)
+                .build();
+        user = repository.save(user);
+        mailService.sendWelcomeMail(user.getEmail(), user.getFullName(), randomPassword);
+        return user;
     }
 
     @Override
