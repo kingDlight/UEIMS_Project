@@ -64,6 +64,9 @@ public enum ErrorCode {
     TAX_CODE_EXISTED(1037, "Mã số thuế đã được sử dụng bởi doanh nghiệp khác", HttpStatus.BAD_REQUEST),
     ENTERPRISE_REGISTRATION_SUCCESS(
             1038, "Đăng ký thành công. Tài khoản sẽ được kích hoạt sau khi Training Manager phê duyệt.", HttpStatus.OK),
+    ENTERPRISE_NOT_FOUND(1039, "Enterprise not found", HttpStatus.NOT_FOUND),
+    ENTERPRISE_NOT_ACTIVE(1040, "Enterprise must be approved before posting job", HttpStatus.BAD_REQUEST),
+    SEMESTER_NOT_ACTIVE(1041, "Job post can only be created when semester is ACTIVE", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.ueims.dto.request.EnterpriseApprovalRequest;
 import com.ueims.model.entity.Enterprise;
 import com.ueims.service.EnterpriseService;
 
@@ -38,5 +39,16 @@ public class EnterpriseController {
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         service.deleteById(id);
         return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{id}/approve")
+    public ResponseEntity<Enterprise> approve(@PathVariable UUID id) {
+        return ResponseEntity.ok(service.approve(id));
+    }
+
+    @PutMapping("/{id}/reject")
+    public ResponseEntity<Enterprise> reject(
+            @PathVariable UUID id, @Valid @RequestBody EnterpriseApprovalRequest request) {
+        return ResponseEntity.ok(service.reject(id, request.getRejectionReason()));
     }
 }

@@ -4,7 +4,10 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.ueims.exception.AppException;
+import com.ueims.exception.ErrorCode;
 import com.ueims.model.entity.Enterprise;
 import com.ueims.repository.EnterpriseRepository;
 import com.ueims.service.EnterpriseService;
@@ -29,6 +32,26 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     @Override
     public Enterprise save(Enterprise entity) {
         return repository.save(entity);
+    }
+
+    @Override
+    @Transactional
+    public Enterprise approve(UUID id) {
+        Enterprise enterprise =
+                repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ENTERPRISE_NOT_FOUND));
+        enterprise.setStatus("ACTIVE");
+        enterprise.setRejectionReason(null);
+        return repository.save(enterprise);
+    }
+
+    @Override
+    @Transactional
+    public Enterprise reject(UUID id, String rejectionReason) {
+        Enterprise enterprise =
+                repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ENTERPRISE_NOT_FOUND));
+        enterprise.setStatus("REJECTED");
+        enterprise.setRejectionReason(rejectionReason);
+        return repository.save(enterprise);
     }
 
     @Override

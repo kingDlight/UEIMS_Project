@@ -31,6 +31,7 @@ public class JobPostController {
 
     @PostMapping
     public ResponseEntity<JobPost> create(@Valid @RequestBody JobPost entity) {
+        // BR-26: semester must be ACTIVE in order to post a job
         return ResponseEntity.ok(service.save(entity));
     }
 

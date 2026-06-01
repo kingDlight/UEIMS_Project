@@ -12,5 +12,9 @@ public interface EnterpriseService {
 
     Enterprise save(Enterprise entity);
 
+    Enterprise approve(UUID id);
+
+    Enterprise reject(UUID id, String rejectionReason);
+
     void deleteById(UUID id);
 }
