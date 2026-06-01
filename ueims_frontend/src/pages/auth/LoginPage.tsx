@@ -121,7 +121,10 @@ export const LoginPage: React.FC = () => {
           </a>
         </div>
 
-        <img src={logoUeims} alt="UEIMS Logo" style={{ height: 50, marginBottom: 16, objectFit: 'contain', alignSelf: 'flex-start' }} />
+        <div style={{ marginBottom: 12 }}>
+          <img src={logoUeims} alt="UEIMS Logo" style={{ height: 48, objectFit: 'contain' }} />
+        </div>
+
         <div
           style={{
             color: FPT_ORANGE,
