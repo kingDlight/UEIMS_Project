@@ -4,6 +4,7 @@ import { LoginPage } from '@/pages/auth/LoginPage';
 import { ForgotPasswordPage } from '@/pages/auth/ForgotPasswordPage';
 import { ResetPasswordPage } from '@/pages/auth/ResetPasswordPage';
 import { ChangePasswordPage } from '@/pages/auth/ChangePasswordPage';
+import { RegisterEnterprisePage } from '@/pages/auth/RegisterEnterprisePage';
 import { HomePage } from '@/pages/home/HomePage';
 import { ProtectedRoute } from '@/components/guards/ProtectedRoute';
 import { EmailPreviewPage } from '@/pages/dev/EmailPreviewPage';
@@ -28,6 +29,10 @@ export const router = createBrowserRouter([
   {
     path: '/change-password',
     element: <ChangePasswordPage />,
+  },
+  {
+    path: '/register-enterprise',
+    element: <RegisterEnterprisePage />,
   },
   {
     path: '/app',

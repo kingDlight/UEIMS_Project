@@ -8,4 +8,6 @@ import org.springframework.stereotype.Repository;
 import com.ueims.model.entity.*;
 
 @Repository
-public interface EnterpriseRepository extends JpaRepository<Enterprise, UUID> {}
+public interface EnterpriseRepository extends JpaRepository<Enterprise, UUID> {
+    boolean existsByTaxCode(String taxCode);
+}

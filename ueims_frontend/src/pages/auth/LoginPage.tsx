@@ -59,19 +59,19 @@ export const LoginPage: React.FC = () => {
         minHeight: '100vh',
         display: 'flex',
         background: '#f6f6f6',
-        overflow: 'hidden',
         height: '100vh',
+        overflow: 'hidden',
       }}
     >
       <svg style={{ position: 'absolute', width: 0, height: 0 }}>
         <defs>
           <clipPath id="humps" clipPathUnits="objectBoundingBox">
-            <path d="M0,0 
-                     C0.05,0 0.08,0.08 0.05,0.15 
-                     C0.02,0.22 0.08,0.25 0.06,0.35 
-                     C0.04,0.45 0.10,0.50 0.08,0.60 
-                     C0.06,0.70 0.12,0.75 0.10,0.85 
-                     C0.08,0.95 0.14,1.00 0.12,1.00 
+            <path d="M0,0
+                     C0.05,0 0.08,0.08 0.05,0.15
+                     C0.02,0.22 0.08,0.25 0.06,0.35
+                     C0.04,0.45 0.10,0.50 0.08,0.60
+                     C0.06,0.70 0.12,0.75 0.10,0.85
+                     C0.08,0.95 0.14,1.00 0.12,1.00
                      L1,1 L1,0 Z" />
           </clipPath>
         </defs>
@@ -81,7 +81,8 @@ export const LoginPage: React.FC = () => {
       <div
         style={{
           width: '40%',
-          paddingLeft: 90,
+          paddingLeft: 80,
+          paddingRight: 40,
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
@@ -90,22 +91,41 @@ export const LoginPage: React.FC = () => {
           height: '100vh',
         }}
       >
-        <div
-          style={{
-            width: 42,
-            height: 42,
-            borderRadius: '50%',
-            background: FPT_ORANGE,
-            marginBottom: 70,
-          }}
-        />
+        {/* Logo circle */}
+        {/* Back to home */}
+        <div style={{ marginBottom: 40 }}>
+          <a
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              navigate('/');
+            }}
+            style={{
+              color: FPT_GRAY,
+              textDecoration: 'none',
+              fontSize: 13,
+              fontWeight: 500,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4,
+              transition: 'color 0.2s',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = FPT_ORANGE; }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = FPT_GRAY; }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            Quay về trang chủ
+          </a>
+        </div>
 
         <div
           style={{
             color: FPT_ORANGE,
-            fontSize: 18,
+            fontSize: 15,
             fontWeight: 600,
-            marginBottom: 8,
+            marginBottom: 4,
           }}
         >
           Welcome to
@@ -113,10 +133,10 @@ export const LoginPage: React.FC = () => {
 
         <div
           style={{
-            fontSize: 62,
+            fontSize: 52,
             fontWeight: 800,
             color: FPT_DARK,
-            marginBottom: 60,
+            marginBottom: 32,
             letterSpacing: '-2px',
           }}
         >
@@ -124,14 +144,14 @@ export const LoginPage: React.FC = () => {
         </div>
 
         <Form onFinish={onFinish}>
-          <div style={{ width: 340, marginBottom: 40 }}>
+          <div style={{ width: 320, marginBottom: 20 }}>
             <label
               style={{
                 display: 'block',
                 color: FPT_ORANGE,
-                fontSize: 18,
+                fontSize: 14,
                 fontWeight: 600,
-                marginBottom: 10,
+                marginBottom: 6,
               }}
             >
               Email
@@ -151,8 +171,8 @@ export const LoginPage: React.FC = () => {
                   border: 'none',
                   borderBottom: '1px solid #a8a8a8',
                   background: 'transparent',
-                  padding: '10px 0',
-                  fontSize: 18,
+                  padding: '8px 0',
+                  fontSize: 15,
                   outline: 'none',
                   borderRadius: 0,
                 }}
@@ -160,14 +180,14 @@ export const LoginPage: React.FC = () => {
             </Form.Item>
           </div>
 
-          <div style={{ width: 340, marginBottom: 40 }}>
+          <div style={{ width: 320, marginBottom: 20 }}>
             <label
               style={{
                 display: 'block',
                 color: FPT_ORANGE,
-                fontSize: 18,
+                fontSize: 14,
                 fontWeight: 600,
-                marginBottom: 10,
+                marginBottom: 6,
               }}
             >
               Password
@@ -184,8 +204,8 @@ export const LoginPage: React.FC = () => {
                   border: 'none',
                   borderBottom: '1px solid #a8a8a8',
                   background: 'transparent',
-                  padding: '10px 0',
-                  fontSize: 18,
+                  padding: '8px 0',
+                  fontSize: 15,
                   outline: 'none',
                   borderRadius: 0,
                 }}
@@ -198,25 +218,25 @@ export const LoginPage: React.FC = () => {
               htmlType="submit"
               loading={loading}
               style={{
-                width: 170,
-                height: 54,
+                width: 160,
+                height: 46,
                 border: 'none',
                 borderRadius: 40,
                 color: FPT_WHITE,
-                fontSize: 20,
+                fontSize: 16,
                 fontWeight: 700,
                 cursor: 'pointer',
                 background: `linear-gradient(90deg, ${FPT_ORANGE}, ${FPT_ORANGE_DARK})`,
-                boxShadow: `0 10px 20px ${FPT_ORANGE}40`,
+                boxShadow: `0 8px 18px ${FPT_ORANGE}40`,
                 transition: 'all 0.3s',
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'scale(1.05)';
-                e.currentTarget.style.boxShadow = `0 15px 30px ${FPT_ORANGE}50`;
+                e.currentTarget.style.boxShadow = `0 12px 24px ${FPT_ORANGE}50`;
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = 'scale(1)';
-                e.currentTarget.style.boxShadow = `0 10px 20px ${FPT_ORANGE}40`;
+                e.currentTarget.style.boxShadow = `0 8px 18px ${FPT_ORANGE}40`;
               }}
             >
               LOGIN
@@ -224,8 +244,8 @@ export const LoginPage: React.FC = () => {
           </Form.Item>
         </Form>
 
-        {/* Forgot Password Link */}
-        <div style={{ marginTop: 16 }}>
+        {/* Forgot Password */}
+        <div style={{ marginTop: 12, marginBottom: 24 }}>
           <a
             href="#"
             onClick={(e) => {
@@ -235,7 +255,7 @@ export const LoginPage: React.FC = () => {
             style={{
               color: FPT_ORANGE,
               textDecoration: 'none',
-              fontSize: 16,
+              fontSize: 13,
               fontWeight: 500,
             }}
           >
@@ -243,23 +263,30 @@ export const LoginPage: React.FC = () => {
           </a>
         </div>
 
+        {/* Divider + Register */}
         <div
           style={{
-            marginTop: 140,
-            color: FPT_GRAY,
-            fontSize: 18,
+            borderTop: '1px solid #e0e0e0',
+            paddingTop: 16,
           }}
         >
-          Don't have an account?{' '}
+          <div style={{ color: FPT_GRAY, fontSize: 13, marginBottom: 6 }}>
+            Bạn là nhà tuyển dụng?
+          </div>
           <a
             href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              navigate('/register-enterprise');
+            }}
             style={{
               color: FPT_ORANGE,
               textDecoration: 'none',
+              fontSize: 13,
               fontWeight: 700,
             }}
           >
-            Sign up
+            Đăng ký tài khoản nhà tuyển dụng →
           </a>
         </div>
       </div>
@@ -306,14 +333,14 @@ export const LoginPage: React.FC = () => {
         .ant-input {
           background: transparent !important;
           border: none !important;
-          font-size: 18px !important;
+          font-size: 15px !important;
         }
         .ant-input-affix-wrapper {
           background: transparent !important;
           border: none !important;
           border-bottom: 1px solid #a8a8a8 !important;
           border-radius: 0 !important;
-          padding: 10px 0 !important;
+          padding: 8px 0 !important;
         }
         .ant-input-affix-wrapper:hover,
         .ant-input-affix-wrapper-focused {
