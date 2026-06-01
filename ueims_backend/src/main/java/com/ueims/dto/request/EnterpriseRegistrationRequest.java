@@ -28,8 +28,6 @@ public class EnterpriseRegistrationRequest {
     @NotBlank(message = "FIELD_REQUIRED")
     String email;
 
-    @NotBlank(message = "FIELD_REQUIRED")
-    String phone;
 
     @NotBlank(message = "FIELD_REQUIRED")
     String address;

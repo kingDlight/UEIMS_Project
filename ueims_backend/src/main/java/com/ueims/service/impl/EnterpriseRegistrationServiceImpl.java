@@ -60,7 +60,6 @@ public class EnterpriseRegistrationServiceImpl implements EnterpriseRegistration
                 .companyName(request.getEnterpriseName())
                 .taxCode(request.getTaxCode())
                 .address(request.getAddress())
-                .phone(request.getPhone())
                 .status("PENDING")
                 .build();
         enterprise = enterpriseRepository.save(enterprise);
@@ -70,7 +69,6 @@ public class EnterpriseRegistrationServiceImpl implements EnterpriseRegistration
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .fullName(request.getContactPerson())
-                .phone(request.getPhone())
                 .status("ACTIVE")
                 .mustChangePassword(true)
                 .enterprise(enterprise)
