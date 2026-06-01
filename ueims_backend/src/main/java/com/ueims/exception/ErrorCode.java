@@ -55,12 +55,15 @@ public enum ErrorCode {
     PASSWORDS_NOT_MATCH(2003, "Mật khẩu mới và xác nhận không khớp", HttpStatus.BAD_REQUEST),
     USER_ALREADY_HAS_ROLE(2004, "Người dùng đã có vai trò. Chỉ được gán một vai trò duy nhất.", HttpStatus.BAD_REQUEST),
     FIELD_REQUIRED(1033, "This field is required", HttpStatus.BAD_REQUEST),
+    MISSING_PARAMETER(1034, "Missing required request parameter: {param}", HttpStatus.BAD_REQUEST),
+    INVALID_PARAMETER_FORMAT(
+            1035, "Invalid format for parameter: {param}. Expected format: {type}", HttpStatus.BAD_REQUEST),
 
     // Enterprise registration
-    ENTERPRISE_EXISTED(1034, "Doanh nghiệp với mã số thuế này đã tồn tại trong hệ thống", HttpStatus.BAD_REQUEST),
-    TAX_CODE_EXISTED(1035, "Mã số thuế đã được sử dụng bởi doanh nghiệp khác", HttpStatus.BAD_REQUEST),
+    ENTERPRISE_EXISTED(1036, "Doanh nghiệp với mã số thuế này đã tồn tại trong hệ thống", HttpStatus.BAD_REQUEST),
+    TAX_CODE_EXISTED(1037, "Mã số thuế đã được sử dụng bởi doanh nghiệp khác", HttpStatus.BAD_REQUEST),
     ENTERPRISE_REGISTRATION_SUCCESS(
-            1036, "Đăng ký thành công. Tài khoản sẽ được kích hoạt sau khi Training Manager phê duyệt.", HttpStatus.OK),
+            1038, "Đăng ký thành công. Tài khoản sẽ được kích hoạt sau khi Training Manager phê duyệt.", HttpStatus.OK),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

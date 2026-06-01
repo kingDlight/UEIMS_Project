@@ -1,5 +1,6 @@
 package com.ueims.service.impl;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -91,5 +92,23 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
                         .currentSemester(s.getCurrentSemester())
                         .build())
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public int finalizeOjtList(UUID semesterId) {
+        List<EligibleStudent> students = repository.findBySemester_SemesterIdAndStatus(semesterId, "ACCEPTED");
+        if (students.isEmpty()) {
+            return 0;
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        for (EligibleStudent student : students) {
+            student.setStatus("OJT");
+            student.setApprovedAt(now);
+        }
+
+        repository.saveAll(students);
+        log.info("Finalized OJT list for semester {}, {} students moved to OJT status.", semesterId, students.size());
+        return students.size();
     }
 }

@@ -47,4 +47,10 @@ public class EligibleStudentController {
             @RequestParam("file") MultipartFile file, @RequestParam("semesterId") UUID semesterId) {
         return ResponseEntity.ok(service.importFromExcel(file, semesterId));
     }
+
+    @PostMapping("/finalize-ojt")
+    public ResponseEntity<java.util.Map<String, Object>> finalizeOjtList(@RequestParam("semesterId") UUID semesterId) {
+        int count = service.finalizeOjtList(semesterId);
+        return ResponseEntity.ok(java.util.Map.of("message", "Finalized OJT list", "updatedCount", count));
+    }
 }

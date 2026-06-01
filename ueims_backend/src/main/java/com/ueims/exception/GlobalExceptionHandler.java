@@ -86,6 +86,36 @@ public class GlobalExceptionHandler {
                         .build());
     }
 
+    @ExceptionHandler(value = org.springframework.web.bind.MissingServletRequestParameterException.class)
+    ResponseEntity<ApiResponse> handlingMissingParameter(
+            org.springframework.web.bind.MissingServletRequestParameterException exception) {
+        log.warn("Missing request parameter: {}", exception.getParameterName());
+        ErrorCode errorCode = ErrorCode.MISSING_PARAMETER;
+        return ResponseEntity.status(errorCode.getStatusCode())
+                .body(ApiResponse.builder()
+                        .code(errorCode.getCode())
+                        .message(errorCode.getMessage().replace("{param}", exception.getParameterName()))
+                        .build());
+    }
+
+    @ExceptionHandler(value = org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class)
+    ResponseEntity<ApiResponse> handlingTypeMismatch(
+            org.springframework.web.method.annotation.MethodArgumentTypeMismatchException exception) {
+        log.warn("Type mismatch for parameter: {}", exception.getName());
+        ErrorCode errorCode = ErrorCode.INVALID_PARAMETER_FORMAT;
+        String requiredType = exception.getRequiredType() != null
+                ? exception.getRequiredType().getSimpleName()
+                : "Unknown";
+        String message =
+                errorCode.getMessage().replace("{param}", exception.getName()).replace("{type}", requiredType);
+
+        return ResponseEntity.status(errorCode.getStatusCode())
+                .body(ApiResponse.builder()
+                        .code(errorCode.getCode())
+                        .message(message)
+                        .build());
+    }
+
     @ExceptionHandler(value = MultipartException.class)
     ResponseEntity<ApiResponse> handlingMultipartException(MultipartException exception) {
         log.warn("Multipart error: {}", exception.getMessage());

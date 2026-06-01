@@ -13,4 +13,6 @@ public interface EligibleStudentRepository extends JpaRepository<EligibleStudent
     boolean existsByStudentCodeAndSemester_SemesterId(String studentCode, UUID semesterId);
 
     java.util.Optional<EligibleStudent> findByUser_UserIdAndSemester_SemesterId(UUID userId, UUID semesterId);
+
+    java.util.List<EligibleStudent> findBySemester_SemesterIdAndStatus(UUID semesterId, String status);
 }

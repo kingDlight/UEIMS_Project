@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${subject}">Cảnh báo trễ báo cáo</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+    
+    <div style="text-align: center; margin-bottom: 20px;">
+        <h2 style="color: #d9534f;">Hệ thống Quản lý Thực tập UEIMS</h2>
+    </div>
+
+    <div style="background-color: #f9f9f9; padding: 20px; border-radius: 5px; border-left: 5px solid #d9534f;">
+        <p>Xin chào <strong><span th:text="${fullName}">Sinh viên</span></strong>,</p>
+        
+        <p>Hệ thống nhận thấy bạn <strong>chưa nộp báo cáo thực tập tuần <span th:text="${weekNumber}"></span></strong> theo đúng thời hạn quy định.</p>
+        
+        <p>Việc nộp báo cáo trễ hạn có thể ảnh hưởng đến kết quả đánh giá thực tập của bạn. Vui lòng đăng nhập vào hệ thống và nộp báo cáo ngay lập tức để tránh các hình thức kỷ luật từ nhà trường.</p>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <a th:href="${loginUrl}" style="background-color: #0056b3; color: white; padding: 12px 25px; text-decoration: none; border-radius: 4px; font-weight: bold;">
+                Đăng nhập để nộp báo cáo
+            </a>
+        </div>
+        
+        <p>Nếu bạn đã nộp báo cáo, vui lòng bỏ qua email này hoặc liên hệ với Training Manager để được hỗ trợ.</p>
+        
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+        
+        <p style="font-size: 12px; color: #777; text-align: center;">
+            Đây là email tự động từ hệ thống UEIMS, vui lòng không trả lời email này.<br>
+            © 2026 UEIMS. All rights reserved.
+        </p>
+    </div>
+
+</body>
+</html>
