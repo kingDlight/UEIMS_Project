@@ -1,16 +1,16 @@
+import bgAuth from '@/assets/bg-auth.png';
+import authShield3d from '@/assets/auth_shield_3d.png';
 import logoUeims from '@/assets/logo_ueims.png';
 import React, { useState } from 'react';
 import { Form, Input, Button, message } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { Mail, ArrowLeft } from 'lucide-react';
+import { Mail, ChevronLeft, Send, Info } from 'lucide-react';
 import { AuthService } from '@/services/AuthService';
 
-const FPT_ORANGE = '#E67E22';
-const FPT_ORANGE_DARK = '#D35400';
-const FPT_WHITE = '#FFFFFF';
-const FPT_DARK = '#1A1A2E';
-const FPT_GRAY = '#6B7280';
-const FPT_LIGHT_GRAY = '#F3F4F6';
+const PRIMARY = '#E96500';
+const WHITE = '#FFFFFF';
+const TEXT_DARK = '#1E293B';
+const TEXT_GRAY = '#64748B';
 
 export const ForgotPasswordPage: React.FC = () => {
   const navigate = useNavigate();
@@ -38,199 +38,134 @@ export const ForgotPasswordPage: React.FC = () => {
       style={{
         minHeight: '100vh',
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        background: '#FAFAFA',
-        padding: '24px',
+        background: `url(${bgAuth}) center/cover no-repeat, #FFF2E8`,
+        padding: '20px',
         position: 'relative',
-        overflow: 'hidden',
+        overflowX: 'hidden',
+        fontFamily: "'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif",
       }}
     >
-      {/* Decorative blobs */}
-      <div style={{ position: 'absolute', top: -80, right: -80, width: 300, height: 300, borderRadius: '50%', background: `radial-gradient(circle, ${FPT_ORANGE}18 0%, transparent 70%)`, pointerEvents: 'none', zIndex: 0 }} />
-      <div style={{ position: 'absolute', bottom: -60, left: -60, width: 240, height: 240, borderRadius: '50%', background: `radial-gradient(circle, ${FPT_ORANGE_DARK}12 0%, transparent 70%)`, pointerEvents: 'none', zIndex: 0 }} />
-      <div style={{ position: 'absolute', top: '40%', right: '30%', width: 180, height: 180, borderRadius: '50%', background: `radial-gradient(circle, #FEF3C7 10%, transparent 70%)`, pointerEvents: 'none', zIndex: 0 }} />
-      {/* Dot grid */}
-      <svg style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 0, opacity: 0.4 }} xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <pattern id="dots" x="0" y="0" width="28" height="28" patternUnits="userSpaceOnUse">
-            <circle cx="2" cy="2" r="1.2" fill={`${FPT_ORANGE}30`} />
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#dots)" />
-      </svg>
-
+      {/* TOP HEADER */}
       <div
         style={{
+          position: 'absolute',
+          top: 40,
+          left: '50%',
+          transform: 'translateX(-50%)',
           display: 'flex',
-          flexDirection: 'row',
-          maxWidth: 900,
-          width: '100%',
-          borderRadius: 24,
-          boxShadow: '0 25px 60px rgba(0, 0, 0, 0.08), 0 8px 24px rgba(0, 0, 0, 0.04)',
-          background: FPT_WHITE,
-          minHeight: 540,
-          position: 'relative',
-          zIndex: 1,
+          alignItems: 'center',
+          gap: 12,
+          zIndex: 10,
         }}
       >
-        {/* LEFT — Illustration */}
+        <img src={logoUeims} alt="UEIMS Logo" style={{ height: 48, objectFit: 'contain' }} />
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <h1 style={{ fontSize: 18, fontWeight: 800, color: PRIMARY, margin: 0, lineHeight: 1.1, letterSpacing: 1 }}>
+            UEIMS
+          </h1>
+          <p style={{ fontSize: 8, color: TEXT_DARK, textTransform: 'uppercase', fontWeight: 600, margin: '2px 0 0 0', letterSpacing: 0.5 }}>
+            Hệ thống quản lý thực tập sinh<br />và doanh nghiệp
+          </p>
+        </div>
+      </div>
+
+      {/* MAIN CONTAINER */}
+      <div
+        style={{
+          width: '100%',
+          maxWidth: 960,
+          height: 560,
+          background: WHITE,
+          borderRadius: 20,
+          boxShadow: '0 30px 60px rgba(233, 101, 0, 0.15)',
+          display: 'flex',
+          overflow: 'hidden',
+          position: 'relative',
+          zIndex: 10,
+          marginTop: 60,
+        }}
+      >
+        {/* LEFT PANEL */}
         <div
           style={{
-            width: '45%',
-            background: `linear-gradient(145deg, ${FPT_ORANGE} 0%, ${FPT_ORANGE_DARK} 100%)`,
+            width: '48%',
+            background: '#E86500',
+            color: WHITE,
+            padding: '40px 30px',
             display: 'flex',
             flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '48px 40px',
             position: 'relative',
             overflow: 'hidden',
           }}
         >
-          {/* Decorative circles */}
-          <div
-            style={{
-              position: 'absolute',
-              top: -60,
-              right: -60,
-              width: 200,
-              height: 200,
-              borderRadius: '50%',
-              background: `${FPT_WHITE}15`,
-            }}
-          />
-          <div
-            style={{
-              position: 'absolute',
-              bottom: -40,
-              left: -40,
-              width: 140,
-              height: 140,
-              borderRadius: '50%',
-              background: `${FPT_WHITE}10`,
-            }}
-          />
+          {/* Subtle dots */}
+          <div style={{ position: 'absolute', top: 40, left: 30, width: 80, height: 80, backgroundImage: 'radial-gradient(rgba(255,255,255,0.4) 2px, transparent 2px)', backgroundSize: '14px 14px' }} />
+          <div style={{ position: 'absolute', bottom: 60, left: 20, width: 80, height: 80, backgroundImage: 'radial-gradient(rgba(255,255,255,0.4) 2px, transparent 2px)', backgroundSize: '14px 14px', opacity: 0.4 }} />
 
-          {/* Icon */}
           <div
             style={{
-              width: 88,
-              height: 88,
-              borderRadius: '50%',
-              background: `${FPT_WHITE}20`,
+              flex: 1,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              marginBottom: 32,
+              position: 'relative',
+              marginTop: 10,
+              marginBottom: 10,
+              zIndex: 2,
             }}
           >
-            <Mail size={40} color={FPT_WHITE} strokeWidth={1.5} />
+            <img
+              src={authShield3d}
+              alt="3D Security Illustration"
+              style={{
+                width: '100%',
+                maxWidth: 340,
+                height: 'auto',
+                objectFit: 'cover',
+                WebkitMaskImage: 'radial-gradient(circle at center, black 40%, rgba(0,0,0,0.8) 55%, transparent 70%)',
+                maskImage: 'radial-gradient(circle at center, black 40%, rgba(0,0,0,0.8) 55%, transparent 70%)',
+                transform: 'scale(1.15)',
+              }}
+            />
           </div>
 
-          <h2
-            style={{
-              color: FPT_WHITE,
-              fontSize: 26,
-              fontWeight: 700,
-              marginBottom: 16,
-              textAlign: 'center',
-              lineHeight: 1.3,
-            }}
-          >
-            Khôi phục tài khoản
-          </h2>
-          <p
-            style={{
-              color: `${FPT_WHITE}CC`,
-              fontSize: 15,
-              textAlign: 'center',
-              lineHeight: 1.7,
-            }}
-          >
-            Nhập email đã đăng ký để nhận link khôi phục mật khẩu qua hộp thư của bạn.
-          </p>
+          <div style={{ zIndex: 2, textAlign: 'center' }}>
+            <h2 style={{ fontSize: 24, fontWeight: 700, margin: '0 0 12px 0', color: WHITE }}>Bảo mật tài khoản của bạn</h2>
+            <p style={{ fontSize: 14, lineHeight: 1.6, color: 'rgba(255,255,255,0.9)', margin: '0 0 32px 0', padding: '0 10px' }}>
+              Chúng tôi sẽ gửi liên kết khôi phục mật khẩu đến email đã đăng ký trong hệ thống.
+            </p>
+          </div>
         </div>
 
-        {/* RIGHT — Form */}
+        {/* RIGHT PANEL */}
         <div
           style={{
-            flex: 1,
-            padding: '56px 48px',
+            width: '52%',
+            padding: '40px 60px',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
             position: 'relative',
-            overflow: 'hidden',
           }}
         >
-          {/* Subtle decorations inside the white panel */}
-          <div style={{ position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: '50%', background: `radial-gradient(circle, ${FPT_ORANGE}08 0%, transparent 70%)`, pointerEvents: 'none' }} />
-          <div style={{ position: 'absolute', bottom: -30, left: -30, width: 120, height: 120, borderRadius: '50%', background: `radial-gradient(circle, ${FPT_ORANGE_DARK}06 0%, transparent 70%)`, pointerEvents: 'none' }} />
-          <svg style={{ position: 'absolute', top: 0, right: 0, width: '100%', height: '100%', pointerEvents: 'none', opacity: 0.3 }} xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <pattern id="dotsInner" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
-                <circle cx="2" cy="2" r="1" fill={`${FPT_ORANGE}20`} />
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#dotsInner)" />
-          </svg>
-
-          {/* Logo mark */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 12,
-              marginBottom: 40,
-            }}
-          >
-            <img src={logoUeims} alt="UEIMS Logo" style={{ height: 36, objectFit: 'contain' }} />
-            <span
-              style={{
-                color: FPT_ORANGE,
-                fontSize: 16,
-                fontWeight: 700,
-                letterSpacing: '0.05em',
-              }}
-            >
-              UEIMS
-            </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: PRIMARY, fontWeight: 700, fontSize: 13, marginBottom: 24 }}>
+            <img src={logoUeims} alt="UEIMS Logo" style={{ height: 24, objectFit: 'contain' }} />
+            UEIMS
           </div>
 
-          <h1
-            style={{
-              fontSize: 28,
-              fontWeight: 800,
-              color: FPT_DARK,
-              marginBottom: 10,
-              lineHeight: 1.2,
-            }}
-          >
+          <h1 style={{ fontSize: 26, fontWeight: 800, color: TEXT_DARK, margin: '0 0 12px 0' }}>
             Quên mật khẩu?
           </h1>
-          <p
-            style={{
-              color: FPT_GRAY,
-              fontSize: 15,
-              marginBottom: 36,
-              lineHeight: 1.6,
-            }}
-          >
-            Nhập email đã đăng ký. Chúng tôi sẽ gửi link khôi phục mật khẩu đến hộp thư của bạn.
+          <p style={{ color: TEXT_GRAY, fontSize: 13, lineHeight: 1.6, margin: '0 0 30px 0' }}>
+            Nhập email đã đăng ký. Chúng tôi sẽ gửi link khôi phục<br />mật khẩu đến hộp thư của bạn.
           </p>
 
-          <Form onFinish={onFinish}>
-            <div style={{ marginBottom: 28 }}>
-              <label
-                style={{
-                  display: 'block',
-                  color: FPT_DARK,
-                  fontSize: 14,
-                  fontWeight: 600,
-                  marginBottom: 8,
-                }}
-              >
+          <Form onFinish={onFinish} layout="vertical" style={{ width: '100%' }}>
+            <div style={{ marginBottom: 24 }}>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: TEXT_DARK, marginBottom: 8 }}>
                 Địa chỉ Email
               </label>
               <Form.Item
@@ -244,20 +179,13 @@ export const ForgotPasswordPage: React.FC = () => {
                 <Input
                   placeholder="name@example.com"
                   size="large"
-                  prefix={
-                    <Mail
-                      size={16}
-                      color={FPT_GRAY}
-                      style={{ marginRight: 8 }}
-                    />
-                  }
+                  prefix={<Mail size={16} color="#94A3B8" style={{ marginRight: 8 }} />}
                   style={{
-                    borderRadius: 12,
-                    border: '1.5px solid #E5E7EB',
-                    padding: '10px 14px',
-                    fontSize: 15,
-                    height: 48,
-                    transition: 'border-color 0.2s',
+                    borderRadius: 6,
+                    border: '1px solid #E2E8F0',
+                    padding: '8px 12px',
+                    fontSize: 14,
+                    height: 44,
                   }}
                 />
               </Form.Item>
@@ -271,42 +199,63 @@ export const ForgotPasswordPage: React.FC = () => {
                 block
                 size="large"
                 style={{
-                  height: 52,
-                  borderRadius: 14,
-                  fontSize: 16,
-                  fontWeight: 700,
-                  background: `linear-gradient(135deg, ${FPT_ORANGE}, ${FPT_ORANGE_DARK})`,
+                  height: 44,
+                  borderRadius: 6,
+                  fontSize: 14,
+                  fontWeight: 600,
+                  background: PRIMARY,
                   border: 'none',
-                  boxShadow: `0 8px 20px ${FPT_ORANGE}40`,
-                  letterSpacing: '0.02em',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 8,
                 }}
               >
+                <Send size={16} />
                 Gửi Link Khôi Phục
               </Button>
             </Form.Item>
           </Form>
 
+          <div style={{ marginTop: 24, backgroundColor: '#FAFAFA', border: '1px solid #F1F5F9', borderRadius: 6, padding: '14px', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+            <Info size={18} fill={PRIMARY} color={WHITE} style={{ flexShrink: 0 }} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <strong style={{ color: PRIMARY, fontSize: 12 }}>Lưu ý</strong>
+              <p style={{ color: TEXT_GRAY, fontSize: 11, lineHeight: 1.5, margin: 0 }}>
+                Vui lòng kiểm tra cả hộp thư Spam / Promotions<br />nếu không thấy email trong hộp thư đến.
+              </p>
+            </div>
+          </div>
+
           <button
             onClick={() => navigate('/login')}
             style={{
-              marginTop: 28,
+              marginTop: 'auto',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              color: PRIMARY,
+              fontSize: 12,
+              fontWeight: 600,
               background: 'none',
               border: 'none',
               cursor: 'pointer',
-              color: FPT_ORANGE,
-              fontSize: 14,
-              fontWeight: 500,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
               padding: 0,
               width: 'fit-content',
+              paddingTop: 30,
             }}
           >
-            <ArrowLeft size={16} />
+            <ChevronLeft size={16} strokeWidth={3} />
             Quay lại trang đăng nhập
           </button>
         </div>
+      </div>
+
+      {/* BOTTOM DOTS */}
+      <div style={{ marginTop: 24, display: 'flex', gap: 8, zIndex: 10 }}>
+        <div style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: PRIMARY }} />
+        <div style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#CBD5E1' }} />
+        <div style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#CBD5E1' }} />
       </div>
     </div>
   );

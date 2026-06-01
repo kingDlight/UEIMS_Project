@@ -2,7 +2,7 @@ import logoUeims from '@/assets/logo_ueims.png';
 import React, { useState, useEffect } from 'react';
 import { Form, Input, Button, message } from 'antd';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Lock, ArrowLeft, Check, Eye, EyeOff } from 'lucide-react';
+import { Lock, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { AuthService } from '@/services/AuthService';
 
 const FPT_ORANGE = '#E67E22';
