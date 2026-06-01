@@ -42,9 +42,6 @@ public class SemesterController {
 
     @PostMapping
     public ResponseEntity<SemesterResponse> create(@Valid @RequestBody SemesterCreationRequest request) {
-        System.out.println("request: " + request);
-        log.info("info request: ", request);
-
         var context = SecurityContextHolder.getContext();
         String email = context.getAuthentication().getName();
         User user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));

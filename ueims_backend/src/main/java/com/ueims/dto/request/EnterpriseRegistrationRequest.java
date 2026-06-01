@@ -1,7 +1,6 @@
 package com.ueims.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -27,7 +26,6 @@ public class EnterpriseRegistrationRequest {
 
     @NotBlank(message = "FIELD_REQUIRED")
     String email;
-
 
     @NotBlank(message = "FIELD_REQUIRED")
     String address;

@@ -1,7 +1,5 @@
 package com.ueims.service.impl;
 
-import java.util.Set;
-
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -76,8 +74,7 @@ public class EnterpriseRegistrationServiceImpl implements EnterpriseRegistration
         user = userRepository.save(user);
 
         // 7. Assign ENTERPRISE role to user
-        var role = roleRepository.findById(ENTERPRISE_ROLE)
-                .orElseThrow(() -> new AppException(ErrorCode.INVALID_KEY));
+        var role = roleRepository.findById(ENTERPRISE_ROLE).orElseThrow(() -> new AppException(ErrorCode.INVALID_KEY));
         UserRole userRole = UserRole.builder()
                 .id(new UserRoleId(user.getUserId(), ENTERPRISE_ROLE))
                 .user(user)
