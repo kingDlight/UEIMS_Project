@@ -1,3 +1,4 @@
+import logoUeims from '@/assets/logo_ueims.png';
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {

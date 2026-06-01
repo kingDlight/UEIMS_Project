@@ -1,3 +1,4 @@
+import logoUeims from '@/assets/logo_ueims.png';
 import React, { useState } from 'react';
 import { Form, Input, Button, message } from 'antd';
 import { useNavigate } from 'react-router-dom';
@@ -120,6 +121,7 @@ export const LoginPage: React.FC = () => {
           </a>
         </div>
 
+        <img src={logoUeims} alt="UEIMS Logo" style={{ height: 50, marginBottom: 16, objectFit: 'contain', alignSelf: 'flex-start' }} />
         <div
           style={{
             color: FPT_ORANGE,

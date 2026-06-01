@@ -1,3 +1,4 @@
+import logoUeims from '@/assets/logo_ueims.png';
 import React, { useState } from 'react';
 import { Form, Input, Button, message } from 'antd';
 import { useNavigate } from 'react-router-dom';
@@ -197,8 +198,7 @@ export const RegisterEnterprisePage: React.FC = () => {
 
           {/* Logo + Back */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-            <div style={{ width: 30, height: 30, borderRadius: '50%', background: FPT_ORANGE }} />
-            <span style={{ color: FPT_ORANGE, fontSize: 14, fontWeight: 700, letterSpacing: '0.05em' }}>UEIMS</span>
+            <img src={logoUeims} alt="UEIMS Logo" style={{ height: 32, objectFit: 'contain' }} />
           </div>
 
           <h1 style={{ fontSize: 20, fontWeight: 800, color: FPT_DARK, marginBottom: 4, lineHeight: 1.2 }}>
