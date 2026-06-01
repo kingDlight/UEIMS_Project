@@ -13,4 +13,6 @@ public interface TrainingWarningService {
     TrainingWarning save(TrainingWarning entity);
 
     void deleteById(UUID id);
+
+    int scanAndSendLateWarnings(UUID semesterId, Integer weekNumber, UUID tmId);
 }

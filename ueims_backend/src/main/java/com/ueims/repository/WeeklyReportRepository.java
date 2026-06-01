@@ -8,4 +8,7 @@ import org.springframework.stereotype.Repository;
 import com.ueims.model.entity.*;
 
 @Repository
-public interface WeeklyReportRepository extends JpaRepository<WeeklyReport, UUID> {}
+public interface WeeklyReportRepository extends JpaRepository<WeeklyReport, UUID> {
+    java.util.List<WeeklyReport> findByAssignment_Semester_SemesterIdAndWeekNumberAndStatus(
+            UUID semesterId, Integer weekNumber, String status);
+}

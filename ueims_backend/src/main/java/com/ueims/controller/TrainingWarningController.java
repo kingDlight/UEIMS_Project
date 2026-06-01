@@ -64,4 +64,15 @@ public class TrainingWarningController {
         service.deleteById(id);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/scan-late-reports")
+    public ResponseEntity<java.util.Map<String, Object>> scanLateReports(
+            @RequestParam("semesterId") UUID semesterId,
+            @RequestParam("weekNumber") Integer weekNumber,
+            @RequestParam("tmId") UUID tmId) {
+
+        int count = service.scanAndSendLateWarnings(semesterId, weekNumber, tmId);
+        return ResponseEntity.ok(
+                java.util.Map.of("message", "Scanned and sent warnings successfully", "warningsSent", count));
+    }
 }
