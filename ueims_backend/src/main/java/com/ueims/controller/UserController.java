@@ -40,14 +40,7 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<User> create(@RequestBody @Valid UserCreationRequest request) {
-        User user = User.builder()
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .fullName(request.getFullName())
-                .phone(request.getPhone())
-                .status("ACTIVE")
-                .build();
-        return ResponseEntity.ok(service.save(user));
+        return ResponseEntity.ok(service.createUser(request));
     }
 
     @DeleteMapping("/{id}")

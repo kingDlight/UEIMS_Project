@@ -13,6 +13,8 @@ public interface UserService {
 
     User save(User entity);
 
+    User createUser(com.ueims.dto.request.UserCreationRequest request);
+
     void deleteById(UUID id);
 
     UserResponse getMyInfo();
