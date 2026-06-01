@@ -1,6 +1,7 @@
 package com.ueims.service.impl;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -12,9 +13,7 @@ import com.ueims.repository.SemesterRepository;
 import com.ueims.service.SemesterService;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SemesterServiceImpl implements SemesterService {
@@ -23,6 +22,7 @@ public class SemesterServiceImpl implements SemesterService {
     private static final String STATUS_ACTIVE = "ACTIVE";
     private static final String STATUS_CLOSED = "CLOSED";
     private static final String STATUS_LOCKED = "LOCKED";
+    private static final List<String> LOCKED_STATUSES = List.of(STATUS_ACTIVE, STATUS_CLOSED, STATUS_LOCKED);
 
     private final SemesterRepository repository;
 
@@ -38,34 +38,44 @@ public class SemesterServiceImpl implements SemesterService {
 
     @Override
     public Semester save(Semester entity) {
-        // BR-09: start_date < end_date
+        validateDates(entity);
+
+        if (entity.getSemesterId() == null) {
+            validateForCreate(entity);
+        } else {
+            Semester existing = repository.findById(entity.getSemesterId()).orElse(null);
+            if (existing != null) {
+                validateForUpdate(entity, existing);
+            }
+        }
+
+        return repository.save(entity);
+    }
+
+    private void validateDates(Semester entity) {
         if (entity.getStartDate() != null
                 && entity.getEndDate() != null
                 && !entity.getStartDate().isBefore(entity.getEndDate())) {
             throw new AppException(ErrorCode.SEMESTER_INVALID_DATE);
         }
+    }
 
-        if (entity.getSemesterId() == null) {
-            if (repository.existsBySemesterCode(entity.getSemesterCode())) {
-                throw new AppException(ErrorCode.SEMESTER_EXISTED);
-            }
-        } else {
-            Semester existing = repository.findById(entity.getSemesterId()).orElse(null);
-            if (existing != null) {
-                if (!existing.getSemesterCode().equals(entity.getSemesterCode())
-                        && repository.existsBySemesterCode(entity.getSemesterCode())) {
-                    throw new AppException(ErrorCode.SEMESTER_EXISTED);
-                }
-                if (List.of(STATUS_ACTIVE, STATUS_CLOSED, STATUS_LOCKED).contains(existing.getStatus())) {
-                    if (!existing.getStartDate().equals(entity.getStartDate())
-                            || !existing.getEndDate().equals(entity.getEndDate())) {
-                        throw new AppException(ErrorCode.SEMESTER_LOCKED_DATE);
-                    }
-                }
-            }
+    private void validateForCreate(Semester entity) {
+        if (repository.existsBySemesterCode(entity.getSemesterCode())) {
+            throw new AppException(ErrorCode.SEMESTER_EXISTED);
         }
+    }
 
-        return repository.save(entity);
+    private void validateForUpdate(Semester entity, Semester existing) {
+        if (!Objects.equals(existing.getSemesterCode(), entity.getSemesterCode())
+                && repository.existsBySemesterCode(entity.getSemesterCode())) {
+            throw new AppException(ErrorCode.SEMESTER_EXISTED);
+        }
+        if (LOCKED_STATUSES.contains(existing.getStatus())
+                && (!Objects.equals(existing.getStartDate(), entity.getStartDate())
+                        || !Objects.equals(existing.getEndDate(), entity.getEndDate()))) {
+            throw new AppException(ErrorCode.SEMESTER_LOCKED_DATE);
+        }
     }
 
     @Override

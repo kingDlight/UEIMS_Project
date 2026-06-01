@@ -39,6 +39,17 @@ export interface IntrospectResponse {
   valid: boolean;
 }
 
+export interface EnterpriseRegistrationRequest {
+  enterpriseName: string;
+  taxCode: string;
+  contactPerson: string;
+  email: string;
+  phone: string;
+  address: string;
+  password: string;
+  confirmPassword: string;
+}
+
 export const AuthService = {
   login: async (data: LoginRequest): Promise<LoginResponse> => {
     const response = await api.post<{ code: number; message: string; result: LoginResponse }>(
@@ -71,5 +82,9 @@ export const AuthService = {
       { token }
     );
     return response.data.result;
+  },
+
+  registerEnterprise: async (data: EnterpriseRegistrationRequest): Promise<void> => {
+    await api.post('/auth/register-enterprise', data);
   },
 };
