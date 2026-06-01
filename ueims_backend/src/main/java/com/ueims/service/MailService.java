@@ -92,7 +92,6 @@ public class MailService {
         log.info("Email cảnh báo trễ báo cáo tuần {} đã được gửi đến: {}", weekNumber, to);
     }
 
-    // ===== Internal sender =====
     private void sendHtml(String to, String subject, String htmlBody) {
         try {
             MimeMessage message = javaMailSender.createMimeMessage();
@@ -100,6 +99,10 @@ public class MailService {
             helper.setTo(to);
             helper.setSubject(subject);
             helper.setText(htmlBody, true);
+            
+            org.springframework.core.io.ClassPathResource logoFile = new org.springframework.core.io.ClassPathResource("logo_ueims.png");
+            helper.addInline("logoImage", logoFile);
+            
             javaMailSender.send(message);
         } catch (Exception e) {
             log.error("Gửi email thất bại đến {}: {}", to, e.getMessage());

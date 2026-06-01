@@ -198,7 +198,8 @@ export const RegisterEnterprisePage: React.FC = () => {
 
           {/* Logo + Back */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-            <img src={logoUeims} alt="UEIMS Logo" style={{ height: 32, objectFit: 'contain' }} />
+            <img src={logoUeims} alt="UEIMS Logo" style={{ height: 30, objectFit: 'contain' }} />
+            <span style={{ color: FPT_ORANGE, fontSize: 14, fontWeight: 700, letterSpacing: '0.05em' }}>UEIMS</span>
           </div>
 
           <h1 style={{ fontSize: 20, fontWeight: 800, color: FPT_DARK, marginBottom: 4, lineHeight: 1.2 }}>
