@@ -1,3 +1,5 @@
+import bgAuth from '@/assets/bg-auth.png';
+import authShield3d from '@/assets/auth_shield_3d.png';
 import logoUeims from '@/assets/logo_ueims.png';
 import React, { useState, useEffect } from 'react';
 import { Form, Input, Button, message } from 'antd';
@@ -5,12 +7,12 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Lock, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { AuthService } from '@/services/AuthService';
 
-const FPT_ORANGE = '#E67E22';
-const FPT_ORANGE_DARK = '#D35400';
-const FPT_WHITE = '#FFFFFF';
-const FPT_DARK = '#1A1A2E';
-const FPT_GRAY = '#6B7280';
-const STRENGTH_RED = '#EF4444';
+const PRIMARY = '#E96500';
+const WHITE = '#FFFFFF';
+const TEXT_DARK = '#1E293B';
+const TEXT_GRAY = '#64748B';
+const BORDER = '#E2E8F0';
+const DANGER = '#EF4444';
 const STRENGTH_ORANGE = '#F97316';
 const STRENGTH_YELLOW = '#EAB308';
 const STRENGTH_GREEN = '#22C55E';
@@ -26,7 +28,7 @@ function validateBR04(password: string): { valid: boolean; hints: string[] } {
 }
 
 function getPasswordStrength(password: string): { level: number; color: string; label: string } {
-  if (!password) return { level: 0, color: '#E5E7EB', label: '' };
+  if (!password) return { level: 0, color: BORDER, label: '' };
 
   let score = 0;
   if (password.length >= 8) score++;
@@ -35,7 +37,7 @@ function getPasswordStrength(password: string): { level: number; color: string; 
   if (/\d/.test(password)) score++;
   if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) score++;
 
-  if (score <= 1) return { level: 1, color: STRENGTH_RED, label: 'Yếu' };
+  if (score <= 1) return { level: 1, color: DANGER, label: 'Yếu' };
   if (score <= 2) return { level: 2, color: STRENGTH_ORANGE, label: 'Trung bình' };
   if (score <= 3) return { level: 3, color: STRENGTH_YELLOW, label: 'Khá' };
   return { level: 4, color: STRENGTH_GREEN, label: 'Mạnh' };
@@ -47,26 +49,26 @@ function PasswordStrengthMeter({ password }: { password: string }) {
   if (!password) return null;
 
   return (
-    <div style={{ marginTop: 8 }}>
+    <div style={{ marginTop: 12 }}>
       <div style={{ display: 'flex', gap: 5, marginBottom: 6 }}>
-        {[1, 2, 3, 4].map((level) => (
+        {[1, 2, 3, 4, 5].map((level) => (
           <div
             key={level}
             style={{
               flex: 1,
               height: 4,
               borderRadius: 4,
-              background: level <= strength.level ? strength.color : '#E5E7EB',
+              background: level <= strength.level + 1 && strength.level > 0 ? strength.color : BORDER,
               transition: 'background 0.3s',
             }}
           />
         ))}
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{ fontSize: 12, fontWeight: 600, color: strength.color }}>{strength.label}</span>
+        <span style={{ fontSize: 12, fontWeight: 700, color: strength.color }}>Độ mạnh: {strength.label}</span>
         {strength.level < 4 && (
-          <span style={{ fontSize: 11, color: FPT_GRAY }}>
-            Cần: {hints.join(', ')}
+          <span style={{ fontSize: 11, color: TEXT_GRAY }}>
+            Cần: {hints[0]}
           </span>
         )}
       </div>
@@ -99,7 +101,7 @@ export const ResetPasswordPage: React.FC = () => {
 
     const { valid } = validateBR04(values.newPassword);
     if (!valid) {
-      message.error('Mật khẩu phải có ít nhất 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt!');
+      message.error('Mật khẩu chưa đủ mạnh. Vui lòng kiểm tra lại!');
       return;
     }
 
@@ -130,332 +132,139 @@ export const ResetPasswordPage: React.FC = () => {
       style={{
         minHeight: '100vh',
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        background: '#FAFAFA',
-        padding: '24px',
+        background: `url(${bgAuth}) center/cover no-repeat, #FFF2E8`,
+        padding: '20px',
         position: 'relative',
-        overflow: 'hidden',
+        overflowX: 'hidden',
+        fontFamily: "'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif",
       }}
     >
-      {/* Decorative blobs */}
-      <div style={{ position: 'absolute', top: -80, right: -80, width: 300, height: 300, borderRadius: '50%', background: `radial-gradient(circle, ${FPT_ORANGE}18 0%, transparent 70%)`, pointerEvents: 'none', zIndex: 0 }} />
-      <div style={{ position: 'absolute', bottom: -60, left: -60, width: 240, height: 240, borderRadius: '50%', background: `radial-gradient(circle, ${FPT_ORANGE_DARK}12 0%, transparent 70%)`, pointerEvents: 'none', zIndex: 0 }} />
-      <div style={{ position: 'absolute', top: '40%', right: '30%', width: 180, height: 180, borderRadius: '50%', background: `radial-gradient(circle, #FEF3C7 10%, transparent 70%)`, pointerEvents: 'none', zIndex: 0 }} />
-      {/* Dot grid */}
-      <svg style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 0, opacity: 0.4 }} xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <pattern id="dots" x="0" y="0" width="28" height="28" patternUnits="userSpaceOnUse">
-            <circle cx="2" cy="2" r="1.2" fill={`${FPT_ORANGE}30`} />
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#dots)" />
-      </svg>
-
       <div
         style={{
-          display: 'flex',
-          flexDirection: 'row',
-          maxWidth: 900,
           width: '100%',
-          borderRadius: 24,
-          boxShadow: '0 25px 60px rgba(0, 0, 0, 0.08), 0 8px 24px rgba(0, 0, 0, 0.04)',
-          background: FPT_WHITE,
-          minHeight: 560,
+          maxWidth: 960,
+          background: WHITE,
+          borderRadius: 20,
+          boxShadow: '0 30px 60px rgba(233, 101, 0, 0.15)',
+          display: 'flex',
+          overflow: 'hidden',
           position: 'relative',
-          zIndex: 1,
+          zIndex: 10,
         }}
       >
-        {/* LEFT — Illustration */}
+        {/* LEFT PANEL */}
         <div
           style={{
             width: '45%',
-            background: `linear-gradient(145deg, ${FPT_ORANGE} 0%, ${FPT_ORANGE_DARK} 100%)`,
+            background: 'linear-gradient(180deg, #FFFDFB 0%, #FFF2E8 100%)',
+            padding: '40px 32px',
             display: 'flex',
             flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '48px 40px',
             position: 'relative',
-            overflow: 'hidden',
+            borderRight: '1px solid rgba(233, 101, 0, 0.05)',
           }}
         >
-          <div
-            style={{
-              position: 'absolute',
-              top: -60,
-              right: -60,
-              width: 200,
-              height: 200,
-              borderRadius: '50%',
-              background: `${FPT_WHITE}15`,
-            }}
-          />
-          <div
-            style={{
-              position: 'absolute',
-              bottom: -40,
-              left: -40,
-              width: 140,
-              height: 140,
-              borderRadius: '50%',
-              background: `${FPT_WHITE}10`,
-            }}
-          />
-
-          <div
-            style={{
-              width: 88,
-              height: 88,
-              borderRadius: '50%',
-              background: `${FPT_WHITE}20`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: 32,
-            }}
-          >
-            <Lock size={40} color={FPT_WHITE} strokeWidth={1.5} />
-          </div>
-
-          <h2
-            style={{
-              color: FPT_WHITE,
-              fontSize: 26,
-              fontWeight: 700,
-              marginBottom: 16,
-              textAlign: 'center',
-              lineHeight: 1.3,
-            }}
-          >
-            Đặt mật khẩu mới
+          {/* Main Title Left */}
+          <h2 style={{ fontSize: 24, fontWeight: 800, color: TEXT_DARK, lineHeight: 1.3, margin: '20px 0 12px 0' }}>
+            Khôi phục<br />
+            <span style={{ color: PRIMARY }}>mật khẩu mới</span>
           </h2>
-          <p
-            style={{
-              color: `${FPT_WHITE}CC`,
-              fontSize: 15,
-              textAlign: 'center',
-              lineHeight: 1.7,
-            }}
-          >
-            Tạo mật khẩu mới an toàn cho tài khoản của bạn. Mật khẩu phải có ít nhất 8 ký tự gồm chữ hoa, chữ thường, số và ký tự đặc biệt.
+          <p style={{ fontSize: 13, color: TEXT_GRAY, lineHeight: 1.6, margin: '0 0 40px 0', maxWidth: '95%' }}>
+            Tạo mật khẩu mới an toàn cho tài khoản của bạn. Đảm bảo mật khẩu đáp ứng đủ độ mạnh để bảo vệ dữ liệu.
           </p>
+
+          <div style={{ display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+            <img src={authShield3d} alt="Shield 3D" style={{ width: '80%', maxWidth: 280, objectFit: 'contain', zIndex: 1, dropShadow: '0 20px 30px rgba(233, 101, 0, 0.2)' }} />
+          </div>
         </div>
 
-        {/* RIGHT — Form */}
-        <div
-          style={{
-            flex: 1,
-            padding: '56px 48px',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            position: 'relative',
-            overflow: 'hidden',
-          }}
-        >
-          {/* Subtle decorations inside the white panel */}
-          <div style={{ position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: '50%', background: `radial-gradient(circle, ${FPT_ORANGE}08 0%, transparent 70%)`, pointerEvents: 'none' }} />
-          <div style={{ position: 'absolute', bottom: -30, left: -30, width: 120, height: 120, borderRadius: '50%', background: `radial-gradient(circle, ${FPT_ORANGE_DARK}06 0%, transparent 70%)`, pointerEvents: 'none' }} />
-          <svg style={{ position: 'absolute', top: 0, right: 0, width: '100%', height: '100%', pointerEvents: 'none', opacity: 0.3 }} xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <pattern id="dotsInner" x="0" y="0" width="24" height="24" patternUnits="userSpaceOnUse">
-                <circle cx="2" cy="2" r="1" fill={`${FPT_ORANGE}20`} />
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#dotsInner)" />
-          </svg>
-
-          {/* Logo mark */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 12,
-              marginBottom: 40,
-            }}
-          >
-            <img src={logoUeims} alt="UEIMS Logo" style={{ height: 36, objectFit: 'contain' }} />
-            <span
-              style={{
-                color: FPT_ORANGE,
-                fontSize: 16,
-                fontWeight: 700,
-                letterSpacing: '0.05em',
-              }}
-            >
-              UEIMS
-            </span>
+        {/* RIGHT PANEL */}
+        <div style={{ width: '55%', padding: '48px 40px', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 32 }}>
+            <img src={logoUeims} alt="UEIMS Logo" style={{ height: 40, objectFit: 'contain' }} />
+            <h1 style={{ fontSize: 16, fontWeight: 800, color: PRIMARY, margin: 0, letterSpacing: 0.5 }}>UEIMS</h1>
           </div>
 
-          <h1
-            style={{
-              fontSize: 28,
-              fontWeight: 800,
-              color: FPT_DARK,
-              marginBottom: 10,
-              lineHeight: 1.2,
-            }}
-          >
-            Đặt lại mật khẩu
-          </h1>
-          <p
-            style={{
-              color: FPT_GRAY,
-              fontSize: 15,
-              marginBottom: 32,
-              lineHeight: 1.6,
-            }}
-          >
-            Nhập mật khẩu mới cho tài khoản của bạn.
+          <h1 style={{ fontSize: 24, fontWeight: 800, color: TEXT_DARK, margin: '0 0 8px 0' }}>Đặt lại mật khẩu</h1>
+          <p style={{ fontSize: 13, color: TEXT_GRAY, lineHeight: 1.5, margin: '0 0 32px 0' }}>
+            Vui lòng nhập mật khẩu mới bên dưới.
           </p>
 
-          <Form onFinish={onFinish}>
-            {/* New Password */}
-            <div style={{ marginBottom: 6 }}>
-              <label
-                style={{
-                  display: 'block',
-                  color: FPT_DARK,
-                  fontSize: 14,
-                  fontWeight: 600,
-                  marginBottom: 8,
-                }}
-              >
-                Mật khẩu mới
-              </label>
-              <Form.Item
-                name="newPassword"
-                rules={[
-                  { required: true, message: 'Vui lòng nhập mật khẩu mới!' },
-                  { min: 8, message: 'Mật khẩu phải có ít nhất 8 ký tự!' },
-                ]}
-                style={{ margin: 0 }}
-              >
-                <Input.Password
-                  placeholder="Ít nhất 8 ký tự (A-Z, a-z, 0-9, !@#...)"
-                  size="large"
-                  visibilityToggle={{
-                    visible: showPassword,
-                    onVisibleChange: setShowPassword,
-                  }}
-                  iconRender={(visible) =>
-                    visible ? <Eye size={16} color={FPT_GRAY} /> : <EyeOff size={16} color={FPT_GRAY} />
-                  }
-                  prefix={<Lock size={16} color={FPT_GRAY} style={{ marginRight: 8 }} />}
-                  style={{
-                    borderRadius: 12,
-                    border: '1.5px solid #E5E7EB',
-                    fontSize: 15,
-                    height: 48,
-                  }}
-                />
-              </Form.Item>
-              <div onChange={(e: any) => setPassword(e.target.value)}>
-                {/* Hidden trigger to sync password state — actual input is controlled by Form */}
-              </div>
-              <PasswordStrengthMeter password={password} />
-            </div>
-
-            {/* Hidden field to track password for strength meter */}
-            <input
-              type="password"
-              style={{ position: 'absolute', opacity: 0, height: 0, width: 0, pointerEvents: 'none' }}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete="off"
-            />
-
-            {/* Confirm Password */}
-            <div style={{ marginBottom: 32 }}>
-              <label
-                style={{
-                  display: 'block',
-                  color: FPT_DARK,
-                  fontSize: 14,
-                  fontWeight: 600,
-                  marginBottom: 8,
-                }}
-              >
-                Xác nhận mật khẩu mới
-              </label>
-              <Form.Item
-                name="confirmPassword"
-                rules={[
-                  { required: true, message: 'Vui lòng xác nhận mật khẩu!' },
-                  ({ getFieldValue }) => ({
-                    validator(_, value) {
-                      if (!value || getFieldValue('newPassword') === value) {
-                        return Promise.resolve();
-                      }
-                      return Promise.reject(new Error('Mật khẩu xác nhận không khớp!'));
-                    },
-                  }),
-                ]}
-                style={{ margin: 0 }}
-              >
-                <Input.Password
-                  placeholder="Nhập lại mật khẩu"
-                  size="large"
-                  visibilityToggle={{
-                    visible: showConfirm,
-                    onVisibleChange: setShowConfirm,
-                  }}
-                  iconRender={(visible) =>
-                    visible ? <Eye size={16} color={FPT_GRAY} /> : <EyeOff size={16} color={FPT_GRAY} />
-                  }
-                  prefix={<Lock size={16} color={FPT_GRAY} style={{ marginRight: 8 }} />}
-                  style={{
-                    borderRadius: 12,
-                    border: '1.5px solid #E5E7EB',
-                    fontSize: 15,
-                    height: 48,
-                  }}
-                />
-              </Form.Item>
-            </div>
-
-            <Form.Item style={{ margin: 0 }}>
-              <Button
-                type="primary"
-                htmlType="submit"
-                loading={loading}
-                block
+          <Form onFinish={onFinish} layout="vertical" requiredMark={false} style={{ width: '100%' }}>
+            
+            <Form.Item
+              name="newPassword"
+              label={<span style={{ fontSize: 13, fontWeight: 700, color: TEXT_DARK }}>Mật khẩu mới <span style={{ color: DANGER }}>*</span></span>}
+              rules={[{ required: true, message: 'Vui lòng nhập mật khẩu mới!' }]}
+              style={{ marginBottom: 12 }}
+            >
+              <Input.Password
+                placeholder="A-Z, a-z, 0-9, !@#..."
                 size="large"
-                disabled={!token}
-                style={{
-                  height: 52,
-                  borderRadius: 14,
-                  fontSize: 16,
-                  fontWeight: 700,
-                  background: !token
-                    ? '#D1D5DB'
-                    : `linear-gradient(135deg, ${FPT_ORANGE}, ${FPT_ORANGE_DARK})`,
-                  border: 'none',
-                  boxShadow: !token ? 'none' : `0 8px 20px ${FPT_ORANGE}40`,
-                  letterSpacing: '0.02em',
-                }}
-              >
-                Đặt lại mật khẩu
-              </Button>
+                prefix={<Lock size={18} color="#94A3B8" style={{ marginRight: 8 }} />}
+                visibilityToggle={{ visible: showPassword, onVisibleChange: setShowPassword }}
+                iconRender={(visible) => visible ? <Eye size={18} color="#94A3B8" /> : <EyeOff size={18} color="#94A3B8" />}
+                onChange={(e) => setPassword(e.target.value)}
+                style={{ borderRadius: 8, border: `1px solid ${BORDER}`, padding: '10px 14px', fontSize: 14 }}
+              />
             </Form.Item>
+
+            <PasswordStrengthMeter password={password} />
+
+            <Form.Item
+              name="confirmPassword"
+              label={<span style={{ fontSize: 13, fontWeight: 700, color: TEXT_DARK }}>Xác nhận mật khẩu mới <span style={{ color: DANGER }}>*</span></span>}
+              rules={[
+                { required: true, message: 'Vui lòng xác nhận mật khẩu!' },
+                ({ getFieldValue }) => ({
+                  validator(_, value) {
+                    if (!value || getFieldValue('newPassword') === value) {
+                      return Promise.resolve();
+                    }
+                    return Promise.reject(new Error('Mật khẩu xác nhận không khớp!'));
+                  },
+                }),
+              ]}
+              style={{ marginTop: 20, marginBottom: 32 }}
+            >
+              <Input.Password
+                placeholder="Nhập lại mật khẩu mới"
+                size="large"
+                prefix={<Lock size={18} color="#94A3B8" style={{ marginRight: 8 }} />}
+                visibilityToggle={{ visible: showConfirm, onVisibleChange: setShowConfirm }}
+                iconRender={(visible) => visible ? <Eye size={18} color="#94A3B8" /> : <EyeOff size={18} color="#94A3B8" />}
+                style={{ borderRadius: 8, border: `1px solid ${BORDER}`, padding: '10px 14px', fontSize: 14 }}
+              />
+            </Form.Item>
+
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={loading}
+              disabled={!token}
+              block
+              style={{
+                height: 48, background: PRIMARY, color: WHITE, border: 'none', borderRadius: 8,
+                fontSize: 15, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+                opacity: !token ? 0.6 : 1,
+              }}
+            >
+              Lưu mật khẩu mới
+            </Button>
           </Form>
 
           <button
             onClick={() => navigate('/login')}
             style={{
-              marginTop: 24,
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              color: FPT_ORANGE,
-              fontSize: 14,
-              fontWeight: 500,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              padding: 0,
-              width: 'fit-content',
+              marginTop: 24, display: 'inline-flex', alignItems: 'center', gap: 6, color: TEXT_GRAY,
+              fontSize: 13, fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', padding: 0,
             }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = PRIMARY; }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = TEXT_GRAY; }}
           >
             <ArrowLeft size={16} />
             Quay lại trang đăng nhập
