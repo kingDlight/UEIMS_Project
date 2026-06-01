@@ -88,7 +88,6 @@ export const RegisterEnterprisePage: React.FC = () => {
     taxCode: string;
     contactPerson: string;
     email: string;
-    phone: string;
     address: string;
     password: string;
     confirmPassword: string;
@@ -109,7 +108,6 @@ export const RegisterEnterprisePage: React.FC = () => {
         taxCode: values.taxCode,
         contactPerson: values.contactPerson,
         email: values.email,
-        phone: values.phone,
         address: values.address,
         password: values.password,
         confirmPassword: values.confirmPassword,
@@ -244,13 +242,7 @@ export const RegisterEnterprisePage: React.FC = () => {
                 </Form.Item>
               </div>
 
-              {/* Phone */}
-              <div style={{ marginBottom: 10 }}>
-                <label style={LABEL}>Số điện thoại <span style={{ color: '#EF4444' }}>*</span></label>
-                <Form.Item name="phone" rules={[{ required: true, message: 'Vui lòng nhập số điện thoại!' }]} style={{ margin: 0 }}>
-                  <Input placeholder="0912 345 678" size="middle" prefix={<Phone size={13} color={FPT_GRAY} style={{ marginRight: 6 }} />} style={INPUT} />
-                </Form.Item>
-              </div>
+
 
               {/* Address — full width */}
               <div style={{ gridColumn: '1 / -1', marginBottom: 10 }}>
