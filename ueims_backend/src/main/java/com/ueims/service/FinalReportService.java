@@ -12,5 +12,7 @@ public interface FinalReportService {
 
     FinalReport save(FinalReport entity);
 
+    FinalReport uploadFinalReport(UUID assignmentId, org.springframework.web.multipart.MultipartFile file);
+
     void deleteById(UUID id);
 }

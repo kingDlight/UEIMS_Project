@@ -48,6 +48,12 @@ public enum ErrorCode {
 
     // Application related
     APPLICATION_NOT_FOUND(1032, "Application not found", HttpStatus.NOT_FOUND),
+    APPLICATION_WITHDRAWAL_DEADLINE_EXPIRED(1033, "Cannot withdraw application after the deadline", HttpStatus.BAD_REQUEST),
+    APPLICATION_WITHDRAWAL_INVALID_STATUS(1034, "Only pending applications may be withdrawn", HttpStatus.BAD_REQUEST),
+    INTERVIEW_NOT_FOUND(1035, "Interview not found", HttpStatus.NOT_FOUND),
+    INTERVIEW_ALREADY_CONFIRMED(1036, "Interview confirmation cannot be reversed", HttpStatus.BAD_REQUEST),
+    FINAL_REPORT_INVALID_FORMAT(1037, "Final report must be a PDF file", HttpStatus.BAD_REQUEST),
+    FINAL_REPORT_SIZE_EXCEEDED(1038, "Final report size must be under 5MB", HttpStatus.BAD_REQUEST),
 
     // Account related
     USER_BANNED(2001, "Tài khoản của bạn đã bị khóa do nhập sai mật khẩu quá 5 lần", HttpStatus.FORBIDDEN),

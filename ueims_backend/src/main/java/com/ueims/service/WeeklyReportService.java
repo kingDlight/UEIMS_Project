@@ -12,5 +12,7 @@ public interface WeeklyReportService {
 
     WeeklyReport save(WeeklyReport entity);
 
+    WeeklyReport updateReport(UUID id, com.ueims.dto.request.WeeklyReportRequest request);
+
     void deleteById(UUID id);
 }

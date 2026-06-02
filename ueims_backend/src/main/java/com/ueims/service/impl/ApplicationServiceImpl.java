@@ -124,6 +124,26 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     @Transactional
+    public ApplicationResponse withdrawApplication(UUID id) {
+        Application application = repository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.APPLICATION_NOT_FOUND));
+
+        if (application.getStatus() != ApplicationStatus.PENDING) {
+            throw new AppException(ErrorCode.APPLICATION_WITHDRAWAL_INVALID_STATUS);
+        }
+
+        JobPost jobPost = application.getJobPost();
+        if (jobPost.getApplicationDeadline() != null && LocalDate.now().isAfter(jobPost.getApplicationDeadline())) {
+            throw new AppException(ErrorCode.APPLICATION_WITHDRAWAL_DEADLINE_EXPIRED);
+        }
+
+        application.setStatus(ApplicationStatus.WITHDRAWN);
+        Application saved = repository.save(application);
+        return mapper.toApplicationResponse(saved);
+    }
+
+    @Override
+    @Transactional
     public void deleteById(UUID id) {
         repository.deleteById(id);
     }

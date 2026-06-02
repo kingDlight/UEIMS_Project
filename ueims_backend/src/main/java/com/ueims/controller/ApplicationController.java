@@ -64,7 +64,20 @@ public class ApplicationController {
     }
 
     /**
-     * Delete/Withdraw an application by ID
+     * Withdraw a pending application before the deadline
+     *
+     * @param id Application UUID
+     * @return ApiResponse containing the updated application status
+     */
+    @PostMapping("/{id}/withdraw")
+    public ApiResponse<ApplicationResponse> withdraw(@PathVariable UUID id) {
+        return ApiResponse.<ApplicationResponse>builder()
+                .result(service.withdrawApplication(id))
+                .build();
+    }
+
+    /**
+     * Delete an application by ID
      *
      * @param id Application UUID
      * @return ApiResponse indicating success

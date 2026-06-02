@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.ueims.dto.request.WeeklyReportRequest;
 import com.ueims.model.entity.WeeklyReport;
 import com.ueims.service.WeeklyReportService;
 
@@ -32,6 +33,12 @@ public class WeeklyReportController {
     @PostMapping
     public ResponseEntity<WeeklyReport> create(@Valid @RequestBody WeeklyReport entity) {
         return ResponseEntity.ok(service.save(entity));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<WeeklyReport> update(@PathVariable UUID id,
+                                               @Valid @RequestBody WeeklyReportRequest request) {
+        return ResponseEntity.ok(service.updateReport(id, request));
     }
 
     @DeleteMapping("/{id}")

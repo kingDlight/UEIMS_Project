@@ -13,5 +13,7 @@ public interface ApplicationService {
 
     ApplicationResponse applyForJob(ApplicationRequest request);
 
+    ApplicationResponse withdrawApplication(UUID id);
+
     void deleteById(UUID id);
 }
