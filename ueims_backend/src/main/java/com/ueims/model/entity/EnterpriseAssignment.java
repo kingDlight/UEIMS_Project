@@ -34,19 +34,6 @@ public class EnterpriseAssignment {
     @Builder.Default
     private String status = "ACTIVE";
 
-    @Column(name = "supervisor_name", length = 255)
-    private String supervisorName;
-
-    @Column(name = "supervisor_email", length = 255)
-    private String supervisorEmail;
-
-    @Column(name = "supervisor_phone", length = 20)
-    private String supervisorPhone;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "assigned_by", nullable = false)
-    private User assignedBy;
-
     @Column(name = "created_at", nullable = false, updatable = false)
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
