@@ -40,8 +40,10 @@ public class AuditLogServiceImpl implements AuditLogService {
     @Override
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public byte[] exportExcel(LocalDate startDate, LocalDate endDate) {
-        LocalDateTime startDateTime = (startDate != null) ? startDate.atStartOfDay() : LocalDateTime.of(2000, 1, 1, 0, 0);
-        LocalDateTime endDateTime = (endDate != null) ? endDate.atTime(LocalTime.MAX) : LocalDateTime.of(2099, 12, 31, 23, 59);
+        LocalDateTime startDateTime =
+                (startDate != null) ? startDate.atStartOfDay() : LocalDateTime.of(2000, 1, 1, 0, 0);
+        LocalDateTime endDateTime =
+                (endDate != null) ? endDate.atTime(LocalTime.MAX) : LocalDateTime.of(2099, 12, 31, 23, 59);
 
         List<AuditLog> logs = repository.findByDateRange(startDateTime, endDateTime);
 
