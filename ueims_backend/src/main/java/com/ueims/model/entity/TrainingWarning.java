@@ -19,7 +19,7 @@ public class TrainingWarning {
     private java.util.UUID warningId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tm_id", nullable = false)
+    @JoinColumn(name = "tm_id", nullable = true)
     private User tm;
 
     @ManyToOne(fetch = FetchType.LAZY)
