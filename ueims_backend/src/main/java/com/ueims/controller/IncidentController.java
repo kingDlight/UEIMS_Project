@@ -39,4 +39,16 @@ public class IncidentController {
         service.deleteById(id);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/report")
+    public ResponseEntity<Incident> reportIncident(
+            @Valid @RequestBody com.ueims.dto.request.IncidentReportRequest request) {
+        return ResponseEntity.ok(service.reportIncident(request));
+    }
+
+    @PutMapping("/{id}/resolve")
+    public ResponseEntity<Incident> resolveIncident(
+            @PathVariable UUID id, @Valid @RequestBody com.ueims.dto.request.IncidentResolveRequest request) {
+        return ResponseEntity.ok(service.resolveIncident(id, request));
+    }
 }

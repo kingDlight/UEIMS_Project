@@ -33,7 +33,8 @@ public class Incident {
     private String description;
 
     @Column(name = "evidence_urls", columnDefinition = "JSONB")
-    private String evidenceUrls;
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
+    private java.util.List<String> evidenceUrls;
 
     @Column(name = "status", nullable = false, length = 20)
     @Builder.Default

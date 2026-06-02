@@ -35,4 +35,49 @@ public class IncidentServiceImpl implements IncidentService {
     public void deleteById(UUID id) {
         repository.deleteById(id);
     }
+
+    @Override
+    public Incident reportIncident(com.ueims.dto.request.IncidentReportRequest request) {
+        com.ueims.model.entity.EnterpriseAssignment assignment = new com.ueims.model.entity.EnterpriseAssignment();
+        assignment.setAssignmentId(request.getAssignmentId());
+
+        com.ueims.model.entity.User reportedBy = new com.ueims.model.entity.User();
+        reportedBy.setUserId(request.getReportedById());
+
+        Incident incident = Incident.builder()
+                .assignment(assignment)
+                .reportedBy(reportedBy)
+                .category(request.getCategory())
+                .description(request.getDescription())
+                .evidenceUrls(request.getEvidenceUrls())
+                .status("OPEN")
+                .build();
+
+        return repository.save(incident);
+    }
+
+    @Override
+    public Incident resolveIncident(UUID incidentId, com.ueims.dto.request.IncidentResolveRequest request) {
+        Incident incident =
+                repository.findById(incidentId).orElseThrow(() -> new IllegalArgumentException("Incident not found"));
+
+        if ("RESOLVED".equals(incident.getStatus())) {
+            throw new IllegalArgumentException("Incident is already resolved");
+        }
+
+        if (request.getResolutionNote() == null
+                || request.getResolutionNote().trim().isEmpty()) {
+            throw new IllegalArgumentException("Resolution note is mandatory when closing an incident (BR-50)");
+        }
+
+        com.ueims.model.entity.User resolvedBy = new com.ueims.model.entity.User();
+        resolvedBy.setUserId(request.getResolvedById());
+
+        incident.setStatus("RESOLVED");
+        incident.setResolutionNote(request.getResolutionNote());
+        incident.setResolvedBy(resolvedBy);
+        incident.setResolvedAt(java.time.LocalDateTime.now());
+
+        return repository.save(incident);
+    }
 }
