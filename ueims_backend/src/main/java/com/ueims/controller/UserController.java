@@ -48,4 +48,18 @@ public class UserController {
         service.deleteById(id);
         return ResponseEntity.ok().build();
     }
+
+    @PutMapping("/{id}/lock")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    public ResponseEntity<Void> lockUser(@PathVariable UUID id) {
+        service.updateUserStatus(id, "INACTIVE");
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{id}/unlock")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    public ResponseEntity<Void> unlockUser(@PathVariable UUID id) {
+        service.updateUserStatus(id, "ACTIVE");
+        return ResponseEntity.ok().build();
+    }
 }

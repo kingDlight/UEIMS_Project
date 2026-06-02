@@ -38,11 +38,8 @@ export const ForgotPasswordPage: React.FC = () => {
       style={{
         minHeight: '100vh',
         display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
         background: `url(${bgAuth}) center/cover no-repeat, #FFF2E8`,
-        padding: '20px',
+        padding: '40px 20px',
         position: 'relative',
         overflowX: 'hidden',
         fontFamily: "'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif",
@@ -77,15 +74,14 @@ export const ForgotPasswordPage: React.FC = () => {
         style={{
           width: '100%',
           maxWidth: 960,
-          height: 560,
           background: WHITE,
           borderRadius: 20,
           boxShadow: '0 30px 60px rgba(233, 101, 0, 0.15)',
           display: 'flex',
+          margin: 'auto',
           overflow: 'hidden',
           position: 'relative',
           zIndex: 10,
-          marginTop: 60,
         }}
       >
         {/* LEFT PANEL */}

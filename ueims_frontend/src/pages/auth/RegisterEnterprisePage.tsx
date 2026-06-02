@@ -118,11 +118,8 @@ export const RegisterEnterprisePage: React.FC = () => {
       style={{
         minHeight: '100vh',
         display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
         background: `url(${bgRegis}) center/cover no-repeat, linear-gradient(135deg, #FFF9F5 0%, #FFE9D9 100%)`,
-        padding: '20px',
+        padding: '40px 20px',
         position: 'relative',
         overflowX: 'hidden',
         fontFamily: "'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif",
@@ -136,6 +133,7 @@ export const RegisterEnterprisePage: React.FC = () => {
           borderRadius: 20,
           boxShadow: '0 30px 60px rgba(233, 101, 0, 0.15)',
           display: 'flex',
+          margin: 'auto',
           overflow: 'hidden',
           position: 'relative',
           zIndex: 10,
@@ -146,7 +144,7 @@ export const RegisterEnterprisePage: React.FC = () => {
           style={{
             width: '45%',
             background: 'linear-gradient(180deg, #FFFDFB 0%, #FFF2E8 100%)',
-            padding: '32px 40px',
+            padding: '24px 32px',
             display: 'flex',
             flexDirection: 'column',
             position: 'relative',
@@ -199,10 +197,10 @@ export const RegisterEnterprisePage: React.FC = () => {
                 </div>
               </div>
             </div>
-            <img src={registerIllustration} alt="Illustration" style={{ position: 'absolute', right: -30, bottom: -20, width: 240, height: 240, objectFit: 'contain', zIndex: 1 }} />
+            <img src={registerIllustration} alt="Illustration" style={{ position: 'absolute', right: -20, bottom: -10, width: 200, height: 200, objectFit: 'contain', zIndex: 1 }} />
           </div>
 
-          <div style={{ background: PRIMARY, borderRadius: 12, padding: 16, display: 'flex', justifyContent: 'space-between', color: WHITE, marginTop: 24, zIndex: 2, boxShadow: '0 10px 25px rgba(233, 101, 0, 0.3)' }}>
+          <div style={{ marginTop: 'auto', background: PRIMARY, borderRadius: 12, padding: 16, display: 'flex', justifyContent: 'space-between', color: WHITE, zIndex: 2, boxShadow: '0 10px 25px rgba(233, 101, 0, 0.3)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <Building2 size={24} color={WHITE} opacity={0.9} />
               <div>
@@ -228,7 +226,7 @@ export const RegisterEnterprisePage: React.FC = () => {
         </div>
 
         {/* RIGHT PANEL */}
-        <div style={{ width: '55%', padding: '36px 48px', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+        <div style={{ width: '55%', padding: '24px 36px', display: 'flex', flexDirection: 'column', position: 'relative' }}>
           
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
             <div style={{ display: 'flex', gap: 16 }}>
