@@ -60,8 +60,7 @@ export const LoginPage: React.FC = () => {
         minHeight: '100vh',
         display: 'flex',
         background: '#f6f6f6',
-        height: '100vh',
-        overflow: 'hidden',
+        flexWrap: 'wrap',
       }}
     >
       <svg style={{ position: 'absolute', width: 0, height: 0 }}>
@@ -80,19 +79,18 @@ export const LoginPage: React.FC = () => {
 
       {/* LEFT SIDE - FORM */}
       <div
+        className="login-left-panel"
         style={{
           width: '40%',
-          paddingLeft: 80,
-          paddingRight: 40,
+          minWidth: 400,
+          padding: '40px 80px 40px 80px',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
           position: 'relative',
           zIndex: 2,
-          height: '100vh',
         }}
       >
-        {/* Logo circle */}
         {/* Back to home */}
         <div style={{ marginBottom: 40 }}>
           <a
@@ -149,7 +147,7 @@ export const LoginPage: React.FC = () => {
         </div>
 
         <Form onFinish={onFinish}>
-          <div style={{ width: 320, marginBottom: 20 }}>
+          <div style={{ width: '100%', maxWidth: 320, marginBottom: 20 }}>
             <label
               style={{
                 display: 'block',
@@ -185,7 +183,7 @@ export const LoginPage: React.FC = () => {
             </Form.Item>
           </div>
 
-          <div style={{ width: 320, marginBottom: 20 }}>
+          <div style={{ width: '100%', maxWidth: 320, marginBottom: 20 }}>
             <label
               style={{
                 display: 'block',
@@ -298,11 +296,12 @@ export const LoginPage: React.FC = () => {
 
       {/* RIGHT SIDE - IMAGE */}
       <div
+        className="login-right-panel"
         style={{
-          width: '60%',
+          flex: 1,
           position: 'relative',
           overflow: 'hidden',
-          height: '100vh',
+          minHeight: '100vh',
         }}
       >
         <div
@@ -354,6 +353,16 @@ export const LoginPage: React.FC = () => {
         }
         .ant-input:focus {
           box-shadow: none !important;
+        }
+        @media (max-width: 900px) {
+          .login-left-panel {
+            width: 100% !important;
+            min-width: unset !important;
+            padding: 40px !important;
+          }
+          .login-right-panel {
+            display: none !important;
+          }
         }
       `}</style>
     </div>

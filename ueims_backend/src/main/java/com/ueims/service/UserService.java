@@ -17,5 +17,7 @@ public interface UserService {
 
     void deleteById(UUID id);
 
+    void updateUserStatus(UUID id, String status);
+
     UserResponse getMyInfo();
 }

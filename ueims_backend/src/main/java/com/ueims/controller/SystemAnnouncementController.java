@@ -6,8 +6,10 @@ import java.util.UUID;
 import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import com.ueims.dto.request.AnnouncementCreationRequest;
 import com.ueims.model.entity.SystemAnnouncement;
 import com.ueims.service.SystemAnnouncementService;
 
@@ -20,8 +22,14 @@ public class SystemAnnouncementController {
     private final SystemAnnouncementService service;
 
     @GetMapping
+    @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
     public ResponseEntity<List<SystemAnnouncement>> getAll() {
         return ResponseEntity.ok(service.findAll());
+    }
+
+    @GetMapping("/active")
+    public ResponseEntity<List<SystemAnnouncement>> getActiveAnnouncements() {
+        return ResponseEntity.ok(service.findActiveAnnouncements());
     }
 
     @GetMapping("/{id}")
@@ -30,11 +38,25 @@ public class SystemAnnouncementController {
     }
 
     @PostMapping
-    public ResponseEntity<SystemAnnouncement> create(@Valid @RequestBody SystemAnnouncement entity) {
-        return ResponseEntity.ok(service.save(entity));
+    @PreAuthorize("hasRole('TRAINING_MANAGER')")
+    public ResponseEntity<SystemAnnouncement> create(@Valid @RequestBody AnnouncementCreationRequest request) {
+        return ResponseEntity.ok(service.createAnnouncement(request));
+    }
+
+    @PutMapping("/{id}/publish")
+    @PreAuthorize("hasRole('TRAINING_MANAGER')")
+    public ResponseEntity<SystemAnnouncement> publish(@PathVariable UUID id) {
+        return ResponseEntity.ok(service.updateStatus(id, "PUBLISHED"));
+    }
+
+    @PutMapping("/{id}/archive")
+    @PreAuthorize("hasRole('TRAINING_MANAGER')")
+    public ResponseEntity<SystemAnnouncement> archive(@PathVariable UUID id) {
+        return ResponseEntity.ok(service.updateStatus(id, "ARCHIVED"));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('TRAINING_MANAGER')")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         service.deleteById(id);
         return ResponseEntity.ok().build();

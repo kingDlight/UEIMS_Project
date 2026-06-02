@@ -60,6 +60,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public void updateUserStatus(UUID id, String status) {
+        User user = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        user.setStatus(status);
+        repository.save(user);
+    }
+
+    @Override
     public UserResponse getMyInfo() {
         var context = SecurityContextHolder.getContext();
         String email = context.getAuthentication().getName();

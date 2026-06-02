@@ -1,5 +1,6 @@
 package com.ueims.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -10,7 +11,5 @@ public interface AuditLogService {
 
     AuditLog findById(UUID id);
 
-    AuditLog save(AuditLog entity);
-
-    void deleteById(UUID id);
+    byte[] exportExcel(LocalDate startDate, LocalDate endDate);
 }
