@@ -12,5 +12,11 @@ public interface InterviewService {
 
     Interview save(Interview entity);
 
+    Interview studentConfirm(UUID id);
+
+    Interview studentDecline(UUID id, String reason);
+
+    Interview decideInterview(UUID id, String result, UUID decidedBy);
+
     void deleteById(UUID id);
 }

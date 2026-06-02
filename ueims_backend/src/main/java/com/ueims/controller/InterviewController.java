@@ -39,4 +39,20 @@ public class InterviewController {
         service.deleteById(id);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/{id}/student-confirm")
+    public ResponseEntity<Interview> studentConfirm(@PathVariable UUID id) {
+        return ResponseEntity.ok(service.studentConfirm(id));
+    }
+
+    @PostMapping("/{id}/student-decline")
+    public ResponseEntity<Interview> studentDecline(@PathVariable UUID id, @RequestParam("reason") String reason) {
+        return ResponseEntity.ok(service.studentDecline(id, reason));
+    }
+
+    @PostMapping("/{id}/decide")
+    public ResponseEntity<Interview> decide(@PathVariable UUID id,
+                                            @RequestBody com.ueims.dto.request.InterviewDecisionRequest req) {
+        return ResponseEntity.ok(service.decideInterview(id, req.getResult(), req.getDecidedBy()));
+    }
 }

@@ -49,6 +49,10 @@ public enum ErrorCode {
     // Application related
     APPLICATION_NOT_FOUND(1032, "Application not found", HttpStatus.NOT_FOUND),
 
+        // Interview related
+        INTERVIEW_NOT_FOUND(1039, "Interview not found", HttpStatus.NOT_FOUND),
+        INTERVIEW_CONFIRMATION_CANNOT_BE_REVERSED(1040, "Interview confirmation cannot be reversed", HttpStatus.BAD_REQUEST),
+
     // Account related
     USER_BANNED(2001, "Tài khoản của bạn đã bị khóa do nhập sai mật khẩu quá 5 lần", HttpStatus.FORBIDDEN),
     WRONG_OLD_PASSWORD(2002, "Mật khẩu cũ không chính xác", HttpStatus.BAD_REQUEST),

@@ -24,6 +24,7 @@ import org.springframework.web.filter.CorsFilter;
 public class SecurityConfig {
     private final String[] PUBLIC_ENDPOINTS = {
         "/api/users",
+        "/api/users/quick-apply",
         "/api/auth/token",
         "/api/auth/introspect",
         "/api/auth/logout",
