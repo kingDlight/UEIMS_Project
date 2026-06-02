@@ -99,10 +99,11 @@ public class MailService {
             helper.setTo(to);
             helper.setSubject(subject);
             helper.setText(htmlBody, true);
-            
-            org.springframework.core.io.ClassPathResource logoFile = new org.springframework.core.io.ClassPathResource("logo_ueims.png");
+
+            org.springframework.core.io.ClassPathResource logoFile =
+                    new org.springframework.core.io.ClassPathResource("logo_ueims.png");
             helper.addInline("logoImage", logoFile);
-            
+
             javaMailSender.send(message);
         } catch (Exception e) {
             log.error("Gửi email thất bại đến {}: {}", to, e.getMessage());
