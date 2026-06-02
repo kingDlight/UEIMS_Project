@@ -39,15 +39,13 @@ public class AuditLogController {
     public ResponseEntity<byte[]> exportExcel(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
-        
+
         byte[] excelData = service.exportExcel(startDate, endDate);
-        
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
         headers.setContentDispositionFormData("attachment", "audit_logs.xlsx");
-        
-        return ResponseEntity.ok()
-                .headers(headers)
-                .body(excelData);
+
+        return ResponseEntity.ok().headers(headers).body(excelData);
     }
 }

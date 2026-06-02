@@ -32,14 +32,14 @@ public class AuditLogAspect {
     private final UserRepository userRepository;
 
     // BR-07: Automatically capture all mutating actions (POST, PUT, DELETE)
-    @Pointcut("@annotation(org.springframework.web.bind.annotation.PostMapping) || " +
-            "@annotation(org.springframework.web.bind.annotation.PutMapping) || " +
-            "@annotation(org.springframework.web.bind.annotation.DeleteMapping)")
+    @Pointcut("@annotation(org.springframework.web.bind.annotation.PostMapping) || "
+            + "@annotation(org.springframework.web.bind.annotation.PutMapping) || "
+            + "@annotation(org.springframework.web.bind.annotation.DeleteMapping)")
     public void mutatingEndpoints() {}
 
     // Exclude AuthController and AuditLogController to avoid loops or redundant auth logs
-    @Pointcut("!within(com.ueims.controller.AuthenticationController) && " +
-            "!within(com.ueims.controller.AuditLogController)")
+    @Pointcut("!within(com.ueims.controller.AuthenticationController) && "
+            + "!within(com.ueims.controller.AuditLogController)")
     public void excludedControllers() {}
 
     @AfterReturning(pointcut = "mutatingEndpoints() && excludedControllers()", returning = "result")
@@ -47,16 +47,18 @@ public class AuditLogAspect {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String email = (authentication != null) ? authentication.getName() : "anonymous";
-            
+
             User user = null;
             if (!"anonymous".equals(email) && !"anonymousUser".equals(email)) {
                 user = userRepository.findByEmail(email).orElse(null);
             }
 
-            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            ServletRequestAttributes attributes =
+                    (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
             String ipAddress = "Unknown";
             String userAgent = "Unknown";
-            String targetEntity = joinPoint.getSignature().getDeclaringType().getSimpleName().replace("Controller", "");
+            String targetEntity =
+                    joinPoint.getSignature().getDeclaringType().getSimpleName().replace("Controller", "");
             String action = joinPoint.getSignature().getName().toUpperCase();
 
             if (attributes != null) {

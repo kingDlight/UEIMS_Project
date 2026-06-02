@@ -124,7 +124,7 @@ Training Manager
 Set up semesters, manage the official internship list, approve/reject enterprise registrations, control legal procedures, ensure internship discipline, monitor student progress and at-risk cases, send late report warnings, handle internship incidents reported by enterprises, submit final academic grades, and export grade reports.
 3
 Enterprise
-Manage company profiles, post job vacancies, screen CVs, schedule interviews, assign internal supervisors to interns, create and manage internship training plans, review and provide feedback on weekly reports, report critical student incidents, and submit final Rubrics evaluations to the University.
+Manage company profiles, post job vacancies, screen CVs, schedule interviews, create and manage internship training plans, review and provide feedback on weekly reports, report critical student incidents, and submit final Rubrics evaluations to the University.
 4
 Student
 Search for internship positions, submit CVs for application, update work progress, fulfill the obligations of the internship module, and submit internal feedback on enterprise quality after the internship period. Access level is determined by current academic semester (Semester 1-4: browse only; Semester 5: apply for jobs; Semester 6: active internship; Semester 7-9: view results and submit enterprise feedback).
@@ -319,94 +319,90 @@ Record Interview Result
 Enterprise
 Record the Pass or Fail outcome of a student after completing the interview process.
 UC-45
-Assign Supervisor to Students
-Enterprise
-Designate an internal staff member to directly supervise and guide an accepted intern.
-UC-46
 View Assigned Students
 Enterprise
 View the list of interns currently assigned to the company for the active semester.
-UC-47
+UC-46
 Manage Internship Training Plan
 Enterprise
 Create, update, and adjust the training roadmap based on the student's actual weekly progress.
-UC-48
+UC-47
 View Student Weekly Report Details
 Enterprise
 Check the detailed content of an intern's weekly work report.
-UC-49
+UC-48
 Review and Feedback Weekly Report
 Enterprise
 Approve or reject a student's weekly report with written comments and feedback.
-UC-50
+UC-49
 Report Critical Incident
 Enterprise
 Submit an incident report to the university regarding serious student violations (absences, poor attitude, etc.).
-UC-51
+UC-50
 Submit Final Rubrics Evaluation
 Enterprise
 Perform a one-time final evaluation using the 4-criteria grading form (Attitude, Professionalism, Skills, Progress).
-UC-52
+UC-51
 Manage Student Profile/CV
 Student
 Update personal information, technical skills, and upload the latest CV file.
-UC-53
+UC-52
 View Job Post List
 Student
 Browse available internship job postings with search and technology filters.
-UC-54
+UC-53
 View Job Details
 Student
 Read job description, requirements, benefits, and application deadline before applying.
-UC-55
+UC-54
 Apply for Job
 Student
 Submit a personal CV application to a desired internship position at a partner enterprise.
-UC-56
+UC-55
 View My Application History
 Student
 Track the progress of all submitted applications (Pending, Reviewed, Interview Scheduled).
-UC-57
+UC-56
 Withdraw Application
 Student
 Retract a submitted application before the enterprise has reviewed the CV.
-UC-58
+UC-57
 View Interview Schedule
 Student
 View interview time, location, and meeting link from the enterprise invitation.
-UC-59
+UC-58
 Confirm/Decline Interview
 Student
 Confirm or decline participation in a scheduled interview appointment from the enterprise.
-UC-60
+UC-59
 Submit Feedback for Enterprise
 Student
 Submit a post-internship evaluation rating the enterprise on training quality, supervisor support, and work environment. Feedback is internal and visible only to Training Manager.
-UC-61
+UC-60
 View Internship Plan Overview
 Student
 View the work plan and training objectives set up by the enterprise for the internship period.
-UC-62
+UC-61
 View Weekly Report List & Details
 Student
 View all submitted weekly reports with their current status and feedback from the enterprise.
-UC-63
+UC-62
 Submit Weekly Report
 Student
 Create and submit a weekly work progress report during the internship period.
-UC-64
+UC-63
 Edit Weekly Report
 Student
 Revise and supplement report content based on rejection feedback from the enterprise.
-UC-65
+UC-64
 Submit Final Internship Report
 Student
 Compile and submit the official final internship report (PDF) for academic grading.
-UC-66
+UC-65
 View Internship Evaluation Results
 Student
 View final Rubrics scores, enterprise feedback, and official course grades.
-UC-67 
+UC-66
 View Student Dashboard & Status 
 Student 
 Allow students to access the main landing page (Home) to track their overall internship progress, statistics, schedules, and recent updates from enterprises.
@@ -902,144 +898,6 @@ Enterprise & Recruitment
  Student & Enterprise
  Reports & Incident & Grading & Notifications
 b. Table Descriptions
-No
-Table
-Description
-01
-roles
-Static authorization table for RBAC. Stores the 6 system roles: ADMIN, TRAINING_MANAGER, ENTERPRISE, Enterprise, Training Manager, STUDENT.
-Primary key: role_id
-Foreign keys: —
-02
-users
-Central table for all 6 actor types. Each user has exactly one role (BR-06). Supports soft delete, account locking after 5 failed attempts (BR-01), and forced password change on first login (BR-04).
-Primary key: user_id
-Foreign keys: role_id → roles.role_id, enterprise_id → enterprises.enterprise_id
-03
-user_sessions
-Active session tracking. Enforces single active session per user (BR-02) and 15-minute inactivity timeout (BR-03).
-Primary key: session_id
-Foreign keys: user_id → users.user_id
-04
-password_reset_tokens
-Temporary tokens for password reset workflow (UC-03, UC-04). Tokens expire after a set time and can only be used once.
-Primary key: token_id
-Foreign keys: user_id → users.user_id
-05
-audit_logs
-Immutable system activity log (UC-12, UC-13). All actions are append-only — UPDATE and DELETE are blocked by trigger trg_audit_immutable (BR-07).
-Primary key: log_id
-Foreign keys: user_id → users.user_id
-06
-semesters
-Internship semester configuration (UC-14 → UC-17). Status follows a strict state machine: DRAFT → OPEN → ACTIVE → CLOSED → LOCKED (BR-13). Dates cannot be modified once ACTIVE (BR-12). LOCKED semesters are fully read-only (BR-11).
-Primary key: semester_id
-Foreign keys: created_by → users.user_id
-07
-eligible_students
-Students eligible for OJT, imported via Excel by Training Manager (UC-20, UC-21). Requires minimum GPA ≥ 2.0 (BR-19). Status tracks student progress: ELIGIBLE → PENDING → ACCEPTED → MATCHED → OJT → CANCELLED. Records can be locked (BR-21) and frozen when semester is LOCKED (BR-14).
-Primary key: eligible_id
-Foreign keys: semester_id → semesters.semester_id, user_id → users.user_id, cancelled_by → users.user_id
-08
-system_announcements
-System-wide announcements created by Training Manager (UC-28). Supports DRAFT, PUBLISHED, and ARCHIVED statuses. Can be linked to a specific semester.
-Primary key: announcement_id
-Foreign keys: semester_id → semesters.semester_id, created_by → users.user_id
-09
-enterprises
-Enterprise/company profiles (UC-30, UC-31, UC-19). Approval workflow: PENDING → APPROVED / REJECTED. Rejection reason is mandatory when rejected (BR-15).
-Primary key: enterprise_id
-Foreign keys: approved_by → users.user_id
-10
-semester_enterprises
-Junction table: Enterprises register to participate in a specific semester (UC-18, UC-19). Each enterprise can register once per semester (UNIQUE constraint). Rejection reason is mandatory when rejected (BR-15).
-Primary key: semester_enterprise_id
-Foreign keys: semester_id → semesters.semester_id, enterprise_id → enterprises.enterprise_id, reviewed_by → users.user_id
-11
-job_posts
-Job postings by enterprises within a semester (UC-32, UC-33). Each post belongs to one enterprise (BR-25). Status: OPEN / CLOSED — new applications are blocked when CLOSED (BR-26).
-Primary key: job_post_id
-Foreign keys: enterprise_id → enterprises.enterprise_id, semester_id → semesters.semester_id
-12
-applications
-Student applications to job posts (UC-34 → UC-36, UC-44 → UC-46). Status flow: PENDING → SCREENING_PASSED / SCREENING_REJECTED → INTERVIEW_SCHEDULED → ACCEPTED / REJECTED / WITHDRAWN. One active application per student per job post (BR-35). CV snapshot is saved at submission time (BR-36). Withdrawal only before deadline (BR-37).
-Primary key: application_id
-Foreign keys: job_post_id → job_posts.job_post_id, student_id → users.user_id, screened_by → users.user_id
-13
-interviews
-Interview scheduling and results (UC-37, UC-38, UC-47, UC-48). Scheduled datetime must be in the future (BR-32). Only SCREENING_PASSED applications can have interviews (BR-33). Result (PASS/FAIL) can only be set when status = COMPLETED (BR-34). Student confirmation is irreversible (BR-38).
-Primary key: interview_id
-Foreign keys: application_id → applications.application_id, decided_by → users.user_id
-14
-student_profiles
-Student personal profiles and CV management (UC-41). One-to-one with users table (UNIQUE constraint). CV file size limited to 5MB (BR-28). PDF format only (BR-27).
-Primary key: profile_id
-Foreign keys: user_id → users.user_id (UNIQUE — 1:1)
-15
-Enterprises
-Enterprise-specific information linked to an enterprise (UC-55). One-to-one with users table (UNIQUE constraint). Each Enterprise belongs to exactly one enterprise.
-Primary key: Enterprise_id
-Foreign keys: user_id → users.user_id (UNIQUE — 1:1), enterprise_id → enterprises.enterprise_id
-16
-Enterprise_assignments
-Central table linking a Enterprise to a Student for a specific semester (UC-40, UC-55). Each Enterprise-student-semester combination is unique. Status: ACTIVE / COMPLETED / TERMINATED.
-Primary key: assignment_id
-Foreign keys: Enterprise_id → Enterprises.Enterprise_id, student_id → users.user_id, semester_id → semesters.semester_id, assigned_by → users.user_id
-17
-internship_plans
-Training plan header created by Enterprise for each assignment (UC-56, UC-49). One-to-one with Enterprise_assignments (UNIQUE constraint).
-Primary key: plan_id
-Foreign keys: assignment_id → Enterprise_assignments.assignment_id (UNIQUE — 1:1)
-18
-internship_plan_items
-Individual tasks/activities within a training plan (BR-42, BR-43). Each item has a week number, task description, and target date. Target date must fall within the semester date range (BR-43, enforced by trigger).
-Primary key: plan_item_id
-Foreign keys: plan_id → internship_plans.plan_id
-19
-Enterprise_evaluations
-Final rubric-based evaluation by Enterprise (UC-60). Four criteria scored 0–10: Attitude (20%), Professionalism (40%), Soft Skills (20%), Progress (20%). Total score is auto-calculated using GENERATED column (BR-47). Locked after submission (BR-48).
-Primary key: evaluation_id
-Foreign keys: assignment_id → Enterprise_assignments.assignment_id (UNIQUE — 1:1)
-20
-weekly_reports
-Student weekly work reports (UC-50, UC-51, UC-52, UC-57). One report per week per assignment (UNIQUE constraint). Status: NOT_SUBMITTED → SUBMITTED → APPROVED / REJECTED. Content cannot be edited once SUBMITTED or APPROVED (BR-UC52-01).
-Primary key: report_id
-Foreign keys: assignment_id → Enterprise_assignments.assignment_id
-21
-report_feedbacks
-Enterprise feedback on weekly reports (UC-58). Action: APPROVED or REJECTED. Feedback text is mandatory when rejecting (BR-44).
-Primary key: feedback_id
-Foreign keys: report_id → weekly_reports.report_id, Enterprise_id → Enterprises.Enterprise_id
-22
-final_reports
-Student final internship report submission (UC-53). One-to-one with Enterprise_assignments (UNIQUE constraint). PDF format only (BR-39). Late submission is tracked (BR-40).
-Primary key: final_report_id
-Foreign keys: assignment_id → Enterprise_assignments.assignment_id (UNIQUE — 1:1)
-23
-Training Manager_assignments
-Assigns a Training Manager to supervise Students during a semester (UC-61). Each Training Manager-student-semester combination is unique. Assigned by Training Manager.
-Primary key: Training Manager_assignment_id
-Foreign keys: Training Manager_id → users.user_id, student_id → users.user_id, semester_id → semesters.semester_id, assigned_by → users.user_id
-24
-incidents
-Critical incident reports by Enterprise or Training Manager (UC-59, UC-64). Categories: PROLONGED_ABSENCE, DISCIPLINARY_VIOLATION, POOR_ATTITUDE, CONFIDENTIALITY_BREACH, OTHER (BR-45). Resolution note is mandatory when status = RESOLVED (BR-50).
-Primary key: incident_id
-Foreign keys: assignment_id → Enterprise_assignments.assignment_id, reported_by → users.user_id, resolved_by → users.user_id
-25
-Training Manager_warnings
-Automated warnings sent to students for late weekly report submissions (UC-63, BR-49). Issued by the supervising Training Manager for a specific week.
-Primary key: warning_id
-Foreign keys: Training Manager_id → users.user_id, student_id → users.user_id, semester_id → semesters.semester_id
-26
-final_grades
-Final university grades assigned by Training Manager (UC-65, UC-66). Grade range: 0.0–10.0 (BR-51). Overall status: PASSED / FAILED / CANCELLED. One grade per student per semester (UNIQUE constraint). Locked after submission, with audit trail for cancellations.
-Primary key: grade_id
-Foreign keys: student_id → users.user_id, Training Manager_id → users.user_id, semester_id → semesters.semester_id, cancelled_by → users.user_id
-27
-notifications
-In-app notification system for all actors. Types: WARNING, INCIDENT, REPORT_FEEDBACK, INTERVIEW_INVITE, APPLICATION_UPDATE, GRADE_PUBLISHED, SYSTEM_ANNOUNCEMENT. Tracks read/unread status.
-Primary key: notification_id
-Foreign keys: recipient_id → users.user_id
 3.2 Code Packages
 [Provide the package diagram for each sub-system. The content of this section including the overall package diagram, the explanation, package and class naming conventions in each package. Please see the sample & description table format below]
 Package descriptions
@@ -3431,63 +3289,10 @@ Business Rule Description
 BR-37
 Recruitment Result Rules
 Final recruitment results (Pass/Fail) can only be logged after the interview session concludes.
-3.11 UC-45_ Assign Supervisor to Students
-a. Functional Description 
-UC ID and Name:
-UC-45 Assign Supervisor to Students
-Created By:
-TriLVM
-Date Created:
-19/May/2026 
-Primary Actor:
-Enterprises
-Secondary Actors:
-Email System
-Trigger:
-User (Enterprise) clicks on the "Assign Supervisor" button next to a student in a list of student who has successfully passed the recruitment process.
-Description:
-Allows the enterprise to assign a specific internal expert or specialist to directly Enterprise and guide a selected passing student.
-Preconditions:
-PRE-1: User has successfully logged into the system with an active Enterprise account.
-  PRE-2: The target student has achieved a "Passed" status in the recruitment results phase (UC-44).
-Postconditions:
-POST-1: The system links the selected Enterprise to the student's profile in the database.
-  POST-2: The student's onboard state updates to "Enterprise Assigned".
-Normal Flow:
-45.0 Assign a Supervisor 
-1. User clicks "Assign Supervisor" on a student record.
-2. System displays a dropdown list of available internal Supervisor.
-3. User selects a Supervisor and clicks "Confirm".
-4. System validates Supervisor capacity, updates the database link, and locks the panel.
-5. System displays a success message: "Supervisor assigned successfully."
-Alternative Flows:
-45.1 Modify assigned Supervisor(Branches from step 1 of 45.0)
-1. User selects a student with an existing Enterprise and clicks "Change Supervisor".
-2. User selects a new Supervisor from the unlocked list and clicks "Save".
-3. System updates the database with the new Supervisor mapping.
-Exceptions:
-45.0.E1 No Enterprise selected (Branches from step 3 of 45.0)
-1. System detects that the user clicked "Confirm" while the Supervisor dropdown selection is still left blank/empty.
-2. System halts the save routine and highlights the dropdown box.
-3. System displays a warning message: "Please select a valid Enterprise from the list before confirming."
-4. User is prompted to choose a Supervisor.
-Priority:
-Medium
-Frequency of Use:
-Medium (Executed at the end of each onboarding batch)
-Business Rules:
-None
-Other Information:
-The updated pairing immediately appears on both the Supervisor’s and Student's workspace dashboards.
-Assumptions:
-Internal supervisor profiles are actively configured prior to allocation.
- 
-b. Business Rules 
-None
-3.12. UC-46: View Assigned Students
+3.11. UC-45: View Assigned Students
 a. Functional Description
 UC ID and Name:
-UC-46: View Assigned Students
+UC-45: View Assigned Students
 Created By:
 Đỗ Minh Gia Bảo
 Date Created:
@@ -3506,17 +3311,17 @@ PRE-2: The Enterprise Admin has assigned students to this Enterprise.
 Postconditions:
 POST-1: System successfully displays the list of assigned students.
 Normal Flow:
-46.0 View Assigned Students
+45.0 View Assigned Students
 1. Enterprise accesses the "Assigned Students" screen from the menu.
 2. System retrieves the list of students who are currently assigned to the logged-in Enterprise.
 3. System displays the list of students in a data grid/table, including basic information: Student Code, Full Name, University/Major, and Current Status (e.g., In Progress, Completed).
 Alternative Flows: 
-46.1 Search and Filter Students
+45.1 Search and Filter Students
 1. On the Assigned Students screen, Enterprise inputs search keywords (Student Name or Code) into the search bar, or selects a specific Status from the filter dropdown.
 2. System retrieves and updates the list to display only students matching the search/filter criteria.
 3. Return to step 3 of the normal flow.
 Exceptions: 
-46.0.E1 No assigned students found
+45.0.E1 No assigned students found
 1. If the Enterprise has not been assigned any students yet, the system displays a friendly message: "There are no students assigned to you at the moment."
 2. UC stops here.
 Priority:
@@ -3531,10 +3336,10 @@ Assumptions:
 Enterprise's account is active and has been correctly mapped (linked) to a valid Enterprise in the system.
 b. Business Rules
  None
-3.13. UC-47: Manage Internship Training Plan
+3.12. UC-46: Manage Internship Training Plan
 a. Functional Description
 UC ID and Name:
-UC-47: Manage Internship Training Plan
+UC-46: Manage Internship Training Plan
 Created By:
 Đỗ Minh Gia Bảo
 Date Created:
@@ -3554,7 +3359,7 @@ Postconditions:
 POST-1: The internship plan is successfully created or updated in the database.
 POST-2: The student can view the newly updated plan on their end.
 Normal Flow:
-47.0 Manage Internship Plan
+46.0 Manage Internship Plan
 1. Enterprise accesses the "Internship Plan" screen of a specific student.
 2. System displays the current plan (if any) or a blank plan form.
 3. Enterprise inputs or modifies plan details (including: Week Number, Task Descriptions, Training Objectives, and Expected Deadlines).
@@ -3565,7 +3370,7 @@ Normal Flow:
 Alternative Flows: 
 None
 Exceptions: 
-47.0.E1 Invalid Input Data
+46.0.E1 Invalid Input Data
 1. If the Enterprise leaves mandatory fields blank (e.g., Task Description is empty) or inputs invalid dates.
 2. System prevents saving and displays an error message highlighting the invalid fields.
 3. Enterprise corrects the data and clicks "Save Plan" again.
@@ -3589,10 +3394,10 @@ Enterprise must provide "Task Description" and "Target Date" for each training p
 BR-39
 Plan Date Boundary Rule
 Internship plan dates must fall strictly within the official Start and End dates of the semester.
-3.14. UC-48: View Student Weekly Report Details
+3.13. UC-47: View Student Weekly Report Details
 a. Functional Description
 UC ID and Name:
-UC-48: View Student Weekly Report Details
+UC-47: View Student Weekly Report Details
 Created By:
 Đỗ Minh Gia Bảo
 Date Created:
@@ -3611,7 +3416,7 @@ PRE-2: The student has submitted at least one weekly report.
 Postconditions:
 POST-1: System successfully displays the full detailed content of the selected weekly report.
 Normal Flow:
-48.0 View Report Details
+47.0 View Report Details
 1. Enterprise accesses the "Weekly Reports" tab for a specific student.
 2. System displays a list of submitted weekly reports.
 3. Enterprise clicks on a specific report item (e.g., "Report - Week 1").
@@ -3620,7 +3425,7 @@ Normal Flow:
 Alternative Flows: 
 None
 Exceptions:
-48.0.E1 Report Data Not Found
+47.0.E1 Report Data Not Found
 1. If the report data is corrupted, deleted, or the Enterprise accesses an invalid link.
 2. System displays an error message: "Report data not found or has been removed."
 3. System automatically redirects the Enterprise back to the Weekly Reports list.
@@ -3636,10 +3441,10 @@ Assumptions:
 The student has submitted the report in a readable text format or valid file types supported by the system.
 b. Business Rules
  None
-3.15. UC-49: Review and Feedback Weekly Report
+3.14. UC-48: Review and Feedback Weekly Report
 a. Functional Description
 UC ID and Name:
-UC-49: Review and Feedback Weekly Report
+UC-48: Review and Feedback Weekly Report
 Created By:
 Đỗ Minh Gia Bảo
 Date Created:
@@ -3659,7 +3464,7 @@ Postconditions:
 POST-1: The weekly report's status is updated to "Approved" or "Rejected".
 POST-2: The feedback is saved in the database and visible to the student.
 Normal Flow:
-49.0 Approve Weekly Report
+48.0 Approve Weekly Report
 1. Enterprise views the details of a "Pending Review" weekly report.
 2. Enterprise types comments or evaluation into the "Feedback/Comments" text area (Optional).
 3. Enterprise clicks the "Approve" button.
@@ -3668,7 +3473,7 @@ Normal Flow:
 6. System updates the report's status to "Approved" and saves the feedback.
 7. System commits the evaluation score to the database and notifies the Training Manager for record keeping.
 Alternative Flows: 
-49.1 Reject Weekly Report
+48.1 Reject Weekly Report
 1. Enterprise views the report and identifies issues that need to be fixed.
 2. Enterprise types the reasons and instructions into the "Feedback/Comments" text area.
 3. Enterprise clicks the "Reject" button.
@@ -3676,7 +3481,7 @@ Alternative Flows:
 5. System updates the report's status to "Rejected" and saves the feedback.
 6. System displays a success message: "Report has been rejected. Student will be notified to resubmit."
 Exceptions: 
-49.1.E1 Missing Mandatory Feedback on Rejection
+48.1.E1 Missing Mandatory Feedback on Rejection
 1. Enterprise clicks the "Reject" button but leaves the "Feedback/Comments" field empty.
 2. System prevents the action and displays an error message: "Feedback is required when rejecting a report. Please provide a reason for the student."
 3. Enterprise enters the required feedback and clicks "Reject" again.
@@ -3697,10 +3502,10 @@ Business Rule Description
 BR-40
 Mandatory Feedback on Rejection
 Enterprise MUST provide written feedback when rejecting a student's weekly report.
-3.16. UC-50: Report Critical Incident
+3.15. UC-49: Report Critical Incident
 a. Functional Description
 UC ID and Name:
-UC-50: Report Critical Incident
+UC-49: Report Critical Incident
 Created By:
 Đỗ Minh Gia Bảo
 Date Created:
@@ -3719,7 +3524,7 @@ PRE-2: The student's internship status is currently active ("In Progress").
 Postconditions:
 POST-1: The incident is logged into the database and an urgent alert is dispatched directly to the Training Manager.
 Normal Flow:
-50.0 Report Critical Incident 
+49.0 Report Critical Incident 
 1. Enterprise clicks "Report Incident" on a student's profile. 
 2. System displays the Incident Report form. 
 3. Enterprise fills out the incident type, severity, and detailed description, then clicks "Submit". 
@@ -3727,7 +3532,7 @@ Normal Flow:
 Alternative Flows: 
 None
 Exceptions: 
-50.0.E1 Missing Mandatory Information
+49.0.E1 Missing Mandatory Information
 1. If the Enterprise forgets to select an Incident Category or leaves the Description blank.
 2. System prevents submission and highlights the missing fields in red with an error message: "Please select a category and provide a detailed description of the incident."
 3. Enterprise fills in the missing information and clicks "Submit Report" again.
@@ -3748,10 +3553,10 @@ Business Rule Description
 BR-41
 Incident Report Completeness
 Both "Incident Category" and "Incident Description" are mandatory to submit an incident report.
-3.17 UC-51_Submit Final Rubrics Evaluation
+3.16 UC-50_Submit Final Rubrics Evaluation
 a. Functional Description 
 UC ID and Name:
-UC-51: Submit Final Rubrics Evaluation
+UC-50: Submit Final Rubrics Evaluation
 Created By:
  BaoNTG
 Date Created:
@@ -3772,7 +3577,7 @@ Postconditions:
 POST-1: A new final internship report record is successfully created in the database with a "Pending Review" status.
 POST-2: The final report submission locks the student's weekly report portal from further standard modifications.
 Normal Flow:
-51.0 Submit Final Internship Report
+50.0 Submit Final Internship Report
 1.Student accesses the Final Report Submission screen.
 2.System retrieves the internship details, aggregates the total hours logged from all weekly reports, and renders the final submission form.
 3.Student inputs the final internship summary, core technologies utilized, and key project outcomes achieved.
@@ -3781,17 +3586,17 @@ Normal Flow:
 6.Student clicks the "Submit Final Report" button.
 7.System records the data into the database, locks the form from future changes, sets the status to "Pending Review", and displays a success notification: "Final Internship Report submitted successfully!"
 Alternative Flows:
-51.1 Student saves final report as draft
+50.1 Student saves final report as draft
 1.On the final report submission screen, at step 6 of the normal flow, the student clicks the "Save as Draft" button instead of submit.
 2.System saves the current inputs into the database with a "Draft" status, keeping the form unlocked for future edits.
 3.UC stops here.
 Exceptions:
   
-51.0.E1 Final report already submitted
+50.0.E1 Final report already submitted
 1.At step 2 of the normal flow, if the system detects an existing final report record for this student with a status of "Pending Review" or "Approved".
 2.System blocks form access and displays an error message: "Action denied. You have already submitted your Final Internship Report for this term."
 3.UC stops here.
-51.0.E2 Invalid file format or oversized file
+50.0.E2 Invalid file format or oversized file
 1.At step 5 of the normal flow, if the uploaded final report is not a PDF file or exceeds 20MB.
 2.System blocks the upload process and displays an error warning: "Invalid file. Please upload your final report strictly in PDF format under 20MB."
 3.Student returns to step 4 of the normal flow.
@@ -3820,10 +3625,10 @@ BR-44
 One-Time Evaluation Lock
 Once submitted, the enterprise's evaluation rubrics form is permanently locked. Modifications require a manual unlock request approved by the Training Manager.
 4. Student Feature 
-4.1 UC-52_Manage Student Profile/CV
+4.1 UC-51_Manage Student Profile/CV
 a. Functional Description 
 UC ID and Name:
-UC-52: Manage Student Profile/CV
+UC-51: Manage Student Profile/CV
 Created By:
  BaoNTG
 Date Created: 19/May/2026
@@ -3841,7 +3646,7 @@ PRE-1: User’s identity has been authenticated.
 Postconditions:
 POST-1: Student's profile data and technical skills in the database are updated.POST-2: The new CV file is successfully saved and linked to the student's profile.
 Normal Flow:
-52.0 Manage Student Profile/CV 
+51.0 Manage Student Profile/CV 
 1.Student accesses the Profile Management screen.
 2.System fetches and displays the student's current profile information, technical skill tags, and the existing CV file metadata.
 3.Student modifies personal details (e.g., phone number, email) and adds or removes technical skill tags.
@@ -3850,13 +3655,13 @@ Normal Flow:
 6.Student clicks the "Save Changes" button.
 7.System updates the student's profile data and CV file in the database, then displays a success notification: "Profile and CV updated successfully!"
 Alternative Flow:
-Flows:52.1 Student cancels the modification
+Flows:51.1 Student cancels the modification
 1.On the Profile Management screen, at step 3 or step 4 of the normal flow, the student clicks the "Cancel" button.
 2.System discards all unsaved inputs and reverts the interface fields back to the original database state.
 3.Return to step 2 of the normal flow.
 Exceptions:
  
-52.0.E1 Invalid file format or oversized file
+51.0.E1 Invalid file format or oversized file
 1.At step 5 of the normal flow, if the system detects that the uploaded file is not in PDF format or exceeds 5MB.
 2.System blocks the upload process, highlights the file input field, and displays an error message: "Invalid file. Please upload a PDF file under 5MB."
 3.UC stops here.
@@ -3881,10 +3686,10 @@ All CVs must be strictly uploaded and processed in PDF format.
 BR-45
 CV Size Limit
 CV files cannot exceed 5MB in storage size.
-4.2 UC-53_View Job Post List 
+4.2 UC-52_View Job Post List 
 a. Functional Description 
 UC ID and Name:
-UC-53: View Job Post List  
+UC-52: View Job Post List  
 Created By:
  BaoNTG
 Date Created:
@@ -3902,20 +3707,20 @@ PRE-1: User’s identity has been authenticated.
 Postconditions:
 POST-1: System successfully filters and renders the list of available job postings based on the user's search criteria or matching preferences.
 Normal Flow: 
-53.0 View Job Post List
+52.0 View Job Post List
 1.Student clicks on the "Job Board" menu.
 2.System queries the active database, checks for postings whose application deadlines are valid, and displays the default list of job postings sorted by the newest date.
 3.Student inputs search keywords (job title or company name) into the search bar, or selects specific technology tags from the filter dropdown.
 4.System filters the database records in real-time and updates the screen to display only the job postings matching all active filter criteria.
 Alternative Flows: 
-53.1 Profile Compatibility Matching
+52.1 Profile Compatibility Matching
 1.On the Job Board screen, student toggles on the "Match My Profile" feature checkbox.
 2.System retrieves the student’s technology skills from their personal profile and cross-references them against active job posting requirements.
 3.System refreshes the interface to sort and display job positions matching the profile skills.
 4.Return to step 4 of the normal flow.
 Exceptions:
-53.0.E1 No job postings match the criteria
-1.At step 4 of the normal flow or during alternative flow 53.1, if no records match the criteria.
+52.0.E1 No job postings match the criteria
+1.At step 4 of the normal flow or during alternative flow 52.1, if no records match the criteria.
 2.System clears the job listing container and displays an informative notification message: "No matching job postings found. Please try refining your keywords or filters."
 3.UC stops here.
 Priority:
@@ -3932,10 +3737,10 @@ Assumptions:
 b. Business Rules:
 None
 Student enterprise feedback is strictly internal. Only the Training Manager role can access feedback data. Enterprise accounts have no API or UI access to read this data.
-4.3 UC-54_View Job Details 
+4.3 UC-53_View Job Details 
 a. Functional Description 
 UC ID and Name:
-UC-54: View Job Details
+UC-53: View Job Details
 Created By:
  BaoNTG
 Date Created:
@@ -3955,20 +3760,20 @@ PRE-2: Student has successfully navigated to the Job Board list view (UC-53).
 Postconditions:
  POST-1: System successfully displays the full job information page to the student.
 Normal Flow: 
-54.0 View Job Details
+53.0 View Job Details
 1.Student selects and clicks on a desired job vacancy card from the list view.
 2.System retrieves the complete details of the selected job posting record from the database.
 3.System displays the full Job Details screen containing the job description (JD), requirements list, student benefits, enterprise profile, application deadline, and renders an active "Apply Now" action button.
 Alternative Flows: 
-54.1 View Job Details from Direct Shared Link
+53.1 View Job Details from Direct Shared Link
 1.Student clicks on a valid direct URL link to the job posting (bypassing the list view menu entirely).
 2.System verifies the user's login authentication state.
 3.System checks if the job posting ID exists and is currently active.
 4.Return to step 3 of the normal flow.
 Exceptions:
  
-54.0.E1 Job posting does not exist or has been deleted
-1.At step 2 of the normal flow or during alternative flow 54.1, if the system detects that the job post ID is invalid or has been removed by the enterprise.
+53.0.E1 Job posting does not exist or has been deleted
+1.At step 2 of the normal flow or during alternative flow 53.1, if the system detects that the job post ID is invalid or has been removed by the enterprise.
 2.System redirects the student back to the main Job Board page (UC-53) and displays an error alert: "Error: The job posting you are looking for does not exist or has been removed."
 3.UC stops here.
 Priority:
@@ -3983,10 +3788,10 @@ Assumptions:
  None 
 b. Business Rules
 None
-4.4 UC-55_Apply for Job  
+4.4 UC-54_Apply for Job  
 a. Functional Description 
 UC ID and Name:
-UC-55: Apply for Job
+UC-54: Apply for Job
 Created By:
  BaoNTG
 Date Created:
@@ -3996,7 +3801,7 @@ Primary Actor:
 Secondary Actors:
  None 
 Trigger:
- Student clicks the "Apply Now" button on a specific Job Details screen (UC-54). 
+ Student clicks the "Apply Now" button on a specific Job Details screen (UC-53). 
 Description:
  Allows students to officially apply for an internship position by submitting their profile snapshot and current CV file directly to a partner enterprise. 
 Preconditions:
@@ -4007,7 +3812,7 @@ Postconditions:
  POST-1: A new application record is created in the database with a "Pending" status (or an existing "Withdrawn" record is updated to "Pending").
 POST-2: The student's profile information and CV file state at the exact moment of application are frozen and locked into the submission.
 Normal Flow: 
-55.0 Apply for Job
+54.0 Apply for Job
 1.Student accesses the details screen of an active job post.
 2.Student clicks the "Apply Now" button.
 3.System triggers and renders a confirmation pop-up screen displaying the name of the student's current uploaded CV.
@@ -4016,18 +3821,18 @@ Normal Flow:
 6.System validates the current submission timestamp against the job post's application deadline.
 7.System records the submission into the database, sets its evaluation state to "Pending", and displays a success message: "Application submitted successfully!"
 Alternative Flows: 
-55.1 Student cancels the application prompt
+54.1 Student cancels the application prompt
 1.On the confirmation pop-up, at step 4 of the normal flow, the student clicks the "Cancel" or "Close" button on the modal.
 2.System closes the pop-up immediately without recording any application records or modifying database flags.
 3.UC stops here (Student returns to the Job Details view).
 Exceptions:
  
  
-55.0.E1 Job posting application deadline has expired
+54.0.E1 Job posting application deadline has expired
 1.At step 6 of the normal flow, if the system validates that the current system date and time have passed the deadline.
 2.System aborts the transaction, rolls back database changes, locks the interface, and displays an error message: "Application failed. This job posting has reached its deadline and is closed for registration."
 3.UC stops here.
-55.0.E2 Duplicate application detected
+54.0.E2 Duplicate application detected
 1.At step 6 of the normal flow, if the system identifies an existing application record from the same student ID for this job post ID, and its status is NOT "Withdrawn" (e.g., status is Pending, Approved, or Interview Scheduled).
 2.System blocks the application process, rejects the database commit, displays a notification: "You have already applied for this position. Duplicate submissions are strictly prohibited.", and disables the submission button.
 3.UC stops here.
@@ -4054,10 +3859,10 @@ A student can only have 1 active application submitted to a specific job post at
 BR-47
 Application Snapshot
 Student profiles are snapshotted at submission; future profile edits do not alter past applications.
-4.5 UC-56_View My Application History 
+4.5 UC-55_View My Application History 
 a. Functional Description 
 UC ID and Name:
-UC-56: View My Application History
+UC-55: View My Application History
 Created By:
  BaoNTG
 Date Created:
@@ -4075,18 +3880,18 @@ PRE-1: User’s identity has been authenticated.
 Postconditions:
  POST-1: System renders the real-time application tracking dashboard for the 
 Normal Flow:
-56.0 View CV Submission History 
+55.0 View CV Submission History 
 1.Student clicks the "Application History" option on the menu.
 2.System queries the database for all application records associated with the logged-in Student ID.
 3.System displays the list of submitted applications ordered by the most recent date, including information: Company Name, Job Title, Applied Date, and Current Status (e.g., Pending, Approved, Rejected).
 Alternative Flows:
-56.1 Student Cancels an Eligible Application
+55.1 Student Cancels an Eligible Application
 1.On the Application History screen, student locates a job application record with a "Pending" status and an active deadline.
 2.Student triggers the withdrawal by clicking the adjacent "Withdraw" action button.
 3.System executes the extend use case: UC-57: Withdraw Application.
 4.Return to step 3 of the normal flow.
 Exceptions:
-56.0.E1 No application history found 
+55.0.E1 No application history found 
 1.At step 2 of the normal flow, if the student has never submitted any applications.
 2.System displays an empty state message: "You haven't submitted any applications yet. Explore the Job Board to start your internship search!"
 3.UC stops here.
@@ -4103,10 +3908,10 @@ Assumptions:
  
 b. Business Rules:
 None
-4.6 UC-57_Withdraw Application 
+4.6 UC-56_Withdraw Application 
 a. Functional Description 
 UC ID and Name:
-UC-57: Withdraw Application
+UC-56: Withdraw Application
 Created By:
  BaoNTG
 Date Created:
@@ -4116,35 +3921,35 @@ Primary Actor:
 Secondary Actors:
  None
 Trigger:
-Student clicks the "Withdraw" or "Cancel Application" button next to an eligible application record on the Application History screen (UC-56). 
+Student clicks the "Withdraw" or "Cancel Application" button next to an eligible application record on the Application History screen (UC-55). 
 Description:
 Allows students to cancel and withdraw a previously submitted job application. Once successfully withdrawn, the student is allowed to modify their CV and resubmit if the job posting deadline has not yet expired. 
 Preconditions:
 PRE-1: User’s identity has been authenticated.
-PRE-2: Student is currently viewing their Application History screen (UC-56).
+PRE-2: Student is currently viewing their Application History screen (UC-55).
 PRE-3: The target application record currently holds a "Pending" status.
 Postconditions:
 POST-1: The application status in the database is updated to "Withdrawn".
 POST-2: The enterprise can no longer view or process this specific application.
 POST-3: The system re-enables the "Apply Now" button for this job post for the student (allowing resubmission before deadline constraints).
 Normal Flow: 
-57.0 Withdraw Application
+56.0 Withdraw Application
 1.Student clicks the "Withdraw" button on an eligible pending application.
 2.System triggers a confirmation modal asking: "Are you sure you want to withdraw your application? You can re-apply later only if the job posting is still open."
 3.Student clicks the "Confirm Withdrawal" button.
 4.System validates the current timestamp against the job post's application deadline and verifies that the company has not altered the "Pending" status.
 5.System updates the application status to "Withdrawn" in the database and displays a success alert: "Application successfully withdrawn."
 Alternative Flows:
-57.1 Student aborts the withdrawal process
+56.1 Student aborts the withdrawal process
 1.On the confirmation modal, at step 2 of the normal flow, the student clicks the "No, Keep It" or "Close" button.
 2.System closes the prompt modal without altering any status flags in the database.
 3.Return to step 1 of the normal flow.
 Exceptions:
-57.0.E1 Job posting deadline has expired
+56.0.E1 Job posting deadline has expired
 1.At step 4 of the normal flow, if the current system time is greater than (>) the job post's application deadline.
 2.System rejects the cancellation request, blocks the database update, and displays an error alert: "Withdrawal failed. The application deadline for this job posting has expired, and the candidate list is locked."
 3.UC stops here.
-57.0.E2 Application status is no longer Pending
+56.0.E2 Application status is no longer Pending
 1.At step 4 of the normal flow, if the enterprise has changed the status (e.g., to Approved or Interview Scheduled) right before the student clicks confirm.
 2.System aborts the withdrawal transaction, updates the screen with the new active status, and displays an error message: "Cannot withdraw. Your application is already being processed or has been reviewed by the enterprise."
 3.UC stops here.
@@ -4166,10 +3971,10 @@ Business Rule Description
 BR-48
 Withdrawal Deadline
 Students can only withdraw their CV before the job posting's defined deadline.
-4.7 UC-58_View Interview Schedule 
+4.7 UC-57_View Interview Schedule 
 a. Functional Description 
 UC ID and Name:
-UC-58: View Interview Schedule
+UC-57: View Interview Schedule
 Created By:
  BaoNTG
 Date Created:
@@ -4187,18 +3992,18 @@ PRE-1: Student has successfully logged into the system.
 Postconditions:
 POST-1: System successfully displays the personalized interview calendar or table view containing active schedules. 
 Normal Flow:
-58.0 View Interview Schedule
+57.0 View Interview Schedule
 1.Student selects the "Interview Schedule" option from the main menu.
 2.System queries the database for all interview records linked to the logged-in Student ID.
 3.System displays the schedule interface showing a list of interviews along with details: Time, Location, Type (Online/Offline), Link (Zoom/Meet if online), and Current Status (e.g., Pending Confirmation, Confirmed, Completed, Missed).
 Alternative Flows:
-58.1 Student Opens an Active Invitation to Confirm
+57.1 Student Opens an Active Invitation to Confirm
 1.On the Interview Schedule screen, student locates an interview slot containing a "Pending Confirmation" badge.
 2.Student clicks the action button to view details and accept.
 3.System executes the include/extend use case: UC-59: Confirm/Decline Interview.
 4.Return to step 3 of the normal flow.
 Exceptions:
-58.0.E1 No interview invitations available 
+57.0.E1 No interview invitations available 
 1.At step 2 of the normal flow, if the query returns an empty dataset for the student.
 2.System displays a blank schedule page with an informative message: "You have no upcoming interview invitations at this moment."
 3.UC stops here.
@@ -4215,10 +4020,10 @@ Assumptions:
  
 b. Business Rules:
 None
-4.8 UC-59_Confirm/Decline Interview 
+4.8 UC-58_Confirm/Decline Interview 
 a. Functional Description 
 UC ID and Name:
-UC-59: Confirm/Decline Interview
+UC-58: Confirm/Decline Interview
 Created By:
  BaoNTG
 Date Created:
@@ -4228,19 +4033,19 @@ Primary Actor:
 Secondary Actors:
  None
 Trigger:
-Student clicks the "Confirm Attendance" or "Accept Invitation" button inside a specific schedule slot (UC-58). 
+Student clicks the "Confirm Attendance" or "Accept Invitation" button inside a specific schedule slot (UC-55). 
 Description:
 As a Student, I want to officially confirm my attendance or decline an interview invitation so that the partner enterprise is notified and can manage their interview timeline accordingly. 
 Preconditions:
 POST-1: The specific interview invitation status is updated to "Confirmed" or "Declined" in the database.
 POST-2: The enterprise is automatically notified of the student's decision (including the refusal reason if declined).
-POST-3: If the invitation expires or is missed (via Exception 58.0.E1), or if the student formally declines the invitation, the system automatically updates the linked job application status (UC-55) to "Rejected" (or closes it) to fully close the application cycle.
+POST-3: If the invitation expires or is missed (via Exception 57.0.E1), or if the student formally declines the invitation, the system automatically updates the linked job application status (UC-54) to "Rejected" (or closes it) to fully close the application cycle.
 Postconditions:
 POST-1: The specific interview invitation status is updated to "Confirmed" in the database.
 POST-2: The enterprise is automatically notified of the student's acceptance.
-POST-3: If the invitation expires or is missed (via Exception 58.0.E1), the system automatically updates the linked job application status (UC-55) to "Rejected" to fully close the application cycle.
+POST-3: If the invitation expires or is missed (via Exception 57.0.E1), the system automatically updates the linked job application status (UC-54 to "Rejected" to fully close the application cycle.
 Normal Flow:
-59.0 Confirm/Decline Interview
+58.0 Confirm/Decline Interview
 1.Student locates a pending interview invitation on the schedule interface.
 2.Student clicks the "Confirm Attendance" button.
 3.System opens a validation pop-up prompt asking: "Are you sure you want to accept this interview schedule? The company will be notified of your commitment."
@@ -4248,11 +4053,11 @@ Normal Flow:
 5.System checks if the interview slot is still active and verifies the current timestamp.
 6.System changes the interview record status to "Confirmed" in the database and displays a success banner: "Interview confirmed successfully!"
 Alternative Flows:
-59.1 Student aborts the confirmation prompt
+58.1 Student aborts the confirmation prompt
 1.On the validation pop-up prompt, at step 4 of the normal flow, the student clicks the "Cancel" or "Close" button.
 2.System closes the prompt modal and leaves the interview status unchanged as "Pending Confirmation".
 3.Return to step 1 of the normal flow.
-59.2 Student declines the interview invitation
+58.2 Student declines the interview invitation
 1.At step 1 of the normal flow, the student clicks the "Decline Invitation" button next to the pending interview schedule slot.
 2.System triggers a pop-up modal containing a mandatory text input field labeled "Reason for Refusal" and a critical warning alert: "Are you sure you want to decline this interview? This action will formally withdraw you from this application cycle."
 3.Student inputs their specific reason into the text field.
@@ -4262,15 +4067,15 @@ Alternative Flows:
 7.System triggers an automated background update to transition the main job application status (UC-58) to "Rejected".
 8.UC stops here.
 Exceptions:
-59.0.E1 Interview schedule has already started or expired
+58.0.E1 Interview schedule has already started or expired
 1.At step 5 of the normal flow, if the current system date/time has passed the scheduled interview start time before the student clicks confirm.
 2.System blocks the confirmation transaction, updates the record status to "Expired/Missed" in the database.
 3.System triggers an automated background update to set the main application status (UC-58) to "Rejected".
 4.System displays an error notice: "Action failed. This interview invitation has expired as the scheduled time has already passed."
-5.UC stops here.59.2.E1 Reason for refusal is left blank (Ref: BR-40) 
+5.UC stops here.58.2.E1 Reason for refusal is left blank (Ref: BR-40) 
 1.At step 5 of the alternative flow 59.2, if the system detects that the student left the "Reason for Refusal" field empty or filled with only whitespace.
 2.System blocks the submission, highlights the input box in red, and displays an error message: "Action denied. You must provide a valid reason for declining the interview invitation."
-3.Student returns to step 3 of alternative flow 59.2.
+3.Student returns to step 3 of alternative flow 58.2.
 Priority:
 Must Have 
 Frequency of Use:
@@ -4289,10 +4094,10 @@ Business Rule Description
 BR-49 
 Attendance Irreversibility 
 Once an interview attendance is confirmed or formally declined by a student, they cannot undo, modify, or reverse the status via the student UI. 
-4.9 UC-60_Submit Feedback for Enterprise 
+4.9 UC-59_Submit Feedback for Enterprise 
 a. Functional Description 
 UC ID and Name:
-UC-60: Submit Feedback for Enterprise
+UC-59: Submit Feedback for Enterprise
 Created By:
  BaoNTG
 Date Created:
@@ -4313,22 +4118,22 @@ Postconditions:
 POST-1: A new feedback record is created in the database linked to the student and enterprise.
 POST-2: The Training Manager can view the submitted feedback via UC-30.
 Normal Flow:
-60.0 Submit Feedback for Enterprise
+59.0 Submit Feedback for Enterprise
 1. Student clicks on the "Enterprise Feedback" option from the menu. 
 2. System verifies that the student's internship has concluded and that no prior feedback exists. 
 3. System displays the feedback form with rating categories: Training Quality (1-5 stars), Supervisor Support (1-5 stars), Work Environment (1-5 stars), and an Overall Rating (1-5 stars), plus a "Written Comments" text area. 
 4. Student selects ratings for each category. 
 5. Student enters optional written comments in the text area. 
 6. Student clicks the "Submit Feedback" button. 
-7. System validates that all mandatory rating fields have been completed and values are valid integers between 1-5 (BR-55). 
+7. System validates that all mandatory rating fields have been completed and values are valid integers between 1-5 (BR-54). 
 8. System saves the feedback to the database and displays a success message: "Thank you! Your feedback has been submitted successfully."
 Alternative Flows:
 None
 Exceptions:
-60.0.E1 Feedback already submitted (Branches from step 2) 
+59.0.E1 Feedback already submitted (Branches from step 2) 
 1. System blocks access and displays a message: "You have already submitted feedback for this enterprise. You can only submit once per semester." 
 2. Use case terminates. 
-60.0.E2 Missing mandatory ratings (Branches from step 7) 
+59.0.E2 Missing mandatory ratings (Branches from step 7) 
 1. System highlights the missing rating fields in red. 
 2. Student is prompted to complete all required ratings (rejoins step 4)
 Priority:
@@ -4354,10 +4159,10 @@ A student can only submit one feedback entry per enterprise per semester. Duplic
 BR-55
 Feedback Rating Scale
 Enterprise feedback scores must be integer values between 1 and 5 inclusive for each evaluation criterion (Training Quality, Supervisor Support, Work Environment, Overall).
-4.10 UC-61_View Internship Plan Overview
+4.10 UC-60_View Internship Plan Overview
 a. Functional Description 
 UC ID and Name:
-UC-61: View Internship Plan Overview
+UC-60: View Internship Plan Overview
 Created By:
  BaoNTG
 Date Created:
@@ -4376,14 +4181,14 @@ PRE-2: Student has been officially assigned to an enterprise and a specific Supe
 Postconditions:
 POST-1: System successfully displays the complete training plan and roadmap milestones to the student.
 Normal Flow:
-61.0 View Internship Plan Overview
+60.0 View Internship Plan Overview
 1.Student selects the "Internship Roadmap" option from the main menu.
 2.System queries the database for the active internship timeline and roadmap data linked to the logged-in Student ID.
 3.System renders the roadmap interface, displaying milestones, weekly objectives, task descriptions, and required outcomes set by the Enterprise.
 Alternative Flows:
 None
 Exceptions: 
-61.0.E1 Roadmap not yet initialized
+60.0.E1 Roadmap not yet initialized
 1.At step 2 of the normal flow, if the Enterprise has not yet populated or approved the training plan for this student.
 2.System displays a placeholder screen with a notification: "Your internship roadmap is being prepared by your Enterprise Supervisor. Please check back later!"
 3.UC stops here.
@@ -4400,10 +4205,10 @@ Assumptions:
  
 b. Business Rules
 None
-4.11 UC-62_View Weekly Report List & Details
+4.11 UC-61_View Weekly Report List & Details
 a. Functional Description 
 UC ID and Name:
-UC-62: View Weekly Report List & Details
+UC-61: View Weekly Report List & Details
 Created By:
  BaoNTG
 Date Created:
@@ -4421,7 +4226,7 @@ PRE-1: Student has successfully logged into the system.
 Postconditions:
 POST-1: System successfully renders the historical list of weekly reports and allows drilling down into specific report details.
 Normal Flow:
-62.0 View Weekly Report List & Details
+61.0 View Weekly Report List & Details
 1.Student clicks the "Report History" option on the dashboard menu.
 2.System queries the database for all weekly report records linked to the logged-in Student ID.
 3.System displays the reports in chronological order, showing Week Number, Submission Date, Status (Draft, Pending Review, Reviewed, Rejected), and Grade/Score (if graded).
@@ -4430,7 +4235,7 @@ Normal Flow:
 Alternative Flows:
 None 
 Exceptions:
-62.0.E1 No reports found
+61.0.E1 No reports found
 1.At step 2 of the normal flow, if the student is in their first week and has not created any report or draft yet.
 2.System displays an empty state screen with a message: "No reports found. You haven't submitted any weekly reports yet."
 3.UC stops here.
@@ -4447,10 +4252,10 @@ Assumptions:
  
 b. Business Rules
 None
-4.12 UC-63_Submit Weekly Report
+4.12 UC-62_Submit Weekly Report
 a. Functional Description 
 UC ID and Name:
-UC-63: Submit Weekly Report
+UC-62: Submit Weekly Report
 Created By:
  BaoNTG
 Date Created:
@@ -4469,7 +4274,7 @@ PRE-1: Student's internship status is active and currently assigned to an enterp
 Postconditions:
 POST-1: A new weekly report record is successfully created in the database with a "Pending Review" status.
 Normal Flow:
-63.0 Submit Weekly Report
+62.0 Submit Weekly Report
 1.Student accesses the Report Submission form screen.
 2.System displays the form, automatically calculating the current active report week based on the official internship timeline configuration set in the roadmap (UC-61).
 3.Student inputs the summary of tasks performed, hours logged, and issues encountered.
@@ -4480,16 +4285,16 @@ Normal Flow:
  
  
 Alternative Flows:
-63.1 Student saves report as draft
+62.1 Student saves report as draft
 1. On the submission form screen, at step 6 of the normal flow, the student clicks the "Save as Draft" button instead of submit.
 2.System saves the current inputs into the database with a "Draft" status, keeping the form open for future edits.
 3.UC stops here.
 Exceptions:
-63.0.E1 Report for the current week already exists
+62.0.E1 Report for the current week already exists
 1.At step 2 of the normal flow, if a report for the active week is already in "Pending Review" or "Reviewed" status.
 2.System blocks form input and displays an error message: "You have already submitted a report for this week."
 3.UC stops here.
-63.0.E2 Invalid file format or oversized file
+62.0.E2 Invalid file format or oversized file
 1.At step 5 of the normal flow, if the attachment is not in PDF/Docx format or exceeds 10MB.
 2.System blocks the upload process and displays an error warning: "Invalid file type or size. Please upload a PDF or Word document under 10MB."
 3.UC stops here.
@@ -4511,10 +4316,10 @@ Business Rule Description
 BR-56
 Submission Window Restriction
 Students can only submit reports for the current active week generated by the system roadmap schedule. Retroactive submission for past weeks is blocked unless authorized by the Training Manager.
-4.13 UC-64_Edit Weekly Report  
+4.13 UC-63_Edit Weekly Report  
 a. Functional Description 
 UC ID and Name:
-UC-64: Edit Weekly Report
+UC-63: Edit Weekly Report
 Created By:
  BaoNTG
 Date Created:
@@ -4524,17 +4329,17 @@ Primary Actor:
 Secondary Actors:
  None
 Trigger:
-Student clicks the "Edit" button next to a "Draft" report or a "Rejected" report on the Report History screen (UC-62).
+Student clicks the "Edit" button next to a "Draft" report or a "Rejected" report on the Report History screen (UC-61).
 Description:
 Allows students to modify, update, and supplement the content or attachments of an existing report that is either in "Draft" state or has been rejected/returned by the Enterprise with feedback.
 Preconditions:
-PRE-1: Student is viewing their report list (UC-62)
+PRE-1: Student is viewing their report list (UC-61)
 PRE-2: The targeted report record must hold either a "Draft" status or a "Rejected" status.
 Postconditions:
 POST-1: The modified content is updated in the database. 
 POST-2: If re-submitted, the status changes back to "Pending Review".
 Normal Flow:
-64.0 Edit Weekly Report
+63.0 Edit Weekly Report
 1.Student selects an eligible "Draft" or "Rejected" report and clicks "Edit".
 2.System loads the previously saved report text and file metadata into the input form.
 3.Student modifies the description text or removes/replaces the attached file.
@@ -4544,7 +4349,7 @@ Normal Flow:
 Alternative Flows:
 None 
 Exceptions:
- 64.0.E1 Status changed externally
+ 63.0.E1 Status changed externally
 1.At step 5 of the normal flow, if the Enterprise changed the report status right before the student clicks submit.
 2.System aborts the commit and displays an error message: "Action failed. The report status has changed and can no longer be edited."
 3.UC stops here.
@@ -4566,10 +4371,10 @@ Business Rule Description
 BR-56
 Weekly Report Submission Window 
 Students are only permitted to submit a weekly report during its designated "Active" week. Retroactive (past) and advance (future) submissions are strictly blocked. Late submissions are only accepted via explicit Training Manager override.
-4.14 UC-65_Submit Final Internship Report
+4.14 UC-64_Submit Final Internship Report
 a. Functional Description 
 UC ID and Name:
-UC-65: Submit Final Internship Report
+UC-64: Submit Final Internship Report
 Created By:
  BaoNTG
 Date Created:
@@ -4590,7 +4395,7 @@ Postconditions:
 POST-1: A new final internship report record is successfully created in the database with a "Pending Review" status. 
 POST-2: The final report submission locks the student's weekly report portal from further standard modifications. 
 Normal Flow:
-65.0 Submit Final Internship Report
+64.0 Submit Final Internship Report
 1.Student accesses the Final Report Submission screen.
 2.System retrieves the internship details, aggregates the total hours logged from all weekly reports, and renders the final submission form.
 3.Student inputs the final internship summary, core technologies utilized, and key project outcomes achieved.
@@ -4599,17 +4404,17 @@ Normal Flow:
 6.Student clicks the "Submit Final Report" button.
 7.System records the data into the database, locks the form from future changes, sets the status to "Pending Review", and displays a success notification: "Final Internship Report submitted successfully!"
 Alternative Flows:
-65.1 Student saves final report as draft
+64.1 Student saves final report as draft
 1.On the final report submission screen, at step 6 of the normal flow, the student clicks the "Save as Draft" button instead of submit.
 2.System saves the current inputs into the database with a "Draft" status, keeping the form unlocked for future edits.
 3.UC stops here.
  
 Exceptions:
-65.0.E1 Final report already submitted
+64.0.E1 Final report already submitted
 1.At step 2 of the normal flow, if the system detects an existing final report record for this student with a status of "Pending Review" or "Approved".
 2.System blocks form access and displays an error message: "Action denied. You have already submitted your Final Internship Report for this term."
 3.UC stops here.
-65.0.E2 Invalid file format or oversized file
+64.0.E2 Invalid file format or oversized file
 1.At step 5 of the normal flow, if the uploaded final report is not a PDF file or exceeds 20MB.
 2.System blocks the upload process and displays an error warning: "Invalid file. Please upload your final report strictly in PDF format under 20MB."
 3.Student returns to step 4 of the normal flow.
@@ -4637,10 +4442,10 @@ The server rejects any final report submissions received after the exact minute 
 BR-45
 File Size Limit 
 Final report files must not exceed 20MB in storage size. 
-4.15 UC-66_View Internship Evaluation Results  
+4.15 UC-65_View Internship Evaluation Results  
 a. Functional Description 
 UC ID and Name:
-UC-66: View Internship Evaluation Results 
+UC-65: View Internship Evaluation Results 
 Created By:
  BaoNTG
 Date Created:
@@ -4655,11 +4460,11 @@ Description:
 Allows students to view their final assessment results, comprehensive grading criteria scores, professional skill ratings, and official remarks provided by the Enterprise and Training Manager after completing the internship term.
 Preconditions:
 PRE-1: Student has successfully logged into the system.
-PRE-2: Student has officially submitted their final report (UC-61), and the evaluation records have been populated by the reviewers.
+PRE-2: Student has officially submitted their final report (UC-60), and the evaluation records have been populated by the reviewers.
 Postconditions:
 POST-1: System successfully displays the detailed scorecards, behavioral evaluations, and final grading breakdown to the student.
 Normal Flow:
-66.0 View Internship Evaluation Results
+65.0 View Internship Evaluation Results
 1.Student clicks on the "Internship Evaluation" option from the navigation menu.
 2.System queries the database for final assessment and grading records associated with the logged-in Student ID.
 3.System fetches the multi-criteria evaluation matrix (e.g., Technical Skills, Discipline, Teamwork, Attendance) along with the final letter/numerical grade.
@@ -4667,7 +4472,7 @@ Normal Flow:
 Alternative Flows:
 None 
 Exceptions:
-66.0.E1 Evaluation results not yet published
+65.0.E1 Evaluation results not yet published
 1.At step 2 of the normal flow, if the Enterprise or Training Manager has not yet completed or submitted the final grading forms in the database.
 2.System displays a secure placeholder view with an informative message: "Your final internship evaluation is currently being processed by the Enterprise and Training Manager. Please check back once grading is officially published."
 3.UC stops here.
@@ -4692,10 +4497,10 @@ Internship evaluation scores are accessible only to the student owning the recor
 BR-54 
 Semester-Based Student Access 
 Students are only authorized to access historical results and evaluation data if their current_semester value is 7-9. 
-4.15 UC-67: View Student Dashboard & Status 
+4.16 UC-66: View Student Dashboard & Status 
 a. Functional Description 
 UC ID and Name:
-UC-67: View Student Dashboard & Status 
+UC-66: View Student Dashboard & Status 
 Created By:
  BaoNTG
 Date Created:
@@ -4713,7 +4518,7 @@ PPRE-1: Student has successfully logged into the system.
 Postconditions:
 POST-1: System successfully renders the personalized dashboard view with accurate, up-to-date internship data.
 Normal Flow:
-67.0 View Student Dashboard & Status
+66.0 View Student Dashboard & Status
 1. Student accesses the Dashboard from the sidebar navigation.
 2. System retrieves the student’s profile, active semester, and current internship placement details.
 3. System fetches aggregated statistics (application counts, interview schedules, report submission status, and logged hours).
@@ -4722,7 +4527,7 @@ Normal Flow:
 Alternative Flows:
 None 
 Exceptions:
-67.0.E1 No Active Placement Found
+66.0.E1 No Active Placement Found
 1. If the student does not have an active enterprise_assignment for the current semester.
 2. System displays a friendly message: "You are not currently assigned to any internship. Please visit the Job Board to apply."
 3. UC stops here.

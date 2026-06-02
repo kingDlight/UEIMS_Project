@@ -38,9 +38,10 @@ public class AuditLogServiceImpl implements AuditLogService {
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public byte[] exportExcel(LocalDate startDate, LocalDate endDate) {
-        LocalDateTime startDateTime = (startDate != null) ? startDate.atStartOfDay() : null;
-        LocalDateTime endDateTime = (endDate != null) ? endDate.atTime(LocalTime.MAX) : null;
+        LocalDateTime startDateTime = (startDate != null) ? startDate.atStartOfDay() : LocalDateTime.of(2000, 1, 1, 0, 0);
+        LocalDateTime endDateTime = (endDate != null) ? endDate.atTime(LocalTime.MAX) : LocalDateTime.of(2099, 12, 31, 23, 59);
 
         List<AuditLog> logs = repository.findByDateRange(startDateTime, endDateTime);
 
@@ -49,7 +50,8 @@ public class AuditLogServiceImpl implements AuditLogService {
             throw new AppException(ErrorCode.EXPORT_EXCEED_LIMIT);
         }
 
-        try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+        try (Workbook workbook = new XSSFWorkbook();
+                ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             Sheet sheet = workbook.createSheet("Audit Logs");
 
             // Header Style
@@ -62,7 +64,9 @@ public class AuditLogServiceImpl implements AuditLogService {
 
             // Headers
             Row headerRow = sheet.createRow(0);
-            String[] columns = {"Log ID", "Timestamp", "User Email", "Action", "Target Entity", "IP Address", "User Agent"};
+            String[] columns = {
+                "Log ID", "Timestamp", "User Email", "Action", "Target Entity", "IP Address", "User Agent"
+            };
             for (int i = 0; i < columns.length; i++) {
                 Cell cell = headerRow.createCell(i);
                 cell.setCellValue(columns[i]);
@@ -76,8 +80,16 @@ public class AuditLogServiceImpl implements AuditLogService {
                 Row row = sheet.createRow(rowIdx++);
 
                 row.createCell(0).setCellValue(logRecord.getLogId().toString());
-                row.createCell(1).setCellValue(logRecord.getTimestamp() != null ? logRecord.getTimestamp().format(formatter) : "");
-                row.createCell(2).setCellValue(logRecord.getUser() != null ? logRecord.getUser().getEmail() : "anonymous");
+                row.createCell(1)
+                        .setCellValue(
+                                logRecord.getTimestamp() != null
+                                        ? logRecord.getTimestamp().format(formatter)
+                                        : "");
+                row.createCell(2)
+                        .setCellValue(
+                                logRecord.getUser() != null
+                                        ? logRecord.getUser().getEmail()
+                                        : "anonymous");
                 row.createCell(3).setCellValue(logRecord.getAction());
                 row.createCell(4).setCellValue(logRecord.getTargetEntity());
                 row.createCell(5).setCellValue(logRecord.getIpAddress());

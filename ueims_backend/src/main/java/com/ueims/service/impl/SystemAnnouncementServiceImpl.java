@@ -11,12 +11,12 @@ import org.springframework.transaction.annotation.Transactional;
 import com.ueims.dto.request.AnnouncementCreationRequest;
 import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
+import com.ueims.model.entity.Semester;
 import com.ueims.model.entity.SystemAnnouncement;
 import com.ueims.model.entity.User;
-import com.ueims.model.entity.Semester;
+import com.ueims.repository.SemesterRepository;
 import com.ueims.repository.SystemAnnouncementRepository;
 import com.ueims.repository.UserRepository;
-import com.ueims.repository.SemesterRepository;
 import com.ueims.service.SystemAnnouncementService;
 
 import lombok.RequiredArgsConstructor;
@@ -47,8 +47,8 @@ public class SystemAnnouncementServiceImpl implements SystemAnnouncementService 
     @Transactional
     public SystemAnnouncement createAnnouncement(AnnouncementCreationRequest request) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User currentUser = userRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        User currentUser =
+                userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         Semester semester = null;
         if (request.getSemesterId() != null) {

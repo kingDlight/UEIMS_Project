@@ -13,10 +13,8 @@ import com.ueims.model.entity.*;
 
 @Repository
 public interface AuditLogRepository extends JpaRepository<AuditLog, UUID> {
-    
-    @Query("SELECT a FROM AuditLog a WHERE " +
-           "(:startDate IS NULL OR a.timestamp >= :startDate) AND " +
-           "(:endDate IS NULL OR a.timestamp <= :endDate) " +
-           "ORDER BY a.timestamp DESC")
-    List<AuditLog> findByDateRange(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+
+    @Query("SELECT a FROM AuditLog a WHERE a.timestamp >= :startDate AND a.timestamp <= :endDate ORDER BY a.timestamp DESC")
+    List<AuditLog> findByDateRange(
+            @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 }

@@ -64,7 +64,10 @@ public enum ErrorCode {
     TAX_CODE_EXISTED(1037, "Mã số thuế đã được sử dụng bởi doanh nghiệp khác", HttpStatus.BAD_REQUEST),
     ENTERPRISE_REGISTRATION_SUCCESS(
             1038, "Đăng ký thành công. Tài khoản sẽ được kích hoạt sau khi Training Manager phê duyệt.", HttpStatus.OK),
-    EXPORT_EXCEED_LIMIT(1039, "Dữ liệu xuất vượt quá giới hạn 10000 dòng. Vui lòng chọn khoảng thời gian hẹp hơn.", HttpStatus.BAD_REQUEST),
+    EXPORT_EXCEED_LIMIT(
+            1039,
+            "Dữ liệu xuất vượt quá giới hạn 10000 dòng. Vui lòng chọn khoảng thời gian hẹp hơn.",
+            HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
