@@ -19,4 +19,6 @@ public interface EligibleStudentService {
     List<com.ueims.dto.response.EligibleStudentResponse> importFromExcel(MultipartFile file, UUID semesterId);
 
     int finalizeOjtList(UUID semesterId);
+
+    byte[] exportOjtStudentsToExcel(UUID semesterId);
 }
