@@ -143,10 +143,9 @@ public class AuthenticationService {
             userSessionRepository.save(session);
 
             // BR-05 / Security: Log the successful login
-            jakarta.servlet.http.HttpServletRequest httpRequest =
-                    ((org.springframework.web.context.request.ServletRequestAttributes)
-                                    org.springframework.web.context.request.RequestContextHolder.getRequestAttributes())
-                            .getRequest();
+            jakarta.servlet.http.HttpServletRequest httpRequest = ((org.springframework.web.context.request.ServletRequestAttributes) org.springframework.web.context.request.RequestContextHolder
+                    .getRequestAttributes())
+                    .getRequest();
 
             com.ueims.model.entity.AuditLog auditLog = com.ueims.model.entity.AuditLog.builder()
                     .user(user)
@@ -261,6 +260,11 @@ public class AuthenticationService {
                         Instant.now().plus(VALID_DURATION, ChronoUnit.SECONDS).toEpochMilli()))
                 .jwtID(UUID.randomUUID().toString())
                 .claim("scope", buildScope(user))
+                .claim(
+                        "role",
+                        user.getRoles().isEmpty()
+                                ? null
+                                : user.getRoles().iterator().next().getRole().getRoleName())
                 .claim("must_change_password", user.getMustChangePassword())
                 .build();
 
@@ -293,7 +297,8 @@ public class AuthenticationService {
 
         var verified = signedJWT.verify(verifier);
 
-        if (!(verified && expiryTime.after(new Date()))) throw new AppException(ErrorCode.UNAUTHENTICATED);
+        if (!(verified && expiryTime.after(new Date())))
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
 
         if (invalidatedTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID()))
             throw new AppException(ErrorCode.UNAUTHENTICATED);
@@ -336,8 +341,8 @@ public class AuthenticationService {
         user.setMustChangePassword(false);
         userRepository.save(user);
 
-        java.time.format.DateTimeFormatter formatter =
-                java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+        java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter
+                .ofPattern("dd/MM/yyyy HH:mm:ss");
         String changedAt = java.time.LocalDateTime.now().format(formatter);
         mailService.sendPasswordChangedMail(user.getEmail(), user.getFullName(), changedAt);
     }
@@ -388,8 +393,8 @@ public class AuthenticationService {
         resetToken.setIsUsed(true);
         passwordResetTokenRepository.save(resetToken);
 
-        java.time.format.DateTimeFormatter formatter =
-                java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+        java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter
+                .ofPattern("dd/MM/yyyy HH:mm:ss");
         String changedAt = java.time.LocalDateTime.now().format(formatter);
         mailService.sendPasswordChangedMail(user.getEmail(), user.getFullName(), changedAt);
 
