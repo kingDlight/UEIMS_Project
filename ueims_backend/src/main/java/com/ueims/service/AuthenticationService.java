@@ -261,6 +261,11 @@ public class AuthenticationService {
                         Instant.now().plus(VALID_DURATION, ChronoUnit.SECONDS).toEpochMilli()))
                 .jwtID(UUID.randomUUID().toString())
                 .claim("scope", buildScope(user))
+                .claim(
+                        "role",
+                        user.getRoles().isEmpty()
+                                ? null
+                                : user.getRoles().iterator().next().getRole().getRoleName())
                 .claim("must_change_password", user.getMustChangePassword())
                 .build();
 

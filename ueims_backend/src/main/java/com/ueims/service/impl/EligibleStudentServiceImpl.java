@@ -47,6 +47,20 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
 
     @Override
     public EligibleStudent save(EligibleStudent entity) {
+        if (entity.getEligibleId() != null) {
+            EligibleStudent existing =
+                    repository.findById(entity.getEligibleId()).orElse(null);
+            if (existing != null && "OJT".equals(existing.getStatus()) && !("OJT".equals(entity.getStatus()))) {
+                var authentication = org.springframework.security.core.context.SecurityContextHolder.getContext()
+                        .getAuthentication();
+                boolean isAdmin = authentication != null
+                        && authentication.getAuthorities().stream()
+                                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+                if (!isAdmin) {
+                    throw new AppException(ErrorCode.ADMIN_INTERVENTION_REQUIRED);
+                }
+            }
+        }
         return repository.save(entity);
     }
 
@@ -101,26 +115,39 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
     }
 
     @Override
-    public int finalizeOjtList(UUID semesterId) {
-        List<EligibleStudent> students = repository.findBySemester_SemesterIdAndStatus(semesterId, "ACCEPTED");
+    public int finalizeOjtList(List<UUID> studentIds) {
+        if (studentIds == null || studentIds.isEmpty()) {
+            return 0;
+        }
+
+        List<EligibleStudent> students = repository.findAllById(studentIds);
         if (students.isEmpty()) {
             return 0;
         }
 
         LocalDateTime now = LocalDateTime.now();
         for (EligibleStudent student : students) {
+            if (!"ACCEPTED".equals(student.getStatus())
+                    && !"MATCHED".equals(student.getStatus())
+                    && !"OJT".equals(student.getStatus())) {
+                throw new AppException(ErrorCode.INVALID_STATUS_FOR_OJT);
+            }
             student.setStatus("OJT");
             student.setApprovedAt(now);
         }
 
         repository.saveAll(students);
-        log.info("Finalized OJT list for semester {}, {} students moved to OJT status.", semesterId, students.size());
+        log.info("Finalized OJT list for {} students moved to OJT status.", students.size());
         return students.size();
     }
 
     @Override
     public byte[] exportOjtStudentsToExcel(UUID semesterId) {
         List<EligibleStudent> students = repository.findBySemester_SemesterIdAndStatus(semesterId, "OJT");
+
+        if (students.size() > 10000) {
+            throw new AppException(ErrorCode.EXPORT_VOLUME_EXCEEDED);
+        }
 
         try (Workbook workbook = new XSSFWorkbook();
                 ByteArrayOutputStream out = new ByteArrayOutputStream()) {
