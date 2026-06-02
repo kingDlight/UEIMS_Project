@@ -12,9 +12,6 @@ public class IncidentReportRequest {
     @NotNull(message = "Assignment ID cannot be null")
     private UUID assignmentId;
 
-    @NotNull(message = "Reported By ID cannot be null")
-    private UUID reportedById;
-
     @NotBlank(message = "Category cannot be blank")
     private String category;
 

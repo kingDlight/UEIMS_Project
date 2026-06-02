@@ -42,7 +42,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(value = org.springframework.dao.DataIntegrityViolationException.class)
-    ResponseEntity<ApiResponse> handlingDataIntegrityViolationException(org.springframework.dao.DataIntegrityViolationException exception) {
+    ResponseEntity<ApiResponse> handlingDataIntegrityViolationException(
+            org.springframework.dao.DataIntegrityViolationException exception) {
         String message = exception.getMostSpecificCause().getMessage();
         log.warn("Data integrity violation: {}", message);
         ErrorCode errorCode = ErrorCode.DATA_INTEGRITY_VIOLATION;
