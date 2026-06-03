@@ -6,12 +6,15 @@ import jakarta.persistence.*;
 
 import lombok.*;
 
+import org.hibernate.annotations.SQLRestriction;
+
 @Entity
 @Table(name = "job_posts")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@SQLRestriction("deleted_at IS NULL")
 public class JobPost {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
