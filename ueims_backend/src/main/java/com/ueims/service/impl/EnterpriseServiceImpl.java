@@ -35,7 +35,8 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     @Override
     public Enterprise findById(UUID id) {
         // Nên dùng mã lỗi chung hoặc mã lỗi liên quan đến Enterprise nếu có
-        Enterprise enterprise = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ENTERPRISE_NOT_FOUND));
+        Enterprise enterprise =
+                repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ENTERPRISE_NOT_FOUND));
 
         // Kiểm tra quyền xem: Nếu là role Enterprise thì chỉ được xem chính mình
         validateAccess(id);
@@ -52,7 +53,8 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     @Transactional
     public Enterprise update(UUID id, Enterprise request) {
         User currentUser = getCurrentUser();
-        Enterprise existing = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ENTERPRISE_NOT_FOUND));
+        Enterprise existing =
+                repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ENTERPRISE_NOT_FOUND));
 
         // UC-36 & Ownership check: Chỉ Enterprise sở hữu profile này mới được sửa
         validateOwnership(id, currentUser);
@@ -79,7 +81,8 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     @Override
     @Transactional
     public Enterprise approveReject(UUID id, String status, String reason) {
-        Enterprise enterprise = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ENTERPRISE_NOT_FOUND));
+        Enterprise enterprise =
+                repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ENTERPRISE_NOT_FOUND));
 
         // BR-15: Bắt buộc có lý do khi Reject
         if ("REJECTED".equalsIgnoreCase(status) && (reason == null || reason.isBlank())) {

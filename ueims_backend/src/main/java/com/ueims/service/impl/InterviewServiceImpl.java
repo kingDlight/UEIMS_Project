@@ -36,7 +36,8 @@ public class InterviewServiceImpl implements InterviewService {
 
     @Override
     public Interview confirmAttendance(UUID id) {
-        Interview interview = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.INTERVIEW_NOT_FOUND));
+        Interview interview =
+                repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.INTERVIEW_NOT_FOUND));
         interview.setStudentConfirmed(Boolean.TRUE);
         interview.setStatus("CONFIRMED");
         interview.setUpdatedAt(LocalDateTime.now());
@@ -45,7 +46,8 @@ public class InterviewServiceImpl implements InterviewService {
 
     @Override
     public Interview declineAttendance(UUID id, String reason) {
-        Interview interview = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.INTERVIEW_NOT_FOUND));
+        Interview interview =
+                repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.INTERVIEW_NOT_FOUND));
         if (Boolean.TRUE.equals(interview.getStudentConfirmed())) {
             throw new AppException(ErrorCode.INTERVIEW_ALREADY_CONFIRMED);
         }

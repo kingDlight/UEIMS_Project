@@ -8,7 +8,6 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.ueims.dto.request.InterviewDecisionRequest;
 import com.ueims.model.entity.Interview;
 import com.ueims.service.InterviewService;
 

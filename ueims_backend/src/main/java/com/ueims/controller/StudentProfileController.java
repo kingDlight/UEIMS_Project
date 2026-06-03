@@ -37,14 +37,13 @@ public class StudentProfileController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<StudentProfile> update(@PathVariable UUID id,
-                                                 @Valid @RequestBody StudentProfileUpdateRequest request) {
+    public ResponseEntity<StudentProfile> update(
+            @PathVariable UUID id, @Valid @RequestBody StudentProfileUpdateRequest request) {
         return ResponseEntity.ok(service.updateProfile(id, request));
     }
 
     @PostMapping("/{id}/upload-cv")
-    public ResponseEntity<StudentProfile> uploadCv(@PathVariable UUID id,
-                                                   @RequestParam("file") MultipartFile file) {
+    public ResponseEntity<StudentProfile> uploadCv(@PathVariable UUID id, @RequestParam("file") MultipartFile file) {
         return ResponseEntity.ok(service.uploadCv(id, file));
     }
 

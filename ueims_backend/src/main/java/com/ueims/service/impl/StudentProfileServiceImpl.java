@@ -42,7 +42,8 @@ public class StudentProfileServiceImpl implements StudentProfileService {
 
     @Override
     public StudentProfile updateProfile(UUID id, StudentProfileUpdateRequest request) {
-        StudentProfile profile = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.STUDENT_PROFILE_NOT_FOUND));
+        StudentProfile profile =
+                repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.STUDENT_PROFILE_NOT_FOUND));
         profile.setMajor(request.getMajor());
         profile.setSkills(request.getSkills());
         profile.setLinkedinUrl(request.getLinkedinUrl());
@@ -54,7 +55,8 @@ public class StudentProfileServiceImpl implements StudentProfileService {
 
     @Override
     public StudentProfile uploadCv(UUID id, MultipartFile file) {
-        StudentProfile profile = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.STUDENT_PROFILE_NOT_FOUND));
+        StudentProfile profile =
+                repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.STUDENT_PROFILE_NOT_FOUND));
 
         if (file == null || file.isEmpty()) {
             throw new AppException(ErrorCode.CV_NOT_UPLOADED);

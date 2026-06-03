@@ -7,9 +7,9 @@ import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-import lombok.*;
-
 import org.hibernate.annotations.SQLRestriction;
+
+import lombok.*;
 
 @Entity
 @Table(name = "job_posts")

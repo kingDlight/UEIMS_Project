@@ -80,6 +80,10 @@ public enum ErrorCode {
             1041, "Request method '{method}' is not supported for this API", HttpStatus.METHOD_NOT_ALLOWED),
     ENTERPRISE_NOT_FOUND(1042, "Enterprise not found", HttpStatus.NOT_FOUND),
     FINAL_REPORT_DEADLINE_EXPIRED(1043, "Cannot submit final report after semester end date", HttpStatus.BAD_REQUEST),
+    INTERVIEW_NOT_FOUND(1044, "Interview not found", HttpStatus.NOT_FOUND),
+    INTERVIEW_ALREADY_CONFIRMED(1045, "Interview already confirmed", HttpStatus.BAD_REQUEST),
+    FINAL_REPORT_INVALID_FORMAT(1046, "Final report must be in PDF format", HttpStatus.BAD_REQUEST),
+    FINAL_REPORT_SIZE_EXCEEDED(1047, "Final report size must not exceed 5MB", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
