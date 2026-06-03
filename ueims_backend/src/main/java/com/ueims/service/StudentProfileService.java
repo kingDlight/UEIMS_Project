@@ -12,5 +12,9 @@ public interface StudentProfileService {
 
     StudentProfile save(StudentProfile entity);
 
+    StudentProfile updateProfile(UUID id, com.ueims.dto.request.StudentProfileUpdateRequest request);
+
+    StudentProfile uploadCv(UUID id, org.springframework.web.multipart.MultipartFile file);
+
     void deleteById(UUID id);
 }
