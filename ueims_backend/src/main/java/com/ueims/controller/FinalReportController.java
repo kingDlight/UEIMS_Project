@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.ueims.model.entity.FinalReport;
 import com.ueims.service.FinalReportService;
@@ -32,6 +33,12 @@ public class FinalReportController {
     @PostMapping
     public ResponseEntity<FinalReport> create(@Valid @RequestBody FinalReport entity) {
         return ResponseEntity.ok(service.save(entity));
+    }
+
+    @PostMapping("/upload")
+    public ResponseEntity<FinalReport> uploadFinalReport(@RequestParam("assignmentId") UUID assignmentId,
+                                                         @RequestParam("file") MultipartFile file) {
+        return ResponseEntity.ok(service.uploadFinalReport(assignmentId, file));
     }
 
     @DeleteMapping("/{id}")
