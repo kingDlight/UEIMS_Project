@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.ueims.dto.request.InterviewDecisionRequest;
 import com.ueims.model.entity.Interview;
 import com.ueims.service.InterviewService;
 
@@ -38,5 +39,15 @@ public class InterviewController {
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         service.deleteById(id);
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{id}/confirm")
+    public ResponseEntity<Interview> confirm(@PathVariable UUID id) {
+        return ResponseEntity.ok(service.confirmAttendance(id));
+    }
+
+    @PostMapping("/{id}/decline")
+    public ResponseEntity<Interview> decline(@PathVariable UUID id, @RequestParam("reason") String reason) {
+        return ResponseEntity.ok(service.declineAttendance(id, reason));
     }
 }
