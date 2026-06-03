@@ -79,6 +79,7 @@ public enum ErrorCode {
     METHOD_NOT_SUPPORTED(
             1041, "Request method '{method}' is not supported for this API", HttpStatus.METHOD_NOT_ALLOWED),
     ENTERPRISE_NOT_FOUND(1042, "Enterprise not found", HttpStatus.NOT_FOUND),
+    FINAL_REPORT_DEADLINE_EXPIRED(1043, "Cannot submit final report after semester end date", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

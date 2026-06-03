@@ -60,6 +60,11 @@ public class FinalReportServiceImpl implements FinalReportService {
         EnterpriseAssignment assignment = enterpriseAssignmentRepository.findById(assignmentId)
                 .orElseThrow(() -> new AppException(ErrorCode.FIELD_REQUIRED));
 
+        // BR-51: Absolute Hard Deadline (Không cho nộp sau khi Học kỳ đã kết thúc)
+        if (java.time.LocalDate.now().isAfter(assignment.getSemester().getEndDate())) {
+            throw new AppException(ErrorCode.FINAL_REPORT_DEADLINE_EXPIRED);
+        }
+
         try {
             Path uploadDir = Paths.get(System.getProperty("user.dir"), "uploads", "final-reports");
             Files.createDirectories(uploadDir);
