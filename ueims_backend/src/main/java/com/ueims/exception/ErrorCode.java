@@ -45,6 +45,13 @@ public enum ErrorCode {
             "Invalid semester status transition. Allowed: DRAFT\u2192OPEN, OPEN\u2192ACTIVE, ACTIVE\u2192CLOSED, CLOSED\u2192LOCKED",
             HttpStatus.UNPROCESSABLE_ENTITY),
     SEMESTER_EXISTED(1031, "Semester code already exists", HttpStatus.BAD_REQUEST),
+    EXPORT_VOLUME_EXCEEDED(1039, "Export volume exceeds the maximum limit of 10,000 records", HttpStatus.BAD_REQUEST),
+    INVALID_STATUS_FOR_OJT(
+            1040,
+            "One or more students do not meet the prerequisite status (ACCEPTED or MATCHED) for OJT approval",
+            HttpStatus.BAD_REQUEST),
+    ADMIN_INTERVENTION_REQUIRED(
+            1041, "Admin intervention is required to modify an already approved OJT student", HttpStatus.FORBIDDEN),
 
     // Application related
     APPLICATION_NOT_FOUND(1032, "Application not found", HttpStatus.NOT_FOUND),
@@ -69,6 +76,8 @@ public enum ErrorCode {
             "Dữ liệu xuất vượt quá giới hạn 10000 dòng. Vui lòng chọn khoảng thời gian hẹp hơn.",
             HttpStatus.BAD_REQUEST),
     DATA_INTEGRITY_VIOLATION(1040, "Data integrity violation: Foreign key or constraint error", HttpStatus.BAD_REQUEST),
+    METHOD_NOT_SUPPORTED(
+            1041, "Request method '{method}' is not supported for this API", HttpStatus.METHOD_NOT_ALLOWED),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

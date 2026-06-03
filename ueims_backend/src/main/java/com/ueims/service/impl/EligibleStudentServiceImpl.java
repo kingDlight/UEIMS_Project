@@ -1,11 +1,17 @@
 package com.ueims.service.impl;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -41,6 +47,20 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
 
     @Override
     public EligibleStudent save(EligibleStudent entity) {
+        if (entity.getEligibleId() != null) {
+            EligibleStudent existing =
+                    repository.findById(entity.getEligibleId()).orElse(null);
+            if (existing != null && "OJT".equals(existing.getStatus()) && !("OJT".equals(entity.getStatus()))) {
+                var authentication = org.springframework.security.core.context.SecurityContextHolder.getContext()
+                        .getAuthentication();
+                boolean isAdmin = authentication != null
+                        && authentication.getAuthorities().stream()
+                                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+                if (!isAdmin) {
+                    throw new AppException(ErrorCode.ADMIN_INTERVENTION_REQUIRED);
+                }
+            }
+        }
         return repository.save(entity);
     }
 
@@ -95,20 +115,72 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
     }
 
     @Override
-    public int finalizeOjtList(UUID semesterId) {
-        List<EligibleStudent> students = repository.findBySemester_SemesterIdAndStatus(semesterId, "ACCEPTED");
+    public int finalizeOjtList(List<UUID> studentIds) {
+        if (studentIds == null || studentIds.isEmpty()) {
+            return 0;
+        }
+
+        List<EligibleStudent> students = repository.findAllById(studentIds);
         if (students.isEmpty()) {
             return 0;
         }
 
         LocalDateTime now = LocalDateTime.now();
         for (EligibleStudent student : students) {
+            if (!"ACCEPTED".equals(student.getStatus())
+                    && !"MATCHED".equals(student.getStatus())
+                    && !"OJT".equals(student.getStatus())) {
+                throw new AppException(ErrorCode.INVALID_STATUS_FOR_OJT);
+            }
             student.setStatus("OJT");
             student.setApprovedAt(now);
         }
 
         repository.saveAll(students);
-        log.info("Finalized OJT list for semester {}, {} students moved to OJT status.", semesterId, students.size());
+        log.info("Finalized OJT list for {} students moved to OJT status.", students.size());
         return students.size();
+    }
+
+    @Override
+    public byte[] exportOjtStudentsToExcel(UUID semesterId) {
+        List<EligibleStudent> students = repository.findBySemester_SemesterIdAndStatus(semesterId, "OJT");
+
+        if (students.size() > 10000) {
+            throw new AppException(ErrorCode.EXPORT_VOLUME_EXCEEDED);
+        }
+
+        try (Workbook workbook = new XSSFWorkbook();
+                ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            Sheet sheet = workbook.createSheet("OJT Students");
+
+            // Header row
+            Row headerRow = sheet.createRow(0);
+            String[] columns = {"No.", "Student Code", "Full Name", "Email", "Major", "GPA", "Semester", "Status"};
+            for (int i = 0; i < columns.length; i++) {
+                headerRow.createCell(i).setCellValue(columns[i]);
+            }
+
+            // Data rows
+            int rowIdx = 1;
+            for (EligibleStudent student : students) {
+                Row row = sheet.createRow(rowIdx++);
+                row.createCell(0).setCellValue(rowIdx - 1);
+                row.createCell(1).setCellValue(student.getStudentCode());
+                row.createCell(2).setCellValue(student.getFullName());
+                row.createCell(3).setCellValue(student.getEmail() != null ? student.getEmail() : "");
+                row.createCell(4).setCellValue(student.getMajor());
+                row.createCell(5)
+                        .setCellValue(
+                                student.getGpa() != null ? student.getGpa().doubleValue() : 0.0);
+                row.createCell(6).setCellValue(student.getCurrentSemester() != null ? student.getCurrentSemester() : 0);
+                row.createCell(7).setCellValue(student.getStatus());
+            }
+
+            workbook.write(out);
+            return out.toByteArray();
+        } catch (IOException e) {
+            log.error("Failed to export OJT students to Excel", e);
+            throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
+        }
     }
 }

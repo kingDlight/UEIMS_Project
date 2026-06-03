@@ -10,4 +10,6 @@ import com.ueims.model.entity.*;
 @Repository
 public interface SemesterRepository extends JpaRepository<Semester, UUID> {
     boolean existsBySemesterCode(String semesterCode);
+
+    java.util.List<Semester> findByStatus(String status);
 }

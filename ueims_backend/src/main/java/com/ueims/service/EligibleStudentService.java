@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import com.ueims.dto.response.EligibleStudentResponse;
 import com.ueims.model.entity.EligibleStudent;
 
 public interface EligibleStudentService {
@@ -16,7 +17,9 @@ public interface EligibleStudentService {
 
     void deleteById(UUID id);
 
-    List<com.ueims.dto.response.EligibleStudentResponse> importFromExcel(MultipartFile file, UUID semesterId);
+    List<EligibleStudentResponse> importFromExcel(MultipartFile file, UUID semesterId);
 
-    int finalizeOjtList(UUID semesterId);
+    int finalizeOjtList(List<UUID> studentIds);
+
+    byte[] exportOjtStudentsToExcel(UUID semesterId);
 }
