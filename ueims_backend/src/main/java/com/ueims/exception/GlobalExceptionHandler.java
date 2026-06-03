@@ -8,6 +8,7 @@ import jakarta.validation.ConstraintViolation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -38,6 +39,18 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.builder()
                         .code(errorCode.getCode())
                         .message(userMessage)
+                        .build());
+    }
+
+    @ExceptionHandler(value = HttpRequestMethodNotSupportedException.class)
+    ResponseEntity<ApiResponse> handlingHttpRequestMethodNotSupportedException(
+            HttpRequestMethodNotSupportedException exception) {
+        log.warn("Method not supported: {}", exception.getMessage());
+        ErrorCode errorCode = ErrorCode.METHOD_NOT_SUPPORTED;
+        return ResponseEntity.status(errorCode.getStatusCode())
+                .body(ApiResponse.builder()
+                        .code(errorCode.getCode())
+                        .message(errorCode.getMessage().replace("{method}", exception.getMethod()))
                         .build());
     }
 

@@ -62,8 +62,11 @@ public class TrainingWarningServiceImpl implements TrainingWarningService {
         Semester semester = new Semester();
         semester.setSemesterId(semesterId);
 
-        User tm = new User();
-        tm.setUserId(tmId);
+        User tm = null;
+        if (tmId != null) {
+            tm = new User();
+            tm.setUserId(tmId);
+        }
 
         List<TrainingWarning> warningsToSave = new ArrayList<>();
         int count = 0;

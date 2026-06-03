@@ -75,6 +75,8 @@ public enum ErrorCode {
             1039,
             "Dữ liệu xuất vượt quá giới hạn 10000 dòng. Vui lòng chọn khoảng thời gian hẹp hơn.",
             HttpStatus.BAD_REQUEST),
+    METHOD_NOT_SUPPORTED(
+            1040, "Request method '{method}' is not supported for this API", HttpStatus.METHOD_NOT_ALLOWED),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
