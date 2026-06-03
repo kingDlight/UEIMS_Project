@@ -8,4 +8,6 @@ import org.springframework.stereotype.Repository;
 import com.ueims.model.entity.*;
 
 @Repository
-public interface FinalReportRepository extends JpaRepository<FinalReport, UUID> {}
+public interface FinalReportRepository extends JpaRepository<FinalReport, UUID> {
+    java.util.Optional<FinalReport> findByAssignment_AssignmentId(UUID assignmentId);
+}
