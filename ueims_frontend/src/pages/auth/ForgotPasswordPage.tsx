@@ -4,13 +4,18 @@ import logoUeims from '@/assets/logo_ueims.png';
 import React, { useState } from 'react';
 import { Form, Input, Button, message } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { Mail, ChevronLeft, Send, Info } from 'lucide-react';
+import { Mail, Send, Info } from 'lucide-react';
 import { AuthService } from '@/services/AuthService';
-
-const PRIMARY = '#E96500';
-const WHITE = '#FFFFFF';
-const TEXT_DARK = '#1E293B';
-const TEXT_GRAY = '#64748B';
+import {
+  AUTH_PRIMARY,
+  AUTH_PRIMARY_LIGHT,
+  AUTH_WHITE,
+  AUTH_TEXT_DARK,
+  AUTH_TEXT_GRAY,
+  AUTH_SHADOW,
+  AUTH_BORDER_RADIUS,
+  AUTH_FONT,
+} from '@/theme/authTheme';
 
 export const ForgotPasswordPage: React.FC = () => {
   const navigate = useNavigate();
@@ -38,15 +43,16 @@ export const ForgotPasswordPage: React.FC = () => {
       style={{
         minHeight: '100vh',
         display: 'flex',
-        background: `url(${bgAuth}) center/cover no-repeat, #FFF2E8`,
+        background: `url(${bgAuth}) center/cover no-repeat, ${AUTH_PRIMARY_LIGHT}`,
         padding: '40px 20px',
         position: 'relative',
         overflowX: 'hidden',
-        fontFamily: "'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif",
+        fontFamily: AUTH_FONT,
       }}
     >
       {/* TOP HEADER */}
       <div
+        className="forgot-top-header"
         style={{
           position: 'absolute',
           top: 40,
@@ -60,10 +66,10 @@ export const ForgotPasswordPage: React.FC = () => {
       >
         <img src={logoUeims} alt="UEIMS Logo" style={{ height: 48, objectFit: 'contain' }} />
         <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <h1 style={{ fontSize: 18, fontWeight: 800, color: PRIMARY, margin: 0, lineHeight: 1.1, letterSpacing: 1 }}>
+          <h1 style={{ fontSize: 18, fontWeight: 800, color: AUTH_PRIMARY, margin: 0, lineHeight: 1.1, letterSpacing: 1 }}>
             UEIMS
           </h1>
-          <p style={{ fontSize: 8, color: TEXT_DARK, textTransform: 'uppercase', fontWeight: 600, margin: '2px 0 0 0', letterSpacing: 0.5 }}>
+          <p style={{ fontSize: 8, color: AUTH_TEXT_DARK, textTransform: 'uppercase', fontWeight: 600, margin: '2px 0 0 0', letterSpacing: 0.5 }}>
             Hệ thống quản lý thực tập sinh<br />và doanh nghiệp
           </p>
         </div>
@@ -71,12 +77,13 @@ export const ForgotPasswordPage: React.FC = () => {
 
       {/* MAIN CONTAINER */}
       <div
+        className="forgot-card"
         style={{
           width: '100%',
           maxWidth: 960,
-          background: WHITE,
-          borderRadius: 20,
-          boxShadow: '0 30px 60px rgba(233, 101, 0, 0.15)',
+          background: AUTH_WHITE,
+          borderRadius: AUTH_BORDER_RADIUS,
+          boxShadow: AUTH_SHADOW,
           display: 'flex',
           margin: 'auto',
           overflow: 'hidden',
@@ -86,10 +93,11 @@ export const ForgotPasswordPage: React.FC = () => {
       >
         {/* LEFT PANEL */}
         <div
+          className="forgot-left-panel"
           style={{
             width: '48%',
-            background: '#E86500',
-            color: WHITE,
+            background: AUTH_PRIMARY,
+            color: AUTH_WHITE,
             padding: '40px 30px',
             display: 'flex',
             flexDirection: 'column',
@@ -129,7 +137,7 @@ export const ForgotPasswordPage: React.FC = () => {
           </div>
 
           <div style={{ zIndex: 2, textAlign: 'center' }}>
-            <h2 style={{ fontSize: 24, fontWeight: 700, margin: '0 0 12px 0', color: WHITE }}>Bảo mật tài khoản của bạn</h2>
+            <h2 style={{ fontSize: 24, fontWeight: 700, margin: '0 0 12px 0', color: AUTH_WHITE }}>Bảo mật tài khoản của bạn</h2>
             <p style={{ fontSize: 14, lineHeight: 1.6, color: 'rgba(255,255,255,0.9)', margin: '0 0 32px 0', padding: '0 10px' }}>
               Chúng tôi sẽ gửi liên kết khôi phục mật khẩu đến email đã đăng ký trong hệ thống.
             </p>
@@ -138,6 +146,7 @@ export const ForgotPasswordPage: React.FC = () => {
 
         {/* RIGHT PANEL */}
         <div
+          className="forgot-right-panel"
           style={{
             width: '52%',
             padding: '40px 60px',
@@ -147,21 +156,21 @@ export const ForgotPasswordPage: React.FC = () => {
             position: 'relative',
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: PRIMARY, fontWeight: 700, fontSize: 13, marginBottom: 24 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: AUTH_PRIMARY, fontWeight: 700, fontSize: 13, marginBottom: 24 }}>
             <img src={logoUeims} alt="UEIMS Logo" style={{ height: 24, objectFit: 'contain' }} />
             UEIMS
           </div>
 
-          <h1 style={{ fontSize: 26, fontWeight: 800, color: TEXT_DARK, margin: '0 0 12px 0' }}>
+          <h1 style={{ fontSize: 26, fontWeight: 800, color: AUTH_TEXT_DARK, margin: '0 0 12px 0' }}>
             Quên mật khẩu?
           </h1>
-          <p style={{ color: TEXT_GRAY, fontSize: 13, lineHeight: 1.6, margin: '0 0 30px 0' }}>
+          <p style={{ color: AUTH_TEXT_GRAY, fontSize: 13, lineHeight: 1.6, margin: '0 0 30px 0' }}>
             Nhập email đã đăng ký. Chúng tôi sẽ gửi link khôi phục<br />mật khẩu đến hộp thư của bạn.
           </p>
 
           <Form onFinish={onFinish} layout="vertical" style={{ width: '100%' }}>
             <div style={{ marginBottom: 24 }}>
-              <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: TEXT_DARK, marginBottom: 8 }}>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: AUTH_TEXT_DARK, marginBottom: 8 }}>
                 Địa chỉ Email
               </label>
               <Form.Item
@@ -177,9 +186,9 @@ export const ForgotPasswordPage: React.FC = () => {
                   size="large"
                   prefix={<Mail size={16} color="#94A3B8" style={{ marginRight: 8 }} />}
                   style={{
-                    borderRadius: 6,
+                    borderRadius: 8,
                     border: '1px solid #E2E8F0',
-                    padding: '8px 12px',
+                    padding: '10px 14px',
                     fontSize: 14,
                     height: 44,
                   }}
@@ -196,10 +205,10 @@ export const ForgotPasswordPage: React.FC = () => {
                 size="large"
                 style={{
                   height: 44,
-                  borderRadius: 6,
+                  borderRadius: 8,
                   fontSize: 14,
                   fontWeight: 600,
-                  background: PRIMARY,
+                  background: AUTH_PRIMARY,
                   border: 'none',
                   display: 'flex',
                   alignItems: 'center',
@@ -213,46 +222,57 @@ export const ForgotPasswordPage: React.FC = () => {
             </Form.Item>
           </Form>
 
-          <div style={{ marginTop: 24, backgroundColor: '#FAFAFA', border: '1px solid #F1F5F9', borderRadius: 6, padding: '14px', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-            <Info size={18} fill={PRIMARY} color={WHITE} style={{ flexShrink: 0 }} />
+          <div style={{ marginTop: 24, backgroundColor: AUTH_PRIMARY_LIGHT, border: '1px solid rgba(233, 101, 0, 0.1)', borderRadius: 8, padding: '14px', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+            <Info size={18} fill={AUTH_PRIMARY} color={AUTH_WHITE} style={{ flexShrink: 0 }} />
             <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              <strong style={{ color: PRIMARY, fontSize: 12 }}>Lưu ý</strong>
-              <p style={{ color: TEXT_GRAY, fontSize: 11, lineHeight: 1.5, margin: 0 }}>
-                Vui lòng kiểm tra cả hộp thư Spam / Promotions<br />nếu không thấy email trong hộp thư đến.
+              <strong style={{ color: AUTH_PRIMARY, fontSize: 12 }}>Lưu ý</strong>
+              <p style={{ color: AUTH_TEXT_GRAY, fontSize: 11, lineHeight: 1.5, margin: 0 }}>
+                Link khôi phục sẽ hết hạn sau <strong style={{ color: AUTH_TEXT_DARK }}>2 giờ</strong>. Nếu không nhận được email, hãy kiểm tra thư mục Spam hoặc liên hệ Training Manager.
               </p>
             </div>
           </div>
 
-          <button
-            onClick={() => navigate('/login')}
-            style={{
-              marginTop: 'auto',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 6,
-              color: PRIMARY,
-              fontSize: 12,
-              fontWeight: 600,
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              padding: 0,
-              width: 'fit-content',
-              paddingTop: 30,
-            }}
-          >
-            <ChevronLeft size={16} strokeWidth={3} />
-            Quay lại trang đăng nhập
-          </button>
+          <div style={{ marginTop: 20, display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'center' }}>
+            <span style={{ color: AUTH_TEXT_GRAY, fontSize: 13 }}>Nhớ mật khẩu?</span>
+            <a
+              onClick={() => navigate('/login')}
+              style={{ color: AUTH_PRIMARY, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}
+            >
+              Quay lại đăng nhập
+            </a>
+          </div>
         </div>
       </div>
 
-      {/* BOTTOM DOTS */}
-      <div style={{ marginTop: 24, display: 'flex', gap: 8, zIndex: 10 }}>
-        <div style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: PRIMARY }} />
-        <div style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#CBD5E1' }} />
-        <div style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#CBD5E1' }} />
-      </div>
+          <style>{`
+        @media (max-width: 1100px) {
+          .forgot-card {
+            max-width: 96vw !important;
+          }
+          .forgot-right-panel {
+            padding: 32px 24px !important;
+          }
+        }
+        @media (max-width: 768px) {
+          .forgot-card {
+            flex-direction: column !important;
+            max-width: 480px !important;
+          }
+          .forgot-left-panel {
+            display: none !important;
+          }
+          .forgot-right-panel {
+            width: 100% !important;
+            padding: 24px !important;
+          }
+          .forgot-top-header {
+            position: relative !important;
+            top: 0 !important;
+            transform: none !important;
+            padding: 20px !important;
+          }
+        }
+      `}</style>
     </div>
   );
 };

@@ -4,12 +4,13 @@ import { Form, Input, Button, message } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { AuthService } from '@/services/AuthService';
-
-const FPT_ORANGE = '#E67E22';
-const FPT_ORANGE_DARK = '#D35400';
-const FPT_WHITE = '#FFFFFF';
-const FPT_DARK = '#1A1A2E';
-const FPT_GRAY = '#6B7280';
+import {
+  AUTH_PRIMARY,
+  AUTH_PRIMARY_DARK,
+  AUTH_WHITE,
+  AUTH_TEXT_GRAY,
+  AUTH_FONT,
+} from '@/theme/authTheme';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -32,7 +33,7 @@ export const LoginPage: React.FC = () => {
       }
 
       loginWithToken(result.token);
-      message.success('Đăng nhập thành công!');
+      message.success('�ăng nhập thành công!');
       navigate('/app/dashboard');
     } catch (error: any) {
       const code = error.response?.data?.code;
@@ -61,6 +62,7 @@ export const LoginPage: React.FC = () => {
         display: 'flex',
         background: '#f6f6f6',
         flexWrap: 'wrap',
+        fontFamily: AUTH_FONT,
       }}
     >
       <svg style={{ position: 'absolute', width: 0, height: 0 }}>
@@ -100,7 +102,7 @@ export const LoginPage: React.FC = () => {
               navigate('/');
             }}
             style={{
-              color: FPT_GRAY,
+              color: AUTH_TEXT_GRAY,
               textDecoration: 'none',
               fontSize: 13,
               fontWeight: 500,
@@ -109,8 +111,8 @@ export const LoginPage: React.FC = () => {
               gap: 4,
               transition: 'color 0.2s',
             }}
-            onMouseEnter={(e) => { e.currentTarget.style.color = FPT_ORANGE; }}
-            onMouseLeave={(e) => { e.currentTarget.style.color = FPT_GRAY; }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = AUTH_PRIMARY; }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = AUTH_TEXT_GRAY; }}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M19 12H5M12 19l-7-7 7-7"/>
@@ -123,40 +125,17 @@ export const LoginPage: React.FC = () => {
           <img src={logoUeims} alt="UEIMS Logo" style={{ height: 48, objectFit: 'contain' }} />
         </div>
 
-        <div
-          style={{
-            color: FPT_ORANGE,
-            fontSize: 15,
-            fontWeight: 600,
-            marginBottom: 4,
-          }}
-        >
+        <div style={{ color: AUTH_PRIMARY, fontSize: 15, fontWeight: 600, marginBottom: 4 }}>
           Welcome to
         </div>
 
-        <div
-          style={{
-            fontSize: 52,
-            fontWeight: 800,
-            color: FPT_DARK,
-            marginBottom: 32,
-            letterSpacing: '-2px',
-          }}
-        >
+        <div style={{ fontSize: 52, fontWeight: 800, color: '#1A1A2E', marginBottom: 32, letterSpacing: '-2px' }}>
           UEIMS
         </div>
 
         <Form onFinish={onFinish}>
           <div style={{ width: '100%', maxWidth: 320, marginBottom: 20 }}>
-            <label
-              style={{
-                display: 'block',
-                color: FPT_ORANGE,
-                fontSize: 14,
-                fontWeight: 600,
-                marginBottom: 6,
-              }}
-            >
+            <label style={{ display: 'block', color: AUTH_PRIMARY, fontSize: 14, fontWeight: 600, marginBottom: 6 }}>
               Email
             </label>
             <Form.Item
@@ -184,15 +163,7 @@ export const LoginPage: React.FC = () => {
           </div>
 
           <div style={{ width: '100%', maxWidth: 320, marginBottom: 20 }}>
-            <label
-              style={{
-                display: 'block',
-                color: FPT_ORANGE,
-                fontSize: 14,
-                fontWeight: 600,
-                marginBottom: 6,
-              }}
-            >
+            <label style={{ display: 'block', color: AUTH_PRIMARY, fontSize: 14, fontWeight: 600, marginBottom: 6 }}>
               Password
             </label>
             <Form.Item
@@ -225,21 +196,21 @@ export const LoginPage: React.FC = () => {
                 height: 46,
                 border: 'none',
                 borderRadius: 40,
-                color: FPT_WHITE,
+                color: AUTH_WHITE,
                 fontSize: 16,
                 fontWeight: 700,
                 cursor: 'pointer',
-                background: `linear-gradient(90deg, ${FPT_ORANGE}, ${FPT_ORANGE_DARK})`,
-                boxShadow: `0 8px 18px ${FPT_ORANGE}40`,
+                background: `linear-gradient(90deg, ${AUTH_PRIMARY}, ${AUTH_PRIMARY_DARK})`,
+                boxShadow: `0 8px 18px ${AUTH_PRIMARY}40`,
                 transition: 'all 0.3s',
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'scale(1.05)';
-                e.currentTarget.style.boxShadow = `0 12px 24px ${FPT_ORANGE}50`;
+                e.currentTarget.style.boxShadow = `0 12px 24px ${AUTH_PRIMARY}50`;
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = 'scale(1)';
-                e.currentTarget.style.boxShadow = `0 8px 18px ${FPT_ORANGE}40`;
+                e.currentTarget.style.boxShadow = `0 8px 18px ${AUTH_PRIMARY}40`;
               }}
             >
               LOGIN
@@ -256,7 +227,7 @@ export const LoginPage: React.FC = () => {
               navigate('/forgot-password');
             }}
             style={{
-              color: FPT_ORANGE,
+              color: AUTH_PRIMARY,
               textDecoration: 'none',
               fontSize: 13,
               fontWeight: 500,
@@ -267,13 +238,8 @@ export const LoginPage: React.FC = () => {
         </div>
 
         {/* Divider + Register */}
-        <div
-          style={{
-            borderTop: '1px solid #e0e0e0',
-            paddingTop: 16,
-          }}
-        >
-          <div style={{ color: FPT_GRAY, fontSize: 13, marginBottom: 6 }}>
+        <div style={{ borderTop: '1px solid #e0e0e0', paddingTop: 16 }}>
+          <div style={{ color: AUTH_TEXT_GRAY, fontSize: 13, marginBottom: 6 }}>
             Bạn là nhà tuyển dụng?
           </div>
           <a
@@ -283,7 +249,7 @@ export const LoginPage: React.FC = () => {
               navigate('/register-enterprise');
             }}
             style={{
-              color: FPT_ORANGE,
+              color: AUTH_PRIMARY,
               textDecoration: 'none',
               fontSize: 13,
               fontWeight: 700,
@@ -326,7 +292,7 @@ export const LoginPage: React.FC = () => {
             left: 0,
             width: '100%',
             height: '100%',
-            background: `linear-gradient(135deg, ${FPT_ORANGE}15 0%, ${FPT_ORANGE_DARK}30 100%)`,
+            background: `linear-gradient(135deg, ${AUTH_PRIMARY}15 0%, ${AUTH_PRIMARY_DARK}30 100%)`,
             clipPath: 'url(#humps)',
             pointerEvents: 'none',
           }}
@@ -348,11 +314,16 @@ export const LoginPage: React.FC = () => {
         }
         .ant-input-affix-wrapper:hover,
         .ant-input-affix-wrapper-focused {
-          border-color: ${FPT_ORANGE} !important;
+          border-color: ${AUTH_PRIMARY} !important;
           box-shadow: none !important;
         }
         .ant-input:focus {
           box-shadow: none !important;
+        }
+        @media (max-width: 1100px) {
+          .login-left-panel {
+            padding: 32px 40px !important;
+          }
         }
         @media (max-width: 900px) {
           .login-left-panel {
