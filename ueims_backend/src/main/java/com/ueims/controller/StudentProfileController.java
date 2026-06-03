@@ -7,7 +7,9 @@ import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.ueims.dto.request.StudentProfileUpdateRequest;
 import com.ueims.model.entity.StudentProfile;
 import com.ueims.service.StudentProfileService;
 
@@ -32,6 +34,18 @@ public class StudentProfileController {
     @PostMapping
     public ResponseEntity<StudentProfile> create(@Valid @RequestBody StudentProfile entity) {
         return ResponseEntity.ok(service.save(entity));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<StudentProfile> update(@PathVariable UUID id,
+                                                 @Valid @RequestBody StudentProfileUpdateRequest request) {
+        return ResponseEntity.ok(service.updateProfile(id, request));
+    }
+
+    @PostMapping("/{id}/upload-cv")
+    public ResponseEntity<StudentProfile> uploadCv(@PathVariable UUID id,
+                                                   @RequestParam("file") MultipartFile file) {
+        return ResponseEntity.ok(service.uploadCv(id, file));
     }
 
     @DeleteMapping("/{id}")
