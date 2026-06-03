@@ -10,7 +10,9 @@ public interface JobPostService {
 
     JobPost findById(UUID id);
 
-    JobPost save(JobPost entity);
+    JobPost create(JobPost entity);
+
+    JobPost update(UUID id, JobPost request);
 
     void deleteById(UUID id);
 }

@@ -5,9 +5,10 @@ import java.util.UUID;
 
 import jakarta.validation.Valid;
 
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import com.ueims.dto.response.ApiResponse;
 import com.ueims.model.entity.JobPost;
 import com.ueims.service.JobPostService;
 
@@ -20,23 +21,39 @@ public class JobPostController {
     private final JobPostService service;
 
     @GetMapping
-    public ResponseEntity<List<JobPost>> getAll() {
-        return ResponseEntity.ok(service.findAll());
+    public ApiResponse<List<JobPost>> getAll() {
+        return ApiResponse.<List<JobPost>>builder().result(service.findAll()).build();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<JobPost> getById(@PathVariable UUID id) {
-        return ResponseEntity.ok(service.findById(id));
+    public ApiResponse<JobPost> getById(@PathVariable UUID id) {
+        return ApiResponse.<JobPost>builder().result(service.findById(id)).build();
     }
 
     @PostMapping
-    public ResponseEntity<JobPost> create(@Valid @RequestBody JobPost entity) {
-        return ResponseEntity.ok(service.save(entity));
+    @PreAuthorize("hasRole('ENTERPRISE')")
+    public ApiResponse<JobPost> create(@RequestBody @Valid JobPost entity) {
+        return ApiResponse.<JobPost>builder()
+                .result(service.create(entity))
+                .message("Job posting created successfully")
+                .build();
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ENTERPRISE')")
+    public ApiResponse<JobPost> update(@PathVariable UUID id, @Valid @RequestBody JobPost entity) {
+        return ApiResponse.<JobPost>builder()
+                .result(service.update(id, entity))
+                .message("Job posting updated successfully")
+                .build();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+    @PreAuthorize("hasRole('ENTERPRISE')")
+    public ApiResponse<Void> delete(@PathVariable UUID id) {
         service.deleteById(id);
-        return ResponseEntity.ok().build();
+        return ApiResponse.<Void>builder()
+                .message("Job posting deleted successfully")
+                .build();
     }
 }
