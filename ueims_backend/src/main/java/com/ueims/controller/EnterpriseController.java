@@ -5,9 +5,10 @@ import java.util.UUID;
 
 import jakarta.validation.Valid;
 
-import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import com.ueims.dto.response.ApiResponse;
 import com.ueims.model.entity.Enterprise;
 import com.ueims.service.EnterpriseService;
 
@@ -20,23 +21,49 @@ public class EnterpriseController {
     private final EnterpriseService service;
 
     @GetMapping
-    public ResponseEntity<List<Enterprise>> getAll() {
-        return ResponseEntity.ok(service.findAll());
+    @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')") // UC-18
+    public ApiResponse<List<Enterprise>> getAll() {
+        return ApiResponse.<List<Enterprise>>builder().result(service.findAll()).build();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Enterprise> getById(@PathVariable UUID id) {
-        return ResponseEntity.ok(service.findById(id));
+    @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN') or hasRole('ENTERPRISE')") // UC-35
+    public ApiResponse<Enterprise> getById(@PathVariable UUID id) {
+        // Logic kiểm tra ownership được thực hiện trong service
+        return ApiResponse.<Enterprise>builder().result(service.findById(id)).build();
     }
 
     @PostMapping
-    public ResponseEntity<Enterprise> create(@Valid @RequestBody Enterprise entity) {
-        return ResponseEntity.ok(service.save(entity));
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    public ApiResponse<Enterprise> create(@Valid @RequestBody Enterprise entity) {
+        return ApiResponse.<Enterprise>builder().result(service.save(entity)).build();
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ENTERPRISE')") // UC-36: Chỉ Enterprise được sửa profile của chính họ
+    public ApiResponse<Enterprise> update(@PathVariable UUID id, @Valid @RequestBody Enterprise entity) {
+        return ApiResponse.<Enterprise>builder()
+                .result(service.update(id, entity))
+                .message("Enterprise profile updated successfully")
+                .build();
+    }
+
+    @PutMapping("/{id}/status")
+    @PreAuthorize("hasRole('TRAINING_MANAGER')") // UC-19: Chỉ TM có quyền duyệt/từ chối
+    public ApiResponse<Enterprise> approveRejectEnterprise(
+            @PathVariable UUID id, @RequestParam String status, @RequestParam(required = false) String reason) {
+        return ApiResponse.<Enterprise>builder()
+                .result(service.approveReject(id, status, reason))
+                .message("Enterprise status updated to " + status)
+                .build();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    public ApiResponse<Void> delete(@PathVariable UUID id) {
         service.deleteById(id);
-        return ResponseEntity.ok().build();
+        return ApiResponse.<Void>builder()
+                .message("Enterprise deleted successfully")
+                .build();
     }
 }

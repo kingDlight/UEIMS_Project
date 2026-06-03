@@ -92,6 +92,26 @@ public class MailService {
         log.info("Email cảnh báo trễ báo cáo tuần {} đã được gửi đến: {}", weekNumber, to);
     }
 
+    // ===== Enterprise Status Notification (UC-19) =====
+    @org.springframework.scheduling.annotation.Async
+    public void sendEnterpriseStatusNotification(String to, String contactPerson, String status, String reason) {
+        String subject = "Thông báo kết quả duyệt hồ sơ doanh nghiệp — UEIMS";
+        String loginUrl = appBaseUrl + "/login";
+
+        Context ctx = new Context();
+        ctx.setVariable("fullName", contactPerson);
+        ctx.setVariable("status", status);
+        ctx.setVariable("reason", reason);
+        ctx.setVariable("loginUrl", loginUrl);
+        ctx.setVariable("subject", subject);
+
+        // Giả định bạn sẽ tạo template enterprise-status.html trong folder templates
+        String html = templateEngine.process("enterprise-status", ctx);
+        sendHtml(to, subject, html);
+
+        log.info("Email thông báo trạng thái {} đã được gửi tới doanh nghiệp: {}", status, to);
+    }
+
     private void sendHtml(String to, String subject, String htmlBody) {
         try {
             MimeMessage message = javaMailSender.createMimeMessage();

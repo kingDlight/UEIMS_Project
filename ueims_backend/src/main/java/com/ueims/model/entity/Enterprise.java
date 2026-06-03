@@ -43,6 +43,15 @@ public class Enterprise {
     @Column(name = "logo_url", length = 500)
     private String logoUrl;
 
+    @Column(name = "contact_person", length = 255)
+    private String contactPerson;
+
+    @Column(name = "contact_phone", length = 20)
+    private String contactPhone;
+
+    @Column(name = "contact_email", length = 255)
+    private String contactEmail;
+
     @Column(name = "status", nullable = false, length = 20)
     @Builder.Default
     private String status = "PENDING";
