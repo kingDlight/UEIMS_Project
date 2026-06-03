@@ -5,7 +5,10 @@ import java.util.UUID;
 
 import jakarta.validation.Valid;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -42,15 +45,29 @@ public class EligibleStudentController {
         return ResponseEntity.ok().build();
     }
 
+    @PreAuthorize("hasAuthority('IMPORT_ELIGIBLE_STUDENT')")
     @PostMapping("/upload")
     public ResponseEntity<List<EligibleStudentResponse>> uploadExcel(
             @RequestParam("file") MultipartFile file, @RequestParam("semesterId") UUID semesterId) {
         return ResponseEntity.ok(service.importFromExcel(file, semesterId));
     }
 
+    @PreAuthorize("hasAuthority('FINALIZE_OJT_LIST')")
     @PostMapping("/finalize-ojt")
-    public ResponseEntity<java.util.Map<String, Object>> finalizeOjtList(@RequestParam("semesterId") UUID semesterId) {
-        int count = service.finalizeOjtList(semesterId);
+    public ResponseEntity<java.util.Map<String, Object>> finalizeOjtList(@RequestBody List<UUID> studentIds) {
+        int count = service.finalizeOjtList(studentIds);
         return ResponseEntity.ok(java.util.Map.of("message", "Finalized OJT list", "updatedCount", count));
+    }
+
+    // đây là file nhị phân, nếu không file lưu về sẽ bị lỗi/hỏng. FE chú ý
+    @PreAuthorize("hasAuthority('EXPORT_OJT_STUDENT')")
+    @GetMapping("/export-ojt")
+    public ResponseEntity<byte[]> exportOjtStudents(@RequestParam("semesterId") UUID semesterId) {
+        byte[] data = service.exportOjtStudentsToExcel(semesterId);
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"OJT_Students.xlsx\"");
+        headers.setContentType(
+                MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+        return ResponseEntity.ok().headers(headers).body(data);
     }
 }
