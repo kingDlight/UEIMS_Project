@@ -58,6 +58,8 @@ public class EnterpriseRegistrationServiceImpl implements EnterpriseRegistration
                 .companyName(request.getEnterpriseName())
                 .taxCode(request.getTaxCode())
                 .address(request.getAddress())
+                .contactPerson(request.getContactPerson())
+                .contactEmail(request.getEmail())
                 .status("PENDING")
                 .build();
         enterprise = enterpriseRepository.save(enterprise);
