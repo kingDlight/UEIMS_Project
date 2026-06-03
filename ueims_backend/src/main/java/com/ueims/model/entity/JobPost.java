@@ -3,6 +3,9 @@ package com.ueims.model.entity;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import lombok.*;
 
@@ -27,12 +30,15 @@ public class JobPost {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "semester_id", nullable = false)
+    @NotNull(message = "Semester is mandatory")
     private Semester semester;
 
     @Column(name = "title", nullable = false, length = 255)
+    @NotBlank(message = "Title is mandatory")
     private String title;
 
     @Column(name = "description", nullable = false, columnDefinition = "TEXT")
+    @NotBlank(message = "Description is mandatory")
     private String description;
 
     @Column(name = "requirements", columnDefinition = "TEXT")
@@ -45,9 +51,12 @@ public class JobPost {
     private String requiredSkills;
 
     @Column(name = "positions_count", nullable = false)
+    @NotNull(message = "Positions count is mandatory")
     private Integer positionsCount;
 
     @Column(name = "application_deadline", nullable = false)
+    @NotNull(message = "Application deadline is mandatory")
+    @Future(message = "Application deadline must be in the future")
     private java.time.LocalDate applicationDeadline;
 
     @Column(name = "status", nullable = false, length = 20)
