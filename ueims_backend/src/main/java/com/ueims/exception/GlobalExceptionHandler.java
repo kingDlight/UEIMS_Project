@@ -42,6 +42,32 @@ public class GlobalExceptionHandler {
                         .build());
     }
 
+    @ExceptionHandler(value = org.springframework.dao.DataIntegrityViolationException.class)
+    ResponseEntity<ApiResponse> handlingDataIntegrityViolationException(
+            org.springframework.dao.DataIntegrityViolationException exception) {
+        String message = exception.getMostSpecificCause().getMessage();
+        log.warn("Data integrity violation: {}", message);
+        ErrorCode errorCode = ErrorCode.DATA_INTEGRITY_VIOLATION;
+        String userMessage = message != null && message.contains("ERROR: ")
+                ? message.substring(message.indexOf("ERROR: ") + 7).split("\n")[0]
+                : errorCode.getMessage();
+        return ResponseEntity.status(errorCode.getStatusCode())
+                .body(ApiResponse.builder()
+                        .code(errorCode.getCode())
+                        .message(userMessage)
+                        .build());
+    }
+
+    @ExceptionHandler(value = IllegalArgumentException.class)
+    ResponseEntity<ApiResponse> handlingIllegalArgumentException(IllegalArgumentException exception) {
+        log.warn("Illegal argument: {}", exception.getMessage());
+        return ResponseEntity.badRequest()
+                .body(ApiResponse.builder()
+                        .code(org.springframework.http.HttpStatus.BAD_REQUEST.value())
+                        .message(exception.getMessage())
+                        .build());
+    }
+
     @ExceptionHandler(value = HttpRequestMethodNotSupportedException.class)
     ResponseEntity<ApiResponse> handlingHttpRequestMethodNotSupportedException(
             HttpRequestMethodNotSupportedException exception) {

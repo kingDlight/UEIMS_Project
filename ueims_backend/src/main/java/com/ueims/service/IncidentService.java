@@ -13,4 +13,8 @@ public interface IncidentService {
     Incident save(Incident entity);
 
     void deleteById(UUID id);
+
+    Incident reportIncident(com.ueims.dto.request.IncidentReportRequest request);
+
+    Incident resolveIncident(UUID incidentId, com.ueims.dto.request.IncidentResolveRequest request);
 }
