@@ -36,8 +36,8 @@ public class FinalReportController {
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<FinalReport> uploadFinalReport(@RequestParam("assignmentId") UUID assignmentId,
-                                                         @RequestParam("file") MultipartFile file) {
+    public ResponseEntity<FinalReport> uploadFinalReport(
+            @RequestParam("assignmentId") UUID assignmentId, @RequestParam("file") MultipartFile file) {
         return ResponseEntity.ok(service.uploadFinalReport(assignmentId, file));
     }
 

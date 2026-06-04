@@ -55,6 +55,9 @@ public enum ErrorCode {
 
     // Application related
     APPLICATION_NOT_FOUND(1032, "Application not found", HttpStatus.NOT_FOUND),
+    APPLICATION_STATUS_CHANGED(
+            1044, "Cannot withdraw. Your application is already being processed or has been reviewed by the enterprise.",
+            HttpStatus.BAD_REQUEST),
 
     // Account related
     USER_BANNED(2001, "Tài khoản của bạn đã bị khóa do nhập sai mật khẩu quá 5 lần", HttpStatus.FORBIDDEN),
@@ -78,6 +81,8 @@ public enum ErrorCode {
     DATA_INTEGRITY_VIOLATION(1040, "Data integrity violation: Foreign key or constraint error", HttpStatus.BAD_REQUEST),
     METHOD_NOT_SUPPORTED(
             1041, "Request method '{method}' is not supported for this API", HttpStatus.METHOD_NOT_ALLOWED),
+    FINAL_REPORT_INVALID_FORMAT(1042, "Invalid file format for final report", HttpStatus.BAD_REQUEST),
+    FINAL_REPORT_SIZE_EXCEEDED(1043, "Final report file size exceeded", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

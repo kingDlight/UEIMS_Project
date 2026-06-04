@@ -36,8 +36,7 @@ public class WeeklyReportController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<WeeklyReport> update(@PathVariable UUID id,
-                                               @Valid @RequestBody WeeklyReportRequest request) {
+    public ResponseEntity<WeeklyReport> update(@PathVariable UUID id, @Valid @RequestBody WeeklyReportRequest request) {
         return ResponseEntity.ok(service.updateReport(id, request));
     }
 

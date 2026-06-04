@@ -127,4 +127,29 @@ public class ApplicationServiceImpl implements ApplicationService {
     public void deleteById(UUID id) {
         repository.deleteById(id);
     }
+
+    @Override
+    @Transactional
+    public ApplicationResponse withdrawApplication(UUID applicationId) {
+        // 1. Get the application
+        Application application = repository.findById(applicationId)
+                .orElseThrow(() -> new AppException(ErrorCode.APPLICATION_NOT_FOUND));
+
+        // 2. BR-48: Check if application deadline has passed
+        JobPost jobPost = application.getJobPost();
+        if (jobPost.getApplicationDeadline() != null && LocalDate.now().isAfter(jobPost.getApplicationDeadline())) {
+            throw new AppException(ErrorCode.APPLICATION_DEADLINE_EXPIRED);
+        }
+
+        // 3. E2: Check if application status is still PENDING
+        if (application.getStatus() != ApplicationStatus.PENDING) {
+            throw new AppException(ErrorCode.APPLICATION_STATUS_CHANGED);
+        }
+
+        // 4. Update status to WITHDRAWN
+        application.setStatus(ApplicationStatus.WITHDRAWN);
+        Application updated = repository.save(application);
+
+        return mapper.toApplicationResponse(updated);
+    }
 }

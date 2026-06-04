@@ -57,17 +57,20 @@ public class FinalReportServiceImpl implements FinalReportService {
             throw new AppException(ErrorCode.FINAL_REPORT_SIZE_EXCEEDED);
         }
 
-        EnterpriseAssignment assignment = enterpriseAssignmentRepository.findById(assignmentId)
+        EnterpriseAssignment assignment = enterpriseAssignmentRepository
+                .findById(assignmentId)
                 .orElseThrow(() -> new AppException(ErrorCode.FIELD_REQUIRED));
 
         try {
             Path uploadDir = Paths.get(System.getProperty("user.dir"), "uploads", "final-reports");
             Files.createDirectories(uploadDir);
-            String stored = assignmentId.toString() + "_" + System.currentTimeMillis() + "_" + StringUtils.cleanPath(filename);
+            String stored =
+                    assignmentId.toString() + "_" + System.currentTimeMillis() + "_" + StringUtils.cleanPath(filename);
             Path path = uploadDir.resolve(stored);
             file.transferTo(path.toFile());
 
-            FinalReport report = repository.findByAssignment_AssignmentId(assignmentId)
+            FinalReport report = repository
+                    .findByAssignment_AssignmentId(assignmentId)
                     .orElse(FinalReport.builder().assignment(assignment).build());
             report.setAssignment(assignment);
             report.setFileUrl("/uploads/final-reports/" + stored);
