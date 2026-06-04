@@ -45,22 +45,29 @@ public class EligibleStudentController {
         return ResponseEntity.ok().build();
     }
 
-    @PreAuthorize("hasAuthority('IMPORT_ELIGIBLE_STUDENT')")
+    @PreAuthorize("hasRole('TRAINING_MANAGER')")
     @PostMapping("/upload")
     public ResponseEntity<List<EligibleStudentResponse>> uploadExcel(
             @RequestParam("file") MultipartFile file, @RequestParam("semesterId") UUID semesterId) {
         return ResponseEntity.ok(service.importFromExcel(file, semesterId));
     }
 
-    @PreAuthorize("hasAuthority('FINALIZE_OJT_LIST')")
+    @PreAuthorize("hasRole('TRAINING_MANAGER')")
     @PostMapping("/finalize-ojt")
     public ResponseEntity<java.util.Map<String, Object>> finalizeOjtList(@RequestBody List<UUID> studentIds) {
         int count = service.finalizeOjtList(studentIds);
         return ResponseEntity.ok(java.util.Map.of("message", "Finalized OJT list", "updatedCount", count));
     }
 
+    @PreAuthorize("hasRole('TRAINING_MANAGER')")
+    @PutMapping("/{id}/cancel")
+    public ResponseEntity<EligibleStudent> cancelOjtResult(
+            @PathVariable UUID id, @Valid @RequestBody com.ueims.dto.request.CancelOjtRequest request) {
+        return ResponseEntity.ok(service.cancelOjtResult(id, request.getReason()));
+    }
+
     // đây là file nhị phân, nếu không file lưu về sẽ bị lỗi/hỏng. FE chú ý
-    @PreAuthorize("hasAuthority('EXPORT_OJT_STUDENT')")
+    @PreAuthorize("hasRole('TRAINING_MANAGER')")
     @GetMapping("/export-ojt")
     public ResponseEntity<byte[]> exportOjtStudents(@RequestParam("semesterId") UUID semesterId) {
         byte[] data = service.exportOjtStudentsToExcel(semesterId);

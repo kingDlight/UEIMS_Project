@@ -90,6 +90,12 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         }
 
         enterprise.setStatus(status.toUpperCase());
+        if ("REJECTED".equalsIgnoreCase(status)) {
+            enterprise.setRejectionReason(reason);
+        } else if ("APPROVED".equalsIgnoreCase(status)) {
+            enterprise.setRejectionReason(null);
+        }
+
         Enterprise saved = repository.save(enterprise);
 
         // UC-19: Gửi email thông báo (Post-condition bắt buộc)

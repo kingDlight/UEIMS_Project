@@ -16,6 +16,8 @@ import com.ueims.model.entity.*;
 public interface UserRepository extends JpaRepository<User, UUID> {
     Optional<User> findByEmail(String email);
 
+    boolean existsByEmail(String email);
+
     @Modifying
     @Transactional
     @Query(

@@ -78,7 +78,11 @@ public class ExcelImportUtil {
 
                 Cell semesterCell = currentRow.getCell(5, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
                 if (semesterCell != null) {
-                    student.setCurrentSemester((int) semesterCell.getNumericCellValue());
+                    int sem = (int) semesterCell.getNumericCellValue();
+                    if (sem != 5 && sem != 6) {
+                        throw new AppException(ErrorCode.INVALID_EXCEL_FORMAT);
+                    }
+                    student.setCurrentSemester(sem);
                 } else {
                     throw new AppException(ErrorCode.INVALID_EXCEL_FORMAT);
                 }
