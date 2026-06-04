@@ -20,7 +20,6 @@ import org.springframework.web.filter.CorsFilter;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-@lombok.RequiredArgsConstructor
 public class SecurityConfig {
     private static final String[] PUBLIC_ENDPOINTS = {
         "/api/users",
@@ -34,11 +33,12 @@ public class SecurityConfig {
         "/api/test/**"
     };
 
-    private final CustomJwtDecoder customJwtDecoder;
-
     @Bean
     public SecurityFilterChain filterChain(
-            HttpSecurity httpSecurity, RequirePasswordChangeFilter requirePasswordChangeFilter) throws Exception {
+            HttpSecurity httpSecurity,
+            CustomJwtDecoder customJwtDecoder,
+            RequirePasswordChangeFilter requirePasswordChangeFilter)
+            throws Exception {
         httpSecurity.authorizeHttpRequests(request -> request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS)
                 .permitAll()
                 .anyRequest()
