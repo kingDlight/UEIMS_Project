@@ -14,6 +14,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class EmailTestController {
 
+    private static final String KEY_FULL_NAME = "fullName";
+    private static final String KEY_STATUS = "status";
+    private static final String KEY_TEMPLATE = "template";
+
     private final MailService mailService;
 
     /**
@@ -22,8 +26,8 @@ public class EmailTestController {
      */
     @PostMapping("/email/password-reset")
     public ResponseEntity<Map<String, String>> testPasswordReset(@RequestBody Map<String, String> body) {
-        mailService.sendPasswordResetMail(body.get("to"), body.get("fullName"), "test-token-123456");
-        return ResponseEntity.ok(Map.of("status", "sent", "template", "password-reset"));
+        mailService.sendPasswordResetMail(body.get("to"), body.get(KEY_FULL_NAME), "test-token-123456");
+        return ResponseEntity.ok(Map.of(KEY_STATUS, "sent", KEY_TEMPLATE, "password-reset"));
     }
 
     /**
@@ -32,8 +36,8 @@ public class EmailTestController {
      */
     @PostMapping("/email/welcome")
     public ResponseEntity<Map<String, String>> testWelcome(@RequestBody Map<String, String> body) {
-        mailService.sendWelcomeMail(body.get("to"), body.get("fullName"), body.get("tempPassword"));
-        return ResponseEntity.ok(Map.of("status", "sent", "template", "welcome"));
+        mailService.sendWelcomeMail(body.get("to"), body.get(KEY_FULL_NAME), body.get("tempPassword"));
+        return ResponseEntity.ok(Map.of(KEY_STATUS, "sent", KEY_TEMPLATE, "welcome"));
     }
 
     /**
@@ -42,7 +46,7 @@ public class EmailTestController {
      */
     @PostMapping("/email/password-changed")
     public ResponseEntity<Map<String, String>> testPasswordChanged(@RequestBody Map<String, String> body) {
-        mailService.sendPasswordChangedMail(body.get("to"), body.get("fullName"), body.get("changedAt"));
-        return ResponseEntity.ok(Map.of("status", "sent", "template", "password-changed"));
+        mailService.sendPasswordChangedMail(body.get("to"), body.get(KEY_FULL_NAME), body.get("changedAt"));
+        return ResponseEntity.ok(Map.of(KEY_STATUS, "sent", KEY_TEMPLATE, "password-changed"));
     }
 }

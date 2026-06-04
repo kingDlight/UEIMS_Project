@@ -25,65 +25,68 @@ import lombok.extern.slf4j.Slf4j;
 public class GlobalExceptionHandler {
 
     private static final String MIN_ATTRIBUTE = "min";
+    private static final String ERROR_PREFIX = "ERROR: ";
 
     @ExceptionHandler(value = JpaSystemException.class)
-    ResponseEntity<ApiResponse> handlingJpaSystemException(JpaSystemException exception) {
+    ResponseEntity<ApiResponse<Void>> handlingJpaSystemException(JpaSystemException exception) {
         String message = exception.getMostSpecificCause().getMessage();
         log.warn("DB constraint violation: {}", message);
         ErrorCode errorCode = ErrorCode.SEMESTER_INVALID_TRANSITION;
         // Extract the readable DB trigger message (after "ERROR: ")
-        String userMessage = message != null && message.contains("ERROR: ")
-                ? message.substring(message.indexOf("ERROR: ") + 7).split("\n")[0]
+        String userMessage = message != null && message.contains(ERROR_PREFIX)
+                ? message.substring(message.indexOf(ERROR_PREFIX) + ERROR_PREFIX.length())
+                        .split("\n")[0]
                 : errorCode.getMessage();
         return ResponseEntity.status(errorCode.getStatusCode())
-                .body(ApiResponse.builder()
+                .body(ApiResponse.<Void>builder()
                         .code(errorCode.getCode())
                         .message(userMessage)
                         .build());
     }
 
     @ExceptionHandler(value = org.springframework.dao.DataIntegrityViolationException.class)
-    ResponseEntity<ApiResponse> handlingDataIntegrityViolationException(
+    ResponseEntity<ApiResponse<Void>> handlingDataIntegrityViolationException(
             org.springframework.dao.DataIntegrityViolationException exception) {
         String message = exception.getMostSpecificCause().getMessage();
         log.warn("Data integrity violation: {}", message);
         ErrorCode errorCode = ErrorCode.DATA_INTEGRITY_VIOLATION;
-        String userMessage = message != null && message.contains("ERROR: ")
-                ? message.substring(message.indexOf("ERROR: ") + 7).split("\n")[0]
+        String userMessage = message != null && message.contains(ERROR_PREFIX)
+                ? message.substring(message.indexOf(ERROR_PREFIX) + ERROR_PREFIX.length())
+                        .split("\n")[0]
                 : errorCode.getMessage();
         return ResponseEntity.status(errorCode.getStatusCode())
-                .body(ApiResponse.builder()
+                .body(ApiResponse.<Void>builder()
                         .code(errorCode.getCode())
                         .message(userMessage)
                         .build());
     }
 
     @ExceptionHandler(value = IllegalArgumentException.class)
-    ResponseEntity<ApiResponse> handlingIllegalArgumentException(IllegalArgumentException exception) {
+    ResponseEntity<ApiResponse<Void>> handlingIllegalArgumentException(IllegalArgumentException exception) {
         log.warn("Illegal argument: {}", exception.getMessage());
         return ResponseEntity.badRequest()
-                .body(ApiResponse.builder()
+                .body(ApiResponse.<Void>builder()
                         .code(org.springframework.http.HttpStatus.BAD_REQUEST.value())
                         .message(exception.getMessage())
                         .build());
     }
 
     @ExceptionHandler(value = HttpRequestMethodNotSupportedException.class)
-    ResponseEntity<ApiResponse> handlingHttpRequestMethodNotSupportedException(
+    ResponseEntity<ApiResponse<Void>> handlingHttpRequestMethodNotSupportedException(
             HttpRequestMethodNotSupportedException exception) {
         log.warn("Method not supported: {}", exception.getMessage());
         ErrorCode errorCode = ErrorCode.METHOD_NOT_SUPPORTED;
         return ResponseEntity.status(errorCode.getStatusCode())
-                .body(ApiResponse.builder()
+                .body(ApiResponse.<Void>builder()
                         .code(errorCode.getCode())
                         .message(errorCode.getMessage().replace("{method}", exception.getMethod()))
                         .build());
     }
 
     @ExceptionHandler(value = Exception.class)
-    ResponseEntity<ApiResponse> handlingRuntimeException(Exception exception) {
+    ResponseEntity<ApiResponse<Void>> handlingRuntimeException(Exception exception) {
         log.error("Exception: ", exception);
-        ApiResponse apiResponse = new ApiResponse();
+        ApiResponse<Void> apiResponse = new ApiResponse<>();
 
         apiResponse.setCode(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode());
         apiResponse.setMessage(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage());
@@ -92,9 +95,9 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(value = AppException.class)
-    ResponseEntity<ApiResponse> handlingAppException(AppException exception) {
+    ResponseEntity<ApiResponse<Void>> handlingAppException(AppException exception) {
         ErrorCode errorCode = exception.getErrorCode();
-        ApiResponse apiResponse = new ApiResponse();
+        ApiResponse<Void> apiResponse = new ApiResponse<>();
 
         apiResponse.setCode(errorCode.getCode());
         apiResponse.setMessage(errorCode.getMessage());
@@ -103,22 +106,22 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(value = AccessDeniedException.class)
-    ResponseEntity<ApiResponse> handlingAccessDeniedException(AccessDeniedException exception) {
+    ResponseEntity<ApiResponse<Void>> handlingAccessDeniedException(AccessDeniedException exception) {
         ErrorCode errorCode = ErrorCode.UNAUTHORIZED;
 
         return ResponseEntity.status(errorCode.getStatusCode())
-                .body(ApiResponse.builder()
+                .body(ApiResponse.<Void>builder()
                         .code(errorCode.getCode())
                         .message(errorCode.getMessage())
                         .build());
     }
 
     @ExceptionHandler(value = MissingServletRequestPartException.class)
-    ResponseEntity<ApiResponse> handlingMissingPart(MissingServletRequestPartException exception) {
+    ResponseEntity<ApiResponse<Void>> handlingMissingPart(MissingServletRequestPartException exception) {
         log.warn("Missing multipart part: {}", exception.getRequestPartName());
         ErrorCode errorCode = ErrorCode.INVALID_EXCEL_FORMAT;
         return ResponseEntity.status(errorCode.getStatusCode())
-                .body(ApiResponse.builder()
+                .body(ApiResponse.<Void>builder()
                         .code(errorCode.getCode())
                         .message("Required file part '" + exception.getRequestPartName()
                                 + "' is missing. Please attach the file in form-data.")
@@ -126,19 +129,19 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(value = org.springframework.web.bind.MissingServletRequestParameterException.class)
-    ResponseEntity<ApiResponse> handlingMissingParameter(
+    ResponseEntity<ApiResponse<Void>> handlingMissingParameter(
             org.springframework.web.bind.MissingServletRequestParameterException exception) {
         log.warn("Missing request parameter: {}", exception.getParameterName());
         ErrorCode errorCode = ErrorCode.MISSING_PARAMETER;
         return ResponseEntity.status(errorCode.getStatusCode())
-                .body(ApiResponse.builder()
+                .body(ApiResponse.<Void>builder()
                         .code(errorCode.getCode())
                         .message(errorCode.getMessage().replace("{param}", exception.getParameterName()))
                         .build());
     }
 
     @ExceptionHandler(value = org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class)
-    ResponseEntity<ApiResponse> handlingTypeMismatch(
+    ResponseEntity<ApiResponse<Void>> handlingTypeMismatch(
             org.springframework.web.method.annotation.MethodArgumentTypeMismatchException exception) {
         log.warn("Type mismatch for parameter: {}", exception.getName());
         ErrorCode errorCode = ErrorCode.INVALID_PARAMETER_FORMAT;
@@ -149,18 +152,18 @@ public class GlobalExceptionHandler {
                 errorCode.getMessage().replace("{param}", exception.getName()).replace("{type}", requiredType);
 
         return ResponseEntity.status(errorCode.getStatusCode())
-                .body(ApiResponse.builder()
+                .body(ApiResponse.<Void>builder()
                         .code(errorCode.getCode())
                         .message(message)
                         .build());
     }
 
     @ExceptionHandler(value = MultipartException.class)
-    ResponseEntity<ApiResponse> handlingMultipartException(MultipartException exception) {
+    ResponseEntity<ApiResponse<Void>> handlingMultipartException(MultipartException exception) {
         log.warn("Multipart error: {}", exception.getMessage());
         ErrorCode errorCode = ErrorCode.INVALID_EXCEL_FORMAT;
         return ResponseEntity.status(errorCode.getStatusCode())
-                .body(ApiResponse.builder()
+                .body(ApiResponse.<Void>builder()
                         .code(errorCode.getCode())
                         .message(
                                 "Invalid multipart request. Make sure Content-Type is multipart/form-data and the file is attached.")
@@ -168,18 +171,18 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(value = MaxUploadSizeExceededException.class)
-    ResponseEntity<ApiResponse> handlingMaxUploadSize(MaxUploadSizeExceededException exception) {
+    ResponseEntity<ApiResponse<Void>> handlingMaxUploadSize(MaxUploadSizeExceededException exception) {
         log.warn("File too large: {}", exception.getMessage());
         ErrorCode errorCode = ErrorCode.INVALID_EXCEL_FORMAT;
         return ResponseEntity.status(errorCode.getStatusCode())
-                .body(ApiResponse.builder()
+                .body(ApiResponse.<Void>builder()
                         .code(errorCode.getCode())
                         .message("Uploaded file exceeds the maximum allowed size.")
                         .build());
     }
 
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
-    ResponseEntity<ApiResponse> handlingValidation(MethodArgumentNotValidException exception) {
+    ResponseEntity<ApiResponse<Void>> handlingValidation(MethodArgumentNotValidException exception) {
         String enumKey = exception.getFieldError().getDefaultMessage();
 
         ErrorCode errorCode = ErrorCode.INVALID_KEY;
@@ -195,10 +198,10 @@ public class GlobalExceptionHandler {
             log.info(attributes.toString());
 
         } catch (IllegalArgumentException e) {
-
+            // Keep default ErrorCode.INVALID_KEY if the violation message is not a valid ErrorCode enum name
         }
 
-        ApiResponse apiResponse = new ApiResponse();
+        ApiResponse<Void> apiResponse = new ApiResponse<>();
 
         apiResponse.setCode(errorCode.getCode());
         apiResponse.setMessage(

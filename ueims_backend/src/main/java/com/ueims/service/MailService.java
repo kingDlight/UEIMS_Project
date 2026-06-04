@@ -17,6 +17,11 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class MailService {
 
+    private static final String VAR_FULL_NAME = "fullName";
+    private static final String VAR_SUBJECT = "subject";
+    private static final String PATH_LOGIN = "/login";
+    private static final String VAR_LOGIN_URL = "loginUrl";
+
     private final JavaMailSender javaMailSender;
     private final TemplateEngine templateEngine;
 
@@ -29,9 +34,9 @@ public class MailService {
         String subject = "Yêu cầu đặt lại mật khẩu — UEIMS";
 
         Context ctx = new Context();
-        ctx.setVariable("fullName", fullName);
+        ctx.setVariable(VAR_FULL_NAME, fullName);
         ctx.setVariable("resetUrl", resetUrl);
-        ctx.setVariable("subject", subject);
+        ctx.setVariable(VAR_SUBJECT, subject);
 
         String html = templateEngine.process("password-reset", ctx);
         sendHtml(to, subject, html);
@@ -41,15 +46,15 @@ public class MailService {
 
     // ===== Welcome Email (VI) =====
     public void sendWelcomeMail(String to, String fullName, String tempPassword) {
-        String loginUrl = appBaseUrl + "/login";
+        String loginUrl = appBaseUrl + PATH_LOGIN;
         String subject = "Chào mừng bạn đến với UEIMS";
 
         Context ctx = new Context();
-        ctx.setVariable("fullName", fullName);
+        ctx.setVariable(VAR_FULL_NAME, fullName);
         ctx.setVariable("email", to);
         ctx.setVariable("tempPassword", tempPassword);
-        ctx.setVariable("loginUrl", loginUrl);
-        ctx.setVariable("subject", subject);
+        ctx.setVariable(VAR_LOGIN_URL, loginUrl);
+        ctx.setVariable(VAR_SUBJECT, subject);
 
         String html = templateEngine.process("welcome", ctx);
         sendHtml(to, subject, html);
@@ -59,14 +64,14 @@ public class MailService {
 
     // ===== Password Changed (VI) =====
     public void sendPasswordChangedMail(String to, String fullName, String changedAt) {
-        String loginUrl = appBaseUrl + "/login";
+        String loginUrl = appBaseUrl + PATH_LOGIN;
         String subject = "Mật khẩu đã được thay đổi — UEIMS";
 
         Context ctx = new Context();
-        ctx.setVariable("fullName", fullName);
+        ctx.setVariable(VAR_FULL_NAME, fullName);
         ctx.setVariable("changedAt", changedAt);
-        ctx.setVariable("loginUrl", loginUrl);
-        ctx.setVariable("subject", subject);
+        ctx.setVariable(VAR_LOGIN_URL, loginUrl);
+        ctx.setVariable(VAR_SUBJECT, subject);
 
         String html = templateEngine.process("password-changed", ctx);
         sendHtml(to, subject, html);
@@ -77,19 +82,39 @@ public class MailService {
     // ===== Late Report Warning (VI) =====
     @org.springframework.scheduling.annotation.Async
     public void sendLateReportWarningMail(String to, String fullName, Integer weekNumber) {
-        String loginUrl = appBaseUrl + "/login";
+        String loginUrl = appBaseUrl + PATH_LOGIN;
         String subject = "Cảnh báo: Trễ hạn nộp báo cáo tuần " + weekNumber + " — UEIMS";
 
         Context ctx = new Context();
-        ctx.setVariable("fullName", fullName);
+        ctx.setVariable(VAR_FULL_NAME, fullName);
         ctx.setVariable("weekNumber", weekNumber);
-        ctx.setVariable("loginUrl", loginUrl);
-        ctx.setVariable("subject", subject);
+        ctx.setVariable(VAR_LOGIN_URL, loginUrl);
+        ctx.setVariable(VAR_SUBJECT, subject);
 
         String html = templateEngine.process("late-report-warning", ctx);
         sendHtml(to, subject, html);
 
         log.info("Email cảnh báo trễ báo cáo tuần {} đã được gửi đến: {}", weekNumber, to);
+    }
+
+    // ===== Enterprise Status Notification (UC-19) =====
+    @org.springframework.scheduling.annotation.Async
+    public void sendEnterpriseStatusNotification(String to, String contactPerson, String status, String reason) {
+        String subject = "Thông báo kết quả duyệt hồ sơ doanh nghiệp — UEIMS";
+        String loginUrl = appBaseUrl + PATH_LOGIN;
+
+        Context ctx = new Context();
+        ctx.setVariable(VAR_FULL_NAME, contactPerson);
+        ctx.setVariable("status", status);
+        ctx.setVariable("reason", reason);
+        ctx.setVariable(VAR_LOGIN_URL, loginUrl);
+        ctx.setVariable(VAR_SUBJECT, subject);
+
+        // Giả định bạn sẽ tạo template enterprise-status.html trong folder templates
+        String html = templateEngine.process("enterprise-status", ctx);
+        sendHtml(to, subject, html);
+
+        log.info("Email thông báo trạng thái {} đã được gửi tới doanh nghiệp: {}", status, to);
     }
 
     private void sendHtml(String to, String subject, String htmlBody) {

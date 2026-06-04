@@ -74,15 +74,19 @@ public enum ErrorCode {
     TAX_CODE_EXISTED(1037, "Mã số thuế đã được sử dụng bởi doanh nghiệp khác", HttpStatus.BAD_REQUEST),
     ENTERPRISE_REGISTRATION_SUCCESS(
             1038, "Đăng ký thành công. Tài khoản sẽ được kích hoạt sau khi Training Manager phê duyệt.", HttpStatus.OK),
+    ENTERPRISE_NOT_FOUND(1042, "Enterprise not found", HttpStatus.NOT_FOUND),
+    FINAL_REPORT_DEADLINE_EXPIRED(1043, "Cannot submit final report after semester end date", HttpStatus.BAD_REQUEST),
+    INTERVIEW_NOT_FOUND(1045, "Interview not found", HttpStatus.NOT_FOUND),
+    INTERVIEW_ALREADY_CONFIRMED(1046, "Interview already confirmed", HttpStatus.BAD_REQUEST),
+    FINAL_REPORT_INVALID_FORMAT(1047, "Invalid file format for final report", HttpStatus.BAD_REQUEST),
+    FINAL_REPORT_SIZE_EXCEEDED(1048, "Final report size exceeded", HttpStatus.BAD_REQUEST),
     EXPORT_EXCEED_LIMIT(
-            1039,
+            1049,
             "Dữ liệu xuất vượt quá giới hạn 10000 dòng. Vui lòng chọn khoảng thời gian hẹp hơn.",
             HttpStatus.BAD_REQUEST),
-    DATA_INTEGRITY_VIOLATION(1040, "Data integrity violation: Foreign key or constraint error", HttpStatus.BAD_REQUEST),
+    DATA_INTEGRITY_VIOLATION(1050, "Data integrity violation: Foreign key or constraint error", HttpStatus.BAD_REQUEST),
     METHOD_NOT_SUPPORTED(
-            1041, "Request method '{method}' is not supported for this API", HttpStatus.METHOD_NOT_ALLOWED),
-    FINAL_REPORT_INVALID_FORMAT(1042, "Invalid file format for final report", HttpStatus.BAD_REQUEST),
-    FINAL_REPORT_SIZE_EXCEEDED(1043, "Final report file size exceeded", HttpStatus.BAD_REQUEST),
+            1051, "Request method '{method}' is not supported for this API", HttpStatus.METHOD_NOT_ALLOWED),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

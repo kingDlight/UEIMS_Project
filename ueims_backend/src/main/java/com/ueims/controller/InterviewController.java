@@ -39,4 +39,14 @@ public class InterviewController {
         service.deleteById(id);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/{id}/confirm")
+    public ResponseEntity<Interview> confirm(@PathVariable UUID id) {
+        return ResponseEntity.ok(service.confirmAttendance(id));
+    }
+
+    @PostMapping("/{id}/decline")
+    public ResponseEntity<Interview> decline(@PathVariable UUID id, @RequestParam("reason") String reason) {
+        return ResponseEntity.ok(service.declineAttendance(id, reason));
+    }
 }

@@ -33,7 +33,7 @@ export const LoginPage: React.FC = () => {
       }
 
       loginWithToken(result.token);
-      message.success('�ăng nhập thành công!');
+      message.success('Đăng nhập thành công!');
       navigate('/app/dashboard');
     } catch (error: any) {
       const code = error.response?.data?.code;
