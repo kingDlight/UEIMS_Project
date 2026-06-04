@@ -164,7 +164,7 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
             int rowIdx = 1;
             for (EligibleStudent student : students) {
                 Row row = sheet.createRow(rowIdx++);
-                row.createCell(0).setCellValue(rowIdx - 1);
+                row.createCell(0).setCellValue((double) rowIdx - 1);
                 row.createCell(1).setCellValue(student.getStudentCode());
                 row.createCell(2).setCellValue(student.getFullName());
                 row.createCell(3).setCellValue(student.getEmail() != null ? student.getEmail() : "");

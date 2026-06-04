@@ -107,7 +107,7 @@ public class AuditLogServiceImpl implements AuditLogService {
             return out.toByteArray();
         } catch (Exception e) {
             log.error("Failed to export Excel", e);
-            throw new RuntimeException("Failed to generate Excel file");
+            throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
         }
     }
 }
