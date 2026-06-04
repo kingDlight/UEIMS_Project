@@ -18,6 +18,10 @@ import com.ueims.model.entity.EligibleStudent;
 
 public class ExcelImportUtil {
 
+    private ExcelImportUtil() {
+        throw new IllegalStateException("Utility class");
+    }
+
     public static List<EligibleStudent> parseEligibleStudents(InputStream is) {
         try {
             Workbook workbook = new XSSFWorkbook(is);

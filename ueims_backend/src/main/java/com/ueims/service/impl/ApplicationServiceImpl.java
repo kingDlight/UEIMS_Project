@@ -3,7 +3,6 @@ package com.ueims.service.impl;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,7 +31,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     @Transactional(readOnly = true)
     public List<ApplicationResponse> findAll() {
-        return repository.findAll().stream().map(mapper::toApplicationResponse).collect(Collectors.toList());
+        return repository.findAll().stream().map(mapper::toApplicationResponse).toList();
     }
 
     @Override
