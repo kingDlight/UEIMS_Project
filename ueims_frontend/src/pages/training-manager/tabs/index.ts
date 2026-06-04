@@ -1,0 +1,9 @@
+export { DashboardTab } from './DashboardTab';
+export { EnterpriseTab } from './EnterpriseTab';
+export { StudentsTab } from './StudentsTab';
+export { OJTTab } from './OJTTab';
+export { StatsTab } from './StatsTab';
+export { IncidentsTab } from './IncidentsTab';
+export { ReportsTab } from './ReportsTab';
+export { SemesterTab } from './SemesterTab';
+export { NoticesTab } from './NoticesTab';

@@ -1,11 +1,27 @@
-import axios from 'axios';
-
-const API_URL = 'http://localhost:8080/api/incidents';
+import { api } from './api';
 
 export const IncidentService = {
-    getAll: () => axios.get(API_URL),
-    getById: (id: string) => axios.get(`${API_URL}/${id}`),
-    create: (data: any) => axios.post(API_URL, data),
-    update: (id: string, data: any) => axios.put(`${API_URL}/${id}`, data),
-    delete: (id: string) => axios.delete(`${API_URL}/${id}`)
+    getAll: async () => {
+        const response = await api.get('/incidents');
+        return response.data;
+    },
+    getById: async (id: string) => {
+        const response = await api.get(`/incidents/${id}`);
+        return response.data;
+    },
+    create: async (data: any) => {
+        const response = await api.post('/incidents', data);
+        return response.data;
+    },
+    update: async (id: string, data: any) => {
+        const response = await api.put(`/incidents/${id}`, data);
+        return response.data;
+    },
+    delete: async (id: string) => {
+        await api.delete(`/incidents/${id}`);
+    },
+    resolve: async (id: string, data: { resolutionNote: string }) => {
+        const response = await api.put(`/incidents/${id}/resolve`, data);
+        return response.data;
+    }
 };

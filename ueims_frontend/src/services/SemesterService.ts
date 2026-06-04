@@ -1,11 +1,53 @@
-import axios from 'axios';
+import { api } from './api';
 
-const API_URL = 'http://localhost:8080/api/semesters';
+export interface SemesterResponse {
+  semesterId: string;
+  semesterCode: string;
+  name: string;
+  startDate: string;
+  endDate: string;
+  status: string;
+  weeklyReportDeadlineDay: string;
+  weeklyReportDeadlineTime: string;
+}
 
 export const SemesterService = {
-    getAll: () => axios.get(API_URL),
-    getById: (id: string) => axios.get(`${API_URL}/${id}`),
-    create: (data: any) => axios.post(API_URL, data),
-    update: (id: string, data: any) => axios.put(`${API_URL}/${id}`, data),
-    delete: (id: string) => axios.delete(`${API_URL}/${id}`)
+  async getAllSemesters(): Promise<SemesterResponse[]> {
+    const response = await api.get<SemesterResponse[]>('/semesters');
+    return response.data || [];
+  },
+
+  async getAll(): Promise<SemesterResponse[]> {
+    return this.getAllSemesters();
+  },
+
+  async getActiveSemester(): Promise<SemesterResponse | undefined> {
+    const semesters = await this.getAllSemesters();
+    return semesters.find((s) => s.status === 'ACTIVE');
+  },
+
+  async createSemester(data: any): Promise<SemesterResponse> {
+    const response = await api.post<SemesterResponse>('/semesters', data);
+    return response.data;
+  },
+
+  async openSemester(id: string): Promise<SemesterResponse> {
+    const response = await api.put<SemesterResponse>(`/semesters/${id}/open`);
+    return response.data;
+  },
+
+  async activateSemester(id: string): Promise<SemesterResponse> {
+    const response = await api.put<SemesterResponse>(`/semesters/${id}/active`);
+    return response.data;
+  },
+
+  async closeSemester(id: string): Promise<SemesterResponse> {
+    const response = await api.put<SemesterResponse>(`/semesters/${id}/close`);
+    return response.data;
+  },
+
+  async lockSemester(id: string): Promise<SemesterResponse> {
+    const response = await api.put<SemesterResponse>(`/semesters/${id}/lock`);
+    return response.data;
+  },
 };
