@@ -1,6 +1,5 @@
 package com.ueims.configuration;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -21,8 +20,9 @@ import org.springframework.web.filter.CorsFilter;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@lombok.RequiredArgsConstructor
 public class SecurityConfig {
-    private final String[] PUBLIC_ENDPOINTS = {
+    private static final String[] PUBLIC_ENDPOINTS = {
         "/api/users",
         "/api/auth/token",
         "/api/auth/introspect",
@@ -34,14 +34,11 @@ public class SecurityConfig {
         "/api/test/**"
     };
 
-    @Autowired
-    private CustomJwtDecoder customJwtDecoder;
-
-    @Autowired
-    private RequirePasswordChangeFilter requirePasswordChangeFilter;
+    private final CustomJwtDecoder customJwtDecoder;
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
+    public SecurityFilterChain filterChain(
+            HttpSecurity httpSecurity, RequirePasswordChangeFilter requirePasswordChangeFilter) throws Exception {
         httpSecurity.authorizeHttpRequests(request -> request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS)
                 .permitAll()
                 .anyRequest()

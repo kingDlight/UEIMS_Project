@@ -198,7 +198,7 @@ public class GlobalExceptionHandler {
             log.info(attributes.toString());
 
         } catch (IllegalArgumentException e) {
-
+            // Keep default ErrorCode.INVALID_KEY if the violation message is not a valid ErrorCode enum name
         }
 
         ApiResponse<Void> apiResponse = new ApiResponse<>();
