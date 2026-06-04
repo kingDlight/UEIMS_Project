@@ -143,7 +143,7 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
 
     @Override
     public byte[] exportOjtStudentsToExcel(UUID semesterId) {
-        List<EligibleStudent> students = repository.findBySemester_SemesterIdAndStatus(semesterId, "OJT");
+        List<EligibleStudent> students = repository.findBySemester_SemesterId(semesterId);
 
         if (students.size() > 10000) {
             throw new AppException(ErrorCode.EXPORT_VOLUME_EXCEEDED);
@@ -182,5 +182,17 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
             log.error("Failed to export OJT students to Excel", e);
             throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
         }
+    }
+
+    @Override
+    @org.springframework.transaction.annotation.Transactional
+    public EligibleStudent cancelOjtResult(UUID id, String reason) {
+        EligibleStudent student = repository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION));
+        
+        student.setStatus("CANCELLED");
+        student.setCancelledReason(reason);
+        
+        return repository.save(student);
     }
 }

@@ -15,4 +15,6 @@ public interface EligibleStudentRepository extends JpaRepository<EligibleStudent
     java.util.Optional<EligibleStudent> findByUser_UserIdAndSemester_SemesterId(UUID userId, UUID semesterId);
 
     java.util.List<EligibleStudent> findBySemester_SemesterIdAndStatus(UUID semesterId, String status);
+
+    java.util.List<EligibleStudent> findBySemester_SemesterId(UUID semesterId);
 }

@@ -1,11 +1,44 @@
-import axios from 'axios';
-
-const API_URL = 'http://localhost:8080/api/eligible-students';
+import { api } from './api';
+import type { EligibleStudent } from '@/pages/training-manager/types';
 
 export const EligibleStudentService = {
-    getAll: () => axios.get(API_URL),
-    getById: (id: string) => axios.get(`${API_URL}/${id}`),
-    create: (data: any) => axios.post(API_URL, data),
-    update: (id: string, data: any) => axios.put(`${API_URL}/${id}`, data),
-    delete: (id: string) => axios.delete(`${API_URL}/${id}`)
+  async getAllEligibleStudents(): Promise<EligibleStudent[]> {
+    const response = await api.get<EligibleStudent[]>('/eligible-students');
+    return response.data || [];
+  },
+
+  async getAll(): Promise<EligibleStudent[]> {
+    return this.getAllEligibleStudents();
+  },
+
+  async importFromExcel(file: File, semesterId: string): Promise<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('semesterId', semesterId);
+
+    const response = await api.post('/eligible-students/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  async exportToExcel(semesterId: string): Promise<Blob> {
+    const response = await api.get('/eligible-students/export-ojt', {
+      params: { semesterId },
+      responseType: 'blob',
+    });
+    return response.data;
+  },
+
+  async finalizeOjtList(studentIds: string[]): Promise<any> {
+    const response = await api.post('/eligible-students/finalize-ojt', studentIds);
+    return response.data;
+  },
+
+  async cancelOjtResult(id: string, reason: string): Promise<EligibleStudent> {
+    const response = await api.put(`/eligible-students/${id}/cancel`, { reason });
+    return response.data;
+  }
 };

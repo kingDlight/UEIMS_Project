@@ -1,11 +1,34 @@
-import axios from 'axios';
+import { api } from './api';
+import type { Enterprise } from '@/pages/training-manager/types';
 
-const API_URL = 'http://localhost:8080/api/enterprises';
+interface ApiResponse<T> {
+  code: number;
+  message?: string;
+  result: T;
+}
 
 export const EnterpriseService = {
-    getAll: () => axios.get(API_URL),
-    getById: (id: string) => axios.get(`${API_URL}/${id}`),
-    create: (data: any) => axios.post(API_URL, data),
-    update: (id: string, data: any) => axios.put(`${API_URL}/${id}`, data),
-    delete: (id: string) => axios.delete(`${API_URL}/${id}`)
+  async getAllEnterprises(): Promise<Enterprise[]> {
+    const response = await api.get<ApiResponse<Enterprise[]>>('/enterprises');
+    return response.data.result;
+  },
+
+  async getAll(): Promise<Enterprise[]> {
+    return this.getAllEnterprises();
+  },
+
+  async updateEnterpriseStatus(
+    id: string,
+    status: 'APPROVED' | 'REJECTED',
+    reason?: string
+  ): Promise<Enterprise> {
+    const response = await api.put<ApiResponse<Enterprise>>(`/enterprises/${id}/status`, null, {
+      params: {
+        status,
+        ...(reason ? { reason } : {}),
+      },
+    });
+
+    return response.data.result;
+  },
 };

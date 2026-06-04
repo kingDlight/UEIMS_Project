@@ -43,6 +43,13 @@ public class SystemAnnouncementController {
         return ResponseEntity.ok(service.createAnnouncement(request));
     }
 
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('TRAINING_MANAGER')")
+    public ResponseEntity<SystemAnnouncement> update(
+            @PathVariable UUID id, @Valid @RequestBody AnnouncementCreationRequest request) {
+        return ResponseEntity.ok(service.updateAnnouncement(id, request));
+    }
+
     @PutMapping("/{id}/publish")
     @PreAuthorize("hasRole('TRAINING_MANAGER')")
     public ResponseEntity<SystemAnnouncement> publish(@PathVariable UUID id) {

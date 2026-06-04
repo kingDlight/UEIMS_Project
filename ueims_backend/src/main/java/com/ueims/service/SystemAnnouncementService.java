@@ -15,6 +15,8 @@ public interface SystemAnnouncementService {
 
     SystemAnnouncement createAnnouncement(AnnouncementCreationRequest request);
 
+    SystemAnnouncement updateAnnouncement(UUID id, AnnouncementCreationRequest request);
+
     SystemAnnouncement updateStatus(UUID id, String status);
 
     void deleteById(UUID id);
