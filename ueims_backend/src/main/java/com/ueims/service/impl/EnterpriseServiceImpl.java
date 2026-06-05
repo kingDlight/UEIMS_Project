@@ -108,12 +108,15 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     }
 
     private void validateAccess(UUID targetId) {
-        User currentUser = getCurrentUser();
-        boolean isStaff = currentUser.getRoles().stream()
-                .anyMatch(r -> r.getRole().getRoleName().equals("TRAINING_MANAGER")
-                        || r.getRole().getRoleName().equals("SYSTEM_ADMIN"));
+        org.springframework.security.core.Authentication auth =
+                SecurityContextHolder.getContext().getAuthentication();
+        boolean isStaff = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_TRAINING_MANAGER")
+                        || a.getAuthority().equals("ROLE_ADMIN")
+                        || a.getAuthority().equals("ROLE_SYSTEM_ADMIN"));
 
         if (!isStaff) {
+            User currentUser = getCurrentUser();
             validateOwnership(targetId, currentUser);
         }
     }

@@ -254,18 +254,14 @@ public class AuthenticationService {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
 
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
+                .claim("userId", user.getUserId().toString())
                 .subject(user.getEmail())
                 .issuer("ueims.com")
+                .claim("authorities", buildScope(user))
                 .issueTime(new Date())
                 .expirationTime(new Date(
                         Instant.now().plus(validDuration, ChronoUnit.SECONDS).toEpochMilli()))
                 .jwtID(UUID.randomUUID().toString())
-                .claim("scope", buildScope(user))
-                .claim(
-                        "role",
-                        user.getRoles().isEmpty()
-                                ? null
-                                : user.getRoles().iterator().next().getRole().getRoleName())
                 .claim("must_change_password", user.getMustChangePassword())
                 .build();
 
