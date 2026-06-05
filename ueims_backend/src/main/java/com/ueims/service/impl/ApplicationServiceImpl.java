@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -131,10 +132,16 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Transactional
     public ApplicationResponse withdrawApplication(UUID applicationId) {
         // 1. Get the application
-        Application application = repository.findById(applicationId)
-                .orElseThrow(() -> new AppException(ErrorCode.APPLICATION_NOT_FOUND));
+        Application application =
+                repository.findById(applicationId).orElseThrow(() -> new AppException(ErrorCode.APPLICATION_NOT_FOUND));
 
-        // 2. BR-48: Check if application deadline has passed
+        // 2. E1: Ensure the current student owns this application
+        User currentUser = getCurrentUser();
+        if (!application.getStudent().getUserId().equals(currentUser.getUserId())) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        // 3. BR-48: Check if application deadline has passed
         JobPost jobPost = application.getJobPost();
         if (jobPost.getApplicationDeadline() != null && LocalDate.now().isAfter(jobPost.getApplicationDeadline())) {
             throw new AppException(ErrorCode.APPLICATION_DEADLINE_EXPIRED);
@@ -150,5 +157,10 @@ public class ApplicationServiceImpl implements ApplicationService {
         Application updated = repository.save(application);
 
         return mapper.toApplicationResponse(updated);
+    }
+
+    private User getCurrentUser() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
     }
 }

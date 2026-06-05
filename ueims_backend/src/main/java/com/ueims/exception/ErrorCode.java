@@ -56,37 +56,38 @@ public enum ErrorCode {
     // Application related
     APPLICATION_NOT_FOUND(1032, "Application not found", HttpStatus.NOT_FOUND),
     APPLICATION_STATUS_CHANGED(
-            1044, "Cannot withdraw. Your application is already being processed or has been reviewed by the enterprise.",
+            1044,
+            "Cannot withdraw. Your application is already being processed or has been reviewed by the enterprise.",
             HttpStatus.BAD_REQUEST),
 
     // Account related
-    USER_BANNED(2001, "Tài khoản của bạn đã bị khóa do nhập sai mật khẩu quá 5 lần", HttpStatus.FORBIDDEN),
-    WRONG_OLD_PASSWORD(2002, "Mật khẩu cũ không chính xác", HttpStatus.BAD_REQUEST),
-    PASSWORDS_NOT_MATCH(2003, "Mật khẩu mới và xác nhận không khớp", HttpStatus.BAD_REQUEST),
-    USER_ALREADY_HAS_ROLE(2004, "Người dùng đã có vai trò. Chỉ được gán một vai trò duy nhất.", HttpStatus.BAD_REQUEST),
+    USER_BANNED(2001, "Your account has been locked due to more than 5 incorrect password attempts", HttpStatus.FORBIDDEN),
+    WRONG_OLD_PASSWORD(2002, "Old password is incorrect", HttpStatus.BAD_REQUEST),
+    PASSWORDS_NOT_MATCH(2003, "New password and confirmation do not match", HttpStatus.BAD_REQUEST),
+    USER_ALREADY_HAS_ROLE(2004, "User already has a role. Only one role can be assigned.", HttpStatus.BAD_REQUEST),
     FIELD_REQUIRED(1033, "This field is required", HttpStatus.BAD_REQUEST),
     MISSING_PARAMETER(1034, "Missing required request parameter: {param}", HttpStatus.BAD_REQUEST),
     INVALID_PARAMETER_FORMAT(
             1035, "Invalid format for parameter: {param}. Expected format: {type}", HttpStatus.BAD_REQUEST),
 
     // Enterprise registration
-    ENTERPRISE_EXISTED(1036, "Doanh nghiệp với mã số thuế này đã tồn tại trong hệ thống", HttpStatus.BAD_REQUEST),
-    TAX_CODE_EXISTED(1037, "Mã số thuế đã được sử dụng bởi doanh nghiệp khác", HttpStatus.BAD_REQUEST),
+    ENTERPRISE_EXISTED(1036, "An enterprise with this tax code already exists in the system", HttpStatus.BAD_REQUEST),
+    TAX_CODE_EXISTED(1037, "Tax code has already been used by another enterprise", HttpStatus.BAD_REQUEST),
     ENTERPRISE_REGISTRATION_SUCCESS(
-            1038, "Đăng ký thành công. Tài khoản sẽ được kích hoạt sau khi Training Manager phê duyệt.", HttpStatus.OK),
+            1038, "Registration successful. The account will be activated after Training Manager approval.", HttpStatus.OK),
+    EXPORT_EXCEED_LIMIT(
+            1039,
+            "Export data exceeds the limit of 10,000 rows. Please choose a narrower date range.",
+            HttpStatus.BAD_REQUEST),
+    DATA_INTEGRITY_VIOLATION(1040, "Data integrity violation: Foreign key or constraint error", HttpStatus.BAD_REQUEST),
+    METHOD_NOT_SUPPORTED(
+            1041, "Request method '{method}' is not supported for this API", HttpStatus.METHOD_NOT_ALLOWED),
     ENTERPRISE_NOT_FOUND(1042, "Enterprise not found", HttpStatus.NOT_FOUND),
     FINAL_REPORT_DEADLINE_EXPIRED(1043, "Cannot submit final report after semester end date", HttpStatus.BAD_REQUEST),
     INTERVIEW_NOT_FOUND(1045, "Interview not found", HttpStatus.NOT_FOUND),
     INTERVIEW_ALREADY_CONFIRMED(1046, "Interview already confirmed", HttpStatus.BAD_REQUEST),
-    FINAL_REPORT_INVALID_FORMAT(1047, "Invalid file format for final report", HttpStatus.BAD_REQUEST),
+    FINAL_REPORT_INVALID_FORMAT(1047, "Final report must be in PDF format", HttpStatus.BAD_REQUEST),
     FINAL_REPORT_SIZE_EXCEEDED(1048, "Final report size exceeded", HttpStatus.BAD_REQUEST),
-    EXPORT_EXCEED_LIMIT(
-            1049,
-            "Dữ liệu xuất vượt quá giới hạn 10000 dòng. Vui lòng chọn khoảng thời gian hẹp hơn.",
-            HttpStatus.BAD_REQUEST),
-    DATA_INTEGRITY_VIOLATION(1050, "Data integrity violation: Foreign key or constraint error", HttpStatus.BAD_REQUEST),
-    METHOD_NOT_SUPPORTED(
-            1051, "Request method '{method}' is not supported for this API", HttpStatus.METHOD_NOT_ALLOWED),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

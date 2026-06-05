@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import jakarta.validation.Valid;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.ueims.dto.request.ApplicationRequest;
@@ -78,11 +79,12 @@ public class ApplicationController {
     /**
      * Withdraw a pending job application (UC-57)
      * Enforces BR-48 (withdrawal must be before job posting deadline)
-     * 
+     *
      * @param id Application UUID
      * @return ApiResponse containing the updated application response with WITHDRAWN status
      */
     @PatchMapping("/{id}/withdraw")
+    @PreAuthorize("hasRole('STUDENT')")
     public ApiResponse<ApplicationResponse> withdrawApplication(@PathVariable UUID id) {
         return ApiResponse.<ApplicationResponse>builder()
                 .result(service.withdrawApplication(id))
