@@ -45,26 +45,9 @@ public enum ErrorCode {
             "Invalid semester status transition. Allowed: DRAFT\u2192OPEN, OPEN\u2192ACTIVE, ACTIVE\u2192CLOSED, CLOSED\u2192LOCKED",
             HttpStatus.UNPROCESSABLE_ENTITY),
     SEMESTER_EXISTED(1031, "Semester code already exists", HttpStatus.BAD_REQUEST),
-    EXPORT_VOLUME_EXCEEDED(1039, "Export volume exceeds the maximum limit of 10,000 records", HttpStatus.BAD_REQUEST),
-    INVALID_STATUS_FOR_OJT(
-            1040,
-            "One or more students do not meet the prerequisite status (ACCEPTED or MATCHED) for OJT approval",
-            HttpStatus.BAD_REQUEST),
-    ADMIN_INTERVENTION_REQUIRED(
-            1041, "Admin intervention is required to modify an already approved OJT student", HttpStatus.FORBIDDEN),
 
     // Application related
     APPLICATION_NOT_FOUND(1032, "Application not found", HttpStatus.NOT_FOUND),
-    APPLICATION_STATUS_CHANGED(
-            1044,
-            "Cannot withdraw. Your application is already being processed or has been reviewed by the enterprise.",
-            HttpStatus.BAD_REQUEST),
-
-    // Account related
-    USER_BANNED(2001, "Your account has been locked due to more than 5 incorrect password attempts", HttpStatus.FORBIDDEN),
-    WRONG_OLD_PASSWORD(2002, "Old password is incorrect", HttpStatus.BAD_REQUEST),
-    PASSWORDS_NOT_MATCH(2003, "New password and confirmation do not match", HttpStatus.BAD_REQUEST),
-    USER_ALREADY_HAS_ROLE(2004, "User already has a role. Only one role can be assigned.", HttpStatus.BAD_REQUEST),
     FIELD_REQUIRED(1033, "This field is required", HttpStatus.BAD_REQUEST),
     MISSING_PARAMETER(1034, "Missing required request parameter: {param}", HttpStatus.BAD_REQUEST),
     INVALID_PARAMETER_FORMAT(
@@ -74,7 +57,9 @@ public enum ErrorCode {
     ENTERPRISE_EXISTED(1036, "An enterprise with this tax code already exists in the system", HttpStatus.BAD_REQUEST),
     TAX_CODE_EXISTED(1037, "Tax code has already been used by another enterprise", HttpStatus.BAD_REQUEST),
     ENTERPRISE_REGISTRATION_SUCCESS(
-            1038, "Registration successful. The account will be activated after Training Manager approval.", HttpStatus.OK),
+            1038,
+            "Registration successful. The account will be activated after Training Manager approval.",
+            HttpStatus.OK),
     EXPORT_EXCEED_LIMIT(
             1039,
             "Export data exceeds the limit of 10,000 rows. Please choose a narrower date range.",
@@ -84,10 +69,28 @@ public enum ErrorCode {
             1041, "Request method '{method}' is not supported for this API", HttpStatus.METHOD_NOT_ALLOWED),
     ENTERPRISE_NOT_FOUND(1042, "Enterprise not found", HttpStatus.NOT_FOUND),
     FINAL_REPORT_DEADLINE_EXPIRED(1043, "Cannot submit final report after semester end date", HttpStatus.BAD_REQUEST),
+    APPLICATION_STATUS_CHANGED(
+            1044,
+            "Cannot withdraw. Your application is already being processed or has been reviewed by the enterprise.",
+            HttpStatus.BAD_REQUEST),
     INTERVIEW_NOT_FOUND(1045, "Interview not found", HttpStatus.NOT_FOUND),
     INTERVIEW_ALREADY_CONFIRMED(1046, "Interview already confirmed", HttpStatus.BAD_REQUEST),
     FINAL_REPORT_INVALID_FORMAT(1047, "Final report must be in PDF format", HttpStatus.BAD_REQUEST),
     FINAL_REPORT_SIZE_EXCEEDED(1048, "Final report size exceeded", HttpStatus.BAD_REQUEST),
+    EXPORT_VOLUME_EXCEEDED(1049, "Export volume exceeds the maximum limit of 10,000 records", HttpStatus.BAD_REQUEST),
+    INVALID_STATUS_FOR_OJT(
+            1050,
+            "One or more students do not meet the prerequisite status (ACCEPTED or MATCHED) for OJT approval",
+            HttpStatus.BAD_REQUEST),
+    ADMIN_INTERVENTION_REQUIRED(
+            1051, "Admin intervention is required to modify an already approved OJT student", HttpStatus.FORBIDDEN),
+
+    // Account related
+    USER_BANNED(
+            2001, "Your account has been locked due to more than 5 incorrect password attempts", HttpStatus.FORBIDDEN),
+    WRONG_OLD_PASSWORD(2002, "Old password is incorrect", HttpStatus.BAD_REQUEST),
+    PASSWORDS_NOT_MATCH(2003, "New password and confirmation do not match", HttpStatus.BAD_REQUEST),
+    USER_ALREADY_HAS_ROLE(2004, "User already has a role. Only one role can be assigned.", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
