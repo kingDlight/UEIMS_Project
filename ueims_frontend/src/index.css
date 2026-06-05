@@ -8,6 +8,7 @@
   --fpt-orange: #E67E22;
   --fpt-orange-dark: #D35400;
   --fpt-orange-light: #F39C12;
+  --fpt-orange-accent: #FF662C;
   --fpt-dark: #1A1A2E;
   --fpt-navy: #16213E;
   --fpt-light: #F8F9FA;
@@ -17,6 +18,21 @@
   --fpt-info: #3498DB;
   --fpt-warning: #F1C40F;
   --fpt-purple: #9B59B6;
+
+  /* Dashboard Dark Theme */
+  --sidebar-bg: #17181C;
+  --sidebar-text: #FFFFFF;
+  --sidebar-text-muted: rgba(255, 255, 255, 0.6);
+  --sidebar-hover: rgba(255, 102, 44, 0.1);
+  --sidebar-active: rgba(255, 102, 44, 0.15);
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --topbar-bg: #FFFFFF;
+  --content-bg: #F5F5F5;
+  --card-bg: #FFFFFF;
+  --card-border: rgba(0, 0, 0, 0.06);
+  --text-primary: #17181C;
+  --text-secondary: #71717A;
+  --text-tertiary: #A1A1AA;
 
   /* Gradients */
   --fpt-gradient: linear-gradient(135deg, #E67E22, #D35400);
@@ -68,11 +84,11 @@ html {
 }
 
 body {
-  font-family: 'Times New Roman', Times, serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: 1rem;
   line-height: 1.6;
-  color: var(--fpt-dark);
-  background: var(--fpt-light);
+  color: var(--text-primary);
+  background: var(--content-bg);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
@@ -91,9 +107,9 @@ body {
    Typography
    ============================================ */
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Times New Roman', Times, serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-weight: 700;
-  color: var(--fpt-dark);
+  color: var(--text-primary);
   line-height: 1.2;
   margin: 0;
 }

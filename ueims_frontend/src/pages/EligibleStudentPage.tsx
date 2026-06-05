@@ -5,7 +5,7 @@ const EligibleStudentPage: React.FC = () => {
     const [data, setData] = useState<any[]>([]);
 
     useEffect(() => {
-        EligibleStudentService.getAll().then(res => setData(res.data)).catch(err => console.error(err));
+        EligibleStudentService.getAll().then(res => setData(res)).catch(err => console.error(err));
     }, []);
 
     return (

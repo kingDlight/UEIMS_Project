@@ -1,3 +1,4 @@
+import bgAuth from '@/assets/bg-auth.png';
 import logoUeims from '@/assets/logo_ueims.png';
 import React, { useState } from 'react';
 import { Form, Input, Button, message } from 'antd';
@@ -126,25 +127,12 @@ export const ChangePasswordPage: React.FC = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: '#FAFAFA',
+        background: `url(${bgAuth}) center/cover no-repeat, #FFF5EC`,
         padding: '24px',
         position: 'relative',
         overflow: 'hidden',
       }}
     >
-      {/* Decorative blobs */}
-      <div style={{ position: 'absolute', top: -80, right: -80, width: 300, height: 300, borderRadius: '50%', background: `radial-gradient(circle, ${FPT_ORANGE}18 0%, transparent 70%)`, pointerEvents: 'none', zIndex: 0 }} />
-      <div style={{ position: 'absolute', bottom: -60, left: -60, width: 240, height: 240, borderRadius: '50%', background: `radial-gradient(circle, ${FPT_ORANGE_DARK}12 0%, transparent 70%)`, pointerEvents: 'none', zIndex: 0 }} />
-      <div style={{ position: 'absolute', top: '40%', right: '30%', width: 180, height: 180, borderRadius: '50%', background: `radial-gradient(circle, #FEF3C7 10%, transparent 70%)`, pointerEvents: 'none', zIndex: 0 }} />
-      {/* Dot grid */}
-      <svg style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 0, opacity: 0.4 }} xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <pattern id="dots" x="0" y="0" width="28" height="28" patternUnits="userSpaceOnUse">
-            <circle cx="2" cy="2" r="1.2" fill={`${FPT_ORANGE}30`} />
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#dots)" />
-      </svg>
 
       <div
         style={{
@@ -459,29 +447,48 @@ export const ChangePasswordPage: React.FC = () => {
             </Form.Item>
           </Form>
 
-          <button
-            onClick={() => {
-              logout();
-              navigate('/login');
-            }}
-            style={{
-              marginTop: 20,
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              color: FPT_GRAY,
-              fontSize: 14,
-              fontWeight: 500,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              padding: 0,
-              width: 'fit-content',
-            }}
-          >
-            <ArrowLeft size={15} />
-            Đăng xuất
-          </button>
+          <div style={{ display: 'flex', gap: 24, marginTop: 20 }}>
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                color: FPT_GRAY,
+                fontSize: 14,
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: 0,
+              }}
+            >
+              <ArrowLeft size={15} />
+              Quay lại
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                logout();
+                navigate('/login');
+              }}
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                color: '#EF4444',
+                fontSize: 14,
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: 0,
+              }}
+            >
+              Đăng xuất
+            </button>
+          </div>
         </div>
       </div>
     </div>
