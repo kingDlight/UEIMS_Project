@@ -73,7 +73,7 @@ public class AuthenticationService {
         boolean isValid = true;
 
         try {
-            verifyToken(token, false);
+            verifyToken(token, "ACCESS");
         } catch (AppException e) {
             isValid = false;
         }
@@ -125,8 +125,8 @@ public class AuthenticationService {
         // BR-02: Simultaneous Session Control - Invalidate old sessions
         userSessionManagementService.invalidateOldSessions(user.getEmail());
 
-        var token = generateToken(user, validDuration, false);
-        var refreshToken = generateToken(user, refreshableDuration, true);
+        var token = generateToken(user, validDuration, "ACCESS");
+        var refreshToken = generateToken(user, refreshableDuration, "REFRESH");
 
         // Save new sessions for BOTH access token and refresh token
         try {
@@ -186,21 +186,12 @@ public class AuthenticationService {
 
     public void logout(LogoutRequest request) {
         try {
-            var signToken = verifyToken(request.getToken(), false);
+            var signToken = verifyToken(request.getToken(), "ACCESS");
 
-            String jit = signToken.getJWTClaimsSet().getJWTID();
-            Date expiryTime = signToken.getJWTClaimsSet().getExpirationTime();
-
-            InvalidatedToken invalidatedToken = InvalidatedToken.builder()
-                    .tokenId(jit)
-                    .expiresAt(expiryTime
-                            .toInstant()
-                            .atZone(java.time.ZoneId.systemDefault())
-                            .toLocalDateTime())
-                    .build();
-
-            invalidatedTokenRepository.save(invalidatedToken);
-            userSessionRepository.findById(jit).ifPresent(userSessionRepository::delete);
+            String email = signToken.getJWTClaimsSet().getSubject();
+            
+            // Invalidate all active sessions (both access and refresh tokens)
+            userSessionManagementService.invalidateOldSessions(email);
         } catch (AppException exception) {
             log.info("Token already expired");
         } catch (ParseException e) {
@@ -211,7 +202,7 @@ public class AuthenticationService {
     @Transactional
     public AuthenticationResponse refreshToken(RefreshRequest request) {
         try {
-            var signedJWT = verifyToken(request.getToken(), true);
+            var signedJWT = verifyToken(request.getToken(), "REFRESH");
 
             var jit = signedJWT.getJWTClaimsSet().getJWTID();
             var expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
@@ -231,8 +222,8 @@ public class AuthenticationService {
 
             var user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
 
-            var token = generateToken(user, validDuration, false);
-            var newRefreshToken = generateToken(user, refreshableDuration, true);
+            var token = generateToken(user, validDuration, "ACCESS");
+            var newRefreshToken = generateToken(user, refreshableDuration, "REFRESH");
 
             try {
                 SignedJWT parsedToken = SignedJWT.parse(token);
@@ -274,7 +265,7 @@ public class AuthenticationService {
         }
     }
 
-    private String generateToken(User user, long durationInSeconds, boolean isRefresh) {
+    private String generateToken(User user, long durationInSeconds, String tokenType) {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
 
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
@@ -282,7 +273,7 @@ public class AuthenticationService {
                 .subject(user.getEmail())
                 .issuer("ueims.com")
                 .claim("authorities", buildScope(user))
-                .claim("token_type", isRefresh ? "REFRESH" : "ACCESS")
+                .claim("token_type", tokenType)
                 .issueTime(new Date())
                 .expirationTime(new Date(Instant.now()
                         .plus(durationInSeconds, ChronoUnit.SECONDS)
@@ -304,7 +295,7 @@ public class AuthenticationService {
         }
     }
 
-    private SignedJWT verifyToken(String token, boolean isRefresh) {
+    private SignedJWT verifyToken(String token, String expectedTokenType) {
         try {
             JWSVerifier verifier = new MACVerifier(signerKey.getBytes());
 
@@ -320,8 +311,7 @@ public class AuthenticationService {
                     signedJWT.getJWTClaimsSet().getJWTID())) throw new AppException(ErrorCode.UNAUTHENTICATED);
 
             String tokenType = signedJWT.getJWTClaimsSet().getStringClaim("token_type");
-            if (isRefresh && !"REFRESH".equals(tokenType)) throw new AppException(ErrorCode.UNAUTHENTICATED);
-            if (!isRefresh && !"ACCESS".equals(tokenType)) throw new AppException(ErrorCode.UNAUTHENTICATED);
+            if (!expectedTokenType.equals(tokenType)) throw new AppException(ErrorCode.UNAUTHENTICATED);
 
             return signedJWT;
         } catch (ParseException | JOSEException e) {
