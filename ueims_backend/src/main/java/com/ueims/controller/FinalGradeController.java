@@ -49,7 +49,7 @@ public class FinalGradeController {
 
         // Round to 1 decimal place to match DB precision
         finalGrade = finalGrade.setScale(1, RoundingMode.HALF_UP);
-        entity.setFinalGrade(finalGrade);
+        entity.setGradeValue(finalGrade);
 
         // Compute overall status based on threshold: >= 5.0 => PASS, otherwise FAIL
         BigDecimal passThreshold = new BigDecimal("5.0");

@@ -12,6 +12,10 @@ public interface IncidentService {
 
     Incident save(Incident entity);
 
+    Incident createIncident(com.ueims.dto.request.IncidentRequest request);
+
+    Incident updateIncident(UUID id, com.ueims.dto.request.IncidentRequest request);
+
     void deleteById(UUID id);
 
     Incident reportIncident(com.ueims.dto.request.IncidentReportRequest request);

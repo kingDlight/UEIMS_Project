@@ -34,8 +34,8 @@ public class IncidentController {
 
     @PostMapping
     @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
-    public ResponseEntity<Incident> create(@Valid @RequestBody Incident entity) {
-        return ResponseEntity.ok(service.save(entity));
+    public ResponseEntity<Incident> create(@Valid @RequestBody com.ueims.dto.request.IncidentRequest request) {
+        return ResponseEntity.ok(service.createIncident(request));
     }
 
     @DeleteMapping("/{id}")
@@ -47,9 +47,9 @@ public class IncidentController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
-    public ResponseEntity<Incident> update(@PathVariable UUID id, @Valid @RequestBody Incident entity) {
-        entity.setIncidentId(id);
-        return ResponseEntity.ok(service.save(entity));
+    public ResponseEntity<Incident> update(
+            @PathVariable UUID id, @Valid @RequestBody com.ueims.dto.request.IncidentRequest request) {
+        return ResponseEntity.ok(service.updateIncident(id, request));
     }
 
     @PostMapping("/report")
