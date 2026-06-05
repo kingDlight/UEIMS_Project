@@ -68,7 +68,7 @@ public class AuthenticationService {
     @Value("${jwt.refreshable-duration}")
     private long refreshableDuration;
 
-    public IntrospectResponse introspect(IntrospectRequest request) throws JOSEException, ParseException {
+    public IntrospectResponse introspect(IntrospectRequest request) {
         var token = request.getToken();
         boolean isValid = true;
 
@@ -184,7 +184,7 @@ public class AuthenticationService {
                 .build();
     }
 
-    public void logout(LogoutRequest request) throws ParseException, JOSEException {
+    public void logout(LogoutRequest request) {
         try {
             var signToken = verifyToken(request.getToken(), false);
 
@@ -203,69 +203,75 @@ public class AuthenticationService {
             userSessionRepository.findById(jit).ifPresent(userSessionRepository::delete);
         } catch (AppException exception) {
             log.info("Token already expired");
+        } catch (ParseException e) {
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
     }
 
     @Transactional
-    public AuthenticationResponse refreshToken(RefreshRequest request) throws ParseException, JOSEException {
-        var signedJWT = verifyToken(request.getToken(), true);
-
-        var jit = signedJWT.getJWTClaimsSet().getJWTID();
-        var expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
-
-        InvalidatedToken invalidatedToken = InvalidatedToken.builder()
-                .tokenId(jit)
-                .expiresAt(expiryTime
-                        .toInstant()
-                        .atZone(java.time.ZoneId.systemDefault())
-                        .toLocalDateTime())
-                .build();
-
-        invalidatedTokenRepository.save(invalidatedToken);
-        userSessionRepository.findById(jit).ifPresent(userSessionRepository::delete);
-
-        var email = signedJWT.getJWTClaimsSet().getSubject();
-
-        var user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
-
-        var token = generateToken(user, validDuration, false);
-        var newRefreshToken = generateToken(user, refreshableDuration, true);
-
+    public AuthenticationResponse refreshToken(RefreshRequest request) {
         try {
-            SignedJWT parsedToken = SignedJWT.parse(token);
-            UserSession accessSession = UserSession.builder()
-                    .tokenId(parsedToken.getJWTClaimsSet().getJWTID())
-                    .email(user.getEmail())
-                    .expiresAt(parsedToken
-                            .getJWTClaimsSet()
-                            .getExpirationTime()
-                            .toInstant()
-                            .atZone(ZoneId.systemDefault())
-                            .toLocalDateTime())
-                    .build();
-            userSessionRepository.save(accessSession);
+            var signedJWT = verifyToken(request.getToken(), true);
 
-            SignedJWT parsedRefreshToken = SignedJWT.parse(newRefreshToken);
-            UserSession refreshSession = UserSession.builder()
-                    .tokenId(parsedRefreshToken.getJWTClaimsSet().getJWTID())
-                    .email(user.getEmail())
-                    .expiresAt(parsedRefreshToken
-                            .getJWTClaimsSet()
-                            .getExpirationTime()
+            var jit = signedJWT.getJWTClaimsSet().getJWTID();
+            var expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+
+            InvalidatedToken invalidatedToken = InvalidatedToken.builder()
+                    .tokenId(jit)
+                    .expiresAt(expiryTime
                             .toInstant()
-                            .atZone(ZoneId.systemDefault())
+                            .atZone(java.time.ZoneId.systemDefault())
                             .toLocalDateTime())
                     .build();
-            userSessionRepository.save(refreshSession);
+
+            invalidatedTokenRepository.save(invalidatedToken);
+            userSessionRepository.findById(jit).ifPresent(userSessionRepository::delete);
+
+            var email = signedJWT.getJWTClaimsSet().getSubject();
+
+            var user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
+
+            var token = generateToken(user, validDuration, false);
+            var newRefreshToken = generateToken(user, refreshableDuration, true);
+
+            try {
+                SignedJWT parsedToken = SignedJWT.parse(token);
+                UserSession accessSession = UserSession.builder()
+                        .tokenId(parsedToken.getJWTClaimsSet().getJWTID())
+                        .email(user.getEmail())
+                        .expiresAt(parsedToken
+                                .getJWTClaimsSet()
+                                .getExpirationTime()
+                                .toInstant()
+                                .atZone(ZoneId.systemDefault())
+                                .toLocalDateTime())
+                        .build();
+                userSessionRepository.save(accessSession);
+
+                SignedJWT parsedRefreshToken = SignedJWT.parse(newRefreshToken);
+                UserSession refreshSession = UserSession.builder()
+                        .tokenId(parsedRefreshToken.getJWTClaimsSet().getJWTID())
+                        .email(user.getEmail())
+                        .expiresAt(parsedRefreshToken
+                                .getJWTClaimsSet()
+                                .getExpirationTime()
+                                .toInstant()
+                                .atZone(ZoneId.systemDefault())
+                                .toLocalDateTime())
+                        .build();
+                userSessionRepository.save(refreshSession);
+            } catch (ParseException e) {
+                log.error("Failed to parse generated token", e);
+            }
+
+            return AuthenticationResponse.builder()
+                    .token(token)
+                    .refreshToken(newRefreshToken)
+                    .authenticated(true)
+                    .build();
         } catch (ParseException e) {
-            log.error("Failed to parse generated token", e);
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
-
-        return AuthenticationResponse.builder()
-                .token(token)
-                .refreshToken(newRefreshToken)
-                .authenticated(true)
-                .build();
     }
 
     private String generateToken(User user, long durationInSeconds, boolean isRefresh) {
@@ -298,25 +304,29 @@ public class AuthenticationService {
         }
     }
 
-    private SignedJWT verifyToken(String token, boolean isRefresh) throws JOSEException, ParseException {
-        JWSVerifier verifier = new MACVerifier(signerKey.getBytes());
+    private SignedJWT verifyToken(String token, boolean isRefresh) {
+        try {
+            JWSVerifier verifier = new MACVerifier(signerKey.getBytes());
 
-        SignedJWT signedJWT = SignedJWT.parse(token);
+            SignedJWT signedJWT = SignedJWT.parse(token);
 
-        Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+            Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
 
-        var verified = signedJWT.verify(verifier);
+            var verified = signedJWT.verify(verifier);
 
-        if (!(verified && expiryTime.after(new Date()))) throw new AppException(ErrorCode.UNAUTHENTICATED);
+            if (!(verified && expiryTime.after(new Date()))) throw new AppException(ErrorCode.UNAUTHENTICATED);
 
-        if (invalidatedTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID()))
+            if (invalidatedTokenRepository.existsById(
+                    signedJWT.getJWTClaimsSet().getJWTID())) throw new AppException(ErrorCode.UNAUTHENTICATED);
+
+            String tokenType = signedJWT.getJWTClaimsSet().getStringClaim("token_type");
+            if (isRefresh && !"REFRESH".equals(tokenType)) throw new AppException(ErrorCode.UNAUTHENTICATED);
+            if (!isRefresh && !"ACCESS".equals(tokenType)) throw new AppException(ErrorCode.UNAUTHENTICATED);
+
+            return signedJWT;
+        } catch (ParseException | JOSEException e) {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
-
-        String tokenType = signedJWT.getJWTClaimsSet().getStringClaim("token_type");
-        if (isRefresh && !"REFRESH".equals(tokenType)) throw new AppException(ErrorCode.UNAUTHENTICATED);
-        if (!isRefresh && !"ACCESS".equals(tokenType)) throw new AppException(ErrorCode.UNAUTHENTICATED);
-
-        return signedJWT;
+        }
     }
 
     private String buildScope(User user) {
