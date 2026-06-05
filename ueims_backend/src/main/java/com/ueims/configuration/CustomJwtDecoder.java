@@ -33,6 +33,12 @@ public class CustomJwtDecoder implements JwtDecoder {
     public Jwt decode(String token) throws JwtException {
         try {
             com.nimbusds.jwt.SignedJWT signedJWT = com.nimbusds.jwt.SignedJWT.parse(token);
+
+            String tokenType = signedJWT.getJWTClaimsSet().getStringClaim("token_type");
+            if (!"ACCESS".equals(tokenType)) {
+                throw new JwtException("Invalid token type");
+            }
+
             String jit = signedJWT.getJWTClaimsSet().getJWTID();
             if (jit != null && invalidatedTokenRepository.existsById(jit)) {
                 throw new JwtException("Token has been invalidated");
