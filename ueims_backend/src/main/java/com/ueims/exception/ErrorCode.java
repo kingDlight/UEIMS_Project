@@ -84,6 +84,10 @@ public enum ErrorCode {
             HttpStatus.BAD_REQUEST),
     ADMIN_INTERVENTION_REQUIRED(
             1051, "Admin intervention is required to modify an already approved OJT student", HttpStatus.FORBIDDEN),
+    EXPORT_LOG_EXCEED_LIMIT(
+            1052,
+            "Export aborted. Record count exceeds 50,000 threshold. Please shrink your search horizon filter properties.",
+            HttpStatus.BAD_REQUEST),
 
     // Account related
     USER_BANNED(
