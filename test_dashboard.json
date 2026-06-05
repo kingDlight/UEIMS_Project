@@ -1,0 +1,120 @@
+{
+  "info": {
+    "name": "Dashboard API Tests",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get Employment Rate Chart",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJtdXN0X2NoYW5nZV9wYXNzd29yZCI6ZmFsc2UsInN1YiI6ImFkbWluQHVlaW1zLmNvbSIsImlzcyI6InVlaW1zLmNvbSIsImV4cCI6MTc4MDY3NzMzMSwidXNlcklkIjoiMjkzMGIyZmUtZGM4My00YTFiLTk4MzEtNzMyZjYzMjM5ZjZlIiwiaWF0IjoxNzgwNjc2NDMxLCJhdXRob3JpdGllcyI6IlJPTEVfQURNSU4gRVhQT1JUX09KVF9TVFVERU5UIFZJRVdfSU5DSURFTlQgSU1QT1JUX0VMSUdJQkxFX1NUVURFTlQgTUFOQUdFX0lOQ0lERU5UIiwianRpIjoiZGZkMzdiMTAtYTQ4Ny00NTRhLThmODYtZDhhNGQwOWJiNjM0In0.Ut8B2Otjus0wBwuRlnbWzvO0bMNCjBK5z4HVgYMkkGN5KKQdSS4EviB0BZQ8q6y_d2JELbHHgUYJC3ogMepaqA",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/dashboard/employment-rate/123e4567-e89b-12d3-a456-426614174000",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "dashboard",
+            "employment-rate",
+            "123e4567-e89b-12d3-a456-426614174000"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Interview Pass Rate Chart",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJtdXN0X2NoYW5nZV9wYXNzd29yZCI6ZmFsc2UsInN1YiI6ImFkbWluQHVlaW1zLmNvbSIsImlzcyI6InVlaW1zLmNvbSIsImV4cCI6MTc4MDY3NzMzMSwidXNlcklkIjoiMjkzMGIyZmUtZGM4My00YTFiLTk4MzEtNzMyZjYzMjM5ZjZlIiwiaWF0IjoxNzgwNjc2NDMxLCJhdXRob3JpdGllcyI6IlJPTEVfQURNSU4gRVhQT1JUX09KVF9TVFVERU5UIFZJRVdfSU5DSURFTlQgSU1QT1JUX0VMSUdJQkxFX1NUVURFTlQgTUFOQUdFX0lOQ0lERU5UIiwianRpIjoiZGZkMzdiMTAtYTQ4Ny00NTRhLThmODYtZDhhNGQwOWJiNjM0In0.Ut8B2Otjus0wBwuRlnbWzvO0bMNCjBK5z4HVgYMkkGN5KKQdSS4EviB0BZQ8q6y_d2JELbHHgUYJC3ogMepaqA",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/dashboard/interview-pass-rate/123e4567-e89b-12d3-a456-426614174000",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "dashboard",
+            "interview-pass-rate",
+            "123e4567-e89b-12d3-a456-426614174000"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Major Distribution Chart",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJtdXN0X2NoYW5nZV9wYXNzd29yZCI6ZmFsc2UsInN1YiI6ImFkbWluQHVlaW1zLmNvbSIsImlzcyI6InVlaW1zLmNvbSIsImV4cCI6MTc4MDY3NzMzMSwidXNlcklkIjoiMjkzMGIyZmUtZGM4My00YTFiLTk4MzEtNzMyZjYzMjM5ZjZlIiwiaWF0IjoxNzgwNjc2NDMxLCJhdXRob3JpdGllcyI6IlJPTEVfQURNSU4gRVhQT1JUX09KVF9TVFVERU5UIFZJRVdfSU5DSURFTlQgSU1QT1JUX0VMSUdJQkxFX1NUVURFTlQgTUFOQUdFX0lOQ0lERU5UIiwianRpIjoiZGZkMzdiMTAtYTQ4Ny00NTRhLThmODYtZDhhNGQwOWJiNjM0In0.Ut8B2Otjus0wBwuRlnbWzvO0bMNCjBK5z4HVgYMkkGN5KKQdSS4EviB0BZQ8q6y_d2JELbHHgUYJC3ogMepaqA",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/dashboard/major-distribution/123e4567-e89b-12d3-a456-426614174000",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "dashboard",
+            "major-distribution",
+            "123e4567-e89b-12d3-a456-426614174000"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Grade Distribution Chart",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer eyJhbGciOiJIUzUxMiJ9.eyJtdXN0X2NoYW5nZV9wYXNzd29yZCI6ZmFsc2UsInN1YiI6ImFkbWluQHVlaW1zLmNvbSIsImlzcyI6InVlaW1zLmNvbSIsImV4cCI6MTc4MDY3NzMzMSwidXNlcklkIjoiMjkzMGIyZmUtZGM4My00YTFiLTk4MzEtNzMyZjYzMjM5ZjZlIiwiaWF0IjoxNzgwNjc2NDMxLCJhdXRob3JpdGllcyI6IlJPTEVfQURNSU4gRVhQT1JUX09KVF9TVFVERU5UIFZJRVdfSU5DSURFTlQgSU1QT1JUX0VMSUdJQkxFX1NUVURFTlQgTUFOQUdFX0lOQ0lERU5UIiwianRpIjoiZGZkMzdiMTAtYTQ4Ny00NTRhLThmODYtZDhhNGQwOWJiNjM0In0.Ut8B2Otjus0wBwuRlnbWzvO0bMNCjBK5z4HVgYMkkGN5KKQdSS4EviB0BZQ8q6y_d2JELbHHgUYJC3ogMepaqA",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8080/api/dashboard/grade-distribution/123e4567-e89b-12d3-a456-426614174000",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "dashboard",
+            "grade-distribution",
+            "123e4567-e89b-12d3-a456-426614174000"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

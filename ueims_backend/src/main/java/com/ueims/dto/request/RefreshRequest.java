@@ -1,5 +1,7 @@
 package com.ueims.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
+
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,5 +15,6 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class RefreshRequest {
+    @NotBlank(message = "FIELD_REQUIRED")
     String token;
 }
