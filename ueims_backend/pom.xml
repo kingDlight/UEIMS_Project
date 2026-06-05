@@ -124,7 +124,7 @@
                 </executions>
                 <configuration>
                     <excludes>
-<!--                        <exclude>**/mapper/**</exclude>-->
+                        <exclude>**/mapper/**</exclude>
                         <exclude>**/configuration/**</exclude>
                     </excludes>
                 </configuration>
