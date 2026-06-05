@@ -1,0 +1,96 @@
+{
+  "info": {
+    "name": "Dashboard API Tests",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get Employment Rate Chart",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/dashboard/employment-rate/123e4567-e89b-12d3-a456-426614174000",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "dashboard",
+            "employment-rate",
+            "123e4567-e89b-12d3-a456-426614174000"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Interview Pass Rate Chart",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/dashboard/interview-pass-rate/123e4567-e89b-12d3-a456-426614174000",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "dashboard",
+            "interview-pass-rate",
+            "123e4567-e89b-12d3-a456-426614174000"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Major Distribution Chart",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/dashboard/major-distribution/123e4567-e89b-12d3-a456-426614174000",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "dashboard",
+            "major-distribution",
+            "123e4567-e89b-12d3-a456-426614174000"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Grade Distribution Chart",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/dashboard/grade-distribution/123e4567-e89b-12d3-a456-426614174000",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "dashboard",
+            "grade-distribution",
+            "123e4567-e89b-12d3-a456-426614174000"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
