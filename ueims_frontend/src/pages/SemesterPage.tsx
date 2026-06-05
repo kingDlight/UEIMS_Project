@@ -5,7 +5,7 @@ const SemesterPage: React.FC = () => {
     const [data, setData] = useState<any[]>([]);
 
     useEffect(() => {
-        SemesterService.getAll().then(res => setData(res.data)).catch(err => console.error(err));
+        SemesterService.getAll().then(res => setData(res)).catch(err => console.error(err));
     }, []);
 
     return (
