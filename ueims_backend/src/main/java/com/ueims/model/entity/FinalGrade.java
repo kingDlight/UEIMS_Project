@@ -35,7 +35,7 @@ public class FinalGrade {
     private BigDecimal enterpriseTotalScore;
 
     @Column(name = "final_grade", nullable = false, precision = 3, scale = 1)
-    private BigDecimal finalGrade;
+    private BigDecimal gradeValue;
 
     @Column(name = "overall_status", nullable = false, length = 20)
     private String overallStatus;

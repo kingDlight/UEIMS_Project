@@ -35,15 +35,16 @@ public class EnterpriseController {
 
     @PostMapping
     @PreAuthorize("hasRole('SYSTEM_ADMIN')")
-    public ApiResponse<Enterprise> create(@Valid @RequestBody Enterprise entity) {
-        return ApiResponse.<Enterprise>builder().result(service.save(entity)).build();
+    public ApiResponse<Enterprise> create(@Valid @RequestBody com.ueims.dto.request.EnterpriseRequest request) {
+        return ApiResponse.<Enterprise>builder().result(service.save(request)).build();
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ENTERPRISE')") // UC-36: Chỉ Enterprise được sửa profile của chính họ
-    public ApiResponse<Enterprise> update(@PathVariable UUID id, @Valid @RequestBody Enterprise entity) {
+    public ApiResponse<Enterprise> update(
+            @PathVariable UUID id, @Valid @RequestBody com.ueims.dto.request.EnterpriseRequest request) {
         return ApiResponse.<Enterprise>builder()
-                .result(service.update(id, entity))
+                .result(service.update(id, request))
                 .message("Enterprise profile updated successfully")
                 .build();
     }

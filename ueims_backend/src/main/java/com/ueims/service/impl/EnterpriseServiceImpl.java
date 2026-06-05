@@ -45,13 +45,27 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     }
 
     @Override
-    public Enterprise save(Enterprise entity) {
+    public Enterprise save(com.ueims.dto.request.EnterpriseRequest request) {
+        Enterprise entity = Enterprise.builder()
+                .companyName(request.getCompanyName())
+                .taxCode(request.getTaxCode())
+                .website(request.getWebsite())
+                .industry(request.getIndustry())
+                .description(request.getDescription())
+                .address(request.getAddress())
+                .logoUrl(request.getLogoUrl())
+                .contactPerson(request.getContactPerson())
+                .contactPhone(request.getContactPhone())
+                .contactEmail(request.getContactEmail())
+                .status(request.getStatus() != null ? request.getStatus() : "PENDING")
+                .rejectionReason(request.getRejectionReason())
+                .build();
         return repository.save(entity);
     }
 
     @Override
     @Transactional
-    public Enterprise update(UUID id, Enterprise request) {
+    public Enterprise update(UUID id, com.ueims.dto.request.EnterpriseRequest request) {
         User currentUser = getCurrentUser();
         Enterprise existing =
                 repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ENTERPRISE_NOT_FOUND));

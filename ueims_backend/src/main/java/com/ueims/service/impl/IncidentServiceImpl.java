@@ -44,6 +44,79 @@ public class IncidentServiceImpl implements IncidentService {
     }
 
     @Override
+    public Incident createIncident(com.ueims.dto.request.IncidentRequest request) {
+        EnterpriseAssignment assignment = assignmentRepository
+                .findById(request.getAssignmentId())
+                .orElseThrow(() -> new IllegalArgumentException("Assignment not found"));
+
+        User reportedBy = userRepository
+                .findById(request.getReportedById())
+                .orElseThrow(() -> new IllegalArgumentException("Reported user not found"));
+
+        User resolvedBy = null;
+        if (request.getResolvedById() != null) {
+            resolvedBy = userRepository
+                    .findById(request.getResolvedById())
+                    .orElseThrow(() -> new IllegalArgumentException("Resolved user not found"));
+        }
+
+        Incident incident = Incident.builder()
+                .assignment(assignment)
+                .reportedBy(reportedBy)
+                .category(request.getCategory())
+                .description(request.getDescription())
+                .evidenceUrls(request.getEvidenceUrls())
+                .status(request.getStatus() != null ? request.getStatus() : "OPEN")
+                .resolutionNote(request.getResolutionNote())
+                .resolvedBy(resolvedBy)
+                .build();
+
+        if (resolvedBy != null && incident.getResolvedAt() == null) {
+            incident.setResolvedAt(java.time.LocalDateTime.now());
+        }
+
+        return repository.save(incident);
+    }
+
+    @Override
+    public Incident updateIncident(UUID id, com.ueims.dto.request.IncidentRequest request) {
+        Incident incident =
+                repository.findById(id).orElseThrow(() -> new IllegalArgumentException("Incident not found"));
+
+        EnterpriseAssignment assignment = assignmentRepository
+                .findById(request.getAssignmentId())
+                .orElseThrow(() -> new IllegalArgumentException("Assignment not found"));
+
+        User reportedBy = userRepository
+                .findById(request.getReportedById())
+                .orElseThrow(() -> new IllegalArgumentException("Reported user not found"));
+
+        User resolvedBy = null;
+        if (request.getResolvedById() != null) {
+            resolvedBy = userRepository
+                    .findById(request.getResolvedById())
+                    .orElseThrow(() -> new IllegalArgumentException("Resolved user not found"));
+        }
+
+        incident.setAssignment(assignment);
+        incident.setReportedBy(reportedBy);
+        incident.setCategory(request.getCategory());
+        incident.setDescription(request.getDescription());
+        incident.setEvidenceUrls(request.getEvidenceUrls());
+        incident.setStatus(request.getStatus() != null ? request.getStatus() : "OPEN");
+        incident.setResolutionNote(request.getResolutionNote());
+
+        if (resolvedBy != null && incident.getResolvedBy() == null) {
+            incident.setResolvedAt(java.time.LocalDateTime.now());
+        } else if (resolvedBy == null) {
+            incident.setResolvedAt(null);
+        }
+        incident.setResolvedBy(resolvedBy);
+
+        return repository.save(incident);
+    }
+
+    @Override
     public Incident reportIncident(com.ueims.dto.request.IncidentReportRequest request) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User currentUser =

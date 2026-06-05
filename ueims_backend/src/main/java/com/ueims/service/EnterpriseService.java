@@ -10,9 +10,9 @@ public interface EnterpriseService {
 
     Enterprise findById(UUID id);
 
-    Enterprise save(Enterprise entity);
+    Enterprise save(com.ueims.dto.request.EnterpriseRequest request);
 
-    Enterprise update(UUID id, Enterprise entity);
+    Enterprise update(UUID id, com.ueims.dto.request.EnterpriseRequest request);
 
     Enterprise approveReject(UUID id, String status, String reason);
 

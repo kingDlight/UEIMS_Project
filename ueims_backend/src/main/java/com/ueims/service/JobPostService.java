@@ -10,9 +10,9 @@ public interface JobPostService {
 
     JobPost findById(UUID id);
 
-    JobPost create(JobPost entity);
+    JobPost create(com.ueims.dto.request.JobPostRequest request);
 
-    JobPost update(UUID id, JobPost request);
+    JobPost update(UUID id, com.ueims.dto.request.JobPostRequest request);
 
     void deleteById(UUID id);
 }
