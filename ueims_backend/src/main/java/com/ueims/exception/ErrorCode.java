@@ -45,26 +45,16 @@ public enum ErrorCode {
             "Invalid semester status transition. Allowed: DRAFT\u2192OPEN, OPEN\u2192ACTIVE, ACTIVE\u2192CLOSED, CLOSED\u2192LOCKED",
             HttpStatus.UNPROCESSABLE_ENTITY),
     SEMESTER_EXISTED(1031, "Semester code already exists", HttpStatus.BAD_REQUEST),
-    EXPORT_VOLUME_EXCEEDED(1039, "Export volume exceeds the maximum limit of 10,000 records", HttpStatus.BAD_REQUEST),
-    INVALID_STATUS_FOR_OJT(
-            1040,
-            "One or more students do not meet the prerequisite status (ACCEPTED or MATCHED) for OJT approval",
-            HttpStatus.BAD_REQUEST),
-    ADMIN_INTERVENTION_REQUIRED(
-            1041, "Admin intervention is required to modify an already approved OJT student", HttpStatus.FORBIDDEN),
-
     // Application related
     APPLICATION_NOT_FOUND(1032, "Application not found", HttpStatus.NOT_FOUND),
-
-    // Account related
-    USER_BANNED(2001, "Tài khoản của bạn đã bị khóa do nhập sai mật khẩu quá 5 lần", HttpStatus.FORBIDDEN),
-    WRONG_OLD_PASSWORD(2002, "Mật khẩu cũ không chính xác", HttpStatus.BAD_REQUEST),
-    PASSWORDS_NOT_MATCH(2003, "Mật khẩu mới và xác nhận không khớp", HttpStatus.BAD_REQUEST),
-    USER_ALREADY_HAS_ROLE(2004, "Người dùng đã có vai trò. Chỉ được gán một vai trò duy nhất.", HttpStatus.BAD_REQUEST),
     FIELD_REQUIRED(1033, "This field is required", HttpStatus.BAD_REQUEST),
     MISSING_PARAMETER(1034, "Missing required request parameter: {param}", HttpStatus.BAD_REQUEST),
     INVALID_PARAMETER_FORMAT(
             1035, "Invalid format for parameter: {param}. Expected format: {type}", HttpStatus.BAD_REQUEST),
+    APPLICATION_STATUS_CHANGED(
+            1049,
+            "Cannot withdraw. Your application is already being processed or has been reviewed by the enterprise.",
+            HttpStatus.BAD_REQUEST),
 
     // Enterprise registration
     ENTERPRISE_EXISTED(1036, "Doanh nghiệp với mã số thuế này đã tồn tại trong hệ thống", HttpStatus.BAD_REQUEST),
@@ -88,6 +78,19 @@ public enum ErrorCode {
             1048,
             "Export aborted. Record count exceeds 50,000 threshold. Please shrink your search horizon filter properties.",
             HttpStatus.BAD_REQUEST),
+    EXPORT_VOLUME_EXCEEDED(1050, "Export volume exceeds the maximum limit of 10,000 records", HttpStatus.BAD_REQUEST),
+    INVALID_STATUS_FOR_OJT(
+            1051,
+            "One or more students do not meet the prerequisite status (ACCEPTED or MATCHED) for OJT approval",
+            HttpStatus.BAD_REQUEST),
+    ADMIN_INTERVENTION_REQUIRED(
+            1052, "Admin intervention is required to modify an already approved OJT student", HttpStatus.FORBIDDEN),
+
+    // Account related
+    USER_BANNED(2001, "Tài khoản của bạn đã bị khóa do nhập sai mật khẩu quá 5 lần", HttpStatus.FORBIDDEN),
+    WRONG_OLD_PASSWORD(2002, "Mật khẩu cũ không chính xác", HttpStatus.BAD_REQUEST),
+    PASSWORDS_NOT_MATCH(2003, "Mật khẩu mới và xác nhận không khớp", HttpStatus.BAD_REQUEST),
+    USER_ALREADY_HAS_ROLE(2004, "Người dùng đã có vai trò. Chỉ được gán một vai trò duy nhất.", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
