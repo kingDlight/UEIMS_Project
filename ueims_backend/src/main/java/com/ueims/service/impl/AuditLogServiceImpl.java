@@ -47,9 +47,9 @@ public class AuditLogServiceImpl implements AuditLogService {
 
         List<AuditLog> logs = repository.findByDateRange(startDateTime, endDateTime);
 
-        // BR-20: Data exports are capped at a maximum of 10,000 records per transaction.
-        if (logs.size() > 10000) {
-            throw new AppException(ErrorCode.EXPORT_EXCEED_LIMIT);
+        // UC-13 Other Information: The export threshold for System Logs is set at 50,000 records
+        if (logs.size() > 50000) {
+            throw new AppException(ErrorCode.EXPORT_LOG_EXCEED_LIMIT);
         }
 
         try (Workbook workbook = new XSSFWorkbook();

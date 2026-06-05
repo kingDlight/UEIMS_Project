@@ -84,6 +84,10 @@ public enum ErrorCode {
     INTERVIEW_ALREADY_CONFIRMED(1045, "Interview already confirmed", HttpStatus.BAD_REQUEST),
     FINAL_REPORT_INVALID_FORMAT(1046, "Final report must be in PDF format", HttpStatus.BAD_REQUEST),
     FINAL_REPORT_SIZE_EXCEEDED(1047, "Final report size must not exceed 5MB", HttpStatus.BAD_REQUEST),
+    EXPORT_LOG_EXCEED_LIMIT(
+            1048,
+            "Export aborted. Record count exceeds 50,000 threshold. Please shrink your search horizon filter properties.",
+            HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

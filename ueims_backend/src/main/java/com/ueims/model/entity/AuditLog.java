@@ -52,4 +52,10 @@ public class AuditLog {
     protected void onCreate() {
         timestamp = LocalDateTime.now();
     }
+
+    @PreUpdate
+    @PreRemove
+    protected void preventUpdateOrDelete() {
+        throw new UnsupportedOperationException("Audit logs are immutable and cannot be updated or deleted.");
+    }
 }
