@@ -5,7 +5,6 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
-import java.util.List;
 import java.util.StringJoiner;
 import java.util.UUID;
 
@@ -55,6 +54,7 @@ public class AuthenticationService {
     com.ueims.repository.PasswordResetTokenRepository passwordResetTokenRepository;
     MailService mailService;
     PasswordEncoder passwordEncoder;
+    UserSessionManagementService userSessionManagementService;
 
     @NonFinal
     @Value("${jwt.signerKey}")
@@ -123,7 +123,7 @@ public class AuthenticationService {
         }
 
         // BR-02: Simultaneous Session Control - Invalidate old sessions
-        invalidateOldSessions(user.getEmail());
+        userSessionManagementService.invalidateOldSessions(user.getEmail());
 
         var token = generateToken(user);
 
@@ -167,21 +167,6 @@ public class AuthenticationService {
                 .authenticated(true)
                 .mustChangePassword(user.getMustChangePassword())
                 .build();
-    }
-
-    @Transactional
-    protected void invalidateOldSessions(String email) {
-        List<UserSession> oldSessions = userSessionRepository.findByEmail(email);
-        if (!CollectionUtils.isEmpty(oldSessions)) {
-            List<InvalidatedToken> invalidTokens = oldSessions.stream()
-                    .map(s -> InvalidatedToken.builder()
-                            .tokenId(s.getTokenId())
-                            .expiresAt(s.getExpiresAt())
-                            .build())
-                    .toList();
-            invalidatedTokenRepository.saveAll(invalidTokens);
-            userSessionRepository.deleteAll(oldSessions);
-        }
     }
 
     public void logout(LogoutRequest request) throws ParseException, JOSEException {
@@ -254,18 +239,14 @@ public class AuthenticationService {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
 
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
+                .claim("userId", user.getUserId().toString())
                 .subject(user.getEmail())
                 .issuer("ueims.com")
+                .claim("authorities", buildScope(user))
                 .issueTime(new Date())
                 .expirationTime(new Date(
                         Instant.now().plus(validDuration, ChronoUnit.SECONDS).toEpochMilli()))
                 .jwtID(UUID.randomUUID().toString())
-                .claim("scope", buildScope(user))
-                .claim(
-                        "role",
-                        user.getRoles().isEmpty()
-                                ? null
-                                : user.getRoles().iterator().next().getRole().getRoleName())
                 .claim("must_change_password", user.getMustChangePassword())
                 .build();
 
@@ -400,6 +381,6 @@ public class AuthenticationService {
         mailService.sendPasswordChangedMail(user.getEmail(), user.getFullName(), changedAt);
 
         // Invalidate all old sessions so they have to login again
-        invalidateOldSessions(user.getEmail());
+        userSessionManagementService.invalidateOldSessions(user.getEmail());
     }
 }

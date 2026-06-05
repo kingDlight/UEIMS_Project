@@ -32,6 +32,7 @@ public class ExcelImportUtil {
                     isHeader = false;
                     continue;
                 }
+
                 students.add(parseRow(row));
             }
             return students;

@@ -39,7 +39,7 @@ public class JobPostServiceImpl implements JobPostService {
 
     @Override
     @Transactional
-    public JobPost create(JobPost entity) {
+    public JobPost create(com.ueims.dto.request.JobPostRequest request) {
         User currentUser = getCurrentUser();
         if (currentUser.getEnterprise() == null
                 || !"ACTIVE".equals(currentUser.getEnterprise().getStatus())) {
@@ -47,26 +47,35 @@ public class JobPostServiceImpl implements JobPostService {
         }
 
         // BR-30: Kiểm tra trạng thái Semester trước khi tạo mới
-        if (entity.getSemester() == null || entity.getSemester().getSemesterId() == null) {
+        if (request.getSemester() == null || request.getSemester().getSemesterId() == null) {
             throw new AppException(ErrorCode.FIELD_REQUIRED);
         }
 
         Semester semester = semesterRepository
-                .findById(entity.getSemester().getSemesterId())
+                .findById(request.getSemester().getSemesterId())
                 .orElseThrow(() -> new AppException(ErrorCode.SEMESTER_NOT_FOUND));
 
         validateSemesterStatus(semester);
 
-        entity.setEnterprise(currentUser.getEnterprise());
-        entity.setSemester(semester);
-        if (entity.getStatus() == null) entity.setStatus("OPEN");
+        JobPost entity = JobPost.builder()
+                .enterprise(currentUser.getEnterprise())
+                .semester(semester)
+                .title(request.getTitle())
+                .description(request.getDescription())
+                .requirements(request.getRequirements())
+                .benefits(request.getBenefits())
+                .requiredSkills(request.getRequiredSkills())
+                .positionsCount(request.getPositionsCount())
+                .applicationDeadline(request.getApplicationDeadline())
+                .status(request.getStatus() != null ? request.getStatus() : "OPEN")
+                .build();
 
         return repository.save(entity);
     }
 
     @Override
     @Transactional
-    public JobPost update(UUID id, JobPost request) {
+    public JobPost update(UUID id, com.ueims.dto.request.JobPostRequest request) {
         JobPost existing = findById(id);
         validateOwnership(existing);
         validateSemesterStatus(existing.getSemester()); // BR-30
@@ -79,7 +88,9 @@ public class JobPostServiceImpl implements JobPostService {
         existing.setPositionsCount(request.getPositionsCount());
         existing.setApplicationDeadline(request.getApplicationDeadline());
         // BR-29: Cho phép Enterprise điều chỉnh trạng thái (OPEN/CLOSED...)
-        existing.setStatus(request.getStatus());
+        if (request.getStatus() != null) {
+            existing.setStatus(request.getStatus());
+        }
         return repository.save(existing);
     }
 

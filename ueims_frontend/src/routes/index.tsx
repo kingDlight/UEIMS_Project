@@ -8,6 +8,7 @@ import { RegisterEnterprisePage } from '@/pages/auth/RegisterEnterprisePage';
 import { HomePage } from '@/pages/home/HomePage';
 import { ProtectedRoute } from '@/components/guards/ProtectedRoute';
 import { EmailPreviewPage } from '@/pages/dev/EmailPreviewPage';
+import { TrainingManagerDashboard } from '@/pages/TrainingManagerDashboard';
 
 export const router = createBrowserRouter([
   {
@@ -39,24 +40,28 @@ export const router = createBrowserRouter([
     element: <ProtectedRoute />,
     children: [
       {
-        path: '/app',
-        element: <AppLayout />,
-        children: [
-          {
-            index: true,
-            element: <Navigate to="/app/dashboard" replace />,
-          },
-          {
-            path: 'dashboard',
-            element: <div>Trang Dashboard Module (Sẽ code ở Phase sau)</div>,
-          },
-        ],
+        index: true,
+        element: <Navigate to="/app/dashboard" replace />,
       },
+      {
+        path: 'dashboard',
+        element: <TrainingManagerDashboard />,
+      },
+      // Nếu sau này có màn hình nào khác của Admin/Student cần dùng AppLayout cũ thì khai báo vào đây:
+      // {
+      //   path: 'admin',
+      //   element: <AppLayout />,
+      //   children: [...]
+      // }
     ],
   },
   {
     path: '/dev/email-preview',
     element: <EmailPreviewPage />,
+  },
+  {
+    path: '/tm-dashboard/:tab?',
+    element: <TrainingManagerDashboard />,
   },
   {
     path: '*',

@@ -22,4 +22,6 @@ public interface EligibleStudentService {
     int finalizeOjtList(List<UUID> studentIds);
 
     byte[] exportOjtStudentsToExcel(UUID semesterId);
+
+    EligibleStudent cancelOjtResult(UUID id, String reason);
 }

@@ -21,6 +21,8 @@ BEGIN
         ('TRAINING_MANAGER', 'RESOLVE_INCIDENT'),
         ('ADMIN', 'VIEW_INCIDENT'),
         ('ADMIN', 'MANAGE_INCIDENT'),
+        ('ADMIN', 'IMPORT_ELIGIBLE_STUDENT'),
+        ('ADMIN', 'EXPORT_OJT_STUDENT'),
         ('STUDENT', 'REPORT_INCIDENT'),
         ('ENTERPRISE', 'REPORT_INCIDENT')
     ON CONFLICT (role_name, permission_name) DO NOTHING;

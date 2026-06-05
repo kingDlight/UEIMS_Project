@@ -5,7 +5,7 @@ const SystemAnnouncementPage: React.FC = () => {
     const [data, setData] = useState<any[]>([]);
 
     useEffect(() => {
-        SystemAnnouncementService.getAll().then(res => setData(res.data)).catch(err => console.error(err));
+        SystemAnnouncementService.getAll().then(res => setData(res)).catch(err => console.error(err));
     }, []);
 
     return (

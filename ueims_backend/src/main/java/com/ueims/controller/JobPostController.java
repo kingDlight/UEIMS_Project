@@ -32,18 +32,19 @@ public class JobPostController {
 
     @PostMapping
     @PreAuthorize("hasRole('ENTERPRISE')")
-    public ApiResponse<JobPost> create(@RequestBody @Valid JobPost entity) {
+    public ApiResponse<JobPost> create(@RequestBody @Valid com.ueims.dto.request.JobPostRequest request) {
         return ApiResponse.<JobPost>builder()
-                .result(service.create(entity))
+                .result(service.create(request))
                 .message("Job posting created successfully")
                 .build();
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ENTERPRISE')")
-    public ApiResponse<JobPost> update(@PathVariable UUID id, @Valid @RequestBody JobPost entity) {
+    public ApiResponse<JobPost> update(
+            @PathVariable UUID id, @Valid @RequestBody com.ueims.dto.request.JobPostRequest request) {
         return ApiResponse.<JobPost>builder()
-                .result(service.update(id, entity))
+                .result(service.update(id, request))
                 .message("Job posting updated successfully")
                 .build();
     }

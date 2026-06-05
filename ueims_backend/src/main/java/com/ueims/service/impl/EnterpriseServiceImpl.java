@@ -45,13 +45,27 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     }
 
     @Override
-    public Enterprise save(Enterprise entity) {
+    public Enterprise save(com.ueims.dto.request.EnterpriseRequest request) {
+        Enterprise entity = Enterprise.builder()
+                .companyName(request.getCompanyName())
+                .taxCode(request.getTaxCode())
+                .website(request.getWebsite())
+                .industry(request.getIndustry())
+                .description(request.getDescription())
+                .address(request.getAddress())
+                .logoUrl(request.getLogoUrl())
+                .contactPerson(request.getContactPerson())
+                .contactPhone(request.getContactPhone())
+                .contactEmail(request.getContactEmail())
+                .status(request.getStatus() != null ? request.getStatus() : "PENDING")
+                .rejectionReason(request.getRejectionReason())
+                .build();
         return repository.save(entity);
     }
 
     @Override
     @Transactional
-    public Enterprise update(UUID id, Enterprise request) {
+    public Enterprise update(UUID id, com.ueims.dto.request.EnterpriseRequest request) {
         User currentUser = getCurrentUser();
         Enterprise existing =
                 repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ENTERPRISE_NOT_FOUND));
@@ -90,6 +104,12 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         }
 
         enterprise.setStatus(status.toUpperCase());
+        if ("REJECTED".equalsIgnoreCase(status)) {
+            enterprise.setRejectionReason(reason);
+        } else if ("APPROVED".equalsIgnoreCase(status)) {
+            enterprise.setRejectionReason(null);
+        }
+
         Enterprise saved = repository.save(enterprise);
 
         // UC-19: Gửi email thông báo (Post-condition bắt buộc)
@@ -102,12 +122,15 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     }
 
     private void validateAccess(UUID targetId) {
-        User currentUser = getCurrentUser();
-        boolean isStaff = currentUser.getRoles().stream()
-                .anyMatch(r -> r.getRole().getRoleName().equals("TRAINING_MANAGER")
-                        || r.getRole().getRoleName().equals("SYSTEM_ADMIN"));
+        org.springframework.security.core.Authentication auth =
+                SecurityContextHolder.getContext().getAuthentication();
+        boolean isStaff = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_TRAINING_MANAGER")
+                        || a.getAuthority().equals("ROLE_ADMIN")
+                        || a.getAuthority().equals("ROLE_SYSTEM_ADMIN"));
 
         if (!isStaff) {
+            User currentUser = getCurrentUser();
             validateOwnership(targetId, currentUser);
         }
     }

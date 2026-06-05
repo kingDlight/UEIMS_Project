@@ -1,11 +1,43 @@
-import axios from 'axios';
-
-const API_URL = 'http://localhost:8080/api/system-announcements';
+import { api } from './api';
+import type { SystemAnnouncement } from '../pages/training-manager/types';
 
 export const SystemAnnouncementService = {
-    getAll: () => axios.get(API_URL),
-    getById: (id: string) => axios.get(`${API_URL}/${id}`),
-    create: (data: any) => axios.post(API_URL, data),
-    update: (id: string, data: any) => axios.put(`${API_URL}/${id}`, data),
-    delete: (id: string) => axios.delete(`${API_URL}/${id}`)
+  getAll: async (): Promise<SystemAnnouncement[]> => {
+    const response = await api.get('/system-announcements');
+    return response.data;
+  },
+
+  getActive: async (): Promise<SystemAnnouncement[]> => {
+    const response = await api.get('/system-announcements/active');
+    return response.data;
+  },
+
+  getById: async (id: string): Promise<SystemAnnouncement> => {
+    const response = await api.get(`/system-announcements/${id}`);
+    return response.data;
+  },
+
+  create: async (data: { title: string; content: string; semesterId?: string }): Promise<SystemAnnouncement> => {
+    const response = await api.post('/system-announcements', data);
+    return response.data;
+  },
+
+  update: async (id: string, data: { title: string; content: string; semesterId?: string }): Promise<SystemAnnouncement> => {
+    const response = await api.put(`/system-announcements/${id}`, data);
+    return response.data;
+  },
+
+  publish: async (id: string): Promise<SystemAnnouncement> => {
+    const response = await api.put(`/system-announcements/${id}/publish`);
+    return response.data;
+  },
+
+  archive: async (id: string): Promise<SystemAnnouncement> => {
+    const response = await api.put(`/system-announcements/${id}/archive`);
+    return response.data;
+  },
+
+  delete: async (id: string): Promise<void> => {
+    await api.delete(`/system-announcements/${id}`);
+  }
 };

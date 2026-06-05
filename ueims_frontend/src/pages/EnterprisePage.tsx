@@ -5,7 +5,7 @@ const EnterprisePage: React.FC = () => {
     const [data, setData] = useState<any[]>([]);
 
     useEffect(() => {
-        EnterpriseService.getAll().then(res => setData(res.data)).catch(err => console.error(err));
+        EnterpriseService.getAll().then(res => setData(res)).catch(err => console.error(err));
     }, []);
 
     return (
