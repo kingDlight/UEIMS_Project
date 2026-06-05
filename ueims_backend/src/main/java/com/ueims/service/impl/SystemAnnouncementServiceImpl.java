@@ -70,17 +70,18 @@ public class SystemAnnouncementServiceImpl implements SystemAnnouncementService 
     @Transactional
     public SystemAnnouncement updateAnnouncement(UUID id, AnnouncementCreationRequest request) {
         SystemAnnouncement announcement = findById(id);
-        
+
         announcement.setTitle(request.getTitle());
         announcement.setContent(request.getContent());
-        
+
         if (request.getSemesterId() != null) {
-            Semester semester = semesterRepository.findById(request.getSemesterId()).orElse(null);
+            Semester semester =
+                    semesterRepository.findById(request.getSemesterId()).orElse(null);
             announcement.setSemester(semester);
         } else {
             announcement.setSemester(null);
         }
-        
+
         return repository.save(announcement);
     }
 

@@ -187,12 +187,12 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
     @Override
     @org.springframework.transaction.annotation.Transactional
     public EligibleStudent cancelOjtResult(UUID id, String reason) {
-        EligibleStudent student = repository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION));
-        
+        EligibleStudent student =
+                repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION));
+
         student.setStatus("CANCELLED");
         student.setCancelledReason(reason);
-        
+
         return repository.save(student);
     }
 }
