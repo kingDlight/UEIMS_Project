@@ -23,6 +23,8 @@ public class IncidentServiceImpl implements IncidentService {
     private final EnterpriseAssignmentRepository assignmentRepository;
     private final UserRepository userRepository;
 
+    private static final String ASSIGNMENT_NOT_FOUND = "Assignment not found";
+
     @Override
     public List<Incident> findAll() {
         return repository.findAll();
@@ -47,7 +49,7 @@ public class IncidentServiceImpl implements IncidentService {
     public Incident createIncident(com.ueims.dto.request.IncidentRequest request) {
         EnterpriseAssignment assignment = assignmentRepository
                 .findById(request.getAssignmentId())
-                .orElseThrow(() -> new IllegalArgumentException("Assignment not found"));
+                .orElseThrow(() -> new IllegalArgumentException(ASSIGNMENT_NOT_FOUND));
 
         User reportedBy = userRepository
                 .findById(request.getReportedById())
@@ -85,7 +87,7 @@ public class IncidentServiceImpl implements IncidentService {
 
         EnterpriseAssignment assignment = assignmentRepository
                 .findById(request.getAssignmentId())
-                .orElseThrow(() -> new IllegalArgumentException("Assignment not found"));
+                .orElseThrow(() -> new IllegalArgumentException(ASSIGNMENT_NOT_FOUND));
 
         User reportedBy = userRepository
                 .findById(request.getReportedById())
@@ -124,7 +126,7 @@ public class IncidentServiceImpl implements IncidentService {
 
         EnterpriseAssignment assignment = assignmentRepository
                 .findById(request.getAssignmentId())
-                .orElseThrow(() -> new IllegalArgumentException("Assignment not found"));
+                .orElseThrow(() -> new IllegalArgumentException(ASSIGNMENT_NOT_FOUND));
 
         boolean isStudent = assignment.getStudent().getUserId().equals(currentUser.getUserId());
         boolean isEnterprise = assignment.getEnterprise() != null

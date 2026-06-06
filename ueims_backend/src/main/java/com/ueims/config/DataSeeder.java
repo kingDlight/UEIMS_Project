@@ -2,6 +2,7 @@ package com.ueims.config;
 
 import java.util.Arrays;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -29,6 +30,9 @@ public class DataSeeder implements CommandLineRunner {
     private final RoleRepository roleRepository;
     private final UserRoleRepository userRoleRepository;
     private final PasswordEncoder passwordEncoder;
+
+    @Value("${app.seed.default-password:defaultPassword}")
+    private String defaultPassword;
 
     @Override
     public void run(String... args) throws Exception {
@@ -100,7 +104,7 @@ public class DataSeeder implements CommandLineRunner {
 
             User tmUser = User.builder()
                     .email("tm@ueims.edu.vn")
-                    .password(passwordEncoder.encode("Password123!"))
+                    .password(passwordEncoder.encode(defaultPassword))
                     .fullName("Angie Do")
                     .phone("0987654321")
                     .status("ACTIVE")
