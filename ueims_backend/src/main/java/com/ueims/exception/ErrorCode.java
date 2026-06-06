@@ -85,6 +85,10 @@ public enum ErrorCode {
             HttpStatus.BAD_REQUEST),
     ADMIN_INTERVENTION_REQUIRED(
             1052, "Admin intervention is required to modify an already approved OJT student", HttpStatus.FORBIDDEN),
+    INTERVIEW_DATE_MUST_BE_IN_FUTURE(1053, "Ngày phỏng vấn phải ở tương lai", HttpStatus.BAD_REQUEST),
+    INTERVIEW_ELIGIBILITY_RULE(
+            1054, "Chỉ những ứng viên đã vượt qua vòng sơ loại mới được lên lịch phỏng vấn", HttpStatus.BAD_REQUEST),
+    INTERVIEW_OVERLAP(1055, "Thời gian phỏng vấn bị trùng với lịch đã có của doanh nghiệp", HttpStatus.BAD_REQUEST),
 
     // Account related
     USER_BANNED(2001, "Tài khoản của bạn đã bị khóa do nhập sai mật khẩu quá 5 lần", HttpStatus.FORBIDDEN),
