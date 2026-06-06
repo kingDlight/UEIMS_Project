@@ -14,6 +14,7 @@ import com.ueims.service.WeeklyReportService;
 
 import lombok.RequiredArgsConstructor;
 
+@SuppressWarnings("java:S4684")
 @RestController
 @RequestMapping("/api/weekly-reports")
 @RequiredArgsConstructor

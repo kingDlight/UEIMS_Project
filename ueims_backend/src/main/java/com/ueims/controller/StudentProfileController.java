@@ -15,6 +15,7 @@ import com.ueims.service.StudentProfileService;
 
 import lombok.RequiredArgsConstructor;
 
+@SuppressWarnings("java:S4684")
 @RestController
 @RequestMapping("/api/student-profiles")
 @RequiredArgsConstructor

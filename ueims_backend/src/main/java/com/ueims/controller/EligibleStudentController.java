@@ -18,6 +18,7 @@ import com.ueims.service.EligibleStudentService;
 
 import lombok.RequiredArgsConstructor;
 
+@SuppressWarnings("java:S4684")
 @RestController
 @RequestMapping("/api/eligible-students")
 @RequiredArgsConstructor

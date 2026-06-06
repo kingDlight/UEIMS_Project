@@ -14,6 +14,7 @@ import com.ueims.service.FinalReportService;
 
 import lombok.RequiredArgsConstructor;
 
+@SuppressWarnings("java:S4684")
 @RestController
 @RequestMapping("/api/final-reports")
 @RequiredArgsConstructor

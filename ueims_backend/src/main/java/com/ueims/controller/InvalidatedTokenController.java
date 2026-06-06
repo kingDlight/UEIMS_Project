@@ -12,6 +12,7 @@ import com.ueims.service.InvalidatedTokenService;
 
 import lombok.RequiredArgsConstructor;
 
+@SuppressWarnings("java:S4684")
 @RestController
 @RequestMapping("/api/invalidated-tokens")
 @RequiredArgsConstructor

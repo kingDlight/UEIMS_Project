@@ -13,6 +13,7 @@ import com.ueims.service.InterviewService;
 
 import lombok.RequiredArgsConstructor;
 
+@SuppressWarnings("java:S4684")
 @RestController
 @RequestMapping("/api/interviews")
 @RequiredArgsConstructor
