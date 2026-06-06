@@ -7,6 +7,7 @@ import {
   CalendarOutlined,
   FileProtectOutlined,
   FileTextOutlined,
+  SnippetsOutlined,
   TeamOutlined,
   TrophyOutlined,
 } from '@ant-design/icons';
@@ -48,6 +49,7 @@ export const navItems: NavItem[] = [
   { key: 'analytics', label: 'Stats', icon: React.createElement(TrophyOutlined) },
   { key: 'incidents', label: 'Incidents', icon: React.createElement(AlertOutlined) },
   { key: 'reports', label: 'Reports', icon: React.createElement(FileTextOutlined) },
+  { key: 'weekly-reports', label: 'Weekly Reports', icon: React.createElement(SnippetsOutlined) },
   { key: 'calendar', label: 'Semester', icon: React.createElement(CalendarOutlined) },
   { key: 'notifications', label: 'Notices', icon: React.createElement(BellOutlined) },
 ];
