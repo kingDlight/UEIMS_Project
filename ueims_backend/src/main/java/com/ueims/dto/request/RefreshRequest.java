@@ -17,4 +17,7 @@ import lombok.experimental.FieldDefaults;
 public class RefreshRequest {
     @NotBlank(message = "FIELD_REQUIRED")
     String token;
+
+    @NotBlank(message = "FIELD_REQUIRED")
+    String deviceId;
 }
