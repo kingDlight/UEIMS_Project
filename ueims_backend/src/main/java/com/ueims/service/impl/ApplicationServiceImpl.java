@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ueims.dto.request.ApplicationRequest;
+import com.ueims.dto.request.ApplicationScreenRequest;
 import com.ueims.dto.response.ApplicationResponse;
 import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
@@ -157,6 +158,42 @@ public class ApplicationServiceImpl implements ApplicationService {
         Application updated = repository.save(application);
 
         return mapper.toApplicationResponse(updated);
+    }
+
+    @Override
+    @Transactional
+    public ApplicationResponse screenApplication(UUID id, ApplicationScreenRequest request) {
+        Application application =
+                repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.APPLICATION_NOT_FOUND));
+
+        // BR-33: Chỉ cho phép lọc nếu đang ở trạng thái PENDING
+        if (application.getStatus() != ApplicationStatus.PENDING) {
+            throw new AppException(ErrorCode.APPLICATION_STATUS_CHANGED);
+        }
+
+        // Kiểm tra quyền: Chỉ Enterprise sở hữu JobPost này mới được lọc CV
+        User currentUser = getCurrentUser();
+        if (currentUser.getEnterprise() == null
+                || !application
+                        .getJobPost()
+                        .getEnterprise()
+                        .getEnterpriseId()
+                        .equals(currentUser.getEnterprise().getEnterpriseId())) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        application.setStatus(request.getStatus());
+
+        if (request.getStatus() == ApplicationStatus.SCREENING_REJECTED) {
+            application.setRejectionReason(request.getRejectionReason());
+        } else {
+            // Đảm bảo xóa lý do cũ nếu trạng thái là PASSED
+            application.setRejectionReason(null);
+        }
+
+        application.setScreenedBy(currentUser);
+
+        return mapper.toApplicationResponse(repository.save(application));
     }
 
     private User getCurrentUser() {

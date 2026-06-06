@@ -1,4 +1,5 @@
 export { DashboardTab } from './DashboardTab';
+export { CommandCenterDashboard } from './CommandCenterDashboard';
 export { EnterpriseTab } from './EnterpriseTab';
 export { StudentsTab } from './StudentsTab';
 export { OJTTab } from './OJTTab';
@@ -7,3 +8,4 @@ export { IncidentsTab } from './IncidentsTab';
 export { ReportsTab } from './ReportsTab';
 export { SemesterTab } from './SemesterTab';
 export { NoticesTab } from './NoticesTab';
+export { WeeklyReportsTab } from './WeeklyReportsTab';

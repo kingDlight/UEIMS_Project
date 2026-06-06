@@ -54,12 +54,18 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-content: flex-end;
-  overflow: hidden;
+  overflow-x: auto;
   flex: 1 1 0;
   min-width: 0;
   padding: 4px 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.modern-nav-items::-webkit-scrollbar {
+  display: none;
 }
 
 .modern-nav-item {
