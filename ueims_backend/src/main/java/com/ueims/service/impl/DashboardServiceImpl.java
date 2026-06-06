@@ -8,6 +8,8 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ueims.exception.AppException;
+import com.ueims.exception.ErrorCode;
 import com.ueims.model.dto.dashboard.ChartDataDTO;
 import com.ueims.model.entity.SemesterStatistics;
 import com.ueims.repository.EligibleStudentRepository;
@@ -29,11 +31,8 @@ public class DashboardServiceImpl implements DashboardService {
     @Override
     public List<ChartDataDTO> getEmploymentRateChart(UUID semesterId) {
         SemesterStatistics stats =
-                semesterStatisticsRepository.findById(semesterId).orElse(null);
+                semesterStatisticsRepository.findById(semesterId).orElseThrow(() -> new AppException(ErrorCode.SEMESTER_NOT_FOUND));
         List<ChartDataDTO> chart = new ArrayList<>();
-        if (stats == null) {
-            return chart;
-        }
 
         long ojt = stats.getTotalOjt() != null ? stats.getTotalOjt() : 0;
         long total = stats.getTotalEligible() != null ? stats.getTotalEligible() : 0;
@@ -48,11 +47,8 @@ public class DashboardServiceImpl implements DashboardService {
     @Override
     public List<ChartDataDTO> getInterviewPassRateChart(UUID semesterId) {
         SemesterStatistics stats =
-                semesterStatisticsRepository.findById(semesterId).orElse(null);
+                semesterStatisticsRepository.findById(semesterId).orElseThrow(() -> new AppException(ErrorCode.SEMESTER_NOT_FOUND));
         List<ChartDataDTO> chart = new ArrayList<>();
-        if (stats == null) {
-            return chart;
-        }
 
         long passed = stats.getInterviewsPassed() != null ? stats.getInterviewsPassed() : 0;
         long failed = stats.getInterviewsFailed() != null ? stats.getInterviewsFailed() : 0;
@@ -94,6 +90,16 @@ public class DashboardServiceImpl implements DashboardService {
         chart.add(new ChartDataDTO("Good (7.0 - 8.4)", good));
         chart.add(new ChartDataDTO("Average (5.0 - 6.9)", average));
         chart.add(new ChartDataDTO("Failed (< 5.0)", failed));
+        return chart;
+    }
+
+    @Override
+    public List<ChartDataDTO> getAverageRatingChart(UUID semesterId) {
+        SemesterStatistics stats =
+                semesterStatisticsRepository.findById(semesterId).orElseThrow(() -> new AppException(ErrorCode.SEMESTER_NOT_FOUND));
+        List<ChartDataDTO> chart = new ArrayList<>();
+        BigDecimal avgFinalGrade = stats.getAvgFinalGrade() != null ? stats.getAvgFinalGrade() : BigDecimal.ZERO;
+        chart.add(new ChartDataDTO("Average Rating", avgFinalGrade.doubleValue()));
         return chart;
     }
 }

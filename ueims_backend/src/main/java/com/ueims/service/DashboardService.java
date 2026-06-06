@@ -13,4 +13,6 @@ public interface DashboardService {
     List<ChartDataDTO> getMajorDistributionChart(UUID semesterId);
 
     List<ChartDataDTO> getGradeDistributionChart(UUID semesterId);
+
+    List<ChartDataDTO> getAverageRatingChart(UUID semesterId);
 }

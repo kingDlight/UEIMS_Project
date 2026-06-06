@@ -11,11 +11,14 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ueims.model.dto.dashboard.ChartDataDTO;
 import com.ueims.service.DashboardService;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/dashboard")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
 public class DashboardController {
 
     private final DashboardService dashboardService;
@@ -38,5 +41,10 @@ public class DashboardController {
     @GetMapping("/grade-distribution/{semesterId}")
     public List<ChartDataDTO> getGradeDistributionChart(@PathVariable UUID semesterId) {
         return dashboardService.getGradeDistributionChart(semesterId);
+    }
+
+    @GetMapping("/average-rating/{semesterId}")
+    public List<ChartDataDTO> getAverageRatingChart(@PathVariable UUID semesterId) {
+        return dashboardService.getAverageRatingChart(semesterId);
     }
 }
