@@ -13,7 +13,6 @@ import com.ueims.service.EnterpriseAssignmentService;
 
 import lombok.RequiredArgsConstructor;
 
-@SuppressWarnings("java:S4684")
 @RestController
 @RequestMapping("/api/enterprise-assignments")
 @RequiredArgsConstructor

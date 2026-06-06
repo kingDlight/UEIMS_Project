@@ -13,7 +13,6 @@ import com.ueims.service.PasswordResetTokenService;
 
 import lombok.RequiredArgsConstructor;
 
-@SuppressWarnings("java:S4684")
 @RestController
 @RequestMapping("/api/password-reset-tokens")
 @RequiredArgsConstructor

@@ -13,7 +13,6 @@ import com.ueims.service.NotificationService;
 
 import lombok.RequiredArgsConstructor;
 
-@SuppressWarnings("java:S4684")
 @RestController
 @RequestMapping("/api/notifications")
 @RequiredArgsConstructor

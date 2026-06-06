@@ -13,7 +13,6 @@ import com.ueims.service.InternshipPlanService;
 
 import lombok.RequiredArgsConstructor;
 
-@SuppressWarnings("java:S4684")
 @RestController
 @RequestMapping("/api/internship-plans")
 @RequiredArgsConstructor

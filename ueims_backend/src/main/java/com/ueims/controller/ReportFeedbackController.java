@@ -13,7 +13,6 @@ import com.ueims.service.ReportFeedbackService;
 
 import lombok.RequiredArgsConstructor;
 
-@SuppressWarnings("java:S4684")
 @RestController
 @RequestMapping("/api/report-feedbacks")
 @RequiredArgsConstructor
