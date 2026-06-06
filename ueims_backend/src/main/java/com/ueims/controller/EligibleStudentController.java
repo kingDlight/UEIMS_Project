@@ -12,8 +12,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.ueims.dto.request.EligibleStudentRequest;
+import com.ueims.dto.response.EligibleStudentDTO;
 import com.ueims.dto.response.EligibleStudentResponse;
-import com.ueims.model.entity.EligibleStudent;
+import com.ueims.mapper.EligibleStudentMapper;
 import com.ueims.service.EligibleStudentService;
 
 import lombok.RequiredArgsConstructor;
@@ -23,20 +25,21 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class EligibleStudentController {
     private final EligibleStudentService service;
+    private final EligibleStudentMapper mapper;
 
     @GetMapping
-    public ResponseEntity<List<EligibleStudent>> getAll() {
-        return ResponseEntity.ok(service.findAll());
+    public ResponseEntity<List<EligibleStudentDTO>> getAll() {
+        return ResponseEntity.ok(service.findAll().stream().map(mapper::toDto).toList());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<EligibleStudent> getById(@PathVariable UUID id) {
-        return ResponseEntity.ok(service.findById(id));
+    public ResponseEntity<EligibleStudentDTO> getById(@PathVariable UUID id) {
+        return ResponseEntity.ok(mapper.toDto(service.findById(id)));
     }
 
     @PostMapping
-    public ResponseEntity<EligibleStudent> create(@Valid @RequestBody EligibleStudent entity) {
-        return ResponseEntity.ok(service.save(entity));
+    public ResponseEntity<EligibleStudentDTO> create(@Valid @RequestBody EligibleStudentRequest request) {
+        return ResponseEntity.ok(mapper.toDto(service.save(mapper.toEntity(request))));
     }
 
     @DeleteMapping("/{id}")
@@ -61,9 +64,9 @@ public class EligibleStudentController {
 
     @PreAuthorize("hasRole('TRAINING_MANAGER')")
     @PutMapping("/{id}/cancel")
-    public ResponseEntity<EligibleStudent> cancelOjtResult(
+    public ResponseEntity<EligibleStudentDTO> cancelOjtResult(
             @PathVariable UUID id, @Valid @RequestBody com.ueims.dto.request.CancelOjtRequest request) {
-        return ResponseEntity.ok(service.cancelOjtResult(id, request.getReason()));
+        return ResponseEntity.ok(mapper.toDto(service.cancelOjtResult(id, request.getReason())));
     }
 
     // đây là file nhị phân, nếu không file lưu về sẽ bị lỗi/hỏng. FE chú ý
