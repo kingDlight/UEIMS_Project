@@ -8,7 +8,7 @@ import lombok.Getter;
 @Getter
 public enum ErrorCode {
     UNCATEGORIZED_EXCEPTION(9999, "Uncategorized error", HttpStatus.INTERNAL_SERVER_ERROR),
-    INVALID_KEY(1001, "Uncategorized error", HttpStatus.BAD_REQUEST),
+    INVALID_KEY(1001, "Invalid validation key", HttpStatus.BAD_REQUEST),
     USER_EXISTED(1002, "User existed", HttpStatus.BAD_REQUEST),
     USERNAME_INVALID(1003, "Username must be at least {min} characters", HttpStatus.BAD_REQUEST),
     INVALID_PASSWORD(1004, "Password must be at least {min} characters", HttpStatus.BAD_REQUEST),
@@ -95,6 +95,11 @@ public enum ErrorCode {
     WRONG_OLD_PASSWORD(2002, "Mật khẩu cũ không chính xác", HttpStatus.BAD_REQUEST),
     PASSWORDS_NOT_MATCH(2003, "Mật khẩu mới và xác nhận không khớp", HttpStatus.BAD_REQUEST),
     USER_ALREADY_HAS_ROLE(2004, "Người dùng đã có vai trò. Chỉ được gán một vai trò duy nhất.", HttpStatus.BAD_REQUEST),
+
+    // JWT / Auth related
+    TOKEN_INVALIDATED(1053, "Token has been invalidated", HttpStatus.UNAUTHORIZED),
+    SESSION_EXPIRED(1054, "Session expired due to inactivity", HttpStatus.UNAUTHORIZED),
+    INVALID_TOKEN_FORMAT(1055, "Invalid token format", HttpStatus.UNAUTHORIZED),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
