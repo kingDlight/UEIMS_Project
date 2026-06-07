@@ -1,7 +1,5 @@
 package com.ueims.service;
 
-import jakarta.mail.internet.MimeMessage;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -9,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
+import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -80,7 +79,7 @@ public class MailService {
     }
 
     // ===== Late Report Warning (VI) =====
-    @org.springframework.scheduling.annotation.Async
+    @org.springframework.scheduling.annotation.Async("mailTaskExecutor")
     public void sendLateReportWarningMail(String to, String fullName, Integer weekNumber) {
         String loginUrl = appBaseUrl + PATH_LOGIN;
         String subject = "Cảnh báo: Trễ hạn nộp báo cáo tuần " + weekNumber + " — UEIMS";
@@ -98,7 +97,7 @@ public class MailService {
     }
 
     // ===== Enterprise Status Notification (UC-19) =====
-    @org.springframework.scheduling.annotation.Async
+    @org.springframework.scheduling.annotation.Async("mailTaskExecutor")
     public void sendEnterpriseStatusNotification(String to, String contactPerson, String status, String reason) {
         String subject = "Thông báo kết quả duyệt hồ sơ doanh nghiệp — UEIMS";
         String loginUrl = appBaseUrl + PATH_LOGIN;
