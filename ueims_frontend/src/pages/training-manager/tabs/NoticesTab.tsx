@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Table, Modal, Form, Input, Select, Button, Popconfirm, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import {
@@ -250,6 +250,14 @@ export const NoticesTab: React.FC = () => {
   const [selectedNotice, setSelectedNotice] = useState<NoticeRecord | null>(null);
   const [form] = Form.useForm();
 
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+
   const filteredNotices = notices.filter((n) => {
     const matchAudience = audienceFilter === 'all' || n.audienceLabel === audienceFilter;
     const matchStatus = statusFilter === 'all' || n.status === statusFilter;
@@ -407,7 +415,7 @@ export const NoticesTab: React.FC = () => {
     {
       title: <HeaderBadge align="right">Actions</HeaderBadge>,
       key: 'actions',
-      fixed: 'right' as const,
+      fixed: isMobile ? undefined : 'right',
       align: 'right' as const,
       width: 220,
       render: (_: unknown, record: NoticeRecord) => (
@@ -759,16 +767,18 @@ export const NoticesTab: React.FC = () => {
         </div>
 
         {/* ANT DESIGN TABLE */}
-        <Table<NoticeRecord>
-          columns={columns}
-          dataSource={filteredNotices}
-          rowKey="id"
-          pagination={false}
-          scroll={{ x: 860 }}
-          className="notices-table"
-          size="middle"
-          style={{ fontFamily: 'Inter, sans-serif' }}
-        />
+        <div style={{ overflowX: 'auto', maxWidth: '100%', minWidth: 0 }}>
+          <Table<NoticeRecord>
+            columns={columns}
+            dataSource={filteredNotices}
+            rowKey="id"
+            pagination={false}
+            scroll={{ x: 860 }}
+            className="notices-table"
+            size="middle"
+            style={{ fontFamily: 'Inter, sans-serif' }}
+          />
+        </div>
       </div>
 
       {/* ============================================================ */}

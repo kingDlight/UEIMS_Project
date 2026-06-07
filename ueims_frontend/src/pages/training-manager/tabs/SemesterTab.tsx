@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Table, Modal, Form, DatePicker, Input, Button, Popconfirm, message, Spin, Select } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import {
@@ -212,6 +212,14 @@ export const SemesterTab: React.FC = () => {
   const [form] = Form.useForm();
   const [editForm] = Form.useForm();
 
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+
   const handleSetCurrent = useCallback((record: SemesterRecord) => {
     message.success({ content: `"${record.name}" is now set as Current semester.`, duration: 2.5 });
   }, []);
@@ -273,7 +281,7 @@ export const SemesterTab: React.FC = () => {
       title: <HeaderBadge>Semester</HeaderBadge>,
       dataIndex: 'name',
       key: 'name',
-      fixed: 'left' as const,
+      fixed: isMobile ? undefined : 'left',
       align: 'left' as const,
       width: 190,
       render: (name: string, record: SemesterRecord) => (
@@ -416,7 +424,7 @@ export const SemesterTab: React.FC = () => {
     {
       title: <HeaderBadge align="right">Actions</HeaderBadge>,
       key: 'actions',
-      fixed: 'right' as const,
+      fixed: isMobile ? undefined : 'right',
       align: 'right' as const,
       width: 210,
       render: (_: unknown, record: SemesterRecord) => (
@@ -638,16 +646,18 @@ export const SemesterTab: React.FC = () => {
         </div>
 
         {/* ANT DESIGN TABLE */}
-        <Table<SemesterRecord>
-          columns={columns}
-          dataSource={semesters}
-          rowKey="id"
-          pagination={false}
-          scroll={{ x: 860 }}
-          className="semester-table"
+        <div style={{ overflowX: 'auto', maxWidth: '100%', minWidth: 0 }}>
+          <Table<SemesterRecord>
+            columns={columns}
+            dataSource={semesters}
+            rowKey="id"
+            pagination={false}
+            scroll={{ x: 860 }}
+            className="semester-table"
           size="middle"
           style={{ fontFamily: 'Inter, sans-serif' }}
         />
+        </div>
       </div>
 
       {/* ============================================================ */}

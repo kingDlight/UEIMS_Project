@@ -211,21 +211,7 @@ const MetricCard: React.FC<{
 // MAIN COMPONENT
 // ============================================================
 export const StatsTab: React.FC = () => {
-  const [chartWidth, setChartWidth] = useState(400);
   const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const measure = () => {
-      if (containerRef.current) {
-        const w = containerRef.current.clientWidth;
-        if (w > 0) setChartWidth(w / 2 - 40); // half of 2-col grid minus gap/padding
-      }
-    };
-    measure();
-    const ro = new ResizeObserver(measure);
-    if (containerRef.current) ro.observe(containerRef.current);
-    return () => ro.disconnect();
-  }, []);
 
   const totalPlaced = MAJOR_TABLE_DATA.reduce((s, r) => s + r.placed, 0);
   const totalStudents = MAJOR_TABLE_DATA.reduce((s, r) => s + r.total, 0);
@@ -289,7 +275,7 @@ export const StatsTab: React.FC = () => {
   ];
 
   return (
-    <div style={{ fontFamily: 'Inter, sans-serif', padding: '0 24px 40px' }}>
+    <div className="stats-container" style={{ fontFamily: 'Inter, sans-serif' }}>
       <style>{`
         .stats-table .ant-table-thead > tr > th {
           background: ${cc.neutralBg} !important;
@@ -316,6 +302,24 @@ export const StatsTab: React.FC = () => {
         .stats-table .ant-progress-bg {
           transition: width 0.6s cubic-bezier(0.32, 0.72, 0, 1) !important;
         }
+        .stats-container {
+          padding: 0 24px 40px;
+        }
+        .stats-charts-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 16px;
+          margin-bottom: 16px;
+          min-width: 0;
+        }
+        @media (max-width: 768px) {
+          .stats-container {
+            padding: 0 12px 100px;
+          }
+          .stats-charts-grid {
+            grid-template-columns: 1fr;
+          }
+        }
       `}</style>
 
       {/* Page Header */}
@@ -337,13 +341,13 @@ export const StatsTab: React.FC = () => {
       </div>
 
       {/* Charts Section — 2-column grid */}
-      <div ref={containerRef} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16, minWidth: 0 }}>
+      <div ref={containerRef} className="stats-charts-grid">
         {/* LEFT: Donut Chart */}
         <div style={{ background: cc.surface, border: `1px solid ${cc.border}`, borderRadius: cc.radiusLg, boxShadow: cc.shadowSm, padding: 20 }}>
           <div style={{ fontSize: 13.5, fontWeight: 700, color: cc.textPrimary, marginBottom: 4 }}>Placement Overview</div>
           <div style={{ fontSize: 12, color: cc.textMuted, marginBottom: 20 }}>Placed vs. still searching — current semester</div>
           <div style={{ height: 220, minHeight: 0 }}>
-            <ResponsiveContainer width={chartWidth} height="100%">
+            <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={PLACEMENT_DATA}
@@ -355,6 +359,10 @@ export const StatsTab: React.FC = () => {
                   dataKey="value"
                   startAngle={90}
                   endAngle={-270}
+                  isAnimationActive={true}
+                  animationBegin={200}
+                  animationDuration={1200}
+                  animationEasing="ease-out"
                 >
                   {PLACEMENT_DATA.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} stroke="#FFFFFF" strokeWidth={4} />
@@ -389,8 +397,8 @@ export const StatsTab: React.FC = () => {
         <div style={{ background: cc.surface, border: `1px solid ${cc.border}`, borderRadius: cc.radiusLg, boxShadow: cc.shadowSm, padding: 20 }}>
           <div style={{ fontSize: 13.5, fontWeight: 700, color: cc.textPrimary, marginBottom: 4 }}>GPA by Major</div>
           <div style={{ fontSize: 12, color: cc.textMuted, marginBottom: 16 }}>Average GPA distribution across majors</div>
-          <div style={{ height: 220, minHeight: 0 }}>
-            <ResponsiveContainer width={chartWidth} height="100%">
+          <div style={{ height: 220, minHeight: 0, paddingRight: 24 }}>
+            <ResponsiveContainer width="100%" height="100%">
               <BarChart data={GPA_DATA} margin={{ top: 8, right: 8, left: -16, bottom: 0 }} barCategoryGap="28%">
                 <defs>
                   <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
@@ -402,7 +410,16 @@ export const StatsTab: React.FC = () => {
                 <XAxis dataKey="major" tickLine={false} axisLine={false} tick={{ fontSize: 11, fontWeight: 700, fill: cc.textMuted, fontFamily: 'Inter, sans-serif' }} />
                 <YAxis domain={[0, 4]} tickLine={false} axisLine={false} tick={{ fontSize: 11, fontWeight: 500, fill: cc.textMuted, fontFamily: 'Inter, sans-serif' }} tickFormatter={(v) => v.toFixed(1)} />
                 <Tooltip content={<CustomTooltip unit=" GPA" />} cursor={{ fill: cc.brandSubtle, radius: 6 }} />
-                <Bar dataKey="avgGpa" fill="url(#barGradient)" radius={[6, 6, 0, 0]} maxBarSize={52} />
+                <Bar 
+                  dataKey="avgGpa" 
+                  fill="url(#barGradient)" 
+                  radius={[6, 6, 0, 0]} 
+                  maxBarSize={52} 
+                  isAnimationActive={true}
+                  animationBegin={400}
+                  animationDuration={1200}
+                  animationEasing="ease-out"
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -425,8 +442,8 @@ export const StatsTab: React.FC = () => {
             ))}
           </div>
         </div>
-        <div style={{ height: 160, minHeight: 0 }}>
-          <ResponsiveContainer width={chartWidth * 2 + 16} height="100%">
+        <div style={{ height: 160, minHeight: 0, paddingRight: 24 }}>
+          <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={TREND_DATA} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="placedGrad" x1="0" y1="0" x2="0" y2="1">
@@ -442,15 +459,39 @@ export const StatsTab: React.FC = () => {
               <XAxis dataKey="month" tickLine={false} axisLine={false} tick={{ fontSize: 11, fontWeight: 600, fill: cc.textMuted, fontFamily: 'Inter, sans-serif' }} />
               <YAxis tickLine={false} axisLine={false} tick={{ fontSize: 11, fontWeight: 500, fill: cc.textMuted, fontFamily: 'Inter, sans-serif' }} />
               <Tooltip content={<CustomTooltip unit=" students" />} />
-              <Area type="monotone" dataKey="placed" stroke={cc.success} strokeWidth={2.5} fill="url(#placedGrad)" dot={{ r: 4, fill: cc.success, strokeWidth: 0 }} activeDot={{ r: 5, fill: cc.success, strokeWidth: 0 }} />
-              <Area type="monotone" dataKey="searching" stroke={cc.warning} strokeWidth={2.5} fill="url(#searchGrad)" dot={{ r: 4, fill: cc.warning, strokeWidth: 0 }} activeDot={{ r: 5, fill: cc.warning, strokeWidth: 0 }} />
+              <Area 
+                type="monotone" 
+                dataKey="placed" 
+                stroke={cc.success} 
+                strokeWidth={2.5} 
+                fill="url(#placedGrad)" 
+                dot={{ r: 4, fill: cc.success, strokeWidth: 0 }} 
+                activeDot={{ r: 5, fill: cc.success, strokeWidth: 0 }} 
+                isAnimationActive={true}
+                animationBegin={600}
+                animationDuration={1200}
+                animationEasing="ease-out"
+              />
+              <Area 
+                type="monotone" 
+                dataKey="searching" 
+                stroke={cc.warning} 
+                strokeWidth={2.5} 
+                fill="url(#searchGrad)" 
+                dot={{ r: 4, fill: cc.warning, strokeWidth: 0 }} 
+                activeDot={{ r: 5, fill: cc.warning, strokeWidth: 0 }} 
+                isAnimationActive={true}
+                animationBegin={800}
+                animationDuration={1200}
+                animationEasing="ease-out"
+              />
             </AreaChart>
           </ResponsiveContainer>
         </div>
       </div>
 
       {/* Bottom Table */}
-      <div style={{ background: cc.surface, border: `1px solid ${cc.border}`, borderRadius: cc.radiusLg, boxShadow: cc.shadowSm, overflow: 'hidden' }}>
+      <div style={{ background: cc.surface, border: `1px solid ${cc.border}`, borderRadius: cc.radiusLg, boxShadow: cc.shadowSm, overflowX: 'auto', maxWidth: '100%', minWidth: 0 }}>
         <div style={{ padding: '16px 20px 12px', borderBottom: `1px solid ${cc.borderSubtle}` }}>
           <div style={{ fontSize: 13.5, fontWeight: 700, color: cc.textPrimary, fontFamily: 'Inter, sans-serif' }}>Performance by Major</div>
           <div style={{ fontSize: 12, color: cc.textMuted, marginTop: 2, fontFamily: 'Inter, sans-serif' }}>OJT placement rates and GPA averages across all majors — AY 2025–2026</div>
@@ -461,6 +502,7 @@ export const StatsTab: React.FC = () => {
           dataSource={MAJOR_TABLE_DATA}
           rowKey="key"
           pagination={false}
+          scroll={{ x: 800 }}
         />
       </div>
     </div>

@@ -462,7 +462,7 @@ const ResolutionWorkspace: React.FC<{
       </div>
 
       {/* Resolution note textarea */}
-      <div style={{ marginBottom: 8 }}>
+      <div style={{ marginBottom: 24 }}>
         <label
           style={{
             display: 'block',
@@ -699,7 +699,7 @@ export const IncidentsTab: React.FC = () => {
   const cfg = severity ? SEVERITY_CONFIG[severity] : null;
 
   return (
-    <div style={{ fontFamily: 'Inter, sans-serif', padding: '0 24px 40px' }}>
+    <div className="incidents-container" style={{ fontFamily: 'Inter, sans-serif' }}>
       <style>{`
         .incident-card-btn:focus-visible {
           outline: 2px solid ${cc.brand} !important;
@@ -725,6 +725,34 @@ export const IncidentsTab: React.FC = () => {
           font-size: 11px !important;
           color: ${cc.textMuted} !important;
           font-family: Inter, sans-serif !important;
+        }
+        .master-detail-grid {
+          display: grid;
+          grid-template-columns: 5fr 7fr;
+          gap: 16px;
+          align-items: start;
+        }
+        .incidents-container {
+          padding: 0 24px 40px;
+        }
+        .info-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 14px;
+          margin-bottom: 14px;
+        }
+        @media (max-width: 900px) {
+          .master-detail-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
+        @media (max-width: 768px) {
+          .incidents-container {
+            padding: 0 12px 100px;
+          }
+          .info-grid {
+            grid-template-columns: 1fr;
+          }
         }
       `}</style>
 
@@ -786,14 +814,7 @@ export const IncidentsTab: React.FC = () => {
       </div>
 
       {/* 12-col Master-Detail Grid */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '5fr 7fr',
-          gap: 16,
-          alignItems: 'start',
-        }}
-      >
+      <div className="master-detail-grid">
         {/* LEFT INBOX */}
         <div>
           {/* Inbox header */}
@@ -986,7 +1007,7 @@ export const IncidentsTab: React.FC = () => {
 
               {/* Incident Info Grid */}
               <div style={{ padding: '16px 18px 0' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
+                <div className="info-grid">
                   {[
                     { label: 'Student', value: student?.fullName ?? '—' },
                     { label: 'Enterprise', value: enterprise?.companyName ?? '—' },

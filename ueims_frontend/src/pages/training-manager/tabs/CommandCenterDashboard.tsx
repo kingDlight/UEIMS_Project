@@ -328,7 +328,7 @@ const TextLink: React.FC<{ children: React.ReactNode; onClick?: () => void; colo
 // SECTION B: SEMESTER CONTEXT BAR
 // ============================================================
 const SemesterContextBar: React.FC = () => (
-  <div style={{
+  <div className="cc-semester-bar" style={{
     maxWidth: 1200,
     margin: '0 auto',
     padding: '0 24px',
@@ -509,13 +509,7 @@ const UrgencyCard: React.FC<{
 );
 
 const UrgencyCardsRow: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => (
-  <div style={{
-    display: 'grid',
-    gridTemplateColumns: 'repeat(2, 1fr)',
-    gap: 16,
-    marginBottom: 16,
-    alignItems: 'stretch',
-  }}>
+  <div className="cc-grid-2" style={{ marginBottom: 16, alignItems: 'stretch' }}>
     {/* Active Incidents */}
     <UrgencyCard
       title="Active Incidents"
@@ -531,7 +525,7 @@ const UrgencyCardsRow: React.FC<{ onNavigate: (route: string) => void }> = ({ on
       body={
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {mockIncidents.map((inc) => (
-            <div key={inc.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div key={inc.id} className="cc-incident-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <StatusDot color={inc.severity === 'high' ? cc.error : cc.warning} pulse={inc.severity === 'high'} />
                 <span style={{ fontSize: 12, fontWeight: 600, color: cc.textPrimary }}>{inc.name}</span>
@@ -668,7 +662,7 @@ const WeeklyReportsCard: React.FC<{ onNavigate: (route: string) => void }> = ({ 
         </div>
 
         {/* 2x2 Status Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, marginBottom: 16 }}>
+        <div className="cc-grid-4" style={{ marginBottom: 16 }}>
           <ReportStatusChip
             icon={<CheckCircle2 size={16} />}
             label="Submitted"
@@ -879,13 +873,7 @@ const PlacementPipelineCard: React.FC<{ onNavigate: (route: string) => void }> =
 };
 
 const CompliancePipelineRow: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => (
-  <div style={{
-    display: 'grid',
-    gridTemplateColumns: '7fr 5fr',
-    gap: 16,
-    marginBottom: 16,
-    alignItems: 'stretch',
-  }}>
+  <div className="cc-grid-pipeline" style={{ marginBottom: 16, alignItems: 'stretch' }}>
     <WeeklyReportsCard onNavigate={onNavigate} />
     <PlacementPipelineCard onNavigate={onNavigate} />
   </div>
@@ -912,7 +900,7 @@ const QuickActionsRow: React.FC<{ onNavigate: (route: string) => void }> = ({ on
     }}>
       Quick Actions
     </div>
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, alignItems: 'stretch' }}>
+    <div className="cc-grid-4" style={{ alignItems: 'stretch' }}>
       {mockQuickActions.map((action, i) => (
         <div key={action.label} style={{ display: 'flex', flexDirection: 'column' }}>
         <motion.div
@@ -1325,12 +1313,7 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
               <QuickActionsRow onNavigate={handleNavigate} />
 
               {/* ROW 4: Timeline + Alerts */}
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: 16,
-                alignItems: 'stretch',
-              }}>
+              <div className="cc-grid-2" style={{ alignItems: 'stretch' }}>
                 <TimelineCard onNavigate={handleNavigate} />
                 <RecentAlertsCard onNavigate={handleNavigate} />
               </div>
@@ -1344,6 +1327,55 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
         @keyframes pulse-dot {
           0%, 100% { opacity: 1; transform: scale(1); }
           50% { opacity: 0.5; transform: scale(1.15); }
+        }
+        .cc-grid-2 {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 16px;
+        }
+        .cc-grid-pipeline {
+          display: grid;
+          grid-template-columns: 7fr 5fr;
+          gap: 16px;
+        }
+        .cc-grid-4 {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 12px;
+        }
+        @media (max-width: 1024px) {
+          .cc-grid-pipeline {
+            grid-template-columns: 1fr;
+          }
+          .cc-grid-4 {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+        @media (max-width: 768px) {
+          .cc-grid-2 {
+            grid-template-columns: 1fr;
+          }
+          .cc-grid-4 {
+            grid-template-columns: 1fr;
+          }
+          .cc-semester-bar {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 12px !important;
+          }
+          .cc-semester-bar > div {
+            flex-wrap: wrap;
+          }
+          .cc-incident-row {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 12px !important;
+          }
+          .cc-incident-row > div:last-child {
+            align-self: flex-start !important;
+            margin-top: -4px;
+            padding-left: 20px;
+          }
         }
       `}</style>
     </div>

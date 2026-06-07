@@ -269,7 +269,7 @@ const ApprovalRow: React.FC<{
             style={{ overflow: 'hidden' }}
           >
             <div style={{ borderTop: `1px solid ${cc.borderSubtle}`, padding: '14px 16px', background: cc.bg }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>
+              <div className="ent-info-grid">
                 {[
                   { label: 'Contact Person', value: enterprise.contactPerson },
                   { label: 'Email', value: enterprise.contactEmail },
@@ -374,13 +374,16 @@ const AllEnterprisesTable: React.FC<{ data: Enterprise[] }> = ({ data }) => {
   ];
 
   return (
-    <Table
-      columns={columns}
-      dataSource={data}
-      rowKey="enterpriseId"
-      pagination={false}
-      style={{ background: cc.surface, borderRadius: cc.radiusLg, overflow: 'hidden' }}
-    />
+    <div style={{ overflowX: 'auto', maxWidth: '100%', minWidth: 0 }}>
+      <Table
+        columns={columns}
+        dataSource={data}
+        rowKey="enterpriseId"
+        pagination={false}
+        scroll={{ x: 800 }}
+        style={{ background: cc.surface, borderRadius: cc.radiusLg, overflow: 'hidden' }}
+      />
+    </div>
   );
 };
 
@@ -445,7 +448,15 @@ export const EnterpriseTab: React.FC = () => {
   const pendingEnterprises = enterprises.filter((e) => e.status === 'PENDING');
 
   return (
-    <div style={{ fontFamily: 'Inter, sans-serif' }}>
+    <div className="ent-container" style={{ fontFamily: 'Inter, sans-serif' }}>
+      <style>{`
+        .ent-container { padding-bottom: 40px; }
+        .ent-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+        @media (max-width: 768px) {
+          .ent-container { padding-bottom: 100px !important; }
+          .ent-info-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
           <h1 style={{ fontSize: 22, fontWeight: 800, color: cc.textPrimary, margin: 0, letterSpacing: '-0.02em' }}>
