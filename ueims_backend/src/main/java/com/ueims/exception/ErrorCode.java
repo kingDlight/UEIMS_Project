@@ -89,6 +89,11 @@ public enum ErrorCode {
     INTERVIEW_ELIGIBILITY_RULE(
             1054, "Chỉ những ứng viên đã vượt qua vòng sơ loại mới được lên lịch phỏng vấn", HttpStatus.BAD_REQUEST),
     INTERVIEW_OVERLAP(1055, "Thời gian phỏng vấn bị trùng với lịch đã có của doanh nghiệp", HttpStatus.BAD_REQUEST),
+    EVALUATION_LOCKED(1056, "Đánh giá đã bị khóa và không thể chỉnh sửa", HttpStatus.BAD_REQUEST),
+    MISSING_EVALUATION_CRITERIA(1057, "Cần phải chấm điểm đầy đủ cả 4 tiêu chí của Rubrics", HttpStatus.BAD_REQUEST),
+    INVALID_SCORE_RANGE(1058, "Điểm các tiêu chí phải nằm trong khoảng từ 0.0 đến 10.0", HttpStatus.BAD_REQUEST),
+    STUDENT_RESULT_ACCESS_DENIED(
+            1059, "Sinh viên chỉ được xem kết quả đánh giá khi ở học kỳ 7 trở đi", HttpStatus.FORBIDDEN),
 
     // Account related
     USER_BANNED(2001, "Tài khoản của bạn đã bị khóa do nhập sai mật khẩu quá 5 lần", HttpStatus.FORBIDDEN),
