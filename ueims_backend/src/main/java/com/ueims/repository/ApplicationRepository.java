@@ -13,4 +13,6 @@ public interface ApplicationRepository extends JpaRepository<Application, UUID> 
             UUID jobPostId, UUID studentId, ApplicationStatus status);
 
     long countByStudent_UserIdAndStatusNotAndDeletedAtIsNull(UUID studentId, ApplicationStatus status);
+
+    java.util.List<Application> findByStudent_UserId(UUID studentId);
 }

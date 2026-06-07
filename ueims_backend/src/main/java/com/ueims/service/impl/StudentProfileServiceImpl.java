@@ -11,11 +11,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import org.springframework.security.core.context.SecurityContextHolder;
 import com.ueims.dto.request.StudentProfileUpdateRequest;
 import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
 import com.ueims.model.entity.StudentProfile;
+import com.ueims.model.entity.User;
 import com.ueims.repository.StudentProfileRepository;
+import com.ueims.repository.UserRepository;
 import com.ueims.service.StudentProfileService;
 
 import lombok.RequiredArgsConstructor;
@@ -24,6 +27,12 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class StudentProfileServiceImpl implements StudentProfileService {
     private final StudentProfileRepository repository;
+    private final UserRepository userRepository;
+
+    private User getCurrentUser() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+    }
 
     @Override
     public List<StudentProfile> findAll() {
@@ -44,6 +53,13 @@ public class StudentProfileServiceImpl implements StudentProfileService {
     public StudentProfile updateProfile(UUID id, StudentProfileUpdateRequest request) {
         StudentProfile profile =
                 repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.STUDENT_PROFILE_NOT_FOUND));
+        
+        // Ownership verification (Security BOLA check)
+        User currentUser = getCurrentUser();
+        if (!profile.getUser().getUserId().equals(currentUser.getUserId())) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
         profile.setMajor(request.getMajor());
         profile.setSkills(request.getSkills());
         profile.setLinkedinUrl(request.getLinkedinUrl());
@@ -57,6 +73,12 @@ public class StudentProfileServiceImpl implements StudentProfileService {
     public StudentProfile uploadCv(UUID id, MultipartFile file) {
         StudentProfile profile =
                 repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.STUDENT_PROFILE_NOT_FOUND));
+
+        // Ownership verification (Security BOLA check)
+        User currentUser = getCurrentUser();
+        if (!profile.getUser().getUserId().equals(currentUser.getUserId())) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
 
         if (file == null || file.isEmpty()) {
             throw new AppException(ErrorCode.CV_NOT_UPLOADED);
