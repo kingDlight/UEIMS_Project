@@ -308,6 +308,7 @@ const ReportCard = forwardRef<HTMLDivElement, ReportCardProps>((
             flexShrink: 0,
           }}>
             <button
+              aria-label={"Approve report for " + report.studentName}
               onClick={() => onApprove(report.id)}
               style={{
                 width: '100%',
@@ -342,6 +343,7 @@ const ReportCard = forwardRef<HTMLDivElement, ReportCardProps>((
               Approve
             </button>
             <button
+              aria-label={"Reject report for " + report.studentName}
               onClick={() => onReject(report.id)}
               style={{
                 width: '100%',

@@ -420,6 +420,11 @@ a:hover {
   color: var(--fpt-orange) !important;
 }
 
+/* Pagination Override */
+.ant-pagination-item, .ant-pagination-item-link {
+  border-radius: 8px !important;
+}
+
 /* ============================================
    Utility Classes
    ============================================ */
