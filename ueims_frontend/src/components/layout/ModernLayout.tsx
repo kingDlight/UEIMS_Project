@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Modal, Dropdown } from 'antd';
 import type { MenuProps } from 'antd';
 import { BellOutlined, DownOutlined } from '@ant-design/icons';
@@ -244,7 +245,17 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
         </div>
 
         {/* Page Content */}
-        <div>{children}</div>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -15 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+          >
+            {children}
+          </motion.div>
+        </AnimatePresence>
       </div>
 
       {/* Profile Modal */}

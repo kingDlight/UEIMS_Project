@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   AlertTriangle,
@@ -93,7 +94,7 @@ const mockWeeklyReports = {
   week: 23,
   submitted: 3,
   pending: 2,
-  late: 2,
+  late: 3,
   notStarted: 0,
   students: [
     { name: 'Le Van C', daysOverdue: 3, status: 'late' },
@@ -123,10 +124,10 @@ const mockAlerts = [
 ];
 
 const mockQuickActions = [
-  { label: 'Import Students', icon: <Upload size={24} />, description: 'Upload eligible student list via Excel' },
-  { label: 'Review Enterprises', icon: <Building2 size={24} />, description: 'Approve or reject enterprise registrations' },
-  { label: 'Send Reminders', icon: <SendHorizontal size={24} />, description: 'Send weekly report reminders to students' },
-  { label: 'View Reports', icon: <FileBarChart size={24} />, description: 'View compliance, grades, and rubrics' },
+  { label: 'Import Students', icon: <Upload size={24} />, description: 'Upload eligible student list via Excel', route: 'students' },
+  { label: 'Review Enterprises', icon: <Building2 size={24} />, description: 'Approve or reject enterprise registrations', route: 'enterprises' },
+  { label: 'Send Reminders', icon: <SendHorizontal size={24} />, description: 'Send weekly report reminders to students', route: 'incidents' },
+  { label: 'View Reports', icon: <FileBarChart size={24} />, description: 'View compliance, grades, and rubrics', route: 'reports' },
 ];
 
 // ============================================================
@@ -507,7 +508,7 @@ const UrgencyCard: React.FC<{
   </motion.div>
 );
 
-const UrgencyCardsRow: React.FC = () => (
+const UrgencyCardsRow: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => (
   <div style={{
     display: 'grid',
     gridTemplateColumns: 'repeat(2, 1fr)',
@@ -544,7 +545,7 @@ const UrgencyCardsRow: React.FC = () => (
           ))}
         </div>
       }
-      cta={<CTAButton variant="red" size="sm" icon={null}>Handle Now</CTAButton>}
+      cta={<CTAButton variant="red" size="sm" icon={null} onClick={() => onNavigate('incidents')}>Handle Now</CTAButton>}
       ctaVariant="red"
     />
 
@@ -576,7 +577,7 @@ const UrgencyCardsRow: React.FC = () => (
           </div>
         </div>
       }
-      cta={<CTAButton variant="amber" size="sm" icon={null}>Review Now</CTAButton>}
+      cta={<CTAButton variant="amber" size="sm" icon={null} onClick={() => onNavigate('enterprises')}>Review Now</CTAButton>}
       ctaVariant="amber"
     />
   </div>
@@ -620,7 +621,7 @@ const ReportStatusChip: React.FC<{
   </div>
 );
 
-const WeeklyReportsCard: React.FC = () => {
+const WeeklyReportsCard: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => {
   const { week, submitted, pending, late, notStarted, students } = mockWeeklyReports;
 
   return (
@@ -731,15 +732,15 @@ const WeeklyReportsCard: React.FC = () => {
 
         {/* CTA */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <TextLink color={cc.brand}>View all reports</TextLink>
-          <CTAButton variant="primary" size="sm" icon={null}>Send Warnings ({late})</CTAButton>
+          <TextLink color={cc.brand} onClick={() => onNavigate('reports')}>View all reports</TextLink>
+          <CTAButton variant="primary" size="sm" icon={null} onClick={() => onNavigate('incidents')}>Send Warnings ({late})</CTAButton>
         </div>
       </CardWrapper>
     </motion.div>
   );
 };
 
-const PlacementPipelineCard: React.FC = () => {
+const PlacementPipelineCard: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => {
   const { eligible, applied, interviewed, placed } = mockPipeline;
   const total = eligible || 1;
   const stages = [
@@ -870,14 +871,14 @@ const PlacementPipelineCard: React.FC = () => {
 
         {/* CTA */}
         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <TextLink color={cc.brand}>View Enterprises</TextLink>
+          <TextLink color={cc.brand} onClick={() => onNavigate('enterprises')}>View Enterprises</TextLink>
         </div>
       </CardWrapper>
     </motion.div>
   );
 };
 
-const CompliancePipelineRow: React.FC = () => (
+const CompliancePipelineRow: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => (
   <div style={{
     display: 'grid',
     gridTemplateColumns: '7fr 5fr',
@@ -885,15 +886,15 @@ const CompliancePipelineRow: React.FC = () => (
     marginBottom: 16,
     alignItems: 'stretch',
   }}>
-    <WeeklyReportsCard />
-    <PlacementPipelineCard />
+    <WeeklyReportsCard onNavigate={onNavigate} />
+    <PlacementPipelineCard onNavigate={onNavigate} />
   </div>
 );
 
 // ============================================================
 // SECTION E: QUICK ACTIONS
 // ============================================================
-const QuickActionsRow: React.FC = () => (
+const QuickActionsRow: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => (
   <motion.div
     initial={{ opacity: 0, y: 16 }}
     animate={{ opacity: 1, y: 0 }}
@@ -915,6 +916,7 @@ const QuickActionsRow: React.FC = () => (
       {mockQuickActions.map((action, i) => (
         <div key={action.label} style={{ display: 'flex', flexDirection: 'column' }}>
         <motion.div
+          onClick={() => action.route && onNavigate(action.route)}
           whileHover={{ y: -3, boxShadow: cc.shadowMd }}
           whileTap={{ scale: 0.98 }}
           transition={{ duration: 0.15, ease: [0.32, 0.72, 0, 1] }}
@@ -993,7 +995,7 @@ const QuickActionsRow: React.FC = () => (
 // ============================================================
 // SECTION F: TIMELINE
 // ============================================================
-const TimelineCard: React.FC = () => (
+const TimelineCard: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => (
   <motion.div
     initial={{ opacity: 0, y: 16 }}
     animate={{ opacity: 1, y: 0 }}
@@ -1124,7 +1126,7 @@ const TimelineCard: React.FC = () => (
       <div style={{ height: 1, background: cc.borderSubtle, marginTop: 'auto', marginBottom: 14 }} />
 
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <TextLink color={cc.textSecondary}>Edit timeline</TextLink>
+        <TextLink color={cc.brand} onClick={() => onNavigate('calendar')}>Edit timeline</TextLink>
       </div>
     </CardWrapper>
   </motion.div>
@@ -1198,7 +1200,7 @@ const AlertItem: React.FC<{
   );
 };
 
-const RecentAlertsCard: React.FC = () => (
+const RecentAlertsCard: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => (
   <motion.div
     initial={{ opacity: 0, y: 16 }}
     animate={{ opacity: 1, y: 0 }}
@@ -1255,7 +1257,7 @@ const RecentAlertsCard: React.FC = () => (
       <div style={{ height: 1, background: cc.borderSubtle, marginTop: 'auto', marginBottom: 14 }} />
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <TextLink color={cc.textSecondary}>See all alerts</TextLink>
+        <TextLink color={cc.brand} onClick={() => onNavigate('incidents')}>See all alerts</TextLink>
         <button
           style={{
             fontSize: 11,
@@ -1277,12 +1279,21 @@ const RecentAlertsCard: React.FC = () => (
 // ============================================================
 // MAIN COMMAND CENTER COMPONENT
 // ============================================================
-export const CommandCenterDashboard: React.FC = () => {
+export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => void }> = ({ onNavigate }) => {
   const [mounted, setMounted] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const handleNavigate = (route: string) => {
+    if (onNavigate) {
+      onNavigate(route);
+    } else {
+      navigate(`/tm-dashboard/${route}`);
+    }
+  };
 
   return (
     <div style={{
@@ -1305,13 +1316,13 @@ export const CommandCenterDashboard: React.FC = () => {
               <SemesterContextBar />
 
               {/* ROW 1: Urgency Cards */}
-              <UrgencyCardsRow />
+              <UrgencyCardsRow onNavigate={handleNavigate} />
 
               {/* ROW 2: Weekly Reports + Pipeline */}
-              <CompliancePipelineRow />
+              <CompliancePipelineRow onNavigate={handleNavigate} />
 
               {/* ROW 3: Quick Actions */}
-              <QuickActionsRow />
+              <QuickActionsRow onNavigate={handleNavigate} />
 
               {/* ROW 4: Timeline + Alerts */}
               <div style={{
@@ -1320,8 +1331,8 @@ export const CommandCenterDashboard: React.FC = () => {
                 gap: 16,
                 alignItems: 'stretch',
               }}>
-                <TimelineCard />
-                <RecentAlertsCard />
+                <TimelineCard onNavigate={handleNavigate} />
+                <RecentAlertsCard onNavigate={handleNavigate} />
               </div>
             </motion.div>
           )}

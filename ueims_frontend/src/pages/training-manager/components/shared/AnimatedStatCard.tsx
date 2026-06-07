@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Typography } from 'antd';
+import { motion, animate } from 'framer-motion';
 import { Sparkline } from '../charts/Sparkline';
 import { c } from '../../constants';
-import { useAnimatedCounter } from '../../hooks/useAnimatedCounter';
-
 const { Text } = Typography;
 
 export const AnimatedStatCard: React.FC<{
@@ -16,7 +15,7 @@ export const AnimatedStatCard: React.FC<{
   sparkline?: number[];
   delay: number;
 }> = ({ label, value, icon, color, trend, insight, sparkline, delay }) => {
-  const animatedValue = useAnimatedCounter(value, 800, delay);
+  const [displayValue, setDisplayValue] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -24,6 +23,17 @@ export const AnimatedStatCard: React.FC<{
     const timer = setTimeout(() => setIsLoaded(true), delay);
     return () => clearTimeout(timer);
   }, [delay]);
+
+  useEffect(() => {
+    const controls = animate(0, value, {
+      duration: 1.2,
+      delay: delay / 1000,
+      onUpdate(val) {
+        setDisplayValue(Math.round(val));
+      }
+    });
+    return () => controls.stop();
+  }, [value, delay]);
 
   return (
       <div
@@ -48,7 +58,7 @@ export const AnimatedStatCard: React.FC<{
         <div style={{ minWidth: 0, flex: 1 }}>
           <Text style={{ fontSize: 12, color: c.textMuted, display: 'block', fontWeight: 700 }}>{label}</Text>
           <div style={{ fontSize: 34, fontWeight: 900, color: c.text, marginTop: 4, letterSpacing: '-1.3px', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
-            {animatedValue.toLocaleString()}
+            {displayValue.toLocaleString()}
           </div>
           {trend && <div style={{ fontSize: 12, color: c.success, fontWeight: 800, marginTop: 6 }}>{trend}</div>}
           {insight && <div style={{ fontSize: 11.5, color: c.textMuted, marginTop: 4, lineHeight: 1.45 }}>{insight}</div>}

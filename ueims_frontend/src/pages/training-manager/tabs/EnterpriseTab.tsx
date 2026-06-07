@@ -460,7 +460,7 @@ export const EnterpriseTab: React.FC = () => {
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px' }}>
         <div style={{
           display: 'inline-flex', alignItems: 'center', gap: 0, background: cc.surface,
-          border: `1px solid ${cc.border}`, borderRadius: cc.radiusFull, padding: 4, marginBottom: 20, boxShadow: cc.shadowSm,
+          border: `1px solid ${cc.border}`, borderRadius: cc.radiusMd, padding: 4, marginBottom: 20, boxShadow: cc.shadowSm,
         }}>
           {(['pending', 'all'] as const).map((view) => (
             <motion.button
@@ -469,7 +469,7 @@ export const EnterpriseTab: React.FC = () => {
               whileTap={{ scale: 0.98 }}
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 18px',
-                borderRadius: cc.radiusFull, fontSize: 13,
+                borderRadius: cc.radiusMd, fontSize: 13,
                 fontWeight: activeView === view ? 700 : 500,
                 color: activeView === view ? '#fff' : cc.textSecondary,
                 background: activeView === view ? cc.brand : 'transparent',

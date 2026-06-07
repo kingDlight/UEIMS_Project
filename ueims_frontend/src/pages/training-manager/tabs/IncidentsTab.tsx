@@ -207,6 +207,7 @@ const IncidentCard: React.FC<{
 
   return (
     <motion.button
+      className="incident-card-btn"
       initial={{ opacity: 0, x: -12 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.4, delay: index * 0.07, ease: [0.32, 0.72, 0, 1] }}
@@ -216,7 +217,7 @@ const IncidentCard: React.FC<{
         background: isSelected ? cc.brandSubtle : cc.surface,
         border: 'none',
         borderLeft: `4px solid ${cfg.borderColor}`,
-        borderRadius: cc.radiusLg,
+        borderRadius: cc.radiusMd,
         padding: '13px 14px',
         cursor: 'pointer',
         textAlign: 'left',
@@ -593,10 +594,24 @@ const MetricCard: React.FC<{
   icon: React.ReactNode;
   color: string;
   bgMuted: string;
-}> = ({ label, value, icon, color, bgMuted }) => (
+}> = ({ label, value, icon, color, bgMuted }) => {
+  const [displayValue, setDisplayValue] = React.useState(typeof value === 'number' ? 0 : value);
+  
+  React.useEffect(() => {
+    if (typeof value === 'number') {
+      import('framer-motion').then(({ animate }) => {
+        animate(0, value, { duration: 1.2, onUpdate: v => setDisplayValue(Math.round(v)) });
+      });
+    } else {
+      setDisplayValue(value);
+    }
+  }, [value]);
+
+  return (
   <motion.div
     initial={{ opacity: 0, y: 10 }}
     animate={{ opacity: 1, y: 0 }}
+    whileHover={{ y: -2, boxShadow: '0 8px 24px rgba(15,23,42,.12)', transition: { duration: 0.2 } }}
     style={{
       background: cc.surface,
       border: `1px solid ${cc.border}`,
@@ -624,15 +639,15 @@ const MetricCard: React.FC<{
       {icon}
     </div>
     <div>
-      <div style={{ fontSize: 22, fontWeight: 800, color: cc.textPrimary, lineHeight: 1, fontFamily: 'Inter, sans-serif', letterSpacing: '-0.02em' }}>
-        {value}
+      <div style={{ fontSize: 22, fontWeight: 800, color: cc.textPrimary, lineHeight: 1, fontFamily: 'Inter, sans-serif', letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums' }}>
+        {displayValue}
       </div>
       <div style={{ fontSize: 11.5, color: cc.textMuted, marginTop: 3, fontFamily: 'Inter, sans-serif' }}>
         {label}
       </div>
     </div>
   </motion.div>
-);
+)};
 
 // ============================================================
 // MAIN COMPONENT
@@ -679,6 +694,10 @@ export const IncidentsTab: React.FC = () => {
   return (
     <div style={{ fontFamily: 'Inter, sans-serif', padding: '0 24px 40px' }}>
       <style>{`
+        .incident-card-btn:focus-visible {
+          outline: 2px solid ${cc.brand} !important;
+          outline-offset: 2px;
+        }
         .incidents-table .ant-table-thead > tr > th {
           background: ${cc.neutralBg} !important;
           border-bottom: 1px solid ${cc.border} !important;
@@ -817,23 +836,23 @@ export const IncidentsTab: React.FC = () => {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   style={{
-                    textAlign: 'center',
-                    padding: '40px 20px',
-                    background: cc.surface,
-                    border: `1px solid ${cc.border}`,
+                    padding: '40px 20px', 
+                    textAlign: 'center', 
+                    background: cc.surface, 
                     borderRadius: cc.radiusLg,
+                    border: `1px dashed ${cc.border}`
                   }}
                 >
-                  <CheckCircle2 size={28} color={cc.success} style={{ margin: '0 auto 10px' }} />
-                  <div style={{ fontSize: 13, fontWeight: 700, color: cc.textPrimary }}>All clear</div>
-                  <div style={{ fontSize: 12, color: cc.textMuted, marginTop: 4 }}>No open incidents</div>
+                  <CheckCircle2 size={32} color={cc.success} style={{ marginBottom: 12, opacity: 0.5, display: 'inline-block' }} />
+                  <div style={{ fontSize: 13, fontWeight: 700, color: cc.textSecondary, fontFamily: 'Inter, sans-serif' }}>Inbox Zero!</div>
+                  <div style={{ fontSize: 11.5, color: cc.textMuted, fontFamily: 'Inter, sans-serif', marginTop: 4 }}>No open incidents require your attention.</div>
                 </motion.div>
               ) : (
-                open.map((incident, i) => (
+                open.map((inc, i) => (
                   <IncidentCard
-                    key={incident.incidentId}
-                    incident={incident}
-                    isSelected={selected?.incidentId === incident.incidentId}
+                    key={inc.incidentId}
+                    incident={inc}
+                    isSelected={selected?.incidentId === inc.incidentId}
                     onSelect={setSelected}
                     index={i}
                   />
