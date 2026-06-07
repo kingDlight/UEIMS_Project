@@ -1238,7 +1238,7 @@ const RecentAlertsCard: React.FC = () => (
         </span>
       </div>
 
-      {/* Alert List */}
+      {/* Chart bars replaced later */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}>
         {mockAlerts.map((alert, i) => (
           <AlertItem

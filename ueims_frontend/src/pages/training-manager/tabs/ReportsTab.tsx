@@ -279,7 +279,7 @@ const TemplateCard: React.FC<{
 export const ReportsTab: React.FC = () => {
   const [semester, setSemester] = useState<string>('SUMMER_2026');
   const [category, setCategory] = useState<string>('ALL');
-  const [exportingId, setExportingId] = useState<string | null>(null);
+  const [, setExportingId] = useState<string | null>(null);
 
   const handleExport = (template: ReportTemplate) => {
     setExportingId(template.id);

@@ -1,5 +1,6 @@
 import React from 'react';
 import { useParams, Navigate } from 'react-router-dom';
+import { useAuthStore } from '@/stores/useAuthStore';
 import { navItems } from './training-manager/constants';
 import type { PageKey } from './training-manager/types';
 import {
@@ -33,8 +34,16 @@ export const TrainingManagerDashboard: React.FC = () => {
     notifications: <NoticesTab />,
   };
 
-  if (!pages[currentTab]) {
-    return <Navigate to="/tm-dashboard/dashboard" replace />;
+  const { currentRole } = useAuthStore();
+  const allowedItem = navItems.find((item) => item.key === currentTab);
+
+  if (!allowedItem || (allowedItem.roles && currentRole && !allowedItem.roles.includes(currentRole))) {
+    // Redirect to the first available tab for this role
+    const firstAllowed = navItems.find((item) => !item.roles || (currentRole && item.roles.includes(currentRole)));
+    if (firstAllowed) {
+      return <Navigate to={`/tm-dashboard/${firstAllowed.key}`} replace />;
+    }
+    return <Navigate to="/login" replace />;
   }
 
   return (

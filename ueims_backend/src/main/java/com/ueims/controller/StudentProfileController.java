@@ -29,7 +29,8 @@ public class StudentProfileController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('STUDENT') or hasRole('ENTERPRISE') or hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
+    @PreAuthorize(
+            "hasRole('STUDENT') or hasRole('ENTERPRISE') or hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
     public ResponseEntity<StudentProfile> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(service.findById(id));
     }

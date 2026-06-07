@@ -6,8 +6,6 @@ import {
   Inbox,
   CheckCircle2,
   TrendingUp,
-  Search,
-  BookOpen,
   ChevronDown,
 } from 'lucide-react';
 

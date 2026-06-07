@@ -14,14 +14,10 @@ import {
   AUTH_TEXT_GRAY,
   AUTH_BORDER,
   AUTH_DANGER,
-  AUTH_STRENGTH_ORANGE,
-  AUTH_STRENGTH_YELLOW,
-  AUTH_STRENGTH_GREEN,
   AUTH_SHADOW,
   AUTH_BORDER_RADIUS,
   AUTH_FONT,
   validatePassword,
-  getPasswordStrength,
   PasswordStrengthMeter,
 } from '@/theme/authTheme';
 
