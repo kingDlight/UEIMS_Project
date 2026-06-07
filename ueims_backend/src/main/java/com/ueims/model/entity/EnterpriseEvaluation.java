@@ -4,6 +4,9 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 
 import lombok.*;
 
@@ -24,15 +27,27 @@ public class EnterpriseEvaluation {
     private EnterpriseAssignment assignment;
 
     @Column(name = "attitude_score", nullable = false, precision = 4, scale = 2)
+    @NotNull(message = "Attitude score is mandatory")
+    @Min(0)
+    @Max(10)
     private BigDecimal attitudeScore;
 
     @Column(name = "professionalism_score", nullable = false, precision = 4, scale = 2)
+    @NotNull(message = "Professionalism score is mandatory")
+    @Min(0)
+    @Max(10)
     private BigDecimal professionalismScore;
 
     @Column(name = "soft_skills_score", nullable = false, precision = 4, scale = 2)
+    @NotNull(message = "Soft skills score is mandatory")
+    @Min(0)
+    @Max(10)
     private BigDecimal softSkillsScore;
 
     @Column(name = "progress_score", nullable = false, precision = 4, scale = 2)
+    @NotNull(message = "Progress score is mandatory")
+    @Min(0)
+    @Max(10)
     private BigDecimal progressScore;
 
     // Computed field in DB, mapped as read-only here
@@ -53,6 +68,9 @@ public class EnterpriseEvaluation {
     @Column(name = "created_at", nullable = false, updatable = false)
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Version
+    private Long version;
 
     @PrePersist
     protected void onCreate() {
