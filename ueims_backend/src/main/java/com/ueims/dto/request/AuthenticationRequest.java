@@ -20,4 +20,7 @@ public class AuthenticationRequest {
 
     @NotBlank(message = "FIELD_REQUIRED")
     String password;
+
+    @NotBlank(message = "FIELD_REQUIRED")
+    String deviceId;
 }
