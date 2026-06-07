@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import lombok.*;
 
@@ -55,6 +56,7 @@ public class EnterpriseEvaluation {
     private BigDecimal totalScore;
 
     @Column(name = "overall_comments", columnDefinition = "TEXT")
+    @Size(max = 5000, message = "Comments must not exceed 5000 characters")
     private String overallComments;
 
     @Column(name = "is_locked", nullable = false)

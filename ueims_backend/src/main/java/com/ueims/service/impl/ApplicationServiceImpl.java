@@ -182,6 +182,12 @@ public class ApplicationServiceImpl implements ApplicationService {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
+        // Đảm bảo chỉ được chuyển sang các trạng thái hợp lệ của vòng lọc CV
+        if (request.getStatus() != ApplicationStatus.SCREENING_PASSED
+                && request.getStatus() != ApplicationStatus.SCREENING_REJECTED) {
+            throw new AppException(ErrorCode.INVALID_PARAMETER_FORMAT);
+        }
+
         application.setStatus(request.getStatus());
 
         if (request.getStatus() == ApplicationStatus.SCREENING_REJECTED) {

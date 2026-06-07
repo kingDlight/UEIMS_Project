@@ -114,13 +114,15 @@ public class EnterpriseEvaluationServiceImpl implements EnterpriseEvaluationServ
                 .add(prof.multiply(new BigDecimal("0.4")))
                 .add(softSkills.multiply(new BigDecimal("0.2")))
                 .add(progress.multiply(new BigDecimal("0.2")))
-                .setScale(2, RoundingMode.HALF_UP);
+                .setScale(1, RoundingMode.HALF_UP);
 
         entity.setTotalScore(totalScore);
 
-        // BR-44: Thiết lập trạng thái khóa khi nộp (Final Submission)
+        // BR-44: Thiết lập trạng thái khóa và thời gian nộp (Final Submission)
         entity.setIsLocked(true);
-        entity.setSubmittedAt(LocalDateTime.now());
+        if (entity.getSubmittedAt() == null) {
+            entity.setSubmittedAt(LocalDateTime.now());
+        }
         entity.setAssignment(assignment);
 
         return repository.save(entity);
