@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.ueims.model.entity.*;
+import com.ueims.model.entity.EnterpriseAssignment;
 
 @Repository
 public interface EnterpriseAssignmentRepository extends JpaRepository<EnterpriseAssignment, UUID> {
@@ -18,4 +18,6 @@ public interface EnterpriseAssignmentRepository extends JpaRepository<Enterprise
             + "AND wr.weekNumber = :weekNumber AND wr.status != 'NOT_SUBMITTED')")
     List<EnterpriseAssignment> findAssignmentsWithLateReports(
             @Param("semesterId") UUID semesterId, @Param("weekNumber") Integer weekNumber);
+
+    boolean existsByEnterprise_EnterpriseIdAndStudent_UserId(UUID enterpriseId, UUID studentId);
 }
