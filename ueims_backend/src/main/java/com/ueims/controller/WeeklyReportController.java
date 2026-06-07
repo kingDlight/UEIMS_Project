@@ -32,6 +32,15 @@ public class WeeklyReportController {
 
     @PostMapping
     public ResponseEntity<WeeklyReport> create(@Valid @RequestBody WeeklyReport entity) {
+        // Sanitize rich-text HTML fields before saving
+        if (entity.getTasksCompleted() != null)
+            entity.setTasksCompleted(com.ueims.util.HtmlSanitizer.sanitize(entity.getTasksCompleted()));
+        if (entity.getIssuesChallenges() != null)
+            entity.setIssuesChallenges(com.ueims.util.HtmlSanitizer.sanitize(entity.getIssuesChallenges()));
+        if (entity.getLessonsLearned() != null)
+            entity.setLessonsLearned(com.ueims.util.HtmlSanitizer.sanitize(entity.getLessonsLearned()));
+        if (entity.getPlanNextWeek() != null)
+            entity.setPlanNextWeek(com.ueims.util.HtmlSanitizer.sanitize(entity.getPlanNextWeek()));
         return ResponseEntity.ok(service.save(entity));
     }
 
