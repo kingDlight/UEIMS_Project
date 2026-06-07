@@ -75,6 +75,19 @@ export const DashboardTab: React.FC<{ animationDelay?: number; onNavigate?: (pag
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 22, opacity: isLoaded ? 1 : 0, transform: isLoaded ? 'translateY(0)' : 'translateY(20px)', transition: 'all .4s ease-out' }}>
+      <style>{`
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; align-items: stretch; }
+        .bottom-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; align-items: stretch; }
+        .mini-cards-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 14px; align-items: stretch; }
+        @media (max-width: 768px) {
+          .kpi-grid { grid-template-columns: 1fr; }
+          .bottom-grid { grid-template-columns: 1fr; }
+          .mini-cards-grid { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 480px) {
+          .mini-cards-grid { grid-template-columns: 1fr; }
+        }
+      `}</style>
       {/* HERO CARD */}
       <div
         style={{
@@ -155,7 +168,7 @@ export const DashboardTab: React.FC<{ animationDelay?: number; onNavigate?: (pag
       </div>
 
       {/* 4 KPI STAT CARDS — equal height via alignItems: stretch */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, alignItems: 'stretch' }}>
+      <div className="kpi-grid">
         <AnimatedStatCard label="Total Eligible" value={stats.totalStudents} icon={<UserOutlined />} color={c.primary} trend="Live total" insight="All internship-eligible records" sparkline={kpiSparklineA} delay={100 + animationDelay} />
         <AnimatedStatCard label="Total Applications" value={stats.enterprises} icon={<BankOutlined />} color={c.info} trend="Job Applications" insight="Total CVs applied" sparkline={kpiSparklineB} delay={200 + animationDelay} />
         <AnimatedStatCard label="OJT Students" value={stats.activeInterns} icon={<ClockCircleOutlined />} color={c.success} trend="Active" insight="Students currently in OJT" sparkline={kpiSparklineC} delay={300 + animationDelay} />
@@ -163,7 +176,7 @@ export const DashboardTab: React.FC<{ animationDelay?: number; onNavigate?: (pag
       </div>
 
       {/* BOTTOM ROW: Weekly Reports + Recent Alerts — equal height */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 20, alignItems: 'stretch' }}>
+      <div className="bottom-grid">
         <NeuSurface style={{ padding: 24, opacity: isLoaded ? 1 : 0, transform: isLoaded ? 'translateY(0)' : 'translateY(20px)', transition: 'all .4s ease-out .3s' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
             <div>
@@ -174,7 +187,7 @@ export const DashboardTab: React.FC<{ animationDelay?: number; onNavigate?: (pag
           </div>
           <div style={{ height: 170 }}><AreaChart data={weeklyReportData.map((d) => d.submitted)} color={c.primary} /></div>
           {/* 5 mini-cards — equal height via alignItems: stretch + minHeight */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 10, marginTop: 14, alignItems: 'stretch' }}>
+          <div className="mini-cards-grid">
             {weeklyReportData.map((day) => (
               <motion.div whileHover={{ y: -2, transition: { duration: 0.2 }, boxShadow: '0 8px 24px rgba(15,23,42,.12)' }} key={day.day} style={{ padding: '10px 12px', borderRadius: 14, background: c.bgLight, border: '1px solid #e5e7eb', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: 72 }}>
                 <div style={{ fontSize: 11, color: c.textMuted, fontWeight: 700 }}>{day.day}</div>

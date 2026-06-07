@@ -218,27 +218,17 @@ const ReportCard = forwardRef<HTMLDivElement, ReportCardProps>((
         overflow: 'hidden',
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'stretch' }}>
+      <div className="report-card-inner">
         {/* Left: Checkbox */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          padding: '18px 0 18px 18px',
-          borderRight: `1px solid ${st.borderSubtle}`,
-          background: checked ? st.successMuted : 'transparent',
-          transition: 'background 0.2s',
-          minWidth: 50,
-          justifyContent: 'center',
-          flexShrink: 0,
-        }}>
+        <div className="rc-checkbox" style={{ background: checked ? st.successMuted : 'transparent' }}>
           <Checkbox checked={checked} onChange={() => onToggle(report.id)} />
         </div>
 
         {/* Middle: Card Content */}
-        <div style={{ flex: 1, padding: '16px 18px', minWidth: 0 }}>
+        <div className="rc-content">
           {/* Card Header */}
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
-            <div>
+          <div className="rc-header">
+            <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'nowrap', marginBottom: 3, maxWidth: '100%', minWidth: 0 }}>
                 <span style={{ fontSize: 14, fontWeight: 800, color: st.textPrimary, fontFamily: 'Inter, sans-serif', letterSpacing: '-0.01em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {report.studentName}
@@ -297,16 +287,7 @@ const ReportCard = forwardRef<HTMLDivElement, ReportCardProps>((
 
         {/* Right: Action Buttons */}
         {isPending && (
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            gap: 6,
-            padding: '16px 18px 16px 14px',
-            borderLeft: `1px solid ${st.borderSubtle}`,
-            minWidth: 108,
-            flexShrink: 0,
-          }}>
+          <div className="rc-actions">
             <button
               aria-label={"Approve report for " + report.studentName}
               onClick={() => onApprove(report.id)}
@@ -398,8 +379,6 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
 }) => {
   return (
     <div style={{
-      width: 220,
-      flexShrink: 0,
       background: st.surface,
       border: `1px solid ${st.border}`,
       borderRadius: st.radiusXl,
@@ -648,13 +627,94 @@ export const WeeklyReportsTab: React.FC = () => {
   const someSelected = selectedIds.size > 0 && selectedIds.size < filteredReports.length;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20, padding: '0 2px 40px' }}>
+    <div className="wr-container" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         .wr-scroll::-webkit-scrollbar { width: 4px; }
         .wr-scroll::-webkit-scrollbar-track { background: transparent; }
         .wr-scroll::-webkit-scrollbar-thumb { background: ${st.border}; border-radius: 99px; }
+        .wr-scroll::-webkit-scrollbar-thumb { background: ${st.border}; border-radius: 99px; }
         .wr-scroll::-webkit-scrollbar-thumb:hover { background: ${st.textMuted}; }
+        .wr-container {
+          padding: 0 24px 40px;
+        }
+        .wr-layout {
+          display: flex;
+          gap: 16px;
+          align-items: flex-start;
+        }
+        .wr-sidebar {
+          width: 220px;
+          flex-shrink: 0;
+        }
+        @media (max-width: 768px) {
+          .wr-container {
+            padding: 0 12px 100px !important;
+          }
+          .wr-layout {
+            flex-direction: column;
+          }
+          .wr-sidebar {
+            width: 100%;
+            position: relative !important; /* disable sticky on mobile */
+          }
+          .report-card-inner {
+            flex-direction: column !important;
+          }
+          .rc-checkbox {
+            border-right: none !important;
+            border-bottom: 1px solid ${st.borderSubtle};
+            padding: 12px 18px !important;
+            justify-content: flex-start !important;
+          }
+          .rc-header {
+            flex-direction: column;
+            align-items: flex-start !important;
+            gap: 8px !important;
+          }
+          .rc-actions {
+            border-left: none !important;
+            border-top: 1px solid ${st.borderSubtle};
+            flex-direction: row !important;
+            padding: 12px 18px !important;
+          }
+        }
+        .report-card-inner {
+          display: flex;
+          align-items: stretch;
+        }
+        .rc-checkbox {
+          display: flex;
+          align-items: center;
+          padding: 18px 0 18px 18px;
+          border-right: 1px solid ${st.borderSubtle};
+          transition: background 0.2s;
+          min-width: 50px;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+        .rc-content {
+          flex: 1;
+          padding: 16px 18px;
+          min-width: 0;
+        }
+        .rc-header {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 12px;
+          margin-bottom: 8px;
+        }
+        .rc-actions {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          gap: 6px;
+          padding: 16px 18px 16px 14px;
+          border-left: 1px solid ${st.borderSubtle};
+          min-width: 108px;
+          flex-shrink: 0;
+        }
       `}</style>
 
       {/* ── Page Header ──────────────────────────────── */}
@@ -675,15 +735,17 @@ export const WeeklyReportsTab: React.FC = () => {
       </div>
 
       {/* ── Main Layout: Sidebar + Content ────────────── */}
-      <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+      <div className="wr-layout">
         {/* LEFT: Filter Sidebar */}
-        <FilterSidebar
-          selectedWeek={selectedWeek}
-          onWeekChange={setSelectedWeek}
-          checkedStatuses={checkedStatuses}
-          onStatusToggle={toggleStatus}
-          counts={counts}
-        />
+        <div className="wr-sidebar">
+          <FilterSidebar
+            selectedWeek={selectedWeek}
+            onWeekChange={setSelectedWeek}
+            checkedStatuses={checkedStatuses}
+            onStatusToggle={toggleStatus}
+            counts={counts}
+          />
+        </div>
 
         {/* RIGHT: Report List */}
         <div style={{ flex: 1, minWidth: 0 }}>

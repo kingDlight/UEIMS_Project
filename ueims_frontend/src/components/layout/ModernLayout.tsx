@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Modal, Dropdown } from 'antd';
+import { Modal, Dropdown, Drawer } from 'antd';
 import type { MenuProps } from 'antd';
-import { BellOutlined, DownOutlined } from '@ant-design/icons';
+import { BellOutlined, DownOutlined, MenuOutlined } from '@ant-design/icons';
 import { SmallPill } from '@/pages/training-manager/components/shared/SmallPill';
 import { floatingNotifications } from '@/pages/training-manager/data';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -37,6 +37,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
   const notificationMenuRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
   const { tab } = useParams<{ tab: string }>();
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   // Determine current active tab
   const activeTab = tab || defaultRoute;
@@ -95,6 +96,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
 
   const handleNavigate = (key: string) => {
     navigate(`${basePath}/${key}`);
+    setDrawerOpen(false);
   };
 
   return (
@@ -104,8 +106,17 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
         {/* Header Navbar */}
         <div className="modern-header-navbar">
           <div className="modern-header-content">
-            <div className="modern-brand-logo">UEIMS</div>
-            <div className="modern-nav-items">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div 
+                className="mobile-menu-btn" 
+                onClick={() => setDrawerOpen(true)}
+                style={{ cursor: 'pointer', fontSize: 18, color: '#1e293b' }}
+              >
+                <MenuOutlined />
+              </div>
+              <div className="modern-brand-logo">UEIMS</div>
+            </div>
+            <div className="modern-nav-items desktop-only">
               {/* Visible pills: first 7 items */}
               {filteredNavItems.slice(0, 7).map((item) => {
                 const isActive = activeTab === item.key;
@@ -243,6 +254,43 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
             </div>
           )}
         </div>
+
+        {/* Mobile Drawer */}
+        <Drawer
+          title={<div className="modern-brand-logo">UEIMS</div>}
+          placement="left"
+          onClose={() => setDrawerOpen(false)}
+          open={drawerOpen}
+          width={280}
+          bodyStyle={{ padding: 0 }}
+          headerStyle={{ borderBottom: '1px solid rgba(233,101,0,.10)' }}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', padding: '16px 0' }}>
+            {filteredNavItems.map((item) => {
+              const isActive = activeTab === item.key;
+              return (
+                <div
+                  key={item.key}
+                  onClick={() => handleNavigate(item.key)}
+                  style={{
+                    padding: '12px 24px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 12,
+                    cursor: 'pointer',
+                    background: isActive ? 'rgba(233,101,0,.08)' : 'transparent',
+                    color: isActive ? '#E96500' : '#475569',
+                    borderRight: isActive ? '3px solid #E96500' : '3px solid transparent',
+                    fontWeight: isActive ? 700 : 500,
+                  }}
+                >
+                  <span style={{ fontSize: 18 }}>{item.icon}</span>
+                  <span style={{ fontSize: 15 }}>{item.label}</span>
+                </div>
+              );
+            })}
+          </div>
+        </Drawer>
 
         {/* Page Content */}
         <AnimatePresence mode="wait">

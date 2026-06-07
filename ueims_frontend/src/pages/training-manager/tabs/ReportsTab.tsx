@@ -448,7 +448,7 @@ export const ReportsTab: React.FC = () => {
   ];
 
   return (
-    <div style={{ fontFamily: 'Inter, sans-serif', padding: '0 24px 40px' }}>
+    <div className="reports-container" style={{ fontFamily: 'Inter, sans-serif' }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         .reports-tab-table .ant-table-thead > tr > th {
@@ -488,6 +488,27 @@ export const ReportsTab: React.FC = () => {
           font-size: 13px !important;
           line-height: 34px !important;
           color: ${st.textMuted} !important;
+        }
+        .reports-container {
+          padding: 0 24px 40px;
+        }
+        .reports-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 14px;
+        }
+        @media (max-width: 1024px) {
+          .reports-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+        @media (max-width: 768px) {
+          .reports-container {
+            padding: 0 12px 100px; /* Extra padding for floating bottom bar */
+          }
+          .reports-grid {
+            grid-template-columns: 1fr;
+          }
         }
       `}</style>
 
@@ -604,11 +625,7 @@ export const ReportsTab: React.FC = () => {
             One-click export for the most common report types
           </span>
         </div>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: 14,
-        }}>
+        <div className="reports-grid">
           {REPORT_TEMPLATES.map((tpl, i) => (
             <TemplateCard key={tpl.id} template={tpl} index={i} onExport={handleExport} />
           ))}
@@ -658,14 +675,17 @@ export const ReportsTab: React.FC = () => {
             </span>
           </div>
 
-          <Table
-            className="reports-tab-table"
-            columns={historyColumns}
-            dataSource={REPORT_HISTORY}
-            rowKey="key"
-            pagination={false}
-            size="middle"
-          />
+          <div style={{ overflowX: 'auto', maxWidth: '100%', minWidth: 0 }}>
+            <Table
+              className="reports-tab-table"
+              columns={historyColumns}
+              dataSource={REPORT_HISTORY}
+              rowKey="key"
+              pagination={false}
+              size="middle"
+              scroll={{ x: 800 }}
+            />
+          </div>
         </div>
       </motion.div>
     </div>

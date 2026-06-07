@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Table, Select, Modal, message, Spin } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import {
@@ -263,6 +263,14 @@ export const OJTTab: React.FC = () => {
   const [reviewDrawerOpen, setReviewDrawerOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<PlacementRecord | null>(null);
 
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+
   const [placementData, setPlacementData] = useState<PlacementRecord[]>(MOCK_PLACEMENTS);
   const pendingCount = placementData.filter((p) => p.status === 'PENDING_APPROVAL').length;
 
@@ -339,7 +347,7 @@ export const OJTTab: React.FC = () => {
       title: <HeaderBadge>Student</HeaderBadge>,
       dataIndex: 'studentName',
       key: 'student',
-      fixed: 'left' as const,
+      fixed: isMobile ? undefined : 'left',
       align: 'left' as const,
       width: 220,
       render: (_: unknown, record: PlacementRecord) => (
@@ -445,7 +453,7 @@ export const OJTTab: React.FC = () => {
     {
       title: <HeaderBadge align="right">Actions</HeaderBadge>,
       key: 'actions',
-      fixed: 'right' as const,
+      fixed: isMobile ? undefined : 'right',
       align: 'right' as const,
       width: 130,
       render: (_: unknown, record: PlacementRecord) => (
@@ -616,7 +624,7 @@ export const OJTTab: React.FC = () => {
         borderRadius: cc.radiusLg, boxShadow: cc.shadowSm, flexWrap: 'wrap',
       }}>
         {/* Left: CTAs */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
           <button
             onClick={handleAutoMatch}
             disabled={running}
@@ -688,7 +696,7 @@ export const OJTTab: React.FC = () => {
           </button>
 
           {/* Summary — mono-tint pill chips */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4, paddingLeft: 8, borderLeft: `1px solid ${cc.border}`, marginLeft: 4 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4, paddingLeft: 8, borderLeft: `1px solid ${cc.border}`, marginLeft: 4, flexWrap: 'wrap' }}>
             {([
               { label: 'Unplaced', n: filteredData.filter((p) => p.status === 'UNPLACED').length },
               { label: 'Pending', n: filteredData.filter((p) => p.status === 'PENDING_APPROVAL').length },
@@ -759,7 +767,7 @@ export const OJTTab: React.FC = () => {
       </div>
 
       {/* ── TABLE ─────────────────────────────────────────── */}
-      <div className="ojt-table">
+      <div className="ojt-table" style={{ overflowX: 'auto', maxWidth: '100%', minWidth: 0 }}>
         <Table
           columns={columns}
           dataSource={filteredData}
