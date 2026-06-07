@@ -33,7 +33,7 @@ public class AtRiskStudentServiceImpl implements AtRiskStudentService {
         return atRiskStudentRepository.findBySemesterId(semesterId);
     }
 
-    @Scheduled(cron = "0 0 1 * * MON")
+    @Scheduled(cron = "0 0 20 ? * SUN", zone = "Asia/Ho_Chi_Minh")
     @Transactional
     public void scanAndProcessLateReportsAutomatically() {
         log.info("Starting automated job to scan for late weekly reports...");
