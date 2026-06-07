@@ -15,11 +15,13 @@ export interface User {
 interface AuthState {
   user: User | null;
   token: string | null;
+  refreshToken: string | null;
   currentRole: UserRole | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (user: User, token: string, role: UserRole) => void;
-  loginWithToken: (token: string) => void;
+  loginWithTokens: (token: string, refreshToken: string) => void;
+  setTokens: (token: string, refreshToken: string) => void;
   logout: () => void;
   switchRole: (role: UserRole) => void;
   setLoading: (loading: boolean) => void;
@@ -30,6 +32,7 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       user: null,
       token: null,
+      refreshToken: null,
       currentRole: null,
       isAuthenticated: false,
       isLoading: false,
@@ -37,10 +40,10 @@ export const useAuthStore = create<AuthState>()(
       login: (user, token, role) =>
         set({ user, token, currentRole: role, isAuthenticated: true }),
 
-      loginWithToken: (token: string) => {
+      loginWithTokens: (token: string, refreshToken: string) => {
         const payload = extractUserFromToken(token);
         if (!payload) {
-          set({ user: null, token: null, currentRole: null, isAuthenticated: false });
+          set({ user: null, token: null, refreshToken: null, currentRole: null, isAuthenticated: false });
           return;
         }
         const primaryRole = (payload.roles[0] as UserRole) || null;
@@ -53,13 +56,16 @@ export const useAuthStore = create<AuthState>()(
             mustChangePassword: payload.mustChangePassword,
           },
           token,
+          refreshToken,
           currentRole: primaryRole,
           isAuthenticated: true,
         });
       },
 
+      setTokens: (token: string, refreshToken: string) => set({ token, refreshToken }),
+
       logout: () =>
-        set({ user: null, token: null, currentRole: null, isAuthenticated: false }),
+        set({ user: null, token: null, refreshToken: null, currentRole: null, isAuthenticated: false }),
 
       switchRole: (role) => set({ currentRole: role }),
 
@@ -70,6 +76,7 @@ export const useAuthStore = create<AuthState>()(
       partialize: (state) => ({
         user: state.user,
         token: state.token,
+        refreshToken: state.refreshToken,
         currentRole: state.currentRole,
         isAuthenticated: state.isAuthenticated,
       }),

@@ -7,6 +7,7 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   token: string;
+  refreshToken: string;
   authenticated: boolean;
   mustChangePassword: boolean;
 }
