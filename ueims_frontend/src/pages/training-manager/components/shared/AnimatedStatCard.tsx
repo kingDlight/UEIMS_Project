@@ -47,7 +47,7 @@ export const AnimatedStatCard: React.FC<{
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, flex: 1 }}>
         <div style={{ minWidth: 0, flex: 1 }}>
           <Text style={{ fontSize: 12, color: c.textMuted, display: 'block', fontWeight: 700 }}>{label}</Text>
-          <div style={{ fontSize: 34, fontWeight: 900, color: c.text, marginTop: 4, letterSpacing: '-1.3px', lineHeight: 1 }}>
+          <div style={{ fontSize: 34, fontWeight: 900, color: c.text, marginTop: 4, letterSpacing: '-1.3px', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
             {animatedValue.toLocaleString()}
           </div>
           {trend && <div style={{ fontSize: 12, color: c.success, fontWeight: 800, marginTop: 6 }}>{trend}</div>}

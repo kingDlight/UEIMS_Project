@@ -170,13 +170,13 @@ const AudienceBadge: React.FC<AudienceBadgeProps> = ({ audience, label }) => {
     Enterprise: {
       bg: cc.purpleMuted,
       border: '#DDD6FE',
-      color: '#5B21B6',
+      color: cc.purple,
       icon: <Megaphone size={11} />,
     },
     Semester: {
       bg: cc.brandMuted,
       border: '#FED7AA',
-      color: '#C2410C',
+      color: cc.warningText,
       icon: <Megaphone size={11} />,
     },
   };
@@ -212,8 +212,8 @@ interface StatusBadgeProps {
 
 const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
   const cfg = status === 'Published'
-    ? { bg: '#ECFDF5', border: '#A7F3D0', color: '#065F46', dot: cc.success, label: 'Published' }
-    : { bg: '#FFFBEB', border: '#FDE68A', color: '#92400E', dot: cc.warning, label: 'Draft' };
+    ? { bg: cc.successMuted, border: '#A7F3D0', color: cc.successText, dot: cc.success, label: 'Published' }
+    : { bg: cc.warningMuted, border: '#FDE68A', color: cc.warningText, dot: cc.warning, label: 'Draft' };
 
   return (
     <span
@@ -445,12 +445,12 @@ export const NoticesTab: React.FC = () => {
                   onMouseEnter={(e) => {
                     const b = e.currentTarget as HTMLButtonElement;
                     b.style.transform = 'translateY(-1px)';
-                    b.style.boxShadow = '0 4px 10px rgba(16,185,129,.3)';
+                    b.style.boxShadow = '0 4px 12px rgba(16,185,129,0.35)';
                   }}
                   onMouseLeave={(e) => {
                     const b = e.currentTarget as HTMLButtonElement;
                     b.style.transform = 'translateY(0)';
-                    b.style.boxShadow = '0 2px 6px rgba(16,185,129,.2)';
+                    b.style.boxShadow = '0 2px 8px rgba(16,185,129,0.25)';
                   }}
                 >
                   <Send size={11} strokeWidth={2} />

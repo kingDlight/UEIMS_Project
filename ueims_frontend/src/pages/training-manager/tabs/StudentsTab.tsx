@@ -54,6 +54,48 @@ const st = {
 };
 
 // ============================================================
+// COLOR UTILITIES — shared across all tabs for ghost style rendering
+// ============================================================
+function hexToRgba(hex: string, alpha: number): string {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+// ============================================================
+// AVATAR PALETTE — deterministic 4-color from brand tokens
+// ============================================================
+const AVATAR_PALETTE = [
+  { bg: st.brandMuted,   text: st.brand  },   // slot 0 — orange family
+  { bg: st.successMuted, text: st.success },   // slot 1 — green family
+  { bg: st.infoMuted,    text: st.info   },   // slot 2 — blue family
+  { bg: st.warningMuted, text: st.warning },   // slot 3 — amber family
+];
+
+function getAvatarColor(name: string) {
+  const idx = name.split('').reduce((a, c) => a + c.charCodeAt(0), 0) % AVATAR_PALETTE.length;
+  return AVATAR_PALETTE[idx];
+}
+
+const Avatar: React.FC<{ initials: string }> = ({ initials }) => {
+  const palette = getAvatarColor(initials);
+  return (
+    <div style={{
+      width: 32, height: 32, borderRadius: '50%',
+      background: palette.bg,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      color: palette.text,
+      fontWeight: 700, fontSize: 11,
+      fontFamily: 'Inter, sans-serif', flexShrink: 0,
+    }}>
+      {initials}
+    </div>
+  );
+};
+
+// ============================================================
 // RDS BUSINESS RULES — OJT Status by Semester
 // RDS UC-20 / BR-19:
 //   - Sem 1-4 : Pre-Registration  (cannot register OJT, just view list)
@@ -63,42 +105,25 @@ const st = {
 //   - Note: "Pre-Registration" students do NOT appear in the Eligible list
 //     by default; they are only shown when "All" filter is applied.
 // ============================================================
-const OJT_STATUS = {
+const OJT_STATUS: Record<string, {
+  label: string; color: string; bg: string; borderColor: string;
+  semRange: string; description: string;
+}> = {
   PRE_REGISTRATION: {
-    label: 'Pre-Registration',
-    color: '#6B7280',
-    bg: '#F3F4F6',
-    textColor: '#374151',
-    semRange: 'Sem. 1-4',
-    description: 'Cannot register OJT — semester below eligibility threshold',
+    label: 'Pre-Registration', color: st.textMuted,  bg: hexToRgba(st.textMuted,  0.06), borderColor: hexToRgba(st.textMuted,  0.25), semRange: 'Sem. 1-4', description: 'Cannot register OJT — semester below eligibility threshold',
   },
   ELIGIBLE: {
-    label: 'Eligible',
-    color: '#3B82F6',
-    bg: '#DBEAFE',
-    textColor: '#1E40AF',
-    semRange: 'Sem. 5',
-    description: 'Meets all OJT criteria — ready to register for internship',
+    label: 'Eligible',        color: st.info,     bg: hexToRgba(st.info,     0.06), borderColor: hexToRgba(st.info,     0.25), semRange: 'Sem. 5',     description: 'Meets all OJT criteria — ready to register for internship',
   },
   IN_OJT: {
-    label: 'In OJT',
-    color: '#10B981',
-    bg: '#D1FAE5',
-    textColor: '#065F46',
-    semRange: 'Sem. 6',
-    description: 'Currently in OJT — active internship',
+    label: 'In OJT',           color: st.success,  bg: hexToRgba(st.success,  0.06), borderColor: hexToRgba(st.success,  0.25), semRange: 'Sem. 6',     description: 'Currently in OJT — active internship',
   },
   COMPLETED: {
-    label: 'Completed',
-    color: '#8B5CF6',
-    bg: '#EDE9FE',
-    textColor: '#6D28D9',
-    semRange: 'Sem. 7-9',
-    description: 'OJT finished — eligible to view results',
+    label: 'Completed',       color: st.warning,  bg: hexToRgba(st.warning,  0.06), borderColor: hexToRgba(st.warning,  0.25), semRange: 'Sem. 7-9',   description: 'OJT finished — eligible to view results',
   },
-} as const;
+};
 
-function deriveStatus(sem: number): keyof typeof OJT_STATUS {
+function deriveStatus(sem: number): string {
   if (sem < 5) return 'PRE_REGISTRATION';
   if (sem === 5) return 'ELIGIBLE';
   if (sem === 6) return 'IN_OJT';
@@ -260,6 +285,9 @@ const ACAD_SEM_OPTIONS = [
 // UI COMPONENTS
 // ============================================================
 
+// ============================================================
+// STATUS BADGE — ghost outline (text color + whisper border, no solid fill)
+// ============================================================
 const StatusBadge: React.FC<{ sem: number }> = ({ sem }) => {
   const key = deriveStatus(sem);
   const cfg = OJT_STATUS[key];
@@ -269,24 +297,16 @@ const StatusBadge: React.FC<{ sem: number }> = ({ sem }) => {
         display: 'inline-flex',
         alignItems: 'center',
         gap: 5,
-        padding: '4px 10px',
-        borderRadius: st.radiusFull,
-        background: cfg.bg,
+        padding: '3px 9px',
+        borderRadius: 6,
+        backgroundColor: cfg.bg,
+        border: `1px solid ${cfg.borderColor}`,
         color: cfg.color,
-        fontSize: 11.5,
-        fontWeight: 700,
+        fontSize: 11,
+        fontWeight: 600,
         fontFamily: 'Inter, sans-serif',
       }}
     >
-      <span
-        style={{
-          width: 7,
-          height: 7,
-          borderRadius: '50%',
-          background: cfg.color,
-          flexShrink: 0,
-        }}
-      />
       {cfg.label}
     </span>
   );
@@ -386,7 +406,7 @@ const StudentDetailModal: React.FC<{
           backdropFilter: 'blur(6px)',
         },
         content: {
-          borderRadius: 10,
+          borderRadius: st.radiusMd,
           border: '1px solid #E5E7EB',
           boxShadow: '0 20px 60px rgba(0,0,0,.20)',
           padding: 0,
@@ -472,7 +492,7 @@ const StudentDetailModal: React.FC<{
           </div>
         </div>
 
-        {/* Status badge — floating below banner */}
+        {/* Status badge — floating below banner, ghost style */}
         <div
           style={{
             position: 'absolute',
@@ -481,21 +501,12 @@ const StudentDetailModal: React.FC<{
             display: 'inline-flex',
             alignItems: 'center',
             gap: 5,
-            padding: '5px 12px',
+            padding: '4px 10px',
             borderRadius: 20,
-            background: '#fff',
-            border: `1.5px solid ${cfg.color}`,
-            boxShadow: '0 3px 10px rgba(0,0,0,.12)',
+            backgroundColor: hexToRgba(cfg.color, 0.06),
+            border: `1px solid ${hexToRgba(cfg.color, 0.25)}`,
           }}
         >
-          <span
-            style={{
-              width: 8,
-              height: 8,
-              borderRadius: '50%',
-              background: cfg.color,
-            }}
-          />
           <span
             style={{
               fontSize: 12,
@@ -616,7 +627,7 @@ const StudentDetailModal: React.FC<{
           style={{
             flex: 1,
             padding: '9px 0',
-            borderRadius: 22,
+            borderRadius: st.radiusMd,
             border: '1.5px solid #FF7A30',
             background: 'transparent',
             color: '#FF7A30',
@@ -636,7 +647,7 @@ const StudentDetailModal: React.FC<{
           style={{
             flex: 1,
             padding: '9px 0',
-            borderRadius: 22,
+            borderRadius: st.radiusMd,
             border: 'none',
             background: '#FF7A30',
             color: '#fff',

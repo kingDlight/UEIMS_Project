@@ -147,31 +147,76 @@ const MOCK_PLACEMENTS: PlacementRecord[] = [
 ];
 
 // ============================================================
-// STATUS CONFIG
+// COLOR UTILITIES
+// ============================================================
+function hexToRgba(hex: string, alpha: number): string {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+// ============================================================
+// STATUS CONFIG — ghost outline (rgba bg for backgroundColor compat)
 // ============================================================
 const STATUS_CONFIG: Record<PlacementStatus, {
   label: string; color: string; bg: string; borderColor: string;
 }> = {
-  UNPLACED: { label: 'Unplaced', color: cc.neutral, bg: cc.neutralMuted, borderColor: '#D1D5DB' },
-  PENDING_APPROVAL: { label: 'Pending', color: cc.info, bg: cc.infoMuted, borderColor: '#93C5FD' },
-  INTERVIEWING: { label: 'Interviewing', color: cc.warning, bg: cc.warningMuted, borderColor: '#FCD34D' },
-  PLACED: { label: 'Placed', color: cc.success, bg: cc.successMuted, borderColor: '#6EE7B7' },
+  UNPLACED:        { label: 'Unplaced',      color: cc.neutral,  bg: hexToRgba(cc.neutral,  0.06), borderColor: hexToRgba(cc.neutral,  0.25) },
+  PENDING_APPROVAL:{ label: 'Pending',        color: cc.info,    bg: hexToRgba(cc.info,    0.06), borderColor: hexToRgba(cc.info,    0.25) },
+  INTERVIEWING:    { label: 'Interviewing',   color: cc.warning, bg: hexToRgba(cc.warning, 0.06), borderColor: hexToRgba(cc.warning, 0.25) },
+  PLACED:          { label: 'Placed',        color: cc.success, bg: hexToRgba(cc.success, 0.06), borderColor: hexToRgba(cc.success, 0.25) },
 };
 
 // ============================================================
-// AVATAR — minimal circle
+// AVATAR PALETTE — deterministic 4-color from brand tokens
 // ============================================================
-const Avatar: React.FC<{ initials: string; color?: string }> = ({ initials, color = cc.brand }) => (
-  <div style={{
-    width: 32, height: 32, borderRadius: '50%',
-    background: color,
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
-    color: '#fff', fontWeight: 700, fontSize: 11,
-    fontFamily: 'Inter, sans-serif', flexShrink: 0,
-  }}>
-    {initials}
-  </div>
-);
+const AVATAR_PALETTE = [
+  { bg: cc.brandMuted,   text: cc.brand  },   // slot 0 — orange family
+  { bg: cc.successMuted, text: cc.success },   // slot 1 — green family
+  { bg: cc.infoMuted,    text: cc.info   },   // slot 2 — blue family
+  { bg: cc.warningMuted, text: cc.warning },   // slot 3 — amber family
+];
+
+// ============================================================
+// ENTERPRISE PALETTE — deterministic 4-color for enterprise avatars
+// ============================================================
+const ENTERPRISE_PALETTE = [
+  { color: cc.brand,   bg: hexToRgba(cc.brand,   0.15) },   // slot 0 — orange family
+  { color: cc.success, bg: hexToRgba(cc.success, 0.15) },   // slot 1 — green family
+  { color: cc.info,    bg: hexToRgba(cc.info,    0.15) },   // slot 2 — blue family
+  { color: cc.warning, bg: hexToRgba(cc.warning, 0.15) },   // slot 3 — amber family
+];
+
+function getEnterpriseColor(name: string) {
+  const idx = name.split('').reduce((a, c) => a + c.charCodeAt(0), 0) % ENTERPRISE_PALETTE.length;
+  return ENTERPRISE_PALETTE[idx];
+}
+
+function getAvatarColor(name: string) {
+  const idx = name.split('').reduce((a, c) => a + c.charCodeAt(0), 0) % AVATAR_PALETTE.length;
+  return AVATAR_PALETTE[idx];
+}
+
+// ============================================================
+// AVATAR — minimal circle with deterministic brand palette
+// ============================================================
+const Avatar: React.FC<{ initials: string; color?: string; bg?: string }> = ({ initials, color, bg }) => {
+  const palette = (color || bg) ? null : getAvatarColor(initials);
+  return (
+    <div style={{
+      width: 32, height: 32, borderRadius: '50%',
+      background: bg ?? (color ? hexToRgba(color, 0.15) : palette!.bg),
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      color: color ?? (palette!.text),
+      fontWeight: 700, fontSize: 11,
+      fontFamily: 'Inter, sans-serif', flexShrink: 0,
+    }}>
+      {initials}
+    </div>
+  );
+};
 
 // ============================================================
 // STATUS BADGE — only visual accent in a row
@@ -181,8 +226,8 @@ const StatusBadge: React.FC<{ status: PlacementStatus }> = ({ status }) => {
   return (
     <span style={{
       display: 'inline-flex', alignItems: 'center',
-      padding: '3px 9px', borderRadius: cc.radiusFull,
-      background: cfg.bg, border: `1px solid ${cfg.borderColor}`,
+      padding: '3px 9px', borderRadius: 6,
+      backgroundColor: cfg.bg, border: `1px solid ${cfg.borderColor}`,
       color: cfg.color, fontSize: 11, fontWeight: 600,
       fontFamily: 'Inter, sans-serif', letterSpacing: '0.01em',
     }}>
@@ -224,10 +269,10 @@ export const OJTTab: React.FC = () => {
   const pendingCount = placementData.filter((p) => p.status === 'PENDING_APPROVAL').length;
 
   const ENTERPRISES = [
-    { name: 'FPT Software', initials: 'FP', color: '#E96500' },
-    { name: 'VinBigData', initials: 'VB', color: '#3B82F6' },
-    { name: 'VNG Corporation', initials: 'VN', color: '#8B5CF6' },
-    { name: 'NashTech VN', initials: 'NT', color: '#10B981' },
+    { name: 'FPT Software',  initials: 'FP', ...getEnterpriseColor('FPT Software')  },
+    { name: 'VinBigData',    initials: 'VB', ...getEnterpriseColor('VinBigData')   },
+    { name: 'VNG Corporation', initials: 'VN', ...getEnterpriseColor('VNG Corporation') },
+    { name: 'NashTech VN',   initials: 'NT', ...getEnterpriseColor('NashTech VN') },
   ];
 
   const handleAutoMatch = useCallback(async () => {
@@ -301,7 +346,7 @@ export const OJTTab: React.FC = () => {
       width: 220,
       render: (_: unknown, record: PlacementRecord) => (
         <div style={row}>
-          <Avatar initials={record.avatar} color={cc.brand} />
+          <Avatar initials={record.avatar} />
           <div style={{ minWidth: 0, marginLeft: 10 }}>
             {/* name */}
             <div style={{ ...cellBase, fontSize: 13, fontWeight: 600, color: cc.textPrimary, lineHeight: 1.3 }}>
@@ -355,9 +400,9 @@ export const OJTTab: React.FC = () => {
         <div style={row}>
           <span style={{
             display: 'inline-flex', alignItems: 'center',
-            padding: '2px 7px', borderRadius: 5,
-            background: record.source === 'SELF_SOURCED' ? cc.infoMuted : cc.purpleMuted,
-            border: `1px solid ${record.source === 'SELF_SOURCED' ? '#BFDBFE' : '#C4B5FD'}`,
+            padding: '2px 7px', borderRadius: 6,
+            backgroundColor: record.source === 'SELF_SOURCED' ? hexToRgba(cc.info, 0.06) : hexToRgba(cc.purple, 0.06),
+            border: `1px solid ${record.source === 'SELF_SOURCED' ? hexToRgba(cc.info, 0.25) : hexToRgba(cc.purple, 0.25)}`,
             color: record.source === 'SELF_SOURCED' ? cc.info : cc.purple,
             fontSize: 10, fontWeight: 700, fontFamily: 'Inter, sans-serif',
             whiteSpace: 'nowrap',
@@ -378,7 +423,7 @@ export const OJTTab: React.FC = () => {
             <span style={{ ...cellBase, fontSize: 12, color: cc.textMuted, fontStyle: 'italic' }}>—</span>
           ) : (
             <>
-              <Avatar initials={record.enterpriseInitials ?? '??'} color={record.enterpriseColor ?? cc.brand} />
+              <Avatar initials={record.enterpriseInitials ?? '??'} color={record.enterpriseColor ?? undefined} />
               <span style={{ ...cellBase, fontSize: 12, fontWeight: 600, color: cc.textPrimary, marginLeft: 8, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {record.enterprise}
               </span>
@@ -644,21 +689,27 @@ export const OJTTab: React.FC = () => {
             )}
           </button>
 
-          {/* Summary */}
+          {/* Summary — mono-tint pill chips */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 4, paddingLeft: 8, borderLeft: `1px solid ${cc.border}`, marginLeft: 4 }}>
             {([
-              { label: 'Unplaced', n: filteredData.filter((p) => p.status === 'UNPLACED').length, c: cc.neutral },
-              { label: 'Pending', n: filteredData.filter((p) => p.status === 'PENDING_APPROVAL').length, c: cc.info },
-              { label: 'Interviewing', n: filteredData.filter((p) => p.status === 'INTERVIEWING').length, c: cc.warning },
-              { label: 'Placed', n: filteredData.filter((p) => p.status === 'PLACED').length, c: cc.success },
-            ] as const).map(({ label, n, c }) => (
+              { label: 'Unplaced', n: filteredData.filter((p) => p.status === 'UNPLACED').length },
+              { label: 'Pending', n: filteredData.filter((p) => p.status === 'PENDING_APPROVAL').length },
+              { label: 'Interviewing', n: filteredData.filter((p) => p.status === 'INTERVIEWING').length },
+              { label: 'Placed', n: filteredData.filter((p) => p.status === 'PLACED').length },
+            ] as const).map(({ label, n }) => (
               <div key={label} style={{
-                display: 'flex', alignItems: 'center', gap: 5,
+                display: 'flex', alignItems: 'center', gap: 4,
                 padding: '3px 8px', borderRadius: cc.radiusFull,
-                background: `${c}10`,
+                background: `${cc.neutral}0A`,   // 4% neutral gray — all identical
               }}>
-                <span style={{ width: 6, height: 6, borderRadius: '50%', background: c, flexShrink: 0 }} />
-                <span style={{ fontSize: 11.5, fontWeight: 600, color: cc.textSecondary, fontFamily: 'Inter, sans-serif' }}>
+                <span style={{
+                  minWidth: 18, height: 18, borderRadius: cc.radiusFull,
+                  background: hexToRgba(cc.brand, 0.06),  // 6% brand orange tint
+                  color: cc.brand,
+                  fontSize: 10.5, fontWeight: 700, fontFamily: 'Inter, sans-serif',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  padding: '0 4px', lineHeight: 1, flexShrink: 0,
+                }}>
                   {n}
                 </span>
                 <span style={{ fontSize: 11, color: cc.textMuted, fontFamily: 'Inter, sans-serif' }}>{label}</span>
@@ -755,10 +806,10 @@ export const OJTTab: React.FC = () => {
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {[
-              { name: 'FPT Software', initials: 'FP', color: '#E96500' },
-              { name: 'VinBigData', initials: 'VB', color: '#3B82F6' },
-              { name: 'VNG Corporation', initials: 'VN', color: '#8B5CF6' },
-              { name: 'NashTech VN', initials: 'NT', color: '#10B981' },
+              { name: 'FPT Software',    initials: 'FP', ...getEnterpriseColor('FPT Software')     },
+              { name: 'VinBigData',     initials: 'VB', ...getEnterpriseColor('VinBigData')      },
+              { name: 'VNG Corporation', initials: 'VN', ...getEnterpriseColor('VNG Corporation') },
+              { name: 'NashTech VN',    initials: 'NT', ...getEnterpriseColor('NashTech VN')     },
             ].map((ent) => (
               <button
                 key={ent.name}
@@ -832,7 +883,7 @@ export const OJTTab: React.FC = () => {
               background: cc.neutralBg, border: `1px solid ${cc.border}`,
               marginBottom: 14,
             }}>
-              <Avatar initials={selectedRecord.enterpriseInitials ?? '??'} color={selectedRecord.enterpriseColor ?? cc.brand} />
+              <Avatar initials={selectedRecord.enterpriseInitials ?? '??'} color={selectedRecord.enterpriseColor ?? undefined} />
               <div>
                 <div style={{ fontSize: 12.5, fontWeight: 700, color: cc.textPrimary, fontFamily: 'Inter, sans-serif' }}>
                   {selectedRecord.enterprise}
@@ -982,7 +1033,7 @@ export const OJTTab: React.FC = () => {
                 background: cc.neutralBg, border: `1px solid ${cc.border}`,
                 marginBottom: 8,
               }}>
-                <Avatar initials={record.avatar} color={cc.brand} />
+                <Avatar initials={record.avatar} />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 12.5, fontWeight: 700, color: cc.textPrimary, fontFamily: 'Inter, sans-serif' }}>
                     {record.studentName}
@@ -991,7 +1042,7 @@ export const OJTTab: React.FC = () => {
                     {record.studentCode} &middot; {record.targetRole}
                   </div>
                 </div>
-                <Avatar initials={record.enterpriseInitials ?? '??'} color={record.enterpriseColor ?? cc.brand} />
+                <Avatar initials={record.enterpriseInitials ?? '??'} color={record.enterpriseColor ?? undefined} />
                 <span style={{ fontSize: 12, fontWeight: 600, color: cc.textSecondary, fontFamily: 'Inter, sans-serif', minWidth: 90 }}>
                   {record.enterprise}
                 </span>

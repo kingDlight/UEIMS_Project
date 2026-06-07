@@ -12,6 +12,17 @@ import dayjs from 'dayjs';
 import { c } from '../constants';
 
 // ============================================================
+// COLOR UTILITY
+// ============================================================
+function hexToRgba(hex: string, alpha: number): string {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+// ============================================================
 // DESIGN TOKENS — matches OJTTab Command Center aesthetic
 // ============================================================
 const cc = {
@@ -135,23 +146,23 @@ interface StatusBadgeProps {
 const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
   const config: Record<SemesterStatus, { bg: string; border: string; color: string; dot: string; label: string }> = {
     Current: {
-      bg: '#ECFDF5',
-      border: '#A7F3D0',
-      color: '#065F46',
+      bg: cc.successMuted,
+      border: hexToRgba(cc.success, 0.4),
+      color: cc.successText,
       dot: cc.success,
       label: 'Current',
     },
     Upcoming: {
-      bg: '#FFF7ED',
-      border: '#FED7AA',
-      color: '#C2410C',
+      bg: cc.brandMuted,
+      border: hexToRgba(cc.brand, 0.4),
+      color: cc.warningText,
       dot: cc.brand,
       label: 'Upcoming',
     },
     Completed: {
-      bg: '#F9FAFB',
-      border: '#E5E7EB',
-      color: cc.textMuted,
+      bg: cc.neutralMuted,
+      border: cc.border,
+      color: cc.neutral,
       dot: cc.neutral,
       label: 'Completed',
     },
