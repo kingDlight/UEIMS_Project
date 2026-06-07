@@ -30,8 +30,9 @@ public class DashboardServiceImpl implements DashboardService {
 
     @Override
     public List<ChartDataDTO> getEmploymentRateChart(UUID semesterId) {
-        SemesterStatistics stats =
-                semesterStatisticsRepository.findById(semesterId).orElseThrow(() -> new AppException(ErrorCode.SEMESTER_NOT_FOUND));
+        SemesterStatistics stats = semesterStatisticsRepository
+                .findById(semesterId)
+                .orElseThrow(() -> new AppException(ErrorCode.SEMESTER_NOT_FOUND));
         List<ChartDataDTO> chart = new ArrayList<>();
 
         long ojt = stats.getTotalOjt() != null ? stats.getTotalOjt() : 0;
@@ -46,8 +47,9 @@ public class DashboardServiceImpl implements DashboardService {
 
     @Override
     public List<ChartDataDTO> getInterviewPassRateChart(UUID semesterId) {
-        SemesterStatistics stats =
-                semesterStatisticsRepository.findById(semesterId).orElseThrow(() -> new AppException(ErrorCode.SEMESTER_NOT_FOUND));
+        SemesterStatistics stats = semesterStatisticsRepository
+                .findById(semesterId)
+                .orElseThrow(() -> new AppException(ErrorCode.SEMESTER_NOT_FOUND));
         List<ChartDataDTO> chart = new ArrayList<>();
 
         long passed = stats.getInterviewsPassed() != null ? stats.getInterviewsPassed() : 0;
@@ -95,8 +97,9 @@ public class DashboardServiceImpl implements DashboardService {
 
     @Override
     public List<ChartDataDTO> getAverageRatingChart(UUID semesterId) {
-        SemesterStatistics stats =
-                semesterStatisticsRepository.findById(semesterId).orElseThrow(() -> new AppException(ErrorCode.SEMESTER_NOT_FOUND));
+        SemesterStatistics stats = semesterStatisticsRepository
+                .findById(semesterId)
+                .orElseThrow(() -> new AppException(ErrorCode.SEMESTER_NOT_FOUND));
         List<ChartDataDTO> chart = new ArrayList<>();
         BigDecimal avgFinalGrade = stats.getAvgFinalGrade() != null ? stats.getAvgFinalGrade() : BigDecimal.ZERO;
         chart.add(new ChartDataDTO("Average Rating", avgFinalGrade.doubleValue()));
