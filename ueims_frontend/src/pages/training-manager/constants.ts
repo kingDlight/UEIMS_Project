@@ -42,16 +42,16 @@ export const c: ThemeColors = {
 };
 
 export const navItems: NavItem[] = [
-  { key: 'dashboard', label: 'Dashboard', icon: React.createElement(BarChartOutlined) },
-  { key: 'enterprises', label: 'Enterprise', icon: React.createElement(BankOutlined) },
-  { key: 'students', label: 'Students', icon: React.createElement(TeamOutlined) },
-  { key: 'ojt', label: 'OJT', icon: React.createElement(FileProtectOutlined) },
-  { key: 'analytics', label: 'Stats', icon: React.createElement(TrophyOutlined) },
-  { key: 'incidents', label: 'Incidents', icon: React.createElement(AlertOutlined) },
-  { key: 'reports', label: 'Reports', icon: React.createElement(FileTextOutlined) },
-  { key: 'weekly-reports', label: 'Weekly Reports', icon: React.createElement(SnippetsOutlined) },
-  { key: 'calendar', label: 'Semester', icon: React.createElement(CalendarOutlined) },
-  { key: 'notifications', label: 'Notices', icon: React.createElement(BellOutlined) },
+  { key: 'dashboard', label: 'Dashboard', icon: React.createElement(BarChartOutlined), roles: ['TRAINING_MANAGER', 'SYSTEM_ADMIN', 'ENTERPRISE', 'STUDENT'] },
+  { key: 'enterprises', label: 'Enterprise', icon: React.createElement(BankOutlined), roles: ['TRAINING_MANAGER', 'SYSTEM_ADMIN'] },
+  { key: 'students', label: 'Students', icon: React.createElement(TeamOutlined), roles: ['TRAINING_MANAGER', 'SYSTEM_ADMIN'] },
+  { key: 'ojt', label: 'OJT', icon: React.createElement(FileProtectOutlined), roles: ['TRAINING_MANAGER', 'SYSTEM_ADMIN', 'ENTERPRISE', 'STUDENT'] },
+  { key: 'analytics', label: 'Stats', icon: React.createElement(TrophyOutlined), roles: ['TRAINING_MANAGER', 'SYSTEM_ADMIN'] },
+  { key: 'incidents', label: 'Incidents', icon: React.createElement(AlertOutlined), roles: ['TRAINING_MANAGER', 'SYSTEM_ADMIN', 'ENTERPRISE'] },
+  { key: 'reports', label: 'Reports', icon: React.createElement(FileTextOutlined), roles: ['TRAINING_MANAGER', 'SYSTEM_ADMIN', 'ENTERPRISE', 'STUDENT'] },
+  { key: 'weekly-reports', label: 'Weekly Reports', icon: React.createElement(SnippetsOutlined), roles: ['TRAINING_MANAGER', 'SYSTEM_ADMIN', 'ENTERPRISE', 'STUDENT'] },
+  { key: 'calendar', label: 'Semester', icon: React.createElement(CalendarOutlined), roles: ['TRAINING_MANAGER', 'SYSTEM_ADMIN'] },
+  { key: 'notifications', label: 'Notices', icon: React.createElement(BellOutlined), roles: ['TRAINING_MANAGER', 'SYSTEM_ADMIN', 'ENTERPRISE', 'STUDENT'] },
 ];
 
 export const defaultPage: PageKey = 'dashboard';

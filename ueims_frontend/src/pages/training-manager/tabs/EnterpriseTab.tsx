@@ -1,12 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Table, Modal, Button, Input, Badge, message } from 'antd';
+import { Table, Modal, Button, Input, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import {
   Building2,
   CheckCircle2,
   XCircle,
-  ArrowRight,
   ChevronDown,
   AlertTriangle,
 } from 'lucide-react';
@@ -244,8 +243,6 @@ const ApprovalRow: React.FC<{
             <span>{enterprise.industry}</span>
             <span style={{ color: cc.border }}>|</span>
             <span style={{ fontFamily: 'monospace', fontSize: 11 }}>{enterprise.taxCode}</span>
-            <span style={{ color: cc.border }}>|</span>
-            <span>{enterprise.submittedDate ?? new Date(enterprise.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
           </div>
         </div>
         <motion.button

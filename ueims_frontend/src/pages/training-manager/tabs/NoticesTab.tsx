@@ -11,7 +11,7 @@ import {
   XCircle,
 } from 'lucide-react';
 import dayjs from 'dayjs';
-import { c } from '../constants';
+
 
 // ============================================================
 // DESIGN TOKENS — matches SemesterTab / OJTTab Command Center

@@ -357,7 +357,7 @@ export const StatsTab: React.FC = () => {
                   endAngle={-270}
                 >
                   {PLACEMENT_DATA.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} stroke="#FFFFFF" strokeWidth={4} cornerRadius={6} />
+                    <Cell key={`cell-${index}`} fill={entry.color} stroke="#FFFFFF" strokeWidth={4} />
                   ))}
                 </Pie>
                 <text x="50%" y="43%" textAnchor="middle" dominantBaseline="central" fill={cc.textPrimary} fontSize={28} fontWeight={800} fontFamily="Inter, sans-serif" letterSpacing="-0.03em">
