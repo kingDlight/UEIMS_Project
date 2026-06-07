@@ -4,13 +4,13 @@ import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
 
-import org.hibernate.annotations.Where;
+import org.hibernate.annotations.SQLRestriction;
 
 import lombok.*;
 
 @Entity
 @Table(name = "applications")
-@Where(clause = "deleted_at IS NULL")
+@SQLRestriction("deleted_at IS NULL")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
