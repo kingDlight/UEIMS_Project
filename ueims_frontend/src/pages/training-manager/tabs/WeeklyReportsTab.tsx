@@ -15,6 +15,17 @@ import {
 import { st } from './StatsTab';
 
 // ============================================================
+// COLOR UTILITY — hex-to-rgba for ghost style rendering
+// ============================================================
+function hexToRgba(hex: string, alpha: number): string {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+// ============================================================
 // TYPES
 // ============================================================
 export interface WeeklyReport {
@@ -124,22 +135,22 @@ const ALL_WEEKS = [
 const STATUS_CONFIG = {
   PENDING: {
     color: st.warning,
-    bg: st.warningMuted,
-    text: st.warningText,
+    bg: hexToRgba(st.warning, 0.06),
+    borderColor: hexToRgba(st.warning, 0.20),
     icon: <Clock size={12} strokeWidth={2.5} />,
     label: 'Pending',
   },
   APPROVED: {
     color: st.success,
-    bg: st.successMuted,
-    text: st.successText,
+    bg: hexToRgba(st.success, 0.06),
+    borderColor: hexToRgba(st.success, 0.20),
     icon: <CheckCircle2 size={12} strokeWidth={2.5} />,
     label: 'Approved',
   },
   REJECTED: {
     color: st.error,
-    bg: st.errorMuted,
-    text: st.errorText,
+    bg: hexToRgba(st.error, 0.06),
+    borderColor: hexToRgba(st.error, 0.20),
     icon: <AlertCircle size={12} strokeWidth={2.5} />,
     label: 'Rejected',
   },
@@ -317,7 +328,7 @@ const ReportCard = forwardRef<HTMLDivElement, ReportCardProps>((
                 gap: 4,
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.background = '#0D9668';
+                (e.currentTarget as HTMLButtonElement).style.background = st.success;
                 (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-1px)';
                 (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 4px 12px rgba(16,185,129,0.35)';
               }}
@@ -708,20 +719,20 @@ export const WeeklyReportsTab: React.FC = () => {
                 cursor: batchDisabled ? 'not-allowed' : 'pointer',
                 opacity: batchDisabled ? 0.55 : 1,
                 transition: 'all 0.2s cubic-bezier(0.32, 0.72, 0, 1)',
-                boxShadow: batchDisabled ? 'none' : '0 2px 10px rgba(16,185,129,0.25)',
+                boxShadow: batchDisabled ? 'none' : '0 2px 8px rgba(16,185,129,0.25)',
                 pointerEvents: batchDisabled ? 'none' : 'auto',
               }}
               onMouseEnter={(e) => {
                 if (!batchDisabled && !batchLoading) {
-                  (e.currentTarget as HTMLButtonElement).style.background = '#0D9668';
+                  (e.currentTarget as HTMLButtonElement).style.background = st.success;
                   (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-1px)';
-                  (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 4px 14px rgba(16,185,129,0.35)';
+                  (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 4px 12px rgba(16,185,129,0.35)';
                 }
               }}
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLButtonElement).style.background = batchDisabled ? 'transparent' : st.success;
                 (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0)';
-                (e.currentTarget as HTMLButtonElement).style.boxShadow = batchDisabled ? 'none' : '0 2px 10px rgba(16,185,129,0.25)';
+                (e.currentTarget as HTMLButtonElement).style.boxShadow = batchDisabled ? 'none' : '0 2px 8px rgba(16,185,129,0.25)';
               }}
             >
               <CheckSquare size={14} strokeWidth={2.5} />

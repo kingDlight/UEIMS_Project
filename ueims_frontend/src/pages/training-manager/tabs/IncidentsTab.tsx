@@ -55,47 +55,52 @@ const cc = {
 };
 
 // ============================================================
-// INCIDENT SEVERITY MAPPING (BR-26 aligned)
+// COLOR UTILITY — hex-to-rgba for ghost style rendering
+// ============================================================
+function hexToRgba(hex: string, alpha: number): string {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+// ============================================================
+// INCIDENT SEVERITY MAPPING (BR-26 aligned) — ghost outline style
 // ============================================================
 type Severity = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | 'RESOLVED';
 
-const SEVERITY_CONFIG: Record<
-  Severity,
-  { color: string; bg: string; label: string; borderColor: string; dotColor: string }
-> = {
+const SEVERITY_CONFIG: Record<Severity, {
+  color: string; bg: string; borderColor: string; label: string;
+}> = {
   CRITICAL: {
-    color: '#EF4444',
-    bg: '#FEF2F2',
-    borderColor: '#EF4444',
-    dotColor: '#EF4444',
+    color: cc.error,
+    bg: hexToRgba(cc.error,  0.06),
+    borderColor: hexToRgba(cc.error,  0.25),
     label: 'CRITICAL',
   },
   HIGH: {
-    color: '#F59E0B',
-    bg: '#FFFBEB',
-    borderColor: '#F59E0B',
-    dotColor: '#F59E0B',
+    color: cc.warning,
+    bg: hexToRgba(cc.warning, 0.06),
+    borderColor: hexToRgba(cc.warning, 0.25),
     label: 'HIGH',
   },
   MEDIUM: {
-    color: '#3B82F6',
-    bg: '#EFF6FF',
-    borderColor: '#3B82F6',
-    dotColor: '#3B82F6',
+    color: cc.info,
+    bg: hexToRgba(cc.info,    0.06),
+    borderColor: hexToRgba(cc.info,    0.25),
     label: 'MEDIUM',
   },
   LOW: {
-    color: '#6B7280',
-    bg: '#F9FAFB',
-    borderColor: '#9CA3AF',
-    dotColor: '#9CA3AF',
+    color: cc.textMuted,
+    bg: hexToRgba(cc.textMuted, 0.06),
+    borderColor: hexToRgba(cc.textMuted, 0.25),
     label: 'LOW',
   },
   RESOLVED: {
-    color: '#10B981',
-    bg: '#F0FDF4',
-    borderColor: '#10B981',
-    dotColor: '#10B981',
+    color: cc.success,
+    bg: hexToRgba(cc.success, 0.06),
+    borderColor: hexToRgba(cc.success, 0.25),
     label: 'RESOLVED',
   },
 };
@@ -243,7 +248,7 @@ const IncidentCard: React.FC<{
       >
         {isCritical ? (
           <motion.span
-            animate={{ scale: [1, 1.4, 1], opacity: [0.35, 0, 0.35] }}
+            animate={{ scale: [1, 1.4, 1], opacity: [0.12, 0, 0.12] }}
             transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
             style={{
               position: 'absolute',
@@ -280,11 +285,12 @@ const IncidentCard: React.FC<{
           <span
             style={{
               fontSize: 9,
-              fontWeight: 800,
+              fontWeight: 700,
               color: cfg.color,
-              background: cfg.bg,
+              backgroundColor: cfg.bg,
+              border: `1px solid ${cfg.borderColor}`,
               padding: '2px 7px',
-              borderRadius: cc.radiusFull,
+              borderRadius: 6,
               fontFamily: 'Inter, sans-serif',
               flexShrink: 0,
               letterSpacing: '0.04em',
@@ -558,6 +564,16 @@ const ResolutionWorkspace: React.FC<{
             alignItems: 'center',
             justifyContent: 'center',
             gap: 6,
+          }}
+          onMouseEnter={(e) => {
+            if (isValid) {
+              (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-1px)';
+              (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 5px 14px rgba(239,68,68,.40)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0)';
+            (e.currentTarget as HTMLButtonElement).style.boxShadow = isValid ? cc.shadowError : 'none';
           }}
         >
           <XCircle size={14} />
@@ -928,12 +944,12 @@ export const IncidentsTab: React.FC = () => {
                 <span
                   style={{
                     fontSize: 9.5,
-                    fontWeight: 800,
-                    color: cfg?.color ?? '#fff',
-                    background: cfg?.bg ?? cc.neutralBg,
+                    fontWeight: 700,
+                    color: cfg?.color ?? cc.textMuted,
+                    backgroundColor: cfg?.bg ?? 'transparent',
                     border: `1px solid ${cfg?.borderColor ?? cc.border}`,
                     padding: '3px 8px',
-                    borderRadius: cc.radiusFull,
+                    borderRadius: 6,
                     fontFamily: 'Inter, sans-serif',
                     letterSpacing: '0.05em',
                   }}

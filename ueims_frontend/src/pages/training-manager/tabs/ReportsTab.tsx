@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Table, Select, Tag, message } from 'antd';
+import { Table, Select, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import {
   FileSpreadsheet,
@@ -15,6 +15,17 @@ import {
 import { st } from './StatsTab';
 
 // ============================================================
+// COLOR UTILITY — hex-to-rgba for ghost style rendering
+// ============================================================
+function hexToRgba(hex: string, alpha: number): string {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+// ============================================================
 // TYPES
 // ============================================================
 interface ReportTemplate {
@@ -26,6 +37,18 @@ interface ReportTemplate {
   formatColor: string;
   formatBg: string;
   downloadCount: number;
+}
+
+// Deterministically picks a brand color from the token set based on template title
+function getFormatPalette(tpl: Pick<ReportTemplate, 'id' | 'format'>): { color: string; bg: string } {
+  const id = tpl.id;
+  if (tpl.format === 'PDF' || id === 'tpl-2') {
+    return { color: st.info, bg: hexToRgba(st.info, 0.06) };
+  }
+  if (id === 'tpl-3') {
+    return { color: st.warning, bg: hexToRgba(st.warning, 0.06) };
+  }
+  return { color: st.success, bg: hexToRgba(st.success, 0.06) };
 }
 
 interface ReportHistoryItem {
@@ -48,8 +71,8 @@ const REPORT_TEMPLATES: ReportTemplate[] = [
     description: 'Student placement rates, enterprise distribution, and outcome breakdown for the selected semester.',
     icon: <FileSpreadsheet size={28} color={st.success} strokeWidth={1.6} />,
     format: 'Excel',
-    formatColor: st.successText,
-    formatBg: st.successMuted,
+    formatColor: st.success,
+    formatBg: 'ghost',
     downloadCount: 124,
   },
   {
@@ -58,18 +81,18 @@ const REPORT_TEMPLATES: ReportTemplate[] = [
     description: 'Comprehensive final grade report including rubric scores, supervisor evaluation, and pass/fail summary.',
     icon: <FileText size={28} color={st.info} strokeWidth={1.6} />,
     format: 'PDF',
-    formatColor: st.infoText,
-    formatBg: st.infoMuted,
+    formatColor: st.info,
+    formatBg: 'ghost',
     downloadCount: 98,
   },
   {
     id: 'tpl-3',
     title: 'Enterprise Feedback Report',
     description: 'Aggregated enterprise supervisor feedback scores, strengths, and improvement areas per student cohort.',
-    icon: <FileBarChart2 size={28} color={st.brand} strokeWidth={1.6} />,
+    icon: <FileBarChart2 size={28} color={st.warning} strokeWidth={1.6} />,
     format: 'Excel',
-    formatColor: st.warningText,
-    formatBg: st.warningMuted,
+    formatColor: st.warning,
+    formatBg: 'ghost',
     downloadCount: 76,
   },
 ];
@@ -177,9 +200,10 @@ const TemplateCard: React.FC<{
           fontSize: 10,
           fontWeight: 700,
           color: template.formatColor,
-          background: template.formatBg,
+          backgroundColor: hexToRgba(template.formatColor, 0.06),
+          border: `1px solid ${hexToRgba(template.formatColor, 0.20)}`,
           padding: '3px 8px',
-          borderRadius: st.radiusFull,
+          borderRadius: st.radiusMd,
           letterSpacing: '0.04em',
           fontFamily: 'Inter, sans-serif',
           textTransform: 'uppercase',
@@ -299,21 +323,22 @@ export const ReportsTab: React.FC = () => {
       ),
       key: 'category',
       render: (_: unknown, record: ReportHistoryItem) => (
-        <Tag
+        <span
           style={{
             borderRadius: st.radiusFull,
-            border: 'none',
-            background: record.categoryColor + '18',
+            border: `1px solid ${hexToRgba(record.categoryColor, 0.20)}`,
+            backgroundColor: hexToRgba(record.categoryColor, 0.06),
             color: record.categoryColor,
             fontSize: 11,
-            fontWeight: 700,
+            fontWeight: 600,
             padding: '2px 10px',
             fontFamily: 'Inter, sans-serif',
             letterSpacing: '0.02em',
+            display: 'inline-block',
           }}
         >
           {record.category}
-        </Tag>
+        </span>
       ),
       width: 150,
     },

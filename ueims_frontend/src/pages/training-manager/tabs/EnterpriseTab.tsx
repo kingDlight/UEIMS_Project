@@ -13,6 +13,17 @@ import {
 import { EnterpriseService } from '@/services/EnterpriseService';
 import type { Enterprise } from '../types';
 
+// ============================================================
+// COLOR UTILITY — hex-to-rgba for ghost style rendering
+// ============================================================
+function hexToRgba(hex: string, alpha: number): string {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 const cc = {
   brand: '#FF7A30',
   brandHover: '#E86A20',
@@ -218,13 +229,16 @@ const ApprovalRow: React.FC<{
             <span style={{ fontSize: 14, fontWeight: 700, color: cc.textPrimary, letterSpacing: '-0.01em' }}>
               {enterprise.companyName}
             </span>
-            <Badge
-              count={isApproved ? 'Approved' : 'Pending'}
-              style={{
-                backgroundColor: isApproved ? cc.success : cc.warning,
-                fontSize: 10, fontWeight: 700, padding: '0 6px', height: 18, lineHeight: '18px', borderRadius: cc.radiusFull,
-              }}
-            />
+            <span style={{
+              display: 'inline-flex', alignItems: 'center', padding: '2px 8px',
+              borderRadius: cc.radiusFull,
+              backgroundColor: isApproved ? hexToRgba(cc.success, 0.06) : hexToRgba(cc.warning, 0.06),
+              border: `1px solid ${isApproved ? hexToRgba(cc.success, 0.25) : hexToRgba(cc.warning, 0.25)}`,
+              color: isApproved ? cc.success : cc.warning,
+              fontSize: 10, fontWeight: 700, fontFamily: 'Inter, sans-serif',
+            }}>
+              {isApproved ? 'Approved' : 'Pending'}
+            </span>
           </div>
           <div style={{ fontSize: 12, color: cc.textSecondary, marginTop: 2, display: 'flex', alignItems: 'center', gap: 6 }}>
             <span>{enterprise.industry}</span>
@@ -346,15 +360,16 @@ const AllEnterprisesTable: React.FC<{ data: Enterprise[] }> = ({ data }) => {
       dataIndex: 'status',
       key: 'status',
       render: (status: string) => {
-        const config = status === 'APPROVED'
-          ? { color: cc.success, bg: cc.successMuted, label: 'Approved' }
-          : { color: cc.warning, bg: cc.warningMuted, label: 'Pending' };
+        const approved = status === 'APPROVED';
+        const color = approved ? cc.success : cc.warning;
         return (
           <span style={{
-            display: 'inline-flex', alignItems: 'center', padding: '3px 10px', borderRadius: cc.radiusFull,
-            background: config.bg, color: config.color, fontSize: 11, fontWeight: 700,
+            display: 'inline-flex', alignItems: 'center', padding: '3px 9px', borderRadius: 6,
+            backgroundColor: hexToRgba(color, 0.06),
+            border: `1px solid ${hexToRgba(color, 0.25)}`,
+            color, fontSize: 11, fontWeight: 600,
           }}>
-            {config.label}
+            {approved ? 'Approved' : 'Pending'}
           </span>
         );
       },

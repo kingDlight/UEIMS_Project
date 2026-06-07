@@ -130,6 +130,17 @@ const mockQuickActions = [
 ];
 
 // ============================================================
+// COLOR UTILITY — hex-to-rgba for ghost style rendering
+// ============================================================
+function hexToRgba(hex: string, alpha: number): string {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+// ============================================================
 // HELPER COMPONENTS
 // ============================================================
 
@@ -197,22 +208,23 @@ const TrendBadge: React.FC<{ direction: 'up' | 'down' | 'neutral'; value: string
 };
 
 const SeverityBadge: React.FC<{ label: string; severity: 'critical' | 'high' | 'medium' | 'low' | 'info' }> = ({ label, severity }) => {
-  const config = {
-    critical: { bg: cc.errorMuted, text: cc.errorText },
-    high: { bg: cc.errorMuted, text: cc.errorText },
-    medium: { bg: cc.warningMuted, text: cc.warningText },
-    low: { bg: cc.infoMuted, text: cc.infoText },
-    info: { bg: cc.borderSubtle, text: cc.textSecondary },
+  const config: Record<string, { bg: string; color: string; borderColor: string }> = {
+    critical: { bg: hexToRgba(cc.error,   0.06), color: cc.error,   borderColor: hexToRgba(cc.error,   0.25) },
+    high:     { bg: hexToRgba(cc.warning, 0.06), color: cc.warning, borderColor: hexToRgba(cc.warning, 0.25) },
+    medium:   { bg: hexToRgba(cc.info,    0.06), color: cc.info,    borderColor: hexToRgba(cc.info,    0.25) },
+    low:      { bg: hexToRgba(cc.textMuted, 0.06), color: cc.textMuted, borderColor: hexToRgba(cc.textMuted, 0.25) },
+    info:     { bg: hexToRgba(cc.info,    0.06), color: cc.info,    borderColor: hexToRgba(cc.info,    0.25) },
   };
-  const { bg, text } = config[severity];
+  const { bg, color, borderColor } = config[severity] ?? config.info;
   return (
     <span style={{
       display: 'inline-flex',
       alignItems: 'center',
       padding: '3px 8px',
-      borderRadius: cc.radiusFull,
-      background: bg,
-      color: text,
+      borderRadius: cc.radiusMd,
+      backgroundColor: bg,
+      border: `1px solid ${borderColor}`,
+      color,
       fontSize: 10,
       fontWeight: 700,
       textTransform: 'uppercase',
@@ -303,6 +315,7 @@ const TextLink: React.FC<{ children: React.ReactNode; onClick?: () => void; colo
       cursor: 'pointer',
       padding: 0,
       fontFamily: 'Inter, -apple-system, sans-serif',
+      borderRadius: cc.radiusMd,
     }}
   >
     {children}
@@ -345,7 +358,8 @@ const SemesterContextBar: React.FC = () => (
         fontSize: 12,
         fontWeight: 600,
         color: cc.success,
-        background: cc.successMuted,
+        backgroundColor: hexToRgba(cc.success, 0.06),
+        border: `1px solid ${hexToRgba(cc.success, 0.25)}`,
         padding: '2px 8px',
         borderRadius: cc.radiusFull,
       }}>
@@ -376,8 +390,9 @@ const SemesterContextBar: React.FC = () => (
         gap: 4,
         padding: '3px 10px',
         borderRadius: cc.radiusFull,
-        background: '#FEF2F2',
-        color: cc.errorText,
+        backgroundColor: hexToRgba(cc.error, 0.06),
+        border: `1px solid ${hexToRgba(cc.error, 0.25)}`,
+        color: cc.error,
         fontSize: 11,
         fontWeight: 600,
       }}>
@@ -574,16 +589,16 @@ const ReportStatusChip: React.FC<{
   icon: React.ReactNode;
   label: string;
   value: number;
-  bg: string;
   color: string;
-}> = ({ icon, label, value, bg, color }) => (
+}> = ({ icon, label, value, color }) => (
   <div style={{
     display: 'flex',
     alignItems: 'center',
     gap: 10,
     padding: '10px 14px',
     borderRadius: cc.radiusMd,
-    background: bg,
+    backgroundColor: hexToRgba(color, 0.05),
+    border: `1px solid ${hexToRgba(color, 0.15)}`,
     flex: 1,
     minWidth: 0,
   }}>
@@ -640,8 +655,9 @@ const WeeklyReportsCard: React.FC = () => {
             <span style={{
               padding: '2px 8px',
               borderRadius: cc.radiusFull,
-              background: cc.successMuted,
-              color: cc.successText,
+              backgroundColor: hexToRgba(cc.success, 0.06),
+              border: `1px solid ${hexToRgba(cc.success, 0.20)}`,
+              color: cc.success,
               fontSize: 10,
               fontWeight: 600,
             }}>
@@ -656,29 +672,25 @@ const WeeklyReportsCard: React.FC = () => {
             icon={<CheckCircle2 size={16} />}
             label="Submitted"
             value={submitted}
-            bg={cc.successMuted}
-            color={cc.successText}
+            color={cc.success}
           />
           <ReportStatusChip
             icon={<Clock size={16} />}
             label="Pending"
             value={pending}
-            bg={cc.infoMuted}
-            color={cc.infoText}
+            color={cc.info}
           />
           <ReportStatusChip
             icon={<AlertTriangle size={16} />}
             label="Late"
             value={late}
-            bg={cc.errorMuted}
-            color={cc.errorText}
+            color={cc.error}
           />
           <ReportStatusChip
             icon={<MinusCircle size={16} />}
             label="Not Started"
             value={notStarted}
-            bg={cc.borderSubtle}
-            color={cc.textSecondary}
+            color={cc.textMuted}
           />
         </div>
 
@@ -687,11 +699,11 @@ const WeeklyReportsCard: React.FC = () => {
           <div style={{
             padding: '12px',
             borderRadius: cc.radiusMd,
-            background: cc.errorMuted,
+            backgroundColor: hexToRgba(cc.error, 0.05),
             marginBottom: 14,
-            border: `1px solid ${cc.error}20`,
+            border: `1px solid ${hexToRgba(cc.error, 0.15)}`,
           }}>
-            <div style={{ fontSize: 11, fontWeight: 600, color: cc.errorText, marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: cc.error, marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
               Students needing attention
             </div>
             {students.map((s, i) => (
@@ -704,9 +716,9 @@ const WeeklyReportsCard: React.FC = () => {
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <StatusDot color={cc.error} />
-                  <span style={{ fontSize: 13, fontWeight: 500, color: cc.errorText }}>{s.name}</span>
+                  <span style={{ fontSize: 13, fontWeight: 500, color: cc.textPrimary }}>{s.name}</span>
                 </div>
-                <span style={{ fontSize: 11, color: cc.errorText, opacity: 0.8 }}>
+                <span style={{ fontSize: 11, color: cc.error, opacity: 0.8 }}>
                   {s.daysOverdue} days overdue
                 </span>
               </div>
@@ -825,7 +837,7 @@ const PlacementPipelineCard: React.FC = () => {
           <div style={{
             height: '100%',
             width: `${(applied / total) * 100}%`,
-            background: `linear-gradient(90deg, ${cc.info}, ${cc.brand})`,
+            background: cc.brand,
             borderRadius: cc.radiusFull,
             transition: 'width 0.6s ease',
           }} />
@@ -1125,11 +1137,11 @@ const AlertItem: React.FC<{
   delay?: number;
 }> = ({ severity, title, meta, delay = 0 }) => {
   const config = {
-    high: { dot: cc.error, bg: cc.errorMuted, border: cc.error, label: 'HIGH', labelBg: cc.errorMuted, labelText: cc.errorText },
-    medium: { dot: cc.warning, bg: cc.warningMuted, border: cc.warning, label: 'MED', labelBg: cc.warningMuted, labelText: cc.warningText },
-    low: { dot: cc.info, bg: cc.infoMuted, border: cc.info, label: 'LOW', labelBg: cc.infoMuted, labelText: cc.infoText },
+    high:   { dot: cc.error,   label: 'HIGH',   labelColor: cc.error   },
+    medium: { dot: cc.warning, label: 'MED',    labelColor: cc.warning },
+    low:    { dot: cc.info,    label: 'LOW',    labelColor: cc.info    },
   };
-  const { dot, bg, border, label, labelBg, labelText } = config[severity];
+  const { dot, label, labelColor } = config[severity];
 
   return (
     <motion.div
@@ -1142,13 +1154,13 @@ const AlertItem: React.FC<{
         gap: 12,
         padding: '12px 14px',
         borderRadius: cc.radiusMd,
-        background: bg,
-        border: `1px solid ${border}25`,
+        backgroundColor: hexToRgba(dot, 0.06),
+        border: `1px solid ${hexToRgba(dot, 0.20)}`,
         cursor: 'pointer',
-        transition: 'background 0.12s',
+        transition: 'background-color 0.12s',
       }}
-      onMouseEnter={(e) => (e.currentTarget.style.background = `${border}18`)}
-      onMouseLeave={(e) => (e.currentTarget.style.background = bg)}
+      onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = hexToRgba(dot, 0.10))}
+      onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = hexToRgba(dot, 0.06))}
     >
       <div style={{ paddingTop: 2, flexShrink: 0 }}>
         <StatusDot color={dot} pulse={severity === 'high'} />
@@ -1160,10 +1172,12 @@ const AlertItem: React.FC<{
             fontWeight: 700,
             textTransform: 'uppercase',
             letterSpacing: '0.05em',
-            color: labelText,
-            background: labelBg,
-            padding: '2px 6px',
-            borderRadius: cc.radiusFull,
+            color: labelColor,
+            backgroundColor: hexToRgba(labelColor, 0.08),
+            border: `1px solid ${hexToRgba(labelColor, 0.20)}`,
+            padding: '2px 7px',
+            borderRadius: cc.radiusMd,
+            fontFamily: 'Inter, sans-serif',
           }}>
             {label}
           </span>
@@ -1246,11 +1260,11 @@ const RecentAlertsCard: React.FC = () => (
           style={{
             fontSize: 11,
             color: cc.textMuted,
-            background: 'none',
+            background: 'transparent',
             border: 'none',
             cursor: 'pointer',
             fontFamily: 'Inter, sans-serif',
-            textDecoration: 'underline',
+            borderRadius: cc.radiusMd,
           }}
         >
           Mark all as read

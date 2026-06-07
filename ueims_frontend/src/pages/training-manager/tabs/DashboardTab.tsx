@@ -94,15 +94,15 @@ export const DashboardTab: React.FC<{ animationDelay?: number; onNavigate?: (pag
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 18 }}>
               <div style={{ padding: '10px 14px', borderRadius: 16, background: '#fff', border: '1px solid rgba(226,232,240,.95)', boxShadow: '0 4px 18px rgba(15,23,42,.06)', display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: 68 }}>
                 <div style={{ fontSize: 11, color: c.textLight, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em' }}>Students</div>
-                <div style={{ fontSize: 26, fontWeight: 900, color: c.text, lineHeight: 1.1 }}>{stats.totalStudents.toLocaleString()}</div>
+                <div style={{ fontSize: 26, fontWeight: 900, color: c.text, lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>{stats.totalStudents.toLocaleString()}</div>
               </div>
               <div style={{ padding: '10px 14px', borderRadius: 16, background: '#fff', border: '1px solid rgba(226,232,240,.95)', boxShadow: '0 4px 18px rgba(15,23,42,.06)', display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: 68 }}>
                 <div style={{ fontSize: 11, color: c.textLight, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em' }}>Applications</div>
-                <div style={{ fontSize: 26, fontWeight: 900, color: c.text, lineHeight: 1.1 }}>{stats.enterprises}</div>
+                <div style={{ fontSize: 26, fontWeight: 900, color: c.text, lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>{stats.enterprises}</div>
               </div>
               <div style={{ padding: '10px 14px', borderRadius: 16, background: '#fff', border: '1px solid rgba(226,232,240,.95)', boxShadow: '0 4px 18px rgba(15,23,42,.06)', display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: 68 }}>
                 <div style={{ fontSize: 11, color: c.textLight, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em' }}>OJT Active</div>
-                <div style={{ fontSize: 26, fontWeight: 900, color: c.text, lineHeight: 1.1 }}>{stats.activeInterns}</div>
+                <div style={{ fontSize: 26, fontWeight: 900, color: c.text, lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>{stats.activeInterns}</div>
               </div>
             </div>
           </div>
@@ -111,7 +111,7 @@ export const DashboardTab: React.FC<{ animationDelay?: number; onNavigate?: (pag
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
                 <div>
                   <div style={{ fontSize: 12, color: c.textMuted, fontWeight: 700 }}>Review Approvals</div>
-                  <div style={{ fontSize: 28, fontWeight: 900, color: c.text, lineHeight: 1.05 }}>{pendingApprovals}</div>
+                  <div style={{ fontSize: 28, fontWeight: 900, color: c.text, lineHeight: 1.05, fontVariantNumeric: 'tabular-nums' }}>{pendingApprovals}</div>
                   <div style={{ fontSize: 12, color: c.warning, fontWeight: 700, marginTop: 4 }}>Enterprise registrations pending</div>
                 </div>
                 <div style={{ width: 62, height: 62, borderRadius: 18, background: 'linear-gradient(135deg, rgba(233,101,0,.16), rgba(255,138,90,.10))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -124,14 +124,14 @@ export const DashboardTab: React.FC<{ animationDelay?: number; onNavigate?: (pag
               <div style={{ padding: 14, borderRadius: 18, background: 'rgba(255,255,255,.72)', border: '1px solid rgba(226,232,240,.9)', boxShadow: '0 6px 18px rgba(15,23,42,.06)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: 80 }}>
                 <div>
                   <div style={{ fontSize: 12, color: c.textMuted, fontWeight: 700 }}>Pending</div>
-                  <div style={{ fontSize: 24, fontWeight: 900, color: c.text, lineHeight: 1.1, marginTop: 4 }}>{pendingApprovals}</div>
+                  <div style={{ fontSize: 24, fontWeight: 900, color: c.text, lineHeight: 1.1, marginTop: 4, fontVariantNumeric: 'tabular-nums' }}>{pendingApprovals}</div>
                 </div>
                 <div style={{ fontSize: 12, color: c.primaryDark, marginTop: 4, fontWeight: 600 }}>Review now</div>
               </div>
               <div style={{ padding: 14, borderRadius: 18, background: 'rgba(255,255,255,.72)', border: '1px solid rgba(226,232,240,.9)', boxShadow: '0 6px 18px rgba(15,23,42,.06)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: 80 }}>
                 <div>
                   <div style={{ fontSize: 12, color: c.textMuted, fontWeight: 700 }}>Cancelled</div>
-                  <div style={{ fontSize: 24, fontWeight: 900, color: c.danger, lineHeight: 1.1, marginTop: 4 }}>{stats.atRisk}</div>
+                  <div style={{ fontSize: 24, fontWeight: 900, color: c.danger, lineHeight: 1.1, marginTop: 4, fontVariantNumeric: 'tabular-nums' }}>{stats.atRisk}</div>
                 </div>
                 <div style={{ fontSize: 12, color: c.danger, marginTop: 4, fontWeight: 600 }}>Cancelled OJT</div>
               </div>
