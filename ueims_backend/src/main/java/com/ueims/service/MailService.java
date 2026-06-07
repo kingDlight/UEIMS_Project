@@ -80,7 +80,7 @@ public class MailService {
     }
 
     // ===== Late Report Warning (VI) =====
-    @org.springframework.scheduling.annotation.Async
+    @org.springframework.scheduling.annotation.Async("mailTaskExecutor")
     public void sendLateReportWarningMail(String to, String fullName, Integer weekNumber) {
         String loginUrl = appBaseUrl + PATH_LOGIN;
         String subject = "Cảnh báo: Trễ hạn nộp báo cáo tuần " + weekNumber + " — UEIMS";
@@ -98,7 +98,7 @@ public class MailService {
     }
 
     // ===== Enterprise Status Notification (UC-19) =====
-    @org.springframework.scheduling.annotation.Async
+    @org.springframework.scheduling.annotation.Async("mailTaskExecutor")
     public void sendEnterpriseStatusNotification(String to, String contactPerson, String status, String reason) {
         String subject = "Thông báo kết quả duyệt hồ sơ doanh nghiệp — UEIMS";
         String loginUrl = appBaseUrl + PATH_LOGIN;

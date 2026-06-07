@@ -42,7 +42,7 @@ export const DashboardTab: React.FC<{ animationDelay?: number; onNavigate?: (pag
           totalStudents: data.totalEligible || 0,
           activeInterns: data.totalOjt || 0,
           atRisk: data.totalCancelled || 0,
-          enterprises: data.totalApplications || 0, // Phỏng đoán data.totalApplications = số lượng DN tham gia
+          enterprises: data.totalApplications || 0,
           reportsThisWeek: 0,
         });
       }
@@ -65,6 +65,7 @@ export const DashboardTab: React.FC<{ animationDelay?: number; onNavigate?: (pag
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 22, opacity: isLoaded ? 1 : 0, transform: isLoaded ? 'translateY(0)' : 'translateY(20px)', transition: 'all .4s ease-out' }}>
+      {/* HERO CARD */}
       <div
         style={{
           position: 'relative',
@@ -79,26 +80,29 @@ export const DashboardTab: React.FC<{ animationDelay?: number; onNavigate?: (pag
         <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'radial-gradient(circle at top right, rgba(233,101,0,.14), transparent 30%), radial-gradient(circle at 20% 20%, rgba(255,138,90,.10), transparent 25%)' }} />
         <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 5, background: 'linear-gradient(180deg, #FF662C, #FF824D, #FF9B73)' }} />
         <div style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', gap: 20, alignItems: 'stretch', flexWrap: 'wrap' }}>
-          <div style={{ minWidth: 0, flex: '1 1 480px' }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '7px 12px', borderRadius: 999, background: 'rgba(233,101,0,.08)', color: c.primaryDark, fontSize: 12, fontWeight: 700, marginBottom: 14 }}>
-              Current Semester: {currentSemesterCode}
+          <div style={{ minWidth: 0, flex: '1 1 480px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '7px 12px', borderRadius: 999, background: 'rgba(233,101,0,.08)', color: c.primaryDark, fontSize: 12, fontWeight: 700, marginBottom: 14 }}>
+                Current Semester: {currentSemesterCode}
+              </div>
+              <h1 style={{ fontSize: 34, lineHeight: 1.06, fontWeight: 900, color: c.text, margin: 0, letterSpacing: '-1.2px' }}>Internship operations at a glance.</h1>
+              <p style={{ fontSize: 14.5, color: c.textMuted, marginTop: 10, maxWidth: 720, lineHeight: 1.7 }}>
+                {stats.totalStudents.toLocaleString()} eligible students, {stats.enterprises} enterprise applications, and live progress for Training Manager supervision.
+              </p>
             </div>
-            <h1 style={{ fontSize: 34, lineHeight: 1.06, fontWeight: 900, color: c.text, margin: 0, letterSpacing: '-1.2px' }}>Internship operations at a glance.</h1>
-            <p style={{ fontSize: 14.5, color: c.textMuted, marginTop: 10, maxWidth: 720, lineHeight: 1.7 }}>
-              {stats.totalStudents.toLocaleString()} eligible students, {stats.enterprises} enterprise applications, and live progress for Training Manager supervision.
-            </p>
+            {/* 3 hero mini-cards — equal height row */}
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 18 }}>
-              <div style={{ padding: '10px 14px', borderRadius: 16, background: '#fff', border: '1px solid rgba(226,232,240,.95)', boxShadow: '0 4px 18px rgba(15,23,42,.06)' }}>
+              <div style={{ padding: '10px 14px', borderRadius: 16, background: '#fff', border: '1px solid rgba(226,232,240,.95)', boxShadow: '0 4px 18px rgba(15,23,42,.06)', display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: 68 }}>
                 <div style={{ fontSize: 11, color: c.textLight, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em' }}>Students</div>
-                <div style={{ fontSize: 26, fontWeight: 900, color: c.text, lineHeight: 1.1 }}>{stats.totalStudents.toLocaleString()}</div>
+                <div style={{ fontSize: 26, fontWeight: 900, color: c.text, lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>{stats.totalStudents.toLocaleString()}</div>
               </div>
-              <div style={{ padding: '10px 14px', borderRadius: 16, background: '#fff', border: '1px solid rgba(226,232,240,.95)', boxShadow: '0 4px 18px rgba(15,23,42,.06)' }}>
+              <div style={{ padding: '10px 14px', borderRadius: 16, background: '#fff', border: '1px solid rgba(226,232,240,.95)', boxShadow: '0 4px 18px rgba(15,23,42,.06)', display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: 68 }}>
                 <div style={{ fontSize: 11, color: c.textLight, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em' }}>Applications</div>
-                <div style={{ fontSize: 26, fontWeight: 900, color: c.text, lineHeight: 1.1 }}>{stats.enterprises}</div>
+                <div style={{ fontSize: 26, fontWeight: 900, color: c.text, lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>{stats.enterprises}</div>
               </div>
-              <div style={{ padding: '10px 14px', borderRadius: 16, background: '#fff', border: '1px solid rgba(226,232,240,.95)', boxShadow: '0 4px 18px rgba(15,23,42,.06)' }}>
+              <div style={{ padding: '10px 14px', borderRadius: 16, background: '#fff', border: '1px solid rgba(226,232,240,.95)', boxShadow: '0 4px 18px rgba(15,23,42,.06)', display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: 68 }}>
                 <div style={{ fontSize: 11, color: c.textLight, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em' }}>OJT Active</div>
-                <div style={{ fontSize: 26, fontWeight: 900, color: c.text, lineHeight: 1.1 }}>{stats.activeInterns}</div>
+                <div style={{ fontSize: 26, fontWeight: 900, color: c.text, lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>{stats.activeInterns}</div>
               </div>
             </div>
           </div>
@@ -107,7 +111,7 @@ export const DashboardTab: React.FC<{ animationDelay?: number; onNavigate?: (pag
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
                 <div>
                   <div style={{ fontSize: 12, color: c.textMuted, fontWeight: 700 }}>Review Approvals</div>
-                  <div style={{ fontSize: 28, fontWeight: 900, color: c.text, lineHeight: 1.05 }}>{pendingApprovals}</div>
+                  <div style={{ fontSize: 28, fontWeight: 900, color: c.text, lineHeight: 1.05, fontVariantNumeric: 'tabular-nums' }}>{pendingApprovals}</div>
                   <div style={{ fontSize: 12, color: c.warning, fontWeight: 700, marginTop: 4 }}>Enterprise registrations pending</div>
                 </div>
                 <div style={{ width: 62, height: 62, borderRadius: 18, background: 'linear-gradient(135deg, rgba(233,101,0,.16), rgba(255,138,90,.10))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -116,15 +120,19 @@ export const DashboardTab: React.FC<{ animationDelay?: number; onNavigate?: (pag
               </div>
               <div style={{ marginTop: 12 }}><Sparkline data={heroSparklineData} color={c.primary} width={260} height={42} /></div>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-              <div style={{ padding: 14, borderRadius: 18, background: 'rgba(255,255,255,.72)', border: '1px solid rgba(226,232,240,.9)', boxShadow: '0 6px 18px rgba(15,23,42,.06)' }}>
-                <div style={{ fontSize: 12, color: c.textMuted, fontWeight: 700 }}>Pending</div>
-                <div style={{ fontSize: 24, fontWeight: 900, color: c.text, lineHeight: 1.1 }}>{pendingApprovals}</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, alignItems: 'stretch' }}>
+              <div style={{ padding: 14, borderRadius: 18, background: 'rgba(255,255,255,.72)', border: '1px solid rgba(226,232,240,.9)', boxShadow: '0 6px 18px rgba(15,23,42,.06)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: 80 }}>
+                <div>
+                  <div style={{ fontSize: 12, color: c.textMuted, fontWeight: 700 }}>Pending</div>
+                  <div style={{ fontSize: 24, fontWeight: 900, color: c.text, lineHeight: 1.1, marginTop: 4, fontVariantNumeric: 'tabular-nums' }}>{pendingApprovals}</div>
+                </div>
                 <div style={{ fontSize: 12, color: c.primaryDark, marginTop: 4, fontWeight: 600 }}>Review now</div>
               </div>
-              <div style={{ padding: 14, borderRadius: 18, background: 'rgba(255,255,255,.72)', border: '1px solid rgba(226,232,240,.9)', boxShadow: '0 6px 18px rgba(15,23,42,.06)' }}>
-                <div style={{ fontSize: 12, color: c.textMuted, fontWeight: 700 }}>Students Cancelled</div>
-                <div style={{ fontSize: 24, fontWeight: 900, color: c.danger, lineHeight: 1.1 }}>{stats.atRisk}</div>
+              <div style={{ padding: 14, borderRadius: 18, background: 'rgba(255,255,255,.72)', border: '1px solid rgba(226,232,240,.9)', boxShadow: '0 6px 18px rgba(15,23,42,.06)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: 80 }}>
+                <div>
+                  <div style={{ fontSize: 12, color: c.textMuted, fontWeight: 700 }}>Cancelled</div>
+                  <div style={{ fontSize: 24, fontWeight: 900, color: c.danger, lineHeight: 1.1, marginTop: 4, fontVariantNumeric: 'tabular-nums' }}>{stats.atRisk}</div>
+                </div>
                 <div style={{ fontSize: 12, color: c.danger, marginTop: 4, fontWeight: 600 }}>Cancelled OJT</div>
               </div>
             </div>
@@ -135,15 +143,17 @@ export const DashboardTab: React.FC<{ animationDelay?: number; onNavigate?: (pag
           </div>
         </div>
       </div>
-      
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+
+      {/* 4 KPI STAT CARDS — equal height via alignItems: stretch */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, alignItems: 'stretch' }}>
         <AnimatedStatCard label="Total Eligible" value={stats.totalStudents} icon={<UserOutlined />} color={c.primary} trend="Live total" insight="All internship-eligible records" sparkline={kpiSparklineA} delay={100 + animationDelay} />
         <AnimatedStatCard label="Total Applications" value={stats.enterprises} icon={<BankOutlined />} color={c.info} trend="Job Applications" insight="Total CVs applied" sparkline={kpiSparklineB} delay={200 + animationDelay} />
         <AnimatedStatCard label="OJT Students" value={stats.activeInterns} icon={<ClockCircleOutlined />} color={c.success} trend="Active" insight="Students currently in OJT" sparkline={kpiSparklineC} delay={300 + animationDelay} />
         <AnimatedStatCard label="Cancelled OJT" value={stats.atRisk} icon={<WarningOutlined />} color={c.danger} trend="Failed" insight="Cancelled or Failed OJT" sparkline={kpiSparklineD} delay={400 + animationDelay} />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 20 }}>
+      {/* BOTTOM ROW: Weekly Reports + Recent Alerts — equal height */}
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 20, alignItems: 'stretch' }}>
         <NeuSurface style={{ padding: 24, opacity: isLoaded ? 1 : 0, transform: isLoaded ? 'translateY(0)' : 'translateY(20px)', transition: 'all .4s ease-out .3s' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
             <div>
@@ -153,23 +163,24 @@ export const DashboardTab: React.FC<{ animationDelay?: number; onNavigate?: (pag
             <SmallPill color={c.success} glow>Live tracking</SmallPill>
           </div>
           <div style={{ height: 170 }}><AreaChart data={weeklyReportData.map((d) => d.submitted)} color={c.primary} /></div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 10, marginTop: 14 }}>
+          {/* 5 mini-cards — equal height via alignItems: stretch + minHeight */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 10, marginTop: 14, alignItems: 'stretch' }}>
             {weeklyReportData.map((day) => (
-              <div key={day.day} style={{ padding: '10px 12px', borderRadius: 14, background: c.bgLight, border: '1px solid #e5e7eb' }}>
+              <div key={day.day} style={{ padding: '10px 12px', borderRadius: 14, background: c.bgLight, border: '1px solid #e5e7eb', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: 72 }}>
                 <div style={{ fontSize: 11, color: c.textMuted, fontWeight: 700 }}>{day.day}</div>
-                <div style={{ fontSize: 18, fontWeight: 900, color: c.text, lineHeight: 1.1 }}>{day.submitted}</div>
-                <div style={{ fontSize: 11, color: c.primaryDark, fontWeight: 700 }}>{day.pending} pending</div>
+                <div style={{ fontSize: 18, fontWeight: 900, color: c.text, lineHeight: 1.1, marginTop: 4 }}>{day.submitted}</div>
+                <div style={{ fontSize: 11, color: c.primaryDark, fontWeight: 700, marginTop: 4 }}>{day.pending} pending</div>
               </div>
             ))}
           </div>
         </NeuSurface>
 
-        <NeuSurface style={{ padding: 24, opacity: isLoaded ? 1 : 0, transform: isLoaded ? 'translateY(0)' : 'translateY(20px)', transition: 'all .4s ease-out .4s' }}>
+        <NeuSurface style={{ padding: 24, opacity: isLoaded ? 1 : 0, transform: isLoaded ? 'translateY(0)' : 'translateY(20px)', transition: 'all .4s ease-out .4s', display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
             <h2 style={{ fontSize: 18, fontWeight: 800, color: c.text, margin: 0 }}>Recent Alerts</h2>
             <SmallPill color={c.warning}>Live</SmallPill>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, flex: 1 }}>
             {dashboardAlerts.map((item) => (
               <div key={item.title} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '12px 14px', borderRadius: 16, background: '#fff', border: '1px solid rgba(226,232,240,.9)', boxShadow: '0 4px 16px rgba(15,23,42,.04)' }}>
                 <div style={{ width: 10, height: 10, borderRadius: '50%', background: item.tone, boxShadow: `0 0 0 4px ${item.tone}20`, marginTop: 4 }} />

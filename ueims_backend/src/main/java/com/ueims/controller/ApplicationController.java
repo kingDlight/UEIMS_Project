@@ -9,6 +9,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.ueims.dto.request.ApplicationRequest;
+import com.ueims.dto.request.ApplicationScreenRequest;
 import com.ueims.dto.response.ApiResponse;
 import com.ueims.dto.response.ApplicationResponse;
 import com.ueims.service.ApplicationService;
@@ -61,6 +62,23 @@ public class ApplicationController {
     public ApiResponse<ApplicationResponse> applyForJob(@RequestBody @Valid ApplicationRequest request) {
         return ApiResponse.<ApplicationResponse>builder()
                 .result(service.applyForJob(request))
+                .build();
+    }
+
+    /**
+     * Screen a job application (CV Screening)
+     * Transitions the application to SCREENING_PASSED or SCREENING_REJECTED.
+     *
+     * @param id Application UUID
+     * @param request The screening result (status and reason)
+     * @return ApiResponse containing the updated application details
+     */
+    @PutMapping("/{id}/screen")
+    @PreAuthorize("hasRole('ENTERPRISE')")
+    public ApiResponse<ApplicationResponse> screenApplication(
+            @PathVariable UUID id, @RequestBody @Valid ApplicationScreenRequest request) {
+        return ApiResponse.<ApplicationResponse>builder()
+                .result(service.screenApplication(id, request))
                 .build();
     }
 

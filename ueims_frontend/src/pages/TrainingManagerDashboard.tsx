@@ -1,14 +1,16 @@
 import React from 'react';
 import { useParams, Navigate } from 'react-router-dom';
+import { useAuthStore } from '@/stores/useAuthStore';
 import { navItems } from './training-manager/constants';
 import type { PageKey } from './training-manager/types';
 import {
-  DashboardTab,
+  CommandCenterDashboard,
   EnterpriseTab,
   IncidentsTab,
   NoticesTab,
   OJTTab,
   ReportsTab,
+  WeeklyReportsTab,
   SemesterTab,
   StatsTab,
   StudentsTab,
@@ -19,21 +21,29 @@ export const TrainingManagerDashboard: React.FC = () => {
   const { tab } = useParams<{ tab: string }>();
   const currentTab = (tab || 'dashboard') as PageKey;
 
-  const pages: Record<PageKey, React.ReactNode> = {
-    dashboard: <DashboardTab onNavigate={() => {}} />,
+  const pages: Record<string, React.ReactNode> = {
+    dashboard: <CommandCenterDashboard />,
     enterprises: <EnterpriseTab />,
     students: <StudentsTab />,
     ojt: <OJTTab />,
     analytics: <StatsTab />,
     incidents: <IncidentsTab />,
     reports: <ReportsTab />,
+    'weekly-reports': <WeeklyReportsTab />,
     calendar: <SemesterTab />,
     notifications: <NoticesTab />,
   };
 
-  // If tab is invalid, redirect to dashboard
-  if (!pages[currentTab]) {
-    return <Navigate to="/tm-dashboard/dashboard" replace />;
+  const { currentRole } = useAuthStore();
+  const allowedItem = navItems.find((item) => item.key === currentTab);
+
+  if (!allowedItem || (allowedItem.roles && currentRole && !allowedItem.roles.includes(currentRole))) {
+    // Redirect to the first available tab for this role
+    const firstAllowed = navItems.find((item) => !item.roles || (currentRole && item.roles.includes(currentRole)));
+    if (firstAllowed) {
+      return <Navigate to={`/tm-dashboard/${firstAllowed.key}`} replace />;
+    }
+    return <Navigate to="/login" replace />;
   }
 
   return (

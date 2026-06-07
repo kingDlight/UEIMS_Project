@@ -26,7 +26,7 @@ export const AnimatedStatCard: React.FC<{
   }, [delay]);
 
   return (
-    <div
+      <div
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={{
@@ -39,12 +39,15 @@ export const AnimatedStatCard: React.FC<{
         transition: 'all .25s ease',
         opacity: isLoaded ? 1 : 0,
         cursor: 'pointer',
+        minHeight: 128,
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, flex: 1 }}>
         <div style={{ minWidth: 0, flex: 1 }}>
           <Text style={{ fontSize: 12, color: c.textMuted, display: 'block', fontWeight: 700 }}>{label}</Text>
-          <div style={{ fontSize: 34, fontWeight: 900, color: c.text, marginTop: 4, letterSpacing: '-1.3px', lineHeight: 1 }}>
+          <div style={{ fontSize: 34, fontWeight: 900, color: c.text, marginTop: 4, letterSpacing: '-1.3px', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
             {animatedValue.toLocaleString()}
           </div>
           {trend && <div style={{ fontSize: 12, color: c.success, fontWeight: 800, marginTop: 6 }}>{trend}</div>}

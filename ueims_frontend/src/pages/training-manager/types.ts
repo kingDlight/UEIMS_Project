@@ -8,6 +8,7 @@ export type PageKey =
   | 'analytics'
   | 'incidents'
   | 'reports'
+  | 'weekly-reports'
   | 'calendar'
   | 'notifications';
 
@@ -66,6 +67,7 @@ export type Incident = {
   createdAt: string;
   assignment?: any;
   reportedBy?: any;
+  resolutionNote?: string;
 };
 
 export type WeeklyReport = {
@@ -136,6 +138,7 @@ export type NavItem = {
   key: PageKey;
   label: string;
   icon: React.ReactNode;
+  roles?: string[];
 };
 
 export type SystemAnnouncement = {
