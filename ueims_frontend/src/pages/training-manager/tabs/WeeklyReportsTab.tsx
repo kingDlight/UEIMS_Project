@@ -239,8 +239,8 @@ const ReportCard = forwardRef<HTMLDivElement, ReportCardProps>((
           {/* Card Header */}
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 3 }}>
-                <span style={{ fontSize: 14, fontWeight: 800, color: st.textPrimary, fontFamily: 'Inter, sans-serif', letterSpacing: '-0.01em' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'nowrap', marginBottom: 3, maxWidth: '100%', minWidth: 0 }}>
+                <span style={{ fontSize: 14, fontWeight: 800, color: st.textPrimary, fontFamily: 'Inter, sans-serif', letterSpacing: '-0.01em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {report.studentName}
                 </span>
                 <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 11, color: st.textMuted, fontFamily: 'Inter, sans-serif' }}>
@@ -370,6 +370,7 @@ const ReportCard = forwardRef<HTMLDivElement, ReportCardProps>((
                 (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
                 (e.currentTarget as HTMLButtonElement).style.color = st.error;
               }}
+              disabled={report.status !== 'PENDING'}
             >
               <AlertCircle size={12} strokeWidth={2.5} />
               Reject
@@ -604,17 +605,27 @@ export const WeeklyReportsTab: React.FC = () => {
     });
   }, []);
 
+  const [processingId, setProcessingId] = useState<string | null>(null);
+
   // Single approve
-  const handleApprove = useCallback((id: string) => {
+  const handleApprove = useCallback(async (id: string) => {
+    if (processingId) return;
+    setProcessingId(id);
+    await new Promise((r) => setTimeout(r, 400)); // Simulate API delay
     setReports((prev) => prev.map((r) => r.id === id ? { ...r, status: 'APPROVED' as const } : r));
     void message.success({ content: 'Report approved.', key: id, duration: 2 });
-  }, []);
+    setProcessingId(null);
+  }, [processingId]);
 
   // Single reject
-  const handleReject = useCallback((id: string) => {
+  const handleReject = useCallback(async (id: string) => {
+    if (processingId) return;
+    setProcessingId(id);
+    await new Promise((r) => setTimeout(r, 400)); // Simulate API delay
     setReports((prev) => prev.map((r) => r.id === id ? { ...r, status: 'REJECTED' as const } : r));
     void message.warning({ content: 'Report rejected.', key: id, duration: 2 });
-  }, []);
+    setProcessingId(null);
+  }, [processingId]);
 
   // Batch approve
   const handleBatchApprove = useCallback(async () => {
