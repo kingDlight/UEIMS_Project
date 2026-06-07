@@ -598,10 +598,17 @@ const MetricCard: React.FC<{
   const [displayValue, setDisplayValue] = React.useState(typeof value === 'number' ? 0 : value);
   
   React.useEffect(() => {
+    let isMounted = true;
+    let controls: any;
     if (typeof value === 'number') {
       import('framer-motion').then(({ animate }) => {
-        animate(0, value, { duration: 1.2, onUpdate: v => setDisplayValue(Math.round(v)) });
+        if (!isMounted) return;
+        controls = animate(0, value, { duration: 1.2, onUpdate: v => setDisplayValue(Math.round(v)) });
       });
+      return () => {
+        isMounted = false;
+        if (controls) controls.stop();
+      };
     } else {
       setDisplayValue(value);
     }
