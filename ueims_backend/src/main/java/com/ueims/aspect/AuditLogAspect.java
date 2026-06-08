@@ -35,15 +35,13 @@ public class AuditLogAspect {
     @Pointcut("@annotation(org.springframework.web.bind.annotation.PostMapping) || "
             + "@annotation(org.springframework.web.bind.annotation.PutMapping) || "
             + "@annotation(org.springframework.web.bind.annotation.DeleteMapping)")
-    public void mutatingEndpoints() {
-    }
+    public void mutatingEndpoints() {}
 
     // Exclude AuthController and AuditLogController to avoid loops or redundant
     // auth logs
     @Pointcut("!within(com.ueims.controller.AuthenticationController) && "
             + "!within(com.ueims.controller.AuditLogController)")
-    public void excludedControllers() {
-    }
+    public void excludedControllers() {}
 
     @AfterReturning(pointcut = "mutatingEndpoints() && excludedControllers()", returning = "result")
     public void logAfterReturning(JoinPoint joinPoint, Object result) {
@@ -56,11 +54,12 @@ public class AuditLogAspect {
                 user = userRepository.findByEmail(email).orElse(null);
             }
 
-            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder
-                    .getRequestAttributes();
+            ServletRequestAttributes attributes =
+                    (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
             String ipAddress = "Unknown";
             String userAgent = "Unknown";
-            String targetEntity = joinPoint.getSignature().getDeclaringType().getSimpleName().replace("Controller", "");
+            String targetEntity =
+                    joinPoint.getSignature().getDeclaringType().getSimpleName().replace("Controller", "");
             String action = joinPoint.getSignature().getName().toUpperCase();
 
             if (attributes != null) {

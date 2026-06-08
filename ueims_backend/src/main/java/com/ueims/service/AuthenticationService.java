@@ -10,6 +10,8 @@ import java.util.Date;
 import java.util.StringJoiner;
 import java.util.UUID;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -46,7 +48,6 @@ import com.ueims.repository.PasswordResetTokenRepository;
 import com.ueims.repository.UserRepository;
 import com.ueims.repository.UserSessionRepository;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -172,8 +173,7 @@ public class AuthenticationService {
             userSessionRepository.save(refreshSession);
 
             // BR-05 / Security: Log the successful login
-            HttpServletRequest httpRequest = ((ServletRequestAttributes) RequestContextHolder
-                    .getRequestAttributes())
+            HttpServletRequest httpRequest = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
                     .getRequest();
 
             AuditLog auditLog = AuditLog.builder()
@@ -372,8 +372,7 @@ public class AuthenticationService {
         user.setMustChangePassword(false);
         userRepository.save(user);
 
-        DateTimeFormatter formatter = DateTimeFormatter
-                .ofPattern("dd/MM/yyyy HH:mm:ss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
         String changedAt = LocalDateTime.now().format(formatter);
         mailService.sendPasswordChangedMail(user.getEmail(), user.getFullName(), changedAt);
     }
@@ -389,7 +388,7 @@ public class AuthenticationService {
         PasswordResetToken resetToken = PasswordResetToken.builder()
                 .user(user)
                 .tokenHash(tokenRaw)
-                .expiresAt(java.time.LocalDateTime.now().plusMinutes(15))
+                .expiresAt(LocalDateTime.now().plusMinutes(15))
                 .isUsed(false)
                 .build();
 
@@ -412,7 +411,7 @@ public class AuthenticationService {
             throw new AppException(ErrorCode.INVALID_KEY);
         }
 
-        if (resetToken.getExpiresAt().isBefore(java.time.LocalDateTime.now())) {
+        if (resetToken.getExpiresAt().isBefore(LocalDateTime.now())) {
             throw new AppException(ErrorCode.INVALID_KEY);
         }
 
@@ -424,8 +423,7 @@ public class AuthenticationService {
         resetToken.setIsUsed(true);
         passwordResetTokenRepository.save(resetToken);
 
-        DateTimeFormatter formatter = DateTimeFormatter
-                .ofPattern("dd/MM/yyyy HH:mm:ss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
         String changedAt = LocalDateTime.now().format(formatter);
         mailService.sendPasswordChangedMail(user.getEmail(), user.getFullName(), changedAt);
 

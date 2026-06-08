@@ -177,7 +177,7 @@ public class IncidentServiceImpl implements IncidentService {
         incident.setStatus("RESOLVED");
         incident.setResolutionNote(request.getResolutionNote());
         incident.setResolvedBy(resolvedBy);
-        incident.setResolvedAt(java.time.LocalDateTime.now());
+        incident.setResolvedAt(LocalDateTime.now());
 
         return repository.save(incident);
     }
