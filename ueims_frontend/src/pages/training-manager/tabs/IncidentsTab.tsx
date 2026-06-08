@@ -660,7 +660,7 @@ const MetricCard: React.FC<{
 // MAIN COMPONENT
 // ============================================================
 export const IncidentsTab: React.FC = () => {
-  const [incidents] = useState<Incident[]>(MOCK_INCIDENTS);
+  const [incidents, setIncidents] = useState<Incident[]>(MOCK_INCIDENTS);
   const [selected, setSelected] = useState<Incident | null>(null);
 
   const open = incidents.filter((i) => i.status === 'OPEN');
@@ -680,14 +680,22 @@ export const IncidentsTab: React.FC = () => {
 
   const handleResolve = useCallback(async (id: string, _outcome: string, note: string) => {
     try {
-      await IncidentService.resolve(id, { resolutionNote: note });
+      if (!id.startsWith('INC')) {
+        await IncidentService.resolve(id, { resolutionNote: note });
+      } else {
+        // Simulate network delay for mock incidents to prevent 400 -> 401 logout
+        await new Promise(r => setTimeout(r, 500));
+      }
       void message.success('Incident closed successfully.');
-      const updated = MOCK_INCIDENTS.map((i) =>
-        i.incidentId === id ? { ...i, status: 'RESOLVED' as const, resolutionNote: note } : i
-      );
-      // Update local state
-      const next = updated.find((i) => i.status === 'OPEN') ?? null;
-      setSelected(next);
+      
+      setIncidents(prev => {
+        const updated = prev.map((i) =>
+          i.incidentId === id ? { ...i, status: 'RESOLVED' as const, resolutionNote: note } : i
+        );
+        const next = updated.find((i) => i.status === 'OPEN') ?? null;
+        setSelected(next);
+        return updated;
+      });
     } catch {
       void message.error('Failed to close incident. Please try again.');
     }
