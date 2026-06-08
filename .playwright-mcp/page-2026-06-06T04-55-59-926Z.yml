@@ -1,0 +1,59 @@
+- generic [ref=e4]:
+  - generic [ref=e6]:
+    - generic [ref=e7]: UEIMS
+    - generic [ref=e8]:
+      - generic [ref=e9] [cursor=pointer]:
+        - img "bar-chart" [ref=e11]:
+          - img [ref=e12]
+        - generic [ref=e14]: Dashboard
+      - generic [ref=e15] [cursor=pointer]:
+        - img "bank" [ref=e17]:
+          - img [ref=e18]
+        - generic [ref=e20]: Enterprise
+      - generic [ref=e21] [cursor=pointer]:
+        - img "team" [ref=e23]:
+          - img [ref=e24]
+        - generic [ref=e26]: Students
+      - generic [ref=e27] [cursor=pointer]:
+        - img "file-protect" [ref=e29]:
+          - img [ref=e30]
+        - generic [ref=e32]: OJT
+      - generic [ref=e33] [cursor=pointer]:
+        - img "trophy" [ref=e35]:
+          - img [ref=e36]
+        - generic [ref=e38]: Stats
+      - generic [ref=e39] [cursor=pointer]:
+        - img "alert" [ref=e41]:
+          - img [ref=e42]
+        - generic [ref=e44]: Incidents
+      - generic [ref=e45] [cursor=pointer]:
+        - img "file-text" [ref=e47]:
+          - img [ref=e48]
+        - generic [ref=e50]: Reports
+      - generic [ref=e51] [cursor=pointer]:
+        - img "calendar" [ref=e53]:
+          - img [ref=e54]
+        - generic [ref=e56]: Semester
+      - generic [ref=e57] [cursor=pointer]:
+        - img "bell" [ref=e59]:
+          - img [ref=e60]
+        - generic [ref=e62]: Notices
+  - generic [ref=e64]:
+    - img "bell" [ref=e67] [cursor=pointer]:
+      - img [ref=e68]
+    - generic [ref=e72] [cursor=pointer]:
+      - generic [ref=e73]: ki
+      - generic [ref=e74]:
+        - generic [ref=e75]: kingdn522005
+        - generic [ref=e76]: kingdn522005@gmail.com
+  - generic [ref=e78]:
+    - generic [ref=e79]:
+      - heading "Final Grade & Feedback" [level=2] [ref=e80]
+      - paragraph [ref=e81]: Review rubric scores, finalize internship grades, and inspect anonymous student feedback
+    - generic [ref=e83]:
+      - button "Input Final Grade" [ref=e84] [cursor=pointer]:
+        - img [ref=e85]
+        - text: Input Final Grade
+      - button "Export Grade Report" [ref=e87] [cursor=pointer]:
+        - img [ref=e88]
+        - text: Export Grade Report

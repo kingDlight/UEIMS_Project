@@ -1,0 +1,182 @@
+- generic [ref=e4]:
+  - generic [ref=e6]:
+    - generic [ref=e7]: UEIMS
+    - generic [ref=e8]:
+      - generic [ref=e9] [cursor=pointer]:
+        - img "bar-chart" [ref=e11]:
+          - img [ref=e12]
+        - generic [ref=e14]: Dashboard
+      - generic [ref=e15] [cursor=pointer]:
+        - img "bank" [ref=e17]:
+          - img [ref=e18]
+        - generic [ref=e20]: Enterprise
+      - generic [ref=e21] [cursor=pointer]:
+        - img "team" [ref=e23]:
+          - img [ref=e24]
+        - generic [ref=e26]: Students
+      - generic [ref=e27] [cursor=pointer]:
+        - img "file-protect" [ref=e29]:
+          - img [ref=e30]
+        - generic [ref=e32]: OJT
+      - generic [ref=e33] [cursor=pointer]:
+        - img "trophy" [ref=e35]:
+          - img [ref=e36]
+        - generic [ref=e38]: Stats
+      - generic [ref=e39] [cursor=pointer]:
+        - img "alert" [ref=e41]:
+          - img [ref=e42]
+        - generic [ref=e44]: Incidents
+      - generic [ref=e45] [cursor=pointer]:
+        - img "file-text" [ref=e47]:
+          - img [ref=e48]
+        - generic [ref=e50]: Reports
+      - generic [ref=e51] [cursor=pointer]:
+        - img "calendar" [ref=e53]:
+          - img [ref=e54]
+        - generic [ref=e56]: Semester
+      - generic [ref=e57] [cursor=pointer]:
+        - img "bell" [ref=e59]:
+          - img [ref=e60]
+        - generic [ref=e62]: Notices
+  - generic [ref=e64]:
+    - img "bell" [ref=e67] [cursor=pointer]:
+      - img [ref=e68]
+    - generic [ref=e72] [cursor=pointer]:
+      - generic [ref=e73]: Te
+      - generic [ref=e74]:
+        - generic [ref=e75]: Tester
+        - generic [ref=e76]: kingdn522005@gmail.com
+  - generic [ref=e78]:
+    - generic [ref=e79]:
+      - generic [ref=e80]:
+        - generic [ref=e81]:
+          - heading "Student Management" [level=2] [ref=e82]
+          - paragraph [ref=e83]: Manage and track eligible students for OJT placement
+        - generic [ref=e84]:
+          - button "Import Excel" [ref=e85] [cursor=pointer]:
+            - img [ref=e86]
+            - text: Import Excel
+          - button "Export" [ref=e89] [cursor=pointer]:
+            - img [ref=e90]
+            - text: Export
+      - generic [ref=e93]:
+        - generic [ref=e94]:
+          - img [ref=e96]
+          - generic [ref=e101]:
+            - generic [ref=e102]: "4"
+            - generic [ref=e103]: Total Students
+            - generic [ref=e104]: Summer 2026
+        - generic [ref=e105]:
+          - img [ref=e107]
+          - generic [ref=e111]:
+            - generic [ref=e112]: "4"
+            - generic [ref=e113]: Eligible for OJT
+            - generic [ref=e114]: Ready to place
+        - generic [ref=e115]:
+          - img [ref=e117]
+          - generic [ref=e120]:
+            - generic [ref=e121]: "0"
+            - generic [ref=e122]: Currently in OJT
+            - generic [ref=e123]: Active placements
+    - generic [ref=e124]:
+      - generic [ref=e125]:
+        - img [ref=e127]
+        - textbox "Search by Name or Student ID..." [ref=e130]
+      - generic [ref=e132] [cursor=pointer]:
+        - generic [ref=e134]:
+          - combobox [ref=e136]
+          - generic "Summer 2026" [ref=e137]
+        - generic:
+          - img:
+            - img
+      - generic [ref=e138] [cursor=pointer]:
+        - generic [ref=e140]:
+          - combobox [ref=e142]
+          - generic "All Majors" [ref=e143]
+        - generic:
+          - img:
+            - img
+      - generic [ref=e144] [cursor=pointer]:
+        - generic [ref=e146]:
+          - combobox [ref=e148]
+          - generic "All Statuses" [ref=e149]
+        - generic:
+          - img:
+            - img
+      - generic [ref=e150]: 4 students found
+    - generic [ref=e154]:
+      - table [ref=e158]:
+        - rowgroup [ref=e166]:
+          - row "Student ID Full Name Major GPA OJT Status" [ref=e167]:
+            - columnheader "Student ID" [ref=e168]
+            - columnheader "Full Name" [ref=e169]
+            - columnheader "Major" [ref=e170]
+            - columnheader "GPA" [ref=e171]
+            - columnheader "OJT Status" [ref=e172]
+            - columnheader [ref=e173]
+        - rowgroup [ref=e174]:
+          - row "SE160001 Nguyen Van A Software Engineering 3.50 Eligible" [ref=e175]:
+            - cell "SE160001" [ref=e176]
+            - cell "Nguyen Van A" [ref=e177]
+            - cell "Software Engineering" [ref=e178]
+            - cell "3.50" [ref=e179]
+            - cell "Eligible" [ref=e180]:
+              - generic [ref=e181]: Eligible
+            - cell [ref=e182]:
+              - generic [ref=e183]:
+                - button "View Details" [ref=e184] [cursor=pointer]:
+                  - img [ref=e185]
+                - button "Edit" [ref=e188] [cursor=pointer]:
+                  - img [ref=e189]
+          - row "SE160002 Tran Thi B Information Assurance 3.20 Eligible" [ref=e191]:
+            - cell "SE160002" [ref=e192]
+            - cell "Tran Thi B" [ref=e193]
+            - cell "Information Assurance" [ref=e194]
+            - cell "3.20" [ref=e195]
+            - cell "Eligible" [ref=e196]:
+              - generic [ref=e197]: Eligible
+            - cell [ref=e198]:
+              - generic [ref=e199]:
+                - button "View Details" [ref=e200] [cursor=pointer]:
+                  - img [ref=e201]
+                - button "Edit" [ref=e204] [cursor=pointer]:
+                  - img [ref=e205]
+          - row "SE160003 Le Van C Artificial Intelligence 3.80 Eligible" [ref=e207]:
+            - cell "SE160003" [ref=e208]
+            - cell "Le Van C" [ref=e209]
+            - cell "Artificial Intelligence" [ref=e210]
+            - cell "3.80" [ref=e211]
+            - cell "Eligible" [ref=e212]:
+              - generic [ref=e213]: Eligible
+            - cell [ref=e214]:
+              - generic [ref=e215]:
+                - button "View Details" [ref=e216] [cursor=pointer]:
+                  - img [ref=e217]
+                - button "Edit" [ref=e220] [cursor=pointer]:
+                  - img [ref=e221]
+          - row "GD160004 Pham Thi D Graphic Design 3.10 Eligible" [ref=e223]:
+            - cell "GD160004" [ref=e224]
+            - cell "Pham Thi D" [ref=e225]
+            - cell "Graphic Design" [ref=e226]
+            - cell "3.10" [ref=e227]
+            - cell "Eligible" [ref=e228]:
+              - generic [ref=e229]: Eligible
+            - cell [ref=e230]:
+              - generic [ref=e231]:
+                - button "View Details" [ref=e232] [cursor=pointer]:
+                  - img [ref=e233]
+                - button "Edit" [ref=e236] [cursor=pointer]:
+                  - img [ref=e237]
+      - list [ref=e239]:
+        - listitem [ref=e240]:
+          - generic [ref=e241]: Showing 1-4 of 4 students
+        - listitem "Previous Page" [ref=e242]:
+          - button "left" [disabled] [ref=e243]:
+            - img "left" [ref=e244]:
+              - img [ref=e245]
+        - listitem "1" [ref=e247] [cursor=pointer]:
+          - generic [ref=e248]: "1"
+        - listitem "Next Page" [ref=e249]:
+          - button "right" [disabled] [ref=e250]:
+            - img "right" [ref=e251]:
+              - img [ref=e252]

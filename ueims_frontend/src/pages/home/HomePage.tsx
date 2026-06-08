@@ -1,170 +1,244 @@
 import logoUeims from '@/assets/logo_ueims.png';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  MenuOutlined,
-  CloseOutlined,
-  ArrowRightOutlined,
-} from '@ant-design/icons';
-
-// FPT Orange Gradient Theme
-const FPT_ORANGE = '#E67E22';
-const FPT_ORANGE_LIGHT = '#F39C12';
-const FPT_ORANGE_DARK = '#D35400';
-const FPT_WHITE = '#FFFFFF';
-const FPT_DARK = '#1A1A2E';
-const FPT_GRAY = '#6B7280';
-const FPT_LIGHT_BG = '#F9FAFB';
-const FPT_BORDER = '#E5E7EB';
+  GraduationCap,
+  Building2,
+  Users,
+  ShieldCheck,
+  Calendar,
+  BarChart3,
+  ArrowRight,
+  Menu,
+  X,
+  CheckCircle2,
+  Briefcase,
+  FileCheck2,
+  UserCheck2,
+  Sun,
+  Moon,
+} from 'lucide-react';
 
 const navLinks = [
   { label: 'Giới thiệu', href: '#about' },
   { label: 'Tính năng', href: '#features' },
-  { label: 'Hướng dẫn', href: '#guide' },
-  { label: 'Liên hệ', href: '#contact' },
+  { label: 'Quy trình OJT', href: '#process' },
+  { label: 'Doanh nghiệp', href: '#partner' },
 ];
 
 const stats = [
-  { value: '2,500+', label: 'Sinh viên thực tập' },
-  { value: '350+', label: 'Doanh nghiệp đối tác' },
-  { value: '95%', label: 'Tỷ lệ hài lòng' },
-  { value: '12+', label: 'Năm kinh nghiệm' },
+  { value: '3,200+', label: 'Sinh viên thực tập' },
+  { value: '450+', label: 'Doanh nghiệp liên kết' },
+  { value: '98.5%', label: 'Tỷ lệ hoàn thành OJT' },
+  { value: '96.2%', label: 'Đánh giá hài lòng' },
 ];
 
 const features = [
   {
-    icon: '🎓',
-    title: 'Quản lý Kỳ OJT',
-    desc: 'Tạo và quản lý toàn bộ chu trình thực tập: từ phân bổ sinh viên, theo dõi tiến độ đến chấm điểm cuối kỳ.',
+    icon: GraduationCap,
+    title: 'Quản lý Kỳ OJT Linh hoạt',
+    desc: 'Tự động tạo kỳ thực tập, thiết lập tiêu chí đánh giá, kết quả đầu ra và điều hành toàn bộ tiến độ sinh viên một cách có hệ thống.',
+    color: 'from-orange-500 to-amber-500',
   },
   {
-    icon: '🏢',
-    title: 'Kết nối Doanh nghiệp',
-    desc: 'Nền tảng kết nối trực tiếp giữa nhà trường và doanh nghiệp, đăng tin tuyển dụng và lọc ứng viên hiệu quả.',
+    icon: Building2,
+    title: 'Hợp tác Doanh nghiệp 3.0',
+    desc: 'Nhà tuyển dụng trực tiếp phê duyệt hồ sơ, đăng tin tuyển dụng, và phản hồi chất lượng đào tạo chỉ trên một cổng duy nhất.',
+    color: 'from-blue-500 to-indigo-500',
   },
   {
-    icon: '📊',
-    title: 'Báo cáo & Đánh giá',
-    desc: 'Sinh viên nộp báo cáo tuần, mentor đánh giá rubric, giảng viên chấm điểm — tất cả được số hóa và minh bạch.',
+    icon: FileCheck2,
+    title: 'Báo cáo & Đánh giá Rubric',
+    desc: 'Sinh viên báo cáo hàng tuần và được Mentor doanh nghiệp, Giảng viên chấm điểm bằng thang đo Rubric chuẩn hóa, minh bạch.',
+    color: 'from-emerald-500 to-teal-500',
   },
   {
-    icon: '🔐',
-    title: 'Phân quyền đa cấp',
-    desc: 'Hệ thống phân quyền chặt chẽ theo 6 vai trò: Admin, Training Manager, Enterprise, Mentor, Lecturer và Student.',
+    icon: ShieldCheck,
+    title: 'Phân quyền Role-based (RBAC)',
+    desc: 'Bảo mật thông tin tối đa với cơ chế phân quyền chi tiết cho 6 đối tượng: Admin, Training Manager, Enterprise, Mentor, Lecturer, Student.',
+    color: 'from-purple-500 to-pink-500',
   },
   {
-    icon: '📅',
-    title: 'Lịch Phỏng vấn',
-    desc: 'Doanh nghiệp đặt lịch phỏng vấn trực tiếp, kiểm tra chồng lịch tự động và gửi thông báo tức thì.',
+    icon: Calendar,
+    title: 'Đặt lịch Phỏng vấn Tự động',
+    desc: 'Hệ thống tự động phát hiện trùng lịch, sắp xếp phòng phỏng vấn trực tiếp giữa Doanh nghiệp và Sinh viên, gửi email nhắc lịch tức thì.',
+    color: 'from-rose-500 to-orange-500',
   },
   {
-    icon: '📈',
-    title: 'Thống kê Tổng quan',
-    desc: 'Dashboard thời gian thực với biểu đồ thống kê số lượng sinh viên, điểm trung bình và tình trạng thực tập.',
+    icon: BarChart3,
+    title: 'Dashboard Thống kê Realtime',
+    desc: 'Trực quan hóa dữ liệu OJT với biểu đồ trực tuyến về tình trạng sinh viên, đánh giá kỹ năng mềm và phân bổ địa điểm thực tập.',
+    color: 'from-violet-500 to-fuchsia-500',
   },
 ];
 
-// Fade In Animation Component
-const FadeIn: React.FC<{ children: React.ReactNode; delay?: number }> = ({ children, delay = 0 }) => {
-  const [visible, setVisible] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setTimeout(() => setVisible(true), delay);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.1 }
-    );
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [delay]);
-
-  return (
-    <div ref={ref} style={{
-      opacity: visible ? 1 : 0,
-      transform: visible ? 'translateY(0)' : 'translateY(30px)',
-      transition: 'all 0.7s cubic-bezier(0.4, 0, 0.2, 1)',
-    }}>
-      {children}
-    </div>
-  );
-};
+const steps = [
+  {
+    num: '01',
+    title: 'Chuẩn bị OJT',
+    desc: 'Nhà trường mở kỳ OJT mới, import thông tin sinh viên đủ điều kiện và thiết lập các tiêu chí chuẩn hóa.',
+  },
+  {
+    num: '02',
+    title: 'Tuyển dụng & Phỏng vấn',
+    desc: 'Doanh nghiệp đăng tin tuyển dụng. Sinh viên nộp CV trực tuyến và đặt lịch phỏng vấn thông qua hệ thống.',
+  },
+  {
+    num: '03',
+    title: 'Thực tập & Báo cáo',
+    desc: 'Sinh viên làm việc tại doanh nghiệp, gửi báo cáo tuần. Mentor doanh nghiệp theo dõi, hướng dẫn và ký duyệt.',
+  },
+  {
+    num: '04',
+    title: 'Đánh giá & Tổng kết',
+    desc: 'Doanh nghiệp chấm điểm đánh giá. Giảng viên chấm báo cáo cuối kỳ. Hệ thống tổng hợp điểm số và xuất file Excel.',
+  },
+];
 
 export const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isDark, setIsDark] = useState(() => {
+    const saved = localStorage.getItem('homepage-theme');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+  const spotlightRef = React.useRef<HTMLDivElement>(null);
+
+  const handleMouseMove = React.useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (!spotlightRef.current) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    // Cập nhật CSS Variables trực tiếp vào DOM thay vì dùng state để tránh re-render toàn bộ trang
+    spotlightRef.current.style.setProperty('--mouse-x', `${x}px`);
+    spotlightRef.current.style.setProperty('--mouse-y', `${y}px`);
+  }, []);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 50);
-    window.addEventListener('scroll', onScroll);
-    return () => window.removeEventListener('scroll', onScroll);
+    localStorage.setItem('homepage-theme', JSON.stringify(isDark));
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDark]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 40);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const scrollToSection = (href: string) => {
     setMenuOpen(false);
     const element = document.querySelector(href);
-    element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (element) {
+      try {
+        // Modern browsers: native scrollIntoView respecting CSS scroll-margin-top (scroll-mt-20)
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch (err) {
+        // Fallback for older browsers
+        const offset = 80;
+        const elementPosition = element.getBoundingClientRect().top + (window.pageYOffset || window.scrollY);
+        window.scrollTo({
+          top: elementPosition - offset,
+          behavior: 'smooth'
+        });
+      }
+    }
+  };
+
+  const themeTimeoutRef = React.useRef<any>(null);
+
+  const toggleTheme = () => {
+    document.documentElement.classList.add('theme-transitioning');
+    setIsDark(!isDark);
+    if (themeTimeoutRef.current) clearTimeout(themeTimeoutRef.current);
+    themeTimeoutRef.current = setTimeout(() => {
+      document.documentElement.classList.remove('theme-transitioning');
+    }, 700);
   };
 
   return (
-    <div style={{
-      fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-      overflowX: 'hidden',
-      background: FPT_LIGHT_BG,
-    }}>
+    <div className={`min-h-screen font-sans selection:bg-[#f37021]/30 selection:text-white overflow-x-hidden transition-colors duration-300 ease-in-out ${
+      isDark ? 'bg-[#0b0f19] text-zinc-100' : 'bg-slate-50 text-slate-800'
+    }`}>
+      <style>{`
+        .theme-transitioning * {
+          transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow !important;
+          transition-duration: 0.7s !important;
+          transition-timing-function: ease-in-out !important;
+        }
+      `}</style>
+      
+      {/* ============ BACKGROUND EFFECTS ============ */}
+      {/* Primary drifting orbs */}
+      <div className={`fixed -top-40 -right-40 w-[500px] h-[500px] blur-[100px] pointer-events-none z-0 animate-drift ${
+        isDark ? 'bg-[#f37021]/10 rounded-full' : 'bg-[#f37021]/15 animate-morph'
+      }`} style={{ willChange: 'transform' }}></div>
+      <div className={`fixed top-[35%] -left-40 w-[450px] h-[450px] blur-[90px] pointer-events-none z-0 animate-drift-alt ${
+        isDark ? 'rounded-full' : 'animate-morph'
+      }`} style={{ background: '#00aeff21', willChange: 'transform', animationDelay: '5s' }}></div>
+      {/* Secondary accent orbs removed per user request */}
+
+      {/* Animated SVG dot-grid — light mode gets brighter colors */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden" aria-hidden="true">
+        <svg width="100%" height="100%" className={`absolute inset-0 transition-opacity duration-300 ${
+          isDark ? 'opacity-[0.04]' : 'opacity-[0.18]'
+        }`}>
+          <defs>
+            <pattern id="hp-dots" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+              <circle cx="1.5" cy="1.5" r="1.5" fill={isDark ? '#f37021' : '#f37021'} />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#hp-dots)" />
+        </svg>
+        {/* Rotating decorative ring — top left */}
+        <div className={`absolute -top-32 -left-32 w-[550px] h-[550px] rounded-full border-[1.5px] pointer-events-none animate-rotate-slow ${
+          isDark ? 'border-[#f37021]/8' : 'border-[#f37021]/20'
+        }`} style={{ willChange: 'transform' }}></div>
+        <div className={`absolute -top-20 -left-20 w-[380px] h-[380px] rounded-full border pointer-events-none animate-rotate-slow-reverse ${
+          isDark ? 'border-blue-500/6' : 'border-blue-400/18'
+        }`} style={{ willChange: 'transform', animationDelay: '4s' }}></div>
+        {/* Rotating ring — bottom right */}
+        <div className={`absolute -bottom-28 -right-28 w-[500px] h-[500px] rounded-full border-[1.5px] pointer-events-none animate-rotate-slow-reverse ${
+          isDark ? 'border-purple-500/6' : 'border-orange-400/15'
+        }`} style={{ willChange: 'transform', animationDelay: '8s' }}></div>
+      </div>
 
       {/* ============ NAVBAR ============ */}
-      <nav style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        zIndex: 1000,
-        padding: '0 60px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        height: 72,
-        background: scrolled ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.8)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        borderBottom: scrolled ? '1px solid rgba(230, 126, 34, 0.1)' : '1px solid transparent',
-        transition: 'all 0.3s ease',
-      }}>
-        {/* Logo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}
-             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-          <img src={logoUeims} alt="UEIMS Logo" style={{ height: 44, objectFit: 'contain' }} />
-          <span style={{ fontWeight: 800, fontSize: 20, color: FPT_DARK }}>UEIMS</span>
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out px-6 md:px-12 flex items-center justify-between ${
+        scrolled 
+          ? isDark 
+            ? 'h-16 bg-[#0b0f19]/80 backdrop-blur-xl border-b border-zinc-800/50 shadow-lg' 
+            : 'h-16 bg-white/80 backdrop-blur-xl border-b border-slate-200/80 shadow-md'
+          : 'h-20 bg-transparent'
+      }`}>
+        {/* Brand */}
+        <div className="flex items-center gap-3 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+          <img src="/src/assets/logo_ueims.png" alt="UEIMS Logo" style={{ height: '36px', objectFit: 'contain' }} />
+          <span className={`font-bold text-lg tracking-wide transition-colors duration-300 ease-in-out ${isDark ? 'text-white' : 'text-slate-900'}`}>UEIMS</span>
         </div>
 
-        {/* Desktop Nav */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }} className="desktop-nav">
+        {/* Links (Desktop) */}
+        <div className="hidden md:flex items-center gap-1.5">
           {navLinks.map((link) => (
-            <a key={link.label} href={link.href}
-               onClick={(e) => { e.preventDefault(); scrollToSection(link.href); }}
-               style={{
-                 color: FPT_DARK,
-                 fontSize: 14,
-                 fontWeight: 500,
-                 padding: '8px 16px',
-                 borderRadius: 8,
-                 textDecoration: 'none',
-                 transition: 'all 0.2s',
-               }}
-               onMouseEnter={(e) => {
-                 e.currentTarget.style.background = `${FPT_ORANGE}10`;
-                 e.currentTarget.style.color = FPT_ORANGE;
-               }}
-               onMouseLeave={(e) => {
-                 e.currentTarget.style.background = 'transparent';
-                 e.currentTarget.style.color = FPT_DARK;
-               }}
+            <a
+              key={link.label}
+              href={link.href}
+              onClick={(e) => {
+                e.preventDefault();
+                scrollToSection(link.href);
+              }}
+              className={`text-xs font-medium px-3.5 py-2 rounded-lg transition-all duration-300 ease-in-out ${
+                isDark 
+                  ? 'text-zinc-300 hover:text-white hover:bg-zinc-800/40' 
+                  : 'text-slate-700 hover:text-slate-950 hover:bg-slate-100'
+              }`}
             >
               {link.label}
             </a>
@@ -172,534 +246,578 @@ export const HomePage: React.FC = () => {
         </div>
 
         {/* Actions */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <button onClick={() => navigate('/login')}
-            style={{
-              background: 'transparent',
-              border: `2px solid ${FPT_BORDER}`,
-              color: FPT_DARK,
-              borderRadius: 25,
-              padding: '10px 24px',
-              fontSize: 14,
-              fontWeight: 600,
-              cursor: 'pointer',
-              transition: 'all 0.3s',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = FPT_ORANGE;
-              e.currentTarget.style.color = FPT_ORANGE;
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = FPT_BORDER;
-              e.currentTarget.style.color = FPT_DARK;
-            }}
+        <div className="flex items-center gap-3">
+          {/* Theme Toggle */}
+          <button
+            onClick={toggleTheme}
+            className={`w-9 h-9 flex items-center justify-center rounded-full border transition-all duration-300 ease-in-out bg-transparent shrink-0 ${
+              isDark 
+                ? 'border-zinc-500 text-amber-400 hover:text-amber-300 hover:border-amber-400/50 hover:bg-zinc-800/40' 
+                : 'border-slate-400 text-slate-700 hover:text-slate-950 hover:border-slate-500 hover:bg-slate-100'
+            }`}
+            title={isDark ? "Chuyển sang chế độ sáng" : "Chuyển sang chế độ tối"}
+          >
+            {isDark ? <Sun className="h-4 w-4 relative" /> : <Moon className="h-4 w-4 relative" />}
+          </button>
+
+          <button
+            onClick={() => navigate('/login')}
+            className={`text-xs font-semibold bg-transparent px-4 py-2 border rounded-lg transition-all duration-300 ease-in-out ${
+              isDark
+                ? 'text-zinc-100 border-zinc-500 hover:text-white hover:border-[#f37021] hover:bg-[#f37021]/5'
+                : 'text-slate-800 border-slate-400 hover:text-[#f37021] hover:border-[#f37021] hover:bg-[#f37021]/5'
+            }`}
           >
             Đăng nhập
           </button>
-          <button onClick={() => navigate('/login')}
-            style={{
-              background: `linear-gradient(135deg, ${FPT_ORANGE} 0%, ${FPT_ORANGE_DARK} 100%)`,
-              border: 'none',
-              color: FPT_WHITE,
-              borderRadius: 25,
-              padding: '10px 24px',
-              fontSize: 14,
-              fontWeight: 700,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              boxShadow: `0 4px 14px ${FPT_ORANGE}40`,
-              transition: 'all 0.3s',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = `0 6px 20px ${FPT_ORANGE}50`;
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = `0 4px 14px ${FPT_ORANGE}40`;
-            }}
+          <button
+            onClick={() => navigate('/login')}
+            className="hidden sm:flex text-xs font-bold text-white px-4 py-2 rounded-lg bg-gradient-to-r from-[#f37021] to-[#e26215] shadow-lg shadow-[#f37021]/20 hover:shadow-[#f37021]/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 ease-in-out gap-1.5 items-center"
           >
-            Vào hệ thống <ArrowRightOutlined />
+            Vào hệ thống
+            <ArrowRight className="h-3.5 w-3.5" />
           </button>
-          <button onClick={() => setMenuOpen(!menuOpen)} className="mobile-menu-btn"
-            style={{
-              background: 'none',
-              border: 'none',
-              color: FPT_DARK,
-              cursor: 'pointer',
-              fontSize: 24,
-              padding: 8,
-            }}>
-            {menuOpen ? <CloseOutlined /> : <MenuOutlined />}
+          
+          {/* Mobile menu trigger */}
+          <button 
+            onClick={() => setMenuOpen(!menuOpen)} 
+            className={`md:hidden p-1 bg-transparent transition-colors duration-300 ease-in-out ${
+              isDark ? 'text-zinc-400 hover:text-white' : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </div>
+
+        {/* Mobile Dropdown Menu */}
+        {menuOpen && (
+          <div className={`absolute top-16 left-0 right-0 p-6 flex flex-col gap-4 md:hidden shadow-xl animate-fade-in border-b transition-colors duration-300 ease-in-out ${
+            isDark ? 'bg-[#0f1422] border-zinc-800/80' : 'bg-white border-slate-200'
+          }`}>
+            {navLinks.map((link) => (
+              <a
+                key={link.label}
+                href={link.href}
+                onClick={(e) => {
+                  e.preventDefault();
+                  scrollToSection(link.href);
+                }}
+                className={`text-sm font-medium py-1 transition-colors duration-300 ease-in-out ${
+                  isDark ? 'text-zinc-300 hover:text-white' : 'text-slate-700 hover:text-slate-950'
+                }`}
+              >
+                {link.label}
+              </a>
+            ))}
+            <button
+              onClick={() => navigate('/login')}
+              className="text-sm font-bold text-white px-4 py-2.5 rounded-lg bg-[#f37021] flex justify-center items-center gap-1.5 shadow-md shadow-[#f37021]/15 mt-2"
+            >
+              Vào hệ thống
+              <ArrowRight className="h-4 w-4" />
+            </button>
+          </div>
+        )}
       </nav>
 
       {/* ============ HERO SECTION ============ */}
-      <section style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        position: 'relative',
-        padding: '120px 60px 80px',
-        background: `linear-gradient(135deg, ${FPT_DARK} 0%, #2D3748 100%)`,
-        overflow: 'hidden',
-      }}>
-        {/* Orange Glow Background */}
-        <div style={{
-          position: 'absolute',
-          width: 600,
-          height: 600,
-          borderRadius: '50%',
-          background: `radial-gradient(circle, ${FPT_ORANGE}30 0%, transparent 70%)`,
-          top: -100,
-          right: -100,
-          animation: 'pulse 8s ease-in-out infinite',
-        }} />
-        
-        {/* Floating Decorative Shapes */}
-        <div style={{
-          position: 'absolute',
-          width: 100,
-          height: 100,
-          borderRadius: 24,
-          border: `3px solid ${FPT_ORANGE}40`,
-          top: '20%',
-          left: '10%',
-          transform: 'rotate(15deg)',
-          animation: 'float1 7s ease-in-out infinite',
-        }} />
-        
-        <div style={{
-          position: 'absolute',
-          width: 60,
-          height: 60,
-          borderRadius: 15,
-          background: `${FPT_ORANGE}25`,
-          top: '30%',
-          right: '15%',
-          animation: 'float2 9s ease-in-out infinite',
-        }} />
-        
-        <div style={{
-          position: 'absolute',
-          width: 80,
-          height: 80,
-          borderRadius: 20,
-          border: `2px solid ${FPT_ORANGE_LIGHT}50`,
-          bottom: '25%',
-          left: '20%',
-          transform: 'rotate(-10deg)',
-          animation: 'float3 8s ease-in-out infinite',
-        }} />
-        
-        <div style={{
-          position: 'absolute',
-          width: 50,
-          height: 50,
-          borderRadius: 12,
-          background: `${FPT_ORANGE_LIGHT}30`,
-          bottom: '30%',
-          right: '25%',
-          animation: 'float1 10s ease-in-out infinite reverse',
-        }} />
-        
-        {/* Small dots */}
-        {[...Array(10)].map((_, i) => (
-          <div key={i} style={{
-            position: 'absolute',
-            width: 8,
-            height: 8,
-            borderRadius: '50%',
-            background: FPT_ORANGE,
-            opacity: 0.3 + (i % 3) * 0.1,
-            top: `${15 + i * 8}%`,
-            left: `${5 + (i % 4) * 10}%`,
-            animation: `float${(i % 3) + 1} ${5 + i * 0.3}s ease-in-out infinite`,
-            animationDelay: `${i * 0.3}s`,
-          }} />
-        ))}
+      <section 
+        onMouseMove={handleMouseMove}
+        className={`relative pt-36 pb-20 md:pt-48 md:pb-32 px-6 md:px-12 flex items-center justify-center overflow-hidden z-10 border-b transition-colors duration-300 ease-in-out ${
+          isDark ? 'border-zinc-900' : 'border-slate-200'
+        }`}
+      >
+        {/* Interactive Spotlight Glow */}
+        <div 
+          ref={spotlightRef}
+          className="absolute inset-0 pointer-events-none z-0 opacity-70 transition-opacity duration-300 ease-in-out"
+          style={{
+            background: `radial-gradient(700px circle at var(--mouse-x, 50%) var(--mouse-y, -20%), ${
+              isDark ? 'rgba(243, 112, 33, 0.07)' : 'rgba(243, 112, 33, 0.08)'
+            }, transparent 80%)`
+          }}
+        ></div>
 
-        <div style={{ maxWidth: 1200, textAlign: 'center', position: 'relative', zIndex: 1 }}>
-          <FadeIn delay={200}>
-            {/* Badge */}
-            <div style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 8,
-              background: `${FPT_ORANGE}20`,
-              border: `1px solid ${FPT_ORANGE}40`,
-              borderRadius: 50,
-              padding: '8px 20px',
-              marginBottom: 24,
-            }}>
-              <span style={{ fontSize: 16 }}>🎓</span>
-              <span style={{ color: FPT_ORANGE, fontWeight: 600, fontSize: 13 }}>
-                University-Enterprise Internship Management
-              </span>
-            </div>
-          </FadeIn>
+        {/* Floating Abstract Shapes */}
+        {/* Circles */}
+        <div className="absolute top-[20%] left-[8%] w-12 h-12 rounded-full animate-float pointer-events-none z-0" 
+             style={{ 
+               border: isDark ? '1px solid rgba(243, 112, 33, 0.18)' : '1px solid rgba(243, 112, 33, 0.35)',
+               willChange: 'transform' 
+             }}></div>
+        <div className="absolute bottom-[15%] right-[8%] w-16 h-16 rounded-xl rotate-45 animate-float pointer-events-none z-0" 
+             style={{ 
+               border: isDark ? '1px solid rgba(59, 130, 246, 0.18)' : '1px solid rgba(96, 165, 250, 0.40)',
+               animationDelay: '1.5s', animationDuration: '8s', willChange: 'transform' 
+             }}></div>
+        <div className={`absolute top-[35%] right-[12%] w-8 h-8 rounded-full animate-float pointer-events-none z-0 ${
+          isDark ? 'bg-amber-500/6' : 'bg-orange-400/20'
+        }`} style={{ animationDelay: '3s', animationDuration: '7s', willChange: 'transform' }}></div>
+        <div className="absolute bottom-[30%] left-[12%] w-20 h-20 rounded-full animate-float pointer-events-none z-0" 
+             style={{ 
+               border: isDark ? '1px solid rgba(113, 113, 122, 0.12)' : '1px solid rgba(148, 163, 184, 0.25)',
+               animationDelay: '4.5s', animationDuration: '9s', willChange: 'transform' 
+             }}></div>
+        {/* Extra particles */}
+        <div className={`absolute top-[55%] left-[5%] w-5 h-5 rounded-full animate-particle pointer-events-none z-0 ${
+          isDark ? 'bg-[#f37021]/20' : 'bg-[#f37021]/40'
+        }`} style={{ animationDelay: '0.5s', willChange: 'transform' }}></div>
+        <div className={`absolute top-[18%] right-[22%] w-3 h-3 rounded-full animate-particle pointer-events-none z-0 ${
+          isDark ? 'bg-blue-400/25' : 'bg-blue-500/50'
+        }`} style={{ animationDelay: '2s', willChange: 'transform' }}></div>
+        <div className={`absolute bottom-[20%] right-[30%] w-4 h-4 rounded-full animate-particle pointer-events-none z-0 ${
+          isDark ? 'bg-amber-400/18' : 'bg-amber-500/40'
+        }`} style={{ animationDelay: '3.5s', willChange: 'transform' }}></div>
+        <div className={`absolute top-[42%] left-[30%] w-2.5 h-2.5 rounded-full animate-particle pointer-events-none z-0 ${
+          isDark ? 'bg-purple-400/20' : 'bg-purple-500/45'
+        }`} style={{ animationDelay: '5s', willChange: 'transform' }}></div>
+        {/* Rotating diamond */}
+        <div className="absolute top-[10%] left-[35%] w-6 h-6 rotate-45 animate-rotate-slow pointer-events-none z-0" 
+             style={{ 
+               border: isDark ? '1px solid rgba(243, 112, 33, 0.3)' : '1px solid rgba(243, 112, 33, 0.6)',
+               willChange: 'transform' 
+             }}></div>
+        <div className="absolute bottom-[8%] right-[18%] w-8 h-8 rotate-12 animate-rotate-slow-reverse pointer-events-none z-0" 
+             style={{ 
+               border: isDark ? '1px solid rgba(59, 130, 246, 0.2)' : '1px solid rgba(59, 130, 246, 0.4)',
+               willChange: 'transform', animationDelay: '3s' 
+             }}></div>
+        
+        {/* Floating Rounded Squares */}
+        <div className="absolute top-[25%] right-[15%] w-16 h-16 rounded-2xl animate-float pointer-events-none z-20"
+             style={{ 
+               border: isDark ? '2px solid rgba(243, 112, 33, 0.5)' : '2px solid rgba(243, 112, 33, 0.8)',
+               animationDelay: '2.5s', animationDuration: '8.5s', willChange: 'transform' 
+             }}></div>
+        <div className="absolute top-[65%] left-[20%] w-12 h-12 rounded-xl animate-float pointer-events-none z-20"
+             style={{ 
+               border: isDark ? '1px solid rgba(59, 130, 246, 0.5)' : '1px solid rgba(59, 130, 246, 0.8)',
+               animationDelay: '4s', animationDuration: '6s', willChange: 'transform' 
+             }}></div>
 
-          <FadeIn delay={400}>
-            <h1 style={{
-              fontSize: 'clamp(40px, 6vw, 72px)',
-              fontWeight: 800,
-              color: FPT_WHITE,
-              margin: '0 0 24px',
-              lineHeight: 1.1,
-              letterSpacing: '-2px',
-            }}>
-              Kết nối <span style={{ color: FPT_ORANGE }}>Nhà trường</span>
-              <br />
-              với <span style={{ color: FPT_ORANGE_LIGHT }}>Doanh nghiệp</span>
-            </h1>
-          </FadeIn>
+        <div className="max-w-6xl w-full text-center relative z-10">
+          
+          {/* Glowing Background Badge */}
+          <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border mb-8 animate-fade-in-up transition-colors duration-300 ease-in-out ${
+            isDark ? 'bg-[#f37021]/10 border-[#f37021]/30' : 'bg-[#f37021]/5 border-[#f37021]/20'
+          }`}>
+            <span className="flex h-2 w-2 rounded-full bg-[#f37021] animate-pulse"></span>
+            <span className="text-xs font-semibold tracking-wider text-[#f37021] uppercase">
+              OJT - FPT University
+            </span>
+          </div>
 
-          <FadeIn delay={600}>
-            <p style={{
-              fontSize: 20,
-              color: 'rgba(255, 255, 255, 0.6)',
-              maxWidth: 650,
-              margin: '0 auto 40px',
-              lineHeight: 1.7,
-            }}>
-              UEIMS — Nền tảng số hóa toàn bộ quy trình thực tập doanh nghiệp, từ
-              quản lý kỳ OJT, kết nối tuyển dụng đến đánh giá rubric minh bạch.
-            </p>
-          </FadeIn>
+          {/* Headline */}
+          <h1 className={`text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-none mb-6 animate-fade-in-up transition-colors duration-300 ease-in-out ${
+            isDark ? 'text-white' : 'text-slate-900'
+          }`}>
+            Chuyển Đổi Số Toàn Diện
+            <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#f37021] via-amber-500 to-orange-400">
+              Quy Trình Thực Tập OJT
+            </span>
+          </h1>
 
-          <FadeIn delay={800}>
-            <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
-              <button onClick={() => navigate('/login')} style={{
-                background: `linear-gradient(135deg, ${FPT_ORANGE} 0%, ${FPT_ORANGE_DARK} 100%)`,
-                border: 'none',
-                color: FPT_WHITE,
-                borderRadius: 30,
-                padding: '16px 36px',
-                fontSize: 16,
-                fontWeight: 700,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 10,
-                boxShadow: `0 8px 25px ${FPT_ORANGE}40`,
-                transition: 'all 0.3s',
-              }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-3px) scale(1.02)';
-                  e.currentTarget.style.boxShadow = `0 12px 35px ${FPT_ORANGE}50`;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0) scale(1)';
-                  e.currentTarget.style.boxShadow = `0 8px 25px ${FPT_ORANGE}40`;
-                }}
-              >
-                Bắt đầu ngay <ArrowRightOutlined />
-              </button>
-              <button onClick={() => scrollToSection('#features')} style={{
-                background: 'transparent',
-                border: '2px solid rgba(255, 255, 255, 0.2)',
-                color: FPT_WHITE,
-                borderRadius: 30,
-                padding: '16px 36px',
-                fontSize: 16,
-                fontWeight: 600,
-                cursor: 'pointer',
-                transition: 'all 0.3s',
-              }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = FPT_WHITE;
-                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-                  e.currentTarget.style.background = 'transparent';
-                }}
-              >
-                Khám phá tính năng
-              </button>
-            </div>
-          </FadeIn>
+          {/* Subtext */}
+          <p className={`text-base sm:text-lg md:text-xl max-w-3xl mx-auto mb-10 leading-relaxed font-normal animate-fade-in-up transition-colors duration-300 ease-in-out ${
+            isDark ? 'text-zinc-300' : 'text-slate-655'
+          }`}>
+            Đơn giản hóa việc kết nối Doanh nghiệp, quản lý hồ sơ sinh viên, sắp xếp phỏng vấn và đánh giá điểm năng lực bằng hệ thống số hóa thông minh, minh bạch.
+          </p>
 
-          {/* Stats */}
-          <FadeIn delay={1000}>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(4, 1fr)',
-              gap: 32,
-              marginTop: 80,
-              paddingTop: 40,
-              borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-            }} className="stats-grid">
-              {stats.map((stat, index) => (
-                <div key={index} style={{ textAlign: 'center' }}>
-                  <div style={{
-                    fontSize: 'clamp(32px, 4vw, 48px)',
-                    fontWeight: 800,
-                    color: FPT_ORANGE,
-                    marginBottom: 8,
-                  }}>
-                    {stat.value}
-                  </div>
-                  <div style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: 14, fontWeight: 500 }}>
-                    {stat.label}
-                  </div>
+          {/* CTAs */}
+          <div className="flex gap-4 justify-center flex-wrap mb-20 animate-fade-in-up">
+            <button
+              onClick={() => navigate('/login')}
+              className="text-sm font-bold text-white px-7 py-3.5 rounded-full bg-gradient-to-r from-[#f37021] to-[#e26215] shadow-lg shadow-[#f37021]/20 hover:shadow-[#f37021]/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 ease-in-out flex items-center gap-2"
+            >
+              Bắt đầu ngay
+              <ArrowRight className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => scrollToSection('#features')}
+              className={`text-sm font-semibold bg-transparent px-7 py-3.5 rounded-full border transition-all duration-300 ease-in-out ${
+                isDark
+                  ? 'text-zinc-100 border-zinc-500 hover:text-white hover:bg-zinc-800/40 hover:border-zinc-400'
+                  : 'text-slate-800 border-slate-400 hover:text-[#f37021] hover:bg-slate-100 hover:border-[#f37021]'
+              }`}
+            >
+              Tìm hiểu tính năng
+            </button>
+          </div>
+
+          {/* Stats Bar */}
+          <div className={`grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 pt-10 backdrop-blur-md rounded-2xl p-6 border transition-all duration-300 ease-in-out ${
+            isDark 
+              ? 'border-zinc-800/30 bg-[#0e1322]/30 text-zinc-100' 
+              : 'border-slate-200 bg-white/85 shadow-lg shadow-slate-100/40 text-slate-800'
+          }`}>
+            {stats.map((stat, i) => (
+              <div key={i} className="text-center">
+                <div className={`text-2xl sm:text-3xl md:text-4xl font-extrabold mb-1 tracking-tight transition-colors duration-300 ease-in-out ${
+                  isDark ? 'text-white' : 'text-slate-900'
+                }`}>
+                  {stat.value}
                 </div>
-              ))}
+                <div className={`text-xs font-semibold uppercase tracking-wider transition-colors duration-300 ease-in-out ${
+                  isDark ? 'text-zinc-300' : 'text-slate-650'
+                }`}>
+                  {stat.label}
+                </div>
+              </div>
+            ))}
+          </div>
+
+        </div>
+      </section>
+
+      {/* ============ ABOUT SECTION ============ */}
+      <section id="about" className={`py-20 md:py-28 px-6 md:px-12 relative z-10 border-b scroll-mt-20 transition-colors duration-300 ease-in-out ${
+        isDark ? 'border-zinc-900 bg-[#070a11]/40' : 'border-slate-200 bg-slate-50/50'
+      }`}>
+        <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-12 items-center">
+          {/* Left Content */}
+          <div className="flex-1">
+            <span className="text-xs font-bold tracking-widest text-[#f37021] uppercase">Giới thiệu</span>
+            <h2 className={`text-3xl sm:text-4xl md:text-5xl font-extrabold mt-3 mb-6 tracking-tight transition-colors duration-300 ease-in-out ${
+              isDark ? 'text-white' : 'text-slate-900'
+            }`}>
+              Cầu nối hiện đại giữa Giảng đường & Doanh nghiệp
+            </h2>
+            <p className={`text-sm sm:text-base leading-relaxed mb-6 transition-colors duration-300 ease-in-out ${
+              isDark ? 'text-zinc-300' : 'text-slate-600'
+            }`}>
+              Hệ thống Quản lý Thực tập Doanh nghiệp (UEIMS) là nền tảng số hóa tối ưu được xây dựng nhằm phục vụ kỳ thực tập doanh nghiệp (On-the-Job Training) tại Trường Đại học FPT Đà Nẵng.
+            </p>
+            <p className={`text-sm sm:text-base leading-relaxed transition-colors duration-300 ease-in-out ${
+              isDark ? 'text-zinc-300' : 'text-slate-600'
+            }`}>
+              Chúng tôi loại bỏ hoàn toàn các rào cản hành chính thủ công, kết nối trực tiếp nhà trường, sinh viên và nhà tuyển dụng để cùng kiến tạo những trải nghiệm học tập thực tế chất lượng nhất.
+            </p>
+          </div>
+
+          {/* Right Highlights Grid */}
+          <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-6 w-full">
+            <div className={`border p-6 rounded-2xl transition-all duration-300 ease-in-out ${
+              isDark ? 'bg-[#101524]/60 border-zinc-800/40' : 'bg-white border-slate-200 shadow-sm'
+            }`}>
+              <div className={`h-9 w-9 rounded-lg flex items-center justify-center mb-4 font-semibold text-sm ${
+                isDark ? 'bg-blue-600/10 text-blue-400' : 'bg-blue-50 text-blue-600'
+              }`}>
+                01
+              </div>
+              <h4 className={`text-sm font-bold mb-2 transition-colors duration-300 ease-in-out ${isDark ? 'text-zinc-100' : 'text-slate-800'}`}>Số hóa 100%</h4>
+              <p className={`text-xs leading-relaxed transition-colors duration-300 ease-in-out ${isDark ? 'text-zinc-300' : 'text-slate-600'}`}>Toàn bộ biểu mẫu báo cáo, phê duyệt CV và chấm điểm Rubric được thực hiện trực tuyến hoàn toàn.</p>
             </div>
-          </FadeIn>
+            
+            <div className={`border p-6 rounded-2xl transition-all duration-300 ease-in-out ${
+              isDark ? 'bg-[#101524]/60 border-zinc-800/40' : 'bg-white border-slate-200 shadow-sm'
+            }`}>
+              <div className={`h-9 w-9 rounded-lg flex items-center justify-center mb-4 font-semibold text-sm ${
+                isDark ? 'bg-[#f37021]/10 text-[#f37021]' : 'bg-orange-50 text-[#f37021]'
+              }`}>
+                02
+              </div>
+              <h4 className={`text-sm font-bold mb-2 transition-colors duration-300 ease-in-out ${isDark ? 'text-zinc-100' : 'text-slate-800'}`}>Đồng bộ Đa bên</h4>
+              <p className={`text-xs leading-relaxed transition-colors duration-300 ease-in-out ${isDark ? 'text-zinc-300' : 'text-slate-600'}`}>Cập nhật thông tin tức thời giữa Sinh viên, Giảng viên Hướng dẫn và Doanh nghiệp đối tác.</p>
+            </div>
+
+            <div className={`border p-6 rounded-2xl transition-all duration-300 ease-in-out ${
+              isDark ? 'bg-[#101524]/60 border-zinc-800/40' : 'bg-white border-slate-200 shadow-sm'
+            }`}>
+              <div className={`h-9 w-9 rounded-lg flex items-center justify-center mb-4 font-semibold text-sm ${
+                isDark ? 'bg-emerald-600/10 text-emerald-400' : 'bg-emerald-50 text-emerald-600'
+              }`}>
+                03
+              </div>
+              <h4 className={`text-sm font-bold mb-2 transition-colors duration-300 ease-in-out ${isDark ? 'text-zinc-100' : 'text-slate-800'}`}>Tuyển dụng Trực tiếp</h4>
+              <p className={`text-xs leading-relaxed transition-colors duration-300 ease-in-out ${isDark ? 'text-zinc-300' : 'text-slate-600'}`}>Doanh nghiệp đăng tin tuyển dụng OJT và chủ động lọc hồ sơ, xếp lịch phỏng vấn nhanh gọn.</p>
+            </div>
+
+            <div className={`border p-6 rounded-2xl transition-all duration-300 ease-in-out ${
+              isDark ? 'bg-[#101524]/60 border-zinc-800/40' : 'bg-white border-slate-200 shadow-sm'
+            }`}>
+              <div className={`h-9 w-9 rounded-lg flex items-center justify-center mb-4 font-semibold text-sm ${
+                isDark ? 'bg-purple-600/10 text-purple-400' : 'bg-purple-50 text-purple-600'
+              }`}>
+                04
+              </div>
+              <h4 className={`text-sm font-bold mb-2 transition-colors duration-300 ease-in-out ${isDark ? 'text-zinc-100' : 'text-slate-800'}`}>Thống kê Minh bạch</h4>
+              <p className={`text-xs leading-relaxed transition-colors duration-300 ease-in-out ${isDark ? 'text-zinc-300' : 'text-slate-600'}`}>Theo dõi trực quan tiến độ và xuất dữ liệu báo cáo OJT đầy đủ chuẩn xác chỉ với một cú click.</p>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* ============ FEATURES SECTION ============ */}
-      <section id="features" style={{ padding: '100px 60px', background: FPT_WHITE }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-          <FadeIn>
-            <div style={{ textAlign: 'center', marginBottom: 60 }}>
-              <span style={{
-                color: FPT_ORANGE,
-                fontWeight: 700,
-                fontSize: 14,
-                textTransform: 'uppercase',
-                letterSpacing: '0.1em',
-              }}>
-                Tính năng
-              </span>
-              <h2 style={{
-                fontSize: 'clamp(32px, 4vw, 48px)',
-                fontWeight: 800,
-                color: FPT_DARK,
-                margin: '12px 0 16px',
-              }}>
-                Giải pháp toàn diện cho OJT
-              </h2>
-              <p style={{ color: FPT_GRAY, fontSize: 18, maxWidth: 600, margin: '0 auto' }}>
-                Tất cả những gì bạn cần để quản lý kỳ thực tập doanh nghiệp một cách hiệu quả
-              </p>
-            </div>
-          </FadeIn>
+      <section id="features" className={`py-20 md:py-28 px-6 md:px-12 relative z-10 border-b scroll-mt-20 transition-colors duration-300 ease-in-out ${
+        isDark ? 'border-zinc-900 bg-[#0e1322]/20' : 'border-slate-200 bg-white'
+      }`}>
+        <div className="max-w-6xl mx-auto">
+          
+          <div className="text-center mb-16 md:mb-20">
+            <span className="text-xs font-bold tracking-widest text-[#f37021] uppercase">Tính Năng Cốt Lõi</span>
+            <h2 className={`text-3xl sm:text-4xl md:text-5xl font-extrabold mt-3 mb-4 tracking-tight transition-colors duration-300 ease-in-out ${
+              isDark ? 'text-white' : 'text-slate-900'
+            }`}>
+              Quản lý thực tập chuyên nghiệp
+            </h2>
+            <p className={`text-sm sm:text-base max-w-xl mx-auto transition-colors duration-300 ease-in-out ${
+              isDark ? 'text-zinc-300' : 'text-slate-600'
+            }`}>
+              Thiết kế giải pháp phù hợp cho tất cả các đối tượng tham gia vào kỳ học doanh nghiệp OJT.
+            </p>
+          </div>
 
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: 28,
-          }} className="features-grid">
-            {features.map((feature, index) => (
-              <FadeIn key={index} delay={index * 100}>
-                <div style={{
-                  background: FPT_LIGHT_BG,
-                  borderRadius: 20,
-                  padding: 32,
-                  border: '1px solid #E5E7EB',
-                  transition: 'all 0.4s',
-                  cursor: 'default',
-                }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-8px)';
-                    e.currentTarget.style.borderColor = FPT_ORANGE;
-                    e.currentTarget.style.boxShadow = `0 20px 40px ${FPT_ORANGE}15`;
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.borderColor = '#E5E7EB';
-                    e.currentTarget.style.boxShadow = 'none';
-                  }}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {features.map((feat, i) => {
+              const Icon = feat.icon;
+              return (
+                <div
+                  key={i}
+                  className={`border rounded-2xl p-8 hover:-translate-y-1 transition-all duration-300 ease-in-out group ${
+                    isDark 
+                      ? 'bg-[#101524] border-zinc-800/50 hover:border-zinc-700 hover:shadow-xl hover:shadow-black/20' 
+                      : 'bg-white border-slate-200 hover:border-slate-300 hover:shadow-xl hover:shadow-slate-200/50'
+                  }`}
                 >
-                  <div style={{
-                    fontSize: 48,
-                    marginBottom: 20,
-                  }}>
-                    {feature.icon}
+                  <div className={`h-11 w-11 rounded-xl bg-gradient-to-br ${feat.color} flex items-center justify-center text-white mb-6 group-hover:scale-105 transition-transform`}>
+                    <Icon className="h-5.5 w-5.5" />
                   </div>
-                  <h3 style={{ fontSize: 20, fontWeight: 700, color: FPT_DARK, margin: '0 0 12px' }}>
-                    {feature.title}
+                  <h3 className={`text-lg font-bold mb-3 transition-colors duration-300 ease-in-out ${
+                    isDark ? 'text-zinc-100 group-hover:text-white' : 'text-slate-800 group-hover:text-slate-900'
+                  }`}>
+                    {feat.title}
                   </h3>
-                  <p style={{ color: FPT_GRAY, fontSize: 15, lineHeight: 1.7, margin: 0 }}>
-                    {feature.desc}
+                  <p className={`text-xs sm:text-sm leading-relaxed font-normal transition-colors duration-300 ease-in-out ${
+                    isDark ? 'text-zinc-300' : 'text-slate-650'
+                  }`}>
+                    {feat.desc}
                   </p>
                 </div>
-              </FadeIn>
+              );
+            })}
+          </div>
+
+        </div>
+      </section>
+
+      {/* ============ PROCESS SECTION ============ */}
+      <section id="process" className={`py-20 md:py-28 px-6 md:px-12 relative z-10 border-b scroll-mt-20 transition-colors duration-300 ease-in-out ${
+        isDark ? 'border-zinc-900' : 'border-slate-200'
+      }`}>
+        <div className="max-w-6xl mx-auto">
+          
+          <div className="text-center mb-16 md:mb-20">
+            <span className="text-xs font-bold tracking-widest text-blue-500 uppercase">Quy Trình Hoạt Động</span>
+            <h2 className={`text-3xl sm:text-4xl md:text-5xl font-extrabold mt-3 mb-4 tracking-tight transition-colors duration-300 ease-in-out ${
+              isDark ? 'text-white' : 'text-slate-900'
+            }`}>
+              Bốn bước khép kín thông minh
+            </h2>
+            <p className={`text-sm sm:text-base max-w-xl mx-auto transition-colors duration-300 ease-in-out ${
+              isDark ? 'text-zinc-300' : 'text-slate-650'
+            }`}>
+              Vận hành đồng bộ nhịp nhàng giữa Nhà trường - Sinh viên - Doanh nghiệp.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative">
+            {steps.map((step, i) => (
+              <div key={i} className={`border rounded-xl p-6 relative overflow-hidden group transition-all duration-300 ease-in-out ${
+                isDark ? 'bg-[#101524]/40 border-zinc-900' : 'bg-white border-slate-200 shadow-sm'
+              }`}>
+                {/* Flow Lines for Desktop */}
+                {i < 3 && (
+                  <div className={`hidden lg:block absolute top-[40%] right-[-16px] w-8 h-[1px] z-10 transition-colors duration-300 ease-in-out ${
+                    isDark ? 'bg-zinc-800' : 'bg-slate-200'
+                  }`}></div>
+                )}
+                <div className="text-3xl font-extrabold text-[#f37021]/40 group-hover:text-[#f37021]/70 mb-4 transition-colors">
+                  {step.num}
+                </div>
+                <h3 className={`text-sm font-bold mb-2 transition-colors duration-300 ease-in-out ${
+                  isDark ? 'text-zinc-200' : 'text-slate-800'
+                }`}>{step.title}</h3>
+                <p className={`text-xs leading-relaxed transition-colors duration-300 ease-in-out ${
+                  isDark ? 'text-zinc-300' : 'text-slate-650'
+                }`}>{step.desc}</p>
+              </div>
             ))}
+          </div>
+
+        </div>
+      </section>
+
+      {/* ============ PARTNER REGISTRATION SECTION ============ */}
+      <section id="partner" className={`py-20 md:py-28 px-6 md:px-12 relative z-10 border-b scroll-mt-20 transition-colors duration-300 ease-in-out ${
+        isDark ? 'bg-[#0e1322]/20 border-zinc-900' : 'bg-slate-50 border-slate-200'
+      }`}>
+        <div className={`max-w-5xl mx-auto border rounded-3xl p-8 md:p-14 shadow-2xl relative overflow-hidden flex flex-col md:flex-row gap-8 items-center transition-colors duration-300 ease-in-out ${
+          isDark ? 'bg-[#101524] border-zinc-800/80' : 'bg-white border-slate-200'
+        }`}>
+          
+          {/* Subtle decoration */}
+          <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-blue-500/10 blur-3xl rounded-full"></div>
+          
+          <div className="flex-1 z-10">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#f37021] bg-[#f37021]/10 px-2.5 py-1 rounded-md">
+              Dành cho Doanh nghiệp
+            </span>
+            <h2 className={`text-2xl sm:text-3xl md:text-4xl font-extrabold mt-5 mb-4 tracking-tight transition-colors duration-300 ease-in-out ${
+              isDark ? 'text-white' : 'text-slate-900'
+            }`}>
+              Đồng hành cùng nguồn nhân lực chất lượng cao
+            </h2>
+            <p className={`text-xs sm:text-sm leading-relaxed max-w-lg mb-0 transition-colors duration-300 ease-in-out ${
+              isDark ? 'text-zinc-300' : 'text-slate-650'
+            }`}>
+              Đăng ký hợp tác ngay để tiếp cận hàng nghìn sinh viên công nghệ, quản trị và thiết kế năng động của Đại học FPT, đồng thời số hóa hoạt động tiếp nhận thực tập sinh một cách nhanh chóng.
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-3 shrink-0 z-10 w-full md:w-auto">
+            <button
+              onClick={() => navigate('/register-enterprise')}
+              className="text-xs font-bold text-white px-6 py-3.5 rounded-xl bg-gradient-to-r from-[#f37021] to-[#e26215] shadow-lg shadow-[#f37021]/15 hover:shadow-[#f37021]/30 hover:-translate-y-0.5 active:translate-y-0 text-center transition-all duration-300 ease-in-out"
+            >
+              Đăng ký tài khoản Doanh nghiệp
+            </button>
+            <button
+              onClick={() => navigate('/login')}
+              className={`text-xs font-semibold bg-transparent px-6 py-3.5 rounded-xl border text-center transition-all duration-300 ease-in-out ${
+                isDark
+                  ? 'text-zinc-100 border-zinc-500 hover:text-white hover:border-[#f37021] hover:bg-[#f37021]/5'
+                  : 'text-slate-800 border-slate-400 hover:text-[#f37021] hover:border-[#f37021] hover:bg-[#f37021]/5'
+              }`}
+            >
+              Hỗ trợ & Liên hệ OJT
+            </button>
           </div>
         </div>
       </section>
 
-      {/* ============ CTA SECTION ============ */}
-      <section style={{
-        padding: '100px 60px',
-        background: `linear-gradient(135deg, ${FPT_DARK} 0%, #2D3748 100%)`,
-        position: 'relative',
-        overflow: 'hidden',
-      }}>
-        <div style={{
-          position: 'absolute',
-          width: 500,
-          height: 500,
-          borderRadius: '50%',
-          background: `radial-gradient(circle, ${FPT_ORANGE}30 0%, transparent 70%)`,
-          top: -200,
-          left: '50%',
-          transform: 'translateX(-50%)',
-        }} />
-
-        <FadeIn>
-          <div style={{ textAlign: 'center', maxWidth: 700, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-            <h2 style={{
-              fontSize: 'clamp(32px, 4vw, 48px)',
-              fontWeight: 800,
-              color: FPT_WHITE,
-              margin: '0 0 20px',
-            }}>
-              Sẵn sàng nâng cấp
-              <br />
-              <span style={{ color: FPT_ORANGE }}>Quy trình thực tập</span> của bạn?
-            </h2>
-            <p style={{
-              fontSize: 18,
-              color: 'rgba(255, 255, 255, 0.6)',
-              margin: '0 0 40px',
-              lineHeight: 1.7,
-            }}>
-              Tham gia cùng hàng trăm doanh nghiệp và hàng nghìn sinh viên đang sử dụng UEIMS
-              để quản lý kỳ thực tập doanh nghiệp hiệu quả hơn.
-            </p>
-            <button onClick={() => navigate('/login')} style={{
-              background: `linear-gradient(135deg, ${FPT_ORANGE} 0%, ${FPT_ORANGE_DARK} 100%)`,
-              border: 'none',
-              color: FPT_WHITE,
-              borderRadius: 30,
-              padding: '18px 48px',
-              fontSize: 18,
-              fontWeight: 700,
-              cursor: 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 12,
-              boxShadow: `0 8px 30px ${FPT_ORANGE}50`,
-              transition: 'all 0.3s',
-            }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'translateY(-4px) scale(1.03)';
-                e.currentTarget.style.boxShadow = `0 12px 40px ${FPT_ORANGE}60`;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0) scale(1)';
-                e.currentTarget.style.boxShadow = `0 8px 30px ${FPT_ORANGE}50`;
-              }}
-            >
-              Đăng nhập ngay <ArrowRightOutlined />
-            </button>
-          </div>
-        </FadeIn>
+      {/* ============ CALL TO ACTION SECTION ============ */}
+      <section className={`py-20 md:py-32 px-6 md:px-12 relative z-10 text-center overflow-hidden border-b transition-colors duration-300 ease-in-out ${
+        isDark 
+          ? 'bg-gradient-to-b from-[#0b0f19] to-[#070a11] border-transparent' 
+          : 'bg-gradient-to-b from-white to-slate-50 border-slate-200'
+      }`}>
+        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[400px] h-[400px] bg-[#f37021]/10 blur-[120px] rounded-full pointer-events-none"></div>
+        
+        <div className="max-w-4xl mx-auto relative z-10">
+          <h2 className={`text-3xl sm:text-5xl font-extrabold tracking-tight mb-6 transition-colors duration-300 ease-in-out ${
+            isDark ? 'text-white' : 'text-slate-900'
+          }`}>
+            Bắt đầu số hóa hành trình
+            <br />
+            <span className="text-[#f37021]">quản lý OJT</span> ngay hôm nay
+          </h2>
+          <p className={`text-sm sm:text-base max-w-xl mx-auto mb-10 leading-relaxed transition-colors duration-300 ease-in-out ${
+            isDark ? 'text-zinc-300' : 'text-slate-650'
+          }`}>
+            Hợp tác bền vững, theo dõi liền mạch, quản lý hiệu quả. Trải nghiệm hệ thống quản lý thực tập tốt nhất.
+          </p>
+          <button
+            onClick={() => navigate('/login')}
+            className="text-sm font-bold text-white px-8 py-4 rounded-full bg-gradient-to-r from-[#f37021] to-[#e26215] shadow-lg shadow-[#f37021]/20 hover:shadow-[#f37021]/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 ease-in-out inline-flex items-center gap-2"
+          >
+            Đăng nhập hệ thống
+            <ArrowRight className="h-4 w-4" />
+          </button>
+        </div>
       </section>
 
       {/* ============ FOOTER ============ */}
-      <footer id="contact" style={{ background: '#111827', padding: '60px 60px 40px' }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: '2fr 1fr 1fr 1fr',
-            gap: 48,
-            marginBottom: 48,
-          }} className="footer-grid">
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-                <img src={logoUeims} alt="UEIMS Logo" style={{ height: 44, objectFit: 'contain' }} />
-                <span style={{ color: FPT_WHITE, fontWeight: 800, fontSize: 20 }}>UEIMS</span>
+      <footer className={`border-t px-6 md:px-12 py-16 relative z-10 transition-colors duration-300 ease-in-out ${
+        isDark ? 'bg-[#070a11] border-zinc-900/60 text-zinc-400' : 'bg-slate-100 border-slate-200 text-slate-600'
+      }`}>
+        <div className="max-w-6xl mx-auto">
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
+            
+            {/* Column Brand */}
+            <div className="lg:col-span-2">
+              <div className="flex items-center gap-3 mb-4">
+                <img src="/src/assets/logo_ueims.png" alt="UEIMS Logo" style={{ height: '32px', objectFit: 'contain' }} />
+                <span className={`font-bold text-base tracking-wide transition-colors duration-300 ease-in-out ${isDark ? 'text-white' : 'text-slate-900'}`}>UEIMS</span>
               </div>
-              <p style={{ color: 'rgba(255, 255, 255, 0.5)', fontSize: 14, lineHeight: 1.7, margin: 0 }}>
-                University-Enterprise Internship Management System. Nền tảng quản lý thực tập doanh nghiệp hàng đầu tại Việt Nam.
+              <p className={`text-xs leading-relaxed max-w-sm transition-colors duration-300 ease-in-out ${isDark ? 'text-zinc-400' : 'text-slate-600'}`}>
+                University-Enterprise Internship Management System. Nền tảng quản trị thông minh đồng hành cùng nhà trường và doanh nghiệp trong từng kỳ OJT của sinh viên.
               </p>
             </div>
-
-            {['Về UEIMS', 'Hỗ trợ', 'Kết nối'].map((title, i) => (
-              <div key={i}>
-                <h4 style={{ color: FPT_WHITE, fontWeight: 700, marginBottom: 20 }}>{title}</h4>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  {['Giới thiệu', 'Tính năng', 'Đội ngũ', 'Liên hệ'].map((item) => (
-                    <a key={item} href="#" style={{
-                      color: 'rgba(255, 255, 255, 0.5)',
-                      textDecoration: 'none',
-                      fontSize: 14,
-                      transition: 'color 0.2s',
-                    }}
-                      onMouseEnter={(e) => (e.currentTarget.style.color = FPT_ORANGE)}
-                      onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255, 255, 255, 0.5)')}
-                    >
-                      {item}
-                    </a>
-                  ))}
-                </div>
+ 
+            {/* Links Columns */}
+            <div>
+              <h4 className={`font-bold text-xs tracking-wider uppercase mb-4 transition-colors duration-300 ease-in-out ${isDark ? 'text-zinc-300' : 'text-slate-800'}`}>Hệ Thống</h4>
+              <div className="flex flex-col gap-2.5 text-xs">
+                <a
+                  href="#about"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    scrollToSection('#about');
+                  }}
+                  className="hover:text-[#f37021] transition-colors"
+                >
+                  Giới thiệu
+                </a>
+                <a
+                  href="#features"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    scrollToSection('#features');
+                  }}
+                  className="hover:text-[#f37021] transition-colors"
+                >
+                  Tính năng
+                </a>
+                <a
+                  href="#process"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    scrollToSection('#process');
+                  }}
+                  className="hover:text-[#f37021] transition-colors"
+                >
+                  Quy trình
+                </a>
               </div>
-            ))}
+            </div>
+ 
+            <div>
+              <h4 className={`font-bold text-xs tracking-wider uppercase mb-4 transition-colors duration-300 ease-in-out ${isDark ? 'text-zinc-300' : 'text-slate-800'}`}>Vai Trò</h4>
+              <div className="flex flex-col gap-2.5 text-xs">
+                <a href="/login" className={`hover:text-[#f37021] transition-colors ${isDark ? 'text-zinc-400' : 'text-slate-600'}`}>Doanh nghiệp</a>
+                <a href="/login" className={`hover:text-[#f37021] transition-colors ${isDark ? 'text-zinc-400' : 'text-slate-600'}`}>Sinh viên</a>
+                <a href="/login" className={`hover:text-[#f37021] transition-colors ${isDark ? 'text-zinc-400' : 'text-slate-600'}`}>Giảng viên / Quản lý</a>
+              </div>
+            </div>
+ 
+            <div>
+              <h4 className={`font-bold text-xs tracking-wider uppercase mb-4 transition-colors duration-300 ease-in-out ${isDark ? 'text-zinc-300' : 'text-slate-800'}`}>Phát Triển</h4>
+              <div className="flex flex-col gap-2.5 text-xs font-semibold">
+                <span className={isDark ? 'text-zinc-450' : 'text-slate-650'}>Đại học FPT</span>
+                <span className={isDark ? 'text-zinc-450' : 'text-slate-650'}>Nhóm 7 - SE20A05</span>
+                <span className="text-[#f37021]">OJT 2026</span>
+              </div>
+            </div>
+ 
           </div>
-
-          <div style={{
-            borderTop: '1px solid rgba(255, 255, 255, 0.1)',
-            paddingTop: 24,
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            gap: 16,
-          }}>
-            <span style={{ color: 'rgba(255, 255, 255, 0.4)', fontSize: 13 }}>
-              © 2026 UEIMS - FPT University. All rights reserved.
+ 
+          <div className={`border-t pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-center transition-colors duration-300 ease-in-out ${
+            isDark ? 'border-zinc-900/40 text-zinc-500' : 'border-slate-200 text-slate-500'
+          }`}>
+            <span className="text-xs sm:text-sm">
+              © 2026 UEIMS. Bản quyền thuộc về Nhóm 7 - Trường Đại học FPT Đà Nẵng.
             </span>
-            <span style={{ color: FPT_ORANGE, fontSize: 13, fontWeight: 600 }}>
-              Nhóm 7 - SE20A05
+            <span className="text-xs sm:text-sm">
+              Chương trình thực tập Doanh nghiệp (On-the-Job Training)
             </span>
           </div>
+ 
         </div>
       </footer>
 
-      {/* ============ STYLES ============ */}
-      <style>{`
-        @keyframes float1 {
-          0%, 100% { transform: translateY(0) rotate(0deg); }
-          50% { transform: translateY(-20px) rotate(3deg); }
-        }
-        
-        @keyframes float2 {
-          0%, 100% { transform: translateY(0) rotate(0deg); }
-          50% { transform: translateY(-25px) rotate(-5deg); }
-        }
-        
-        @keyframes float3 {
-          0%, 100% { transform: translateY(0) rotate(-10deg); }
-          50% { transform: translateY(-15px) rotate(0deg); }
-        }
-        
-        @keyframes pulse {
-          0%, 100% { transform: scale(1); opacity: 0.3; }
-          50% { transform: scale(1.1); opacity: 0.5; }
-        }
-        
-        .desktop-nav { display: flex !important; }
-        .mobile-menu-btn { display: none !important; }
-        
-        @media (max-width: 1024px) {
-          .desktop-nav { display: none !important; }
-          .mobile-menu-btn { display: block !important; }
-          .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
-          .features-grid { grid-template-columns: repeat(2, 1fr) !important; }
-          .footer-grid { grid-template-columns: repeat(2, 1fr) !important; }
-        }
-        
-        @media (max-width: 640px) {
-          .stats-grid, .features-grid, .footer-grid { grid-template-columns: 1fr !important; }
-        }
-        
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: ${FPT_ORANGE}; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: ${FPT_ORANGE_DARK}; }
-        
-        ::selection { background: ${FPT_ORANGE}40; }
-      `}</style>
     </div>
   );
 };

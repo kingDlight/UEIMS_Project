@@ -1,0 +1,124 @@
+- generic [ref=e3]:
+  - navigation [ref=e4]:
+    - generic [ref=e5] [cursor=pointer]:
+      - img "UEIMS Logo" [ref=e6]
+      - generic [ref=e7]: UEIMS
+    - generic [ref=e8]:
+      - button "Đăng nhập" [ref=e9] [cursor=pointer]
+      - button "Vào hệ thống arrow-right" [ref=e10] [cursor=pointer]:
+        - text: Vào hệ thống
+        - img "arrow-right" [ref=e11]:
+          - img [ref=e12]
+      - button "menu" [ref=e14] [cursor=pointer]:
+        - img "menu" [ref=e15]:
+          - img [ref=e16]
+  - generic [ref=e34]:
+    - generic [ref=e36]:
+      - generic [ref=e37]: 🎓
+      - generic [ref=e38]: University-Enterprise Internship Management
+    - heading "Kết nối Nhà trường với Doanh nghiệp" [level=1] [ref=e40]:
+      - text: Kết nối Nhà trường
+      - text: với Doanh nghiệp
+    - paragraph [ref=e42]: UEIMS — Nền tảng số hóa toàn bộ quy trình thực tập doanh nghiệp, từ quản lý kỳ OJT, kết nối tuyển dụng đến đánh giá rubric minh bạch.
+    - generic [ref=e44]:
+      - button "Bắt đầu ngay arrow-right" [ref=e45] [cursor=pointer]:
+        - text: Bắt đầu ngay
+        - img "arrow-right" [ref=e46]:
+          - img [ref=e47]
+      - button "Khám phá tính năng" [ref=e49] [cursor=pointer]
+    - generic [ref=e51]:
+      - generic [ref=e52]:
+        - generic [ref=e53]: 2,500+
+        - generic [ref=e54]: Sinh viên thực tập
+      - generic [ref=e55]:
+        - generic [ref=e56]: 350+
+        - generic [ref=e57]: Doanh nghiệp đối tác
+      - generic [ref=e58]:
+        - generic [ref=e59]: 95%
+        - generic [ref=e60]: Tỷ lệ hài lòng
+      - generic [ref=e61]:
+        - generic [ref=e62]: 12+
+        - generic [ref=e63]: Năm kinh nghiệm
+  - generic [ref=e65]:
+    - generic [ref=e67]:
+      - text: Tính năng
+      - heading "Giải pháp toàn diện cho OJT" [level=2] [ref=e68]
+      - paragraph [ref=e69]: Tất cả những gì bạn cần để quản lý kỳ thực tập doanh nghiệp một cách hiệu quả
+    - generic [ref=e70]:
+      - generic [ref=e72]:
+        - generic [ref=e73]: 🎓
+        - heading "Quản lý Kỳ OJT" [level=3] [ref=e74]
+        - paragraph [ref=e75]: "Tạo và quản lý toàn bộ chu trình thực tập: từ phân bổ sinh viên, theo dõi tiến độ đến chấm điểm cuối kỳ."
+      - generic [ref=e77]:
+        - generic [ref=e78]: 🏢
+        - heading "Kết nối Doanh nghiệp" [level=3] [ref=e79]
+        - paragraph [ref=e80]: Nền tảng kết nối trực tiếp giữa nhà trường và doanh nghiệp, đăng tin tuyển dụng và lọc ứng viên hiệu quả.
+      - generic [ref=e82]:
+        - generic [ref=e83]: 📊
+        - heading "Báo cáo & Đánh giá" [level=3] [ref=e84]
+        - paragraph [ref=e85]: Sinh viên nộp báo cáo tuần, mentor đánh giá rubric, giảng viên chấm điểm — tất cả được số hóa và minh bạch.
+      - generic [ref=e87]:
+        - generic [ref=e88]: 🔐
+        - heading "Phân quyền đa cấp" [level=3] [ref=e89]
+        - paragraph [ref=e90]: "Hệ thống phân quyền chặt chẽ theo 6 vai trò: Admin, Training Manager, Enterprise, Mentor, Lecturer và Student."
+      - generic [ref=e92]:
+        - generic [ref=e93]: 📅
+        - heading "Lịch Phỏng vấn" [level=3] [ref=e94]
+        - paragraph [ref=e95]: Doanh nghiệp đặt lịch phỏng vấn trực tiếp, kiểm tra chồng lịch tự động và gửi thông báo tức thì.
+      - generic [ref=e97]:
+        - generic [ref=e98]: 📈
+        - heading "Thống kê Tổng quan" [level=3] [ref=e99]
+        - paragraph [ref=e100]: Dashboard thời gian thực với biểu đồ thống kê số lượng sinh viên, điểm trung bình và tình trạng thực tập.
+  - generic [ref=e104]:
+    - heading "Sẵn sàng nâng cấp Quy trình thực tập của bạn?" [level=2] [ref=e105]:
+      - text: Sẵn sàng nâng cấp
+      - text: Quy trình thực tập của bạn?
+    - paragraph [ref=e106]: Tham gia cùng hàng trăm doanh nghiệp và hàng nghìn sinh viên đang sử dụng UEIMS để quản lý kỳ thực tập doanh nghiệp hiệu quả hơn.
+    - button "Đăng nhập ngay arrow-right" [ref=e107] [cursor=pointer]:
+      - text: Đăng nhập ngay
+      - img "arrow-right" [ref=e108]:
+        - img [ref=e109]
+  - contentinfo [ref=e111]:
+    - generic [ref=e112]:
+      - generic [ref=e113]:
+        - generic [ref=e114]:
+          - generic [ref=e115]:
+            - img "UEIMS Logo" [ref=e116]
+            - generic [ref=e117]: UEIMS
+          - paragraph [ref=e118]: University-Enterprise Internship Management System. Nền tảng quản lý thực tập doanh nghiệp hàng đầu tại Việt Nam.
+        - generic [ref=e119]:
+          - heading "Về UEIMS" [level=4] [ref=e120]
+          - generic [ref=e121]:
+            - link "Giới thiệu" [ref=e122] [cursor=pointer]:
+              - /url: "#"
+            - link "Tính năng" [ref=e123] [cursor=pointer]:
+              - /url: "#"
+            - link "Đội ngũ" [ref=e124] [cursor=pointer]:
+              - /url: "#"
+            - link "Liên hệ" [ref=e125] [cursor=pointer]:
+              - /url: "#"
+        - generic [ref=e126]:
+          - heading "Hỗ trợ" [level=4] [ref=e127]
+          - generic [ref=e128]:
+            - link "Giới thiệu" [ref=e129] [cursor=pointer]:
+              - /url: "#"
+            - link "Tính năng" [ref=e130] [cursor=pointer]:
+              - /url: "#"
+            - link "Đội ngũ" [ref=e131] [cursor=pointer]:
+              - /url: "#"
+            - link "Liên hệ" [ref=e132] [cursor=pointer]:
+              - /url: "#"
+        - generic [ref=e133]:
+          - heading "Kết nối" [level=4] [ref=e134]
+          - generic [ref=e135]:
+            - link "Giới thiệu" [ref=e136] [cursor=pointer]:
+              - /url: "#"
+            - link "Tính năng" [ref=e137] [cursor=pointer]:
+              - /url: "#"
+            - link "Đội ngũ" [ref=e138] [cursor=pointer]:
+              - /url: "#"
+            - link "Liên hệ" [ref=e139] [cursor=pointer]:
+              - /url: "#"
+      - generic [ref=e140]:
+        - generic [ref=e141]: © 2026 UEIMS - FPT University. All rights reserved.
+        - generic [ref=e142]: Nhóm 7 - SE20A05

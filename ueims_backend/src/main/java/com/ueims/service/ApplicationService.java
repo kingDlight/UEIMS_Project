@@ -10,6 +10,8 @@ import com.ueims.dto.response.ApplicationResponse;
 public interface ApplicationService {
     List<ApplicationResponse> findAll();
 
+    List<ApplicationResponse> findMyApplications();
+
     ApplicationResponse findById(UUID id);
 
     ApplicationResponse applyForJob(ApplicationRequest request);

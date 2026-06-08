@@ -8,6 +8,8 @@ import com.ueims.model.entity.Interview;
 public interface InterviewService {
     List<Interview> findAll();
 
+    List<Interview> findMyInterviews();
+
     Interview findById(UUID id);
 
     Interview save(Interview entity);

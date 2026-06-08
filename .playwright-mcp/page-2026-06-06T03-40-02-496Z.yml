@@ -1,0 +1,214 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e4]:
+    - generic [ref=e6]:
+      - generic [ref=e7]: UEIMS
+      - generic [ref=e8]:
+        - generic [ref=e9] [cursor=pointer]:
+          - img "bar-chart" [ref=e11]:
+            - img [ref=e12]
+          - generic [ref=e14]: Dashboard
+        - generic [ref=e15] [cursor=pointer]:
+          - img "bank" [ref=e17]:
+            - img [ref=e18]
+          - generic [ref=e20]: Enterprise
+        - generic [ref=e21] [cursor=pointer]:
+          - img "team" [ref=e23]:
+            - img [ref=e24]
+          - generic [ref=e26]: Students
+        - generic [ref=e27] [cursor=pointer]:
+          - img "file-protect" [ref=e29]:
+            - img [ref=e30]
+          - generic [ref=e32]: OJT
+        - generic [ref=e33] [cursor=pointer]:
+          - img "trophy" [ref=e35]:
+            - img [ref=e36]
+          - generic [ref=e38]: Stats
+        - generic [ref=e39] [cursor=pointer]:
+          - img "alert" [ref=e41]:
+            - img [ref=e42]
+          - generic [ref=e44]: Incidents
+        - generic [ref=e45] [cursor=pointer]:
+          - img "file-text" [ref=e47]:
+            - img [ref=e48]
+          - generic [ref=e50]: Reports
+        - generic [ref=e51] [cursor=pointer]:
+          - img "calendar" [ref=e53]:
+            - img [ref=e54]
+          - generic [ref=e56]: Semester
+        - generic [ref=e57] [cursor=pointer]:
+          - img "bell" [ref=e59]:
+            - img [ref=e60]
+          - generic [ref=e62]: Notices
+    - generic [ref=e64]:
+      - img "bell" [ref=e67] [cursor=pointer]:
+        - img [ref=e68]
+      - generic [ref=e72] [cursor=pointer]:
+        - generic [ref=e73]: Te
+        - generic [ref=e74]:
+          - generic [ref=e75]: Tester
+          - generic [ref=e76]: kingdn522005@gmail.com
+    - generic [ref=e78]:
+      - generic [ref=e79]:
+        - heading "Statistics & Analytics" [level=2] [ref=e80]
+        - paragraph [ref=e81]: Performance overview across majors, placement outcomes, and GPA trends
+      - generic [ref=e82]:
+        - generic [ref=e83]:
+          - img [ref=e85]
+          - generic [ref=e88]:
+            - generic [ref=e89]: 88%
+            - generic [ref=e90]: Placement Rate
+            - generic [ref=e91]:
+              - generic [ref=e92]:
+                - img [ref=e93]
+                - text: +2.1%
+              - generic [ref=e96]: of enrolled students
+        - generic [ref=e97]:
+          - img [ref=e99]
+          - generic [ref=e101]:
+            - generic [ref=e102]: "3.2"
+            - generic [ref=e103]: Avg GPA
+            - generic [ref=e104]:
+              - generic [ref=e105]:
+                - img [ref=e106]
+                - text: "+0.1"
+              - generic [ref=e109]: across all majors
+        - generic [ref=e110]:
+          - img [ref=e112]
+          - generic [ref=e116]:
+            - generic [ref=e117]: "124"
+            - generic [ref=e118]: Total Enterprises
+            - generic [ref=e119]:
+              - generic [ref=e120]:
+                - img [ref=e121]
+                - text: "+8"
+              - generic [ref=e124]: active partnerships
+        - generic [ref=e125]:
+          - img [ref=e127]
+          - generic [ref=e132]:
+            - generic [ref=e133]: 92%
+            - generic [ref=e134]: Student Participation
+            - generic [ref=e135]:
+              - generic [ref=e136]:
+                - img [ref=e137]
+                - text: +1.4%
+              - generic [ref=e140]: active in OJT
+      - generic [ref=e141]:
+        - generic [ref=e142]:
+          - generic [ref=e144]:
+            - generic [ref=e145]: Placement Overview
+            - generic [ref=e146]: Overall 88.1% placement rate
+          - generic [ref=e149]:
+            - list [ref=e151]:
+              - listitem [ref=e152]:
+                - img "Placed legend icon" [ref=e153]
+                - generic [ref=e156]:
+                  - text: Placed
+                  - generic [ref=e157]: (88%)
+              - listitem [ref=e158]:
+                - img "Searching legend icon" [ref=e159]
+                - generic [ref=e162]:
+                  - text: Searching
+                  - generic [ref=e163]: (12%)
+            - application [ref=e164]:
+              - generic [ref=e165]:
+                - text: "104"
+                - generic [ref=e166]: of 118 placed
+        - generic [ref=e167]:
+          - generic [ref=e169]:
+            - generic [ref=e170]: Average GPA by Major
+            - generic [ref=e171]: Semester average across 4 study programs
+          - application [ref=e175]:
+            - generic [ref=e179]:
+              - generic [ref=e180]:
+                - generic [ref=e182]: SE
+                - generic [ref=e184]: IA
+                - generic [ref=e186]: AI
+                - generic [ref=e188]: GD
+              - generic [ref=e189]:
+                - generic [ref=e191]: "0"
+                - generic [ref=e193]: "1"
+                - generic [ref=e195]: "2"
+                - generic [ref=e197]: "3"
+                - generic [ref=e199]: "4"
+      - generic [ref=e200]:
+        - generic [ref=e201]:
+          - generic [ref=e202]:
+            - generic [ref=e203]: Performance by Major
+            - generic [ref=e204]: Placement and GPA breakdown per study program
+          - generic [ref=e205] [cursor=pointer]:
+            - generic [ref=e207]:
+              - combobox [ref=e209]
+              - generic "Summer 2026" [ref=e210]
+            - generic:
+              - img:
+                - img
+        - table [ref=e218]:
+          - rowgroup [ref=e225]:
+            - row "Major Total Students Placed Placement Rate Avg GPA" [ref=e226]:
+              - columnheader "Major" [ref=e227]
+              - columnheader "Total Students" [ref=e228]
+              - columnheader "Placed" [ref=e229]
+              - columnheader "Placement Rate" [ref=e230]
+              - columnheader "Avg GPA" [ref=e231]
+          - rowgroup [ref=e232]:
+            - row "SE Software Engineering SE 48 42 87.5% 3.2 / 4.0" [ref=e233]:
+              - cell "SE Software Engineering SE" [ref=e234]:
+                - generic [ref=e235]:
+                  - generic [ref=e236]: SE
+                  - generic [ref=e237]:
+                    - generic [ref=e238]: Software Engineering
+                    - generic [ref=e239]: SE
+              - cell "48" [ref=e240]
+              - cell "42" [ref=e241]
+              - cell "87.5%" [ref=e242]:
+                - generic [ref=e246]: 87.5%
+              - cell "3.2 / 4.0" [ref=e247]:
+                - generic [ref=e248]:
+                  - generic [ref=e249]: "3.2"
+                  - generic [ref=e250]: / 4.0
+            - row "IA Information Assurance IA 30 27 90.0% 3.4 / 4.0" [ref=e251]:
+              - cell "IA Information Assurance IA" [ref=e252]:
+                - generic [ref=e253]:
+                  - generic [ref=e254]: IA
+                  - generic [ref=e255]:
+                    - generic [ref=e256]: Information Assurance
+                    - generic [ref=e257]: IA
+              - cell "30" [ref=e258]
+              - cell "27" [ref=e259]
+              - cell "90.0%" [ref=e260]:
+                - generic [ref=e264]: 90.0%
+              - cell "3.4 / 4.0" [ref=e265]:
+                - generic [ref=e266]:
+                  - generic [ref=e267]: "3.4"
+                  - generic [ref=e268]: / 4.0
+            - row "AI Artificial Intelligence AI 22 21 95.5% 3.5 / 4.0" [ref=e269]:
+              - cell "AI Artificial Intelligence AI" [ref=e270]:
+                - generic [ref=e271]:
+                  - generic [ref=e272]: AI
+                  - generic [ref=e273]:
+                    - generic [ref=e274]: Artificial Intelligence
+                    - generic [ref=e275]: AI
+              - cell "22" [ref=e276]
+              - cell "21" [ref=e277]
+              - cell "95.5%" [ref=e278]:
+                - generic [ref=e282]: 95.5%
+              - cell "3.5 / 4.0" [ref=e283]:
+                - generic [ref=e284]:
+                  - generic [ref=e285]: "3.5"
+                  - generic [ref=e286]: / 4.0
+            - row "GD Graphic Design GD 18 14 77.8% 3.1 / 4.0" [ref=e287]:
+              - cell "GD Graphic Design GD" [ref=e288]:
+                - generic [ref=e289]:
+                  - generic [ref=e290]: GD
+                  - generic [ref=e291]:
+                    - generic [ref=e292]: Graphic Design
+                    - generic [ref=e293]: GD
+              - cell "18" [ref=e294]
+              - cell "14" [ref=e295]
+              - cell "77.8%" [ref=e296]:
+                - generic [ref=e300]: 77.8%
+              - cell "3.1 / 4.0" [ref=e301]:
+                - generic [ref=e302]:
+                  - generic [ref=e303]: "3.1"
+                  - generic [ref=e304]: / 4.0
+  - generic [ref=e305]: "0"
