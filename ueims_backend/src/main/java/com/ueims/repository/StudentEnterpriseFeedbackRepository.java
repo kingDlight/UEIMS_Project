@@ -9,5 +9,6 @@ import com.ueims.model.entity.StudentEnterpriseFeedback;
 
 @Repository
 public interface StudentEnterpriseFeedbackRepository extends JpaRepository<StudentEnterpriseFeedback, UUID> {
-    boolean existsByStudent_UserIdAndEnterprise_EnterpriseIdAndSemester_SemesterId(UUID studentId, UUID enterpriseId, UUID semesterId);
+    boolean existsByStudent_UserIdAndEnterprise_EnterpriseIdAndSemester_SemesterId(
+            UUID studentId, UUID enterpriseId, UUID semesterId);
 }

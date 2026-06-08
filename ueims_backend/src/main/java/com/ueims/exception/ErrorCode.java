@@ -60,11 +60,11 @@ public enum ErrorCode {
     ENTERPRISE_EXISTED(1036, "Enterprise with this tax code already exists in the system", HttpStatus.BAD_REQUEST),
     TAX_CODE_EXISTED(1037, "Tax code is already used by another enterprise", HttpStatus.BAD_REQUEST),
     ENTERPRISE_REGISTRATION_SUCCESS(
-            1038, "Registration successful. Your account will be activated upon approval by the Training Manager.", HttpStatus.OK),
+            1038,
+            "Registration successful. Your account will be activated upon approval by the Training Manager.",
+            HttpStatus.OK),
     EXPORT_EXCEED_LIMIT(
-            1039,
-            "Export data exceeds the 10000 limit. Please select a narrower time range.",
-            HttpStatus.BAD_REQUEST),
+            1039, "Export data exceeds the 10000 limit. Please select a narrower time range.", HttpStatus.BAD_REQUEST),
     DATA_INTEGRITY_VIOLATION(1040, "Data integrity violation: Foreign key or constraint error", HttpStatus.BAD_REQUEST),
     METHOD_NOT_SUPPORTED(
             1041, "Request method '{method}' is not supported for this API", HttpStatus.METHOD_NOT_ALLOWED),
@@ -94,7 +94,8 @@ public enum ErrorCode {
     INVALID_SCORE_RANGE(1058, "Điểm các tiêu chí phải nằm trong khoảng từ 0.0 đến 10.0", HttpStatus.BAD_REQUEST),
     STUDENT_RESULT_ACCESS_DENIED(
             1059, "Sinh viên chỉ được xem kết quả đánh giá khi ở học kỳ 7 trở đi", HttpStatus.FORBIDDEN),
-    FEEDBACK_DUPLICATE(1060, "You have already submitted feedback for this enterprise in this semester", HttpStatus.BAD_REQUEST),
+    FEEDBACK_DUPLICATE(
+            1060, "You have already submitted feedback for this enterprise in this semester", HttpStatus.BAD_REQUEST),
     FEEDBACK_RATING_INVALID(1061, "Feedback rating scores must be between 1 and 5", HttpStatus.BAD_REQUEST),
 
     // Account related
@@ -109,8 +110,6 @@ public enum ErrorCode {
     INVALID_TOKEN_FORMAT(1055, "Invalid token format", HttpStatus.UNAUTHORIZED),
     ;
 
-  
-    
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
         this.code = code;
         this.message = message;

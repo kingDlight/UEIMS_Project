@@ -68,12 +68,14 @@ public class AuthenticationService {
     @Value("${jwt.refreshable-duration}")
     private long refreshableDuration;
 
+    private static final String ACCESS_TOKEN_TYPE = "ACCESS";
+
     public IntrospectResponse introspect(IntrospectRequest request) {
         var token = request.getToken();
         boolean isValid = true;
 
         try {
-            verifyToken(token, "ACCESS");
+            verifyToken(token, ACCESS_TOKEN_TYPE);
         } catch (AppException e) {
             isValid = false;
         }
@@ -125,7 +127,7 @@ public class AuthenticationService {
         // BR-02: Simultaneous Session Control - Invalidate old sessions
         userSessionManagementService.invalidateOldSessions(user.getEmail());
 
-        var token = generateToken(user, validDuration, "ACCESS");
+        var token = generateToken(user, validDuration, ACCESS_TOKEN_TYPE);
         var refreshToken = generateToken(user, refreshableDuration, "REFRESH");
 
         // Save new sessions for BOTH access token and refresh token
@@ -188,7 +190,7 @@ public class AuthenticationService {
 
     public void logout(LogoutRequest request) {
         try {
-            var signToken = verifyToken(request.getToken(), "ACCESS");
+            var signToken = verifyToken(request.getToken(), ACCESS_TOKEN_TYPE);
 
             String email = signToken.getJWTClaimsSet().getSubject();
 
@@ -233,25 +235,9 @@ public class AuthenticationService {
 
             var user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
 
-            var token = generateToken(user, validDuration, "ACCESS");
+            var token = generateToken(user, validDuration, ACCESS_TOKEN_TYPE);
 
-            try {
-                SignedJWT parsedToken = SignedJWT.parse(token);
-                UserSession accessSession = UserSession.builder()
-                        .tokenId(parsedToken.getJWTClaimsSet().getJWTID())
-                        .email(user.getEmail())
-                        .deviceId(request.getDeviceId())
-                        .expiresAt(parsedToken
-                                .getJWTClaimsSet()
-                                .getExpirationTime()
-                                .toInstant()
-                                .atZone(ZoneId.systemDefault())
-                                .toLocalDateTime())
-                        .build();
-                userSessionRepository.save(accessSession);
-            } catch (ParseException e) {
-                log.error("Failed to parse generated token", e);
-            }
+            saveAccessSession(user, token, request.getDeviceId());
 
             return AuthenticationResponse.builder()
                     .token(token)
@@ -260,6 +246,26 @@ public class AuthenticationService {
                     .build();
         } catch (ParseException e) {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
+    }
+
+    private void saveAccessSession(User user, String token, String deviceId) {
+        try {
+            SignedJWT parsedToken = SignedJWT.parse(token);
+            UserSession accessSession = UserSession.builder()
+                    .tokenId(parsedToken.getJWTClaimsSet().getJWTID())
+                    .email(user.getEmail())
+                    .deviceId(deviceId)
+                    .expiresAt(parsedToken
+                            .getJWTClaimsSet()
+                            .getExpirationTime()
+                            .toInstant()
+                            .atZone(ZoneId.systemDefault())
+                            .toLocalDateTime())
+                    .build();
+            userSessionRepository.save(accessSession);
+        } catch (ParseException e) {
+            log.error("Failed to parse generated token", e);
         }
     }
 

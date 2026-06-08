@@ -1,0 +1,6 @@
+projectKey=Ueims_FE
+serverUrl=http://localhost:9000
+serverVersion=26.5.0.122743
+dashboardUrl=http://localhost:9000/dashboard?id=Ueims_FE
+ceTaskId=ddfaa0f5-8e9e-4c82-b567-b88c9c1b88bf
+ceTaskUrl=http://localhost:9000/api/ce/task?id=ddfaa0f5-8e9e-4c82-b567-b88c9c1b88bf
