@@ -32,58 +32,64 @@ import {
   RefreshCw,
   Eye,
   Download,
+  Inbox,
+  TrendingUp,
+  Award,
+  ExternalLink,
 } from 'lucide-react';
 import { api } from '@/services/api';
 
 // ============================================================
-// DESIGN TOKENS — Student Portal (matching TM Dashboard style)
+// DESIGN TOKENS — Student Portal (aligned with TM cc / constants)
 // ============================================================
-export const sp = {
+const cc = {
+  // Brand
+  primary: '#E96500',
+  primaryHover: '#CC5800',
+  primaryLight: '#FFF3E8',
   brand: '#FF7A30',
-  brandHover: '#E86A20',
-  brandActive: '#CC5A18',
-  brandMuted: '#FFF3E8',
-  brandSubtle: '#FFF8F0',
   brandStrong: '#9B4A10',
 
-  success: '#10B981',
-  successMuted: '#D1FAE5',
-  successText: '#065F46',
-  error: '#EF4444',
-  errorMuted: '#FEE2E2',
-  errorText: '#991B1B',
-  warning: '#F59E0B',
-  warningMuted: '#FEF3C7',
-  warningText: '#92400E',
-  info: '#3B82F6',
-  infoMuted: '#DBEAFE',
-  infoText: '#1E40AF',
+  // Semantic
+  success: '#22c55e',
+  successMuted: '#dcfce7',
+  successText: '#166534',
+  warning: '#f59e0b',
+  warningMuted: '#fef3c7',
+  warningText: '#92400e',
+  error: '#ef4444',
+  errorMuted: '#fee2e2',
+  errorText: '#991b1b',
+  info: '#3b82f6',
+  infoMuted: '#dbeafe',
+  infoText: '#1e40af',
 
-  textPrimary: '#1A1A2E',
-  textSecondary: '#6B7280',
-  textMuted: '#9CA3AF',
-  textDisabled: '#D1D5DB',
+  // Neutrals
+  textPrimary: '#1e293b',
+  textSecondary: '#64748b',
+  textMuted: '#94a3b8',
+  surface: '#ffffff',
+  bg: '#f8fafc',
+  border: '#e2e8f0',
+  borderSubtle: '#f1f5f9',
 
-  surface: '#FFFFFF',
-  bg: 'transparent',
-  neutralBg: '#F9FAFB',
-  border: '#E5E7EB',
-  borderSubtle: '#F3F4F6',
-
+  // Radii
   radiusSm: 6,
   radiusMd: 8,
   radiusLg: 12,
   radiusXl: 16,
+  radius2xl: 22,
   radiusFull: 9999,
 
-  shadowSm: '0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)',
-  shadowMd: '0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.04)',
-  shadowLg: '0 10px 15px rgba(0,0,0,0.08), 0 4px 6px rgba(0,0,0,0.04)',
-  shadowXl: '0 20px 25px rgba(0,0,0,0.10), 0 8px 10px rgba(0,0,0,0.04)',
-  shadowBrand: '0 4px 12px rgba(255,122,48,0.25)',
-  shadowSuccess: '0 4px 12px rgba(16,185,129,0.25)',
-  shadowError: '0 4px 12px rgba(239,68,68,0.25)',
-  shadowWarning: '0 4px 12px rgba(245,158,11,0.25)',
+  // Shadows
+  shadowSm: '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)',
+  shadowMd: '0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04)',
+  shadowLg: '0 10px 20px rgba(0,0,0,0.08), 0 4px 8px rgba(0,0,0,0.04)',
+  shadowXl: '0 20px 40px rgba(0,0,0,0.10), 0 8px 16px rgba(0,0,0,0.06)',
+  shadowBrand: '0 4px 12px rgba(233,101,0,0.22)',
+  shadowSuccess: '0 4px 12px rgba(34,197,94,0.22)',
+  shadowError: '0 4px 12px rgba(239,68,68,0.22)',
+  shadowWarning: '0 4px 12px rgba(245,158,11,0.22)',
 };
 
 // ============================================================
@@ -98,9 +104,9 @@ function hexToRgba(hex: string, alpha: number): string {
 }
 
 // ============================================================
-// SHARED UI COMPONENTS
+// SHARED UI COMPONENTS (matching TM quality)
 // ============================================================
-const CardWrapper: React.FC<{
+const Card: React.FC<{
   children: React.ReactNode;
   className?: string;
   style?: React.CSSProperties;
@@ -116,14 +122,14 @@ const CardWrapper: React.FC<{
       onMouseLeave={() => hoverable && setHovered(false)}
       animate={{
         y: hovered && hoverable ? -2 : 0,
-        boxShadow: hovered && hoverable ? sp.shadowMd : sp.shadowSm,
+        boxShadow: hovered && hoverable ? cc.shadowMd : cc.shadowSm,
       }}
       transition={{ duration: 0.15, ease: [0.32, 0.72, 0, 1] }}
       style={{
-        background: sp.surface,
-        borderRadius: sp.radiusLg,
-        border: `1px solid ${sp.borderSubtle}`,
-        boxShadow: sp.shadowSm,
+        background: cc.surface,
+        borderRadius: cc.radiusLg,
+        border: `1px solid ${cc.border}`,
+        boxShadow: cc.shadowSm,
         overflow: 'hidden',
         cursor: onClick ? 'pointer' : 'default',
         ...style,
@@ -134,45 +140,161 @@ const CardWrapper: React.FC<{
   );
 };
 
-const Label: React.FC<{ children: React.ReactNode; className?: string; style?: React.CSSProperties }> = ({ children, className = '', style }) => (
-  <span
+const NeuSurface: React.FC<{
+  children: React.ReactNode;
+  className?: string;
+  style?: React.CSSProperties;
+}> = ({ children, className = '', style }) => (
+  <div
     className={className}
     style={{
-      fontSize: 11,
-      fontWeight: 600,
-      textTransform: 'uppercase',
-      letterSpacing: '0.06em',
-      color: sp.textMuted,
+      background: cc.surface,
+      borderRadius: cc.radius2xl,
+      boxShadow: '0 4px 20px rgba(15,23,42,.06)',
+      border: '1px solid rgba(226,232,240,.9)',
       ...style,
     }}
   >
     {children}
-  </span>
+  </div>
 );
+
+const StatCard: React.FC<{
+  label: string;
+  value: string | number;
+  icon: React.ReactNode;
+  color: string;
+  trend?: string;
+  trendUp?: boolean;
+}> = ({ label, value, icon, color, trend, trendUp }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 16 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.4 }}
+  >
+    <Card style={{ padding: 18 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+        <div style={{
+          width: 48,
+          height: 48,
+          borderRadius: cc.radiusMd,
+          background: hexToRgba(color, 0.12),
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: color,
+          flexShrink: 0,
+        }}>
+          {icon}
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p style={{ fontSize: 11, fontWeight: 600, color: cc.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 2px' }}>
+            {label}
+          </p>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+            <p style={{ fontSize: 28, fontWeight: 700, color: cc.textPrimary, margin: 0, lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
+              {value}
+            </p>
+            {trend && (
+              <span style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 2,
+                fontSize: 11,
+                fontWeight: 600,
+                color: trendUp ? cc.success : cc.error,
+                background: trendUp ? cc.successMuted : cc.errorMuted,
+                padding: '2px 6px',
+                borderRadius: cc.radiusFull,
+              }}>
+                <TrendingUp size={10} style={{ transform: trendUp ? 'none' : 'rotate(180deg)' }} />
+                {trend}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+    </Card>
+  </motion.div>
+);
+
+const SectionTitle: React.FC<{ children: React.ReactNode; action?: React.ReactNode }> = ({ children, action }) => (
+  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+    <h3 style={{ fontSize: 15, fontWeight: 600, color: cc.textPrimary, margin: 0 }}>{children}</h3>
+    {action}
+  </div>
+);
+
+const TextLink: React.FC<{ children: React.ReactNode; onClick?: () => void; icon?: React.ReactNode }> = ({ children, onClick, icon }) => (
+  <motion.button
+    onClick={onClick}
+    whileHover={{ opacity: 0.75, x: 2 }}
+    whileTap={{ scale: 0.98 }}
+    transition={{ duration: 0.15 }}
+    style={{
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: 4,
+      fontSize: 12,
+      fontWeight: 600,
+      color: cc.primary,
+      background: 'none',
+      border: 'none',
+      cursor: 'pointer',
+      padding: 0,
+    }}
+  >
+    {children}
+    {icon || <ArrowRight size={13} />}
+  </motion.button>
+);
+
+const SmallPill: React.FC<{ label: string; variant: 'success' | 'warning' | 'error' | 'info' | 'neutral' }> = ({ label, variant }) => {
+  const map: Record<string, { bg: string; color: string }> = {
+    success: { bg: cc.successMuted, color: cc.successText },
+    warning: { bg: cc.warningMuted, color: cc.warningText },
+    error: { bg: cc.errorMuted, color: cc.errorText },
+    info: { bg: cc.infoMuted, color: cc.infoText },
+    neutral: { bg: cc.borderSubtle, color: cc.textSecondary },
+  };
+  const { bg, color } = map[variant];
+  return (
+    <span style={{
+      display: 'inline-flex',
+      alignItems: 'center',
+      padding: '3px 8px',
+      borderRadius: cc.radiusFull,
+      background: bg,
+      color,
+      fontSize: 10,
+      fontWeight: 700,
+      textTransform: 'uppercase',
+      letterSpacing: '0.05em',
+    }}>
+      {label}
+    </span>
+  );
+};
 
 const CTAButton: React.FC<{
   children: React.ReactNode;
   onClick?: () => void;
-  variant?: 'primary' | 'amber' | 'red' | 'ghost' | 'success';
-  fullWidth?: boolean;
+  variant?: 'primary' | 'ghost' | 'success' | 'danger';
   size?: 'sm' | 'md' | 'lg';
+  fullWidth?: boolean;
   icon?: React.ReactNode;
   disabled?: boolean;
-}> = ({ children, onClick, variant = 'primary', fullWidth = false, size = 'md', icon, disabled = false }) => {
-  const variants: Record<string, { bg: string; text: string; shadow: string }> = {
-    primary: { bg: sp.brand, text: '#fff', shadow: sp.shadowBrand },
-    success: { bg: sp.success, text: '#fff', shadow: sp.shadowSuccess },
-    amber: { bg: sp.warning, text: '#fff', shadow: sp.shadowWarning },
-    red: { bg: sp.error, text: '#fff', shadow: sp.shadowError },
-    ghost: { bg: 'transparent', text: sp.brand, shadow: 'none' },
+}> = ({ children, onClick, variant = 'primary', size = 'md', fullWidth = false, icon, disabled = false }) => {
+  const styles: Record<string, { bg: string; text: string; border: string; shadow: string }> = {
+    primary: { bg: cc.primary, text: '#fff', border: 'transparent', shadow: cc.shadowBrand },
+    ghost: { bg: 'transparent', text: cc.primary, border: cc.border, shadow: 'none' },
+    success: { bg: cc.success, text: '#fff', border: 'transparent', shadow: cc.shadowSuccess },
+    danger: { bg: cc.error, text: '#fff', border: 'transparent', shadow: cc.shadowError },
   };
-  const { bg, text: textColor, shadow } = variants[variant];
-  const sizes = {
-    sm: { padding: '6px 12px', fontSize: 12 },
-    md: { padding: '9px 16px', fontSize: 13 },
-    lg: { padding: '11px 20px', fontSize: 14 },
-  };
+  const { bg, text, border, shadow } = styles[variant];
+  const sizes = { sm: { padding: '6px 12px', fontSize: 12 }, md: { padding: '9px 16px', fontSize: 13 }, lg: { padding: '11px 20px', fontSize: 14 } };
   const { padding, fontSize } = sizes[size];
+
   return (
     <motion.button
       onClick={onClick}
@@ -187,54 +309,47 @@ const CTAButton: React.FC<{
         padding,
         fontSize,
         fontWeight: 600,
-        color: disabled ? sp.textMuted : textColor,
-        background: disabled ? sp.borderSubtle : bg,
-        border: variant === 'ghost' ? `1px solid ${sp.border}` : 'none',
-        borderRadius: sp.radiusMd,
+        color: disabled ? cc.textMuted : text,
+        background: disabled ? cc.borderSubtle : bg,
+        border: `1px solid ${border}`,
+        borderRadius: cc.radiusMd,
         boxShadow: variant === 'ghost' ? 'none' : shadow,
         cursor: disabled ? 'not-allowed' : 'pointer',
         width: fullWidth ? '100%' : 'auto',
         justifyContent: 'center',
-        fontFamily: 'Inter, -apple-system, sans-serif',
+        fontFamily: "'Inter', -apple-system, sans-serif",
         opacity: disabled ? 0.6 : 1,
       }}
     >
+      {icon && <span style={{ display: 'flex' }}>{icon}</span>}
       {children}
-      {icon === false ? null : (icon || <ArrowRight size={size === 'sm' ? 12 : 14} />)}
     </motion.button>
   );
 };
 
-const StatusBadge: React.FC<{ label: string; variant: 'success' | 'warning' | 'error' | 'info' | 'default' }> = ({ label, variant }) => {
-  const config: Record<string, { bg: string; color: string; borderColor: string }> = {
-    success: { bg: hexToRgba(sp.success, 0.08), color: sp.success, borderColor: hexToRgba(sp.success, 0.25) },
-    warning: { bg: hexToRgba(sp.warning, 0.08), color: sp.warning, borderColor: hexToRgba(sp.warning, 0.25) },
-    error: { bg: hexToRgba(sp.error, 0.08), color: sp.error, borderColor: hexToRgba(sp.error, 0.25) },
-    info: { bg: hexToRgba(sp.info, 0.08), color: sp.info, borderColor: hexToRgba(sp.info, 0.25) },
-    default: { bg: hexToRgba(sp.textMuted, 0.08), color: sp.textMuted, borderColor: hexToRgba(sp.textMuted, 0.25) },
-  };
-  const { bg, color, borderColor } = config[variant];
-  return (
-    <span style={{
-      display: 'inline-flex',
+const EmptyState: React.FC<{ icon: React.ReactNode; title: string; description: string; action?: React.ReactNode }> = ({ icon, title, description, action }) => (
+  <Card style={{ padding: 56, textAlign: 'center' }}>
+    <div style={{
+      width: 72,
+      height: 72,
+      borderRadius: '50%',
+      background: cc.primaryLight,
+      display: 'flex',
       alignItems: 'center',
-      padding: '3px 8px',
-      borderRadius: sp.radiusMd,
-      backgroundColor: bg,
-      border: `1px solid ${borderColor}`,
-      color,
-      fontSize: 10,
-      fontWeight: 700,
-      textTransform: 'uppercase',
-      letterSpacing: '0.05em',
+      justifyContent: 'center',
+      margin: '0 auto 16px',
+      color: cc.primary,
     }}>
-      {label}
-    </span>
-  );
-};
+      {icon}
+    </div>
+    <h3 style={{ fontSize: 16, fontWeight: 600, color: cc.textPrimary, margin: '0 0 6px' }}>{title}</h3>
+    <p style={{ fontSize: 13, color: cc.textMuted, margin: '0 0 20px', maxWidth: 340, marginLeft: 'auto', marginRight: 'auto' }}>{description}</p>
+    {action}
+  </Card>
+);
 
 // ============================================================
-// PROFILE TAB — Drag & Drop CV Upload
+// PROFILE TAB
 // ============================================================
 const ProfileTab: React.FC = () => {
   const [profile, setProfile] = useState<any>(null);
@@ -244,9 +359,7 @@ const ProfileTab: React.FC = () => {
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [cvUrl, setCvUrl] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchProfile();
-  }, []);
+  useEffect(() => { fetchProfile(); }, []);
 
   const fetchProfile = async () => {
     try {
@@ -263,20 +376,13 @@ const ProfileTab: React.FC = () => {
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (e.type === 'dragenter' || e.type === 'dragover') {
-      setDragActive(true);
-    } else if (e.type === 'dragleave') {
-      setDragActive(false);
-    }
+    if (e.type === 'dragenter' || e.type === 'dragover') setDragActive(true);
+    else if (e.type === 'dragleave') setDragActive(false);
   };
 
   const validateFile = (file: File): string | null => {
-    if (file.type !== 'application/pdf') {
-      return 'Chỉ chấp nhận file PDF!';
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      return 'File CV không được vượt quá 5MB!';
-    }
+    if (file.type !== 'application/pdf') return 'Only PDF files are accepted!';
+    if (file.size > 5 * 1024 * 1024) return 'CV file must not exceed 5MB!';
     return null;
   };
 
@@ -284,14 +390,10 @@ const ProfileTab: React.FC = () => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-
     const file = e.dataTransfer.files?.[0];
     if (file) {
       const error = validateFile(file);
-      if (error) {
-        message.error(error);
-        return;
-      }
+      if (error) { message.error(error); return; }
       setCvFile(file);
       setCvUrl(URL.createObjectURL(file));
     }
@@ -301,10 +403,7 @@ const ProfileTab: React.FC = () => {
     const file = e.target.files?.[0];
     if (file) {
       const error = validateFile(file);
-      if (error) {
-        message.error(error);
-        return;
-      }
+      if (error) { message.error(error); return; }
       setCvFile(file);
       setCvUrl(URL.createObjectURL(file));
     }
@@ -312,20 +411,15 @@ const ProfileTab: React.FC = () => {
 
   const handleUploadCV = async () => {
     if (!cvFile) return;
-    
     try {
       setUploading(true);
       const formData = new FormData();
       formData.append('file', cvFile);
-      
-      await api.post('/student-profiles/upload-cv', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      
-      message.success('Upload CV thành công!');
+      await api.post('/student-profiles/upload-cv', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+      message.success('CV uploaded successfully!');
       fetchProfile();
     } catch (err: any) {
-      message.error(err.response?.data?.message || 'Upload thất bại!');
+      message.error(err.response?.data?.message || 'Upload failed!');
     } finally {
       setUploading(false);
     }
@@ -333,120 +427,88 @@ const ProfileTab: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="sp-loading" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}>
-        <div style={{ textAlign: 'center' }}>
-          <RefreshCw size={32} style={{ animation: 'spin 1s linear infinite', color: sp.brand }} />
-          <p style={{ marginTop: 12, color: sp.textMuted }}>Đang tải...</p>
-        </div>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}>
+        <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}>
+          <RefreshCw size={28} color={cc.primary} />
+        </motion.div>
       </div>
     );
   }
 
   return (
     <div style={{ maxWidth: 800, margin: '0 auto', padding: '0 24px 40px' }}>
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        {/* Profile Header Card */}
-        <CardWrapper style={{ padding: 24, marginBottom: 24 }}>
-          <div style={{ display: 'flex', gap: 20, alignItems: 'flex-start' }}>
-            {/* Avatar */}
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+
+        {/* Profile Header */}
+        <Card style={{ padding: 24, marginBottom: 20 }}>
+          <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
             <div style={{
-              width: 80,
-              height: 80,
-              borderRadius: sp.radiusLg,
-              background: `linear-gradient(135deg, ${sp.brand}, ${sp.brandHover})`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#fff',
-              fontSize: 28,
-              fontWeight: 800,
-              flexShrink: 0,
+              width: 80, height: 80,
+              borderRadius: cc.radiusLg,
+              background: `linear-gradient(135deg, ${cc.primary}, ${cc.primaryHover})`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: '#fff', fontSize: 28, fontWeight: 800, flexShrink: 0,
+              boxShadow: cc.shadowBrand,
             }}>
               {profile?.fullName?.substring(0, 2).toUpperCase() || 'ST'}
             </div>
-            
-            {/* Info */}
             <div style={{ flex: 1 }}>
-              <h2 style={{ fontSize: 22, fontWeight: 700, color: sp.textPrimary, margin: '0 0 4px' }}>
-                {profile?.fullName || 'Sinh viên'}
+              <h2 style={{ fontSize: 20, fontWeight: 700, color: cc.textPrimary, margin: '0 0 4px' }}>
+                {profile?.fullName || 'Student'}
               </h2>
-              <p style={{ fontSize: 14, color: sp.textSecondary, margin: '0 0 8px' }}>
+              <p style={{ fontSize: 13, color: cc.textMuted, margin: '0 0 10px' }}>
                 {profile?.email || 'email@student.fpt.edu.vn'}
               </p>
-              <StatusBadge label="Đang thực tập" variant="success" />
+              <SmallPill label="Active Intern" variant="success" />
             </div>
           </div>
-        </CardWrapper>
+        </Card>
 
-        {/* CV Upload Section */}
-        <CardWrapper style={{ padding: 24, marginBottom: 24 }}>
+        {/* CV Upload */}
+        <Card style={{ padding: 24, marginBottom: 20 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
             <div style={{
-              width: 40,
-              height: 40,
-              borderRadius: sp.radiusMd,
-              background: `${sp.info}15`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: sp.info,
+              width: 44, height: 44, borderRadius: cc.radiusMd,
+              background: hexToRgba(cc.info, 0.1), display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.info,
             }}>
               <FileText size={20} />
             </div>
             <div>
-              <h3 style={{ fontSize: 16, fontWeight: 600, color: sp.textPrimary, margin: 0 }}>Hồ sơ CV của bạn</h3>
-              <p style={{ fontSize: 12, color: sp.textMuted, margin: '2px 0 0' }}>Upload CV định dạng PDF, tối đa 5MB</p>
+              <h3 style={{ fontSize: 15, fontWeight: 600, color: cc.textPrimary, margin: 0 }}>Your CV / Resume</h3>
+              <p style={{ fontSize: 12, color: cc.textMuted, margin: '2px 0 0' }}>Upload in PDF format, max 5MB</p>
             </div>
           </div>
 
-          {/* Drop Zone */}
           <div
             onDragEnter={handleDrag}
             onDragLeave={handleDrag}
             onDragOver={handleDrag}
             onDrop={handleDrop}
+            onClick={() => document.getElementById('cv-input')?.click()}
             style={{
-              border: `2px dashed ${dragActive ? sp.brand : sp.border}`,
-              borderRadius: sp.radiusLg,
-              padding: '32px 24px',
+              border: `2px dashed ${dragActive ? cc.primary : cc.border}`,
+              borderRadius: cc.radiusLg,
+              padding: '36px 24px',
               textAlign: 'center',
-              background: dragActive ? sp.brandMuted : sp.neutralBg,
+              background: dragActive ? cc.primaryLight : cc.bg,
               transition: 'all 0.2s ease',
               cursor: 'pointer',
             }}
-            onClick={() => document.getElementById('cv-input')?.click()}
           >
-            <input
-              id="cv-input"
-              type="file"
-              accept=".pdf"
-              onChange={handleFileSelect}
-              style={{ display: 'none' }}
-            />
-            
+            <input id="cv-input" type="file" accept=".pdf" onChange={handleFileSelect} style={{ display: 'none' }} />
+
             {cvFile ? (
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
-                <File size={32} color={sp.success} />
+                <File size={32} color={cc.success} />
                 <div style={{ textAlign: 'left' }}>
-                  <p style={{ fontSize: 14, fontWeight: 600, color: sp.textPrimary, margin: 0 }}>{cvFile.name}</p>
-                  <p style={{ fontSize: 12, color: sp.textMuted, margin: '2px 0 0' }}>
-                    {(cvFile.size / 1024 / 1024).toFixed(2)} MB
-                  </p>
+                  <p style={{ fontSize: 14, fontWeight: 600, color: cc.textPrimary, margin: 0 }}>{cvFile.name}</p>
+                  <p style={{ fontSize: 12, color: cc.textMuted, margin: '2px 0 0' }}>{(cvFile.size / 1024 / 1024).toFixed(2)} MB</p>
                 </div>
                 <button
                   onClick={(e) => { e.stopPropagation(); setCvFile(null); setCvUrl(null); }}
                   style={{
-                    marginLeft: 8,
-                    padding: 8,
-                    borderRadius: sp.radiusMd,
-                    background: sp.errorMuted,
-                    border: 'none',
-                    cursor: 'pointer',
-                    color: sp.error,
+                    marginLeft: 8, padding: 8, borderRadius: cc.radiusMd,
+                    background: cc.errorMuted, border: 'none', cursor: 'pointer', color: cc.error,
                   }}
                 >
                   <X size={16} />
@@ -454,103 +516,62 @@ const ProfileTab: React.FC = () => {
               </div>
             ) : (
               <>
-                <Upload size={40} color={sp.textMuted} style={{ marginBottom: 12 }} />
-                <p style={{ fontSize: 14, fontWeight: 600, color: sp.textPrimary, margin: '0 0 4px' }}>
-                  Kéo thả file CV vào đây
-                </p>
-                <p style={{ fontSize: 12, color: sp.textMuted, margin: 0 }}>
-                  hoặc click để chọn file
-                </p>
+                <Upload size={40} color={cc.textMuted} style={{ marginBottom: 12 }} />
+                <p style={{ fontSize: 14, fontWeight: 600, color: cc.textPrimary, margin: '0 0 4px' }}>Drag & drop your CV here</p>
+                <p style={{ fontSize: 12, color: cc.textMuted, margin: 0 }}>or click to browse files</p>
               </>
             )}
           </div>
 
           {cvFile && (
             <div style={{ marginTop: 16, display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
-              <CTAButton variant="ghost" onClick={() => { setCvFile(null); setCvUrl(null); }}>
-                Hủy
-              </CTAButton>
-              <CTAButton variant="primary" onClick={handleUploadCV} disabled={uploading}>
-                {uploading ? (
-                  <>
-                    <RefreshCw size={14} style={{ animation: 'spin 1s linear infinite' }} />
-                    Đang upload...
-                  </>
-                ) : (
-                  <>
-                    <Upload size={14} />
-                    Upload CV
-                  </>
-                )}
+              <CTAButton variant="ghost" onClick={() => { setCvFile(null); setCvUrl(null); }}>Cancel</CTAButton>
+              <CTAButton variant="primary" onClick={handleUploadCV} disabled={uploading} icon={uploading ? <motion.span animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}><RefreshCw size={14} /></motion.span> : <Upload size={14} />}>
+                {uploading ? 'Uploading...' : 'Upload CV'}
               </CTAButton>
             </div>
           )}
 
-          {/* Current CV */}
           {profile?.cvFileUrl && !cvFile && (
             <div style={{
-              marginTop: 20,
-              padding: 16,
-              borderRadius: sp.radiusMd,
-              background: sp.successMuted,
-              border: `1px solid ${hexToRgba(sp.success, 0.2)}`,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
+              marginTop: 20, padding: 16, borderRadius: cc.radiusMd,
+              background: cc.successMuted, border: `1px solid ${hexToRgba(cc.success, 0.2)}`,
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <CheckCircle size={20} color={sp.success} />
+                <CheckCircle size={20} color={cc.success} />
                 <div>
-                  <p style={{ fontSize: 14, fontWeight: 600, color: sp.successText, margin: 0 }}>CV đã được upload</p>
-                  <p style={{ fontSize: 12, color: sp.successText, opacity: 0.8, margin: '2px 0 0' }}>
-                    {profile.cvFileName || 'cv_document.pdf'}
-                  </p>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: cc.successText, margin: 0 }}>CV uploaded</p>
+                  <p style={{ fontSize: 12, color: cc.successText, opacity: 0.8, margin: '2px 0 0' }}>{profile.cvFileName || 'cv_document.pdf'}</p>
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <CTAButton variant="ghost" size="sm" icon={<Eye size={14} />} onClick={() => window.open(profile.cvFileUrl, '_blank')}>
-                  Xem
-                </CTAButton>
-              </div>
+              <CTAButton variant="ghost" size="sm" icon={<Eye size={14} />} onClick={() => window.open(profile.cvFileUrl, '_blank')}>View</CTAButton>
             </div>
           )}
-        </CardWrapper>
+        </Card>
 
-        {/* Skills Section */}
-        <CardWrapper style={{ padding: 24 }}>
-          <h3 style={{ fontSize: 16, fontWeight: 600, color: sp.textPrimary, margin: '0 0 16px' }}>Kỹ năng</h3>
+        {/* Skills */}
+        <Card style={{ padding: 24 }}>
+          <SectionTitle>Skills</SectionTitle>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
             {['React', 'TypeScript', 'Node.js', 'Java', 'Python', 'SQL'].map((skill) => (
-              <span
-                key={skill}
-                style={{
-                  padding: '6px 12px',
-                  borderRadius: sp.radiusFull,
-                  background: sp.brandMuted,
-                  color: sp.brand,
-                  fontSize: 12,
-                  fontWeight: 600,
-                }}
-              >
+              <span key={skill} style={{
+                padding: '6px 14px', borderRadius: cc.radiusFull,
+                background: cc.primaryLight, color: cc.primary,
+                fontSize: 12, fontWeight: 600,
+              }}>
                 {skill}
               </span>
             ))}
           </div>
-        </CardWrapper>
+        </Card>
       </motion.div>
-
-      <style>{`
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
     </div>
   );
 };
 
 // ============================================================
-// JOB BOARD TAB — Grid Card Layout
+// JOB BOARD TAB
 // ============================================================
 const JobBoardTab: React.FC = () => {
   const [jobs, setJobs] = useState<any[]>([]);
@@ -560,9 +581,7 @@ const JobBoardTab: React.FC = () => {
   const [applying, setApplying] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-  useEffect(() => {
-    fetchJobs();
-  }, []);
+  useEffect(() => { fetchJobs(); }, []);
 
   const fetchJobs = async () => {
     try {
@@ -578,18 +597,14 @@ const JobBoardTab: React.FC = () => {
 
   const handleApply = async () => {
     if (!selectedJob) return;
-    
     try {
       setApplying(true);
-      await api.post('/applications', {
-        jobPostId: selectedJob.jobPostId,
-        cvFileUrl: selectedJob.appliedCvUrl,
-      });
-      message.success('Ứng tuyển thành công!');
+      await api.post('/applications', { jobPostId: selectedJob.jobPostId, cvFileUrl: selectedJob.appliedCvUrl });
+      message.success('Application submitted successfully!');
       setShowConfirmModal(false);
       setSelectedJob(null);
     } catch (err: any) {
-      message.error(err.response?.data?.message || 'Ứng tuyển thất bại!');
+      message.error(err.response?.data?.message || 'Application failed!');
     } finally {
       setApplying(false);
     }
@@ -603,68 +618,50 @@ const JobBoardTab: React.FC = () => {
   if (loading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}>
-        <div style={{ textAlign: 'center' }}>
-          <RefreshCw size={32} style={{ animation: 'spin 1s linear infinite', color: sp.brand }} />
-          <p style={{ marginTop: 12, color: sp.textMuted }}>Đang tải tin tuyển dụng...</p>
-        </div>
+        <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}>
+          <RefreshCw size={28} color={cc.primary} />
+        </motion.div>
       </div>
     );
   }
 
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px 40px' }}>
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+
         {/* Header */}
         <div style={{ marginBottom: 24 }}>
-          <h2 style={{ fontSize: 24, fontWeight: 700, color: sp.textPrimary, margin: '0 0 8px' }}>
-            Bảng tin tuyển dụng
-          </h2>
-          <p style={{ fontSize: 14, color: sp.textMuted, margin: 0 }}>
-            Tìm kiếm vị trí thực tập phù hợp với bạn
-          </p>
+          <h2 style={{ fontSize: 22, fontWeight: 700, color: cc.textPrimary, margin: '0 0 6px' }}>Job Board</h2>
+          <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}>Find the perfect internship opportunity for you</p>
         </div>
 
-        {/* Search Bar */}
-        <CardWrapper style={{ padding: 16, marginBottom: 24 }}>
+        {/* Search */}
+        <Card style={{ padding: 16, marginBottom: 24 }}>
           <div style={{ display: 'flex', gap: 12 }}>
             <input
               type="text"
-              placeholder="Tìm kiếm vị trí, công ty..."
+              placeholder="Search by position, company..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               style={{
-                flex: 1,
-                padding: '10px 16px',
-                borderRadius: sp.radiusMd,
-                border: `1px solid ${sp.border}`,
-                fontSize: 14,
-                outline: 'none',
-                fontFamily: 'Inter, sans-serif',
+                flex: 1, padding: '10px 16px', borderRadius: cc.radiusMd,
+                border: `1px solid ${cc.border}`, fontSize: 13, outline: 'none',
+                fontFamily: "'Inter', sans-serif", color: cc.textPrimary,
               }}
             />
-            <CTAButton variant="primary" icon={<span style={{ fontSize: 16 }}>🔍</span>}>
-              Tìm kiếm
-            </CTAButton>
+            <CTAButton variant="primary" icon={<span style={{ fontSize: 16 }}>🔍</span>}>Search</CTAButton>
           </div>
-        </CardWrapper>
+        </Card>
 
         {/* Job Grid */}
         {filteredJobs.length === 0 ? (
-          <CardWrapper style={{ padding: 48, textAlign: 'center' }}>
-            <Briefcase size={48} color={sp.textMuted} style={{ marginBottom: 16 }} />
-            <h3 style={{ fontSize: 18, fontWeight: 600, color: sp.textPrimary, margin: '0 0 8px' }}>
-              Không có tin tuyển dụng nào
-            </h3>
-            <p style={{ fontSize: 14, color: sp.textMuted, margin: 0 }}>
-              {searchTerm ? 'Thử tìm kiếm với từ khóa khác' : 'Hiện chưa có vị trí thực tập nào'}
-            </p>
-          </CardWrapper>
+          <EmptyState
+            icon={<Inbox size={32} />}
+            title="No job postings found"
+            description={searchTerm ? 'Try adjusting your search terms' : 'No active internship positions available at the moment'}
+          />
         ) : (
-          <div className="sp-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 20 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 20 }}>
             {filteredJobs.map((job, index) => (
               <motion.div
                 key={job.jobPostId || index}
@@ -672,90 +669,73 @@ const JobBoardTab: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.05 }}
               >
-                <CardWrapper
-                  hoverable
-                  onClick={() => setSelectedJob(job)}
-                  style={{ padding: 20, cursor: 'pointer' }}
-                >
-                  {/* Enterprise Logo & Name */}
-                  <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
+                <Card hoverable onClick={() => setSelectedJob(job)} style={{ padding: 20 }}>
+                  <div style={{ display: 'flex', gap: 12, marginBottom: 14 }}>
                     <div style={{
-                      width: 48,
-                      height: 48,
-                      borderRadius: sp.radiusMd,
-                      background: `linear-gradient(135deg, ${sp.brand}20, ${sp.brand}40)`,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: sp.brand,
-                      fontSize: 20,
-                      fontWeight: 700,
-                      flexShrink: 0,
+                      width: 48, height: 48, borderRadius: cc.radiusMd,
+                      background: hexToRgba(cc.primary, 0.1),
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      color: cc.primary, fontSize: 20, fontWeight: 700, flexShrink: 0,
                     }}>
                       {job.enterpriseName?.charAt(0) || 'E'}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <h4 style={{ fontSize: 15, fontWeight: 600, color: sp.textPrimary, margin: '0 0 2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {job.title || 'Vị trí thực tập'}
+                      <h4 style={{
+                        fontSize: 14, fontWeight: 600, color: cc.textPrimary, margin: '0 0 2px',
+                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                      }}>
+                        {job.title || 'Internship Position'}
                       </h4>
-                      <p style={{ fontSize: 13, color: sp.textSecondary, margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {job.enterpriseName || 'Doanh nghiệp'}
+                      <p style={{
+                        fontSize: 12, color: cc.textMuted, margin: 0,
+                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                      }}>
+                        {job.enterpriseName || 'Company'}
                       </p>
                     </div>
                   </div>
 
-                  {/* Meta Info */}
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
                     {job.location && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: sp.textMuted }}>
-                        <MapPin size={12} />
-                        {job.location}
-                      </div>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: cc.textMuted }}>
+                        <MapPin size={12} />{job.location}
+                      </span>
                     )}
                     {job.maxPositions && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: sp.textMuted }}>
-                        <Users size={12} />
-                        {job.maxPositions} vị trí
-                      </div>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: cc.textMuted }}>
+                        <Users size={12} />{job.maxPositions} positions
+                      </span>
                     )}
                   </div>
 
-                  {/* Description Preview */}
-                  <p style={{ fontSize: 13, color: sp.textSecondary, margin: '0 0 16px', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                    {job.description || 'Mô tả công việc...'}
+                  <p style={{
+                    fontSize: 13, color: cc.textSecondary, margin: '0 0 14px', lineHeight: 1.5,
+                    display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
+                  }}>
+                    {job.description || 'Job description...'}
                   </p>
 
-                  {/* Footer */}
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 16, borderTop: `1px solid ${sp.borderSubtle}` }}>
-                    <div style={{ display: 'flex', gap: 8 }}>
-                      <StatusBadge 
-                        label={job.status === 'OPEN' ? 'Đang tuyển' : 'Đã đóng'} 
-                        variant={job.status === 'OPEN' ? 'success' : 'default'} 
-                      />
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: sp.brand, fontWeight: 600 }}>
-                      Xem chi tiết <ChevronRight size={14} />
-                    </div>
+                  <div style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    paddingTop: 14, borderTop: `1px solid ${cc.borderSubtle}`,
+                  }}>
+                    <SmallPill label={job.status === 'OPEN' ? 'Open' : 'Closed'} variant={job.status === 'OPEN' ? 'success' : 'neutral'} />
+                    <TextLink onClick={() => setSelectedJob(job)}>View details <ChevronRight size={13} /></TextLink>
                   </div>
-                </CardWrapper>
+                </Card>
               </motion.div>
             ))}
           </div>
         )}
       </motion.div>
 
-      {/* Job Detail Modal / Drawer */}
+      {/* Job Detail Drawer */}
       {selectedJob && (
-        <div 
+        <div
           onClick={() => setSelectedJob(null)}
           style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0,0,0,0.5)',
-            zIndex: 1000,
-            display: 'flex',
-            alignItems: 'flex-end',
-            justifyContent: 'center',
+            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
+            zIndex: 1000, display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
           }}
         >
           <motion.div
@@ -765,132 +745,87 @@ const JobBoardTab: React.FC = () => {
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             onClick={(e) => e.stopPropagation()}
             style={{
-              background: sp.surface,
-              borderRadius: `${sp.radiusXl}px ${sp.radiusXl}px 0 0`,
-              maxWidth: 600,
-              width: '100%',
-              maxHeight: '85vh',
-              overflow: 'auto',
-              padding: 24,
+              background: cc.surface, borderRadius: `${cc.radiusXl}px ${cc.radiusXl}px 0 0`,
+              maxWidth: 600, width: '100%', maxHeight: '85vh', overflow: 'auto', padding: 28,
             }}
           >
-            {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
               <div style={{ display: 'flex', gap: 16 }}>
                 <div style={{
-                  width: 64,
-                  height: 64,
-                  borderRadius: sp.radiusLg,
-                  background: `linear-gradient(135deg, ${sp.brand}20, ${sp.brand}40)`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: sp.brand,
-                  fontSize: 24,
-                  fontWeight: 700,
-                  flexShrink: 0,
+                  width: 64, height: 64, borderRadius: cc.radiusLg,
+                  background: hexToRgba(cc.primary, 0.1), display: 'flex',
+                  alignItems: 'center', justifyContent: 'center', color: cc.primary,
+                  fontSize: 24, fontWeight: 700, flexShrink: 0,
                 }}>
                   {selectedJob.enterpriseName?.charAt(0) || 'E'}
                 </div>
                 <div>
-                  <h2 style={{ fontSize: 20, fontWeight: 700, color: sp.textPrimary, margin: '0 0 4px' }}>
-                    {selectedJob.title}
-                  </h2>
-                  <p style={{ fontSize: 14, color: sp.textSecondary, margin: 0 }}>{selectedJob.enterpriseName}</p>
+                  <h2 style={{ fontSize: 18, fontWeight: 700, color: cc.textPrimary, margin: '0 0 4px' }}>{selectedJob.title}</h2>
+                  <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}>{selectedJob.enterpriseName}</p>
                 </div>
               </div>
-              <button
-                onClick={() => setSelectedJob(null)}
-                style={{
-                  padding: 8,
-                  borderRadius: sp.radiusMd,
-                  background: sp.neutralBg,
-                  border: 'none',
-                  cursor: 'pointer',
-                  color: sp.textMuted,
-                }}
-              >
+              <button onClick={() => setSelectedJob(null)} style={{
+                padding: 8, borderRadius: cc.radiusMd, background: cc.bg, border: 'none', cursor: 'pointer', color: cc.textMuted,
+              }}>
                 <X size={20} />
               </button>
             </div>
 
-            {/* Meta */}
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 20 }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 20 }}>
               {selectedJob.location && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 12px', borderRadius: sp.radiusMd, background: sp.neutralBg, fontSize: 13 }}>
-                  <MapPin size={14} color={sp.textMuted} />
-                  {selectedJob.location}
-                </div>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 12px', borderRadius: cc.radiusMd, background: cc.bg, fontSize: 13, color: cc.textSecondary }}>
+                  <MapPin size={14} color={cc.textMuted} />{selectedJob.location}
+                </span>
               )}
               {selectedJob.maxPositions && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 12px', borderRadius: sp.radiusMd, background: sp.neutralBg, fontSize: 13 }}>
-                  <Users size={14} color={sp.textMuted} />
-                  {selectedJob.maxPositions} vị trí
-                </div>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 12px', borderRadius: cc.radiusMd, background: cc.bg, fontSize: 13, color: cc.textSecondary }}>
+                  <Users size={14} color={cc.textMuted} />{selectedJob.maxPositions} positions
+                </span>
               )}
             </div>
 
-            {/* Description */}
-            <div style={{ marginBottom: 20 }}>
-              <h3 style={{ fontSize: 14, fontWeight: 600, color: sp.textPrimary, margin: '0 0 8px' }}>Mô tả công việc</h3>
-              <p style={{ fontSize: 14, color: sp.textSecondary, lineHeight: 1.6, margin: 0 }}>
-                {selectedJob.description || 'Không có mô tả'}
-              </p>
-            </div>
+            {selectedJob.description && (
+              <div style={{ marginBottom: 18 }}>
+                <h3 style={{ fontSize: 13, fontWeight: 600, color: cc.textPrimary, margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Description</h3>
+                <p style={{ fontSize: 13, color: cc.textSecondary, lineHeight: 1.6, margin: 0 }}>{selectedJob.description}</p>
+              </div>
+            )}
 
-            {/* Requirements */}
             {selectedJob.requirements && (
-              <div style={{ marginBottom: 20 }}>
-                <h3 style={{ fontSize: 14, fontWeight: 600, color: sp.textPrimary, margin: '0 0 8px' }}>Yêu cầu</h3>
-                <p style={{ fontSize: 14, color: sp.textSecondary, lineHeight: 1.6, margin: 0 }}>
-                  {selectedJob.requirements}
-                </p>
+              <div style={{ marginBottom: 18 }}>
+                <h3 style={{ fontSize: 13, fontWeight: 600, color: cc.textPrimary, margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Requirements</h3>
+                <p style={{ fontSize: 13, color: cc.textSecondary, lineHeight: 1.6, margin: 0 }}>{selectedJob.requirements}</p>
               </div>
             )}
 
-            {/* Benefits */}
             {selectedJob.benefits && (
-              <div style={{ marginBottom: 20 }}>
-                <h3 style={{ fontSize: 14, fontWeight: 600, color: sp.textPrimary, margin: '0 0 8px' }}>Phúc lợi</h3>
-                <p style={{ fontSize: 14, color: sp.textSecondary, lineHeight: 1.6, margin: 0 }}>
-                  {selectedJob.benefits}
-                </p>
+              <div style={{ marginBottom: 18 }}>
+                <h3 style={{ fontSize: 13, fontWeight: 600, color: cc.textPrimary, margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Benefits</h3>
+                <p style={{ fontSize: 13, color: cc.textSecondary, lineHeight: 1.6, margin: 0 }}>{selectedJob.benefits}</p>
               </div>
             )}
 
-            {/* Deadline */}
             {selectedJob.applicationDeadline && (
-              <div style={{ 
-                padding: 16, 
-                borderRadius: sp.radiusMd, 
-                background: sp.warningMuted,
-                marginBottom: 20,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 12,
+              <div style={{
+                padding: 16, borderRadius: cc.radiusMd, background: cc.warningMuted,
+                marginBottom: 20, display: 'flex', alignItems: 'center', gap: 12,
               }}>
-                <Clock size={20} color={sp.warning} />
+                <Clock size={20} color={cc.warning} />
                 <div>
-                  <p style={{ fontSize: 12, color: sp.warningText, margin: 0, fontWeight: 600 }}>Hạn nộp hồ sơ</p>
-                  <p style={{ fontSize: 14, color: sp.warningText, margin: '2px 0 0', fontWeight: 600 }}>
-                    {new Date(selectedJob.applicationDeadline).toLocaleDateString('vi-VN')}
+                  <p style={{ fontSize: 11, color: cc.warningText, margin: 0, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Application Deadline</p>
+                  <p style={{ fontSize: 14, color: cc.warningText, margin: '2px 0 0', fontWeight: 600 }}>
+                    {new Date(selectedJob.applicationDeadline).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
                   </p>
                 </div>
               </div>
             )}
 
-            {/* Apply Button */}
-            <CTAButton 
-              variant="primary" 
-              size="lg" 
-              fullWidth 
-              icon={<Send size={16} />}
-              onClick={() => {
-                setShowConfirmModal(true);
-              }}
+            <CTAButton
+              variant="primary" size="lg" fullWidth icon={<Send size={16} />}
+              onClick={() => setShowConfirmModal(true)}
               disabled={selectedJob.status !== 'OPEN'}
             >
-              {selectedJob.status === 'OPEN' ? 'Ứng tuyển ngay' : 'Đã hết hạn tuyển dụng'}
+              {selectedJob.status === 'OPEN' ? 'Apply Now' : 'Applications Closed'}
             </CTAButton>
           </motion.div>
         </div>
@@ -898,89 +833,54 @@ const JobBoardTab: React.FC = () => {
 
       {/* Confirm Modal */}
       {showConfirmModal && selectedJob && (
-        <div 
+        <div
           onClick={() => setShowConfirmModal(false)}
           style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0,0,0,0.5)',
-            zIndex: 1100,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: 24,
+            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
+            zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24,
           }}
         >
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             onClick={(e) => e.stopPropagation()}
-            style={{
-              background: sp.surface,
-              borderRadius: sp.radiusXl,
-              padding: 24,
-              maxWidth: 400,
-              width: '100%',
-            }}
+            style={{ background: cc.surface, borderRadius: cc.radiusXl, padding: 28, maxWidth: 420, width: '100%' }}
           >
             <div style={{ textAlign: 'center', marginBottom: 20 }}>
               <div style={{
-                width: 64,
-                height: 64,
-                borderRadius: '50%',
-                background: sp.brandMuted,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                margin: '0 auto 16px',
+                width: 64, height: 64, borderRadius: '50%', background: cc.primaryLight,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                margin: '0 auto 16px', color: cc.primary,
               }}>
-                <AlertCircle size={32} color={sp.brand} />
+                <Award size={32} />
               </div>
-              <h3 style={{ fontSize: 18, fontWeight: 700, color: sp.textPrimary, margin: '0 0 8px' }}>
-                Xác nhận ứng tuyển
-              </h3>
-              <p style={{ fontSize: 14, color: sp.textSecondary, margin: 0 }}>
-                Bạn sắp ứng tuyển vị trí <strong>{selectedJob.title}</strong> tại <strong>{selectedJob.enterpriseName}</strong>.
-                Bạn chỉ được ứng tuyển <strong>1 lần</strong> cho vị trí này và không thể thay đổi sau khi gửi.
+              <h3 style={{ fontSize: 17, fontWeight: 700, color: cc.textPrimary, margin: '0 0 8px' }}>Confirm Application</h3>
+              <p style={{ fontSize: 13, color: cc.textSecondary, margin: 0, lineHeight: 1.6 }}>
+                You are about to apply for <strong>{selectedJob.title}</strong> at <strong>{selectedJob.enterpriseName}</strong>.
+                You can only apply <strong>once</strong> and cannot change this after submission.
               </p>
             </div>
             <div style={{ display: 'flex', gap: 12 }}>
-              <CTAButton variant="ghost" fullWidth onClick={() => setShowConfirmModal(false)}>
-                Hủy
-              </CTAButton>
+              <CTAButton variant="ghost" fullWidth onClick={() => setShowConfirmModal(false)}>Cancel</CTAButton>
               <CTAButton variant="primary" fullWidth onClick={handleApply} disabled={applying}>
-                {applying ? 'Đang gửi...' : 'Xác nhận ứng tuyển'}
+                {applying ? 'Submitting...' : 'Confirm Apply'}
               </CTAButton>
             </div>
           </motion.div>
         </div>
       )}
-
-      <style>{`
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        @media (max-width: 768px) {
-          .sp-grid {
-            grid-template-columns: 1fr !important;
-          }
-        }
-      `}</style>
     </div>
   );
 };
 
 // ============================================================
-// REPORTS TAB — Weekly Reports List
+// REPORTS TAB
 // ============================================================
 const ReportsTab: React.FC = () => {
   const [reports, setReports] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchReports();
-  }, []);
+  useEffect(() => { fetchReports(); }, []);
 
   const fetchReports = async () => {
     try {
@@ -998,39 +898,30 @@ const ReportsTab: React.FC = () => {
   if (loading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}>
-        <RefreshCw size={32} style={{ animation: 'spin 1s linear infinite', color: sp.brand }} />
+        <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}>
+          <RefreshCw size={28} color={cc.primary} />
+        </motion.div>
       </div>
     );
   }
 
   return (
     <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 24px 40px' }}>
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
         <div style={{ marginBottom: 24 }}>
-          <h2 style={{ fontSize: 24, fontWeight: 700, color: sp.textPrimary, margin: '0 0 8px' }}>
-            Báo cáo tuần
-          </h2>
-          <p style={{ fontSize: 14, color: sp.textMuted, margin: 0 }}>
-            Theo dõi tiến độ thực tập hàng tuần của bạn
-          </p>
+          <h2 style={{ fontSize: 22, fontWeight: 700, color: cc.textPrimary, margin: '0 0 6px' }}>Weekly Reports</h2>
+          <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}>Track your internship progress on a weekly basis</p>
         </div>
 
         {reports.length === 0 ? (
-          <CardWrapper style={{ padding: 48, textAlign: 'center' }}>
-            <FileText size={48} color={sp.textMuted} style={{ marginBottom: 16 }} />
-            <h3 style={{ fontSize: 18, fontWeight: 600, color: sp.textPrimary, margin: '0 0 8px' }}>
-              Chưa có báo cáo nào
-            </h3>
-            <p style={{ fontSize: 14, color: sp.textMuted, margin: 0 }}>
-              Báo cáo tuần sẽ xuất hiện sau khi bạn bắt đầu thực tập
-            </p>
-          </CardWrapper>
+          <EmptyState
+            icon={<FileText size={32} />}
+            title="No reports yet"
+            description="Your weekly reports will appear once you start your internship"
+            action={<CTAButton variant="primary" icon={<FileText size={14} />} onClick={() => {}}>Submit First Report</CTAButton>}
+          />
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {reports.map((report, index) => (
               <motion.div
                 key={report.reportId || index}
@@ -1038,68 +929,53 @@ const ReportsTab: React.FC = () => {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.3, delay: index * 0.05 }}
               >
-                <CardWrapper hoverable style={{ padding: 20 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+                <Card hoverable style={{ padding: 20 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
                       <div style={{
-                        width: 48,
-                        height: 48,
-                        borderRadius: sp.radiusMd,
-                        background: `${sp.info}15`,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: sp.info,
-                        fontSize: 16,
-                        fontWeight: 700,
+                        width: 52, height: 52, borderRadius: cc.radiusMd,
+                        background: hexToRgba(cc.primary, 0.1), display: 'flex',
+                        alignItems: 'center', justifyContent: 'center',
+                        color: cc.primary, fontSize: 14, fontWeight: 700,
                       }}>
                         W{report.weekNumber}
                       </div>
                       <div>
-                        <h4 style={{ fontSize: 15, fontWeight: 600, color: sp.textPrimary, margin: '0 0 4px' }}>
-                          Báo cáo tuần {report.weekNumber}
+                        <h4 style={{ fontSize: 14, fontWeight: 600, color: cc.textPrimary, margin: '0 0 4px' }}>
+                          Week {report.weekNumber} Report
                         </h4>
-                        <p style={{ fontSize: 13, color: sp.textMuted, margin: '0 0 8px' }}>
-                          {report.submittedAt ? `Đã gửi: ${new Date(report.submittedAt).toLocaleDateString('vi-VN')}` : 'Chưa gửi'}
+                        <p style={{ fontSize: 12, color: cc.textMuted, margin: '0 0 8px' }}>
+                          {report.submittedAt ? `Submitted: ${new Date(report.submittedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}` : 'Not submitted'}
                         </p>
-                        <StatusBadge 
+                        <SmallPill
                           label={
-                            report.status === 'APPROVED' ? 'Đã duyệt' :
-                            report.status === 'REJECTED' ? 'Bị từ chối' :
-                            report.status === 'SUBMITTED' ? 'Chờ duyệt' :
-                            report.status === 'NOT_SUBMITTED' ? 'Chưa nộp' : 'Nháp'
+                            report.status === 'APPROVED' ? 'Approved' :
+                            report.status === 'REJECTED' ? 'Rejected' :
+                            report.status === 'SUBMITTED' ? 'Pending Review' :
+                            report.status === 'NOT_SUBMITTED' ? 'Not Submitted' : 'Draft'
                           }
                           variant={
                             report.status === 'APPROVED' ? 'success' :
                             report.status === 'REJECTED' ? 'error' :
-                            report.status === 'SUBMITTED' ? 'warning' : 'default'
+                            report.status === 'SUBMITTED' ? 'warning' : 'neutral'
                           }
                         />
                       </div>
                     </div>
-                    <CTAButton variant="ghost" size="sm" icon={<Eye size={14} />}>
-                      Xem
-                    </CTAButton>
+                    <CTAButton variant="ghost" size="sm" icon={<Eye size={14} />}>View</CTAButton>
                   </div>
-                </CardWrapper>
+                </Card>
               </motion.div>
             ))}
           </div>
         )}
       </motion.div>
-
-      <style>{`
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
     </div>
   );
 };
 
 // ============================================================
-// MAIN STUDENT DASHBOARD COMPONENT
+// MAIN STUDENT DASHBOARD
 // ============================================================
 export const StudentDashboard: React.FC = () => {
   const { tab } = useParams<{ tab: string }>();
@@ -1111,91 +987,94 @@ export const StudentDashboard: React.FC = () => {
   };
 
   const navItems: NavItem[] = [
-    { key: 'dashboard', label: 'Trang chủ', icon: <Home size={18} /> },
-    { key: 'profile', label: 'Hồ sơ', icon: <User size={18} /> },
-    { key: 'jobs', label: 'Tin tuyển dụng', icon: <Briefcase size={18} /> },
-    { key: 'reports', label: 'Báo cáo tuần', icon: <FileText size={18} /> },
-    { key: 'applications', label: 'Đơn ứng tuyển', icon: <Send size={18} /> },
-    { key: 'schedule', label: 'Lịch phỏng vấn', icon: <Calendar size={18} /> },
-    { key: 'feedback', label: 'Đánh giá', icon: <Star size={18} /> },
-    { key: 'settings', label: 'Cài đặt', icon: <Settings size={18} /> },
+    { key: 'dashboard', label: 'Dashboard', icon: <Home size={18} /> },
+    { key: 'profile', label: 'Profile', icon: <User size={18} /> },
+    { key: 'jobs', label: 'Jobs', icon: <Briefcase size={18} /> },
+    { key: 'reports', label: 'Reports', icon: <FileText size={18} /> },
+    { key: 'applications', label: 'Applications', icon: <Send size={18} /> },
+    { key: 'schedule', label: 'Schedule', icon: <Calendar size={18} /> },
+    { key: 'feedback', label: 'Feedback', icon: <Star size={18} /> },
+    { key: 'settings', label: 'Settings', icon: <Settings size={18} /> },
   ];
 
   const tabComponents: Record<string, React.ReactNode> = {
     dashboard: (
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px 40px' }}>
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <div style={{ marginBottom: 24 }}>
-            <h1 style={{ fontSize: 28, fontWeight: 700, color: sp.textPrimary, margin: '0 0 8px' }}>
-              Xin chào, Sinh viên! 👋
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+
+          {/* Welcome */}
+          <div style={{ marginBottom: 28 }}>
+            <h1 style={{ fontSize: 26, fontWeight: 700, color: cc.textPrimary, margin: '0 0 6px' }}>
+              Welcome back! 👋
             </h1>
-            <p style={{ fontSize: 16, color: sp.textMuted, margin: 0 }}>
-              Theo dõi tiến độ thực tập và quản lý hồ sơ của bạn
+            <p style={{ fontSize: 14, color: cc.textMuted, margin: 0 }}>
+              Track your internship progress and manage your profile
             </p>
           </div>
 
-          <div className="sp-grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
-            {[
-              { label: 'Đơn đã ứng tuyển', value: '3', icon: <Send size={20} />, color: sp.info },
-              { label: 'Phỏng vấn sắp tới', value: '1', icon: <Calendar size={20} />, color: sp.warning },
-              { label: 'Báo cáo tuần này', value: '✓', icon: <CheckCircle size={20} />, color: sp.success },
-              { label: 'Ngày còn lại', value: '28', icon: <Clock size={20} />, color: sp.brand },
-            ].map((stat, i) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: i * 0.1 }}
-              >
-                <CardWrapper style={{ padding: 20 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <div style={{
-                      width: 44,
-                      height: 44,
-                      borderRadius: sp.radiusMd,
-                      background: `${stat.color}15`,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      color: stat.color,
-                    }}>
-                      {stat.icon}
-                    </div>
-                    <div>
-                      <p style={{ fontSize: 24, fontWeight: 700, color: sp.textPrimary, margin: 0 }}>{stat.value}</p>
-                      <p style={{ fontSize: 12, color: sp.textMuted, margin: 0 }}>{stat.label}</p>
-                    </div>
-                  </div>
-                </CardWrapper>
-              </motion.div>
-            ))}
+          {/* Stats Grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 28 }} className="sp-grid-4">
+            <StatCard label="Applications" value="3" icon={<Send size={22} />} color={cc.info} trend="+2" trendUp />
+            <StatCard label="Interviews" value="1" icon={<Calendar size={22} />} color={cc.warning} />
+            <StatCard label="Reports This Week" value="1" icon={<CheckCircle size={22} />} color={cc.success} />
+            <StatCard label="Days Remaining" value="28" icon={<Clock size={22} />} color={cc.primary} />
           </div>
 
-          <CardWrapper style={{ padding: 24 }}>
-            <h3 style={{ fontSize: 16, fontWeight: 600, color: sp.textPrimary, margin: '0 0 16px' }}>
-              Thao tác nhanh
-            </h3>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
-              <CTAButton variant="primary" icon={<FileText size={14} />} onClick={() => handleNavigate('reports')}>
-                Nộp báo cáo tuần
-              </CTAButton>
-              <CTAButton variant="ghost" icon={<Briefcase size={14} />} onClick={() => handleNavigate('jobs')}>
-                Xem tin tuyển dụng
-              </CTAButton>
-              <CTAButton variant="ghost" icon={<User size={14} />} onClick={() => handleNavigate('profile')}>
-                Cập nhật hồ sơ
-              </CTAButton>
-            </div>
-          </CardWrapper>
+          {/* Quick Actions + Recent Activity */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }} className="sp-grid-2">
+            <Card style={{ padding: 24 }}>
+              <SectionTitle>Quick Actions</SectionTitle>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {[
+                  { label: 'Submit Weekly Report', icon: <FileText size={15} />, key: 'reports', variant: 'primary' as const },
+                  { label: 'Browse Job Postings', icon: <Briefcase size={15} />, key: 'jobs', variant: 'ghost' as const },
+                  { label: 'Update My Profile', icon: <User size={15} />, key: 'profile', variant: 'ghost' as const },
+                ].map(action => (
+                  <CTAButton
+                    key={action.key}
+                    variant={action.variant}
+                    icon={action.icon}
+                    fullWidth
+                    onClick={() => handleNavigate(action.key)}
+                  >
+                    {action.label}
+                  </CTAButton>
+                ))}
+              </div>
+            </Card>
+
+            <Card style={{ padding: 24 }}>
+              <SectionTitle>Recent Activity</SectionTitle>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                {[
+                  { text: 'Application submitted to TechCorp Vietnam', time: '2 hours ago', icon: <Send size={14} />, color: cc.info },
+                  { text: 'Weekly report W22 approved by TM', time: 'Yesterday', icon: <CheckCircle size={14} />, color: cc.success },
+                  { text: 'Interview scheduled for Jul 15 at 2:00 PM', time: '3 days ago', icon: <Calendar size={14} />, color: cc.warning },
+                ].map((item, i) => (
+                  <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                    <div style={{
+                      width: 32, height: 32, borderRadius: '50%',
+                      background: hexToRgba(item.color, 0.1),
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      color: item.color, flexShrink: 0,
+                    }}>
+                      {item.icon}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <p style={{ fontSize: 13, fontWeight: 500, color: cc.textPrimary, margin: 0, lineHeight: 1.4 }}>{item.text}</p>
+                      <p style={{ fontSize: 11, color: cc.textMuted, margin: '2px 0 0' }}>{item.time}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </div>
         </motion.div>
 
         <style>{`
           @media (max-width: 1024px) {
             .sp-grid-4 { grid-template-columns: repeat(2, 1fr) !important; }
+            .sp-grid-2 { grid-template-columns: 1fr !important; }
           }
           @media (max-width: 640px) {
             .sp-grid-4 { grid-template-columns: 1fr !important; }
@@ -1203,51 +1082,63 @@ export const StudentDashboard: React.FC = () => {
         `}</style>
       </div>
     ),
+
     profile: <ProfileTab />,
     jobs: <JobBoardTab />,
     reports: <ReportsTab />,
+
     applications: (
-      <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 24px 40px', textAlign: 'center' }}>
-        <Briefcase size={64} color={sp.textMuted} style={{ marginBottom: 16 }} />
-        <h2 style={{ fontSize: 20, fontWeight: 600, color: sp.textPrimary, margin: '0 0 8px' }}>
-          Đơn ứng tuyển
-        </h2>
-        <p style={{ fontSize: 14, color: sp.textMuted }}>
-          Tính năng đang được phát triển...
-        </p>
+      <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 24px 40px' }}>
+        <div style={{ marginBottom: 24 }}>
+          <h2 style={{ fontSize: 22, fontWeight: 700, color: cc.textPrimary, margin: '0 0 6px' }}>My Applications</h2>
+          <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}>Track all your job applications in one place</p>
+        </div>
+        <EmptyState
+          icon={<FileText size={32} />}
+          title="No applications yet"
+          description="Start applying to internships to see your applications here"
+          action={<CTAButton variant="primary" icon={<Briefcase size={14} />} onClick={() => handleNavigate('jobs')}>Browse Jobs</CTAButton>}
+        />
       </div>
     ),
+
     schedule: (
-      <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 24px 40px', textAlign: 'center' }}>
-        <Calendar size={64} color={sp.textMuted} style={{ marginBottom: 16 }} />
-        <h2 style={{ fontSize: 20, fontWeight: 600, color: sp.textPrimary, margin: '0 0 8px' }}>
-          Lịch phỏng vấn
-        </h2>
-        <p style={{ fontSize: 14, color: sp.textMuted }}>
-          Tính năng đang được phát triển...
-        </p>
+      <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 24px 40px' }}>
+        <div style={{ marginBottom: 24 }}>
+          <h2 style={{ fontSize: 22, fontWeight: 700, color: cc.textPrimary, margin: '0 0 6px' }}>Interview Schedule</h2>
+          <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}>Your upcoming interviews and appointments</p>
+        </div>
+        <EmptyState
+          icon={<Calendar size={32} />}
+          title="No scheduled interviews"
+          description="Interviews will appear here once they are scheduled by companies"
+        />
       </div>
     ),
+
     feedback: (
-      <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 24px 40px', textAlign: 'center' }}>
-        <Star size={64} color={sp.textMuted} style={{ marginBottom: 16 }} />
-        <h2 style={{ fontSize: 20, fontWeight: 600, color: sp.textPrimary, margin: '0 0 8px' }}>
-          Đánh giá doanh nghiệp
-        </h2>
-        <p style={{ fontSize: 14, color: sp.textMuted }}>
-          Tính năng đang được phát triển...
-        </p>
+      <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 24px 40px' }}>
+        <div style={{ marginBottom: 24 }}>
+          <h2 style={{ fontSize: 22, fontWeight: 700, color: cc.textPrimary, margin: '0 0 6px' }}>Company Feedback</h2>
+          <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}>Reviews and ratings from companies you've interned with</p>
+        </div>
+        <EmptyState
+          icon={<Star size={32} />}
+          title="No feedback received"
+          description="Company feedback will appear after you complete your internship"
+        />
       </div>
     ),
+
     settings: (
-      <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 24px 40px', textAlign: 'center' }}>
-        <Settings size={64} color={sp.textMuted} style={{ marginBottom: 16 }} />
-        <h2 style={{ fontSize: 20, fontWeight: 600, color: sp.textPrimary, margin: '0 0 8px' }}>
-          Cài đặt
-        </h2>
-        <p style={{ fontSize: 14, color: sp.textMuted }}>
-          Tính năng đang được phát triển...
-        </p>
+      <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 24px 40px' }}>
+        <div style={{ marginBottom: 24 }}>
+          <h2 style={{ fontSize: 22, fontWeight: 700, color: cc.textPrimary, margin: '0 0 6px' }}>Settings</h2>
+          <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}>Manage your account and preferences</p>
+        </div>
+        <Card style={{ padding: 24 }}>
+          <p style={{ fontSize: 14, color: cc.textMuted, textAlign: 'center' }}>Account settings coming soon...</p>
+        </Card>
       </div>
     ),
   };
