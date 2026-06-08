@@ -1,11 +1,12 @@
-import axios from 'axios';
+import { api } from './api';
 
-const API_URL = 'http://localhost:8080/api/applications';
+const API_URL = '/applications';
 
 export const ApplicationService = {
-    getAll: () => axios.get(API_URL),
-    getById: (id: string) => axios.get(`${API_URL}/${id}`),
-    create: (data: any) => axios.post(API_URL, data),
-    update: (id: string, data: any) => axios.put(`${API_URL}/${id}`, data),
-    delete: (id: string) => axios.delete(`${API_URL}/${id}`)
+    getAll: () => api.get(API_URL),
+    getById: (id: string) => api.get(`${API_URL}/${id}`),
+    getMyApplications: () => api.get(`${API_URL}/my-applications`),
+    create: (data: any) => api.post(API_URL, data),
+    update: (id: string, data: any) => api.put(`${API_URL}/${id}`, data),
+    delete: (id: string) => api.delete(`${API_URL}/${id}`)
 };

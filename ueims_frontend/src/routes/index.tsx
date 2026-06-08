@@ -9,6 +9,7 @@ import { HomePage } from '@/pages/home/HomePage';
 import { ProtectedRoute } from '@/components/guards/ProtectedRoute';
 import { EmailPreviewPage } from '@/pages/dev/EmailPreviewPage';
 import { TrainingManagerDashboard } from '@/pages/TrainingManagerDashboard';
+import { StudentDashboard } from '@/pages/student/StudentDashboard';
 
 export const router = createBrowserRouter([
   {
@@ -62,6 +63,10 @@ export const router = createBrowserRouter([
   {
     path: '/tm-dashboard/:tab?',
     element: <TrainingManagerDashboard />,
+  },
+  {
+    path: '/student-dashboard/:tab?',
+    element: <StudentDashboard />,
   },
   {
     path: '*',
