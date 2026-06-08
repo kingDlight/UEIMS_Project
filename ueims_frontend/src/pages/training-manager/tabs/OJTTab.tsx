@@ -138,7 +138,7 @@ const MOCK_PLACEMENTS: PlacementRecord[] = [
   {
     key: 'p-010', id: 'p-010',
     studentName: 'Phan Van J', studentCode: 'SE165555', avatar: 'PVJ',
-    major: 'SE', gpa: 3.0, targetRole: 'Fullstack Dev',
+    major: 'SE', gpa: 3, targetRole: 'Fullstack Dev',
     source: 'SELF_SOURCED', status: 'UNPLACED',
     enterprise: null, enterpriseInitials: null, enterpriseColor: null,
   },
@@ -252,6 +252,12 @@ const HeaderBadge: React.FC<{ children: React.ReactNode; align?: 'left' | 'right
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
+const renderPaginationTotal = (total: number, range: [number, number]) => (
+  <span style={{ fontSize: 12, color: cc.textMuted, fontFamily: 'Inter, sans-serif' }}>
+    {range[0]}–{range[1]} of {total} students
+  </span>
+);
+
 export const OJTTab: React.FC = () => {
   const [majorFilter, setMajorFilter] = useState<string>('ALL');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
@@ -285,25 +291,25 @@ export const OJTTab: React.FC = () => {
     setRunning(true);
     await new Promise((r) => setTimeout(r, 1800));
     setPlacementData((prev) => {
-      const unplaced = prev
-        .map((p, i) => ({ ...p, _idx: i }))
-        .filter((p) => p.status === 'UNPLACED')
-        .slice(0, 3);
-      if (unplaced.length === 0) return prev;
-      const picks = unplaced.map((p) => {
-        const ent = ENTERPRISES[Math.floor(Math.random() * ENTERPRISES.length)];
-        return { ...p, _idx: p._idx as number, status: 'INTERVIEWING' as PlacementStatus, source: 'SYSTEM_MATCHED' as PlacementSource, enterprise: ent.name, enterpriseInitials: ent.initials, enterpriseColor: ent.color };
-      });
+      let unplacedCount = 0;
       return prev.map((p) => {
-        const updated = picks.find((x) => (x._idx as number) === prev.indexOf(p));
-        if (!updated) return p;
-        const { _idx: _d, ...rest } = updated;
-        void _d;
-        return rest as PlacementRecord;
+        if (p.status === 'UNPLACED' && unplacedCount < 3) {
+          unplacedCount++;
+          const ent = ENTERPRISES[Math.floor(Math.random() * ENTERPRISES.length)];
+          return {
+            ...p,
+            status: 'INTERVIEWING',
+            source: 'SYSTEM_MATCHED',
+            enterprise: ent.name,
+            enterpriseInitials: ent.initials,
+            enterpriseColor: ent.color,
+          };
+        }
+        return p;
       });
     });
     setRunning(false);
-    void message.success({ content: 'Successfully matched unplaced students!', duration: 3 });
+    message.success({ content: 'Successfully matched unplaced students!', duration: 3 });
   }, []);
 
   const openManualMatch = useCallback((record: PlacementRecord) => {
@@ -425,15 +431,15 @@ export const OJTTab: React.FC = () => {
       width: 170,
       render: (_: unknown, record: PlacementRecord) => (
         <div style={row}>
-          {!record.enterprise ? (
-            <span style={{ ...cellBase, fontSize: 12, color: cc.textMuted, fontStyle: 'italic' }}>—</span>
-          ) : (
+          {record.enterprise ? (
             <>
               <Avatar initials={record.enterpriseInitials ?? '??'} color={record.enterpriseColor ?? undefined} />
               <span style={{ ...cellBase, fontSize: 12, fontWeight: 600, color: cc.textPrimary, marginLeft: 8, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {record.enterprise}
               </span>
             </>
+          ) : (
+            <span style={{ ...cellBase, fontSize: 12, color: cc.textMuted, fontStyle: 'italic' }}>—</span>
           )}
         </div>
       ),
@@ -456,77 +462,95 @@ export const OJTTab: React.FC = () => {
       fixed: isMobile ? undefined : 'right',
       align: 'right' as const,
       width: 130,
-      render: (_: unknown, record: PlacementRecord) => (
-        <div style={{ ...row, justifyContent: 'flex-end' }}>
-          {record.status === 'UNPLACED' ? (
-            <button
-              onClick={() => openManualMatch(record)}
-              style={{
-                padding: '5px 12px', borderRadius: cc.radiusMd,
-                border: `1.5px solid ${cc.brand}`, background: 'transparent', color: cc.brand,
-                fontSize: 11.5, fontWeight: 700, fontFamily: 'Inter, sans-serif',
-                cursor: 'pointer', transition: 'all 0.18s ease', whiteSpace: 'nowrap',
-              }}
-              onMouseEnter={(e) => {
-                const b = e.currentTarget as HTMLButtonElement;
-                b.style.background = cc.brand; b.style.color = '#fff';
-                b.style.transform = 'translateY(-1px)';
-                b.style.boxShadow = '0 3px 10px rgba(255,122,48,.22)';
-              }}
-              onMouseLeave={(e) => {
-                const b = e.currentTarget as HTMLButtonElement;
-                b.style.background = 'transparent'; b.style.color = cc.brand;
-                b.style.transform = 'translateY(0)'; b.style.boxShadow = 'none';
-              }}
-            >
-              Match
-            </button>
-          ) : record.status === 'PENDING_APPROVAL' ? (
-            <button
-              onClick={() => openApprove(record)}
-              style={{
-                padding: '5px 12px', borderRadius: cc.radiusMd,
-                border: 'none', background: cc.success, color: '#fff',
-                fontSize: 11.5, fontWeight: 700, fontFamily: 'Inter, sans-serif',
-                cursor: 'pointer', transition: 'all 0.18s ease', whiteSpace: 'nowrap',
-                boxShadow: '0 2px 6px rgba(16,185,129,.18)',
-              }}
-              onMouseEnter={(e) => {
-                const b = e.currentTarget as HTMLButtonElement;
-                b.style.background = '#0D9668'; b.style.transform = 'translateY(-1px)';
-                b.style.boxShadow = '0 4px 12px rgba(16,185,129,.25)';
-              }}
-              onMouseLeave={(e) => {
-                const b = e.currentTarget as HTMLButtonElement;
-                b.style.background = cc.success; b.style.transform = 'translateY(0)';
-                b.style.boxShadow = '0 2px 6px rgba(16,185,129,.18)';
-              }}
-            >
-              Approve
-            </button>
-          ) : record.status === 'INTERVIEWING' ? (
-            <button
-              onClick={() => openUpdate(record)}
-              style={{
-                padding: '5px 12px', borderRadius: cc.radiusMd,
-                border: `1.5px solid ${cc.warning}`, background: 'transparent', color: cc.warning,
-                fontSize: 11.5, fontWeight: 700, fontFamily: 'Inter, sans-serif',
-                cursor: 'pointer', transition: 'all 0.18s ease', whiteSpace: 'nowrap',
-              }}
-              onMouseEnter={(e) => {
-                const b = e.currentTarget as HTMLButtonElement;
-                b.style.background = cc.warning; b.style.color = '#fff';
-                b.style.transform = 'translateY(-1px)';
-              }}
-              onMouseLeave={(e) => {
-                const b = e.currentTarget as HTMLButtonElement;
-                b.style.background = 'transparent'; b.style.color = cc.warning;
-                b.style.transform = 'translateY(0)';
-              }}
-            >
-              Update
-            </button>
-          ) : (
+      render: (_: unknown, record: PlacementRecord) => {
+        if (record.status === 'UNPLACED') {
+          return (
+            <div style={{ ...row, justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => openManualMatch(record)}
+                style={{
+                  padding: '5px 12px', borderRadius: cc.radiusMd,
+                  border: `1.5px solid ${cc.brand}`, background: 'transparent', color: cc.brand,
+                  fontSize: 11.5, fontWeight: 700, fontFamily: 'Inter, sans-serif',
+                  cursor: 'pointer', transition: 'all 0.18s ease', whiteSpace: 'nowrap',
+                }}
+                onMouseEnter={(e) => {
+                  const b = e.currentTarget as HTMLButtonElement;
+                  b.style.background = cc.brand; b.style.color = '#fff';
+                  b.style.transform = 'translateY(-1px)';
+                  b.style.boxShadow = '0 3px 10px rgba(255,122,48,.22)';
+                }}
+                onMouseLeave={(e) => {
+                  const b = e.currentTarget as HTMLButtonElement;
+                  b.style.background = 'transparent'; b.style.color = cc.brand;
+                  b.style.transform = 'translateY(0)'; b.style.boxShadow = 'none';
+                }}
+              >
+                Match
+              </button>
+            </div>
+          );
+        }
+
+        if (record.status === 'PENDING_APPROVAL') {
+          return (
+            <div style={{ ...row, justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => openApprove(record)}
+                style={{
+                  padding: '5px 12px', borderRadius: cc.radiusMd,
+                  border: 'none', background: cc.success, color: '#fff',
+                  fontSize: 11.5, fontWeight: 700, fontFamily: 'Inter, sans-serif',
+                  cursor: 'pointer', transition: 'all 0.18s ease', whiteSpace: 'nowrap',
+                  boxShadow: '0 2px 6px rgba(16,185,129,.18)',
+                }}
+                onMouseEnter={(e) => {
+                  const b = e.currentTarget as HTMLButtonElement;
+                  b.style.background = '#0D9668'; b.style.transform = 'translateY(-1px)';
+                  b.style.boxShadow = '0 4px 12px rgba(16,185,129,.25)';
+                }}
+                onMouseLeave={(e) => {
+                  const b = e.currentTarget as HTMLButtonElement;
+                  b.style.background = cc.success; b.style.transform = 'translateY(0)';
+                  b.style.boxShadow = '0 2px 6px rgba(16,185,129,.18)';
+                }}
+              >
+                Approve
+              </button>
+            </div>
+          );
+        }
+
+        if (record.status === 'INTERVIEWING') {
+          return (
+            <div style={{ ...row, justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => openUpdate(record)}
+                style={{
+                  padding: '5px 12px', borderRadius: cc.radiusMd,
+                  border: `1.5px solid ${cc.warning}`, background: 'transparent', color: cc.warning,
+                  fontSize: 11.5, fontWeight: 700, fontFamily: 'Inter, sans-serif',
+                  cursor: 'pointer', transition: 'all 0.18s ease', whiteSpace: 'nowrap',
+                }}
+                onMouseEnter={(e) => {
+                  const b = e.currentTarget as HTMLButtonElement;
+                  b.style.background = cc.warning; b.style.color = '#fff';
+                  b.style.transform = 'translateY(-1px)';
+                }}
+                onMouseLeave={(e) => {
+                  const b = e.currentTarget as HTMLButtonElement;
+                  b.style.background = 'transparent'; b.style.color = cc.warning;
+                  b.style.transform = 'translateY(0)';
+                }}
+              >
+                Update
+              </button>
+            </div>
+          );
+        }
+
+        return (
+          <div style={{ ...row, justifyContent: 'flex-end' }}>
             <button
               onClick={() => handleViewContract(record)}
               style={{
@@ -540,9 +564,9 @@ export const OJTTab: React.FC = () => {
             >
               View Contract
             </button>
-          )}
-        </div>
-      ),
+          </div>
+        );
+      },
     },
   ];
 
@@ -775,11 +799,7 @@ export const OJTTab: React.FC = () => {
           pagination={{
             pageSize: 8,
             showSizeChanger: false,
-            showTotal: (total, range) => (
-              <span style={{ fontSize: 12, color: cc.textMuted, fontFamily: 'Inter, sans-serif' }}>
-                {range[0]}–{range[1]} of {total} students
-              </span>
-            ),
+            showTotal: renderPaginationTotal,
           }}
           scroll={{ x: 935 }}
         />
@@ -789,7 +809,7 @@ export const OJTTab: React.FC = () => {
       <Modal
         title={null} open={matchModalOpen}
         onCancel={() => setMatchModalOpen(false)} footer={null}
-        width={440} centered destroyOnClose
+        width={440} centered
         styles={{ body: { padding: 0 }, mask: { backdropFilter: 'blur(2px)' } }}
       >
         <div style={{
@@ -864,7 +884,7 @@ export const OJTTab: React.FC = () => {
       <Modal
         title={null} open={approveModalOpen}
         onCancel={() => setApproveModalOpen(false)} footer={null}
-        width={440} centered destroyOnClose
+        width={440} centered
         styles={{ body: { padding: 0 }, mask: { backdropFilter: 'blur(2px)' } }}
       >
         <div style={{
@@ -951,7 +971,7 @@ export const OJTTab: React.FC = () => {
       <Modal
         title={null} open={updateModalOpen}
         onCancel={() => setUpdateModalOpen(false)} footer={null}
-        width={400} centered destroyOnClose
+        width={400} centered
         styles={{ body: { padding: 0 }, mask: { backdropFilter: 'blur(2px)' } }}
       >
         <div style={{
