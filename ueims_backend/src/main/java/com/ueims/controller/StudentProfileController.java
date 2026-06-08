@@ -1,6 +1,5 @@
 package com.ueims.controller;
 
-import java.util.List;
 import java.util.UUID;
 
 import jakarta.validation.Valid;
@@ -11,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.ueims.dto.request.StudentProfileUpdateRequest;
-import com.ueims.model.entity.StudentProfile;
 import com.ueims.service.StudentProfileService;
 
 import lombok.RequiredArgsConstructor;
@@ -21,37 +19,40 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class StudentProfileController {
     private final StudentProfileService service;
+    private final com.ueims.mapper.StudentProfileMapper mapper;
 
     @GetMapping
     @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
-    public ResponseEntity<List<StudentProfile>> getAll() {
-        return ResponseEntity.ok(service.findAll());
+    public ResponseEntity<java.util.List<com.ueims.dto.response.StudentProfileDTO>> getAll() {
+        return ResponseEntity.ok(service.findAll().stream().map(mapper::toDto).toList());
     }
 
     @GetMapping("/{id}")
     @PreAuthorize(
             "hasRole('STUDENT') or hasRole('ENTERPRISE') or hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
-    public ResponseEntity<StudentProfile> getById(@PathVariable UUID id) {
-        return ResponseEntity.ok(service.findById(id));
+    public ResponseEntity<com.ueims.dto.response.StudentProfileDTO> getById(@PathVariable UUID id) {
+        return ResponseEntity.ok(mapper.toDto(service.findById(id)));
     }
 
     @PostMapping
     @PreAuthorize("hasRole('SYSTEM_ADMIN')")
-    public ResponseEntity<StudentProfile> create(@Valid @RequestBody StudentProfile entity) {
-        return ResponseEntity.ok(service.save(entity));
+    public ResponseEntity<com.ueims.dto.response.StudentProfileDTO> create(
+            @Valid @RequestBody com.ueims.dto.response.StudentProfileDTO entity) {
+        return ResponseEntity.ok(mapper.toDto(service.save(mapper.toEntity(entity))));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<StudentProfile> update(
+    public ResponseEntity<com.ueims.dto.response.StudentProfileDTO> update(
             @PathVariable UUID id, @Valid @RequestBody StudentProfileUpdateRequest request) {
-        return ResponseEntity.ok(service.updateProfile(id, request));
+        return ResponseEntity.ok(mapper.toDto(service.updateProfile(id, request)));
     }
 
     @PostMapping("/{id}/upload-cv")
     @PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<StudentProfile> uploadCv(@PathVariable UUID id, @RequestParam("file") MultipartFile file) {
-        return ResponseEntity.ok(service.uploadCv(id, file));
+    public ResponseEntity<com.ueims.dto.response.StudentProfileDTO> uploadCv(
+            @PathVariable UUID id, @RequestParam("file") MultipartFile file) {
+        return ResponseEntity.ok(mapper.toDto(service.uploadCv(id, file)));
     }
 
     @DeleteMapping("/{id}")

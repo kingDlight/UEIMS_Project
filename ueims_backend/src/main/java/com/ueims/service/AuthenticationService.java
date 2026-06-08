@@ -2,7 +2,9 @@ package com.ueims.service;
 
 import java.text.ParseException;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.StringJoiner;
@@ -14,6 +16,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
@@ -22,20 +26,27 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.ueims.dto.request.AuthenticationRequest;
 import com.ueims.dto.request.ChangePasswordRequest;
+import com.ueims.dto.request.ForgotPasswordRequest;
 import com.ueims.dto.request.IntrospectRequest;
 import com.ueims.dto.request.LogoutRequest;
 import com.ueims.dto.request.RefreshRequest;
+import com.ueims.dto.request.ResetPasswordRequest;
 import com.ueims.dto.response.AuthenticationResponse;
 import com.ueims.dto.response.IntrospectResponse;
 import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
+import com.ueims.model.entity.AuditLog;
 import com.ueims.model.entity.InvalidatedToken;
+import com.ueims.model.entity.PasswordResetToken;
 import com.ueims.model.entity.User;
 import com.ueims.model.entity.UserSession;
+import com.ueims.repository.AuditLogRepository;
 import com.ueims.repository.InvalidatedTokenRepository;
+import com.ueims.repository.PasswordResetTokenRepository;
 import com.ueims.repository.UserRepository;
 import com.ueims.repository.UserSessionRepository;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -50,8 +61,8 @@ public class AuthenticationService {
     UserRepository userRepository;
     InvalidatedTokenRepository invalidatedTokenRepository;
     UserSessionRepository userSessionRepository;
-    com.ueims.repository.AuditLogRepository auditLogRepository;
-    com.ueims.repository.PasswordResetTokenRepository passwordResetTokenRepository;
+    AuditLogRepository auditLogRepository;
+    PasswordResetTokenRepository passwordResetTokenRepository;
     MailService mailService;
     PasswordEncoder passwordEncoder;
     UserSessionManagementService userSessionManagementService;
@@ -94,7 +105,7 @@ public class AuthenticationService {
             throw new AppException(ErrorCode.USER_BANNED);
         }
 
-        if (user.getLockedUntil() != null && user.getLockedUntil().isAfter(java.time.LocalDateTime.now())) {
+        if (user.getLockedUntil() != null && user.getLockedUntil().isAfter(LocalDateTime.now())) {
             throw new AppException(ErrorCode.USER_BANNED);
         } else if (user.getLockedUntil() != null) {
             user.setFailedLoginAttempts(0);
@@ -107,9 +118,9 @@ public class AuthenticationService {
         if (!authenticated) {
             // Tăng bộ đếm và lưu TRỰC TIẾP bằng SQL, bỏ qua Hibernate
             int attempts = user.getFailedLoginAttempts() + 1;
-            java.time.LocalDateTime lockedUntil = null;
+            LocalDateTime lockedUntil = null;
             if (attempts >= 5) {
-                lockedUntil = java.time.LocalDateTime.now().plusMinutes(30);
+                lockedUntil = LocalDateTime.now().plusMinutes(30);
             }
             userRepository.updateLoginAttemptsAndStatus(user.getUserId(), attempts, user.getStatus(), lockedUntil);
 
@@ -161,12 +172,11 @@ public class AuthenticationService {
             userSessionRepository.save(refreshSession);
 
             // BR-05 / Security: Log the successful login
-            jakarta.servlet.http.HttpServletRequest httpRequest =
-                    ((org.springframework.web.context.request.ServletRequestAttributes)
-                                    org.springframework.web.context.request.RequestContextHolder.getRequestAttributes())
-                            .getRequest();
+            HttpServletRequest httpRequest = ((ServletRequestAttributes) RequestContextHolder
+                    .getRequestAttributes())
+                    .getRequest();
 
-            com.ueims.model.entity.AuditLog auditLog = com.ueims.model.entity.AuditLog.builder()
+            AuditLog auditLog = AuditLog.builder()
                     .user(user)
                     .action("LOGIN_SUCCESS")
                     .targetEntity("User")
@@ -309,13 +319,16 @@ public class AuthenticationService {
 
             var verified = signedJWT.verify(verifier);
 
-            if (!(verified && expiryTime.after(new Date()))) throw new AppException(ErrorCode.UNAUTHENTICATED);
+            if (!(verified && expiryTime.after(new Date())))
+                throw new AppException(ErrorCode.UNAUTHENTICATED);
 
             if (invalidatedTokenRepository.existsById(
-                    signedJWT.getJWTClaimsSet().getJWTID())) throw new AppException(ErrorCode.UNAUTHENTICATED);
+                    signedJWT.getJWTClaimsSet().getJWTID()))
+                throw new AppException(ErrorCode.UNAUTHENTICATED);
 
             String tokenType = signedJWT.getJWTClaimsSet().getStringClaim("token_type");
-            if (!expectedTokenType.equals(tokenType)) throw new AppException(ErrorCode.UNAUTHENTICATED);
+            if (!expectedTokenType.equals(tokenType))
+                throw new AppException(ErrorCode.UNAUTHENTICATED);
 
             return signedJWT;
         } catch (ParseException | JOSEException e) {
@@ -359,21 +372,21 @@ public class AuthenticationService {
         user.setMustChangePassword(false);
         userRepository.save(user);
 
-        java.time.format.DateTimeFormatter formatter =
-                java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
-        String changedAt = java.time.LocalDateTime.now().format(formatter);
+        DateTimeFormatter formatter = DateTimeFormatter
+                .ofPattern("dd/MM/yyyy HH:mm:ss");
+        String changedAt = LocalDateTime.now().format(formatter);
         mailService.sendPasswordChangedMail(user.getEmail(), user.getFullName(), changedAt);
     }
 
     @Transactional
-    public void forgotPassword(com.ueims.dto.request.ForgotPasswordRequest request) {
+    public void forgotPassword(ForgotPasswordRequest request) {
         var user = userRepository
                 .findByEmail(request.getEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         String tokenRaw = UUID.randomUUID().toString();
 
-        com.ueims.model.entity.PasswordResetToken resetToken = com.ueims.model.entity.PasswordResetToken.builder()
+        PasswordResetToken resetToken = PasswordResetToken.builder()
                 .user(user)
                 .tokenHash(tokenRaw)
                 .expiresAt(java.time.LocalDateTime.now().plusMinutes(15))
@@ -386,7 +399,7 @@ public class AuthenticationService {
     }
 
     @Transactional
-    public void resetPassword(com.ueims.dto.request.ResetPasswordRequest request) {
+    public void resetPassword(ResetPasswordRequest request) {
         if (!request.getNewPassword().equals(request.getConfirmPassword())) {
             throw new AppException(ErrorCode.PASSWORDS_NOT_MATCH);
         }
@@ -411,9 +424,9 @@ public class AuthenticationService {
         resetToken.setIsUsed(true);
         passwordResetTokenRepository.save(resetToken);
 
-        java.time.format.DateTimeFormatter formatter =
-                java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
-        String changedAt = java.time.LocalDateTime.now().format(formatter);
+        DateTimeFormatter formatter = DateTimeFormatter
+                .ofPattern("dd/MM/yyyy HH:mm:ss");
+        String changedAt = LocalDateTime.now().format(formatter);
         mailService.sendPasswordChangedMail(user.getEmail(), user.getFullName(), changedAt);
 
         // Invalidate all old sessions so they have to login again

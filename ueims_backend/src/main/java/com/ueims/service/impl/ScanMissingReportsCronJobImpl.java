@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.ueims.dto.response.MissingReportDto;
+import com.ueims.exception.AppException;
+import com.ueims.exception.ErrorCode;
 import com.ueims.service.CronJobService;
 
 import lombok.RequiredArgsConstructor;
@@ -13,7 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * Cron job that scans for missing weekly reports.
  * Executed every Sunday at 20:00 (8 PM).
- * Identifies students who haven't submitted their weekly reports for the current week.
+ * Identifies students who haven't submitted their weekly reports for the
+ * current week.
  */
 @Slf4j
 @Service
@@ -48,7 +51,7 @@ public class ScanMissingReportsCronJobImpl implements CronJobService {
 
         } catch (Exception e) {
             log.error("Error scanning for missing reports: {}", e.getMessage(), e);
-            throw new RuntimeException("ScanMissingReportsCronJob failed", e);
+            throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
         }
     }
 

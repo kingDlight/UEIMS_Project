@@ -1,6 +1,5 @@
 package com.ueims.controller;
 
-import java.util.List;
 import java.util.UUID;
 
 import jakarta.validation.Valid;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ueims.model.entity.Interview;
 import com.ueims.service.InterviewService;
 
 import lombok.RequiredArgsConstructor;
@@ -25,26 +23,29 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class InterviewController {
     private final InterviewService service;
+    private final com.ueims.mapper.InterviewMapper mapper;
 
     @GetMapping
-    public ResponseEntity<List<Interview>> getAll() {
-        return ResponseEntity.ok(service.findAll());
+    public ResponseEntity<java.util.List<com.ueims.dto.response.InterviewDTO>> getAll() {
+        return ResponseEntity.ok(service.findAll().stream().map(mapper::toDto).toList());
     }
 
     @GetMapping("/my-schedules")
     @org.springframework.security.access.prepost.PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<List<Interview>> getMyInterviews() {
-        return ResponseEntity.ok(service.findMyInterviews());
+    public ResponseEntity<java.util.List<com.ueims.dto.response.InterviewDTO>> getMyInterviews() {
+        return ResponseEntity.ok(
+                service.findMyInterviews().stream().map(mapper::toDto).toList());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Interview> getById(@PathVariable UUID id) {
-        return ResponseEntity.ok(service.findById(id));
+    public ResponseEntity<com.ueims.dto.response.InterviewDTO> getById(@PathVariable UUID id) {
+        return ResponseEntity.ok(mapper.toDto(service.findById(id)));
     }
 
     @PostMapping
-    public ResponseEntity<Interview> create(@Valid @RequestBody Interview entity) {
-        return ResponseEntity.ok(service.save(entity));
+    public ResponseEntity<com.ueims.dto.response.InterviewDTO> create(
+            @Valid @RequestBody com.ueims.dto.response.InterviewDTO entity) {
+        return ResponseEntity.ok(mapper.toDto(service.save(mapper.toEntity(entity))));
     }
 
     @DeleteMapping("/{id}")
@@ -55,13 +56,14 @@ public class InterviewController {
 
     @PostMapping("/{id}/confirm")
     @org.springframework.security.access.prepost.PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<Interview> confirm(@PathVariable UUID id) {
-        return ResponseEntity.ok(service.confirmAttendance(id));
+    public ResponseEntity<com.ueims.dto.response.InterviewDTO> confirm(@PathVariable UUID id) {
+        return ResponseEntity.ok(mapper.toDto(service.confirmAttendance(id)));
     }
 
     @PostMapping("/{id}/decline")
     @org.springframework.security.access.prepost.PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<Interview> decline(@PathVariable UUID id, @RequestParam("reason") String reason) {
-        return ResponseEntity.ok(service.declineAttendance(id, reason));
+    public ResponseEntity<com.ueims.dto.response.InterviewDTO> decline(
+            @PathVariable UUID id, @RequestParam("reason") String reason) {
+        return ResponseEntity.ok(mapper.toDto(service.declineAttendance(id, reason)));
     }
 }

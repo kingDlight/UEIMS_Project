@@ -1,11 +1,15 @@
 package com.ueims.service.impl;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import com.ueims.dto.request.IncidentReportRequest;
+import com.ueims.dto.request.IncidentRequest;
+import com.ueims.dto.request.IncidentResolveRequest;
 import com.ueims.model.entity.EnterpriseAssignment;
 import com.ueims.model.entity.Incident;
 import com.ueims.model.entity.User;
@@ -46,7 +50,7 @@ public class IncidentServiceImpl implements IncidentService {
     }
 
     @Override
-    public Incident createIncident(com.ueims.dto.request.IncidentRequest request) {
+    public Incident createIncident(IncidentRequest request) {
         EnterpriseAssignment assignment = assignmentRepository
                 .findById(request.getAssignmentId())
                 .orElseThrow(() -> new IllegalArgumentException(ASSIGNMENT_NOT_FOUND));
@@ -74,16 +78,16 @@ public class IncidentServiceImpl implements IncidentService {
                 .build();
 
         if (resolvedBy != null && incident.getResolvedAt() == null) {
-            incident.setResolvedAt(java.time.LocalDateTime.now());
+            incident.setResolvedAt(LocalDateTime.now());
         }
 
         return repository.save(incident);
     }
 
     @Override
-    public Incident updateIncident(UUID id, com.ueims.dto.request.IncidentRequest request) {
-        Incident incident =
-                repository.findById(id).orElseThrow(() -> new IllegalArgumentException("Incident not found"));
+    public Incident updateIncident(UUID id, IncidentRequest request) {
+        Incident incident = repository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Incident not found"));
 
         EnterpriseAssignment assignment = assignmentRepository
                 .findById(request.getAssignmentId())
@@ -109,7 +113,7 @@ public class IncidentServiceImpl implements IncidentService {
         incident.setResolutionNote(request.getResolutionNote());
 
         if (resolvedBy != null && incident.getResolvedBy() == null) {
-            incident.setResolvedAt(java.time.LocalDateTime.now());
+            incident.setResolvedAt(LocalDateTime.now());
         } else if (resolvedBy == null) {
             incident.setResolvedAt(null);
         }
@@ -119,10 +123,10 @@ public class IncidentServiceImpl implements IncidentService {
     }
 
     @Override
-    public Incident reportIncident(com.ueims.dto.request.IncidentReportRequest request) {
+    public Incident reportIncident(IncidentReportRequest request) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User currentUser =
-                userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("User not found"));
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         EnterpriseAssignment assignment = assignmentRepository
                 .findById(request.getAssignmentId())
@@ -153,9 +157,9 @@ public class IncidentServiceImpl implements IncidentService {
     }
 
     @Override
-    public Incident resolveIncident(UUID incidentId, com.ueims.dto.request.IncidentResolveRequest request) {
-        Incident incident =
-                repository.findById(incidentId).orElseThrow(() -> new IllegalArgumentException("Incident not found"));
+    public Incident resolveIncident(UUID incidentId, IncidentResolveRequest request) {
+        Incident incident = repository.findById(incidentId)
+                .orElseThrow(() -> new IllegalArgumentException("Incident not found"));
 
         if ("RESOLVED".equals(incident.getStatus())) {
             throw new IllegalArgumentException("Incident is already resolved");
@@ -167,8 +171,8 @@ public class IncidentServiceImpl implements IncidentService {
         }
 
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User resolvedBy =
-                userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("User not found"));
+        User resolvedBy = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         incident.setStatus("RESOLVED");
         incident.setResolutionNote(request.getResolutionNote());

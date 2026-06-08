@@ -1,6 +1,5 @@
 package com.ueims.controller;
 
-import java.util.List;
 import java.util.UUID;
 
 import jakarta.validation.Valid;
@@ -8,7 +7,6 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.ueims.model.entity.ReportFeedback;
 import com.ueims.service.ReportFeedbackService;
 
 import lombok.RequiredArgsConstructor;
@@ -18,20 +16,22 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ReportFeedbackController {
     private final ReportFeedbackService service;
+    private final com.ueims.mapper.ReportFeedbackMapper mapper;
 
     @GetMapping
-    public ResponseEntity<List<ReportFeedback>> getAll() {
-        return ResponseEntity.ok(service.findAll());
+    public ResponseEntity<java.util.List<com.ueims.dto.response.ReportFeedbackDTO>> getAll() {
+        return ResponseEntity.ok(service.findAll().stream().map(mapper::toDto).toList());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ReportFeedback> getById(@PathVariable UUID id) {
-        return ResponseEntity.ok(service.findById(id));
+    public ResponseEntity<com.ueims.dto.response.ReportFeedbackDTO> getById(@PathVariable UUID id) {
+        return ResponseEntity.ok(mapper.toDto(service.findById(id)));
     }
 
     @PostMapping
-    public ResponseEntity<ReportFeedback> create(@Valid @RequestBody ReportFeedback entity) {
-        return ResponseEntity.ok(service.save(entity));
+    public ResponseEntity<com.ueims.dto.response.ReportFeedbackDTO> create(
+            @Valid @RequestBody com.ueims.dto.response.ReportFeedbackDTO entity) {
+        return ResponseEntity.ok(mapper.toDto(service.save(mapper.toEntity(entity))));
     }
 
     @DeleteMapping("/{id}")

@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -38,7 +37,7 @@ public class ScanMissingReportsService {
         LocalDate today = LocalDate.now();
         List<Semester> activeSemesters = semesterRepository.findByStatus("ACTIVE").stream()
                 .filter(s -> !s.getStartDate().isAfter(today) && !s.getEndDate().isBefore(today))
-                .collect(Collectors.toList());
+                .toList();
 
         if (activeSemesters.isEmpty()) {
             log.info("No active semester found for current date: {}", today);
@@ -73,7 +72,7 @@ public class ScanMissingReportsService {
                             .weekNumber(currentWeek)
                             .enterpriseName(assignment.getEnterprise().getCompanyName())
                             .build())
-                    .collect(Collectors.toList());
+                    .toList();
 
             allMissingReports.addAll(missingReportsForWeek);
 
@@ -103,6 +102,6 @@ public class ScanMissingReportsService {
                         .weekNumber(weekNumber)
                         .enterpriseName(assignment.getEnterprise().getCompanyName())
                         .build())
-                .collect(Collectors.toList());
+                .toList();
     }
 }

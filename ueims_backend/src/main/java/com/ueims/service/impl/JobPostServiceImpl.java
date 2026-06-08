@@ -8,6 +8,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ueims.dto.request.JobPostRequest;
 import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
 import com.ueims.model.entity.JobPost;
@@ -39,7 +40,7 @@ public class JobPostServiceImpl implements JobPostService {
 
     @Override
     @Transactional
-    public JobPost create(com.ueims.dto.request.JobPostRequest request) {
+    public JobPost create(JobPostRequest request) {
         User currentUser = getCurrentUser();
         if (currentUser.getEnterprise() == null
                 || !"ACTIVE".equals(currentUser.getEnterprise().getStatus())) {
@@ -105,7 +106,8 @@ public class JobPostServiceImpl implements JobPostService {
     }
 
     /**
-     * Kiểm tra xem người dùng hiện tại có phải là chủ sở hữu của bài đăng này không (BR-29)
+     * Kiểm tra xem người dùng hiện tại có phải là chủ sở hữu của bài đăng này không
+     * (BR-29)
      */
     private void validateOwnership(JobPost jobPost) {
         User currentUser = getCurrentUser();
