@@ -159,4 +159,4 @@ note.txt
 env.json
 Ueims.postman_collection.json
 prisma.config.ts
-prisma/schema.prisma
+prisma/
