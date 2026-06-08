@@ -237,16 +237,14 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
         <div className="modern-header-navbar">
           <div className="modern-header-content">
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div 
+              <button 
+                type="button"
                 className="mobile-menu-btn" 
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => { if(e.key === 'Enter') setDrawerOpen(true); }}
                 onClick={() => setDrawerOpen(true)}
-                style={{ cursor: 'pointer', fontSize: 18, color: '#1e293b' }}
+                style={{ cursor: 'pointer', fontSize: 18, color: '#1e293b', background: 'none', border: 'none', padding: 0 }}
               >
                 <MenuOutlined />
-              </div>
+              </button>
               <div className="modern-brand-logo">UEIMS</div>
             </div>
             <div className="modern-nav-items desktop-only">
@@ -254,17 +252,16 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
               {filteredNavItems.slice(0, 7).map((item) => {
                 const isActive = activeTab === item.key;
                 return (
-                  <div
+                  <button
                     key={item.key}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) => { if(e.key === 'Enter') handleNavigate(item.key); }}
+                    type="button"
                     onClick={() => handleNavigate(item.key)}
                     className={`modern-nav-item ${isActive ? 'active' : 'inactive'}`}
+                    style={{ background: 'none', border: 'none', padding: 0, font: 'inherit', color: 'inherit' }}
                   >
                     <span style={{ fontSize: 14 }}>{item.icon}</span>
                     <span>{item.label}</span>
-                  </div>
+                  </button>
                 );
               })}
 
@@ -305,27 +302,25 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
             <div className="modern-bottom-bar-bg" />
             
             <div ref={notificationMenuRef} style={{ position: 'relative', zIndex: 1, flex: '0 0 auto' }}>
-              <div 
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => { if(e.key === 'Enter') { setNotificationOpen((prev) => !prev); setAccountOpen(false); } }}
+              <button 
+                type="button"
                 onClick={() => { setNotificationOpen((prev) => !prev); setAccountOpen(false); }} 
                 className="modern-bell-icon-wrapper"
+                style={{ background: 'none', border: 'none', padding: 0 }}
               >
                 <BellOutlined style={{ fontSize: 18 }} />
                 <div className="modern-bell-badge" />
-              </div>
+              </button>
             </div>
             
             <div className="modern-bar-divider" />
             
             <div ref={accountMenuRef} style={{ position: 'relative', zIndex: 1, flex: '1 1 auto' }}>
-              <div 
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => { if(e.key === 'Enter') { setAccountOpen((prev) => !prev); setNotificationOpen(false); } }}
+              <button 
+                type="button"
                 onClick={() => { setAccountOpen((prev) => !prev); setNotificationOpen(false); }} 
                 className="modern-account-wrapper"
+                style={{ background: 'none', border: 'none', padding: 0, font: 'inherit', textAlign: 'left' }}
               >
                 <div className="modern-account-avatar" style={{ 
                   display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', color: '#fff',
@@ -337,7 +332,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
                   <div className="modern-account-name">{realName}</div>
                   <div className="modern-account-email">{user?.email || 'admin@ueims.com'}</div>
                 </div>
-              </div>
+              </button>
             </div>
             <div style={{ position: 'absolute', left: 0, right: 0, bottom: -1, height: 1, background: 'linear-gradient(90deg, transparent, rgba(233,101,0,.18), transparent)', pointerEvents: 'none' }} />
           </div>
@@ -381,18 +376,9 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
               </div>
               <div style={{ padding: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {['View Profile', 'Change Password', 'Logout'].map((item) => (
-                  <div 
+                  <button 
                     key={item} 
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) => {
-                      if(e.key === 'Enter') {
-                        setAccountOpen(false);
-                        if (item === 'Logout') handleLogout();
-                        if (item === 'Change Password') navigate('/change-password');
-                        if (item === 'View Profile') setProfileOpen(true);
-                      }
-                    }}
+                    type="button"
                     onClick={() => {
                       setAccountOpen(false);
                       if (item === 'Logout') handleLogout();
@@ -400,10 +386,10 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
                       if (item === 'View Profile') setProfileOpen(true);
                     }} 
                     className="modern-menu-item"
-                    style={{ color: item === 'Logout' ? '#ef4444' : '#1e293b' }}
+                    style={{ width: '100%', textAlign: 'left', background: 'none', border: 'none', color: item === 'Logout' ? '#ef4444' : '#1e293b' }}
                   >
                     {item}
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
@@ -423,11 +409,9 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
             {filteredNavItems.map((item) => {
               const isActive = activeTab === item.key;
               return (
-                <div
+                <button
                   key={item.key}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => { if(e.key === 'Enter') handleNavigate(item.key); }}
+                  type="button"
                   onClick={() => handleNavigate(item.key)}
                   style={{
                     padding: '12px 24px',
@@ -437,13 +421,16 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
                     cursor: 'pointer',
                     background: isActive ? 'rgba(233,101,0,.08)' : 'transparent',
                     color: isActive ? '#E96500' : '#475569',
+                    border: 'none',
                     borderRight: isActive ? '3px solid #E96500' : '3px solid transparent',
                     fontWeight: isActive ? 700 : 500,
+                    width: '100%',
+                    textAlign: 'left'
                   }}
                 >
                   <span style={{ fontSize: 18 }}>{item.icon}</span>
                   <span style={{ fontSize: 15 }}>{item.label}</span>
-                </div>
+                </button>
               );
             })}
           </div>

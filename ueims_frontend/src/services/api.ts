@@ -56,15 +56,11 @@ api.interceptors.response.use(
     if ((status === 401 || code === 1006) && !originalRequest._retry) {
       if (isRefreshing) {
         // If already refreshing, wait for the new token
-        try {
-          const token = await new Promise((resolve, reject) => {
-            failedQueue.push({ resolve, reject });
-          });
-          originalRequest.headers.Authorization = `Bearer ${token}`;
-          return api(originalRequest);
-        } catch (err) {
-          throw err;
-        }
+        const token = await new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        });
+        originalRequest.headers.Authorization = `Bearer ${token}`;
+        return api(originalRequest);
       }
 
       originalRequest._retry = true;
