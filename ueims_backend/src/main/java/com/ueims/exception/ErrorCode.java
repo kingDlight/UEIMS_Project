@@ -91,8 +91,6 @@ public enum ErrorCode {
     INTERVIEW_OVERLAP(1055, "Interview time overlaps with an existing schedule of the enterprise", HttpStatus.BAD_REQUEST),
     FEEDBACK_DUPLICATE(1056, "You have already submitted feedback for this enterprise in the current semester", HttpStatus.BAD_REQUEST),
     FEEDBACK_RATING_INVALID(1057, "Feedback rating must be between 1 and 5", HttpStatus.BAD_REQUEST),
-    STUDENT_NOT_IN_SEMESTER_7(1058, "Only semester 7 students are allowed to submit enterprise feedback", HttpStatus.FORBIDDEN),
-    STUDENT_NOT_IN_SEMESTER_6(1059, "Only semester 6 students are allowed to submit reports", HttpStatus.FORBIDDEN),
 
     // Account related
     USER_BANNED(2001, "Your account has been locked due to 5 consecutive incorrect password attempts", HttpStatus.FORBIDDEN),

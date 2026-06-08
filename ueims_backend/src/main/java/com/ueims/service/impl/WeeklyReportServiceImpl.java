@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import com.ueims.dto.request.WeeklyReportRequest;
 import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
-import com.ueims.model.entity.EligibleStudent;
 import com.ueims.model.entity.EnterpriseAssignment;
 import com.ueims.model.entity.User;
 import com.ueims.model.entity.WeeklyReport;
@@ -65,17 +64,13 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
-        // BR-54: Only Semester 6 students can submit reports
-        EligibleStudent eligibleStudent = eligibleStudentRepository
+        // BR-XX: Ensure student is eligible
+        eligibleStudentRepository
                 .findByUser_UserIdAndSemester_SemesterId(
                         currentUser.getUserId(), assignment.getSemester().getSemesterId())
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_ELIGIBLE));
 
-        if (eligibleStudent.getCurrentSemester() == null || eligibleStudent.getCurrentSemester() != 6) {
-            throw new AppException(ErrorCode.STUDENT_NOT_IN_SEMESTER_6);
-        }
-
-        // BR-56: Submission Window Restriction
+        // BR-XX: Submission Window Restriction
         LocalDate startDate = assignment.getSemester().getStartDate();
         long currentWeek = ChronoUnit.WEEKS.between(startDate, LocalDate.now()) + 1;
         
