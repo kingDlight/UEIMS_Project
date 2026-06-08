@@ -129,22 +129,24 @@ const NavBar = ({ isDark, toggleTheme, scrolled, scrollToSection }: { isDark: bo
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   
-  const navBgClass = scrolled 
-    ? (isDark ? 'h-16 bg-[#0b0f19]/80 backdrop-blur-xl border-b border-zinc-800/50 shadow-lg' : 'h-16 bg-white/80 backdrop-blur-xl border-b border-slate-200/80 shadow-md')
-    : 'h-20 bg-transparent';
+  let navBgClass = 'h-20 bg-transparent';
+  if (scrolled) {
+    navBgClass = isDark 
+      ? 'h-16 bg-[#0b0f19]/80 backdrop-blur-xl border-b border-zinc-800/50 shadow-lg' 
+      : 'h-16 bg-white/80 backdrop-blur-xl border-b border-slate-200/80 shadow-md';
+  }
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out px-6 md:px-12 flex items-center justify-between ${navBgClass}`}>
-      <div 
+      <button 
+        type="button"
         className="flex items-center gap-3 cursor-pointer" 
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-        role="button"
-        tabIndex={0}
-        onKeyDown={(e) => { if (e.key === 'Enter') window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+        style={{ background: 'none', border: 'none', padding: 0 }}
       >
         <img src="/src/assets/logo_ueims.png" alt="UEIMS Logo" style={{ height: '36px', objectFit: 'contain' }} />
         <span className={`font-bold text-lg tracking-wide transition-colors duration-300 ease-in-out ${isDark ? 'text-white' : 'text-slate-900'}`}>UEIMS</span>
-      </div>
+      </button>
 
       <div className="hidden md:flex items-center gap-1.5">
         {navLinks.map((link) => (
@@ -273,6 +275,7 @@ const HeroSection = ({ isDark, handleMouseMove, spotlightRef, scrollToSection }:
   return (
     <section 
       onMouseMove={handleMouseMove}
+      role="presentation"
       className={`relative pt-36 pb-20 md:pt-48 md:pb-32 px-6 md:px-12 flex items-center justify-center overflow-hidden z-10 border-b transition-colors duration-300 ease-in-out ${
         isDark ? 'border-zinc-900' : 'border-slate-200'
       }`}
@@ -565,7 +568,7 @@ export const HomePage: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   const [isDark, setIsDark] = useState(() => {
     const saved = localStorage.getItem('homepage-theme');
-    return saved != null ? JSON.parse(saved) : true;
+    return saved !== null ? JSON.parse(saved) : true;
   });
   const spotlightRef = React.useRef<HTMLDivElement>(null);
 

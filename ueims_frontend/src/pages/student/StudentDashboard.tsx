@@ -467,16 +467,15 @@ const ProfileTab: React.FC = () => {
             </div>
           </div>
 
-          <div
+          <button
+            type="button"
             onDragEnter={handleDrag}
             onDragLeave={handleDrag}
             onDragOver={handleDrag}
             onDrop={handleDrop}
             onClick={() => document.getElementById('cv-input')?.click()}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => { if(e.key === 'Enter') document.getElementById('cv-input')?.click(); }}
             style={{
+              width: '100%',
               border: `2px dashed ${dragActive ? cc.primary : cc.border}`,
               borderRadius: cc.radiusLg,
               padding: '36px 24px',
@@ -484,6 +483,8 @@ const ProfileTab: React.FC = () => {
               background: dragActive ? cc.primaryLight : cc.bg,
               transition: 'all 0.2s ease',
               cursor: 'pointer',
+              color: 'inherit',
+              font: 'inherit',
             }}
           >
             <input id="cv-input" type="file" accept=".pdf" onChange={handleFileSelect} style={{ display: 'none' }} />
@@ -512,7 +513,7 @@ const ProfileTab: React.FC = () => {
                 <p style={{ fontSize: 12, color: cc.textMuted, margin: 0 }}>or click to browse files</p>
               </>
             )}
-          </div>
+          </button>
 
           {cvFile && (
             <div style={{ marginTop: 16, display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
@@ -724,9 +725,7 @@ const JobBoardTab: React.FC = () => {
       {selectedJob && (
         <div
           onClick={() => setSelectedJob(null)}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => { if(e.key === 'Escape' || e.key === 'Enter') setSelectedJob(null); }}
+          role="presentation"
           style={{
             position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
             zIndex: 1000, display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
@@ -829,9 +828,7 @@ const JobBoardTab: React.FC = () => {
       {showConfirmModal && selectedJob && (
         <div
           onClick={() => setShowConfirmModal(false)}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => { if(e.key === 'Escape' || e.key === 'Enter') setShowConfirmModal(false); }}
+          role="presentation"
           style={{
             position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
             zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24,
@@ -871,13 +868,21 @@ const JobBoardTab: React.FC = () => {
 };
 
 const ReportCardItem: React.FC<{ report: any, index: number }> = ({ report, index }) => {
-  const isApproved = report.status === 'APPROVED';
-  const isRejected = report.status === 'REJECTED';
-  const isSubmitted = report.status === 'SUBMITTED';
-  const isNotSubmitted = report.status === 'NOT_SUBMITTED';
+  const statusLabelMap: Record<string, string> = {
+    APPROVED: 'Approved',
+    REJECTED: 'Rejected',
+    SUBMITTED: 'Pending Review',
+    NOT_SUBMITTED: 'Not Submitted',
+  };
+  const label = statusLabelMap[report.status] || 'Draft';
 
-  const label = isApproved ? 'Approved' : isRejected ? 'Rejected' : isSubmitted ? 'Pending Review' : isNotSubmitted ? 'Not Submitted' : 'Draft';
-  const variant = isApproved ? 'success' : isRejected ? 'error' : isSubmitted ? 'warning' : 'neutral';
+  const statusVariantMap: Record<string, 'success' | 'warning' | 'error' | 'info' | 'neutral'> = {
+    APPROVED: 'success',
+    REJECTED: 'error',
+    SUBMITTED: 'warning',
+    NOT_SUBMITTED: 'neutral',
+  };
+  const variant = statusVariantMap[report.status] || 'neutral';
 
   return (
     <motion.div
