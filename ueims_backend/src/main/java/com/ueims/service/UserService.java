@@ -3,6 +3,7 @@ package com.ueims.service;
 import java.util.List;
 import java.util.UUID;
 
+import com.ueims.dto.request.UserCreationRequest;
 import com.ueims.dto.response.UserResponse;
 import com.ueims.model.entity.User;
 
@@ -13,7 +14,7 @@ public interface UserService {
 
     User save(User entity);
 
-    User createUser(com.ueims.dto.request.UserCreationRequest request);
+    User createUser(UserCreationRequest request);
 
     void deleteById(UUID id);
 

@@ -3,6 +3,7 @@ package com.ueims.service;
 import java.util.List;
 import java.util.UUID;
 
+import com.ueims.dto.request.JobPostRequest;
 import com.ueims.model.entity.JobPost;
 
 public interface JobPostService {
@@ -10,9 +11,9 @@ public interface JobPostService {
 
     JobPost findById(UUID id);
 
-    JobPost create(com.ueims.dto.request.JobPostRequest request);
+    JobPost create(JobPostRequest request);
 
-    JobPost update(UUID id, com.ueims.dto.request.JobPostRequest request);
+    JobPost update(UUID id, JobPostRequest request);
 
     void deleteById(UUID id);
 }

@@ -4,13 +4,16 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.ueims.dto.request.UserCreationRequest;
 import com.ueims.dto.response.UserResponse;
 import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
 import com.ueims.model.entity.User;
 import com.ueims.repository.UserRepository;
+import com.ueims.service.MailService;
 import com.ueims.service.UserService;
 
 import lombok.RequiredArgsConstructor;
@@ -19,8 +22,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository repository;
-    private final com.ueims.service.MailService mailService;
-    private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+    private final MailService mailService;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public List<User> findAll() {
@@ -38,9 +41,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User createUser(com.ueims.dto.request.UserCreationRequest request) {
-        String randomPassword =
-                java.util.UUID.randomUUID().toString().replace("-", "").substring(0, 12);
+    public User createUser(UserCreationRequest request) {
+        String randomPassword = java.util.UUID.randomUUID().toString().replace("-", "").substring(0, 12);
         User user = User.builder()
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(randomPassword))

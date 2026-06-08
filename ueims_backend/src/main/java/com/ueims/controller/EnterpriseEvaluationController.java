@@ -1,6 +1,5 @@
 package com.ueims.controller;
 
-import java.util.List;
 import java.util.UUID;
 
 import jakarta.validation.Valid;
@@ -9,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import com.ueims.model.entity.EnterpriseEvaluation;
 import com.ueims.service.EnterpriseEvaluationService;
 
 import lombok.RequiredArgsConstructor;
@@ -19,23 +17,25 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class EnterpriseEvaluationController {
     private final EnterpriseEvaluationService service;
+    private final com.ueims.mapper.EnterpriseEvaluationMapper mapper;
 
     @GetMapping
     @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
-    public ResponseEntity<List<EnterpriseEvaluation>> getAll() {
-        return ResponseEntity.ok(service.findAll());
+    public ResponseEntity<java.util.List<com.ueims.dto.response.EnterpriseEvaluationDTO>> getAll() {
+        return ResponseEntity.ok(service.findAll().stream().map(mapper::toDto).toList());
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('ENTERPRISE') or hasRole('STUDENT')")
-    public ResponseEntity<EnterpriseEvaluation> getById(@PathVariable UUID id) {
-        return ResponseEntity.ok(service.findById(id));
+    public ResponseEntity<com.ueims.dto.response.EnterpriseEvaluationDTO> getById(@PathVariable UUID id) {
+        return ResponseEntity.ok(mapper.toDto(service.findById(id)));
     }
 
     @PostMapping
     @PreAuthorize("hasRole('ENTERPRISE')")
-    public ResponseEntity<EnterpriseEvaluation> create(@Valid @RequestBody EnterpriseEvaluation entity) {
-        return ResponseEntity.ok(service.save(entity));
+    public ResponseEntity<com.ueims.dto.response.EnterpriseEvaluationDTO> create(
+            @Valid @RequestBody com.ueims.dto.response.EnterpriseEvaluationDTO entity) {
+        return ResponseEntity.ok(mapper.toDto(service.save(mapper.toEntity(entity))));
     }
 
     @DeleteMapping("/{id}")

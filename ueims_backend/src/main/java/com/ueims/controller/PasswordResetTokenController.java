@@ -1,6 +1,5 @@
 package com.ueims.controller;
 
-import java.util.List;
 import java.util.UUID;
 
 import jakarta.validation.Valid;
@@ -8,7 +7,6 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.ueims.model.entity.PasswordResetToken;
 import com.ueims.service.PasswordResetTokenService;
 
 import lombok.RequiredArgsConstructor;
@@ -18,20 +16,22 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PasswordResetTokenController {
     private final PasswordResetTokenService service;
+    private final com.ueims.mapper.PasswordResetTokenMapper mapper;
 
     @GetMapping
-    public ResponseEntity<List<PasswordResetToken>> getAll() {
-        return ResponseEntity.ok(service.findAll());
+    public ResponseEntity<java.util.List<com.ueims.dto.response.PasswordResetTokenDTO>> getAll() {
+        return ResponseEntity.ok(service.findAll().stream().map(mapper::toDto).toList());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PasswordResetToken> getById(@PathVariable UUID id) {
-        return ResponseEntity.ok(service.findById(id));
+    public ResponseEntity<com.ueims.dto.response.PasswordResetTokenDTO> getById(@PathVariable UUID id) {
+        return ResponseEntity.ok(mapper.toDto(service.findById(id)));
     }
 
     @PostMapping
-    public ResponseEntity<PasswordResetToken> create(@Valid @RequestBody PasswordResetToken entity) {
-        return ResponseEntity.ok(service.save(entity));
+    public ResponseEntity<com.ueims.dto.response.PasswordResetTokenDTO> create(
+            @Valid @RequestBody com.ueims.dto.response.PasswordResetTokenDTO entity) {
+        return ResponseEntity.ok(mapper.toDto(service.save(mapper.toEntity(entity))));
     }
 
     @DeleteMapping("/{id}")
