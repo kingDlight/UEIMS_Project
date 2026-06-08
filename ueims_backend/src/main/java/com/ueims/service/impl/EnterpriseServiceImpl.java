@@ -66,7 +66,7 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 
     @Override
     @Transactional
-    public Enterprise update(UUID id, com.ueims.dto.request.EnterpriseRequest request) {
+    public Enterprise update(UUID id, EnterpriseRequest request) {
         User currentUser = getCurrentUser();
         Enterprise existing = repository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.ENTERPRISE_NOT_FOUND));

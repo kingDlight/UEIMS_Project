@@ -50,8 +50,7 @@ public class WeeklyReportController {
 
     @PostMapping
     @PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<WeeklyReportDTO> create(
-            @Valid @RequestBody WeeklyReportDTO entity) {
+    public ResponseEntity<WeeklyReportDTO> create(@Valid @RequestBody WeeklyReportDTO entity) {
         // Sanitize rich-text HTML fields before saving
         if (entity.getTasksCompleted() != null)
             entity.setTasksCompleted(HtmlSanitizer.sanitize(entity.getTasksCompleted()));
@@ -59,8 +58,7 @@ public class WeeklyReportController {
             entity.setIssuesChallenges(HtmlSanitizer.sanitize(entity.getIssuesChallenges()));
         if (entity.getLessonsLearned() != null)
             entity.setLessonsLearned(HtmlSanitizer.sanitize(entity.getLessonsLearned()));
-        if (entity.getPlanNextWeek() != null)
-            entity.setPlanNextWeek(HtmlSanitizer.sanitize(entity.getPlanNextWeek()));
+        if (entity.getPlanNextWeek() != null) entity.setPlanNextWeek(HtmlSanitizer.sanitize(entity.getPlanNextWeek()));
         return ResponseEntity.ok(mapper.toDto(service.save(mapper.toEntity(entity))));
     }
 

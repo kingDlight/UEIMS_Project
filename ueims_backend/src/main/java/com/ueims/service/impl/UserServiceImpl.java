@@ -42,7 +42,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User createUser(UserCreationRequest request) {
-        String randomPassword = java.util.UUID.randomUUID().toString().replace("-", "").substring(0, 12);
+        String randomPassword = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
         User user = User.builder()
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(randomPassword))
