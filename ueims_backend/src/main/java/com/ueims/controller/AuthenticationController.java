@@ -1,7 +1,5 @@
 package com.ueims.controller;
 
-import java.text.ParseException;
-
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.PostMapping;
@@ -9,7 +7,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.nimbusds.jose.JOSEException;
 import com.ueims.dto.request.*;
 import com.ueims.dto.response.ApiResponse;
 import com.ueims.dto.response.AuthenticationResponse;
@@ -36,21 +33,19 @@ public class AuthenticationController {
     }
 
     @PostMapping("/introspect")
-    public ApiResponse<IntrospectResponse> introspect(@Valid @RequestBody IntrospectRequest request)
-            throws ParseException, JOSEException {
+    public ApiResponse<IntrospectResponse> introspect(@Valid @RequestBody IntrospectRequest request) {
         var result = authenticationService.introspect(request);
         return ApiResponse.<IntrospectResponse>builder().result(result).build();
     }
 
     @PostMapping("/refresh")
-    public ApiResponse<AuthenticationResponse> refreshToken(@Valid @RequestBody RefreshRequest request)
-            throws ParseException, JOSEException {
+    public ApiResponse<AuthenticationResponse> refreshToken(@Valid @RequestBody RefreshRequest request) {
         var result = authenticationService.refreshToken(request);
         return ApiResponse.<AuthenticationResponse>builder().result(result).build();
     }
 
     @PostMapping("/logout")
-    public ApiResponse<Void> logout(@Valid @RequestBody LogoutRequest request) throws ParseException, JOSEException {
+    public ApiResponse<Void> logout(@Valid @RequestBody LogoutRequest request) {
         authenticationService.logout(request);
         return ApiResponse.<Void>builder().build();
     }

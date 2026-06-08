@@ -1,3 +1,120 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 20% 98%; /* Slightly off-white background */
+    --foreground: 222.2 84% 4.9%; /* Darker text */
+    --card: 0 0% 100%; /* Pure white cards to pop */
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 24.6 95% 53.1%; /* FPT Orange */
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 86%; /* Darker border */
+    --input: 214.3 31.8% 86%;
+    --ring: 24.6 95% 53.1%;
+    --radius: 0.5rem;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 86%;
+    --sidebar-ring: 24.6 95% 53.1%;
+  }
+
+  .dark {
+    --background: 222.2 47.4% 11.2%; /* Softer dark blue-gray (Slate 900) */
+    --foreground: 210 40% 98%;
+    --card: 217.2 32.6% 17.5%; /* Slate 800 - Lighter to pop out */
+    --card-foreground: 210 40% 98%;
+    --popover: 217.2 32.6% 17.5%; /* Slate 800 */
+    --popover-foreground: 210 40% 98%;
+    --primary: 24.6 95% 53.1%; /* Keep FPT orange */
+    --primary-foreground: 210 40% 98%;
+    --secondary: 217.2 32.6% 17.5%; /* Slate 800 */
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 25%; /* Lighter border for visibility */
+    --input: 217.2 32.6% 25%;
+    --ring: 24.6 95% 53.1%;
+    --sidebar-background: 222.2 84% 4.9%; /* Darker than main background for contrast (Slate 950) */
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 24.6 95% 53.1%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 217.2 32.6% 17.5%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217.2 32.6% 25%;
+    --sidebar-ring: 24.6 95% 53.1%;
+    --sidebar-ring: 24.6 95% 53.1%;
+  }
+
+  /* Login Page Specific Overrides */
+  .ant-input {
+    background: transparent !important;
+    border: none !important;
+    font-size: 15px !important;
+  }
+  .ant-input-affix-wrapper {
+    background: transparent !important;
+    border: none !important;
+    border-bottom: 1px solid #a8a8a8 !important;
+    border-radius: 0 !important;
+    padding: 8px 0 !important;
+  }
+  .ant-input-affix-wrapper:hover,
+  .ant-input-affix-wrapper-focused {
+    border-color: #E67E22 !important;
+    box-shadow: none !important;
+  }
+  .ant-input:focus {
+    box-shadow: none !important;
+  }
+  @media (max-width: 1100px) {
+    .login-left-panel {
+      padding: 32px 40px !important;
+    }
+  }
+  @media (max-width: 900px) {
+    .login-left-panel {
+      width: 100% !important;
+      min-width: unset !important;
+      padding: 40px !important;
+    }
+    .login-right-panel {
+      display: none !important;
+    }
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  .dashboard-container, header, aside {
+    @apply transition-colors duration-1000 ease-in-out;
+  }
+}
+
 /* ============================================
    UEIMS Global Styles
    FPT Brand Colors: E67E22 (Primary Orange)
@@ -49,7 +166,7 @@
 
   /* Border Radius */
   --radius-sm: 6px;
-  --radius-md: 10px;
+  --radius-md: 8px;
   --radius-lg: 16px;
   --radius-xl: 20px;
   --radius-full: 9999px;
@@ -80,7 +197,12 @@
 
 html {
   scroll-behavior: smooth;
+  /* Fixed 16px — never change this. Tailwind's rem-based classes (text-xs, text-sm, etc.)
+     all assume 16px root. Changing html font-size at breakpoints causes cross-browser
+     font-size inconsistencies because browsers handle DPI/zoom differently. */
   font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
@@ -106,20 +228,15 @@ body {
 /* ============================================
    Typography
    ============================================ */
+/* Keep only font-family and line-height. Do NOT set font-size here —
+   it conflicts with Tailwind's text-* utility classes. Each page/component
+   controls sizing via Tailwind utilities (text-sm, text-lg, text-4xl, etc.) */
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-weight: 700;
-  color: var(--text-primary);
   line-height: 1.2;
   margin: 0;
 }
-
-h1 { font-size: 3rem; letter-spacing: -0.02em; }
-h2 { font-size: 2.25rem; letter-spacing: -0.01em; }
-h3 { font-size: 1.75rem; }
-h4 { font-size: 1.25rem; }
-h5 { font-size: 1rem; }
-h6 { font-size: 0.875rem; }
 
 p {
   margin: 0;
@@ -237,8 +354,9 @@ a:hover {
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-20px); }
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  33% { transform: translateY(-14px) rotate(2deg); }
+  66% { transform: translateY(-6px) rotate(-1deg); }
 }
 
 @keyframes pulse {
@@ -256,6 +374,48 @@ a:hover {
   to { transform: rotate(360deg); }
 }
 
+/* Homepage Background Animations */
+@keyframes drift {
+  0%   { transform: translate(0px, 0px) scale(1); }
+  25%  { transform: translate(30px, -20px) scale(1.04); }
+  50%  { transform: translate(10px, 30px) scale(0.97); }
+  75%  { transform: translate(-20px, 10px) scale(1.02); }
+  100% { transform: translate(0px, 0px) scale(1); }
+}
+
+@keyframes driftAlt {
+  0%   { transform: translate(0px, 0px) scale(1); }
+  25%  { transform: translate(-25px, 15px) scale(0.96); }
+  50%  { transform: translate(15px, -30px) scale(1.05); }
+  75%  { transform: translate(20px, 20px) scale(0.98); }
+  100% { transform: translate(0px, 0px) scale(1); }
+}
+
+@keyframes morph {
+  0%, 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+  25%       { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+  50%       { border-radius: 50% 60% 30% 60% / 40% 30% 60% 50%; }
+  75%       { border-radius: 70% 30% 50% 40% / 30% 70% 40% 60%; }
+}
+
+@keyframes rotateSlow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes rotateSlowReverse {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(-360deg); }
+}
+
+@keyframes particleFloat {
+  0%   { transform: translateY(0px) translateX(0px); opacity: 0.6; }
+  25%  { transform: translateY(-18px) translateX(8px); opacity: 1; }
+  50%  { transform: translateY(-8px) translateX(-6px); opacity: 0.7; }
+  75%  { transform: translateY(-22px) translateX(4px); opacity: 0.9; }
+  100% { transform: translateY(0px) translateX(0px); opacity: 0.6; }
+}
+
 /* Animation Utilities */
 .animate-fade-in { animation: fadeIn 0.5s ease forwards; }
 .animate-fade-in-up { animation: fadeInUp 0.6s ease forwards; }
@@ -263,9 +423,15 @@ a:hover {
 .animate-slide-in-left { animation: slideInLeft 0.6s ease forwards; }
 .animate-slide-in-right { animation: slideInRight 0.6s ease forwards; }
 .animate-scale-in { animation: scaleIn 0.5s ease forwards; }
-.animate-float { animation: float 6s ease-in-out infinite; }
+.animate-float { animation: float 7s ease-in-out infinite; }
 .animate-pulse { animation: pulse 2s ease-in-out infinite; }
 .animate-spin { animation: spin 1s linear infinite; }
+.animate-drift { animation: drift 18s ease-in-out infinite; }
+.animate-drift-alt { animation: driftAlt 22s ease-in-out infinite; }
+.animate-morph { animation: morph 12s ease-in-out infinite; }
+.animate-rotate-slow { animation: rotateSlow 30s linear infinite; }
+.animate-rotate-slow-reverse { animation: rotateSlowReverse 24s linear infinite; }
+.animate-particle { animation: particleFloat 5s ease-in-out infinite; }
 
 /* Stagger Animation Delays */
 .delay-100 { animation-delay: 100ms; }
@@ -420,6 +586,11 @@ a:hover {
   color: var(--fpt-orange) !important;
 }
 
+/* Pagination Override */
+.ant-pagination-item, .ant-pagination-item-link {
+  border-radius: 8px !important;
+}
+
 /* ============================================
    Utility Classes
    ============================================ */
@@ -511,34 +682,18 @@ a:hover {
 .invisible { visibility: hidden; }
 
 /* ============================================
-   Responsive Breakpoints
+   Responsive Breakpoints — Layout only.
+   Font sizes are handled by Tailwind utilities,
+   NOT by scaling the html root font-size.
    ============================================ */
-@media (max-width: 1200px) {
-  html { font-size: 15px; }
-}
-
 @media (max-width: 992px) {
-  html { font-size: 14px; }
-  
   .grid-cols-4 { grid-template-columns: repeat(2, 1fr); }
   .grid-cols-3 { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 768px) {
-  html { font-size: 13px; }
-  
   .grid-cols-4,
   .grid-cols-3,
   .grid-cols-2 { grid-template-columns: 1fr; }
-  
-  h1 { font-size: 2.25rem; }
-  h2 { font-size: 1.75rem; }
-  h3 { font-size: 1.5rem; }
 }
 
-@media (max-width: 480px) {
-  html { font-size: 12px; }
-  
-  h1 { font-size: 1.875rem; }
-  h2 { font-size: 1.5rem; }
-}

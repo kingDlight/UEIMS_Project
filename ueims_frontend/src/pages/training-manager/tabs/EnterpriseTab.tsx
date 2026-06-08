@@ -1,17 +1,27 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Table, Modal, Button, Input, Badge, message } from 'antd';
+import { Table, Modal, Button, Input, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import {
   Building2,
   CheckCircle2,
   XCircle,
-  ArrowRight,
   ChevronDown,
   AlertTriangle,
 } from 'lucide-react';
 import { EnterpriseService } from '@/services/EnterpriseService';
 import type { Enterprise } from '../types';
+
+// ============================================================
+// COLOR UTILITY — hex-to-rgba for ghost style rendering
+// ============================================================
+function hexToRgba(hex: string, alpha: number): string {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
 
 const cc = {
   brand: '#FF7A30',
@@ -218,20 +228,21 @@ const ApprovalRow: React.FC<{
             <span style={{ fontSize: 14, fontWeight: 700, color: cc.textPrimary, letterSpacing: '-0.01em' }}>
               {enterprise.companyName}
             </span>
-            <Badge
-              count={isApproved ? 'Approved' : 'Pending'}
-              style={{
-                backgroundColor: isApproved ? cc.success : cc.warning,
-                fontSize: 10, fontWeight: 700, padding: '0 6px', height: 18, lineHeight: '18px', borderRadius: cc.radiusFull,
-              }}
-            />
+            <span style={{
+              display: 'inline-flex', alignItems: 'center', padding: '2px 8px',
+              borderRadius: cc.radiusFull,
+              backgroundColor: isApproved ? hexToRgba(cc.success, 0.06) : hexToRgba(cc.warning, 0.06),
+              border: `1px solid ${isApproved ? hexToRgba(cc.success, 0.25) : hexToRgba(cc.warning, 0.25)}`,
+              color: isApproved ? cc.success : cc.warning,
+              fontSize: 10, fontWeight: 700, fontFamily: 'Inter, sans-serif',
+            }}>
+              {isApproved ? 'Approved' : 'Pending'}
+            </span>
           </div>
           <div style={{ fontSize: 12, color: cc.textSecondary, marginTop: 2, display: 'flex', alignItems: 'center', gap: 6 }}>
             <span>{enterprise.industry}</span>
             <span style={{ color: cc.border }}>|</span>
             <span style={{ fontFamily: 'monospace', fontSize: 11 }}>{enterprise.taxCode}</span>
-            <span style={{ color: cc.border }}>|</span>
-            <span>{enterprise.submittedDate ?? new Date(enterprise.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
           </div>
         </div>
         <motion.button
@@ -258,7 +269,7 @@ const ApprovalRow: React.FC<{
             style={{ overflow: 'hidden' }}
           >
             <div style={{ borderTop: `1px solid ${cc.borderSubtle}`, padding: '14px 16px', background: cc.bg }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>
+              <div className="ent-info-grid">
                 {[
                   { label: 'Contact Person', value: enterprise.contactPerson },
                   { label: 'Email', value: enterprise.contactEmail },
@@ -346,15 +357,16 @@ const AllEnterprisesTable: React.FC<{ data: Enterprise[] }> = ({ data }) => {
       dataIndex: 'status',
       key: 'status',
       render: (status: string) => {
-        const config = status === 'APPROVED'
-          ? { color: cc.success, bg: cc.successMuted, label: 'Approved' }
-          : { color: cc.warning, bg: cc.warningMuted, label: 'Pending' };
+        const approved = status === 'APPROVED';
+        const color = approved ? cc.success : cc.warning;
         return (
           <span style={{
-            display: 'inline-flex', alignItems: 'center', padding: '3px 10px', borderRadius: cc.radiusFull,
-            background: config.bg, color: config.color, fontSize: 11, fontWeight: 700,
+            display: 'inline-flex', alignItems: 'center', padding: '3px 9px', borderRadius: 6,
+            backgroundColor: hexToRgba(color, 0.06),
+            border: `1px solid ${hexToRgba(color, 0.25)}`,
+            color, fontSize: 11, fontWeight: 600,
           }}>
-            {config.label}
+            {approved ? 'Approved' : 'Pending'}
           </span>
         );
       },
@@ -362,13 +374,16 @@ const AllEnterprisesTable: React.FC<{ data: Enterprise[] }> = ({ data }) => {
   ];
 
   return (
-    <Table
-      columns={columns}
-      dataSource={data}
-      rowKey="enterpriseId"
-      pagination={false}
-      style={{ background: cc.surface, borderRadius: cc.radiusLg, overflow: 'hidden' }}
-    />
+    <div style={{ overflowX: 'auto', maxWidth: '100%', minWidth: 0 }}>
+      <Table
+        columns={columns}
+        dataSource={data}
+        rowKey="enterpriseId"
+        pagination={false}
+        scroll={{ x: 800 }}
+        style={{ background: cc.surface, borderRadius: cc.radiusLg, overflow: 'hidden' }}
+      />
+    </div>
   );
 };
 
@@ -433,7 +448,15 @@ export const EnterpriseTab: React.FC = () => {
   const pendingEnterprises = enterprises.filter((e) => e.status === 'PENDING');
 
   return (
-    <div style={{ fontFamily: 'Inter, sans-serif' }}>
+    <div className="ent-container" style={{ fontFamily: 'Inter, sans-serif' }}>
+      <style>{`
+        .ent-container { padding-bottom: 40px; }
+        .ent-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+        @media (max-width: 768px) {
+          .ent-container { padding-bottom: 100px !important; }
+          .ent-info-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
           <h1 style={{ fontSize: 22, fontWeight: 800, color: cc.textPrimary, margin: 0, letterSpacing: '-0.02em' }}>
@@ -448,7 +471,7 @@ export const EnterpriseTab: React.FC = () => {
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px' }}>
         <div style={{
           display: 'inline-flex', alignItems: 'center', gap: 0, background: cc.surface,
-          border: `1px solid ${cc.border}`, borderRadius: cc.radiusFull, padding: 4, marginBottom: 20, boxShadow: cc.shadowSm,
+          border: `1px solid ${cc.border}`, borderRadius: cc.radiusMd, padding: 4, marginBottom: 20, boxShadow: cc.shadowSm,
         }}>
           {(['pending', 'all'] as const).map((view) => (
             <motion.button
@@ -457,7 +480,7 @@ export const EnterpriseTab: React.FC = () => {
               whileTap={{ scale: 0.98 }}
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 18px',
-                borderRadius: cc.radiusFull, fontSize: 13,
+                borderRadius: cc.radiusMd, fontSize: 13,
                 fontWeight: activeView === view ? 700 : 500,
                 color: activeView === view ? '#fff' : cc.textSecondary,
                 background: activeView === view ? cc.brand : 'transparent',

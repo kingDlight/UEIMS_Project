@@ -55,47 +55,52 @@ const cc = {
 };
 
 // ============================================================
-// INCIDENT SEVERITY MAPPING (BR-26 aligned)
+// COLOR UTILITY — hex-to-rgba for ghost style rendering
+// ============================================================
+function hexToRgba(hex: string, alpha: number): string {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+// ============================================================
+// INCIDENT SEVERITY MAPPING (BR-26 aligned) — ghost outline style
 // ============================================================
 type Severity = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | 'RESOLVED';
 
-const SEVERITY_CONFIG: Record<
-  Severity,
-  { color: string; bg: string; label: string; borderColor: string; dotColor: string }
-> = {
+const SEVERITY_CONFIG: Record<Severity, {
+  color: string; bg: string; borderColor: string; label: string;
+}> = {
   CRITICAL: {
-    color: '#EF4444',
-    bg: '#FEF2F2',
-    borderColor: '#EF4444',
-    dotColor: '#EF4444',
+    color: cc.error,
+    bg: hexToRgba(cc.error,  0.06),
+    borderColor: hexToRgba(cc.error,  0.25),
     label: 'CRITICAL',
   },
   HIGH: {
-    color: '#F59E0B',
-    bg: '#FFFBEB',
-    borderColor: '#F59E0B',
-    dotColor: '#F59E0B',
+    color: cc.warning,
+    bg: hexToRgba(cc.warning, 0.06),
+    borderColor: hexToRgba(cc.warning, 0.25),
     label: 'HIGH',
   },
   MEDIUM: {
-    color: '#3B82F6',
-    bg: '#EFF6FF',
-    borderColor: '#3B82F6',
-    dotColor: '#3B82F6',
+    color: cc.info,
+    bg: hexToRgba(cc.info,    0.06),
+    borderColor: hexToRgba(cc.info,    0.25),
     label: 'MEDIUM',
   },
   LOW: {
-    color: '#6B7280',
-    bg: '#F9FAFB',
-    borderColor: '#9CA3AF',
-    dotColor: '#9CA3AF',
+    color: cc.textMuted,
+    bg: hexToRgba(cc.textMuted, 0.06),
+    borderColor: hexToRgba(cc.textMuted, 0.25),
     label: 'LOW',
   },
   RESOLVED: {
-    color: '#10B981',
-    bg: '#F0FDF4',
-    borderColor: '#10B981',
-    dotColor: '#10B981',
+    color: cc.success,
+    bg: hexToRgba(cc.success, 0.06),
+    borderColor: hexToRgba(cc.success, 0.25),
     label: 'RESOLVED',
   },
 };
@@ -202,6 +207,7 @@ const IncidentCard: React.FC<{
 
   return (
     <motion.button
+      className="incident-card-btn"
       initial={{ opacity: 0, x: -12 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.4, delay: index * 0.07, ease: [0.32, 0.72, 0, 1] }}
@@ -211,7 +217,7 @@ const IncidentCard: React.FC<{
         background: isSelected ? cc.brandSubtle : cc.surface,
         border: 'none',
         borderLeft: `4px solid ${cfg.borderColor}`,
-        borderRadius: cc.radiusLg,
+        borderRadius: cc.radiusMd,
         padding: '13px 14px',
         cursor: 'pointer',
         textAlign: 'left',
@@ -243,7 +249,7 @@ const IncidentCard: React.FC<{
       >
         {isCritical ? (
           <motion.span
-            animate={{ scale: [1, 1.4, 1], opacity: [0.35, 0, 0.35] }}
+            animate={{ scale: [1, 1.4, 1], opacity: [0.12, 0, 0.12] }}
             transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
             style={{
               position: 'absolute',
@@ -280,11 +286,12 @@ const IncidentCard: React.FC<{
           <span
             style={{
               fontSize: 9,
-              fontWeight: 800,
+              fontWeight: 700,
               color: cfg.color,
-              background: cfg.bg,
+              backgroundColor: cfg.bg,
+              border: `1px solid ${cfg.borderColor}`,
               padding: '2px 7px',
-              borderRadius: cc.radiusFull,
+              borderRadius: 6,
               fontFamily: 'Inter, sans-serif',
               flexShrink: 0,
               letterSpacing: '0.04em',
@@ -455,7 +462,7 @@ const ResolutionWorkspace: React.FC<{
       </div>
 
       {/* Resolution note textarea */}
-      <div style={{ marginBottom: 8 }}>
+      <div style={{ marginBottom: 24 }}>
         <label
           style={{
             display: 'block',
@@ -559,6 +566,16 @@ const ResolutionWorkspace: React.FC<{
             justifyContent: 'center',
             gap: 6,
           }}
+          onMouseEnter={(e) => {
+            if (isValid) {
+              (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-1px)';
+              (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 5px 14px rgba(239,68,68,.40)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0)';
+            (e.currentTarget as HTMLButtonElement).style.boxShadow = isValid ? cc.shadowError : 'none';
+          }}
         >
           <XCircle size={14} />
           Close Incident
@@ -577,10 +594,31 @@ const MetricCard: React.FC<{
   icon: React.ReactNode;
   color: string;
   bgMuted: string;
-}> = ({ label, value, icon, color, bgMuted }) => (
+}> = ({ label, value, icon, color, bgMuted }) => {
+  const [displayValue, setDisplayValue] = React.useState(typeof value === 'number' ? 0 : value);
+  
+  React.useEffect(() => {
+    let isMounted = true;
+    let controls: any;
+    if (typeof value === 'number') {
+      import('framer-motion').then(({ animate }) => {
+        if (!isMounted) return;
+        controls = animate(0, value, { duration: 1.2, onUpdate: v => setDisplayValue(Math.round(v)) });
+      });
+      return () => {
+        isMounted = false;
+        if (controls) controls.stop();
+      };
+    } else {
+      setDisplayValue(value);
+    }
+  }, [value]);
+
+  return (
   <motion.div
     initial={{ opacity: 0, y: 10 }}
     animate={{ opacity: 1, y: 0 }}
+    whileHover={{ y: -2, boxShadow: '0 8px 24px rgba(15,23,42,.12)', transition: { duration: 0.2 } }}
     style={{
       background: cc.surface,
       border: `1px solid ${cc.border}`,
@@ -608,21 +646,21 @@ const MetricCard: React.FC<{
       {icon}
     </div>
     <div>
-      <div style={{ fontSize: 22, fontWeight: 800, color: cc.textPrimary, lineHeight: 1, fontFamily: 'Inter, sans-serif', letterSpacing: '-0.02em' }}>
-        {value}
+      <div style={{ fontSize: 22, fontWeight: 800, color: cc.textPrimary, lineHeight: 1, fontFamily: 'Inter, sans-serif', letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums' }}>
+        {displayValue}
       </div>
       <div style={{ fontSize: 11.5, color: cc.textMuted, marginTop: 3, fontFamily: 'Inter, sans-serif' }}>
         {label}
       </div>
     </div>
   </motion.div>
-);
+)};
 
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
 export const IncidentsTab: React.FC = () => {
-  const [incidents] = useState<Incident[]>(MOCK_INCIDENTS);
+  const [incidents, setIncidents] = useState<Incident[]>(MOCK_INCIDENTS);
   const [selected, setSelected] = useState<Incident | null>(null);
 
   const open = incidents.filter((i) => i.status === 'OPEN');
@@ -642,14 +680,22 @@ export const IncidentsTab: React.FC = () => {
 
   const handleResolve = useCallback(async (id: string, _outcome: string, note: string) => {
     try {
-      await IncidentService.resolve(id, { resolutionNote: note });
+      if (!id.startsWith('INC')) {
+        await IncidentService.resolve(id, { resolutionNote: note });
+      } else {
+        // Simulate network delay for mock incidents to prevent 400 -> 401 logout
+        await new Promise(r => setTimeout(r, 500));
+      }
       void message.success('Incident closed successfully.');
-      const updated = MOCK_INCIDENTS.map((i) =>
-        i.incidentId === id ? { ...i, status: 'RESOLVED' as const, resolutionNote: note } : i
-      );
-      // Update local state
-      const next = updated.find((i) => i.status === 'OPEN') ?? null;
-      setSelected(next);
+      
+      setIncidents(prev => {
+        const updated = prev.map((i) =>
+          i.incidentId === id ? { ...i, status: 'RESOLVED' as const, resolutionNote: note } : i
+        );
+        const next = updated.find((i) => i.status === 'OPEN') ?? null;
+        setSelected(next);
+        return updated;
+      });
     } catch {
       void message.error('Failed to close incident. Please try again.');
     }
@@ -661,8 +707,12 @@ export const IncidentsTab: React.FC = () => {
   const cfg = severity ? SEVERITY_CONFIG[severity] : null;
 
   return (
-    <div style={{ fontFamily: 'Inter, sans-serif', padding: '0 24px 40px' }}>
+    <div className="incidents-container" style={{ fontFamily: 'Inter, sans-serif' }}>
       <style>{`
+        .incident-card-btn:focus-visible {
+          outline: 2px solid ${cc.brand} !important;
+          outline-offset: 2px;
+        }
         .incidents-table .ant-table-thead > tr > th {
           background: ${cc.neutralBg} !important;
           border-bottom: 1px solid ${cc.border} !important;
@@ -683,6 +733,34 @@ export const IncidentsTab: React.FC = () => {
           font-size: 11px !important;
           color: ${cc.textMuted} !important;
           font-family: Inter, sans-serif !important;
+        }
+        .master-detail-grid {
+          display: grid;
+          grid-template-columns: 5fr 7fr;
+          gap: 16px;
+          align-items: start;
+        }
+        .incidents-container {
+          padding: 0 24px 40px;
+        }
+        .info-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 14px;
+          margin-bottom: 14px;
+        }
+        @media (max-width: 900px) {
+          .master-detail-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
+        @media (max-width: 768px) {
+          .incidents-container {
+            padding: 0 12px 100px;
+          }
+          .info-grid {
+            grid-template-columns: 1fr;
+          }
         }
       `}</style>
 
@@ -744,14 +822,7 @@ export const IncidentsTab: React.FC = () => {
       </div>
 
       {/* 12-col Master-Detail Grid */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '5fr 7fr',
-          gap: 16,
-          alignItems: 'start',
-        }}
-      >
+      <div className="master-detail-grid">
         {/* LEFT INBOX */}
         <div>
           {/* Inbox header */}
@@ -801,23 +872,23 @@ export const IncidentsTab: React.FC = () => {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   style={{
-                    textAlign: 'center',
-                    padding: '40px 20px',
-                    background: cc.surface,
-                    border: `1px solid ${cc.border}`,
+                    padding: '40px 20px', 
+                    textAlign: 'center', 
+                    background: cc.surface, 
                     borderRadius: cc.radiusLg,
+                    border: `1px dashed ${cc.border}`
                   }}
                 >
-                  <CheckCircle2 size={28} color={cc.success} style={{ margin: '0 auto 10px' }} />
-                  <div style={{ fontSize: 13, fontWeight: 700, color: cc.textPrimary }}>All clear</div>
-                  <div style={{ fontSize: 12, color: cc.textMuted, marginTop: 4 }}>No open incidents</div>
+                  <CheckCircle2 size={32} color={cc.success} style={{ marginBottom: 12, opacity: 0.5, display: 'inline-block' }} />
+                  <div style={{ fontSize: 13, fontWeight: 700, color: cc.textSecondary, fontFamily: 'Inter, sans-serif' }}>Inbox Zero!</div>
+                  <div style={{ fontSize: 11.5, color: cc.textMuted, fontFamily: 'Inter, sans-serif', marginTop: 4 }}>No open incidents require your attention.</div>
                 </motion.div>
               ) : (
-                open.map((incident, i) => (
+                open.map((inc, i) => (
                   <IncidentCard
-                    key={incident.incidentId}
-                    incident={incident}
-                    isSelected={selected?.incidentId === incident.incidentId}
+                    key={inc.incidentId}
+                    incident={inc}
+                    isSelected={selected?.incidentId === inc.incidentId}
                     onSelect={setSelected}
                     index={i}
                   />
@@ -928,12 +999,12 @@ export const IncidentsTab: React.FC = () => {
                 <span
                   style={{
                     fontSize: 9.5,
-                    fontWeight: 800,
-                    color: cfg?.color ?? '#fff',
-                    background: cfg?.bg ?? cc.neutralBg,
+                    fontWeight: 700,
+                    color: cfg?.color ?? cc.textMuted,
+                    backgroundColor: cfg?.bg ?? 'transparent',
                     border: `1px solid ${cfg?.borderColor ?? cc.border}`,
                     padding: '3px 8px',
-                    borderRadius: cc.radiusFull,
+                    borderRadius: 6,
                     fontFamily: 'Inter, sans-serif',
                     letterSpacing: '0.05em',
                   }}
@@ -944,7 +1015,7 @@ export const IncidentsTab: React.FC = () => {
 
               {/* Incident Info Grid */}
               <div style={{ padding: '16px 18px 0' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
+                <div className="info-grid">
                   {[
                     { label: 'Student', value: student?.fullName ?? '—' },
                     { label: 'Enterprise', value: enterprise?.companyName ?? '—' },

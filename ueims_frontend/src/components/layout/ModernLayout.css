@@ -152,7 +152,9 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #ef4444;
+  background-color: #FEE2E2;
+  color: #991B1B;
+  border: 1px solid rgba(239, 68, 68, 0.4);
   box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
   animation: pulse-ring 2s infinite;
 }
@@ -291,3 +293,38 @@
     transform: translateY(0);
   }
 }
+
+/* Mobile Responsiveness (Pillar 5 Fixes) */
+@media (max-width: 768px) {
+  .modern-layout-wrapper {
+    padding: 12px;
+  }
+  .modern-layout-container {
+    padding: 16px 14px;
+    border-radius: 24px;
+  }
+  .modern-bottom-bar-wrapper {
+    left: 16px;
+    right: 16px;
+    width: auto;
+    bottom: 16px;
+  }
+  .modern-bottom-bar {
+    justify-content: space-between;
+  }
+  .modern-nav-items {
+    padding-bottom: 8px; /* Room for touch scroll */
+    justify-content: flex-start; /* Fixes left-side clipping on overflow */
+  }
+  .desktop-only {
+    display: none !important;
+  }
+  .mobile-menu-btn {
+    display: block !important;
+  }
+}
+
+.mobile-menu-btn {
+  display: none;
+}
+

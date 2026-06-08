@@ -45,14 +45,14 @@ public class StudentProfileServiceImpl implements StudentProfileService {
 
     @Override
     public StudentProfile findById(UUID id) {
-        StudentProfile profile = repository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.STUDENT_PROFILE_NOT_FOUND));
+        StudentProfile profile =
+                repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.STUDENT_PROFILE_NOT_FOUND));
 
         User currentUser = getCurrentUser();
 
         boolean isAdminOrTM = currentUser.getRoles().stream()
-                .anyMatch(role -> role.getRole().getRoleName().equals("SYSTEM_ADMIN") 
-                               || role.getRole().getRoleName().equals("TRAINING_MANAGER"));
+                .anyMatch(role -> role.getRole().getRoleName().equals("SYSTEM_ADMIN")
+                        || role.getRole().getRoleName().equals("TRAINING_MANAGER"));
 
         if (isAdminOrTM) {
             return profile;
@@ -75,10 +75,10 @@ public class StudentProfileServiceImpl implements StudentProfileService {
             UUID studentId = profile.getUser().getUserId();
             UUID enterpriseId = currentUser.getEnterprise().getEnterpriseId();
 
-            boolean hasApplication = applicationRepository
-                    .existsByJobPost_Enterprise_EnterpriseIdAndStudent_UserId(enterpriseId, studentId);
-            boolean hasAssignment = enterpriseAssignmentRepository
-                    .existsByEnterprise_EnterpriseIdAndStudent_UserId(enterpriseId, studentId);
+            boolean hasApplication = applicationRepository.existsByJobPost_Enterprise_EnterpriseIdAndStudent_UserId(
+                    enterpriseId, studentId);
+            boolean hasAssignment = enterpriseAssignmentRepository.existsByEnterprise_EnterpriseIdAndStudent_UserId(
+                    enterpriseId, studentId);
 
             if (!hasApplication && !hasAssignment) {
                 throw new AppException(ErrorCode.UNAUTHORIZED);
@@ -98,7 +98,7 @@ public class StudentProfileServiceImpl implements StudentProfileService {
     public StudentProfile updateProfile(UUID id, StudentProfileUpdateRequest request) {
         StudentProfile profile =
                 repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.STUDENT_PROFILE_NOT_FOUND));
-        
+
         // Ownership verification (Security BOLA check)
         User currentUser = getCurrentUser();
         if (!profile.getUser().getUserId().equals(currentUser.getUserId())) {

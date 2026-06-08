@@ -4,6 +4,7 @@ import { Form, Input, Button, message } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { AuthService } from '@/services/AuthService';
+import { getDeviceId } from '@/utils/device';
 import {
   AUTH_PRIMARY,
   AUTH_PRIMARY_DARK,
@@ -14,7 +15,7 @@ import {
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const loginWithToken = useAuthStore((state) => state.loginWithToken);
+  const loginWithTokens = useAuthStore((state) => state.loginWithTokens);
   const [loading, setLoading] = useState(false);
 
   const onFinish = async (values: { email: string; password: string }) => {
@@ -23,16 +24,17 @@ export const LoginPage: React.FC = () => {
       const result = await AuthService.login({
         email: values.email,
         password: values.password,
+        deviceId: getDeviceId(),
       });
 
       if (result.mustChangePassword) {
-        loginWithToken(result.token);
+        loginWithTokens(result.token, result.refreshToken);
         message.warning('Bạn cần đổi mật khẩu trước khi tiếp tục!');
         navigate('/change-password');
         return;
       }
 
-      loginWithToken(result.token);
+      loginWithTokens(result.token, result.refreshToken);
       message.success('Đăng nhập thành công!');
       navigate('/app/dashboard');
     } catch (error: any) {

@@ -18,12 +18,11 @@ export function extractUserFromToken(token: string) {
   const payload = parseJwt(token);
   if (!payload) return null;
 
-  const scope = payload.scope as string;
+  const scope = (payload.authorities || payload.scope) as string;
   const roles = scope
     ? scope
         .split(' ')
-        .filter((s: string) => s.startsWith('ROLE_'))
-        .map((s: string) => s.replace('ROLE_', '')) as string[]
+        .map((s: string) => s.startsWith('ROLE_') ? s.replace('ROLE_', '') : s) as string[]
     : [];
 
   return {

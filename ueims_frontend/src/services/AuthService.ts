@@ -3,10 +3,12 @@ import { api } from './api';
 export interface LoginRequest {
   email: string;
   password: string;
+  deviceId?: string;
 }
 
 export interface LoginResponse {
   token: string;
+  refreshToken: string;
   authenticated: boolean;
   mustChangePassword: boolean;
 }
