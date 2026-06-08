@@ -198,8 +198,16 @@ const Label: React.FC<{ children: React.ReactNode; className?: string; style?: R
 );
 
 const TrendBadge: React.FC<{ direction: 'up' | 'down' | 'neutral'; value: string; color?: string }> = ({ direction, value, color }) => {
-  const iconColor = color || (direction === 'up' ? cc.success : direction === 'down' ? cc.error : cc.textMuted);
-  const Icon = direction === 'up' ? TrendingUp : direction === 'down' ? TrendingDown : MinusCircle;
+  let iconColor = color || cc.textMuted;
+  let Icon = MinusCircle;
+
+  if (!color) {
+    if (direction === 'up') iconColor = cc.success;
+    else if (direction === 'down') iconColor = cc.error;
+  }
+
+  if (direction === 'up') Icon = TrendingUp;
+  else if (direction === 'down') Icon = TrendingDown;
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 6 }}>
       <Icon size={12} color={iconColor} />
@@ -244,7 +252,7 @@ const StatusDot: React.FC<{ color: string; pulse?: boolean }> = ({ color, pulse 
     borderRadius: '50%',
     background: color,
     boxShadow: `0 0 0 3px ${color}20`,
-    animation: pulse ? `${pulse ? 'pulse-dot 2s ease-in-out infinite' : 'none'}` : 'none',
+    animation: pulse ? 'pulse-dot 2s ease-in-out infinite' : 'none',
   }} />
 );
 
@@ -404,7 +412,7 @@ const SemesterContextBar: React.FC = () => (
           background: cc.error,
           display: 'inline-block',
         }} />
-        18 days remaining
+        {' 18 days remaining'}
       </span>
     </motion.div>
   </div>
@@ -702,7 +710,7 @@ const WeeklyReportsCard: React.FC<{ onNavigate: (route: string) => void }> = ({ 
               Students needing attention
             </div>
             {students.map((s, i) => (
-              <div key={i} style={{
+              <div key={s.name} style={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
@@ -1051,8 +1059,22 @@ const TimelineCard: React.FC<{ onNavigate: (route: string) => void }> = ({ onNav
           {mockTimelineMilestones.map((milestone, i) => {
             const isCompleted = milestone.status === 'completed';
             const isCurrent = milestone.status === 'current';
-            const nodeColor = isCompleted ? cc.success : isCurrent ? cc.warning : cc.textMuted;
-            const NodeIcon = isCompleted ? CheckCircle2 : isCurrent ? Activity : MinusCircle;
+            let nodeColor = cc.textMuted;
+            let NodeIcon = MinusCircle;
+            let nodeBg = cc.borderSubtle;
+            let labelColor = cc.textMuted;
+
+            if (isCompleted) {
+              nodeColor = cc.success;
+              NodeIcon = CheckCircle2;
+              nodeBg = cc.successMuted;
+              labelColor = cc.successText;
+            } else if (isCurrent) {
+              nodeColor = cc.warning;
+              NodeIcon = Activity;
+              nodeBg = cc.warningMuted;
+              labelColor = cc.warningText;
+            }
 
             return (
               <div key={milestone.label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
@@ -1061,7 +1083,7 @@ const TimelineCard: React.FC<{ onNavigate: (route: string) => void }> = ({ onNav
                     width: 28,
                     height: 28,
                     borderRadius: '50%',
-                    background: isCurrent ? cc.warningMuted : isCompleted ? cc.successMuted : cc.borderSubtle,
+                    background: nodeBg,
                     border: `2px solid ${nodeColor}`,
                     display: 'flex',
                     alignItems: 'center',
@@ -1087,7 +1109,7 @@ const TimelineCard: React.FC<{ onNavigate: (route: string) => void }> = ({ onNav
                   <div style={{
                     fontSize: 10,
                     fontWeight: isCurrent ? 700 : 500,
-                    color: isCurrent ? cc.warningText : isCompleted ? cc.successText : cc.textMuted,
+                    color: labelColor,
                     textTransform: 'uppercase',
                     letterSpacing: '0.03em',
                     marginBottom: 2,
