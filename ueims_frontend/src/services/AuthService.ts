@@ -3,6 +3,7 @@ import { api } from './api';
 export interface LoginRequest {
   email: string;
   password: string;
+  deviceId?: string;
 }
 
 export interface LoginResponse {

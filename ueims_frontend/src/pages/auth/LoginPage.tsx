@@ -4,6 +4,7 @@ import { Form, Input, Button, message } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { AuthService } from '@/services/AuthService';
+import { getDeviceId } from '@/utils/device';
 import {
   AUTH_PRIMARY,
   AUTH_PRIMARY_DARK,
@@ -23,6 +24,7 @@ export const LoginPage: React.FC = () => {
       const result = await AuthService.login({
         email: values.email,
         password: values.password,
+        deviceId: getDeviceId(),
       });
 
       if (result.mustChangePassword) {

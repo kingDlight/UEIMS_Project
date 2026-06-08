@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { getDeviceId } from '@/utils/device';
 
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080/api',
@@ -11,6 +12,11 @@ export const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
+    // Do not attach old tokens to login or refresh endpoints to prevent 401 loop
+    if (config.url?.includes('/auth/token') || config.url?.includes('/auth/refresh')) {
+      return config;
+    }
+
     const token = useAuthStore.getState().token;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -41,6 +47,11 @@ api.interceptors.response.use(
     const status = error.response?.status;
     const code = error.response?.data?.code;
 
+    // Skip interceptor for auth endpoints to avoid infinite loops
+    if (originalRequest.url?.includes('/auth/')) {
+      return Promise.reject(error);
+    }
+
     // Check if the error is 401 and it's not a retry of a failed refresh token request itself
     if ((status === 401 || code === 1006) && !originalRequest._retry) {
       if (isRefreshing) {
@@ -68,7 +79,7 @@ api.interceptors.response.use(
         // Call the refresh endpoint directly with axios to avoid interceptor loops
         const { data } = await axios.post<{ code: number; result: { token: string; refreshToken: string } }>(
           `${import.meta.env.VITE_API_URL || 'http://localhost:8080/api'}/auth/refresh`,
-          { token: refreshToken }
+          { token: refreshToken, deviceId: getDeviceId() }
         );
 
         const newToken = data.result?.token;
@@ -86,7 +97,8 @@ api.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError, null);
         useAuthStore.getState().logout();
-        window.location.href = '/login';
+        // Soft redirect: let React Router handle via ProtectedRoute state change
+        window.dispatchEvent(new CustomEvent('auth:logout'));
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
