@@ -182,7 +182,7 @@ public class AuthenticationService {
                 .token(token)
                 .refreshToken(refreshToken)
                 .authenticated(true)
-                .mustChangePassword(user.getMustChangePassword())
+                .mustChangePassword(Boolean.TRUE.equals(user.getMustChangePassword()))
                 .build();
     }
 
@@ -277,7 +277,7 @@ public class AuthenticationService {
                         .plus(durationInSeconds, ChronoUnit.SECONDS)
                         .toEpochMilli()))
                 .jwtID(UUID.randomUUID().toString())
-                .claim("must_change_password", user.getMustChangePassword())
+                .claim("must_change_password", Boolean.TRUE.equals(user.getMustChangePassword()))
                 .build();
 
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
