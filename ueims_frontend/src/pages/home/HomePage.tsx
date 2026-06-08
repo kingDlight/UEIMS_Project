@@ -250,14 +250,14 @@ export const HomePage: React.FC = () => {
           {/* Theme Toggle */}
           <button
             onClick={toggleTheme}
-            className={`p-2 rounded-full border transition-all duration-300 ease-in-out bg-transparent shrink-0 ${
+            className={`w-9 h-9 flex items-center justify-center rounded-full border transition-all duration-300 ease-in-out bg-transparent shrink-0 ${
               isDark 
                 ? 'border-zinc-500 text-amber-400 hover:text-amber-300 hover:border-amber-400/50 hover:bg-zinc-800/40' 
                 : 'border-slate-400 text-slate-700 hover:text-slate-950 hover:border-slate-500 hover:bg-slate-100'
             }`}
             title={isDark ? "Chuyển sang chế độ sáng" : "Chuyển sang chế độ tối"}
           >
-            {isDark ? <Sun className="h-4 w-4 relative top-[2px]" /> : <Moon className="h-4 w-4 relative top-[2px]" />}
+            {isDark ? <Sun className="h-4 w-4 relative" /> : <Moon className="h-4 w-4 relative" />}
           </button>
 
           <button
