@@ -135,9 +135,9 @@ const mockQuickActions = [
 // ============================================================
 function hexToRgba(hex: string, alpha: number): string {
   const h = hex.replace('#', '');
-  const r = parseInt(h.substring(0, 2), 16);
-  const g = parseInt(h.substring(2, 4), 16);
-  const b = parseInt(h.substring(4, 6), 16);
+  const r = Number.parseInt(h.substring(0, 2), 16);
+  const g = Number.parseInt(h.substring(2, 4), 16);
+  const b = Number.parseInt(h.substring(4, 6), 16);
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
@@ -651,7 +651,7 @@ const WeeklyReportsCard: React.FC<{ onNavigate: (route: string) => void }> = ({ 
               padding: '2px 8px',
               borderRadius: cc.radiusFull,
               backgroundColor: hexToRgba(cc.success, 0.06),
-              border: `1px solid ${hexToRgba(cc.success, 0.20)}`,
+              border: `1px solid ${hexToRgba(cc.success, 0.2)}`,
               color: cc.success,
               fontSize: 10,
               fontWeight: 600,
@@ -1145,11 +1145,11 @@ const AlertItem: React.FC<{
         padding: '12px 14px',
         borderRadius: cc.radiusMd,
         backgroundColor: hexToRgba(dot, 0.06),
-        border: `1px solid ${hexToRgba(dot, 0.20)}`,
+        border: `1px solid ${hexToRgba(dot, 0.2)}`,
         cursor: 'pointer',
         transition: 'background-color 0.12s',
       }}
-      onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = hexToRgba(dot, 0.10))}
+      onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = hexToRgba(dot, 0.1))}
       onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = hexToRgba(dot, 0.06))}
     >
       <div style={{ paddingTop: 2, flexShrink: 0 }}>
@@ -1164,7 +1164,7 @@ const AlertItem: React.FC<{
             letterSpacing: '0.05em',
             color: labelColor,
             backgroundColor: hexToRgba(labelColor, 0.08),
-            border: `1px solid ${hexToRgba(labelColor, 0.20)}`,
+            border: `1px solid ${hexToRgba(labelColor, 0.2)}`,
             padding: '2px 7px',
             borderRadius: cc.radiusMd,
             fontFamily: 'Inter, sans-serif',

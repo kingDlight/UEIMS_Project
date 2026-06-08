@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Typography } from 'antd';
-import { motion, animate } from 'framer-motion';
+import { animate } from 'framer-motion';
 import { Sparkline } from '../charts/Sparkline';
 import { c } from '../../constants';
 const { Text } = Typography;

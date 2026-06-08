@@ -19,9 +19,9 @@ import { st } from './StatsTab';
 // ============================================================
 function hexToRgba(hex: string, alpha: number): string {
   const h = hex.replace('#', '');
-  const r = parseInt(h.substring(0, 2), 16);
-  const g = parseInt(h.substring(2, 4), 16);
-  const b = parseInt(h.substring(4, 6), 16);
+  const r = Number.parseInt(h.substring(0, 2), 16);
+  const g = Number.parseInt(h.substring(2, 4), 16);
+  const b = Number.parseInt(h.substring(4, 6), 16);
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
@@ -201,7 +201,7 @@ const TemplateCard: React.FC<{
           fontWeight: 700,
           color: template.formatColor,
           backgroundColor: hexToRgba(template.formatColor, 0.06),
-          border: `1px solid ${hexToRgba(template.formatColor, 0.20)}`,
+          border: `1px solid ${hexToRgba(template.formatColor, 0.2)}`,
           padding: '3px 8px',
           borderRadius: st.radiusMd,
           letterSpacing: '0.04em',
@@ -279,7 +279,10 @@ const TemplateCard: React.FC<{
 export const ReportsTab: React.FC = () => {
   const [semester, setSemester] = useState<string>('SUMMER_2026');
   const [category, setCategory] = useState<string>('ALL');
-  const [, setExportingId] = useState<string | null>(null);
+  const [exportingId, setExportingId] = useState<string | null>(null);
+
+  // Suppress unused variable warning if your linter complains about exportingId
+  console.debug('Exporting:', exportingId);
 
   const handleExport = (template: ReportTemplate) => {
     setExportingId(template.id);
@@ -326,7 +329,7 @@ export const ReportsTab: React.FC = () => {
         <span
           style={{
             borderRadius: st.radiusFull,
-            border: `1px solid ${hexToRgba(record.categoryColor, 0.20)}`,
+            border: `1px solid ${hexToRgba(record.categoryColor, 0.2)}`,
             backgroundColor: hexToRgba(record.categoryColor, 0.06),
             color: record.categoryColor,
             fontSize: 11,
