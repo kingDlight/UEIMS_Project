@@ -8,7 +8,7 @@ import lombok.Getter;
 @Getter
 public enum ErrorCode {
     UNCATEGORIZED_EXCEPTION(9999, "Uncategorized error", HttpStatus.INTERNAL_SERVER_ERROR),
-    INVALID_KEY(1001, "Uncategorized error", HttpStatus.BAD_REQUEST),
+    INVALID_KEY(1001, "Invalid validation key", HttpStatus.BAD_REQUEST),
     USER_EXISTED(1002, "User existed", HttpStatus.BAD_REQUEST),
     USERNAME_INVALID(1003, "Username must be at least {min} characters", HttpStatus.BAD_REQUEST),
     INVALID_PASSWORD(1004, "Password must be at least {min} characters", HttpStatus.BAD_REQUEST),
@@ -87,18 +87,24 @@ public enum ErrorCode {
             1052, "Admin intervention is required to modify an already approved OJT student", HttpStatus.FORBIDDEN),
     INTERVIEW_DATE_MUST_BE_IN_FUTURE(1053, "Interview date must be in the future", HttpStatus.BAD_REQUEST),
     INTERVIEW_ELIGIBILITY_RULE(
-            1054, "Only candidates who passed the screening round can be scheduled for an interview", HttpStatus.BAD_REQUEST),
-    INTERVIEW_OVERLAP(1055, "Interview time overlaps with an existing schedule of the enterprise", HttpStatus.BAD_REQUEST),
-    FEEDBACK_DUPLICATE(1056, "You have already submitted feedback for this enterprise in the current semester", HttpStatus.BAD_REQUEST),
-    FEEDBACK_RATING_INVALID(1057, "Feedback rating must be between 1 and 5", HttpStatus.BAD_REQUEST),
-    STUDENT_NOT_IN_SEMESTER_7(1058, "Only semester 7 students are allowed to submit enterprise feedback", HttpStatus.FORBIDDEN),
-    STUDENT_NOT_IN_SEMESTER_6(1059, "Only semester 6 students are allowed to submit reports", HttpStatus.FORBIDDEN),
+            1054, "Chỉ những ứng viên đã vượt qua vòng sơ loại mới được lên lịch phỏng vấn", HttpStatus.BAD_REQUEST),
+    INTERVIEW_OVERLAP(1055, "Thời gian phỏng vấn bị trùng với lịch đã có của doanh nghiệp", HttpStatus.BAD_REQUEST),
+    EVALUATION_LOCKED(1056, "Đánh giá đã bị khóa và không thể chỉnh sửa", HttpStatus.BAD_REQUEST),
+    MISSING_EVALUATION_CRITERIA(1057, "Cần phải chấm điểm đầy đủ cả 4 tiêu chí của Rubrics", HttpStatus.BAD_REQUEST),
+    INVALID_SCORE_RANGE(1058, "Điểm các tiêu chí phải nằm trong khoảng từ 0.0 đến 10.0", HttpStatus.BAD_REQUEST),
+    STUDENT_RESULT_ACCESS_DENIED(
+            1059, "Sinh viên chỉ được xem kết quả đánh giá khi ở học kỳ 7 trở đi", HttpStatus.FORBIDDEN),
 
     // Account related
-    USER_BANNED(2001, "Your account has been locked due to 5 consecutive incorrect password attempts", HttpStatus.FORBIDDEN),
-    WRONG_OLD_PASSWORD(2002, "Incorrect old password", HttpStatus.BAD_REQUEST),
-    PASSWORDS_NOT_MATCH(2003, "New password and confirmation do not match", HttpStatus.BAD_REQUEST),
-    USER_ALREADY_HAS_ROLE(2004, "User already has a role. Only one role can be assigned.", HttpStatus.BAD_REQUEST),
+    USER_BANNED(2001, "Tài khoản của bạn đã bị khóa do nhập sai mật khẩu quá 5 lần", HttpStatus.FORBIDDEN),
+    WRONG_OLD_PASSWORD(2002, "Mật khẩu cũ không chính xác", HttpStatus.BAD_REQUEST),
+    PASSWORDS_NOT_MATCH(2003, "Mật khẩu mới và xác nhận không khớp", HttpStatus.BAD_REQUEST),
+    USER_ALREADY_HAS_ROLE(2004, "Người dùng đã có vai trò. Chỉ được gán một vai trò duy nhất.", HttpStatus.BAD_REQUEST),
+
+    // JWT / Auth related
+    TOKEN_INVALIDATED(1053, "Token has been invalidated", HttpStatus.UNAUTHORIZED),
+    SESSION_EXPIRED(1054, "Session expired due to inactivity", HttpStatus.UNAUTHORIZED),
+    INVALID_TOKEN_FORMAT(1055, "Invalid token format", HttpStatus.UNAUTHORIZED),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

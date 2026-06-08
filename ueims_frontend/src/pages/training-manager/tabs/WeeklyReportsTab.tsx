@@ -15,6 +15,17 @@ import {
 import { st } from './StatsTab';
 
 // ============================================================
+// COLOR UTILITY — hex-to-rgba for ghost style rendering
+// ============================================================
+function hexToRgba(hex: string, alpha: number): string {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+// ============================================================
 // TYPES
 // ============================================================
 export interface WeeklyReport {
@@ -124,22 +135,22 @@ const ALL_WEEKS = [
 const STATUS_CONFIG = {
   PENDING: {
     color: st.warning,
-    bg: st.warningMuted,
-    text: st.warningText,
+    bg: hexToRgba(st.warning, 0.06),
+    borderColor: hexToRgba(st.warning, 0.20),
     icon: <Clock size={12} strokeWidth={2.5} />,
     label: 'Pending',
   },
   APPROVED: {
     color: st.success,
-    bg: st.successMuted,
-    text: st.successText,
+    bg: hexToRgba(st.success, 0.06),
+    borderColor: hexToRgba(st.success, 0.20),
     icon: <CheckCircle2 size={12} strokeWidth={2.5} />,
     label: 'Approved',
   },
   REJECTED: {
     color: st.error,
-    bg: st.errorMuted,
-    text: st.errorText,
+    bg: hexToRgba(st.error, 0.06),
+    borderColor: hexToRgba(st.error, 0.20),
     icon: <AlertCircle size={12} strokeWidth={2.5} />,
     label: 'Rejected',
   },
@@ -207,29 +218,19 @@ const ReportCard = forwardRef<HTMLDivElement, ReportCardProps>((
         overflow: 'hidden',
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'stretch' }}>
+      <div className="report-card-inner">
         {/* Left: Checkbox */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          padding: '18px 0 18px 18px',
-          borderRight: `1px solid ${st.borderSubtle}`,
-          background: checked ? st.successMuted : 'transparent',
-          transition: 'background 0.2s',
-          minWidth: 50,
-          justifyContent: 'center',
-          flexShrink: 0,
-        }}>
+        <div className="rc-checkbox" style={{ background: checked ? st.successMuted : 'transparent' }}>
           <Checkbox checked={checked} onChange={() => onToggle(report.id)} />
         </div>
 
         {/* Middle: Card Content */}
-        <div style={{ flex: 1, padding: '16px 18px', minWidth: 0 }}>
+        <div className="rc-content">
           {/* Card Header */}
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 8 }}>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 3 }}>
-                <span style={{ fontSize: 14, fontWeight: 800, color: st.textPrimary, fontFamily: 'Inter, sans-serif', letterSpacing: '-0.01em' }}>
+          <div className="rc-header">
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'nowrap', marginBottom: 3, maxWidth: '100%', minWidth: 0 }}>
+                <span style={{ fontSize: 14, fontWeight: 800, color: st.textPrimary, fontFamily: 'Inter, sans-serif', letterSpacing: '-0.01em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {report.studentName}
                 </span>
                 <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 11, color: st.textMuted, fontFamily: 'Inter, sans-serif' }}>
@@ -286,17 +287,9 @@ const ReportCard = forwardRef<HTMLDivElement, ReportCardProps>((
 
         {/* Right: Action Buttons */}
         {isPending && (
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            gap: 6,
-            padding: '16px 18px 16px 14px',
-            borderLeft: `1px solid ${st.borderSubtle}`,
-            minWidth: 108,
-            flexShrink: 0,
-          }}>
+          <div className="rc-actions">
             <button
+              aria-label={"Approve report for " + report.studentName}
               onClick={() => onApprove(report.id)}
               style={{
                 width: '100%',
@@ -317,7 +310,7 @@ const ReportCard = forwardRef<HTMLDivElement, ReportCardProps>((
                 gap: 4,
               }}
               onMouseEnter={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.background = '#0D9668';
+                (e.currentTarget as HTMLButtonElement).style.background = st.success;
                 (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-1px)';
                 (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 4px 12px rgba(16,185,129,0.35)';
               }}
@@ -331,6 +324,7 @@ const ReportCard = forwardRef<HTMLDivElement, ReportCardProps>((
               Approve
             </button>
             <button
+              aria-label={"Reject report for " + report.studentName}
               onClick={() => onReject(report.id)}
               style={{
                 width: '100%',
@@ -357,6 +351,7 @@ const ReportCard = forwardRef<HTMLDivElement, ReportCardProps>((
                 (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
                 (e.currentTarget as HTMLButtonElement).style.color = st.error;
               }}
+              disabled={report.status !== 'PENDING'}
             >
               <AlertCircle size={12} strokeWidth={2.5} />
               Reject
@@ -384,8 +379,6 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
 }) => {
   return (
     <div style={{
-      width: 220,
-      flexShrink: 0,
       background: st.surface,
       border: `1px solid ${st.border}`,
       borderRadius: st.radiusXl,
@@ -591,17 +584,27 @@ export const WeeklyReportsTab: React.FC = () => {
     });
   }, []);
 
+  const [processingId, setProcessingId] = useState<string | null>(null);
+
   // Single approve
-  const handleApprove = useCallback((id: string) => {
+  const handleApprove = useCallback(async (id: string) => {
+    if (processingId) return;
+    setProcessingId(id);
+    await new Promise((r) => setTimeout(r, 400)); // Simulate API delay
     setReports((prev) => prev.map((r) => r.id === id ? { ...r, status: 'APPROVED' as const } : r));
     void message.success({ content: 'Report approved.', key: id, duration: 2 });
-  }, []);
+    setProcessingId(null);
+  }, [processingId]);
 
   // Single reject
-  const handleReject = useCallback((id: string) => {
+  const handleReject = useCallback(async (id: string) => {
+    if (processingId) return;
+    setProcessingId(id);
+    await new Promise((r) => setTimeout(r, 400)); // Simulate API delay
     setReports((prev) => prev.map((r) => r.id === id ? { ...r, status: 'REJECTED' as const } : r));
     void message.warning({ content: 'Report rejected.', key: id, duration: 2 });
-  }, []);
+    setProcessingId(null);
+  }, [processingId]);
 
   // Batch approve
   const handleBatchApprove = useCallback(async () => {
@@ -624,13 +627,94 @@ export const WeeklyReportsTab: React.FC = () => {
   const someSelected = selectedIds.size > 0 && selectedIds.size < filteredReports.length;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20, padding: '0 2px 40px' }}>
+    <div className="wr-container" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         .wr-scroll::-webkit-scrollbar { width: 4px; }
         .wr-scroll::-webkit-scrollbar-track { background: transparent; }
         .wr-scroll::-webkit-scrollbar-thumb { background: ${st.border}; border-radius: 99px; }
+        .wr-scroll::-webkit-scrollbar-thumb { background: ${st.border}; border-radius: 99px; }
         .wr-scroll::-webkit-scrollbar-thumb:hover { background: ${st.textMuted}; }
+        .wr-container {
+          padding: 0 24px 40px;
+        }
+        .wr-layout {
+          display: flex;
+          gap: 16px;
+          align-items: flex-start;
+        }
+        .wr-sidebar {
+          width: 220px;
+          flex-shrink: 0;
+        }
+        @media (max-width: 768px) {
+          .wr-container {
+            padding: 0 12px 100px !important;
+          }
+          .wr-layout {
+            flex-direction: column;
+          }
+          .wr-sidebar {
+            width: 100%;
+            position: relative !important; /* disable sticky on mobile */
+          }
+          .report-card-inner {
+            flex-direction: column !important;
+          }
+          .rc-checkbox {
+            border-right: none !important;
+            border-bottom: 1px solid ${st.borderSubtle};
+            padding: 12px 18px !important;
+            justify-content: flex-start !important;
+          }
+          .rc-header {
+            flex-direction: column;
+            align-items: flex-start !important;
+            gap: 8px !important;
+          }
+          .rc-actions {
+            border-left: none !important;
+            border-top: 1px solid ${st.borderSubtle};
+            flex-direction: row !important;
+            padding: 12px 18px !important;
+          }
+        }
+        .report-card-inner {
+          display: flex;
+          align-items: stretch;
+        }
+        .rc-checkbox {
+          display: flex;
+          align-items: center;
+          padding: 18px 0 18px 18px;
+          border-right: 1px solid ${st.borderSubtle};
+          transition: background 0.2s;
+          min-width: 50px;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+        .rc-content {
+          flex: 1;
+          padding: 16px 18px;
+          min-width: 0;
+        }
+        .rc-header {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 12px;
+          margin-bottom: 8px;
+        }
+        .rc-actions {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          gap: 6px;
+          padding: 16px 18px 16px 14px;
+          border-left: 1px solid ${st.borderSubtle};
+          min-width: 108px;
+          flex-shrink: 0;
+        }
       `}</style>
 
       {/* ── Page Header ──────────────────────────────── */}
@@ -651,15 +735,17 @@ export const WeeklyReportsTab: React.FC = () => {
       </div>
 
       {/* ── Main Layout: Sidebar + Content ────────────── */}
-      <div style={{ display: 'flex', gap: 16, alignItems: 'flex-start' }}>
+      <div className="wr-layout">
         {/* LEFT: Filter Sidebar */}
-        <FilterSidebar
-          selectedWeek={selectedWeek}
-          onWeekChange={setSelectedWeek}
-          checkedStatuses={checkedStatuses}
-          onStatusToggle={toggleStatus}
-          counts={counts}
-        />
+        <div className="wr-sidebar">
+          <FilterSidebar
+            selectedWeek={selectedWeek}
+            onWeekChange={setSelectedWeek}
+            checkedStatuses={checkedStatuses}
+            onStatusToggle={toggleStatus}
+            counts={counts}
+          />
+        </div>
 
         {/* RIGHT: Report List */}
         <div style={{ flex: 1, minWidth: 0 }}>
@@ -708,20 +794,20 @@ export const WeeklyReportsTab: React.FC = () => {
                 cursor: batchDisabled ? 'not-allowed' : 'pointer',
                 opacity: batchDisabled ? 0.55 : 1,
                 transition: 'all 0.2s cubic-bezier(0.32, 0.72, 0, 1)',
-                boxShadow: batchDisabled ? 'none' : '0 2px 10px rgba(16,185,129,0.25)',
+                boxShadow: batchDisabled ? 'none' : '0 2px 8px rgba(16,185,129,0.25)',
                 pointerEvents: batchDisabled ? 'none' : 'auto',
               }}
               onMouseEnter={(e) => {
                 if (!batchDisabled && !batchLoading) {
-                  (e.currentTarget as HTMLButtonElement).style.background = '#0D9668';
+                  (e.currentTarget as HTMLButtonElement).style.background = st.success;
                   (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-1px)';
-                  (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 4px 14px rgba(16,185,129,0.35)';
+                  (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 4px 12px rgba(16,185,129,0.35)';
                 }
               }}
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLButtonElement).style.background = batchDisabled ? 'transparent' : st.success;
                 (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0)';
-                (e.currentTarget as HTMLButtonElement).style.boxShadow = batchDisabled ? 'none' : '0 2px 10px rgba(16,185,129,0.25)';
+                (e.currentTarget as HTMLButtonElement).style.boxShadow = batchDisabled ? 'none' : '0 2px 8px rgba(16,185,129,0.25)';
               }}
             >
               <CheckSquare size={14} strokeWidth={2.5} />

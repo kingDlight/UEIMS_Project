@@ -11,6 +11,7 @@ import {
   Users,
   UserCheck,
   X,
+  AlertCircle,
 } from 'lucide-react';
 import { EligibleStudentService } from '@/services/EligibleStudentService';
 import { SemesterService } from '@/services/SemesterService';
@@ -54,6 +55,48 @@ const st = {
 };
 
 // ============================================================
+// COLOR UTILITIES — shared across all tabs for ghost style rendering
+// ============================================================
+function hexToRgba(hex: string, alpha: number): string {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+// ============================================================
+// AVATAR PALETTE — deterministic 4-color from brand tokens
+// ============================================================
+const AVATAR_PALETTE = [
+  { bg: st.brandMuted,   text: st.brand  },   // slot 0 — orange family
+  { bg: st.successMuted, text: st.success },   // slot 1 — green family
+  { bg: st.infoMuted,    text: st.info   },   // slot 2 — blue family
+  { bg: st.warningMuted, text: st.warning },   // slot 3 — amber family
+];
+
+function getAvatarColor(name: string) {
+  const idx = name.split('').reduce((a, c) => a + c.charCodeAt(0), 0) % AVATAR_PALETTE.length;
+  return AVATAR_PALETTE[idx];
+}
+
+const Avatar: React.FC<{ initials: string }> = ({ initials }) => {
+  const palette = getAvatarColor(initials);
+  return (
+    <div style={{
+      width: 32, height: 32, borderRadius: '50%',
+      background: palette.bg,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      color: palette.text,
+      fontWeight: 700, fontSize: 11,
+      fontFamily: 'Inter, sans-serif', flexShrink: 0,
+    }}>
+      {initials}
+    </div>
+  );
+};
+
+// ============================================================
 // RDS BUSINESS RULES — OJT Status by Semester
 // RDS UC-20 / BR-19:
 //   - Sem 1-4 : Pre-Registration  (cannot register OJT, just view list)
@@ -63,42 +106,25 @@ const st = {
 //   - Note: "Pre-Registration" students do NOT appear in the Eligible list
 //     by default; they are only shown when "All" filter is applied.
 // ============================================================
-const OJT_STATUS = {
+const OJT_STATUS: Record<string, {
+  label: string; color: string; bg: string; borderColor: string;
+  semRange: string; description: string;
+}> = {
   PRE_REGISTRATION: {
-    label: 'Pre-Registration',
-    color: '#6B7280',
-    bg: '#F3F4F6',
-    textColor: '#374151',
-    semRange: 'Sem. 1-4',
-    description: 'Cannot register OJT — semester below eligibility threshold',
+    label: 'Pre-Registration', color: st.textMuted,  bg: hexToRgba(st.textMuted,  0.06), borderColor: hexToRgba(st.textMuted,  0.25), semRange: 'Sem. 1-4', description: 'Cannot register OJT — semester below eligibility threshold',
   },
   ELIGIBLE: {
-    label: 'Eligible',
-    color: '#3B82F6',
-    bg: '#DBEAFE',
-    textColor: '#1E40AF',
-    semRange: 'Sem. 5',
-    description: 'Meets all OJT criteria — ready to register for internship',
+    label: 'Eligible',        color: st.info,     bg: hexToRgba(st.info,     0.06), borderColor: hexToRgba(st.info,     0.25), semRange: 'Sem. 5',     description: 'Meets all OJT criteria — ready to register for internship',
   },
   IN_OJT: {
-    label: 'In OJT',
-    color: '#10B981',
-    bg: '#D1FAE5',
-    textColor: '#065F46',
-    semRange: 'Sem. 6',
-    description: 'Currently in OJT — active internship',
+    label: 'In OJT',           color: st.success,  bg: hexToRgba(st.success,  0.06), borderColor: hexToRgba(st.success,  0.25), semRange: 'Sem. 6',     description: 'Currently in OJT — active internship',
   },
   COMPLETED: {
-    label: 'Completed',
-    color: '#8B5CF6',
-    bg: '#EDE9FE',
-    textColor: '#6D28D9',
-    semRange: 'Sem. 7-9',
-    description: 'OJT finished — eligible to view results',
+    label: 'Completed',       color: st.warning,  bg: hexToRgba(st.warning,  0.06), borderColor: hexToRgba(st.warning,  0.25), semRange: 'Sem. 7-9',   description: 'OJT finished — eligible to view results',
   },
-} as const;
+};
 
-function deriveStatus(sem: number): keyof typeof OJT_STATUS {
+function deriveStatus(sem: number): string {
   if (sem < 5) return 'PRE_REGISTRATION';
   if (sem === 5) return 'ELIGIBLE';
   if (sem === 6) return 'IN_OJT';
@@ -260,6 +286,9 @@ const ACAD_SEM_OPTIONS = [
 // UI COMPONENTS
 // ============================================================
 
+// ============================================================
+// STATUS BADGE — ghost outline (text color + whisper border, no solid fill)
+// ============================================================
 const StatusBadge: React.FC<{ sem: number }> = ({ sem }) => {
   const key = deriveStatus(sem);
   const cfg = OJT_STATUS[key];
@@ -269,24 +298,16 @@ const StatusBadge: React.FC<{ sem: number }> = ({ sem }) => {
         display: 'inline-flex',
         alignItems: 'center',
         gap: 5,
-        padding: '4px 10px',
-        borderRadius: st.radiusFull,
-        background: cfg.bg,
+        padding: '3px 9px',
+        borderRadius: 6,
+        backgroundColor: cfg.bg,
+        border: `1px solid ${cfg.borderColor}`,
         color: cfg.color,
-        fontSize: 11.5,
-        fontWeight: 700,
+        fontSize: 11,
+        fontWeight: 600,
         fontFamily: 'Inter, sans-serif',
       }}
     >
-      <span
-        style={{
-          width: 7,
-          height: 7,
-          borderRadius: '50%',
-          background: cfg.color,
-          flexShrink: 0,
-        }}
-      />
       {cfg.label}
     </span>
   );
@@ -377,7 +398,7 @@ const StudentDetailModal: React.FC<{
       open={open}
       onCancel={onClose}
       footer={null}
-      width={440}
+      width={480}
       centered
       destroyOnHidden
       styles={{
@@ -386,272 +407,123 @@ const StudentDetailModal: React.FC<{
           backdropFilter: 'blur(6px)',
         },
         content: {
-          borderRadius: 10,
-          border: '1px solid #E5E7EB',
-          boxShadow: '0 20px 60px rgba(0,0,0,.20)',
+          borderRadius: st.radiusXl,
+          border: `1px solid ${st.border}`,
+          boxShadow: st.shadowLg,
           padding: 0,
+          overflow: 'hidden',
         },
         header: { display: 'none' },
         body: { padding: 0 },
       }}
     >
-      {/* Gradient orange banner */}
-      <div
-        style={{
-          background: 'linear-gradient(135deg, #FF7A30 0%, #FF9060 100%)',
-          padding: '20px 20px 52px',
-          position: 'relative',
-        }}
-      >
-        {/* Close button */}
+      {/* HEADER SECTION */}
+      <div style={{ padding: '24px 24px 20px', background: st.surface, position: 'relative' }}>
         <button
           onClick={onClose}
           style={{
-            position: 'absolute',
-            top: 14,
-            right: 14,
-            width: 26,
-            height: 26,
-            borderRadius: 7,
-            background: 'rgba(255,255,255,.18)',
-            border: 'none',
-            cursor: 'pointer',
-            color: '#fff',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            position: 'absolute', top: 16, right: 16, width: 30, height: 30, borderRadius: st.radiusMd,
+            background: st.neutralBg, border: `1px solid ${st.borderSubtle}`, cursor: 'pointer',
+            color: st.textSecondary, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            transition: 'all 0.2s',
           }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = st.borderSubtle; e.currentTarget.style.color = st.textPrimary; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = st.neutralBg; e.currentTarget.style.color = st.textSecondary; }}
         >
-          <X size={13} />
+          <X size={15} />
         </button>
 
-        {/* White circular avatar + Name */}
-        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12 }}>
-          <div
-            style={{
-              width: 46,
-              height: 46,
-              borderRadius: '50%',
-              border: '2px solid rgba(255,255,255,.85)',
-              background: '#fff',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: 16,
-              fontWeight: 800,
-              color: '#FF7A30',
-              flexShrink: 0,
-              fontFamily: 'Inter, sans-serif',
-            }}
-          >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <div style={{
+            width: 56, height: 56, borderRadius: st.radiusMd,
+            background: hexToRgba(cfg.color, 0.08), border: `1px solid ${hexToRgba(cfg.color, 0.2)}`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 18, fontWeight: 800, color: cfg.color, flexShrink: 0, fontFamily: 'Inter, sans-serif',
+          }}>
             {initials}
           </div>
-          <div style={{ paddingBottom: 2 }}>
-            <div
-              style={{
-                fontSize: 16,
-                fontWeight: 800,
-                color: '#fff',
-                fontFamily: 'Inter, sans-serif',
-                letterSpacing: '-0.01em',
-                lineHeight: 1.3,
-              }}
-            >
+          <div>
+            <h2 style={{ fontSize: 18, fontWeight: 800, color: st.textPrimary, margin: '0 0 5px', fontFamily: 'Inter, sans-serif', letterSpacing: '-0.01em', lineHeight: 1.2 }}>
               {student.fullName}
-            </div>
-            <div
-              style={{
-                fontSize: 12,
-                color: 'rgba(255,255,255,.78)',
-                marginTop: 3,
-                fontFamily: 'Inter, sans-serif',
-              }}
-            >
-              Sem. {student.currentSemester}
+            </h2>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontSize: 13, color: st.textSecondary, fontFamily: 'Inter, sans-serif', fontWeight: 600 }}>
+                {student.studentCode}
+              </span>
+              <span style={{ width: 4, height: 4, borderRadius: '50%', background: st.border }} />
+              <span style={{
+                display: 'inline-flex', alignItems: 'center', padding: '2px 8px', borderRadius: 6,
+                backgroundColor: hexToRgba(cfg.color, 0.06), border: `1px solid ${hexToRgba(cfg.color, 0.2)}`,
+                color: cfg.color, fontSize: 11, fontWeight: 700, fontFamily: 'Inter, sans-serif', letterSpacing: '0.03em', textTransform: 'uppercase'
+              }}>
+                {cfg.label}
+              </span>
             </div>
           </div>
-        </div>
-
-        {/* Status badge — floating below banner */}
-        <div
-          style={{
-            position: 'absolute',
-            bottom: -14,
-            left: 20,
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 5,
-            padding: '5px 12px',
-            borderRadius: 20,
-            background: '#fff',
-            border: `1.5px solid ${cfg.color}`,
-            boxShadow: '0 3px 10px rgba(0,0,0,.12)',
-          }}
-        >
-          <span
-            style={{
-              width: 8,
-              height: 8,
-              borderRadius: '50%',
-              background: cfg.color,
-            }}
-          />
-          <span
-            style={{
-              fontSize: 12,
-              fontWeight: 700,
-              color: cfg.color,
-              fontFamily: 'Inter, sans-serif',
-            }}
-          >
-            {cfg.label}
-          </span>
         </div>
       </div>
 
-      {/* Info section */}
-      <div style={{ padding: '28px 20px 0' }}>
-        <div
-          style={{
-            fontSize: 11,
-            fontWeight: 700,
-            color: '#9CA3AF',
-            textTransform: 'uppercase',
-            letterSpacing: '0.08em',
-            marginBottom: 12,
-            fontFamily: 'Inter, sans-serif',
-          }}
-        >
-          Student Information
-        </div>
-
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: '0 24px',
-          }}
-        >
+      {/* BODY SECTION */}
+      <div style={{ padding: '0 24px 24px', background: st.surface }}>
+        {/* Simple Grid for Info (No borders) */}
+        <div className="ent-info-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px 24px', marginBottom: 28 }}>
           {[
-            { label: 'Email', value: student.email },
+            { label: 'Email Address', value: student.email },
             { label: 'Major', value: student.major },
-            { label: 'GPA', value: student.gpa.toFixed(2), warn: student.gpa < 2.5 },
-            { label: 'Student ID', value: student.eligibleId },
+            { label: 'Current Semester', value: `Semester ${student.currentSemester}` },
+            { label: 'Cumulative GPA', value: student.gpa.toFixed(2), warn: student.gpa < 2.5 },
           ].map(({ label, value, warn }) => (
-            <div key={label} style={{ paddingBottom: 12 }}>
-              <div
-                style={{
-                  fontSize: 10,
-                  fontWeight: 600,
-                  color: '#C0C0C0',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.06em',
-                  fontFamily: 'Inter, sans-serif',
-                  marginBottom: 4,
-                }}
-              >
+            <div key={label}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: st.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6, fontFamily: 'Inter, sans-serif' }}>
                 {label}
               </div>
-              <div
-                style={{
-                  fontSize: 13,
-                  fontWeight: 600,
-                  color: warn ? '#F59E0B' : '#111827',
-                  fontFamily: 'Inter, sans-serif',
-                  fontVariantNumeric: 'tabular-nums',
-                  wordBreak: 'break-all',
-                }}
-              >
+              <div style={{ fontSize: 14, fontWeight: 600, color: warn ? st.warning : st.textPrimary, fontFamily: 'Inter, sans-serif', wordBreak: 'break-all' }}>
                 {value}
               </div>
             </div>
           ))}
         </div>
 
-        {/* Hint box */}
-        <div
-          style={{
-            marginTop: 8,
-            marginBottom: 20,
-            padding: '9px 12px',
-            borderRadius: 8,
-            background: '#F9FAFB',
-            border: '1px solid #E5E7EB',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-          }}
-        >
-          <svg
-            width="13"
-            height="13"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#9CA3AF"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <circle cx="12" cy="12" r="10" />
-            <line x1="12" y1="8" x2="12" y2="12" />
-            <line x1="12" y1="16" x2="12.01" y2="16" />
-          </svg>
-          <span
-            style={{
-              fontSize: 11.5,
-              fontWeight: 500,
-              color: '#9CA3AF',
-              fontFamily: 'Inter, sans-serif',
-            }}
-          >
+        {/* Status Hint */}
+        <div style={{
+          display: 'flex', alignItems: 'flex-start', gap: 10, padding: '14px 16px',
+          borderRadius: st.radiusLg, background: hexToRgba(cfg.color, 0.04),
+          border: `1px solid ${hexToRgba(cfg.color, 0.15)}`,
+        }}>
+          <AlertCircle size={16} color={cfg.color} style={{ marginTop: 2, flexShrink: 0 }} />
+          <div style={{ fontSize: 12.5, fontWeight: 500, color: st.textSecondary, fontFamily: 'Inter, sans-serif', lineHeight: 1.5 }}>
+            <span style={{ color: cfg.color, fontWeight: 700, marginRight: 4 }}>Note:</span>
             {cfg.description}
-          </span>
+          </div>
         </div>
       </div>
 
-      {/* Footer */}
-      <div style={{ display: 'flex', gap: 8, padding: '0 20px 20px' }}>
+      {/* FOOTER SECTION */}
+      <div style={{ padding: '18px 24px', borderTop: `1px solid ${st.borderSubtle}`, background: st.surface, display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
         <button
           onClick={onClose}
           style={{
-            flex: 1,
-            padding: '9px 0',
-            borderRadius: 22,
-            border: '1.5px solid #FF7A30',
-            background: 'transparent',
-            color: '#FF7A30',
-            fontSize: 13,
-            fontWeight: 700,
-            cursor: 'pointer',
-            fontFamily: 'Inter, sans-serif',
+            padding: '9px 18px', borderRadius: st.radiusMd, border: `1px solid ${st.border}`,
+            background: st.surface, color: st.textSecondary, fontSize: 13, fontWeight: 600,
+            cursor: 'pointer', fontFamily: 'Inter, sans-serif', transition: 'all 0.2s',
           }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = st.neutralBg; e.currentTarget.style.color = st.textPrimary; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = st.surface; e.currentTarget.style.color = st.textSecondary; }}
         >
-          Close
+          Cancel
         </button>
         <button
-          onClick={() => {
-            onClose();
-            onEdit(student);
-          }}
+          onClick={() => { onClose(); onEdit(student); }}
           style={{
-            flex: 1,
-            padding: '9px 0',
-            borderRadius: 22,
-            border: 'none',
-            background: '#FF7A30',
-            color: '#fff',
-            fontSize: 13,
-            fontWeight: 700,
-            cursor: 'pointer',
-            fontFamily: 'Inter, sans-serif',
-            boxShadow: '0 3px 10px rgba(255,122,48,.30)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 6,
+            padding: '9px 18px', borderRadius: st.radiusMd, border: 'none',
+            background: st.brand, color: '#fff', fontSize: 13, fontWeight: 600,
+            cursor: 'pointer', fontFamily: 'Inter, sans-serif', boxShadow: st.shadowBrand,
+            display: 'flex', alignItems: 'center', gap: 6, transition: 'all 0.2s',
           }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = st.brandHover; e.currentTarget.style.transform = 'translateY(-1px)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = st.brand; e.currentTarget.style.transform = 'translateY(0)'; }}
         >
-          <Edit3 size={13} />
+          <Edit3 size={14} />
           Edit Student
         </button>
       </div>
@@ -898,7 +770,7 @@ export const StudentsTab: React.FC = () => {
   ];
 
   return (
-    <div style={{ fontFamily: 'Inter, sans-serif', padding: '0 24px 40px' }}>
+    <div className="students-container" style={{ fontFamily: 'Inter, sans-serif' }}>
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
         .students-table .ant-table-thead > tr > th {
@@ -924,6 +796,14 @@ export const StudentsTab: React.FC = () => {
           background: ${st.brandSubtle} !important;
         }
         .import-dragger .ant-upload-drag:hover { border-color: ${st.brandHover} !important; background: ${st.brandMuted} !important; }
+        .students-container {
+          padding: 0 24px 40px;
+        }
+        @media (max-width: 768px) {
+          .students-container {
+            padding: 0 12px 100px !important;
+          }
+        }
       `}</style>
 
       {/* Page Header */}
@@ -1097,7 +977,9 @@ export const StudentsTab: React.FC = () => {
           border: `1px solid ${st.border}`,
           borderRadius: st.radiusLg,
           boxShadow: st.shadowSm,
-          overflow: 'hidden',
+          overflowX: 'auto',
+          maxWidth: '100%',
+          minWidth: 0,
         }}
       >
         <Table
@@ -1105,6 +987,7 @@ export const StudentsTab: React.FC = () => {
           rowKey="eligibleId"
           columns={columns}
           dataSource={paginatedStudents}
+          scroll={{ x: 800 }}
           pagination={{
             current: page,
             pageSize,

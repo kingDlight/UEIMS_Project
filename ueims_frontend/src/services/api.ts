@@ -20,16 +20,79 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+let isRefreshing = false;
+let failedQueue: Array<{ resolve: (value?: unknown) => void, reject: (reason?: any) => void }> = [];
+
+const processQueue = (error: any, token: string | null = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
+    const originalRequest = error.config;
     const status = error.response?.status;
     const code = error.response?.data?.code;
 
-    if (status === 401 || code === 1006) {
-      useAuthStore.getState().logout();
-      window.location.href = '/login';
+    // Check if the error is 401 and it's not a retry of a failed refresh token request itself
+    if ((status === 401 || code === 1006) && !originalRequest._retry) {
+      if (isRefreshing) {
+        // If already refreshing, wait for the new token
+        try {
+          const token = await new Promise((resolve, reject) => {
+            failedQueue.push({ resolve, reject });
+          });
+          originalRequest.headers.Authorization = `Bearer ${token}`;
+          return api(originalRequest);
+        } catch (err) {
+          return Promise.reject(err);
+        }
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        const { refreshToken } = useAuthStore.getState();
+        if (!refreshToken) {
+          throw new Error('No refresh token available');
+        }
+
+        // Call the refresh endpoint directly with axios to avoid interceptor loops
+        const { data } = await axios.post<{ code: number; result: { token: string; refreshToken: string } }>(
+          `${import.meta.env.VITE_API_URL || 'http://localhost:8080/api'}/auth/refresh`,
+          { token: refreshToken }
+        );
+
+        const newToken = data.result?.token;
+        const newRefreshToken = data.result?.refreshToken;
+
+        if (!newToken) throw new Error('Token not returned');
+
+        // Update the store
+        useAuthStore.getState().setTokens(newToken, newRefreshToken);
+
+        processQueue(null, newToken);
+        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+        
+        return api(originalRequest);
+      } catch (refreshError) {
+        processQueue(refreshError, null);
+        useAuthStore.getState().logout();
+        window.location.href = '/login';
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
+      }
     }
+
     return Promise.reject(error);
   }
 );

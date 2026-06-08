@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   AlertTriangle,
@@ -93,7 +94,7 @@ const mockWeeklyReports = {
   week: 23,
   submitted: 3,
   pending: 2,
-  late: 2,
+  late: 3,
   notStarted: 0,
   students: [
     { name: 'Le Van C', daysOverdue: 3, status: 'late' },
@@ -123,11 +124,22 @@ const mockAlerts = [
 ];
 
 const mockQuickActions = [
-  { label: 'Import Students', icon: <Upload size={24} />, description: 'Upload eligible student list via Excel' },
-  { label: 'Review Enterprises', icon: <Building2 size={24} />, description: 'Approve or reject enterprise registrations' },
-  { label: 'Send Reminders', icon: <SendHorizontal size={24} />, description: 'Send weekly report reminders to students' },
-  { label: 'View Reports', icon: <FileBarChart size={24} />, description: 'View compliance, grades, and rubrics' },
+  { label: 'Import Students', icon: <Upload size={24} />, description: 'Upload eligible student list via Excel', route: 'students' },
+  { label: 'Review Enterprises', icon: <Building2 size={24} />, description: 'Approve or reject enterprise registrations', route: 'enterprises' },
+  { label: 'Send Reminders', icon: <SendHorizontal size={24} />, description: 'Send weekly report reminders to students', route: 'incidents' },
+  { label: 'View Reports', icon: <FileBarChart size={24} />, description: 'View compliance, grades, and rubrics', route: 'reports' },
 ];
+
+// ============================================================
+// COLOR UTILITY — hex-to-rgba for ghost style rendering
+// ============================================================
+function hexToRgba(hex: string, alpha: number): string {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
 
 // ============================================================
 // HELPER COMPONENTS
@@ -197,22 +209,23 @@ const TrendBadge: React.FC<{ direction: 'up' | 'down' | 'neutral'; value: string
 };
 
 const SeverityBadge: React.FC<{ label: string; severity: 'critical' | 'high' | 'medium' | 'low' | 'info' }> = ({ label, severity }) => {
-  const config = {
-    critical: { bg: cc.errorMuted, text: cc.errorText },
-    high: { bg: cc.errorMuted, text: cc.errorText },
-    medium: { bg: cc.warningMuted, text: cc.warningText },
-    low: { bg: cc.infoMuted, text: cc.infoText },
-    info: { bg: cc.borderSubtle, text: cc.textSecondary },
+  const config: Record<string, { bg: string; color: string; borderColor: string }> = {
+    critical: { bg: hexToRgba(cc.error,   0.06), color: cc.error,   borderColor: hexToRgba(cc.error,   0.25) },
+    high:     { bg: hexToRgba(cc.warning, 0.06), color: cc.warning, borderColor: hexToRgba(cc.warning, 0.25) },
+    medium:   { bg: hexToRgba(cc.info,    0.06), color: cc.info,    borderColor: hexToRgba(cc.info,    0.25) },
+    low:      { bg: hexToRgba(cc.textMuted, 0.06), color: cc.textMuted, borderColor: hexToRgba(cc.textMuted, 0.25) },
+    info:     { bg: hexToRgba(cc.info,    0.06), color: cc.info,    borderColor: hexToRgba(cc.info,    0.25) },
   };
-  const { bg, text } = config[severity];
+  const { bg, color, borderColor } = config[severity] ?? config.info;
   return (
     <span style={{
       display: 'inline-flex',
       alignItems: 'center',
       padding: '3px 8px',
-      borderRadius: cc.radiusFull,
-      background: bg,
-      color: text,
+      borderRadius: cc.radiusMd,
+      backgroundColor: bg,
+      border: `1px solid ${borderColor}`,
+      color,
       fontSize: 10,
       fontWeight: 700,
       textTransform: 'uppercase',
@@ -303,6 +316,7 @@ const TextLink: React.FC<{ children: React.ReactNode; onClick?: () => void; colo
       cursor: 'pointer',
       padding: 0,
       fontFamily: 'Inter, -apple-system, sans-serif',
+      borderRadius: cc.radiusMd,
     }}
   >
     {children}
@@ -314,7 +328,7 @@ const TextLink: React.FC<{ children: React.ReactNode; onClick?: () => void; colo
 // SECTION B: SEMESTER CONTEXT BAR
 // ============================================================
 const SemesterContextBar: React.FC = () => (
-  <div style={{
+  <div className="cc-semester-bar" style={{
     maxWidth: 1200,
     margin: '0 auto',
     padding: '0 24px',
@@ -345,7 +359,8 @@ const SemesterContextBar: React.FC = () => (
         fontSize: 12,
         fontWeight: 600,
         color: cc.success,
-        background: cc.successMuted,
+        backgroundColor: hexToRgba(cc.success, 0.06),
+        border: `1px solid ${hexToRgba(cc.success, 0.25)}`,
         padding: '2px 8px',
         borderRadius: cc.radiusFull,
       }}>
@@ -376,8 +391,9 @@ const SemesterContextBar: React.FC = () => (
         gap: 4,
         padding: '3px 10px',
         borderRadius: cc.radiusFull,
-        background: '#FEF2F2',
-        color: cc.errorText,
+        backgroundColor: hexToRgba(cc.error, 0.06),
+        border: `1px solid ${hexToRgba(cc.error, 0.25)}`,
+        color: cc.error,
         fontSize: 11,
         fontWeight: 600,
       }}>
@@ -492,14 +508,8 @@ const UrgencyCard: React.FC<{
   </motion.div>
 );
 
-const UrgencyCardsRow: React.FC = () => (
-  <div style={{
-    display: 'grid',
-    gridTemplateColumns: 'repeat(2, 1fr)',
-    gap: 16,
-    marginBottom: 16,
-    alignItems: 'stretch',
-  }}>
+const UrgencyCardsRow: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => (
+  <div className="cc-grid-2" style={{ marginBottom: 16, alignItems: 'stretch' }}>
     {/* Active Incidents */}
     <UrgencyCard
       title="Active Incidents"
@@ -515,7 +525,7 @@ const UrgencyCardsRow: React.FC = () => (
       body={
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {mockIncidents.map((inc) => (
-            <div key={inc.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div key={inc.id} className="cc-incident-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <StatusDot color={inc.severity === 'high' ? cc.error : cc.warning} pulse={inc.severity === 'high'} />
                 <span style={{ fontSize: 12, fontWeight: 600, color: cc.textPrimary }}>{inc.name}</span>
@@ -529,7 +539,7 @@ const UrgencyCardsRow: React.FC = () => (
           ))}
         </div>
       }
-      cta={<CTAButton variant="red" size="sm" icon={null}>Handle Now</CTAButton>}
+      cta={<CTAButton variant="red" size="sm" icon={null} onClick={() => onNavigate('incidents')}>Handle Now</CTAButton>}
       ctaVariant="red"
     />
 
@@ -561,7 +571,7 @@ const UrgencyCardsRow: React.FC = () => (
           </div>
         </div>
       }
-      cta={<CTAButton variant="amber" size="sm" icon={null}>Review Now</CTAButton>}
+      cta={<CTAButton variant="amber" size="sm" icon={null} onClick={() => onNavigate('enterprises')}>Review Now</CTAButton>}
       ctaVariant="amber"
     />
   </div>
@@ -574,16 +584,16 @@ const ReportStatusChip: React.FC<{
   icon: React.ReactNode;
   label: string;
   value: number;
-  bg: string;
   color: string;
-}> = ({ icon, label, value, bg, color }) => (
+}> = ({ icon, label, value, color }) => (
   <div style={{
     display: 'flex',
     alignItems: 'center',
     gap: 10,
     padding: '10px 14px',
     borderRadius: cc.radiusMd,
-    background: bg,
+    backgroundColor: hexToRgba(color, 0.05),
+    border: `1px solid ${hexToRgba(color, 0.15)}`,
     flex: 1,
     minWidth: 0,
   }}>
@@ -605,7 +615,7 @@ const ReportStatusChip: React.FC<{
   </div>
 );
 
-const WeeklyReportsCard: React.FC = () => {
+const WeeklyReportsCard: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => {
   const { week, submitted, pending, late, notStarted, students } = mockWeeklyReports;
 
   return (
@@ -640,8 +650,9 @@ const WeeklyReportsCard: React.FC = () => {
             <span style={{
               padding: '2px 8px',
               borderRadius: cc.radiusFull,
-              background: cc.successMuted,
-              color: cc.successText,
+              backgroundColor: hexToRgba(cc.success, 0.06),
+              border: `1px solid ${hexToRgba(cc.success, 0.20)}`,
+              color: cc.success,
               fontSize: 10,
               fontWeight: 600,
             }}>
@@ -651,34 +662,30 @@ const WeeklyReportsCard: React.FC = () => {
         </div>
 
         {/* 2x2 Status Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, marginBottom: 16 }}>
+        <div className="cc-grid-4" style={{ marginBottom: 16 }}>
           <ReportStatusChip
             icon={<CheckCircle2 size={16} />}
             label="Submitted"
             value={submitted}
-            bg={cc.successMuted}
-            color={cc.successText}
+            color={cc.success}
           />
           <ReportStatusChip
             icon={<Clock size={16} />}
             label="Pending"
             value={pending}
-            bg={cc.infoMuted}
-            color={cc.infoText}
+            color={cc.info}
           />
           <ReportStatusChip
             icon={<AlertTriangle size={16} />}
             label="Late"
             value={late}
-            bg={cc.errorMuted}
-            color={cc.errorText}
+            color={cc.error}
           />
           <ReportStatusChip
             icon={<MinusCircle size={16} />}
             label="Not Started"
             value={notStarted}
-            bg={cc.borderSubtle}
-            color={cc.textSecondary}
+            color={cc.textMuted}
           />
         </div>
 
@@ -687,11 +694,11 @@ const WeeklyReportsCard: React.FC = () => {
           <div style={{
             padding: '12px',
             borderRadius: cc.radiusMd,
-            background: cc.errorMuted,
+            backgroundColor: hexToRgba(cc.error, 0.05),
             marginBottom: 14,
-            border: `1px solid ${cc.error}20`,
+            border: `1px solid ${hexToRgba(cc.error, 0.15)}`,
           }}>
-            <div style={{ fontSize: 11, fontWeight: 600, color: cc.errorText, marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: cc.error, marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
               Students needing attention
             </div>
             {students.map((s, i) => (
@@ -704,9 +711,9 @@ const WeeklyReportsCard: React.FC = () => {
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                   <StatusDot color={cc.error} />
-                  <span style={{ fontSize: 13, fontWeight: 500, color: cc.errorText }}>{s.name}</span>
+                  <span style={{ fontSize: 13, fontWeight: 500, color: cc.textPrimary }}>{s.name}</span>
                 </div>
-                <span style={{ fontSize: 11, color: cc.errorText, opacity: 0.8 }}>
+                <span style={{ fontSize: 11, color: cc.error, opacity: 0.8 }}>
                   {s.daysOverdue} days overdue
                 </span>
               </div>
@@ -719,15 +726,15 @@ const WeeklyReportsCard: React.FC = () => {
 
         {/* CTA */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <TextLink color={cc.brand}>View all reports</TextLink>
-          <CTAButton variant="primary" size="sm" icon={null}>Send Warnings ({late})</CTAButton>
+          <TextLink color={cc.brand} onClick={() => onNavigate('reports')}>View all reports</TextLink>
+          <CTAButton variant="primary" size="sm" icon={null} onClick={() => onNavigate('incidents')}>Send Warnings ({late})</CTAButton>
         </div>
       </CardWrapper>
     </motion.div>
   );
 };
 
-const PlacementPipelineCard: React.FC = () => {
+const PlacementPipelineCard: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => {
   const { eligible, applied, interviewed, placed } = mockPipeline;
   const total = eligible || 1;
   const stages = [
@@ -825,7 +832,7 @@ const PlacementPipelineCard: React.FC = () => {
           <div style={{
             height: '100%',
             width: `${(applied / total) * 100}%`,
-            background: `linear-gradient(90deg, ${cc.info}, ${cc.brand})`,
+            background: cc.brand,
             borderRadius: cc.radiusFull,
             transition: 'width 0.6s ease',
           }} />
@@ -858,30 +865,24 @@ const PlacementPipelineCard: React.FC = () => {
 
         {/* CTA */}
         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <TextLink color={cc.brand}>View Enterprises</TextLink>
+          <TextLink color={cc.brand} onClick={() => onNavigate('enterprises')}>View Enterprises</TextLink>
         </div>
       </CardWrapper>
     </motion.div>
   );
 };
 
-const CompliancePipelineRow: React.FC = () => (
-  <div style={{
-    display: 'grid',
-    gridTemplateColumns: '7fr 5fr',
-    gap: 16,
-    marginBottom: 16,
-    alignItems: 'stretch',
-  }}>
-    <WeeklyReportsCard />
-    <PlacementPipelineCard />
+const CompliancePipelineRow: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => (
+  <div className="cc-grid-pipeline" style={{ marginBottom: 16, alignItems: 'stretch' }}>
+    <WeeklyReportsCard onNavigate={onNavigate} />
+    <PlacementPipelineCard onNavigate={onNavigate} />
   </div>
 );
 
 // ============================================================
 // SECTION E: QUICK ACTIONS
 // ============================================================
-const QuickActionsRow: React.FC = () => (
+const QuickActionsRow: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => (
   <motion.div
     initial={{ opacity: 0, y: 16 }}
     animate={{ opacity: 1, y: 0 }}
@@ -899,10 +900,11 @@ const QuickActionsRow: React.FC = () => (
     }}>
       Quick Actions
     </div>
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, alignItems: 'stretch' }}>
+    <div className="cc-grid-4" style={{ alignItems: 'stretch' }}>
       {mockQuickActions.map((action, i) => (
         <div key={action.label} style={{ display: 'flex', flexDirection: 'column' }}>
         <motion.div
+          onClick={() => action.route && onNavigate(action.route)}
           whileHover={{ y: -3, boxShadow: cc.shadowMd }}
           whileTap={{ scale: 0.98 }}
           transition={{ duration: 0.15, ease: [0.32, 0.72, 0, 1] }}
@@ -981,7 +983,7 @@ const QuickActionsRow: React.FC = () => (
 // ============================================================
 // SECTION F: TIMELINE
 // ============================================================
-const TimelineCard: React.FC = () => (
+const TimelineCard: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => (
   <motion.div
     initial={{ opacity: 0, y: 16 }}
     animate={{ opacity: 1, y: 0 }}
@@ -1112,7 +1114,7 @@ const TimelineCard: React.FC = () => (
       <div style={{ height: 1, background: cc.borderSubtle, marginTop: 'auto', marginBottom: 14 }} />
 
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <TextLink color={cc.textSecondary}>Edit timeline</TextLink>
+        <TextLink color={cc.brand} onClick={() => onNavigate('calendar')}>Edit timeline</TextLink>
       </div>
     </CardWrapper>
   </motion.div>
@@ -1125,11 +1127,11 @@ const AlertItem: React.FC<{
   delay?: number;
 }> = ({ severity, title, meta, delay = 0 }) => {
   const config = {
-    high: { dot: cc.error, bg: cc.errorMuted, border: cc.error, label: 'HIGH', labelBg: cc.errorMuted, labelText: cc.errorText },
-    medium: { dot: cc.warning, bg: cc.warningMuted, border: cc.warning, label: 'MED', labelBg: cc.warningMuted, labelText: cc.warningText },
-    low: { dot: cc.info, bg: cc.infoMuted, border: cc.info, label: 'LOW', labelBg: cc.infoMuted, labelText: cc.infoText },
+    high:   { dot: cc.error,   label: 'HIGH',   labelColor: cc.error   },
+    medium: { dot: cc.warning, label: 'MED',    labelColor: cc.warning },
+    low:    { dot: cc.info,    label: 'LOW',    labelColor: cc.info    },
   };
-  const { dot, bg, border, label, labelBg, labelText } = config[severity];
+  const { dot, label, labelColor } = config[severity];
 
   return (
     <motion.div
@@ -1142,13 +1144,13 @@ const AlertItem: React.FC<{
         gap: 12,
         padding: '12px 14px',
         borderRadius: cc.radiusMd,
-        background: bg,
-        border: `1px solid ${border}25`,
+        backgroundColor: hexToRgba(dot, 0.06),
+        border: `1px solid ${hexToRgba(dot, 0.20)}`,
         cursor: 'pointer',
-        transition: 'background 0.12s',
+        transition: 'background-color 0.12s',
       }}
-      onMouseEnter={(e) => (e.currentTarget.style.background = `${border}18`)}
-      onMouseLeave={(e) => (e.currentTarget.style.background = bg)}
+      onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = hexToRgba(dot, 0.10))}
+      onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = hexToRgba(dot, 0.06))}
     >
       <div style={{ paddingTop: 2, flexShrink: 0 }}>
         <StatusDot color={dot} pulse={severity === 'high'} />
@@ -1160,10 +1162,12 @@ const AlertItem: React.FC<{
             fontWeight: 700,
             textTransform: 'uppercase',
             letterSpacing: '0.05em',
-            color: labelText,
-            background: labelBg,
-            padding: '2px 6px',
-            borderRadius: cc.radiusFull,
+            color: labelColor,
+            backgroundColor: hexToRgba(labelColor, 0.08),
+            border: `1px solid ${hexToRgba(labelColor, 0.20)}`,
+            padding: '2px 7px',
+            borderRadius: cc.radiusMd,
+            fontFamily: 'Inter, sans-serif',
           }}>
             {label}
           </span>
@@ -1184,7 +1188,7 @@ const AlertItem: React.FC<{
   );
 };
 
-const RecentAlertsCard: React.FC = () => (
+const RecentAlertsCard: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => (
   <motion.div
     initial={{ opacity: 0, y: 16 }}
     animate={{ opacity: 1, y: 0 }}
@@ -1224,7 +1228,7 @@ const RecentAlertsCard: React.FC = () => (
         </span>
       </div>
 
-      {/* Alert List */}
+      {/* Chart bars replaced later */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}>
         {mockAlerts.map((alert, i) => (
           <AlertItem
@@ -1241,16 +1245,16 @@ const RecentAlertsCard: React.FC = () => (
       <div style={{ height: 1, background: cc.borderSubtle, marginTop: 'auto', marginBottom: 14 }} />
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <TextLink color={cc.textSecondary}>See all alerts</TextLink>
+        <TextLink color={cc.brand} onClick={() => onNavigate('incidents')}>See all alerts</TextLink>
         <button
           style={{
             fontSize: 11,
             color: cc.textMuted,
-            background: 'none',
+            background: 'transparent',
             border: 'none',
             cursor: 'pointer',
             fontFamily: 'Inter, sans-serif',
-            textDecoration: 'underline',
+            borderRadius: cc.radiusMd,
           }}
         >
           Mark all as read
@@ -1263,12 +1267,21 @@ const RecentAlertsCard: React.FC = () => (
 // ============================================================
 // MAIN COMMAND CENTER COMPONENT
 // ============================================================
-export const CommandCenterDashboard: React.FC = () => {
+export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => void }> = ({ onNavigate }) => {
   const [mounted, setMounted] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const handleNavigate = (route: string) => {
+    if (onNavigate) {
+      onNavigate(route);
+    } else {
+      navigate(`/tm-dashboard/${route}`);
+    }
+  };
 
   return (
     <div style={{
@@ -1291,23 +1304,18 @@ export const CommandCenterDashboard: React.FC = () => {
               <SemesterContextBar />
 
               {/* ROW 1: Urgency Cards */}
-              <UrgencyCardsRow />
+              <UrgencyCardsRow onNavigate={handleNavigate} />
 
               {/* ROW 2: Weekly Reports + Pipeline */}
-              <CompliancePipelineRow />
+              <CompliancePipelineRow onNavigate={handleNavigate} />
 
               {/* ROW 3: Quick Actions */}
-              <QuickActionsRow />
+              <QuickActionsRow onNavigate={handleNavigate} />
 
               {/* ROW 4: Timeline + Alerts */}
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: 16,
-                alignItems: 'stretch',
-              }}>
-                <TimelineCard />
-                <RecentAlertsCard />
+              <div className="cc-grid-2" style={{ alignItems: 'stretch' }}>
+                <TimelineCard onNavigate={handleNavigate} />
+                <RecentAlertsCard onNavigate={handleNavigate} />
               </div>
             </motion.div>
           )}
@@ -1319,6 +1327,55 @@ export const CommandCenterDashboard: React.FC = () => {
         @keyframes pulse-dot {
           0%, 100% { opacity: 1; transform: scale(1); }
           50% { opacity: 0.5; transform: scale(1.15); }
+        }
+        .cc-grid-2 {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 16px;
+        }
+        .cc-grid-pipeline {
+          display: grid;
+          grid-template-columns: 7fr 5fr;
+          gap: 16px;
+        }
+        .cc-grid-4 {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 12px;
+        }
+        @media (max-width: 1024px) {
+          .cc-grid-pipeline {
+            grid-template-columns: 1fr;
+          }
+          .cc-grid-4 {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+        @media (max-width: 768px) {
+          .cc-grid-2 {
+            grid-template-columns: 1fr;
+          }
+          .cc-grid-4 {
+            grid-template-columns: 1fr;
+          }
+          .cc-semester-bar {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 12px !important;
+          }
+          .cc-semester-bar > div {
+            flex-wrap: wrap;
+          }
+          .cc-incident-row {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 12px !important;
+          }
+          .cc-incident-row > div:last-child {
+            align-self: flex-start !important;
+            margin-top: -4px;
+            padding-left: 20px;
+          }
         }
       `}</style>
     </div>

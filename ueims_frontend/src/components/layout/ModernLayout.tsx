@@ -1,8 +1,9 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { useNavigate, useLocation, useParams } from 'react-router-dom';
-import { Avatar, Modal, Dropdown } from 'antd';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Modal, Dropdown, Drawer } from 'antd';
 import type { MenuProps } from 'antd';
-import { BellOutlined, DownOutlined } from '@ant-design/icons';
+import { BellOutlined, DownOutlined, MenuOutlined } from '@ant-design/icons';
 import { SmallPill } from '@/pages/training-manager/components/shared/SmallPill';
 import { floatingNotifications } from '@/pages/training-manager/data';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -14,6 +15,7 @@ export interface NavItem {
   key: string;
   label: string;
   icon: React.ReactNode;
+  roles?: string[];
 }
 
 interface ModernLayoutProps {
@@ -34,14 +36,22 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
   const accountMenuRef = useRef<HTMLDivElement | null>(null);
   const notificationMenuRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
-  const location = useLocation();
   const { tab } = useParams<{ tab: string }>();
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   // Determine current active tab
   const activeTab = tab || defaultRoute;
 
-  const { user, token, logout } = useAuthStore();
+  const { user, token, logout, currentRole } = useAuthStore();
   const [realName, setRealName] = useState(user?.fullName || 'User');
+
+  const filteredNavItems = useMemo(() => {
+    return navItems.filter((item) => {
+      if (!item.roles) return true;
+      return currentRole && item.roles.includes(currentRole);
+    });
+  }, [navItems, currentRole]);
+
   const [myProfile, setMyProfile] = useState<any>(null);
   const [profileOpen, setProfileOpen] = useState(false);
 
@@ -86,6 +96,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
 
   const handleNavigate = (key: string) => {
     navigate(`${basePath}/${key}`);
+    setDrawerOpen(false);
   };
 
   return (
@@ -95,10 +106,19 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
         {/* Header Navbar */}
         <div className="modern-header-navbar">
           <div className="modern-header-content">
-            <div className="modern-brand-logo">UEIMS</div>
-            <div className="modern-nav-items">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div 
+                className="mobile-menu-btn" 
+                onClick={() => setDrawerOpen(true)}
+                style={{ cursor: 'pointer', fontSize: 18, color: '#1e293b' }}
+              >
+                <MenuOutlined />
+              </div>
+              <div className="modern-brand-logo">UEIMS</div>
+            </div>
+            <div className="modern-nav-items desktop-only">
               {/* Visible pills: first 7 items */}
-              {navItems.slice(0, 7).map((item) => {
+              {filteredNavItems.slice(0, 7).map((item) => {
                 const isActive = activeTab === item.key;
                 return (
                   <div
@@ -113,8 +133,8 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
               })}
 
               {/* More dropdown: remaining items */}
-              {navItems.length > 7 && (() => {
-                const moreItems: MenuProps['items'] = navItems.slice(7).map((item) => ({
+              {filteredNavItems.length > 7 && (() => {
+                const moreItems: MenuProps['items'] = filteredNavItems.slice(7).map((item) => ({
                   key: item.key,
                   label: (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -125,7 +145,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
                   onClick: () => handleNavigate(item.key),
                 }));
 
-                const isMoreActive = navItems.slice(7).some((item) => activeTab === item.key);
+                const isMoreActive = filteredNavItems.slice(7).some((item) => activeTab === item.key);
 
                 return (
                   <Dropdown menu={{ items: moreItems }} trigger={['click']} placement="bottomRight">
@@ -235,8 +255,55 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
           )}
         </div>
 
+        {/* Mobile Drawer */}
+        <Drawer
+          title={<div className="modern-brand-logo">UEIMS</div>}
+          placement="left"
+          onClose={() => setDrawerOpen(false)}
+          open={drawerOpen}
+          width={280}
+          bodyStyle={{ padding: 0 }}
+          headerStyle={{ borderBottom: '1px solid rgba(233,101,0,.10)' }}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', padding: '16px 0' }}>
+            {filteredNavItems.map((item) => {
+              const isActive = activeTab === item.key;
+              return (
+                <div
+                  key={item.key}
+                  onClick={() => handleNavigate(item.key)}
+                  style={{
+                    padding: '12px 24px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 12,
+                    cursor: 'pointer',
+                    background: isActive ? 'rgba(233,101,0,.08)' : 'transparent',
+                    color: isActive ? '#E96500' : '#475569',
+                    borderRight: isActive ? '3px solid #E96500' : '3px solid transparent',
+                    fontWeight: isActive ? 700 : 500,
+                  }}
+                >
+                  <span style={{ fontSize: 18 }}>{item.icon}</span>
+                  <span style={{ fontSize: 15 }}>{item.label}</span>
+                </div>
+              );
+            })}
+          </div>
+        </Drawer>
+
         {/* Page Content */}
-        <div>{children}</div>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -15 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+          >
+            {children}
+          </motion.div>
+        </AnimatePresence>
       </div>
 
       {/* Profile Modal */}

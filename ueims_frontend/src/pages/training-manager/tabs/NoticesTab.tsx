@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Table, Modal, Form, Input, Select, Button, Popconfirm, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import {
@@ -11,7 +11,7 @@ import {
   XCircle,
 } from 'lucide-react';
 import dayjs from 'dayjs';
-import { c } from '../constants';
+
 
 // ============================================================
 // DESIGN TOKENS — matches SemesterTab / OJTTab Command Center
@@ -170,13 +170,13 @@ const AudienceBadge: React.FC<AudienceBadgeProps> = ({ audience, label }) => {
     Enterprise: {
       bg: cc.purpleMuted,
       border: '#DDD6FE',
-      color: '#5B21B6',
+      color: cc.purple,
       icon: <Megaphone size={11} />,
     },
     Semester: {
       bg: cc.brandMuted,
       border: '#FED7AA',
-      color: '#C2410C',
+      color: cc.warningText,
       icon: <Megaphone size={11} />,
     },
   };
@@ -212,8 +212,8 @@ interface StatusBadgeProps {
 
 const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
   const cfg = status === 'Published'
-    ? { bg: '#ECFDF5', border: '#A7F3D0', color: '#065F46', dot: cc.success, label: 'Published' }
-    : { bg: '#FFFBEB', border: '#FDE68A', color: '#92400E', dot: cc.warning, label: 'Draft' };
+    ? { bg: cc.successMuted, border: '#A7F3D0', color: cc.successText, dot: cc.success, label: 'Published' }
+    : { bg: cc.warningMuted, border: '#FDE68A', color: cc.warningText, dot: cc.warning, label: 'Draft' };
 
   return (
     <span
@@ -249,6 +249,14 @@ export const NoticesTab: React.FC = () => {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedNotice, setSelectedNotice] = useState<NoticeRecord | null>(null);
   const [form] = Form.useForm();
+
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   const filteredNotices = notices.filter((n) => {
     const matchAudience = audienceFilter === 'all' || n.audienceLabel === audienceFilter;
@@ -407,7 +415,7 @@ export const NoticesTab: React.FC = () => {
     {
       title: <HeaderBadge align="right">Actions</HeaderBadge>,
       key: 'actions',
-      fixed: 'right' as const,
+      fixed: isMobile ? undefined : 'right',
       align: 'right' as const,
       width: 220,
       render: (_: unknown, record: NoticeRecord) => (
@@ -445,12 +453,12 @@ export const NoticesTab: React.FC = () => {
                   onMouseEnter={(e) => {
                     const b = e.currentTarget as HTMLButtonElement;
                     b.style.transform = 'translateY(-1px)';
-                    b.style.boxShadow = '0 4px 10px rgba(16,185,129,.3)';
+                    b.style.boxShadow = '0 4px 12px rgba(16,185,129,0.35)';
                   }}
                   onMouseLeave={(e) => {
                     const b = e.currentTarget as HTMLButtonElement;
                     b.style.transform = 'translateY(0)';
-                    b.style.boxShadow = '0 2px 6px rgba(16,185,129,.2)';
+                    b.style.boxShadow = '0 2px 8px rgba(16,185,129,0.25)';
                   }}
                 >
                   <Send size={11} strokeWidth={2} />
@@ -759,16 +767,18 @@ export const NoticesTab: React.FC = () => {
         </div>
 
         {/* ANT DESIGN TABLE */}
-        <Table<NoticeRecord>
-          columns={columns}
-          dataSource={filteredNotices}
-          rowKey="id"
-          pagination={false}
-          scroll={{ x: 860 }}
-          className="notices-table"
-          size="middle"
-          style={{ fontFamily: 'Inter, sans-serif' }}
-        />
+        <div style={{ overflowX: 'auto', maxWidth: '100%', minWidth: 0 }}>
+          <Table<NoticeRecord>
+            columns={columns}
+            dataSource={filteredNotices}
+            rowKey="id"
+            pagination={false}
+            scroll={{ x: 860 }}
+            className="notices-table"
+            size="middle"
+            style={{ fontFamily: 'Inter, sans-serif' }}
+          />
+        </div>
       </div>
 
       {/* ============================================================ */}

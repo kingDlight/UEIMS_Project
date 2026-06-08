@@ -156,3 +156,7 @@ target/
 repomix-output.xml
 *.py
 note.txt
+env.json
+Ueims.postman_collection.json
+prisma.config.ts
+prisma/

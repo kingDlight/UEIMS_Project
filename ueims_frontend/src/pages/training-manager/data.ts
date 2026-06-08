@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { c } from './constants';
 import type {
   AlertItem,
