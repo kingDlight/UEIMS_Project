@@ -46,8 +46,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Transactional(readOnly = true)
     public List<ApplicationResponse> findMyApplications() {
         User currentUser = getCurrentUser();
-        return repository.findByStudent_UserId(currentUser.getUserId())
-                .stream()
+        return repository.findByStudent_UserId(currentUser.getUserId()).stream()
                 .map(mapper::toApplicationResponse)
                 .toList();
     }

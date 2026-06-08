@@ -56,7 +56,8 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
     public WeeklyReport save(WeeklyReport entity) {
         User currentUser = getCurrentUser();
 
-        EnterpriseAssignment assignment = enterpriseAssignmentRepository.findById(entity.getAssignment().getAssignmentId())
+        EnterpriseAssignment assignment = enterpriseAssignmentRepository
+                .findById(entity.getAssignment().getAssignmentId())
                 .orElseThrow(() -> new AppException(ErrorCode.FIELD_REQUIRED));
 
         // Enforce ownership
@@ -73,7 +74,7 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
         // BR-52: Weekly Report Submission Window
         LocalDate startDate = assignment.getSemester().getStartDate();
         long currentWeek = ChronoUnit.WEEKS.between(startDate, LocalDate.now()) + 1;
-        
+
         if (entity.getWeekNumber() != (int) currentWeek) {
             throw new AppException(ErrorCode.APPLICATION_DEADLINE_EXPIRED);
         }
@@ -85,9 +86,11 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
     @Override
     public WeeklyReport updateReport(UUID id, WeeklyReportRequest request) {
         WeeklyReport existing = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.FIELD_REQUIRED));
-        
+
         User currentUser = getCurrentUser();
-        if (!currentUser.getUserId().equals(existing.getAssignment().getStudent().getUserId())) {
+        if (!currentUser
+                .getUserId()
+                .equals(existing.getAssignment().getStudent().getUserId())) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 

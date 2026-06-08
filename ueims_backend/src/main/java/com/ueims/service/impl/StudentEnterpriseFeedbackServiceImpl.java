@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 
 import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
-import com.ueims.model.entity.EligibleStudent;
 import com.ueims.model.entity.StudentEnterpriseFeedback;
 import com.ueims.model.entity.User;
 import com.ueims.repository.EligibleStudentRepository;
@@ -57,16 +56,18 @@ public class StudentEnterpriseFeedbackServiceImpl implements StudentEnterpriseFe
 
         // Constraint: Single Feedback Per Semester
         boolean exists = repository.existsByStudent_UserIdAndEnterprise_EnterpriseIdAndSemester_SemesterId(
-                currentUser.getUserId(), entity.getEnterprise().getEnterpriseId(), entity.getSemester().getSemesterId());
+                currentUser.getUserId(),
+                entity.getEnterprise().getEnterpriseId(),
+                entity.getSemester().getSemesterId());
         if (exists) {
             throw new AppException(ErrorCode.FEEDBACK_DUPLICATE);
         }
 
         // Constraint: Feedback Rating Scale 1-5
-        if (isInvalidScore(entity.getTrainingQualityScore()) ||
-            isInvalidScore(entity.getSupervisorSupportScore()) ||
-            isInvalidScore(entity.getWorkEnvironmentScore()) ||
-            isInvalidScore(entity.getOverallScore())) {
+        if (isInvalidScore(entity.getTrainingQualityScore())
+                || isInvalidScore(entity.getSupervisorSupportScore())
+                || isInvalidScore(entity.getWorkEnvironmentScore())
+                || isInvalidScore(entity.getOverallScore())) {
             throw new AppException(ErrorCode.FEEDBACK_RATING_INVALID);
         }
 
