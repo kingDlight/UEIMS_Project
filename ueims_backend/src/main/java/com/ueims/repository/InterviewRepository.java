@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import com.ueims.model.entity.*;
+import com.ueims.model.entity.Interview;
 
 @Repository
 public interface InterviewRepository extends JpaRepository<Interview, UUID> {
@@ -18,4 +18,6 @@ public interface InterviewRepository extends JpaRepository<Interview, UUID> {
             + "AND i.scheduledTime = :scheduledTime")
     boolean existsByEnterpriseAndTime(
             @Param("enterpriseId") UUID enterpriseId, @Param("scheduledTime") LocalDateTime scheduledTime);
+
+    java.util.List<Interview> findByApplication_Student_UserId(UUID studentId);
 }

@@ -8,6 +8,8 @@ import com.ueims.model.entity.WeeklyReport;
 public interface WeeklyReportService {
     List<WeeklyReport> findAll();
 
+    List<WeeklyReport> findMyReports();
+
     WeeklyReport findById(UUID id);
 
     WeeklyReport save(WeeklyReport entity);
