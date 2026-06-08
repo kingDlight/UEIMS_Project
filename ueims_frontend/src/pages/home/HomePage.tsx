@@ -103,14 +103,18 @@ export const HomePage: React.FC = () => {
     const saved = localStorage.getItem('homepage-theme');
     return saved !== null ? JSON.parse(saved) : true;
   });
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const spotlightRef = React.useRef<HTMLDivElement>(null);
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleMouseMove = React.useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (!spotlightRef.current) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    setMousePos({ x, y });
-  };
+    
+    // Cập nhật CSS Variables trực tiếp vào DOM thay vì dùng state để tránh re-render toàn bộ trang
+    spotlightRef.current.style.setProperty('--mouse-x', `${x}px`);
+    spotlightRef.current.style.setProperty('--mouse-y', `${y}px`);
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('homepage-theme', JSON.stringify(isDark));
@@ -155,19 +159,13 @@ export const HomePage: React.FC = () => {
       
       {/* ============ BACKGROUND EFFECTS ============ */}
       {/* Primary drifting orbs */}
-      <div className={`fixed -top-40 -right-40 w-[700px] h-[700px] blur-[140px] pointer-events-none z-0 animate-drift ${
-        isDark ? 'bg-[#f37021]/12 rounded-full' : 'bg-[#f37021]/20 animate-morph'
+      <div className={`fixed -top-40 -right-40 w-[500px] h-[500px] blur-[100px] pointer-events-none z-0 animate-drift ${
+        isDark ? 'bg-[#f37021]/10 rounded-full' : 'bg-[#f37021]/15 animate-morph'
       }`} style={{ willChange: 'transform' }}></div>
-      <div className={`fixed top-[35%] -left-40 w-[650px] h-[650px] blur-[130px] pointer-events-none z-0 animate-drift-alt ${
-        isDark ? 'bg-blue-600/7 rounded-full' : 'bg-blue-500/15 animate-morph'
-      }`} style={{ willChange: 'transform', animationDelay: '5s' }}></div>
-      {/* Secondary accent orbs */}
-      <div className={`fixed bottom-[10%] right-[20%] w-[400px] h-[400px] blur-[120px] pointer-events-none z-0 animate-drift ${
-        isDark ? 'bg-purple-600/5 rounded-full' : 'bg-orange-300/18 rounded-full'
-      }`} style={{ willChange: 'transform', animationDelay: '9s', animationDuration: '25s' }}></div>
-      <div className={`fixed top-[60%] left-[40%] w-[300px] h-[300px] blur-[100px] pointer-events-none z-0 animate-drift-alt ${
-        isDark ? 'bg-amber-600/4 rounded-full' : 'bg-blue-300/15 rounded-full'
-      }`} style={{ willChange: 'transform', animationDelay: '13s', animationDuration: '20s' }}></div>
+      <div className={`fixed top-[35%] -left-40 w-[450px] h-[450px] blur-[90px] pointer-events-none z-0 animate-drift-alt ${
+        isDark ? 'rounded-full' : 'animate-morph'
+      }`} style={{ background: '#00aeff21', willChange: 'transform', animationDelay: '5s' }}></div>
+      {/* Secondary accent orbs removed per user request */}
 
       {/* Animated SVG dot-grid — light mode gets brighter colors */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden" aria-hidden="true">
@@ -204,9 +202,7 @@ export const HomePage: React.FC = () => {
       }`}>
         {/* Brand */}
         <div className="flex items-center gap-3 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-          <div className="h-9 w-9 rounded-lg bg-[#f37021] flex items-center justify-center text-white shadow-lg shadow-[#f37021]/20">
-            <GraduationCap className="h-5 w-5" />
-          </div>
+          <img src="/src/assets/logo_ueims.png" alt="UEIMS Logo" style={{ height: '36px', objectFit: 'contain' }} />
           <span className={`font-bold text-lg tracking-wide transition-colors duration-700 ease-in-out ${isDark ? 'text-white' : 'text-slate-900'}`}>UEIMS</span>
         </div>
 
@@ -243,7 +239,7 @@ export const HomePage: React.FC = () => {
             }`}
             title={isDark ? "Chuyển sang chế độ sáng" : "Chuyển sang chế độ tối"}
           >
-            {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            {isDark ? <Sun className="h-4 w-4 relative top-[1px]" /> : <Moon className="h-4 w-4 relative top-[1px]" />}
           </button>
 
           <button
@@ -315,9 +311,10 @@ export const HomePage: React.FC = () => {
       >
         {/* Interactive Spotlight Glow */}
         <div 
+          ref={spotlightRef}
           className="absolute inset-0 pointer-events-none z-0 opacity-70 transition-opacity duration-700 ease-in-out"
           style={{
-            background: `radial-gradient(700px circle at ${mousePos.x}px ${mousePos.y}px, ${
+            background: `radial-gradient(700px circle at var(--mouse-x, 50%) var(--mouse-y, -20%), ${
               isDark ? 'rgba(243, 112, 33, 0.07)' : 'rgba(243, 112, 33, 0.08)'
             }, transparent 80%)`
           }}
@@ -325,18 +322,24 @@ export const HomePage: React.FC = () => {
 
         {/* Floating Abstract Shapes */}
         {/* Circles */}
-        <div className={`absolute top-[20%] left-[8%] w-12 h-12 rounded-full border animate-float pointer-events-none z-0 ${
-          isDark ? 'border-[#f37021]/18' : 'border-[#f37021]/35'
-        }`} style={{ willChange: 'transform' }}></div>
-        <div className={`absolute bottom-[15%] right-[8%] w-16 h-16 rounded-xl border rotate-45 animate-float pointer-events-none z-0 ${
-          isDark ? 'border-blue-500/18' : 'border-blue-400/40'
-        }`} style={{ animationDelay: '1.5s', animationDuration: '8s', willChange: 'transform' }}></div>
+        <div className="absolute top-[20%] left-[8%] w-12 h-12 rounded-full animate-float pointer-events-none z-0" 
+             style={{ 
+               border: isDark ? '1px solid rgba(243, 112, 33, 0.18)' : '1px solid rgba(243, 112, 33, 0.35)',
+               willChange: 'transform' 
+             }}></div>
+        <div className="absolute bottom-[15%] right-[8%] w-16 h-16 rounded-xl rotate-45 animate-float pointer-events-none z-0" 
+             style={{ 
+               border: isDark ? '1px solid rgba(59, 130, 246, 0.18)' : '1px solid rgba(96, 165, 250, 0.40)',
+               animationDelay: '1.5s', animationDuration: '8s', willChange: 'transform' 
+             }}></div>
         <div className={`absolute top-[35%] right-[12%] w-8 h-8 rounded-full animate-float pointer-events-none z-0 ${
           isDark ? 'bg-amber-500/6' : 'bg-orange-400/20'
         }`} style={{ animationDelay: '3s', animationDuration: '7s', willChange: 'transform' }}></div>
-        <div className={`absolute bottom-[30%] left-[12%] w-20 h-20 rounded-full border animate-float pointer-events-none z-0 ${
-          isDark ? 'border-zinc-500/12' : 'border-slate-400/25'
-        }`} style={{ animationDelay: '4.5s', animationDuration: '9s', willChange: 'transform' }}></div>
+        <div className="absolute bottom-[30%] left-[12%] w-20 h-20 rounded-full animate-float pointer-events-none z-0" 
+             style={{ 
+               border: isDark ? '1px solid rgba(113, 113, 122, 0.12)' : '1px solid rgba(148, 163, 184, 0.25)',
+               animationDelay: '4.5s', animationDuration: '9s', willChange: 'transform' 
+             }}></div>
         {/* Extra particles */}
         <div className={`absolute top-[55%] left-[5%] w-5 h-5 rounded-full animate-particle pointer-events-none z-0 ${
           isDark ? 'bg-[#f37021]/20' : 'bg-[#f37021]/40'
@@ -351,12 +354,28 @@ export const HomePage: React.FC = () => {
           isDark ? 'bg-purple-400/20' : 'bg-purple-500/45'
         }`} style={{ animationDelay: '5s', willChange: 'transform' }}></div>
         {/* Rotating diamond */}
-        <div className={`absolute top-[10%] left-[35%] w-6 h-6 border rotate-45 animate-rotate-slow pointer-events-none z-0 ${
-          isDark ? 'border-[#f37021]/15' : 'border-[#f37021]/35'
-        }`} style={{ willChange: 'transform' }}></div>
-        <div className={`absolute bottom-[8%] right-[18%] w-8 h-8 border rotate-12 animate-rotate-slow-reverse pointer-events-none z-0 ${
-          isDark ? 'border-blue-400/12' : 'border-blue-500/30'
-        }`} style={{ willChange: 'transform', animationDelay: '3s' }}></div>
+        <div className="absolute top-[10%] left-[35%] w-6 h-6 rotate-45 animate-rotate-slow pointer-events-none z-0" 
+             style={{ 
+               border: isDark ? '1px solid rgba(243, 112, 33, 0.3)' : '1px solid rgba(243, 112, 33, 0.6)',
+               willChange: 'transform' 
+             }}></div>
+        <div className="absolute bottom-[8%] right-[18%] w-8 h-8 rotate-12 animate-rotate-slow-reverse pointer-events-none z-0" 
+             style={{ 
+               border: isDark ? '1px solid rgba(59, 130, 246, 0.2)' : '1px solid rgba(59, 130, 246, 0.4)',
+               willChange: 'transform', animationDelay: '3s' 
+             }}></div>
+        
+        {/* Floating Rounded Squares */}
+        <div className="absolute top-[25%] right-[15%] w-16 h-16 rounded-2xl animate-float pointer-events-none z-20"
+             style={{ 
+               border: isDark ? '2px solid rgba(243, 112, 33, 0.5)' : '2px solid rgba(243, 112, 33, 0.8)',
+               animationDelay: '2.5s', animationDuration: '8.5s', willChange: 'transform' 
+             }}></div>
+        <div className="absolute top-[65%] left-[20%] w-12 h-12 rounded-xl animate-float pointer-events-none z-20"
+             style={{ 
+               border: isDark ? '1px solid rgba(59, 130, 246, 0.5)' : '1px solid rgba(59, 130, 246, 0.8)',
+               animationDelay: '4s', animationDuration: '6s', willChange: 'transform' 
+             }}></div>
 
         <div className="max-w-6xl w-full text-center relative z-10">
           
