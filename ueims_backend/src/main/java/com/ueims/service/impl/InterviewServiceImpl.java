@@ -10,7 +10,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
-import com.ueims.model.entity.*;
+import com.ueims.model.entity.Application;
+import com.ueims.model.entity.ApplicationStatus;
+import com.ueims.model.entity.Interview;
+import com.ueims.model.entity.User;
 import com.ueims.repository.ApplicationRepository;
 import com.ueims.repository.InterviewRepository;
 import com.ueims.repository.UserRepository;
@@ -28,6 +31,12 @@ public class InterviewServiceImpl implements InterviewService {
     @Override
     public List<Interview> findAll() {
         return repository.findAll();
+    }
+
+    @Override
+    public List<Interview> findMyInterviews() {
+        User currentUser = getCurrentUser();
+        return repository.findByApplication_Student_UserId(currentUser.getUserId());
     }
 
     @Override

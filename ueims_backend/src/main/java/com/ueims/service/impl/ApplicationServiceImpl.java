@@ -14,9 +14,15 @@ import com.ueims.dto.response.ApplicationResponse;
 import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
 import com.ueims.mapper.ApplicationMapper;
-import com.ueims.model.entity.*;
+import com.ueims.model.entity.Application;
 import com.ueims.model.entity.ApplicationStatus;
-import com.ueims.repository.*;
+import com.ueims.model.entity.EligibleStudent;
+import com.ueims.model.entity.JobPost;
+import com.ueims.model.entity.User;
+import com.ueims.repository.ApplicationRepository;
+import com.ueims.repository.EligibleStudentRepository;
+import com.ueims.repository.JobPostRepository;
+import com.ueims.repository.UserRepository;
 import com.ueims.service.ApplicationService;
 
 import lombok.RequiredArgsConstructor;
@@ -34,6 +40,16 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Transactional(readOnly = true)
     public List<ApplicationResponse> findAll() {
         return repository.findAll().stream().map(mapper::toApplicationResponse).toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ApplicationResponse> findMyApplications() {
+        User currentUser = getCurrentUser();
+        return repository.findByStudent_UserId(currentUser.getUserId())
+                .stream()
+                .map(mapper::toApplicationResponse)
+                .toList();
     }
 
     @Override

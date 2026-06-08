@@ -1,0 +1,182 @@
+- generic [ref=e4]:
+  - generic [ref=e6]:
+    - generic [ref=e7]: UEIMS
+    - generic [ref=e8]:
+      - generic [ref=e9] [cursor=pointer]:
+        - img "bar-chart" [ref=e11]:
+          - img [ref=e12]
+        - generic [ref=e14]: Dashboard
+      - generic [ref=e15] [cursor=pointer]:
+        - img "bank" [ref=e17]:
+          - img [ref=e18]
+        - generic [ref=e20]: Enterprise
+      - generic [ref=e21] [cursor=pointer]:
+        - img "team" [ref=e23]:
+          - img [ref=e24]
+        - generic [ref=e26]: Students
+      - generic [ref=e27] [cursor=pointer]:
+        - img "file-protect" [ref=e29]:
+          - img [ref=e30]
+        - generic [ref=e32]: OJT
+      - generic [ref=e33] [cursor=pointer]:
+        - img "trophy" [ref=e35]:
+          - img [ref=e36]
+        - generic [ref=e38]: Stats
+      - generic [ref=e39] [cursor=pointer]:
+        - img "alert" [ref=e41]:
+          - img [ref=e42]
+        - generic [ref=e44]: Incidents
+      - generic [ref=e45] [cursor=pointer]:
+        - img "file-text" [ref=e47]:
+          - img [ref=e48]
+        - generic [ref=e50]: Reports
+      - generic [ref=e51] [cursor=pointer]:
+        - img "file-text" [ref=e53]:
+          - img [ref=e54]
+        - generic [ref=e56]: Weekly Reports
+      - generic [ref=e57] [cursor=pointer]:
+        - img "calendar" [ref=e59]:
+          - img [ref=e60]
+        - generic [ref=e62]: Semester
+      - generic [ref=e63] [cursor=pointer]:
+        - img "bell" [ref=e65]:
+          - img [ref=e66]
+        - generic [ref=e68]: Notices
+  - generic [ref=e70]:
+    - img "bell" [ref=e73] [cursor=pointer]:
+      - img [ref=e74]
+    - generic [ref=e78] [cursor=pointer]:
+      - generic [ref=e79]: Te
+      - generic [ref=e80]:
+        - generic [ref=e81]: Tester
+        - generic [ref=e82]: kingdn522005@gmail.com
+  - generic [ref=e84]:
+    - generic [ref=e85]:
+      - heading "Final Grade & Feedback" [level=2] [ref=e86]
+      - paragraph [ref=e87]: Review rubric scores, finalize internship grades, and inspect student performance
+    - generic [ref=e88]:
+      - generic [ref=e89]:
+        - generic [ref=e90]:
+          - img [ref=e91]
+          - generic [ref=e94]:
+            - generic [ref=e95]: Grade Management
+            - generic [ref=e96]: 5 student records total
+        - generic [ref=e97]:
+          - button "Input Final Grade" [ref=e98] [cursor=pointer]:
+            - img [ref=e100]
+            - generic [ref=e102]: Input Final Grade
+          - button "Export Grade Report (PDF)" [ref=e103] [cursor=pointer]:
+            - img [ref=e105]
+            - generic [ref=e108]: Export Grade Report (PDF)
+      - generic [ref=e112]:
+        - table [ref=e116]:
+          - rowgroup [ref=e124]:
+            - row "Student Semester Enterprise Score Final Grade Status Actions" [ref=e125]:
+              - columnheader "Student" [ref=e126]
+              - columnheader "Semester" [ref=e127]
+              - columnheader "Enterprise Score" [ref=e128]
+              - columnheader "Final Grade" [ref=e129]
+              - columnheader "Status" [ref=e130]
+              - columnheader "Actions" [ref=e131]
+          - rowgroup [ref=e132]:
+            - row "Nguyễn Văn Minh SE12345 SU26 92 A PASS Edit Export" [ref=e133]:
+              - cell "Nguyễn Văn Minh SE12345" [ref=e134]:
+                - generic [ref=e135]:
+                  - generic [ref=e136]: Nguyễn Văn Minh
+                  - generic [ref=e137]: SE12345
+              - cell "SU26" [ref=e138]
+              - cell "92" [ref=e139]
+              - cell "A" [ref=e140]
+              - cell "PASS" [ref=e141]:
+                - generic [ref=e142]: PASS
+              - cell "Edit Export" [ref=e143]:
+                - generic [ref=e144]:
+                  - button "Edit" [ref=e145] [cursor=pointer]:
+                    - img [ref=e147]
+                    - generic [ref=e149]: Edit
+                  - button "Export" [ref=e150] [cursor=pointer]:
+                    - img [ref=e152]
+                    - generic [ref=e155]: Export
+            - row "Trần Thị Lan SE12346 SU26 78 B+ PASS Edit Export" [ref=e156]:
+              - cell "Trần Thị Lan SE12346" [ref=e157]:
+                - generic [ref=e158]:
+                  - generic [ref=e159]: Trần Thị Lan
+                  - generic [ref=e160]: SE12346
+              - cell "SU26" [ref=e161]
+              - cell "78" [ref=e162]
+              - cell "B+" [ref=e163]
+              - cell "PASS" [ref=e164]:
+                - generic [ref=e165]: PASS
+              - cell "Edit Export" [ref=e166]:
+                - generic [ref=e167]:
+                  - button "Edit" [ref=e168] [cursor=pointer]:
+                    - img [ref=e170]
+                    - generic [ref=e172]: Edit
+                  - button "Export" [ref=e173] [cursor=pointer]:
+                    - img [ref=e175]
+                    - generic [ref=e178]: Export
+            - row "Lê Hoàng Nam SE12347 SU26 65 C PASS Edit Export" [ref=e179]:
+              - cell "Lê Hoàng Nam SE12347" [ref=e180]:
+                - generic [ref=e181]:
+                  - generic [ref=e182]: Lê Hoàng Nam
+                  - generic [ref=e183]: SE12347
+              - cell "SU26" [ref=e184]
+              - cell "65" [ref=e185]
+              - cell "C" [ref=e186]
+              - cell "PASS" [ref=e187]:
+                - generic [ref=e188]: PASS
+              - cell "Edit Export" [ref=e189]:
+                - generic [ref=e190]:
+                  - button "Edit" [ref=e191] [cursor=pointer]:
+                    - img [ref=e193]
+                    - generic [ref=e195]: Edit
+                  - button "Export" [ref=e196] [cursor=pointer]:
+                    - img [ref=e198]
+                    - generic [ref=e201]: Export
+            - row "Phạm Thu Hà SE12348 SU26 41 F FAIL Edit Export" [ref=e202]:
+              - cell "Phạm Thu Hà SE12348" [ref=e203]:
+                - generic [ref=e204]:
+                  - generic [ref=e205]: Phạm Thu Hà
+                  - generic [ref=e206]: SE12348
+              - cell "SU26" [ref=e207]
+              - cell "41" [ref=e208]
+              - cell "F" [ref=e209]
+              - cell "FAIL" [ref=e210]:
+                - generic [ref=e211]: FAIL
+              - cell "Edit Export" [ref=e212]:
+                - generic [ref=e213]:
+                  - button "Edit" [ref=e214] [cursor=pointer]:
+                    - img [ref=e216]
+                    - generic [ref=e218]: Edit
+                  - button "Export" [ref=e219] [cursor=pointer]:
+                    - img [ref=e221]
+                    - generic [ref=e224]: Export
+            - row "Đặng Minh Tuấn SE12349 SU26 0 PENDING Edit Export" [ref=e225]:
+              - cell "Đặng Minh Tuấn SE12349" [ref=e226]:
+                - generic [ref=e227]:
+                  - generic [ref=e228]: Đặng Minh Tuấn
+                  - generic [ref=e229]: SE12349
+              - cell "SU26" [ref=e230]
+              - cell "0" [ref=e231]
+              - cell [ref=e232]
+              - cell "PENDING" [ref=e233]:
+                - generic [ref=e234]: PENDING
+              - cell "Edit Export" [ref=e235]:
+                - generic [ref=e236]:
+                  - button "Edit" [ref=e237] [cursor=pointer]:
+                    - img [ref=e239]
+                    - generic [ref=e241]: Edit
+                  - button "Export" [ref=e242] [cursor=pointer]:
+                    - img [ref=e244]
+                    - generic [ref=e247]: Export
+        - list [ref=e248]:
+          - listitem "Previous Page" [ref=e249]:
+            - button "left" [disabled] [ref=e250]:
+              - img "left" [ref=e251]:
+                - img [ref=e252]
+          - listitem "1" [ref=e254] [cursor=pointer]:
+            - generic [ref=e255]: "1"
+          - listitem "Next Page" [ref=e256]:
+            - button "right" [disabled] [ref=e257]:
+              - img "right" [ref=e258]:
+                - img [ref=e259]

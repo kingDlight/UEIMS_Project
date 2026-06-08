@@ -1,0 +1,292 @@
+- generic [ref=e4]:
+  - generic [ref=e6]:
+    - generic [ref=e7]: UEIMS
+    - generic [ref=e8]:
+      - generic [ref=e9] [cursor=pointer]:
+        - img "bar-chart" [ref=e11]:
+          - img [ref=e12]
+        - generic [ref=e14]: Dashboard
+      - generic [ref=e15] [cursor=pointer]:
+        - img "bank" [ref=e17]:
+          - img [ref=e18]
+        - generic [ref=e20]: Enterprise
+      - generic [ref=e21] [cursor=pointer]:
+        - img "team" [ref=e23]:
+          - img [ref=e24]
+        - generic [ref=e26]: Students
+      - generic [ref=e27] [cursor=pointer]:
+        - img "file-protect" [ref=e29]:
+          - img [ref=e30]
+        - generic [ref=e32]: OJT
+      - generic [ref=e33] [cursor=pointer]:
+        - img "trophy" [ref=e35]:
+          - img [ref=e36]
+        - generic [ref=e38]: Stats
+      - generic [ref=e39] [cursor=pointer]:
+        - img "alert" [ref=e41]:
+          - img [ref=e42]
+        - generic [ref=e44]: Incidents
+      - generic [ref=e45] [cursor=pointer]:
+        - img "file-text" [ref=e47]:
+          - img [ref=e48]
+        - generic [ref=e50]: Reports
+      - generic [ref=e51] [cursor=pointer]:
+        - img "down" [ref=e53]:
+          - img [ref=e54]
+        - generic [ref=e56]: More
+  - generic [ref=e58]:
+    - img "bell" [ref=e61] [cursor=pointer]:
+      - img [ref=e62]
+    - generic [ref=e66] [cursor=pointer]:
+      - generic [ref=e67]: Te
+      - generic [ref=e68]:
+        - generic [ref=e69]: Tester
+        - generic [ref=e70]: kingdn522005@gmail.com
+  - generic [ref=e72]:
+    - generic [ref=e73]:
+      - heading "OJT Placement Center" [level=2] [ref=e74]
+      - paragraph [ref=e75]: Manage student-to-enterprise matching and placement lifecycle
+    - generic [ref=e76]:
+      - generic [ref=e77]:
+        - button "Auto-Match" [ref=e78] [cursor=pointer]:
+          - img [ref=e79]
+          - text: Auto-Match
+        - button "Self-Placements 3" [ref=e81] [cursor=pointer]:
+          - img [ref=e82]
+          - text: Self-Placements
+          - generic [ref=e85]: "3"
+        - generic [ref=e86]:
+          - generic [ref=e87]:
+            - generic [ref=e89]: "2"
+            - generic [ref=e90]: Unplaced
+          - generic [ref=e91]:
+            - generic [ref=e93]: "3"
+            - generic [ref=e94]: Pending
+          - generic [ref=e95]:
+            - generic [ref=e97]: "2"
+            - generic [ref=e98]: Interviewing
+          - generic [ref=e99]:
+            - generic [ref=e101]: "3"
+            - generic [ref=e102]: Placed
+      - generic [ref=e103]:
+        - generic [ref=e104] [cursor=pointer]:
+          - generic [ref=e106]:
+            - combobox [ref=e108]
+            - generic "All Majors" [ref=e109]
+          - generic:
+            - img
+        - generic [ref=e110] [cursor=pointer]:
+          - generic [ref=e112]:
+            - combobox [ref=e114]
+            - generic "All Statuses" [ref=e115]
+          - generic:
+            - img
+        - generic [ref=e116] [cursor=pointer]:
+          - generic [ref=e118]:
+            - combobox [ref=e120]
+            - generic "All Sources" [ref=e121]
+          - generic:
+            - img
+    - generic [ref=e125]:
+      - table [ref=e129]:
+        - rowgroup [ref=e137]:
+          - row "Student Target Role Source Enterprise Status Actions" [ref=e138]:
+            - columnheader "Student" [ref=e139]:
+              - generic [ref=e140]: Student
+            - columnheader "Target Role" [ref=e141]:
+              - generic [ref=e142]: Target Role
+            - columnheader "Source" [ref=e143]:
+              - generic [ref=e144]: Source
+            - columnheader "Enterprise" [ref=e145]:
+              - generic [ref=e146]: Enterprise
+            - columnheader "Status" [ref=e147]:
+              - generic [ref=e148]: Status
+            - columnheader "Actions" [ref=e149]:
+              - generic [ref=e150]: Actions
+        - rowgroup [ref=e151]:
+          - generic: Student
+          - generic: Target Role
+          - generic: Source
+          - generic: Enterprise
+          - generic: Status
+          - generic: Actions
+          - row "NVA Nguyen Van A SE161234 · SE Frontend Developer System-Matched FP FPT Software Placed View Contract" [ref=e152]:
+            - cell "NVA Nguyen Van A SE161234 · SE" [ref=e153]:
+              - generic [ref=e154]:
+                - generic [ref=e155]: NVA
+                - generic [ref=e156]:
+                  - generic [ref=e157]: Nguyen Van A
+                  - generic [ref=e158]:
+                    - generic [ref=e159]: SE161234
+                    - generic [ref=e160]: ·
+                    - generic [ref=e161]: SE
+            - cell "Frontend Developer" [ref=e162]
+            - cell "System-Matched" [ref=e163]:
+              - generic [ref=e164]: System-Matched
+            - cell "FP FPT Software" [ref=e165]:
+              - generic [ref=e166]:
+                - generic [ref=e167]: FP
+                - generic [ref=e168]: FPT Software
+            - cell "Placed" [ref=e169]:
+              - generic [ref=e170]: Placed
+            - cell "View Contract" [ref=e171]:
+              - button "View Contract" [ref=e172] [cursor=pointer]
+          - row "TTB Tran Thi B IA162345 · IA Security Analyst System-Matched VB VinBigData Interviewing Update" [ref=e173]:
+            - cell "TTB Tran Thi B IA162345 · IA" [ref=e174]:
+              - generic [ref=e175]:
+                - generic [ref=e176]: TTB
+                - generic [ref=e177]:
+                  - generic [ref=e178]: Tran Thi B
+                  - generic [ref=e179]:
+                    - generic [ref=e180]: IA162345
+                    - generic [ref=e181]: ·
+                    - generic [ref=e182]: IA
+            - cell "Security Analyst" [ref=e183]
+            - cell "System-Matched" [ref=e184]:
+              - generic [ref=e185]: System-Matched
+            - cell "VB VinBigData" [ref=e186]:
+              - generic [ref=e187]:
+                - generic [ref=e188]: VB
+                - generic [ref=e189]: VinBigData
+            - cell "Interviewing" [ref=e190]:
+              - generic [ref=e191]: Interviewing
+            - cell "Update" [ref=e192]:
+              - button "Update" [ref=e193] [cursor=pointer]
+          - row "LVC Le Van C SE163456 · SE Backend Developer System-Matched — Unplaced Match" [ref=e194]:
+            - cell "LVC Le Van C SE163456 · SE" [ref=e195]:
+              - generic [ref=e196]:
+                - generic [ref=e197]: LVC
+                - generic [ref=e198]:
+                  - generic [ref=e199]: Le Van C
+                  - generic [ref=e200]:
+                    - generic [ref=e201]: SE163456
+                    - generic [ref=e202]: ·
+                    - generic [ref=e203]: SE
+            - cell "Backend Developer" [ref=e204]
+            - cell "System-Matched" [ref=e205]:
+              - generic [ref=e206]: System-Matched
+            - cell "—" [ref=e207]
+            - cell "Unplaced" [ref=e208]:
+              - generic [ref=e209]: Unplaced
+            - cell "Match" [ref=e210]:
+              - button "Match" [ref=e211] [cursor=pointer]
+          - row "BVG Bui Van G IA163222 · IA DevOps Engineer System-Matched NT NashTech VN Placed View Contract" [ref=e212]:
+            - cell "BVG Bui Van G IA163222 · IA" [ref=e213]:
+              - generic [ref=e214]:
+                - generic [ref=e215]: BVG
+                - generic [ref=e216]:
+                  - generic [ref=e217]: Bui Van G
+                  - generic [ref=e218]:
+                    - generic [ref=e219]: IA163222
+                    - generic [ref=e220]: ·
+                    - generic [ref=e221]: IA
+            - cell "DevOps Engineer" [ref=e222]
+            - cell "System-Matched" [ref=e223]:
+              - generic [ref=e224]: System-Matched
+            - cell "NT NashTech VN" [ref=e225]:
+              - generic [ref=e226]:
+                - generic [ref=e227]: NT
+                - generic [ref=e228]: NashTech VN
+            - cell "Placed" [ref=e229]:
+              - generic [ref=e230]: Placed
+            - cell "View Contract" [ref=e231]:
+              - button "View Contract" [ref=e232] [cursor=pointer]
+          - row "PTD Pham Thi D GD162111 · GD UI/UX Designer System-Matched VN VNG Corporation Interviewing Update" [ref=e233]:
+            - cell "PTD Pham Thi D GD162111 · GD" [ref=e234]:
+              - generic [ref=e235]:
+                - generic [ref=e236]: PTD
+                - generic [ref=e237]:
+                  - generic [ref=e238]: Pham Thi D
+                  - generic [ref=e239]:
+                    - generic [ref=e240]: GD162111
+                    - generic [ref=e241]: ·
+                    - generic [ref=e242]: GD
+            - cell "UI/UX Designer" [ref=e243]
+            - cell "System-Matched" [ref=e244]:
+              - generic [ref=e245]: System-Matched
+            - cell "VN VNG Corporation" [ref=e246]:
+              - generic [ref=e247]:
+                - generic [ref=e248]: VN
+                - generic [ref=e249]: VNG Corporation
+            - cell "Interviewing" [ref=e250]:
+              - generic [ref=e251]: Interviewing
+            - cell "Update" [ref=e252]:
+              - button "Update" [ref=e253] [cursor=pointer]
+          - row "HVE Hoang Van E AI162789 · AI ML Engineer Self-Sourced VA Viettel AI Pending Approve" [ref=e254]:
+            - cell "HVE Hoang Van E AI162789 · AI" [ref=e255]:
+              - generic [ref=e256]:
+                - generic [ref=e257]: HVE
+                - generic [ref=e258]:
+                  - generic [ref=e259]: Hoang Van E
+                  - generic [ref=e260]:
+                    - generic [ref=e261]: AI162789
+                    - generic [ref=e262]: ·
+                    - generic [ref=e263]: AI
+            - cell "ML Engineer" [ref=e264]
+            - cell "Self-Sourced" [ref=e265]:
+              - generic [ref=e266]: Self-Sourced
+            - cell "VA Viettel AI" [ref=e267]:
+              - generic [ref=e268]:
+                - generic [ref=e269]: VA
+                - generic [ref=e270]: Viettel AI
+            - cell "Pending" [ref=e271]:
+              - generic [ref=e272]: Pending
+            - cell "Approve" [ref=e273]:
+              - button "Approve" [ref=e274] [cursor=pointer]
+          - row "DTF Dao Thi F SE164001 · SE QA Engineer Self-Sourced TM TMA Solutions Pending Approve" [ref=e275]:
+            - cell "DTF Dao Thi F SE164001 · SE" [ref=e276]:
+              - generic [ref=e277]:
+                - generic [ref=e278]: DTF
+                - generic [ref=e279]:
+                  - generic [ref=e280]: Dao Thi F
+                  - generic [ref=e281]:
+                    - generic [ref=e282]: SE164001
+                    - generic [ref=e283]: ·
+                    - generic [ref=e284]: SE
+            - cell "QA Engineer" [ref=e285]
+            - cell "Self-Sourced" [ref=e286]:
+              - generic [ref=e287]: Self-Sourced
+            - cell "TM TMA Solutions" [ref=e288]:
+              - generic [ref=e289]:
+                - generic [ref=e290]: TM
+                - generic [ref=e291]: TMA Solutions
+            - cell "Pending" [ref=e292]:
+              - generic [ref=e293]: Pending
+            - cell "Approve" [ref=e294]:
+              - button "Approve" [ref=e295] [cursor=pointer]
+          - row "NTI Nguyen Thi I GD164444 · GD Visual Designer Self-Sourced HV Haravan Tech Pending Approve" [ref=e296]:
+            - cell "NTI Nguyen Thi I GD164444 · GD" [ref=e297]:
+              - generic [ref=e298]:
+                - generic [ref=e299]: NTI
+                - generic [ref=e300]:
+                  - generic [ref=e301]: Nguyen Thi I
+                  - generic [ref=e302]:
+                    - generic [ref=e303]: GD164444
+                    - generic [ref=e304]: ·
+                    - generic [ref=e305]: GD
+            - cell "Visual Designer" [ref=e306]
+            - cell "Self-Sourced" [ref=e307]:
+              - generic [ref=e308]: Self-Sourced
+            - cell "HV Haravan Tech" [ref=e309]:
+              - generic [ref=e310]:
+                - generic [ref=e311]: HV
+                - generic [ref=e312]: Haravan Tech
+            - cell "Pending" [ref=e313]:
+              - generic [ref=e314]: Pending
+            - cell "Approve" [ref=e315]:
+              - button "Approve" [ref=e316] [cursor=pointer]
+      - list [ref=e317]:
+        - listitem [ref=e318]:
+          - generic [ref=e319]: 1–8 of 10 students
+        - listitem "Previous Page" [ref=e320]:
+          - button "left" [disabled] [ref=e321]:
+            - img "left" [ref=e322]:
+              - img [ref=e323]
+        - listitem "1" [ref=e325] [cursor=pointer]:
+          - generic [ref=e326]: "1"
+        - listitem "2" [ref=e327] [cursor=pointer]:
+          - generic [ref=e328]: "2"
+        - listitem "Next Page" [ref=e329] [cursor=pointer]:
+          - button "right" [ref=e330]:
+            - img "right" [ref=e331]:
+              - img [ref=e332]
