@@ -64,13 +64,13 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
-        // BR-XX: Ensure student is eligible
+        // Validate Eligible Student
         eligibleStudentRepository
                 .findByUser_UserIdAndSemester_SemesterId(
                         currentUser.getUserId(), assignment.getSemester().getSemesterId())
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_ELIGIBLE));
 
-        // BR-XX: Submission Window Restriction
+        // BR-52: Weekly Report Submission Window
         LocalDate startDate = assignment.getSemester().getStartDate();
         long currentWeek = ChronoUnit.WEEKS.between(startDate, LocalDate.now()) + 1;
         
@@ -91,7 +91,7 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
-        // Only allow editing if DRAFT or REJECTED
+        // BR-53: Weekly Report Edit Constraint (Only allow editing if DRAFT or REJECTED)
         String status = existing.getStatus();
         if ("APPROVED".equals(status) || "PENDING_REVIEW".equals(status) || "REVIEWED".equals(status)) {
             throw new AppException(ErrorCode.APPLICATION_STATUS_CHANGED);

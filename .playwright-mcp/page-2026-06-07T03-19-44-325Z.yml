@@ -1,0 +1,176 @@
+- generic [ref=e4]:
+  - generic [ref=e6]:
+    - generic [ref=e7]: UEIMS
+    - generic [ref=e8]:
+      - generic [ref=e9] [cursor=pointer]:
+        - img "bar-chart" [ref=e11]:
+          - img [ref=e12]
+        - generic [ref=e14]: Dashboard
+      - generic [ref=e15] [cursor=pointer]:
+        - img "bank" [ref=e17]:
+          - img [ref=e18]
+        - generic [ref=e20]: Enterprise
+      - generic [ref=e21] [cursor=pointer]:
+        - img "team" [ref=e23]:
+          - img [ref=e24]
+        - generic [ref=e26]: Students
+      - generic [ref=e27] [cursor=pointer]:
+        - img "file-protect" [ref=e29]:
+          - img [ref=e30]
+        - generic [ref=e32]: OJT
+      - generic [ref=e33] [cursor=pointer]:
+        - img "trophy" [ref=e35]:
+          - img [ref=e36]
+        - generic [ref=e38]: Stats
+      - generic [ref=e39] [cursor=pointer]:
+        - img "alert" [ref=e41]:
+          - img [ref=e42]
+        - generic [ref=e44]: Incidents
+      - generic [ref=e45] [cursor=pointer]:
+        - img "file-text" [ref=e47]:
+          - img [ref=e48]
+        - generic [ref=e50]: Reports
+      - generic [ref=e51] [cursor=pointer]:
+        - img "down" [ref=e53]:
+          - img [ref=e54]
+        - generic [ref=e56]: More
+  - generic [ref=e58]:
+    - img "bell" [ref=e61] [cursor=pointer]:
+      - img [ref=e62]
+    - generic [ref=e66] [cursor=pointer]:
+      - generic [ref=e67]: Te
+      - generic [ref=e68]:
+        - generic [ref=e69]: Tester
+        - generic [ref=e70]: kingdn522005@gmail.com
+  - generic [ref=e72]:
+    - generic [ref=e73]:
+      - heading "Semester Configuration" [level=1] [ref=e74]
+      - paragraph [ref=e75]: Manage academic terms and OJT timelines
+    - generic [ref=e76]:
+      - generic [ref=e77]:
+        - generic [ref=e79]: 4 semesters
+        - button "Create New Semester" [ref=e80] [cursor=pointer]:
+          - img [ref=e81]
+          - text: Create New Semester
+      - table [ref=e88]:
+        - rowgroup [ref=e96]:
+          - row "Semester Start Date End Date Duration Status Actions" [ref=e97]:
+            - columnheader "Semester" [ref=e98]:
+              - generic [ref=e99]: Semester
+            - columnheader "Start Date" [ref=e100]:
+              - generic [ref=e101]: Start Date
+            - columnheader "End Date" [ref=e102]:
+              - generic [ref=e103]: End Date
+            - columnheader "Duration" [ref=e104]:
+              - generic [ref=e105]: Duration
+            - columnheader "Status" [ref=e106]:
+              - generic [ref=e107]: Status
+            - columnheader "Actions" [ref=e108]:
+              - generic [ref=e109]: Actions
+        - rowgroup [ref=e110]:
+          - generic: Semester
+          - generic: Start Date
+          - generic: End Date
+          - generic: Duration
+          - generic: Status
+          - generic: Actions
+          - row "Fall 2025 FA25 Sep 1, 2025 Dec 15, 2025 15 weeks Completed Edit Timeline Set as Current" [ref=e111]:
+            - cell "Fall 2025 FA25" [ref=e112]:
+              - generic [ref=e113]:
+                - img [ref=e115]
+                - generic [ref=e117]:
+                  - generic [ref=e118]: Fall 2025
+                  - generic [ref=e120]: FA25
+            - cell "Sep 1, 2025" [ref=e121]:
+              - generic [ref=e123]: Sep 1, 2025
+            - cell "Dec 15, 2025" [ref=e124]:
+              - generic [ref=e126]: Dec 15, 2025
+            - cell "15 weeks" [ref=e127]:
+              - generic [ref=e129]:
+                - img [ref=e130]
+                - generic [ref=e133]: 15 weeks
+            - cell "Completed" [ref=e134]:
+              - generic [ref=e136]: Completed
+            - cell "Edit Timeline Set as Current" [ref=e138]:
+              - generic [ref=e139]:
+                - button "Edit Timeline" [ref=e140] [cursor=pointer]:
+                  - img [ref=e141]
+                  - text: Edit Timeline
+                - button "Set as Current" [ref=e144] [cursor=pointer]:
+                  - img [ref=e145]
+                  - text: Set as Current
+          - row "Spring 2026 SP26 Jan 12, 2026 May 10, 2026 16 weeks Completed Edit Timeline Set as Current" [ref=e147]:
+            - cell "Spring 2026 SP26" [ref=e148]:
+              - generic [ref=e149]:
+                - img [ref=e151]
+                - generic [ref=e153]:
+                  - generic [ref=e154]: Spring 2026
+                  - generic [ref=e156]: SP26
+            - cell "Jan 12, 2026" [ref=e157]:
+              - generic [ref=e159]: Jan 12, 2026
+            - cell "May 10, 2026" [ref=e160]:
+              - generic [ref=e162]: May 10, 2026
+            - cell "16 weeks" [ref=e163]:
+              - generic [ref=e165]:
+                - img [ref=e166]
+                - generic [ref=e169]: 16 weeks
+            - cell "Completed" [ref=e170]:
+              - generic [ref=e172]: Completed
+            - cell "Edit Timeline Set as Current" [ref=e174]:
+              - generic [ref=e175]:
+                - button "Edit Timeline" [ref=e176] [cursor=pointer]:
+                  - img [ref=e177]
+                  - text: Edit Timeline
+                - button "Set as Current" [ref=e180] [cursor=pointer]:
+                  - img [ref=e181]
+                  - text: Set as Current
+          - row "Summer 2026 SU26 May 25, 2026 Aug 30, 2026 14 weeks Current Edit Timeline Active" [ref=e183]:
+            - cell "Summer 2026 SU26" [ref=e184]:
+              - generic [ref=e185]:
+                - img [ref=e187]
+                - generic [ref=e189]:
+                  - generic [ref=e190]: Summer 2026
+                  - generic [ref=e192]: SU26
+            - cell "May 25, 2026" [ref=e193]:
+              - generic [ref=e195]: May 25, 2026
+            - cell "Aug 30, 2026" [ref=e196]:
+              - generic [ref=e198]: Aug 30, 2026
+            - cell "14 weeks" [ref=e199]:
+              - generic [ref=e201]:
+                - img [ref=e202]
+                - generic [ref=e205]: 14 weeks
+            - cell "Current" [ref=e206]:
+              - generic [ref=e208]: Current
+            - cell "Edit Timeline Active" [ref=e210]:
+              - generic [ref=e211]:
+                - button "Edit Timeline" [ref=e212] [cursor=pointer]:
+                  - img [ref=e213]
+                  - text: Edit Timeline
+                - generic [ref=e216]:
+                  - img [ref=e217]
+                  - text: Active
+          - row "Fall 2026 FA26 Sep 7, 2026 Dec 20, 2026 15 weeks Upcoming Edit Timeline Set as Current" [ref=e219]:
+            - cell "Fall 2026 FA26" [ref=e220]:
+              - generic [ref=e221]:
+                - img [ref=e223]
+                - generic [ref=e225]:
+                  - generic [ref=e226]: Fall 2026
+                  - generic [ref=e228]: FA26
+            - cell "Sep 7, 2026" [ref=e229]:
+              - generic [ref=e231]: Sep 7, 2026
+            - cell "Dec 20, 2026" [ref=e232]:
+              - generic [ref=e234]: Dec 20, 2026
+            - cell "15 weeks" [ref=e235]:
+              - generic [ref=e237]:
+                - img [ref=e238]
+                - generic [ref=e241]: 15 weeks
+            - cell "Upcoming" [ref=e242]:
+              - generic [ref=e244]: Upcoming
+            - cell "Edit Timeline Set as Current" [ref=e246]:
+              - generic [ref=e247]:
+                - button "Edit Timeline" [ref=e248] [cursor=pointer]:
+                  - img [ref=e249]
+                  - text: Edit Timeline
+                - button "Set as Current" [ref=e252] [cursor=pointer]:
+                  - img [ref=e253]
+                  - text: Set as Current

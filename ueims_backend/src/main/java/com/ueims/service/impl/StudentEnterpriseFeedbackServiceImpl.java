@@ -55,14 +55,14 @@ public class StudentEnterpriseFeedbackServiceImpl implements StudentEnterpriseFe
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
-        // BR-53: Single Feedback Per Semester
+        // Constraint: Single Feedback Per Semester
         boolean exists = repository.existsByStudent_UserIdAndEnterprise_EnterpriseIdAndSemester_SemesterId(
                 currentUser.getUserId(), entity.getEnterprise().getEnterpriseId(), entity.getSemester().getSemesterId());
         if (exists) {
             throw new AppException(ErrorCode.FEEDBACK_DUPLICATE);
         }
 
-        // BR-55: Feedback Rating Scale 1-5
+        // Constraint: Feedback Rating Scale 1-5
         if (isInvalidScore(entity.getTrainingQualityScore()) ||
             isInvalidScore(entity.getSupervisorSupportScore()) ||
             isInvalidScore(entity.getWorkEnvironmentScore()) ||

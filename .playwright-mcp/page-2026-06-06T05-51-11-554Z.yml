@@ -1,0 +1,265 @@
+- generic [ref=e4]:
+  - generic [ref=e6]:
+    - generic [ref=e7]: UEIMS
+    - generic [ref=e8]:
+      - generic [ref=e9] [cursor=pointer]:
+        - img "bar-chart" [ref=e11]:
+          - img [ref=e12]
+        - generic [ref=e14]: Dashboard
+      - generic [ref=e15] [cursor=pointer]:
+        - img "bank" [ref=e17]:
+          - img [ref=e18]
+        - generic [ref=e20]: Enterprise
+      - generic [ref=e21] [cursor=pointer]:
+        - img "team" [ref=e23]:
+          - img [ref=e24]
+        - generic [ref=e26]: Students
+      - generic [ref=e27] [cursor=pointer]:
+        - img "file-protect" [ref=e29]:
+          - img [ref=e30]
+        - generic [ref=e32]: OJT
+      - generic [ref=e33] [cursor=pointer]:
+        - img "trophy" [ref=e35]:
+          - img [ref=e36]
+        - generic [ref=e38]: Stats
+      - generic [ref=e39] [cursor=pointer]:
+        - img "alert" [ref=e41]:
+          - img [ref=e42]
+        - generic [ref=e44]: Incidents
+      - generic [ref=e45] [cursor=pointer]:
+        - img "file-text" [ref=e47]:
+          - img [ref=e48]
+        - generic [ref=e50]: Reports
+      - generic [ref=e51] [cursor=pointer]:
+        - img "calendar" [ref=e53]:
+          - img [ref=e54]
+        - generic [ref=e56]: Semester
+      - generic [ref=e57] [cursor=pointer]:
+        - img "bell" [ref=e59]:
+          - img [ref=e60]
+        - generic [ref=e62]: Notices
+  - generic [ref=e64]:
+    - img "bell" [ref=e67] [cursor=pointer]:
+      - img [ref=e68]
+    - generic [ref=e72] [cursor=pointer]:
+      - generic [ref=e73]: Te
+      - generic [ref=e74]:
+        - generic [ref=e75]: Tester
+        - generic [ref=e76]: kingdn522005@gmail.com
+  - generic [ref=e78]:
+    - generic [ref=e79]:
+      - heading "Student Management" [level=2] [ref=e80]
+      - paragraph [ref=e81]: Manage and track all students across academic semesters
+    - generic [ref=e82]:
+      - generic [ref=e83]:
+        - img [ref=e85]
+        - generic [ref=e90]:
+          - generic [ref=e91]: "11"
+          - generic [ref=e92]: Total Students
+      - generic [ref=e93]:
+        - img [ref=e95]
+        - generic [ref=e99]:
+          - generic [ref=e100]: "3"
+          - generic [ref=e101]: Eligible Students
+    - generic [ref=e102]:
+      - generic [ref=e103]:
+        - img [ref=e105]
+        - textbox "Search by Name or Student ID..." [ref=e108]
+      - generic [ref=e110] [cursor=pointer]:
+        - generic [ref=e112]:
+          - combobox [ref=e114]
+          - generic "All Majors" [ref=e115]
+        - generic:
+          - img:
+            - img
+      - generic [ref=e116] [cursor=pointer]:
+        - generic [ref=e118]:
+          - combobox [ref=e120]
+          - generic "All Academic Sem" [ref=e121]
+        - generic:
+          - img:
+            - img
+      - generic [ref=e122]:
+        - button "Import" [ref=e123] [cursor=pointer]:
+          - img [ref=e124]
+          - text: Import
+        - button "Export" [ref=e127] [cursor=pointer]:
+          - img [ref=e128]
+          - text: Export
+    - generic [ref=e134]:
+      - table [ref=e138]:
+        - rowgroup [ref=e147]:
+          - row "Student ID Full Name Major Sem. GPA OJT Status" [ref=e148]:
+            - columnheader "Student ID" [ref=e149]
+            - columnheader "Full Name" [ref=e150]
+            - columnheader "Major" [ref=e151]
+            - columnheader "Sem." [ref=e152]
+            - columnheader "GPA" [ref=e153]
+            - columnheader "OJT Status" [ref=e154]
+            - columnheader [ref=e155]
+        - rowgroup [ref=e156]:
+          - row "CS240001 Nguyễn Văn An Computer Science Sem. 2 3.85 Pre-Registration" [ref=e157]:
+            - cell "CS240001" [ref=e158]
+            - cell "Nguyễn Văn An" [ref=e159]
+            - cell "Computer Science" [ref=e160]
+            - cell "Sem. 2" [ref=e161]:
+              - generic [ref=e162]: Sem. 2
+            - cell "3.85" [ref=e163]
+            - cell "Pre-Registration" [ref=e164]:
+              - generic [ref=e165]: Pre-Registration
+            - cell [ref=e167]:
+              - generic [ref=e168]:
+                - button "View Details" [ref=e169] [cursor=pointer]:
+                  - img [ref=e170]
+                - button "Edit" [ref=e173] [cursor=pointer]:
+                  - img [ref=e174]
+          - row "SE240003 Trần Thị Bình Software Engineering Sem. 4 2.45 Pre-Registration" [ref=e176]:
+            - cell "SE240003" [ref=e177]
+            - cell "Trần Thị Bình" [ref=e178]
+            - cell "Software Engineering" [ref=e179]
+            - cell "Sem. 4" [ref=e180]:
+              - generic [ref=e181]: Sem. 4
+            - cell "2.45" [ref=e182]
+            - cell "Pre-Registration" [ref=e183]:
+              - generic [ref=e184]: Pre-Registration
+            - cell [ref=e186]:
+              - generic [ref=e187]:
+                - button "View Details" [ref=e188] [cursor=pointer]:
+                  - img [ref=e189]
+                - button "Edit" [ref=e192] [cursor=pointer]:
+                  - img [ref=e193]
+          - row "IA240005 Lê Văn Cường Information Assurance Sem. 4 3.21 Pre-Registration" [ref=e195]:
+            - cell "IA240005" [ref=e196]
+            - cell "Lê Văn Cường" [ref=e197]
+            - cell "Information Assurance" [ref=e198]
+            - cell "Sem. 4" [ref=e199]:
+              - generic [ref=e200]: Sem. 4
+            - cell "3.21" [ref=e201]
+            - cell "Pre-Registration" [ref=e202]:
+              - generic [ref=e203]: Pre-Registration
+            - cell [ref=e205]:
+              - generic [ref=e206]:
+                - button "View Details" [ref=e207] [cursor=pointer]:
+                  - img [ref=e208]
+                - button "Edit" [ref=e211] [cursor=pointer]:
+                  - img [ref=e212]
+          - row "SE230007 Phạm Thị Dung Software Engineering Sem. 5 3.67 Eligible" [ref=e214]:
+            - cell "SE230007" [ref=e215]
+            - cell "Phạm Thị Dung" [ref=e216]
+            - cell "Software Engineering" [ref=e217]
+            - cell "Sem. 5" [ref=e218]:
+              - generic [ref=e219]: Sem. 5
+            - cell "3.67" [ref=e220]
+            - cell "Eligible" [ref=e221]:
+              - generic [ref=e222]: Eligible
+            - cell [ref=e224]:
+              - generic [ref=e225]:
+                - button "View Details" [ref=e226] [cursor=pointer]:
+                  - img [ref=e227]
+                - button "Edit" [ref=e230] [cursor=pointer]:
+                  - img [ref=e231]
+          - row "AI230009 Hoàng Văn Em Artificial Intelligence Sem. 5 3.42 Eligible" [ref=e233]:
+            - cell "AI230009" [ref=e234]
+            - cell "Hoàng Văn Em" [ref=e235]
+            - cell "Artificial Intelligence" [ref=e236]
+            - cell "Sem. 5" [ref=e237]:
+              - generic [ref=e238]: Sem. 5
+            - cell "3.42" [ref=e239]
+            - cell "Eligible" [ref=e240]:
+              - generic [ref=e241]: Eligible
+            - cell [ref=e243]:
+              - generic [ref=e244]:
+                - button "View Details" [ref=e245] [cursor=pointer]:
+                  - img [ref=e246]
+                - button "Edit" [ref=e249] [cursor=pointer]:
+                  - img [ref=e250]
+          - row "CS230011 Vũ Thị Hoa Computer Science Sem. 5 3.12 Eligible" [ref=e252]:
+            - cell "CS230011" [ref=e253]
+            - cell "Vũ Thị Hoa" [ref=e254]
+            - cell "Computer Science" [ref=e255]
+            - cell "Sem. 5" [ref=e256]:
+              - generic [ref=e257]: Sem. 5
+            - cell "3.12" [ref=e258]
+            - cell "Eligible" [ref=e259]:
+              - generic [ref=e260]: Eligible
+            - cell [ref=e262]:
+              - generic [ref=e263]:
+                - button "View Details" [ref=e264] [cursor=pointer]:
+                  - img [ref=e265]
+                - button "Edit" [ref=e268] [cursor=pointer]:
+                  - img [ref=e269]
+          - row "CS220011 Đỗ Thị Phương Computer Science Sem. 6 3.91 In OJT" [ref=e271]:
+            - cell "CS220011" [ref=e272]
+            - cell "Đỗ Thị Phương" [ref=e273]
+            - cell "Computer Science" [ref=e274]
+            - cell "Sem. 6" [ref=e275]:
+              - generic [ref=e276]: Sem. 6
+            - cell "3.91" [ref=e277]
+            - cell "In OJT" [ref=e278]:
+              - generic [ref=e279]: In OJT
+            - cell [ref=e281]:
+              - generic [ref=e282]:
+                - button "View Details" [ref=e283] [cursor=pointer]:
+                  - img [ref=e284]
+                - button "Edit" [ref=e287] [cursor=pointer]:
+                  - img [ref=e288]
+          - row "SE220013 Bùi Văn Giang Software Engineering Sem. 6 2.88 In OJT" [ref=e290]:
+            - cell "SE220013" [ref=e291]
+            - cell "Bùi Văn Giang" [ref=e292]
+            - cell "Software Engineering" [ref=e293]
+            - cell "Sem. 6" [ref=e294]:
+              - generic [ref=e295]: Sem. 6
+            - cell "2.88" [ref=e296]
+            - cell "In OJT" [ref=e297]:
+              - generic [ref=e298]: In OJT
+            - cell [ref=e300]:
+              - generic [ref=e301]:
+                - button "View Details" [ref=e302] [cursor=pointer]:
+                  - img [ref=e303]
+                - button "Edit" [ref=e306] [cursor=pointer]:
+                  - img [ref=e307]
+          - row "IA220015 Ngô Thị Hương Information Assurance Sem. 6 3.15 In OJT" [ref=e309]:
+            - cell "IA220015" [ref=e310]
+            - cell "Ngô Thị Hương" [ref=e311]
+            - cell "Information Assurance" [ref=e312]
+            - cell "Sem. 6" [ref=e313]:
+              - generic [ref=e314]: Sem. 6
+            - cell "3.15" [ref=e315]
+            - cell "In OJT" [ref=e316]:
+              - generic [ref=e317]: In OJT
+            - cell [ref=e319]:
+              - generic [ref=e320]:
+                - button "View Details" [ref=e321] [cursor=pointer]:
+                  - img [ref=e322]
+                - button "Edit" [ref=e325] [cursor=pointer]:
+                  - img [ref=e326]
+          - row "AI210017 Vũ Văn Hùng Artificial Intelligence Sem. 7 3.78 Completed" [ref=e328]:
+            - cell "AI210017" [ref=e329]
+            - cell "Vũ Văn Hùng" [ref=e330]
+            - cell "Artificial Intelligence" [ref=e331]
+            - cell "Sem. 7" [ref=e332]:
+              - generic [ref=e333]: Sem. 7
+            - cell "3.78" [ref=e334]
+            - cell "Completed" [ref=e335]:
+              - generic [ref=e336]: Completed
+            - cell [ref=e338]:
+              - generic [ref=e339]:
+                - button "View Details" [ref=e340] [cursor=pointer]:
+                  - img [ref=e341]
+                - button "Edit" [ref=e344] [cursor=pointer]:
+                  - img [ref=e345]
+      - list [ref=e347]:
+        - listitem [ref=e348]:
+          - generic [ref=e349]: Showing 1-10 of 11 students
+        - listitem "Previous Page" [ref=e350]:
+          - button "left" [disabled] [ref=e351]:
+            - img "left" [ref=e352]:
+              - img [ref=e353]
+        - listitem "1" [ref=e355] [cursor=pointer]:
+          - generic [ref=e356]: "1"
+        - listitem "2" [ref=e357] [cursor=pointer]:
+          - generic [ref=e358]: "2"
+        - listitem "Next Page" [ref=e359] [cursor=pointer]:
+          - button "right" [ref=e360]:
+            - img "right" [ref=e361]:
+              - img [ref=e362]

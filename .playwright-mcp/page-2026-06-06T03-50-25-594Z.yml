@@ -1,0 +1,208 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e4]:
+    - generic [ref=e6]:
+      - generic [ref=e7]: UEIMS
+      - generic [ref=e8]:
+        - generic [ref=e9] [cursor=pointer]:
+          - img "bar-chart" [ref=e11]:
+            - img [ref=e12]
+          - generic [ref=e14]: Dashboard
+        - generic [ref=e15] [cursor=pointer]:
+          - img "bank" [ref=e17]:
+            - img [ref=e18]
+          - generic [ref=e20]: Enterprise
+        - generic [ref=e21] [cursor=pointer]:
+          - img "team" [ref=e23]:
+            - img [ref=e24]
+          - generic [ref=e26]: Students
+        - generic [ref=e27] [cursor=pointer]:
+          - img "file-protect" [ref=e29]:
+            - img [ref=e30]
+          - generic [ref=e32]: OJT
+        - generic [ref=e33] [cursor=pointer]:
+          - img "trophy" [ref=e35]:
+            - img [ref=e36]
+          - generic [ref=e38]: Stats
+        - generic [ref=e39] [cursor=pointer]:
+          - img "alert" [ref=e41]:
+            - img [ref=e42]
+          - generic [ref=e44]: Incidents
+        - generic [ref=e45] [cursor=pointer]:
+          - img "file-text" [ref=e47]:
+            - img [ref=e48]
+          - generic [ref=e50]: Reports
+        - generic [ref=e51] [cursor=pointer]:
+          - img "file-text" [ref=e53]:
+            - img [ref=e54]
+          - generic [ref=e56]: Weekly Reports
+        - generic [ref=e57] [cursor=pointer]:
+          - img "calendar" [ref=e59]:
+            - img [ref=e60]
+          - generic [ref=e62]: Semester
+        - generic [ref=e63] [cursor=pointer]:
+          - img "bell" [ref=e65]:
+            - img [ref=e66]
+          - generic [ref=e68]: Notices
+    - generic [ref=e70]:
+      - img "bell" [ref=e73] [cursor=pointer]:
+        - img [ref=e74]
+      - generic [ref=e78] [cursor=pointer]:
+        - generic [ref=e79]: Te
+        - generic [ref=e80]:
+          - generic [ref=e81]: Tester
+          - generic [ref=e82]: kingdn522005@gmail.com
+    - generic [ref=e84]:
+      - generic [ref=e85]:
+        - heading "Weekly Reports" [level=2] [ref=e86]
+        - paragraph [ref=e87]: Triage, review, and approve student weekly OJT reports
+      - generic [ref=e88]:
+        - generic [ref=e89]:
+          - generic [ref=e90]:
+            - img [ref=e91]
+            - generic [ref=e93]: Filters
+          - generic [ref=e94]:
+            - generic [ref=e95]: Week
+            - generic [ref=e96]:
+              - button "All Weeks" [ref=e97] [cursor=pointer]
+              - button "Week 1 — Jun 2–8, 2026" [ref=e98] [cursor=pointer]
+              - button "Week 2 — Jun 9–15, 2026" [ref=e99] [cursor=pointer]
+              - button "Week 3 — Jun 16–22, 2026" [ref=e100] [cursor=pointer]
+          - generic [ref=e101]:
+            - generic [ref=e102]: Status
+            - generic [ref=e103]:
+              - button "All Statuses 6" [ref=e104] [cursor=pointer]:
+                - generic [ref=e105]: All Statuses
+                - generic [ref=e106]: "6"
+              - button "Pending 3" [ref=e281] [cursor=pointer]:
+                - generic [ref=e108]: Pending
+                - generic [ref=e109]: "3"
+              - button "Approved 2" [ref=e282] [cursor=pointer]:
+                - generic [ref=e111]: Approved
+                - generic [ref=e112]: "2"
+              - button "Rejected 1" [ref=e113] [cursor=pointer]:
+                - generic [ref=e114]: Rejected
+                - generic [ref=e115]: "1"
+        - generic [ref=e116]:
+          - generic [ref=e117]:
+            - generic [ref=e118]:
+              - checkbox [ref=e121] [cursor=pointer]
+              - generic [ref=e123]: 6 Reports
+            - button "Approve All (0)" [disabled]:
+              - img
+              - text: Approve All (0)
+          - generic [ref=e124]:
+            - generic [ref=e125]:
+              - checkbox [ref=e128] [cursor=pointer]
+              - generic [ref=e130]:
+                - generic [ref=e131]:
+                  - img [ref=e132]
+                  - generic [ref=e135]: Le Van C
+                  - generic [ref=e136]: SE161234
+                  - generic [ref=e137]: ·
+                  - generic [ref=e138]: FPT Software
+                  - generic [ref=e139]: ·
+                  - generic [ref=e140]: 40h
+                - generic [ref=e141]: Week 1 — Jun 2–8, 2026
+                - generic [ref=e142]: Completed onboarding modules, set up development environment, and attended team standup meetings. Shadowed senior developer on API integration tasks.
+                - generic [ref=e143]: Submitted Jun 8, 05:30 PM
+              - generic [ref=e145]:
+                - img [ref=e283]
+                - text: Approved
+            - generic [ref=e151]:
+              - checkbox [ref=e154] [cursor=pointer]
+              - generic [ref=e156]:
+                - generic [ref=e157]:
+                  - img [ref=e158]
+                  - generic [ref=e161]: Tran Thi B
+                  - generic [ref=e162]: SE162345
+                  - generic [ref=e163]: ·
+                  - generic [ref=e164]: VinBigData
+                  - generic [ref=e165]: ·
+                  - generic [ref=e166]: 38h
+                - generic [ref=e167]: Week 1 — Jun 2–8, 2026
+                - generic [ref=e168]: Worked on data pipeline scripts using Python and Spark. Participated in sprint planning and completed first data quality check assignment.
+                - generic [ref=e169]: Submitted Jun 8, 06:15 PM
+              - generic [ref=e170]:
+                - generic [ref=e171]:
+                  - img [ref=e172]
+                  - text: Pending
+                - button "Approve" [ref=e175] [cursor=pointer]
+                - button "Reject" [ref=e176] [cursor=pointer]
+            - generic [ref=e177]:
+              - checkbox [ref=e180] [cursor=pointer]
+              - generic [ref=e182]:
+                - generic [ref=e183]:
+                  - img [ref=e184]
+                  - generic [ref=e187]: Pham Van D
+                  - generic [ref=e188]: IA161789
+                  - generic [ref=e189]: ·
+                  - generic [ref=e190]: Viettel Solutions
+                  - generic [ref=e191]: ·
+                  - generic [ref=e192]: 42h
+                - generic [ref=e193]: Week 2 — Jun 9–15, 2026
+                - generic [ref=e194]: Assisted with network security audit tasks. Documented firewall rule configurations and participated in vulnerability assessment workshop.
+                - generic [ref=e195]: Submitted Jun 15, 04:00 PM
+              - generic [ref=e197]:
+                - img [ref=e198]
+                - text: Approved
+            - generic [ref=e201]:
+              - checkbox [ref=e204] [cursor=pointer]
+              - generic [ref=e206]:
+                - generic [ref=e207]:
+                  - img [ref=e208]
+                  - generic [ref=e211]: Nguyen Thi E
+                  - generic [ref=e212]: AI162001
+                  - generic [ref=e213]: ·
+                  - generic [ref=e214]: NashTech VN
+                  - generic [ref=e215]: ·
+                  - generic [ref=e216]: 36h
+                - generic [ref=e217]: Week 2 — Jun 9–15, 2026
+                - generic [ref=e218]: "Completed ML model training pipeline. Report was rejected: missing training logs attachment and unclear methodology description."
+                - generic [ref=e219]: Submitted Jun 15, 02:30 PM
+              - generic [ref=e221]:
+                - img [ref=e222]
+                - text: Rejected
+            - generic [ref=e224]:
+              - checkbox [ref=e227] [cursor=pointer]
+              - generic [ref=e229]:
+                - generic [ref=e230]:
+                  - img [ref=e231]
+                  - generic [ref=e234]: Hoang Van F
+                  - generic [ref=e235]: SE163111
+                  - generic [ref=e236]: ·
+                  - generic [ref=e237]: FPT Software
+                  - generic [ref=e238]: ·
+                  - generic [ref=e239]: 44h
+                - generic [ref=e240]: Week 3 — Jun 16–22, 2026
+                - generic [ref=e241]: Contributed to frontend feature development using React. Completed PR for user dashboard module with full unit test coverage.
+                - generic [ref=e242]: Submitted Jun 22, 07:00 PM
+              - generic [ref=e243]:
+                - generic [ref=e244]:
+                  - img [ref=e245]
+                  - text: Pending
+                - button "Approve" [ref=e248] [cursor=pointer]
+                - button "Reject" [ref=e249] [cursor=pointer]
+            - generic [ref=e250]:
+              - checkbox [ref=e253] [cursor=pointer]
+              - generic [ref=e255]:
+                - generic [ref=e256]:
+                  - img [ref=e257]
+                  - generic [ref=e260]: Dao Thi G
+                  - generic [ref=e261]: GD162222
+                  - generic [ref=e262]: ·
+                  - generic [ref=e263]: VNG
+                  - generic [ref=e264]: ·
+                  - generic [ref=e265]: 40h
+                - generic [ref=e266]: Week 3 — Jun 16–22, 2026
+                - generic [ref=e267]: Designed marketing assets for product launch campaign. Created 5 social media banners and 2 illustrated infographics.
+                - generic [ref=e268]: Submitted Jun 22, 05:45 PM
+              - generic [ref=e269]:
+                - generic [ref=e270]:
+                  - img [ref=e271]
+                  - text: Pending
+                - button "Approve" [ref=e274] [cursor=pointer]
+                - button "Reject" [ref=e275] [cursor=pointer]
+  - generic [ref=e287]:
+    - img "check-circle" [ref=e288]:
+      - img [ref=e289]
+    - generic [ref=e291]: Report approved.

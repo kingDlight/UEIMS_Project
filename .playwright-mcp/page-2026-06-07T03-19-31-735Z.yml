@@ -1,0 +1,207 @@
+- generic [ref=e4]:
+  - generic [ref=e6]:
+    - generic [ref=e7]: UEIMS
+    - generic [ref=e8]:
+      - generic [ref=e9] [cursor=pointer]:
+        - img "bar-chart" [ref=e11]:
+          - img [ref=e12]
+        - generic [ref=e14]: Dashboard
+      - generic [ref=e15] [cursor=pointer]:
+        - img "bank" [ref=e17]:
+          - img [ref=e18]
+        - generic [ref=e20]: Enterprise
+      - generic [ref=e21] [cursor=pointer]:
+        - img "team" [ref=e23]:
+          - img [ref=e24]
+        - generic [ref=e26]: Students
+      - generic [ref=e27] [cursor=pointer]:
+        - img "file-protect" [ref=e29]:
+          - img [ref=e30]
+        - generic [ref=e32]: OJT
+      - generic [ref=e33] [cursor=pointer]:
+        - img "trophy" [ref=e35]:
+          - img [ref=e36]
+        - generic [ref=e38]: Stats
+      - generic [ref=e39] [cursor=pointer]:
+        - img "alert" [ref=e41]:
+          - img [ref=e42]
+        - generic [ref=e44]: Incidents
+      - generic [ref=e45] [cursor=pointer]:
+        - img "file-text" [ref=e47]:
+          - img [ref=e48]
+        - generic [ref=e50]: Reports
+      - generic [ref=e51] [cursor=pointer]:
+        - img "down" [ref=e53]:
+          - img [ref=e54]
+        - generic [ref=e56]: More
+  - generic [ref=e58]:
+    - img "bell" [ref=e61] [cursor=pointer]:
+      - img [ref=e62]
+    - generic [ref=e66] [cursor=pointer]:
+      - generic [ref=e67]: Te
+      - generic [ref=e68]:
+        - generic [ref=e69]: Tester
+        - generic [ref=e70]: kingdn522005@gmail.com
+  - generic [ref=e72]:
+    - generic [ref=e73]:
+      - heading "Announcements" [level=1] [ref=e74]
+      - paragraph [ref=e75]: Broadcast official school-wide notices to enterprises and students
+    - generic [ref=e76]:
+      - generic [ref=e77]:
+        - generic [ref=e78]:
+          - generic [ref=e79]:
+            - generic [ref=e80]: "Target Audience:"
+            - generic [ref=e81] [cursor=pointer]:
+              - generic [ref=e83]:
+                - combobox [ref=e85]
+                - generic "All Audiences" [ref=e86]
+              - generic:
+                - img:
+                  - img
+          - generic [ref=e87]:
+            - generic [ref=e88]: "Status:"
+            - generic [ref=e89] [cursor=pointer]:
+              - generic [ref=e91]:
+                - combobox [ref=e93]
+                - generic "All Statuses" [ref=e94]
+              - generic:
+                - img:
+                  - img
+          - generic [ref=e95]: 5 notices
+        - button "Create Announcement" [ref=e96] [cursor=pointer]:
+          - img [ref=e97]
+          - text: Create Announcement
+      - table [ref=e104]:
+        - rowgroup [ref=e111]:
+          - row "Title Audience Status Published Date Actions" [ref=e112]:
+            - columnheader "Title" [ref=e113]:
+              - generic [ref=e114]: Title
+            - columnheader "Audience" [ref=e115]:
+              - generic [ref=e116]: Audience
+            - columnheader "Status" [ref=e117]:
+              - generic [ref=e118]: Status
+            - columnheader "Published Date" [ref=e119]:
+              - generic [ref=e120]: Published Date
+            - columnheader "Actions" [ref=e121]:
+              - generic [ref=e122]: Actions
+        - rowgroup [ref=e123]:
+          - generic: Title
+          - generic: Audience
+          - generic: Status
+          - generic: Published Date
+          - generic: Actions
+          - row "OJT Registration Deadline Extended The OJT registration deadline has been extended to June… Students Published May 28, 2026 Unpublish View" [ref=e124]:
+            - cell "OJT Registration Deadline Extended The OJT registration deadline has been extended to June…" [ref=e125]:
+              - generic [ref=e126]:
+                - img [ref=e128]
+                - generic [ref=e131]:
+                  - generic [ref=e132]: OJT Registration Deadline Extended
+                  - generic [ref=e133]: The OJT registration deadline has been extended to June…
+            - cell "Students" [ref=e134]:
+              - generic [ref=e136]:
+                - img [ref=e137]
+                - text: Students
+            - cell "Published" [ref=e140]:
+              - generic [ref=e142]: Published
+            - cell "May 28, 2026" [ref=e144]:
+              - generic [ref=e146]: May 28, 2026
+            - cell "Unpublish View" [ref=e147]:
+              - generic [ref=e148]:
+                - button "Unpublish" [ref=e149] [cursor=pointer]:
+                  - img [ref=e150]
+                  - text: Unpublish
+                - button "View" [ref=e154] [cursor=pointer]:
+                  - img [ref=e155]
+                  - text: View
+          - row "Summer 2026 OJT Kickoff Briefing All students enrolled in Summer 2026 OJT must attend th… Summer 2026 Published May 20, 2026 Unpublish View" [ref=e158]:
+            - cell "Summer 2026 OJT Kickoff Briefing All students enrolled in Summer 2026 OJT must attend th…" [ref=e159]:
+              - generic [ref=e160]:
+                - img [ref=e162]
+                - generic [ref=e165]:
+                  - generic [ref=e166]: Summer 2026 OJT Kickoff Briefing
+                  - generic [ref=e167]: All students enrolled in Summer 2026 OJT must attend th…
+            - cell "Summer 2026" [ref=e168]:
+              - generic [ref=e170]:
+                - img [ref=e171]
+                - text: Summer 2026
+            - cell "Published" [ref=e174]:
+              - generic [ref=e176]: Published
+            - cell "May 20, 2026" [ref=e178]:
+              - generic [ref=e180]: May 20, 2026
+            - cell "Unpublish View" [ref=e181]:
+              - generic [ref=e182]:
+                - button "Unpublish" [ref=e183] [cursor=pointer]:
+                  - img [ref=e184]
+                  - text: Unpublish
+                - button "View" [ref=e188] [cursor=pointer]:
+                  - img [ref=e189]
+                  - text: View
+          - row "Enterprise Partnership Program Update New enterprises have joined the partnership program for… Enterprise Published May 15, 2026 Unpublish View" [ref=e192]:
+            - cell "Enterprise Partnership Program Update New enterprises have joined the partnership program for…" [ref=e193]:
+              - generic [ref=e194]:
+                - img [ref=e196]
+                - generic [ref=e199]:
+                  - generic [ref=e200]: Enterprise Partnership Program Update
+                  - generic [ref=e201]: New enterprises have joined the partnership program for…
+            - cell "Enterprise" [ref=e202]:
+              - generic [ref=e204]:
+                - img [ref=e205]
+                - text: Enterprise
+            - cell "Published" [ref=e208]:
+              - generic [ref=e210]: Published
+            - cell "May 15, 2026" [ref=e212]:
+              - generic [ref=e214]: May 15, 2026
+            - cell "Unpublish View" [ref=e215]:
+              - generic [ref=e216]:
+                - button "Unpublish" [ref=e217] [cursor=pointer]:
+                  - img [ref=e218]
+                  - text: Unpublish
+                - button "View" [ref=e222] [cursor=pointer]:
+                  - img [ref=e223]
+                  - text: View
+          - row "OJT Midterm Report Submission Guidelines Detailed guidelines for midterm report submissions have… Summer 2026 Draft Jun 1, 2026 Publish Now Edit" [ref=e226]:
+            - cell "OJT Midterm Report Submission Guidelines Detailed guidelines for midterm report submissions have…" [ref=e227]:
+              - generic [ref=e228]:
+                - img [ref=e230]
+                - generic [ref=e233]:
+                  - generic [ref=e234]: OJT Midterm Report Submission Guidelines
+                  - generic [ref=e235]: Detailed guidelines for midterm report submissions have…
+            - cell "Summer 2026" [ref=e236]:
+              - generic [ref=e238]:
+                - img [ref=e239]
+                - text: Summer 2026
+            - cell "Draft" [ref=e242]:
+              - generic [ref=e244]: Draft
+            - cell "Jun 1, 2026" [ref=e246]:
+              - generic [ref=e248]: Jun 1, 2026
+            - cell "Publish Now Edit" [ref=e249]:
+              - generic [ref=e250]:
+                - button "Publish Now" [ref=e251] [cursor=pointer]:
+                  - img [ref=e252]
+                  - text: Publish Now
+                - button "Edit" [ref=e255] [cursor=pointer]:
+                  - img [ref=e256]
+                  - text: Edit
+          - row "Campus Closure — National Holiday All FPT University campuses will be closed on September… All Users Draft Jun 3, 2026 Publish Now Edit" [ref=e258]:
+            - cell "Campus Closure — National Holiday All FPT University campuses will be closed on September…" [ref=e259]:
+              - generic [ref=e260]:
+                - img [ref=e262]
+                - generic [ref=e265]:
+                  - generic [ref=e266]: Campus Closure — National Holiday
+                  - generic [ref=e267]: All FPT University campuses will be closed on September…
+            - cell "All Users" [ref=e268]:
+              - generic [ref=e270]:
+                - img [ref=e271]
+                - text: All Users
+            - cell "Draft" [ref=e274]:
+              - generic [ref=e276]: Draft
+            - cell "Jun 3, 2026" [ref=e278]:
+              - generic [ref=e280]: Jun 3, 2026
+            - cell "Publish Now Edit" [ref=e281]:
+              - generic [ref=e282]:
+                - button "Publish Now" [ref=e283] [cursor=pointer]:
+                  - img [ref=e284]
+                  - text: Publish Now
+                - button "Edit" [ref=e287] [cursor=pointer]:
+                  - img [ref=e288]
+                  - text: Edit

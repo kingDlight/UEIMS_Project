@@ -1,0 +1,275 @@
+- generic [ref=e439]:
+  - generic [ref=e441]:
+    - generic [ref=e442]: UEIMS
+    - generic [ref=e443]:
+      - generic [ref=e444] [cursor=pointer]:
+        - img "bar-chart" [ref=e446]:
+          - img [ref=e447]
+        - generic [ref=e449]: Dashboard
+      - generic [ref=e450] [cursor=pointer]:
+        - img "bank" [ref=e452]:
+          - img [ref=e453]
+        - generic [ref=e455]: Enterprise
+      - generic [ref=e456] [cursor=pointer]:
+        - img "team" [ref=e458]:
+          - img [ref=e459]
+        - generic [ref=e461]: Students
+      - generic [ref=e462] [cursor=pointer]:
+        - img "file-protect" [ref=e464]:
+          - img [ref=e465]
+        - generic [ref=e467]: OJT
+      - generic [ref=e468] [cursor=pointer]:
+        - img "trophy" [ref=e470]:
+          - img [ref=e471]
+        - generic [ref=e473]: Stats
+      - generic [ref=e474] [cursor=pointer]:
+        - img "alert" [ref=e476]:
+          - img [ref=e477]
+        - generic [ref=e479]: Incidents
+      - generic [ref=e480] [cursor=pointer]:
+        - img "file-text" [ref=e482]:
+          - img [ref=e483]
+        - generic [ref=e485]: Reports
+      - generic [ref=e486] [cursor=pointer]:
+        - img "calendar" [ref=e488]:
+          - img [ref=e489]
+        - generic [ref=e491]: Semester
+      - generic [ref=e492] [cursor=pointer]:
+        - img "bell" [ref=e494]:
+          - img [ref=e495]
+        - generic [ref=e497]: Notices
+  - generic [ref=e499]:
+    - img "bell" [ref=e502] [cursor=pointer]:
+      - img [ref=e503]
+    - generic [ref=e507] [cursor=pointer]:
+      - generic [ref=e508]: Te
+      - generic [ref=e509]:
+        - generic [ref=e510]: Tester
+        - generic [ref=e511]: kingdn522005@gmail.com
+  - generic [ref=e576]:
+    - generic [ref=e577]:
+      - generic [ref=e578]:
+        - generic [ref=e579]: SUMMER 2026
+        - generic [ref=e580]: ·
+        - generic [ref=e581]: ACTIVE
+        - generic [ref=e583]: ·
+        - generic [ref=e584]: OJT Day 38 of 56
+      - generic [ref=e585]:
+        - generic [ref=e586]: Semester lock
+        - generic [ref=e587]: 18 days remaining
+    - generic [ref=e589]:
+      - generic [ref=e592]:
+        - generic [ref=e594]:
+          - img [ref=e596]
+          - generic [ref=e598]: Active Incidents
+        - generic [ref=e599]:
+          - generic [ref=e600]: "2"
+          - generic [ref=e601]:
+            - img [ref=e602]
+            - generic [ref=e605]: ↑ +1 today
+        - generic [ref=e607]:
+          - generic [ref=e608]:
+            - generic [ref=e609]:
+              - generic [ref=e611]: Le Van C
+              - generic [ref=e612]: (CS-2410032)
+            - generic [ref=e613]:
+              - generic [ref=e614]: FPT Software
+              - generic [ref=e615]: HIGH
+          - generic [ref=e616]:
+            - generic [ref=e617]:
+              - generic [ref=e619]: Tran Thi B
+              - generic [ref=e620]: (SE-2410045)
+            - generic [ref=e621]:
+              - generic [ref=e622]: VinBigData
+              - generic [ref=e623]: MEDIUM
+        - button "Handle Now" [ref=e626] [cursor=pointer]:
+          - text: Handle Now
+          - img [ref=e627]
+      - generic [ref=e631]:
+        - generic [ref=e633]:
+          - img [ref=e635]
+          - generic [ref=e638]: Pending Approvals
+        - generic [ref=e639]:
+          - generic [ref=e640]: "4"
+          - generic [ref=e641]:
+            - img [ref=e642]
+            - generic [ref=e645]: ↑ +2 today
+        - generic [ref=e647]:
+          - generic [ref=e648]:
+            - generic [ref=e651]: VinBigData
+            - generic [ref=e652]: 2d
+          - generic [ref=e653]:
+            - generic [ref=e656]: FPT Software
+            - generic [ref=e657]: 1d
+          - generic [ref=e658]: +2 more enterprises waiting
+        - button "Review Now" [ref=e661] [cursor=pointer]:
+          - text: Review Now
+          - img [ref=e662]
+    - generic [ref=e664]:
+      - generic [ref=e666]:
+        - generic [ref=e667]:
+          - generic [ref=e668]:
+            - img [ref=e670]
+            - generic [ref=e673]:
+              - generic [ref=e674]: Weekly Reports
+              - generic [ref=e675]: Week 23 · Jun 2–8
+          - generic [ref=e677]: "Deadline: Sun 11:59 PM"
+        - generic [ref=e678]:
+          - generic [ref=e679]:
+            - img [ref=e681]
+            - generic [ref=e684]:
+              - generic [ref=e685]: "3"
+              - generic [ref=e686]: Submitted
+          - generic [ref=e687]:
+            - img [ref=e689]
+            - generic [ref=e692]:
+              - generic [ref=e693]: "2"
+              - generic [ref=e694]: Pending
+          - generic [ref=e695]:
+            - img [ref=e697]
+            - generic [ref=e699]:
+              - generic [ref=e700]: "2"
+              - generic [ref=e701]: Late
+          - generic [ref=e702]:
+            - img [ref=e704]
+            - generic [ref=e706]:
+              - generic [ref=e707]: "0"
+              - generic [ref=e708]: Not Started
+        - generic [ref=e709]:
+          - generic [ref=e710]: Students needing attention
+          - generic [ref=e711]:
+            - generic [ref=e714]: Le Van C
+            - generic [ref=e715]: 3 days overdue
+          - generic [ref=e716]:
+            - generic [ref=e719]: Nguyen Van A
+            - generic [ref=e720]: 2 days overdue
+          - generic [ref=e721]:
+            - generic [ref=e724]: Pham Thi D
+            - generic [ref=e725]: 1 days overdue
+        - generic [ref=e727]:
+          - button "View all reports" [ref=e728] [cursor=pointer]:
+            - text: View all reports
+            - img [ref=e729]
+          - button "Send Warnings (2)" [ref=e731] [cursor=pointer]:
+            - text: Send Warnings (2)
+            - img [ref=e732]
+      - generic [ref=e735]:
+        - generic [ref=e736]:
+          - img [ref=e738]
+          - generic [ref=e741]:
+            - generic [ref=e742]: Placement Pipeline
+            - generic [ref=e743]: Summer 2026
+        - generic [ref=e744]:
+          - generic [ref=e745]:
+            - generic [ref=e746]: "4"
+            - generic [ref=e747]: ELIGIBLE
+          - img [ref=e749]
+          - generic [ref=e751]:
+            - generic [ref=e752]: "0"
+            - generic [ref=e753]: APPLIED
+          - img [ref=e755]
+          - generic [ref=e757]:
+            - generic [ref=e758]: "0"
+            - generic [ref=e759]: INTERVIEWED
+          - img [ref=e761]
+          - generic [ref=e763]:
+            - generic [ref=e764]: "0"
+            - generic [ref=e765]: PLACED
+        - generic [ref=e767]:
+          - img [ref=e768]
+          - generic [ref=e770]:
+            - generic [ref=e771]: No applications yet
+            - generic [ref=e772]: 4 eligible students waiting for positions
+        - button "View Enterprises" [ref=e775] [cursor=pointer]:
+          - text: View Enterprises
+          - img [ref=e776]
+    - generic [ref=e778]:
+      - generic [ref=e779]: Quick Actions
+      - generic [ref=e780]:
+        - generic [ref=e781] [cursor=pointer]:
+          - img [ref=e784]
+          - generic [ref=e787]:
+            - generic [ref=e788]: Import Students
+            - generic [ref=e789]: Upload eligible student list via Excel
+          - img [ref=e791]
+        - generic [ref=e793] [cursor=pointer]:
+          - img [ref=e796]
+          - generic [ref=e800]:
+            - generic [ref=e801]: Review Enterprises
+            - generic [ref=e802]: Approve or reject enterprise registrations
+          - img [ref=e804]
+        - generic [ref=e806] [cursor=pointer]:
+          - img [ref=e809]
+          - generic [ref=e811]:
+            - generic [ref=e812]: Send Reminders
+            - generic [ref=e813]: Send weekly report reminders to students
+          - img [ref=e815]
+        - generic [ref=e817] [cursor=pointer]:
+          - img [ref=e820]
+          - generic [ref=e823]:
+            - generic [ref=e824]: View Reports
+            - generic [ref=e825]: View compliance, grades, and rubrics
+          - img [ref=e827]
+    - generic [ref=e829]:
+      - generic [ref=e831]:
+        - generic [ref=e832]:
+          - img [ref=e834]
+          - generic [ref=e836]:
+            - generic [ref=e837]: Semester Timeline
+            - generic [ref=e838]: Summer 2026 · May 20 – Aug 15
+        - generic [ref=e842]:
+          - generic [ref=e843]:
+            - img [ref=e846]
+            - generic [ref=e849]:
+              - generic [ref=e850]: OJT Start
+              - generic [ref=e851]: May 20
+          - generic [ref=e852]:
+            - img [ref=e855]
+            - generic [ref=e858]:
+              - generic [ref=e859]: Mid-Review
+              - generic [ref=e860]: Jul 1
+          - generic [ref=e861]:
+            - img [ref=e864]
+            - generic [ref=e867]:
+              - generic [ref=e868]: OJT End
+              - generic [ref=e869]: Aug 1
+            - generic [ref=e872]: ← You are here →
+          - generic [ref=e873]:
+            - img [ref=e876]
+            - generic [ref=e878]:
+              - generic [ref=e879]: Grades Due
+              - generic [ref=e880]: Aug 10
+          - generic [ref=e881]:
+            - img [ref=e884]
+            - generic [ref=e886]:
+              - generic [ref=e887]: Lock
+              - generic [ref=e888]: Aug 15
+        - button "Edit timeline" [ref=e891] [cursor=pointer]:
+          - text: Edit timeline
+          - img [ref=e892]
+      - generic [ref=e895]:
+        - generic [ref=e896]:
+          - generic [ref=e897]:
+            - img [ref=e899]
+            - generic [ref=e901]:
+              - generic [ref=e902]: Recent Alerts
+              - generic [ref=e903]: 2 active alerts
+          - generic [ref=e904]: LIVE
+        - generic [ref=e905]:
+          - generic [ref=e906] [cursor=pointer]:
+            - generic [ref=e909]:
+              - generic [ref=e911]: HIGH
+              - generic [ref=e912]: 4 enterprise registrations pending review
+              - generic [ref=e913]: FPT Software, VinBigData, and 2 others registered this week
+            - img [ref=e915]
+          - generic [ref=e917] [cursor=pointer]:
+            - generic [ref=e920]:
+              - generic [ref=e922]: MED
+              - generic [ref=e923]: 2 students at risk of missing OJT deadline
+              - generic [ref=e924]: Le Van C and Nguyen Van A — 3+ days overdue
+            - img [ref=e926]
+        - generic [ref=e929]:
+          - button "See all alerts" [ref=e930] [cursor=pointer]:
+            - text: See all alerts
+            - img [ref=e931]
+          - button "Mark all as read" [ref=e933] [cursor=pointer]
