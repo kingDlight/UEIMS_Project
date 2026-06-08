@@ -23,7 +23,7 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => { throw error; }
 );
 
 let isRefreshing = false;
@@ -49,7 +49,7 @@ api.interceptors.response.use(
 
     // Skip interceptor for auth endpoints to avoid infinite loops
     if (originalRequest.url?.includes('/auth/')) {
-      return Promise.reject(error);
+      throw error;
     }
 
     // Check if the error is 401 and it's not a retry of a failed refresh token request itself
@@ -63,7 +63,7 @@ api.interceptors.response.use(
           originalRequest.headers.Authorization = `Bearer ${token}`;
           return api(originalRequest);
         } catch (err) {
-          return Promise.reject(err);
+          throw err;
         }
       }
 
@@ -98,13 +98,13 @@ api.interceptors.response.use(
         processQueue(refreshError, null);
         useAuthStore.getState().logout();
         // Soft redirect: let React Router handle via ProtectedRoute state change
-        window.dispatchEvent(new CustomEvent('auth:logout'));
-        return Promise.reject(refreshError);
+        globalThis.dispatchEvent(new CustomEvent('auth:logout'));
+        throw refreshError;
       } finally {
         isRefreshing = false;
       }
     }
 
-    return Promise.reject(error);
+    throw error;
   }
 );

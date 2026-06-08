@@ -149,9 +149,9 @@ const MOCK_PLACEMENTS: PlacementRecord[] = [
 // ============================================================
 function hexToRgba(hex: string, alpha: number): string {
   const h = hex.replace('#', '');
-  const r = parseInt(h.substring(0, 2), 16);
-  const g = parseInt(h.substring(2, 4), 16);
-  const b = parseInt(h.substring(4, 6), 16);
+  const r = Number.parseInt(h.substring(0, 2), 16);
+  const g = Number.parseInt(h.substring(2, 4), 16);
+  const b = Number.parseInt(h.substring(4, 6), 16);
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
@@ -188,12 +188,12 @@ const ENTERPRISE_PALETTE = [
 ];
 
 function getEnterpriseColor(name: string) {
-  const idx = name.split('').reduce((a, c) => a + c.charCodeAt(0), 0) % ENTERPRISE_PALETTE.length;
+  const idx = name.split('').reduce((a, c) => a + (c.codePointAt(0) ?? 0), 0) % ENTERPRISE_PALETTE.length;
   return ENTERPRISE_PALETTE[idx];
 }
 
 function getAvatarColor(name: string) {
-  const idx = name.split('').reduce((a, c) => a + c.charCodeAt(0), 0) % AVATAR_PALETTE.length;
+  const idx = name.split('').reduce((a, c) => a + (c.codePointAt(0) ?? 0), 0) % AVATAR_PALETTE.length;
   return AVATAR_PALETTE[idx];
 }
 
@@ -205,9 +205,9 @@ const Avatar: React.FC<{ initials: string; color?: string; bg?: string }> = ({ i
   return (
     <div style={{
       width: 32, height: 32, borderRadius: '50%',
-      background: bg ?? (color ? hexToRgba(color, 0.15) : palette!.bg),
+      background: bg ?? (color ? hexToRgba(color, 0.15) : palette?.bg),
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      color: color ?? (palette!.text),
+      color: color ?? palette?.text,
       fontWeight: 700, fontSize: 11,
       fontFamily: 'Inter, sans-serif', flexShrink: 0,
     }}>

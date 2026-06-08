@@ -94,7 +94,7 @@ const CropAvatarModal = ({
       cancelText="Hủy"
       okButtonProps={{ style: { background: '#ea580c', borderColor: '#ea580c', fontWeight: 600, fontFamily: 'Inter, sans-serif' } }}
       cancelButtonProps={{ style: { fontWeight: 600, fontFamily: 'Inter, sans-serif' } }}
-      bodyStyle={{ padding: '16px 0' }}
+      styles={{ body: { padding: '16px 0' } }}
     >
       <div style={{ position: 'relative', width: '100%', height: 300, background: '#f8fafc', borderRadius: 8, overflow: 'hidden' }}>
         {tempImageUrl && (
@@ -239,6 +239,9 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <div 
                 className="mobile-menu-btn" 
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if(e.key === 'Enter') setDrawerOpen(true); }}
                 onClick={() => setDrawerOpen(true)}
                 style={{ cursor: 'pointer', fontSize: 18, color: '#1e293b' }}
               >
@@ -253,6 +256,9 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
                 return (
                   <div
                     key={item.key}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => { if(e.key === 'Enter') handleNavigate(item.key); }}
                     onClick={() => handleNavigate(item.key)}
                     className={`modern-nav-item ${isActive ? 'active' : 'inactive'}`}
                   >
@@ -300,6 +306,9 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
             
             <div ref={notificationMenuRef} style={{ position: 'relative', zIndex: 1, flex: '0 0 auto' }}>
               <div 
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if(e.key === 'Enter') { setNotificationOpen((prev) => !prev); setAccountOpen(false); } }}
                 onClick={() => { setNotificationOpen((prev) => !prev); setAccountOpen(false); }} 
                 className="modern-bell-icon-wrapper"
               >
@@ -312,6 +321,9 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
             
             <div ref={accountMenuRef} style={{ position: 'relative', zIndex: 1, flex: '1 1 auto' }}>
               <div 
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if(e.key === 'Enter') { setAccountOpen((prev) => !prev); setNotificationOpen(false); } }}
                 onClick={() => { setAccountOpen((prev) => !prev); setNotificationOpen(false); }} 
                 className="modern-account-wrapper"
               >
@@ -343,7 +355,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
               </div>
               <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {floatingNotifications.map((item, index) => (
-                  <div key={index} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 12px', borderRadius: 16, background: 'rgba(255,255,255,.78)', border: '1px solid rgba(233,101,0,.08)', boxShadow: '0 8px 18px rgba(15,23,42,.04)' }}>
+                  <div key={item.title || index} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 12px', borderRadius: 16, background: 'rgba(255,255,255,.78)', border: '1px solid rgba(233,101,0,.08)', boxShadow: '0 8px 18px rgba(15,23,42,.04)' }}>
                     <div style={{ width: 10, height: 10, borderRadius: '50%', background: item.tone, boxShadow: `0 0 0 4px ${item.tone}20`, marginTop: 4 }} />
                     <div style={{ minWidth: 0, flex: 1 }}>
                       <div style={{ fontSize: 13.5, fontWeight: 800, color: '#1e293b' }}>{item.title}</div>
@@ -371,6 +383,16 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
                 {['View Profile', 'Change Password', 'Logout'].map((item) => (
                   <div 
                     key={item} 
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if(e.key === 'Enter') {
+                        setAccountOpen(false);
+                        if (item === 'Logout') handleLogout();
+                        if (item === 'Change Password') navigate('/change-password');
+                        if (item === 'View Profile') setProfileOpen(true);
+                      }
+                    }}
                     onClick={() => {
                       setAccountOpen(false);
                       if (item === 'Logout') handleLogout();
@@ -395,8 +417,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
           onClose={() => setDrawerOpen(false)}
           open={drawerOpen}
           width={280}
-          bodyStyle={{ padding: 0 }}
-          headerStyle={{ borderBottom: '1px solid rgba(233,101,0,.10)' }}
+          styles={{ body: { padding: 0 }, header: { borderBottom: '1px solid rgba(233,101,0,.10)' } }}
         >
           <div style={{ display: 'flex', flexDirection: 'column', padding: '16px 0' }}>
             {filteredNavItems.map((item) => {
@@ -404,6 +425,9 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
               return (
                 <div
                   key={item.key}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if(e.key === 'Enter') handleNavigate(item.key); }}
                   onClick={() => handleNavigate(item.key)}
                   style={{
                     padding: '12px 24px',
@@ -445,7 +469,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
         onCancel={() => setProfileOpen(false)} 
         footer={null} 
         closable={false}
-        bodyStyle={{ padding: 0, borderRadius: 24, overflow: 'hidden' }}
+        styles={{ body: { padding: 0, borderRadius: 24, overflow: 'hidden' } }}
         width={380}
         modalRender={(modal) => (
           <div style={{ borderRadius: 24, overflow: 'hidden', boxShadow: '0 24px 48px -12px rgba(15, 23, 42, 0.15), 0 0 0 1px rgba(15, 23, 42, 0.05)' }}>
@@ -466,7 +490,9 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
               color: '#475569', cursor: 'pointer', transition: 'all 0.2s', border: 'none'
             }}
             onMouseOver={(e) => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.color = '#0f172a'; }}
+            onFocus={(e) => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.color = '#0f172a'; }}
             onMouseOut={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.7)'; e.currentTarget.style.color = '#475569'; }}
+            onBlur={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.7)'; e.currentTarget.style.color = '#475569'; }}
           >
             <X size={14} strokeWidth={3} />
           </button>
@@ -493,7 +519,9 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
                   color: '#475569', transition: 'all 0.2s', padding: 0
                 }}
                 onMouseOver={(e) => { e.currentTarget.style.color = '#ea580c'; e.currentTarget.style.borderColor = '#ea580c'; }}
+                onFocus={(e) => { e.currentTarget.style.color = '#ea580c'; e.currentTarget.style.borderColor = '#ea580c'; }}
                 onMouseOut={(e) => { e.currentTarget.style.color = '#475569'; e.currentTarget.style.borderColor = '#e2e8f0'; }}
+                onBlur={(e) => { e.currentTarget.style.color = '#475569'; e.currentTarget.style.borderColor = '#e2e8f0'; }}
               >
                 <Camera size={12} strokeWidth={2.5} />
               </button>
@@ -528,8 +556,8 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
           {[
             { icon: <Mail size={16} color="#64748b" />, label: 'Email Address', value: myProfile?.email },
             { icon: <Phone size={16} color="#64748b" />, label: 'Phone Number', value: myProfile?.phone || 'Chưa cập nhật' },
-          ].map((item, i) => (
-            <div key={i} style={{ 
+          ].map((item) => (
+            <div key={item.label} style={{ 
               display: 'flex', flexDirection: 'column', gap: 4, padding: '12px 0', borderBottom: '1px solid #f8fafc'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

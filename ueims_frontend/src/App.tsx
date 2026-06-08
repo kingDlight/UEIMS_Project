@@ -12,8 +12,8 @@ function App() {
     const handleLogout = () => {
       router.navigate('/login');
     };
-    window.addEventListener('auth:logout', handleLogout);
-    return () => window.removeEventListener('auth:logout', handleLogout);
+    globalThis.addEventListener('auth:logout', handleLogout);
+    return () => globalThis.removeEventListener('auth:logout', handleLogout);
   }, []);
 
   return (

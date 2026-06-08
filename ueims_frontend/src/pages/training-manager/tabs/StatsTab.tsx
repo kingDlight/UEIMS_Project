@@ -364,8 +364,8 @@ export const StatsTab: React.FC = () => {
                   animationDuration={1200}
                   animationEasing="ease-out"
                 >
-                  {PLACEMENT_DATA.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} stroke="#FFFFFF" strokeWidth={4} />
+                  {PLACEMENT_DATA.map((entry) => (
+                    <Cell key={entry.name} fill={entry.color} stroke="#FFFFFF" strokeWidth={4} />
                   ))}
                 </Pie>
                 <text x="50%" y="43%" textAnchor="middle" dominantBaseline="central" fill={cc.textPrimary} fontSize={28} fontWeight={800} fontFamily="Inter, sans-serif" letterSpacing="-0.03em">
