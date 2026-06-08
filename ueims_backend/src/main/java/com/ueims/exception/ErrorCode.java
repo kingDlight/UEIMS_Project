@@ -94,6 +94,8 @@ public enum ErrorCode {
     INVALID_SCORE_RANGE(1058, "Điểm các tiêu chí phải nằm trong khoảng từ 0.0 đến 10.0", HttpStatus.BAD_REQUEST),
     STUDENT_RESULT_ACCESS_DENIED(
             1059, "Sinh viên chỉ được xem kết quả đánh giá khi ở học kỳ 7 trở đi", HttpStatus.FORBIDDEN),
+    FEEDBACK_DUPLICATE(1060, "You have already submitted feedback for this enterprise in this semester", HttpStatus.BAD_REQUEST),
+    FEEDBACK_RATING_INVALID(1061, "Feedback rating scores must be between 1 and 5", HttpStatus.BAD_REQUEST),
 
     // Account related
     USER_BANNED(2001, "Tài khoản của bạn đã bị khóa do nhập sai mật khẩu quá 5 lần", HttpStatus.FORBIDDEN),
