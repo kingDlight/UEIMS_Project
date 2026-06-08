@@ -57,13 +57,13 @@ public enum ErrorCode {
             HttpStatus.BAD_REQUEST),
 
     // Enterprise registration
-    ENTERPRISE_EXISTED(1036, "Doanh nghiệp với mã số thuế này đã tồn tại trong hệ thống", HttpStatus.BAD_REQUEST),
-    TAX_CODE_EXISTED(1037, "Mã số thuế đã được sử dụng bởi doanh nghiệp khác", HttpStatus.BAD_REQUEST),
+    ENTERPRISE_EXISTED(1036, "Enterprise with this tax code already exists in the system", HttpStatus.BAD_REQUEST),
+    TAX_CODE_EXISTED(1037, "Tax code is already used by another enterprise", HttpStatus.BAD_REQUEST),
     ENTERPRISE_REGISTRATION_SUCCESS(
-            1038, "Đăng ký thành công. Tài khoản sẽ được kích hoạt sau khi Training Manager phê duyệt.", HttpStatus.OK),
+            1038, "Registration successful. Your account will be activated upon approval by the Training Manager.", HttpStatus.OK),
     EXPORT_EXCEED_LIMIT(
             1039,
-            "Dữ liệu xuất vượt quá giới hạn 10000 dòng. Vui lòng chọn khoảng thời gian hẹp hơn.",
+            "Export data exceeds the 10000 limit. Please select a narrower time range.",
             HttpStatus.BAD_REQUEST),
     DATA_INTEGRITY_VIOLATION(1040, "Data integrity violation: Foreign key or constraint error", HttpStatus.BAD_REQUEST),
     METHOD_NOT_SUPPORTED(
@@ -73,7 +73,7 @@ public enum ErrorCode {
     INTERVIEW_NOT_FOUND(1044, "Interview not found", HttpStatus.NOT_FOUND),
     INTERVIEW_ALREADY_CONFIRMED(1045, "Interview already confirmed", HttpStatus.BAD_REQUEST),
     FINAL_REPORT_INVALID_FORMAT(1046, "Final report must be in PDF format", HttpStatus.BAD_REQUEST),
-    FINAL_REPORT_SIZE_EXCEEDED(1047, "Final report size must not exceed 5MB", HttpStatus.BAD_REQUEST),
+    FINAL_REPORT_SIZE_EXCEEDED(1047, "Final report size must not exceed 20MB", HttpStatus.BAD_REQUEST),
     EXPORT_LOG_EXCEED_LIMIT(
             1048,
             "Export aborted. Record count exceeds 50,000 threshold. Please shrink your search horizon filter properties.",
@@ -85,7 +85,7 @@ public enum ErrorCode {
             HttpStatus.BAD_REQUEST),
     ADMIN_INTERVENTION_REQUIRED(
             1052, "Admin intervention is required to modify an already approved OJT student", HttpStatus.FORBIDDEN),
-    INTERVIEW_DATE_MUST_BE_IN_FUTURE(1053, "Ngày phỏng vấn phải ở tương lai", HttpStatus.BAD_REQUEST),
+    INTERVIEW_DATE_MUST_BE_IN_FUTURE(1053, "Interview date must be in the future", HttpStatus.BAD_REQUEST),
     INTERVIEW_ELIGIBILITY_RULE(
             1054, "Chỉ những ứng viên đã vượt qua vòng sơ loại mới được lên lịch phỏng vấn", HttpStatus.BAD_REQUEST),
     INTERVIEW_OVERLAP(1055, "Thời gian phỏng vấn bị trùng với lịch đã có của doanh nghiệp", HttpStatus.BAD_REQUEST),
@@ -107,6 +107,8 @@ public enum ErrorCode {
     INVALID_TOKEN_FORMAT(1055, "Invalid token format", HttpStatus.UNAUTHORIZED),
     ;
 
+  
+    
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
         this.code = code;
         this.message = message;

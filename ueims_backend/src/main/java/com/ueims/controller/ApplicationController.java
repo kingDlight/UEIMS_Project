@@ -3,10 +3,16 @@ package com.ueims.controller;
 import java.util.List;
 import java.util.UUID;
 
-import jakarta.validation.Valid;
-
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.ueims.dto.request.ApplicationRequest;
 import com.ueims.dto.request.ApplicationScreenRequest;
@@ -14,6 +20,7 @@ import com.ueims.dto.response.ApiResponse;
 import com.ueims.dto.response.ApplicationResponse;
 import com.ueims.service.ApplicationService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -34,6 +41,19 @@ public class ApplicationController {
     public ApiResponse<List<ApplicationResponse>> getAll() {
         return ApiResponse.<List<ApplicationResponse>>builder()
                 .result(service.findAll())
+                .build();
+    }
+
+    /**
+     * Get all job applications of the currently logged in student (UC-55)
+     *
+     * @return ApiResponse containing list of application responses
+     */
+    @GetMapping("/my-history")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ApiResponse<List<ApplicationResponse>> getMyApplications() {
+        return ApiResponse.<List<ApplicationResponse>>builder()
+                .result(service.findMyApplications())
                 .build();
     }
 
