@@ -193,7 +193,7 @@ export const HomePage: React.FC = () => {
       </div>
 
       {/* ============ NAVBAR ============ */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 ease-in-out px-6 md:px-12 flex items-center justify-between ${
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out px-6 md:px-12 flex items-center justify-between ${
         scrolled 
           ? isDark 
             ? 'h-16 bg-[#0b0f19]/80 backdrop-blur-xl border-b border-zinc-800/50 shadow-lg' 
@@ -216,7 +216,7 @@ export const HomePage: React.FC = () => {
                 e.preventDefault();
                 scrollToSection(link.href);
               }}
-              className={`text-xs font-medium px-3.5 py-2 rounded-lg transition-all duration-700 ease-in-out ${
+              className={`text-xs font-medium px-3.5 py-2 rounded-lg transition-all duration-300 ease-in-out ${
                 isDark 
                   ? 'text-zinc-300 hover:text-white hover:bg-zinc-800/40' 
                   : 'text-slate-700 hover:text-slate-950 hover:bg-slate-100'
@@ -232,7 +232,7 @@ export const HomePage: React.FC = () => {
           {/* Theme Toggle */}
           <button
             onClick={() => setIsDark(!isDark)}
-            className={`p-2 rounded-lg border transition-all duration-700 ease-in-out bg-transparent shrink-0 ${
+            className={`p-2 rounded-lg border transition-all duration-300 ease-in-out bg-transparent shrink-0 ${
               isDark 
                 ? 'border-zinc-500 text-amber-400 hover:text-amber-300 hover:border-amber-400/50 hover:bg-zinc-800/40' 
                 : 'border-slate-400 text-slate-700 hover:text-slate-950 hover:border-slate-500 hover:bg-slate-100'
@@ -244,7 +244,7 @@ export const HomePage: React.FC = () => {
 
           <button
             onClick={() => navigate('/login')}
-            className={`text-xs font-semibold bg-transparent px-4 py-2 border rounded-lg transition-all duration-700 ease-in-out ${
+            className={`text-xs font-semibold bg-transparent px-4 py-2 border rounded-lg transition-all duration-300 ease-in-out ${
               isDark
                 ? 'text-zinc-100 border-zinc-500 hover:text-white hover:border-[#f37021] hover:bg-[#f37021]/5'
                 : 'text-slate-800 border-slate-400 hover:text-[#f37021] hover:border-[#f37021] hover:bg-[#f37021]/5'
@@ -254,7 +254,7 @@ export const HomePage: React.FC = () => {
           </button>
           <button
             onClick={() => navigate('/login')}
-            className="hidden sm:flex text-xs font-bold text-white px-4 py-2 rounded-lg bg-gradient-to-r from-[#f37021] to-[#e26215] shadow-lg shadow-[#f37021]/20 hover:shadow-[#f37021]/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-700 ease-in-out gap-1.5 items-center"
+            className="hidden sm:flex text-xs font-bold text-white px-4 py-2 rounded-lg bg-gradient-to-r from-[#f37021] to-[#e26215] shadow-lg shadow-[#f37021]/20 hover:shadow-[#f37021]/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 ease-in-out gap-1.5 items-center"
           >
             Vào hệ thống
             <ArrowRight className="h-3.5 w-3.5" />
@@ -411,14 +411,14 @@ export const HomePage: React.FC = () => {
           <div className="flex gap-4 justify-center flex-wrap mb-20 animate-fade-in-up">
             <button
               onClick={() => navigate('/login')}
-              className="text-sm font-bold text-white px-7 py-3.5 rounded-full bg-gradient-to-r from-[#f37021] to-[#e26215] shadow-lg shadow-[#f37021]/20 hover:shadow-[#f37021]/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-700 ease-in-out flex items-center gap-2"
+              className="text-sm font-bold text-white px-7 py-3.5 rounded-full bg-gradient-to-r from-[#f37021] to-[#e26215] shadow-lg shadow-[#f37021]/20 hover:shadow-[#f37021]/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 ease-in-out flex items-center gap-2"
             >
               Bắt đầu ngay
               <ArrowRight className="h-4 w-4" />
             </button>
             <button
               onClick={() => scrollToSection('#features')}
-              className={`text-sm font-semibold bg-transparent px-7 py-3.5 rounded-full border transition-all duration-700 ease-in-out ${
+              className={`text-sm font-semibold bg-transparent px-7 py-3.5 rounded-full border transition-all duration-300 ease-in-out ${
                 isDark
                   ? 'text-zinc-100 border-zinc-500 hover:text-white hover:bg-zinc-800/40 hover:border-zinc-400'
                   : 'text-slate-800 border-slate-400 hover:text-[#f37021] hover:bg-slate-100 hover:border-[#f37021]'
@@ -429,7 +429,7 @@ export const HomePage: React.FC = () => {
           </div>
 
           {/* Stats Bar */}
-          <div className={`grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 pt-10 backdrop-blur-md rounded-2xl p-6 border transition-all duration-700 ease-in-out ${
+          <div className={`grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 pt-10 backdrop-blur-md rounded-2xl p-6 border transition-all duration-300 ease-in-out ${
             isDark 
               ? 'border-zinc-800/30 bg-[#0e1322]/30 text-zinc-100' 
               : 'border-slate-200 bg-white/85 shadow-lg shadow-slate-100/40 text-slate-800'
@@ -480,7 +480,7 @@ export const HomePage: React.FC = () => {
 
           {/* Right Highlights Grid */}
           <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-6 w-full">
-            <div className={`border p-6 rounded-2xl transition-all duration-700 ease-in-out ${
+            <div className={`border p-6 rounded-2xl transition-all duration-300 ease-in-out ${
               isDark ? 'bg-[#101524]/60 border-zinc-800/40' : 'bg-white border-slate-200 shadow-sm'
             }`}>
               <div className={`h-9 w-9 rounded-lg flex items-center justify-center mb-4 font-semibold text-sm ${
@@ -492,7 +492,7 @@ export const HomePage: React.FC = () => {
               <p className={`text-xs leading-relaxed transition-colors duration-700 ease-in-out ${isDark ? 'text-zinc-300' : 'text-slate-600'}`}>Toàn bộ biểu mẫu báo cáo, phê duyệt CV và chấm điểm Rubric được thực hiện trực tuyến hoàn toàn.</p>
             </div>
             
-            <div className={`border p-6 rounded-2xl transition-all duration-700 ease-in-out ${
+            <div className={`border p-6 rounded-2xl transition-all duration-300 ease-in-out ${
               isDark ? 'bg-[#101524]/60 border-zinc-800/40' : 'bg-white border-slate-200 shadow-sm'
             }`}>
               <div className={`h-9 w-9 rounded-lg flex items-center justify-center mb-4 font-semibold text-sm ${
@@ -504,7 +504,7 @@ export const HomePage: React.FC = () => {
               <p className={`text-xs leading-relaxed transition-colors duration-700 ease-in-out ${isDark ? 'text-zinc-300' : 'text-slate-600'}`}>Cập nhật thông tin tức thời giữa Sinh viên, Giảng viên Hướng dẫn và Doanh nghiệp đối tác.</p>
             </div>
 
-            <div className={`border p-6 rounded-2xl transition-all duration-700 ease-in-out ${
+            <div className={`border p-6 rounded-2xl transition-all duration-300 ease-in-out ${
               isDark ? 'bg-[#101524]/60 border-zinc-800/40' : 'bg-white border-slate-200 shadow-sm'
             }`}>
               <div className={`h-9 w-9 rounded-lg flex items-center justify-center mb-4 font-semibold text-sm ${
@@ -516,7 +516,7 @@ export const HomePage: React.FC = () => {
               <p className={`text-xs leading-relaxed transition-colors duration-700 ease-in-out ${isDark ? 'text-zinc-300' : 'text-slate-600'}`}>Doanh nghiệp đăng tin tuyển dụng OJT và chủ động lọc hồ sơ, xếp lịch phỏng vấn nhanh gọn.</p>
             </div>
 
-            <div className={`border p-6 rounded-2xl transition-all duration-700 ease-in-out ${
+            <div className={`border p-6 rounded-2xl transition-all duration-300 ease-in-out ${
               isDark ? 'bg-[#101524]/60 border-zinc-800/40' : 'bg-white border-slate-200 shadow-sm'
             }`}>
               <div className={`h-9 w-9 rounded-lg flex items-center justify-center mb-4 font-semibold text-sm ${
@@ -557,7 +557,7 @@ export const HomePage: React.FC = () => {
               return (
                 <div
                   key={i}
-                  className={`border rounded-2xl p-8 hover:-translate-y-1 transition-all duration-700 ease-in-out group ${
+                  className={`border rounded-2xl p-8 hover:-translate-y-1 transition-all duration-300 ease-in-out group ${
                     isDark 
                       ? 'bg-[#101524] border-zinc-800/50 hover:border-zinc-700 hover:shadow-xl hover:shadow-black/20' 
                       : 'bg-white border-slate-200 hover:border-slate-300 hover:shadow-xl hover:shadow-slate-200/50'
@@ -606,7 +606,7 @@ export const HomePage: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative">
             {steps.map((step, i) => (
-              <div key={i} className={`border rounded-xl p-6 relative overflow-hidden group transition-all duration-700 ease-in-out ${
+              <div key={i} className={`border rounded-xl p-6 relative overflow-hidden group transition-all duration-300 ease-in-out ${
                 isDark ? 'bg-[#101524]/40 border-zinc-900' : 'bg-white border-slate-200 shadow-sm'
               }`}>
                 {/* Flow Lines for Desktop */}
@@ -661,13 +661,13 @@ export const HomePage: React.FC = () => {
           <div className="flex flex-col gap-3 shrink-0 z-10 w-full md:w-auto">
             <button
               onClick={() => navigate('/register-enterprise')}
-              className="text-xs font-bold text-white px-6 py-3.5 rounded-xl bg-gradient-to-r from-[#f37021] to-[#e26215] shadow-lg shadow-[#f37021]/15 hover:shadow-[#f37021]/30 hover:-translate-y-0.5 active:translate-y-0 text-center transition-all duration-700 ease-in-out"
+              className="text-xs font-bold text-white px-6 py-3.5 rounded-xl bg-gradient-to-r from-[#f37021] to-[#e26215] shadow-lg shadow-[#f37021]/15 hover:shadow-[#f37021]/30 hover:-translate-y-0.5 active:translate-y-0 text-center transition-all duration-300 ease-in-out"
             >
               Đăng ký tài khoản Doanh nghiệp
             </button>
             <button
               onClick={() => navigate('/login')}
-              className={`text-xs font-semibold bg-transparent px-6 py-3.5 rounded-xl border text-center transition-all duration-700 ease-in-out ${
+              className={`text-xs font-semibold bg-transparent px-6 py-3.5 rounded-xl border text-center transition-all duration-300 ease-in-out ${
                 isDark
                   ? 'text-zinc-100 border-zinc-500 hover:text-white hover:border-[#f37021] hover:bg-[#f37021]/5'
                   : 'text-slate-800 border-slate-400 hover:text-[#f37021] hover:border-[#f37021] hover:bg-[#f37021]/5'
@@ -702,7 +702,7 @@ export const HomePage: React.FC = () => {
           </p>
           <button
             onClick={() => navigate('/login')}
-            className="text-sm font-bold text-white px-8 py-4 rounded-full bg-gradient-to-r from-[#f37021] to-[#e26215] shadow-lg shadow-[#f37021]/20 hover:shadow-[#f37021]/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-700 ease-in-out inline-flex items-center gap-2"
+            className="text-sm font-bold text-white px-8 py-4 rounded-full bg-gradient-to-r from-[#f37021] to-[#e26215] shadow-lg shadow-[#f37021]/20 hover:shadow-[#f37021]/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 ease-in-out inline-flex items-center gap-2"
           >
             Đăng nhập hệ thống
             <ArrowRight className="h-4 w-4" />
