@@ -99,8 +99,15 @@ public enum ErrorCode {
     WRONG_OLD_PASSWORD(2002, "Incorrect old password", HttpStatus.BAD_REQUEST),
     PASSWORDS_NOT_MATCH(2003, "New password and confirmation do not match", HttpStatus.BAD_REQUEST),
     USER_ALREADY_HAS_ROLE(2004, "User already has a role. Only one role can be assigned.", HttpStatus.BAD_REQUEST),
+    
+// JWT / Auth related
+    TOKEN_INVALIDATED(1053, "Token has been invalidated", HttpStatus.UNAUTHORIZED),
+    SESSION_EXPIRED(1054, "Session expired due to inactivity", HttpStatus.UNAUTHORIZED),
+    INVALID_TOKEN_FORMAT(1055, "Invalid token format", HttpStatus.UNAUTHORIZED),
     ;
 
+  
+    
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
         this.code = code;
         this.message = message;
