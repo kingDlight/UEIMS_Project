@@ -152,10 +152,28 @@ export const HomePage: React.FC = () => {
     }
   };
 
+  const themeTimeoutRef = React.useRef<any>(null);
+
+  const toggleTheme = () => {
+    document.documentElement.classList.add('theme-transitioning');
+    setIsDark(!isDark);
+    if (themeTimeoutRef.current) clearTimeout(themeTimeoutRef.current);
+    themeTimeoutRef.current = setTimeout(() => {
+      document.documentElement.classList.remove('theme-transitioning');
+    }, 1200);
+  };
+
   return (
-    <div className={`min-h-screen font-sans selection:bg-[#f37021]/30 selection:text-white overflow-x-hidden transition-colors duration-700 ease-in-out ${
+    <div className={`min-h-screen font-sans selection:bg-[#f37021]/30 selection:text-white overflow-x-hidden transition-colors duration-300 ease-in-out ${
       isDark ? 'bg-[#0b0f19] text-zinc-100' : 'bg-slate-50 text-slate-800'
     }`}>
+      <style>{`
+        .theme-transitioning * {
+          transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow !important;
+          transition-duration: 0.7s !important;
+          transition-timing-function: ease-in-out !important;
+        }
+      `}</style>
       
       {/* ============ BACKGROUND EFFECTS ============ */}
       {/* Primary drifting orbs */}
@@ -169,7 +187,7 @@ export const HomePage: React.FC = () => {
 
       {/* Animated SVG dot-grid — light mode gets brighter colors */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden" aria-hidden="true">
-        <svg width="100%" height="100%" className={`absolute inset-0 transition-opacity duration-700 ${
+        <svg width="100%" height="100%" className={`absolute inset-0 transition-opacity duration-300 ${
           isDark ? 'opacity-[0.04]' : 'opacity-[0.18]'
         }`}>
           <defs>
@@ -203,7 +221,7 @@ export const HomePage: React.FC = () => {
         {/* Brand */}
         <div className="flex items-center gap-3 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
           <img src="/src/assets/logo_ueims.png" alt="UEIMS Logo" style={{ height: '36px', objectFit: 'contain' }} />
-          <span className={`font-bold text-lg tracking-wide transition-colors duration-700 ease-in-out ${isDark ? 'text-white' : 'text-slate-900'}`}>UEIMS</span>
+          <span className={`font-bold text-lg tracking-wide transition-colors duration-300 ease-in-out ${isDark ? 'text-white' : 'text-slate-900'}`}>UEIMS</span>
         </div>
 
         {/* Links (Desktop) */}
@@ -231,7 +249,7 @@ export const HomePage: React.FC = () => {
         <div className="flex items-center gap-3">
           {/* Theme Toggle */}
           <button
-            onClick={() => setIsDark(!isDark)}
+            onClick={toggleTheme}
             className={`p-2 rounded-lg border transition-all duration-300 ease-in-out bg-transparent shrink-0 ${
               isDark 
                 ? 'border-zinc-500 text-amber-400 hover:text-amber-300 hover:border-amber-400/50 hover:bg-zinc-800/40' 
@@ -263,7 +281,7 @@ export const HomePage: React.FC = () => {
           {/* Mobile menu trigger */}
           <button 
             onClick={() => setMenuOpen(!menuOpen)} 
-            className={`md:hidden p-1 bg-transparent transition-colors duration-700 ease-in-out ${
+            className={`md:hidden p-1 bg-transparent transition-colors duration-300 ease-in-out ${
               isDark ? 'text-zinc-400 hover:text-white' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
@@ -273,7 +291,7 @@ export const HomePage: React.FC = () => {
 
         {/* Mobile Dropdown Menu */}
         {menuOpen && (
-          <div className={`absolute top-16 left-0 right-0 p-6 flex flex-col gap-4 md:hidden shadow-xl animate-fade-in border-b transition-colors duration-700 ease-in-out ${
+          <div className={`absolute top-16 left-0 right-0 p-6 flex flex-col gap-4 md:hidden shadow-xl animate-fade-in border-b transition-colors duration-300 ease-in-out ${
             isDark ? 'bg-[#0f1422] border-zinc-800/80' : 'bg-white border-slate-200'
           }`}>
             {navLinks.map((link) => (
@@ -284,7 +302,7 @@ export const HomePage: React.FC = () => {
                   e.preventDefault();
                   scrollToSection(link.href);
                 }}
-                className={`text-sm font-medium py-1 transition-colors duration-700 ease-in-out ${
+                className={`text-sm font-medium py-1 transition-colors duration-300 ease-in-out ${
                   isDark ? 'text-zinc-300 hover:text-white' : 'text-slate-700 hover:text-slate-950'
                 }`}
               >
@@ -305,14 +323,14 @@ export const HomePage: React.FC = () => {
       {/* ============ HERO SECTION ============ */}
       <section 
         onMouseMove={handleMouseMove}
-        className={`relative pt-36 pb-20 md:pt-48 md:pb-32 px-6 md:px-12 flex items-center justify-center overflow-hidden z-10 border-b transition-colors duration-700 ease-in-out ${
+        className={`relative pt-36 pb-20 md:pt-48 md:pb-32 px-6 md:px-12 flex items-center justify-center overflow-hidden z-10 border-b transition-colors duration-300 ease-in-out ${
           isDark ? 'border-zinc-900' : 'border-slate-200'
         }`}
       >
         {/* Interactive Spotlight Glow */}
         <div 
           ref={spotlightRef}
-          className="absolute inset-0 pointer-events-none z-0 opacity-70 transition-opacity duration-700 ease-in-out"
+          className="absolute inset-0 pointer-events-none z-0 opacity-70 transition-opacity duration-300 ease-in-out"
           style={{
             background: `radial-gradient(700px circle at var(--mouse-x, 50%) var(--mouse-y, -20%), ${
               isDark ? 'rgba(243, 112, 33, 0.07)' : 'rgba(243, 112, 33, 0.08)'
@@ -380,7 +398,7 @@ export const HomePage: React.FC = () => {
         <div className="max-w-6xl w-full text-center relative z-10">
           
           {/* Glowing Background Badge */}
-          <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border mb-8 animate-fade-in-up transition-colors duration-700 ease-in-out ${
+          <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border mb-8 animate-fade-in-up transition-colors duration-300 ease-in-out ${
             isDark ? 'bg-[#f37021]/10 border-[#f37021]/30' : 'bg-[#f37021]/5 border-[#f37021]/20'
           }`}>
             <span className="flex h-2 w-2 rounded-full bg-[#f37021] animate-pulse"></span>
@@ -390,7 +408,7 @@ export const HomePage: React.FC = () => {
           </div>
 
           {/* Headline */}
-          <h1 className={`text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-none mb-6 animate-fade-in-up transition-colors duration-700 ease-in-out ${
+          <h1 className={`text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-none mb-6 animate-fade-in-up transition-colors duration-300 ease-in-out ${
             isDark ? 'text-white' : 'text-slate-900'
           }`}>
             Chuyển Đổi Số Toàn Diện
@@ -401,7 +419,7 @@ export const HomePage: React.FC = () => {
           </h1>
 
           {/* Subtext */}
-          <p className={`text-base sm:text-lg md:text-xl max-w-3xl mx-auto mb-10 leading-relaxed font-normal animate-fade-in-up transition-colors duration-700 ease-in-out ${
+          <p className={`text-base sm:text-lg md:text-xl max-w-3xl mx-auto mb-10 leading-relaxed font-normal animate-fade-in-up transition-colors duration-300 ease-in-out ${
             isDark ? 'text-zinc-300' : 'text-slate-655'
           }`}>
             Đơn giản hóa việc kết nối Doanh nghiệp, quản lý hồ sơ sinh viên, sắp xếp phỏng vấn và đánh giá điểm năng lực bằng hệ thống số hóa thông minh, minh bạch.
@@ -436,12 +454,12 @@ export const HomePage: React.FC = () => {
           }`}>
             {stats.map((stat, i) => (
               <div key={i} className="text-center">
-                <div className={`text-2xl sm:text-3xl md:text-4xl font-extrabold mb-1 tracking-tight transition-colors duration-700 ease-in-out ${
+                <div className={`text-2xl sm:text-3xl md:text-4xl font-extrabold mb-1 tracking-tight transition-colors duration-300 ease-in-out ${
                   isDark ? 'text-white' : 'text-slate-900'
                 }`}>
                   {stat.value}
                 </div>
-                <div className={`text-xs font-semibold uppercase tracking-wider transition-colors duration-700 ease-in-out ${
+                <div className={`text-xs font-semibold uppercase tracking-wider transition-colors duration-300 ease-in-out ${
                   isDark ? 'text-zinc-300' : 'text-slate-650'
                 }`}>
                   {stat.label}
@@ -454,24 +472,24 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* ============ ABOUT SECTION ============ */}
-      <section id="about" className={`py-20 md:py-28 px-6 md:px-12 relative z-10 border-b scroll-mt-20 transition-colors duration-700 ease-in-out ${
+      <section id="about" className={`py-20 md:py-28 px-6 md:px-12 relative z-10 border-b scroll-mt-20 transition-colors duration-300 ease-in-out ${
         isDark ? 'border-zinc-900 bg-[#070a11]/40' : 'border-slate-200 bg-slate-50/50'
       }`}>
         <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-12 items-center">
           {/* Left Content */}
           <div className="flex-1">
             <span className="text-xs font-bold tracking-widest text-[#f37021] uppercase">Giới thiệu</span>
-            <h2 className={`text-3xl sm:text-4xl md:text-5xl font-extrabold mt-3 mb-6 tracking-tight transition-colors duration-700 ease-in-out ${
+            <h2 className={`text-3xl sm:text-4xl md:text-5xl font-extrabold mt-3 mb-6 tracking-tight transition-colors duration-300 ease-in-out ${
               isDark ? 'text-white' : 'text-slate-900'
             }`}>
               Cầu nối hiện đại giữa Giảng đường & Doanh nghiệp
             </h2>
-            <p className={`text-sm sm:text-base leading-relaxed mb-6 transition-colors duration-700 ease-in-out ${
+            <p className={`text-sm sm:text-base leading-relaxed mb-6 transition-colors duration-300 ease-in-out ${
               isDark ? 'text-zinc-300' : 'text-slate-600'
             }`}>
               Hệ thống Quản lý Thực tập Doanh nghiệp (UEIMS) là nền tảng số hóa tối ưu được xây dựng nhằm phục vụ kỳ thực tập doanh nghiệp (On-the-Job Training) tại Trường Đại học FPT Đà Nẵng.
             </p>
-            <p className={`text-sm sm:text-base leading-relaxed transition-colors duration-700 ease-in-out ${
+            <p className={`text-sm sm:text-base leading-relaxed transition-colors duration-300 ease-in-out ${
               isDark ? 'text-zinc-300' : 'text-slate-600'
             }`}>
               Chúng tôi loại bỏ hoàn toàn các rào cản hành chính thủ công, kết nối trực tiếp nhà trường, sinh viên và nhà tuyển dụng để cùng kiến tạo những trải nghiệm học tập thực tế chất lượng nhất.
@@ -488,8 +506,8 @@ export const HomePage: React.FC = () => {
               }`}>
                 01
               </div>
-              <h4 className={`text-sm font-bold mb-2 transition-colors duration-700 ease-in-out ${isDark ? 'text-zinc-100' : 'text-slate-800'}`}>Số hóa 100%</h4>
-              <p className={`text-xs leading-relaxed transition-colors duration-700 ease-in-out ${isDark ? 'text-zinc-300' : 'text-slate-600'}`}>Toàn bộ biểu mẫu báo cáo, phê duyệt CV và chấm điểm Rubric được thực hiện trực tuyến hoàn toàn.</p>
+              <h4 className={`text-sm font-bold mb-2 transition-colors duration-300 ease-in-out ${isDark ? 'text-zinc-100' : 'text-slate-800'}`}>Số hóa 100%</h4>
+              <p className={`text-xs leading-relaxed transition-colors duration-300 ease-in-out ${isDark ? 'text-zinc-300' : 'text-slate-600'}`}>Toàn bộ biểu mẫu báo cáo, phê duyệt CV và chấm điểm Rubric được thực hiện trực tuyến hoàn toàn.</p>
             </div>
             
             <div className={`border p-6 rounded-2xl transition-all duration-300 ease-in-out ${
@@ -500,8 +518,8 @@ export const HomePage: React.FC = () => {
               }`}>
                 02
               </div>
-              <h4 className={`text-sm font-bold mb-2 transition-colors duration-700 ease-in-out ${isDark ? 'text-zinc-100' : 'text-slate-800'}`}>Đồng bộ Đa bên</h4>
-              <p className={`text-xs leading-relaxed transition-colors duration-700 ease-in-out ${isDark ? 'text-zinc-300' : 'text-slate-600'}`}>Cập nhật thông tin tức thời giữa Sinh viên, Giảng viên Hướng dẫn và Doanh nghiệp đối tác.</p>
+              <h4 className={`text-sm font-bold mb-2 transition-colors duration-300 ease-in-out ${isDark ? 'text-zinc-100' : 'text-slate-800'}`}>Đồng bộ Đa bên</h4>
+              <p className={`text-xs leading-relaxed transition-colors duration-300 ease-in-out ${isDark ? 'text-zinc-300' : 'text-slate-600'}`}>Cập nhật thông tin tức thời giữa Sinh viên, Giảng viên Hướng dẫn và Doanh nghiệp đối tác.</p>
             </div>
 
             <div className={`border p-6 rounded-2xl transition-all duration-300 ease-in-out ${
@@ -512,8 +530,8 @@ export const HomePage: React.FC = () => {
               }`}>
                 03
               </div>
-              <h4 className={`text-sm font-bold mb-2 transition-colors duration-700 ease-in-out ${isDark ? 'text-zinc-100' : 'text-slate-800'}`}>Tuyển dụng Trực tiếp</h4>
-              <p className={`text-xs leading-relaxed transition-colors duration-700 ease-in-out ${isDark ? 'text-zinc-300' : 'text-slate-600'}`}>Doanh nghiệp đăng tin tuyển dụng OJT và chủ động lọc hồ sơ, xếp lịch phỏng vấn nhanh gọn.</p>
+              <h4 className={`text-sm font-bold mb-2 transition-colors duration-300 ease-in-out ${isDark ? 'text-zinc-100' : 'text-slate-800'}`}>Tuyển dụng Trực tiếp</h4>
+              <p className={`text-xs leading-relaxed transition-colors duration-300 ease-in-out ${isDark ? 'text-zinc-300' : 'text-slate-600'}`}>Doanh nghiệp đăng tin tuyển dụng OJT và chủ động lọc hồ sơ, xếp lịch phỏng vấn nhanh gọn.</p>
             </div>
 
             <div className={`border p-6 rounded-2xl transition-all duration-300 ease-in-out ${
@@ -524,27 +542,27 @@ export const HomePage: React.FC = () => {
               }`}>
                 04
               </div>
-              <h4 className={`text-sm font-bold mb-2 transition-colors duration-700 ease-in-out ${isDark ? 'text-zinc-100' : 'text-slate-800'}`}>Thống kê Minh bạch</h4>
-              <p className={`text-xs leading-relaxed transition-colors duration-700 ease-in-out ${isDark ? 'text-zinc-300' : 'text-slate-600'}`}>Theo dõi trực quan tiến độ và xuất dữ liệu báo cáo OJT đầy đủ chuẩn xác chỉ với một cú click.</p>
+              <h4 className={`text-sm font-bold mb-2 transition-colors duration-300 ease-in-out ${isDark ? 'text-zinc-100' : 'text-slate-800'}`}>Thống kê Minh bạch</h4>
+              <p className={`text-xs leading-relaxed transition-colors duration-300 ease-in-out ${isDark ? 'text-zinc-300' : 'text-slate-600'}`}>Theo dõi trực quan tiến độ và xuất dữ liệu báo cáo OJT đầy đủ chuẩn xác chỉ với một cú click.</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* ============ FEATURES SECTION ============ */}
-      <section id="features" className={`py-20 md:py-28 px-6 md:px-12 relative z-10 border-b scroll-mt-20 transition-colors duration-700 ease-in-out ${
+      <section id="features" className={`py-20 md:py-28 px-6 md:px-12 relative z-10 border-b scroll-mt-20 transition-colors duration-300 ease-in-out ${
         isDark ? 'border-zinc-900 bg-[#0e1322]/20' : 'border-slate-200 bg-white'
       }`}>
         <div className="max-w-6xl mx-auto">
           
           <div className="text-center mb-16 md:mb-20">
             <span className="text-xs font-bold tracking-widest text-[#f37021] uppercase">Tính Năng Cốt Lõi</span>
-            <h2 className={`text-3xl sm:text-4xl md:text-5xl font-extrabold mt-3 mb-4 tracking-tight transition-colors duration-700 ease-in-out ${
+            <h2 className={`text-3xl sm:text-4xl md:text-5xl font-extrabold mt-3 mb-4 tracking-tight transition-colors duration-300 ease-in-out ${
               isDark ? 'text-white' : 'text-slate-900'
             }`}>
               Quản lý thực tập chuyên nghiệp
             </h2>
-            <p className={`text-sm sm:text-base max-w-xl mx-auto transition-colors duration-700 ease-in-out ${
+            <p className={`text-sm sm:text-base max-w-xl mx-auto transition-colors duration-300 ease-in-out ${
               isDark ? 'text-zinc-300' : 'text-slate-600'
             }`}>
               Thiết kế giải pháp phù hợp cho tất cả các đối tượng tham gia vào kỳ học doanh nghiệp OJT.
@@ -566,12 +584,12 @@ export const HomePage: React.FC = () => {
                   <div className={`h-11 w-11 rounded-xl bg-gradient-to-br ${feat.color} flex items-center justify-center text-white mb-6 group-hover:scale-105 transition-transform`}>
                     <Icon className="h-5.5 w-5.5" />
                   </div>
-                  <h3 className={`text-lg font-bold mb-3 transition-colors duration-700 ease-in-out ${
+                  <h3 className={`text-lg font-bold mb-3 transition-colors duration-300 ease-in-out ${
                     isDark ? 'text-zinc-100 group-hover:text-white' : 'text-slate-800 group-hover:text-slate-900'
                   }`}>
                     {feat.title}
                   </h3>
-                  <p className={`text-xs sm:text-sm leading-relaxed font-normal transition-colors duration-700 ease-in-out ${
+                  <p className={`text-xs sm:text-sm leading-relaxed font-normal transition-colors duration-300 ease-in-out ${
                     isDark ? 'text-zinc-300' : 'text-slate-650'
                   }`}>
                     {feat.desc}
@@ -585,19 +603,19 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* ============ PROCESS SECTION ============ */}
-      <section id="process" className={`py-20 md:py-28 px-6 md:px-12 relative z-10 border-b scroll-mt-20 transition-colors duration-700 ease-in-out ${
+      <section id="process" className={`py-20 md:py-28 px-6 md:px-12 relative z-10 border-b scroll-mt-20 transition-colors duration-300 ease-in-out ${
         isDark ? 'border-zinc-900' : 'border-slate-200'
       }`}>
         <div className="max-w-6xl mx-auto">
           
           <div className="text-center mb-16 md:mb-20">
             <span className="text-xs font-bold tracking-widest text-blue-500 uppercase">Quy Trình Hoạt Động</span>
-            <h2 className={`text-3xl sm:text-4xl md:text-5xl font-extrabold mt-3 mb-4 tracking-tight transition-colors duration-700 ease-in-out ${
+            <h2 className={`text-3xl sm:text-4xl md:text-5xl font-extrabold mt-3 mb-4 tracking-tight transition-colors duration-300 ease-in-out ${
               isDark ? 'text-white' : 'text-slate-900'
             }`}>
               Bốn bước khép kín thông minh
             </h2>
-            <p className={`text-sm sm:text-base max-w-xl mx-auto transition-colors duration-700 ease-in-out ${
+            <p className={`text-sm sm:text-base max-w-xl mx-auto transition-colors duration-300 ease-in-out ${
               isDark ? 'text-zinc-300' : 'text-slate-650'
             }`}>
               Vận hành đồng bộ nhịp nhàng giữa Nhà trường - Sinh viên - Doanh nghiệp.
@@ -611,17 +629,17 @@ export const HomePage: React.FC = () => {
               }`}>
                 {/* Flow Lines for Desktop */}
                 {i < 3 && (
-                  <div className={`hidden lg:block absolute top-[40%] right-[-16px] w-8 h-[1px] z-10 transition-colors duration-700 ease-in-out ${
+                  <div className={`hidden lg:block absolute top-[40%] right-[-16px] w-8 h-[1px] z-10 transition-colors duration-300 ease-in-out ${
                     isDark ? 'bg-zinc-800' : 'bg-slate-200'
                   }`}></div>
                 )}
                 <div className="text-3xl font-extrabold text-[#f37021]/20 group-hover:text-[#f37021]/40 mb-4 transition-colors">
                   {step.num}
                 </div>
-                <h3 className={`text-sm font-bold mb-2 transition-colors duration-700 ease-in-out ${
+                <h3 className={`text-sm font-bold mb-2 transition-colors duration-300 ease-in-out ${
                   isDark ? 'text-zinc-200' : 'text-slate-800'
                 }`}>{step.title}</h3>
-                <p className={`text-xs leading-relaxed transition-colors duration-700 ease-in-out ${
+                <p className={`text-xs leading-relaxed transition-colors duration-300 ease-in-out ${
                   isDark ? 'text-zinc-300' : 'text-slate-650'
                 }`}>{step.desc}</p>
               </div>
@@ -632,10 +650,10 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* ============ PARTNER REGISTRATION SECTION ============ */}
-      <section id="partner" className={`py-20 md:py-28 px-6 md:px-12 relative z-10 border-b scroll-mt-20 transition-colors duration-700 ease-in-out ${
+      <section id="partner" className={`py-20 md:py-28 px-6 md:px-12 relative z-10 border-b scroll-mt-20 transition-colors duration-300 ease-in-out ${
         isDark ? 'bg-[#0e1322]/20 border-zinc-900' : 'bg-slate-50 border-slate-200'
       }`}>
-        <div className={`max-w-5xl mx-auto border rounded-3xl p-8 md:p-14 shadow-2xl relative overflow-hidden flex flex-col md:flex-row gap-8 items-center transition-colors duration-700 ease-in-out ${
+        <div className={`max-w-5xl mx-auto border rounded-3xl p-8 md:p-14 shadow-2xl relative overflow-hidden flex flex-col md:flex-row gap-8 items-center transition-colors duration-300 ease-in-out ${
           isDark ? 'bg-[#101524] border-zinc-800/80' : 'bg-white border-slate-200'
         }`}>
           
@@ -646,12 +664,12 @@ export const HomePage: React.FC = () => {
             <span className="text-xs font-bold uppercase tracking-wider text-[#f37021] bg-[#f37021]/10 px-2.5 py-1 rounded-md">
               Dành cho Doanh nghiệp
             </span>
-            <h2 className={`text-2xl sm:text-3xl md:text-4xl font-extrabold mt-5 mb-4 tracking-tight transition-colors duration-700 ease-in-out ${
+            <h2 className={`text-2xl sm:text-3xl md:text-4xl font-extrabold mt-5 mb-4 tracking-tight transition-colors duration-300 ease-in-out ${
               isDark ? 'text-white' : 'text-slate-900'
             }`}>
               Đồng hành cùng nguồn nhân lực chất lượng cao
             </h2>
-            <p className={`text-xs sm:text-sm leading-relaxed max-w-lg mb-0 transition-colors duration-700 ease-in-out ${
+            <p className={`text-xs sm:text-sm leading-relaxed max-w-lg mb-0 transition-colors duration-300 ease-in-out ${
               isDark ? 'text-zinc-300' : 'text-slate-650'
             }`}>
               Đăng ký hợp tác ngay để tiếp cận hàng nghìn sinh viên công nghệ, quản trị và thiết kế năng động của Đại học FPT, đồng thời số hóa hoạt động tiếp nhận thực tập sinh một cách nhanh chóng.
@@ -680,7 +698,7 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* ============ CALL TO ACTION SECTION ============ */}
-      <section className={`py-20 md:py-32 px-6 md:px-12 relative z-10 text-center overflow-hidden border-b transition-colors duration-700 ease-in-out ${
+      <section className={`py-20 md:py-32 px-6 md:px-12 relative z-10 text-center overflow-hidden border-b transition-colors duration-300 ease-in-out ${
         isDark 
           ? 'bg-gradient-to-b from-[#0b0f19] to-[#070a11] border-transparent' 
           : 'bg-gradient-to-b from-white to-slate-50 border-slate-200'
@@ -688,14 +706,14 @@ export const HomePage: React.FC = () => {
         <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[400px] h-[400px] bg-[#f37021]/10 blur-[120px] rounded-full pointer-events-none"></div>
         
         <div className="max-w-4xl mx-auto relative z-10">
-          <h2 className={`text-3xl sm:text-5xl font-extrabold tracking-tight mb-6 transition-colors duration-700 ease-in-out ${
+          <h2 className={`text-3xl sm:text-5xl font-extrabold tracking-tight mb-6 transition-colors duration-300 ease-in-out ${
             isDark ? 'text-white' : 'text-slate-900'
           }`}>
             Bắt đầu số hóa hành trình
             <br />
             <span className="text-[#f37021]">quản lý OJT</span> ngay hôm nay
           </h2>
-          <p className={`text-sm sm:text-base max-w-xl mx-auto mb-10 leading-relaxed transition-colors duration-700 ease-in-out ${
+          <p className={`text-sm sm:text-base max-w-xl mx-auto mb-10 leading-relaxed transition-colors duration-300 ease-in-out ${
             isDark ? 'text-zinc-300' : 'text-slate-650'
           }`}>
             Hợp tác bền vững, theo dõi liền mạch, quản lý hiệu quả. Trải nghiệm hệ thống quản lý thực tập tốt nhất.
@@ -711,7 +729,7 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* ============ FOOTER ============ */}
-      <footer className={`border-t px-6 md:px-12 py-16 relative z-10 transition-colors duration-700 ease-in-out ${
+      <footer className={`border-t px-6 md:px-12 py-16 relative z-10 transition-colors duration-300 ease-in-out ${
         isDark ? 'bg-[#070a11] border-zinc-900/60 text-zinc-400' : 'bg-slate-100 border-slate-200 text-slate-600'
       }`}>
         <div className="max-w-6xl mx-auto">
@@ -721,19 +739,17 @@ export const HomePage: React.FC = () => {
             {/* Column Brand */}
             <div className="lg:col-span-2">
               <div className="flex items-center gap-3 mb-4">
-                <div className="h-8 w-8 rounded-lg bg-[#f37021] flex items-center justify-center text-white">
-                  <GraduationCap className="h-4 w-4" />
-                </div>
-                <span className={`font-bold text-base tracking-wide transition-colors duration-700 ease-in-out ${isDark ? 'text-white' : 'text-slate-900'}`}>UEIMS</span>
+                <img src="/src/assets/logo_ueims.png" alt="UEIMS Logo" style={{ height: '32px', objectFit: 'contain' }} />
+                <span className={`font-bold text-base tracking-wide transition-colors duration-300 ease-in-out ${isDark ? 'text-white' : 'text-slate-900'}`}>UEIMS</span>
               </div>
-              <p className={`text-xs leading-relaxed max-w-sm transition-colors duration-700 ease-in-out ${isDark ? 'text-zinc-400' : 'text-slate-600'}`}>
+              <p className={`text-xs leading-relaxed max-w-sm transition-colors duration-300 ease-in-out ${isDark ? 'text-zinc-400' : 'text-slate-600'}`}>
                 University-Enterprise Internship Management System. Nền tảng quản trị thông minh đồng hành cùng nhà trường và doanh nghiệp trong từng kỳ OJT của sinh viên.
               </p>
             </div>
  
             {/* Links Columns */}
             <div>
-              <h4 className={`font-bold text-xs tracking-wider uppercase mb-4 transition-colors duration-700 ease-in-out ${isDark ? 'text-zinc-300' : 'text-slate-800'}`}>Hệ Thống</h4>
+              <h4 className={`font-bold text-xs tracking-wider uppercase mb-4 transition-colors duration-300 ease-in-out ${isDark ? 'text-zinc-300' : 'text-slate-800'}`}>Hệ Thống</h4>
               <div className="flex flex-col gap-2.5 text-xs">
                 <a
                   href="#about"
@@ -769,7 +785,7 @@ export const HomePage: React.FC = () => {
             </div>
  
             <div>
-              <h4 className={`font-bold text-xs tracking-wider uppercase mb-4 transition-colors duration-700 ease-in-out ${isDark ? 'text-zinc-300' : 'text-slate-800'}`}>Vai Trò</h4>
+              <h4 className={`font-bold text-xs tracking-wider uppercase mb-4 transition-colors duration-300 ease-in-out ${isDark ? 'text-zinc-300' : 'text-slate-800'}`}>Vai Trò</h4>
               <div className="flex flex-col gap-2.5 text-xs">
                 <a href="/login" className={`hover:text-[#f37021] transition-colors ${isDark ? 'text-zinc-400' : 'text-slate-600'}`}>Doanh nghiệp</a>
                 <a href="/login" className={`hover:text-[#f37021] transition-colors ${isDark ? 'text-zinc-400' : 'text-slate-600'}`}>Sinh viên</a>
@@ -778,7 +794,7 @@ export const HomePage: React.FC = () => {
             </div>
  
             <div>
-              <h4 className={`font-bold text-xs tracking-wider uppercase mb-4 transition-colors duration-700 ease-in-out ${isDark ? 'text-zinc-300' : 'text-slate-800'}`}>Phát Triển</h4>
+              <h4 className={`font-bold text-xs tracking-wider uppercase mb-4 transition-colors duration-300 ease-in-out ${isDark ? 'text-zinc-300' : 'text-slate-800'}`}>Phát Triển</h4>
               <div className="flex flex-col gap-2.5 text-xs font-semibold">
                 <span className={isDark ? 'text-zinc-450' : 'text-slate-650'}>Đại học FPT</span>
                 <span className={isDark ? 'text-zinc-450' : 'text-slate-650'}>Nhóm 7 - SE20A05</span>
@@ -788,7 +804,7 @@ export const HomePage: React.FC = () => {
  
           </div>
  
-          <div className={`border-t pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-center transition-colors duration-700 ease-in-out ${
+          <div className={`border-t pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-center transition-colors duration-300 ease-in-out ${
             isDark ? 'border-zinc-900/40 text-zinc-500' : 'border-slate-200 text-slate-500'
           }`}>
             <span className="text-xs sm:text-sm">
