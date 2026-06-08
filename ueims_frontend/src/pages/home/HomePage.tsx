@@ -160,7 +160,7 @@ export const HomePage: React.FC = () => {
     if (themeTimeoutRef.current) clearTimeout(themeTimeoutRef.current);
     themeTimeoutRef.current = setTimeout(() => {
       document.documentElement.classList.remove('theme-transitioning');
-    }, 1200);
+    }, 700);
   };
 
   return (
@@ -250,14 +250,14 @@ export const HomePage: React.FC = () => {
           {/* Theme Toggle */}
           <button
             onClick={toggleTheme}
-            className={`p-2 rounded-lg border transition-all duration-300 ease-in-out bg-transparent shrink-0 ${
+            className={`p-2 rounded-full border transition-all duration-300 ease-in-out bg-transparent shrink-0 ${
               isDark 
                 ? 'border-zinc-500 text-amber-400 hover:text-amber-300 hover:border-amber-400/50 hover:bg-zinc-800/40' 
                 : 'border-slate-400 text-slate-700 hover:text-slate-950 hover:border-slate-500 hover:bg-slate-100'
             }`}
             title={isDark ? "Chuyển sang chế độ sáng" : "Chuyển sang chế độ tối"}
           >
-            {isDark ? <Sun className="h-4 w-4 relative top-[1px]" /> : <Moon className="h-4 w-4 relative top-[1px]" />}
+            {isDark ? <Sun className="h-4 w-4 relative top-[2px]" /> : <Moon className="h-4 w-4 relative top-[2px]" />}
           </button>
 
           <button
@@ -633,7 +633,7 @@ export const HomePage: React.FC = () => {
                     isDark ? 'bg-zinc-800' : 'bg-slate-200'
                   }`}></div>
                 )}
-                <div className="text-3xl font-extrabold text-[#f37021]/20 group-hover:text-[#f37021]/40 mb-4 transition-colors">
+                <div className="text-3xl font-extrabold text-[#f37021]/40 group-hover:text-[#f37021]/70 mb-4 transition-colors">
                   {step.num}
                 </div>
                 <h3 className={`text-sm font-bold mb-2 transition-colors duration-300 ease-in-out ${
