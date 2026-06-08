@@ -1,3 +1,4 @@
+import React from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 
 import { LoginPage } from '@/pages/auth/LoginPage';
@@ -9,6 +10,8 @@ import { HomePage } from '@/pages/home/HomePage';
 import { ProtectedRoute } from '@/components/guards/ProtectedRoute';
 import { EmailPreviewPage } from '@/pages/dev/EmailPreviewPage';
 import { TrainingManagerDashboard } from '@/pages/TrainingManagerDashboard';
+import { StudentDashboard } from '@/pages/student/StudentDashboard';
+import { EnterpriseDashboard } from '@/pages/enterprise/EnterpriseDashboard';
 
 export const router = createBrowserRouter([
   {
@@ -47,13 +50,15 @@ export const router = createBrowserRouter([
         path: 'dashboard',
         element: <TrainingManagerDashboard />,
       },
-      // Nếu sau này có màn hình nào khác của Admin/Student cần dùng AppLayout cũ thì khai báo vào đây:
-      // {
-      //   path: 'admin',
-      //   element: <AppLayout />,
-      //   children: [...]
-      // }
     ],
+  },
+  {
+    path: '/student/:tab?',
+    element: <StudentDashboard />,
+  },
+  {
+    path: '/enterprise/:tab?',
+    element: <EnterpriseDashboard />,
   },
   {
     path: '/dev/email-preview',
