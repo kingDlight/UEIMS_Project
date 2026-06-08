@@ -27,10 +27,10 @@ public class MailService {
     @Value("${app.base-url:http://localhost:5173}")
     private String appBaseUrl;
 
-    // ===== Password Reset (VI) =====
+    // ===== Password Reset =====
     public void sendPasswordResetMail(String to, String fullName, String token) {
         String resetUrl = appBaseUrl + "/reset-password?token=" + token;
-        String subject = "Yêu cầu đặt lại mật khẩu — UEIMS";
+        String subject = "Password Reset Request — UEIMS";
 
         Context ctx = new Context();
         ctx.setVariable(VAR_FULL_NAME, fullName);
@@ -40,13 +40,13 @@ public class MailService {
         String html = templateEngine.process("password-reset", ctx);
         sendHtml(to, subject, html);
 
-        log.info("Email đặt lại mật khẩu đã được gửi đến: {}", to);
+        log.info("Password reset email sent to: {}", to);
     }
 
-    // ===== Welcome Email (VI) =====
+    // ===== Welcome Email =====
     public void sendWelcomeMail(String to, String fullName, String tempPassword) {
         String loginUrl = appBaseUrl + PATH_LOGIN;
-        String subject = "Chào mừng bạn đến với UEIMS";
+        String subject = "Welcome to UEIMS";
 
         Context ctx = new Context();
         ctx.setVariable(VAR_FULL_NAME, fullName);
@@ -58,13 +58,13 @@ public class MailService {
         String html = templateEngine.process("welcome", ctx);
         sendHtml(to, subject, html);
 
-        log.info("Email chào mừng đã được gửi đến: {}", to);
+        log.info("Welcome email sent to: {}", to);
     }
 
-    // ===== Password Changed (VI) =====
+    // ===== Password Changed =====
     public void sendPasswordChangedMail(String to, String fullName, String changedAt) {
         String loginUrl = appBaseUrl + PATH_LOGIN;
-        String subject = "Mật khẩu đã được thay đổi — UEIMS";
+        String subject = "Your password has been changed — UEIMS";
 
         Context ctx = new Context();
         ctx.setVariable(VAR_FULL_NAME, fullName);
@@ -75,14 +75,14 @@ public class MailService {
         String html = templateEngine.process("password-changed", ctx);
         sendHtml(to, subject, html);
 
-        log.info("Email thông báo đổi mật khẩu đã được gửi đến: {}", to);
+        log.info("Password changed notification email sent to: {}", to);
     }
 
-    // ===== Late Report Warning (VI) =====
+    // ===== Late Report Warning =====
     @org.springframework.scheduling.annotation.Async("mailTaskExecutor")
     public void sendLateReportWarningMail(String to, String fullName, Integer weekNumber) {
         String loginUrl = appBaseUrl + PATH_LOGIN;
-        String subject = "Cảnh báo: Trễ hạn nộp báo cáo tuần " + weekNumber + " — UEIMS";
+        String subject = "Warning: Overdue Weekly Report " + weekNumber + " — UEIMS";
 
         Context ctx = new Context();
         ctx.setVariable(VAR_FULL_NAME, fullName);
@@ -93,13 +93,13 @@ public class MailService {
         String html = templateEngine.process("late-report-warning", ctx);
         sendHtml(to, subject, html);
 
-        log.info("Email cảnh báo trễ báo cáo tuần {} đã được gửi đến: {}", weekNumber, to);
+        log.info("Late report warning email for week {} sent to: {}", weekNumber, to);
     }
 
     // ===== Enterprise Status Notification (UC-19) =====
     @org.springframework.scheduling.annotation.Async("mailTaskExecutor")
     public void sendEnterpriseStatusNotification(String to, String contactPerson, String status, String reason) {
-        String subject = "Thông báo kết quả duyệt hồ sơ doanh nghiệp — UEIMS";
+        String subject = "Enterprise Registration Approval Result — UEIMS";
         String loginUrl = appBaseUrl + PATH_LOGIN;
 
         Context ctx = new Context();
@@ -113,7 +113,7 @@ public class MailService {
         String html = templateEngine.process("enterprise-status", ctx);
         sendHtml(to, subject, html);
 
-        log.info("Email thông báo trạng thái {} đã được gửi tới doanh nghiệp: {}", status, to);
+        log.info("Enterprise status notification email ({}) sent to: {}", status, to);
     }
 
     private void sendHtml(String to, String subject, String htmlBody) {
@@ -130,11 +130,11 @@ public class MailService {
 
             javaMailSender.send(message);
         } catch (Exception e) {
-            log.error("Gửi email thất bại đến {}: {}", to, e.getMessage());
-            // Log body để debug
+            log.error("Failed to send email to {}: {}", to, e.getMessage());
+            // Fallback log body for debugging
             log.warn("=== EMAIL BODY (fallback log) ===");
-            log.warn("Gửi đến: {}", to);
-            log.warn("Tiêu đề: {}", subject);
+            log.warn("To: {}", to);
+            log.warn("Subject: {}", subject);
             log.warn("Body:\n{}", htmlBody);
             log.warn("==================================");
         }

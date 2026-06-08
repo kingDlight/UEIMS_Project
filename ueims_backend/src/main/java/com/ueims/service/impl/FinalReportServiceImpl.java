@@ -53,7 +53,7 @@ public class FinalReportServiceImpl implements FinalReportService {
             throw new AppException(ErrorCode.FINAL_REPORT_INVALID_FORMAT);
         }
 
-        if (file.getSize() > 5 * 1024 * 1024) {
+        if (file.getSize() > 20 * 1024 * 1024) {
             throw new AppException(ErrorCode.FINAL_REPORT_SIZE_EXCEEDED);
         }
 

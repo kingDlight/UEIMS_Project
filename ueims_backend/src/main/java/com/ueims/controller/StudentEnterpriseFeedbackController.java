@@ -3,14 +3,19 @@ package com.ueims.controller;
 import java.util.List;
 import java.util.UUID;
 
-import jakarta.validation.Valid;
-
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.ueims.model.entity.StudentEnterpriseFeedback;
 import com.ueims.service.StudentEnterpriseFeedbackService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -20,11 +25,13 @@ public class StudentEnterpriseFeedbackController {
     private final StudentEnterpriseFeedbackService service;
 
     @GetMapping
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
     public ResponseEntity<List<StudentEnterpriseFeedback>> getAll() {
         return ResponseEntity.ok(service.findAll());
     }
 
     @GetMapping("/{id}")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
     public ResponseEntity<StudentEnterpriseFeedback> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(service.findById(id));
     }
