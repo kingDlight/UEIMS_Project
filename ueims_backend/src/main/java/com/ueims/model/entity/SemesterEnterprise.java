@@ -1,7 +1,5 @@
 package com.ueims.model.entity;
 
-import java.time.LocalDateTime;
-
 import jakarta.persistence.*;
 
 import lombok.*;
@@ -12,9 +10,11 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(exclude = {"semester", "enterprise", "reviewedBy"})
+@EqualsAndHashCode(
+        callSuper = true,
+        exclude = {"semester", "enterprise", "reviewedBy"})
 @ToString(exclude = {"semester", "enterprise", "reviewedBy"})
-public class SemesterEnterprise {
+public class SemesterEnterprise extends BaseEntity {
     @EmbeddedId
     private SemesterEnterpriseId id;
 
@@ -38,23 +38,4 @@ public class SemesterEnterprise {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reviewed_by")
     private User reviewedBy;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    @Builder.Default
-    private LocalDateTime createdAt = LocalDateTime.now();
-
-    @Column(name = "updated_at", nullable = false)
-    @Builder.Default
-    private LocalDateTime updatedAt = LocalDateTime.now();
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
 }

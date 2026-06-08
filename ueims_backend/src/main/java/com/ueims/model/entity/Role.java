@@ -1,6 +1,5 @@
 package com.ueims.model.entity;
 
-import java.time.LocalDateTime;
 import java.util.Set;
 
 import jakarta.persistence.*;
@@ -13,9 +12,11 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(exclude = {"users", "rolePermissions"})
+@EqualsAndHashCode(
+        callSuper = true,
+        exclude = {"users", "rolePermissions"})
 @ToString(exclude = {"users", "rolePermissions"})
-public class Role {
+public class Role extends BaseEntity {
     @Id
     @Column(name = "role_name", length = 50)
     private String roleName;
@@ -27,28 +28,9 @@ public class Role {
     @Builder.Default
     private Boolean isActive = true;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    @Builder.Default
-    private LocalDateTime createdAt = LocalDateTime.now();
-
-    @Column(name = "updated_at", nullable = false)
-    @Builder.Default
-    private LocalDateTime updatedAt = LocalDateTime.now();
-
     @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<UserRole> users;
 
     @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<RolePermission> rolePermissions;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
 }

@@ -16,9 +16,11 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(exclude = {"semester", "user", "cancelledBy"})
+@EqualsAndHashCode(
+        callSuper = true,
+        exclude = {"semester", "user", "cancelledBy"})
 @ToString(exclude = {"semester", "user", "cancelledBy"})
-public class EligibleStudent {
+public class EligibleStudent extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "eligible_id")
@@ -75,24 +77,4 @@ public class EligibleStudent {
     @JoinColumn(name = "cancelled_by")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "roles", "enterprise"})
     private User cancelledBy;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    @Builder.Default
-    private LocalDateTime createdAt = LocalDateTime.now();
-
-    @Column(name = "updated_at", nullable = false)
-    @Builder.Default
-    private LocalDateTime updatedAt = LocalDateTime.now();
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-        if (importedAt == null) importedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
 }

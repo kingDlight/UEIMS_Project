@@ -19,9 +19,11 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(exclude = {"createdBy", "eligibleStudents", "jobPosts", "systemAnnouncements"})
+@EqualsAndHashCode(
+        callSuper = true,
+        exclude = {"createdBy", "eligibleStudents", "jobPosts", "systemAnnouncements"})
 @ToString(exclude = {"createdBy", "eligibleStudents", "jobPosts", "systemAnnouncements"})
-public class Semester {
+public class Semester extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "semester_id")
@@ -55,14 +57,6 @@ public class Semester {
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "roles", "enterprise"})
     private User createdBy;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    @Builder.Default
-    private LocalDateTime createdAt = LocalDateTime.now();
-
-    @Column(name = "updated_at", nullable = false)
-    @Builder.Default
-    private LocalDateTime updatedAt = LocalDateTime.now();
-
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
@@ -77,15 +71,4 @@ public class Semester {
     @JsonIgnore
     @OneToMany(mappedBy = "semester", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<SystemAnnouncement> systemAnnouncements;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
 }

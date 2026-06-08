@@ -14,10 +14,11 @@ import lombok.*;
 @Entity
 @Table(name = "enterprise_evaluations")
 @Data
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class EnterpriseEvaluation {
+public class EnterpriseEvaluation extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "evaluation_id")
@@ -67,16 +68,6 @@ public class EnterpriseEvaluation {
     @Builder.Default
     private LocalDateTime submittedAt = LocalDateTime.now();
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    @Builder.Default
-    private LocalDateTime createdAt = LocalDateTime.now();
-
     @Version
     private Long version;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        if (submittedAt == null) submittedAt = LocalDateTime.now();
-    }
 }

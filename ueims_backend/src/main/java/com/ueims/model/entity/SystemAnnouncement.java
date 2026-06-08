@@ -13,9 +13,11 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(exclude = {"semester", "createdBy"})
+@EqualsAndHashCode(
+        callSuper = true,
+        exclude = {"semester", "createdBy"})
 @ToString(exclude = {"semester", "createdBy"})
-public class SystemAnnouncement {
+public class SystemAnnouncement extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "announcement_id")
@@ -44,25 +46,6 @@ public class SystemAnnouncement {
     @Column(name = "published_at")
     private LocalDateTime publishedAt;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    @Builder.Default
-    private LocalDateTime createdAt = LocalDateTime.now();
-
-    @Column(name = "updated_at", nullable = false)
-    @Builder.Default
-    private LocalDateTime updatedAt = LocalDateTime.now();
-
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
 }

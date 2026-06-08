@@ -1,7 +1,5 @@
 package com.ueims.model.entity;
 
-import java.time.LocalDateTime;
-
 import jakarta.persistence.*;
 
 import lombok.*;
@@ -9,10 +7,11 @@ import lombok.*;
 @Entity
 @Table(name = "report_feedbacks")
 @Data
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ReportFeedback {
+public class ReportFeedback extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "feedback_id")
@@ -31,13 +30,4 @@ public class ReportFeedback {
 
     @Column(name = "action", nullable = false, length = 20)
     private String action;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    @Builder.Default
-    private LocalDateTime createdAt = LocalDateTime.now();
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
 }

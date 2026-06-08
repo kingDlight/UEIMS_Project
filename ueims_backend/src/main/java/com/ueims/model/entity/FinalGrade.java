@@ -10,10 +10,11 @@ import lombok.*;
 @Entity
 @Table(name = "final_grades")
 @Data
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class FinalGrade {
+public class FinalGrade extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "grade_id")
@@ -57,14 +58,4 @@ public class FinalGrade {
     @Column(name = "graded_at", nullable = false)
     @Builder.Default
     private LocalDateTime gradedAt = LocalDateTime.now();
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    @Builder.Default
-    private LocalDateTime createdAt = LocalDateTime.now();
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        if (gradedAt == null) gradedAt = LocalDateTime.now();
-    }
 }

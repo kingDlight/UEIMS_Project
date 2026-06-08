@@ -1,7 +1,5 @@
 package com.ueims.model.entity;
 
-import java.time.LocalDateTime;
-
 import jakarta.persistence.*;
 
 import lombok.*;
@@ -9,10 +7,11 @@ import lombok.*;
 @Entity
 @Table(name = "notifications")
 @Data
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Notification {
+public class Notification extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "notification_id")
@@ -40,13 +39,4 @@ public class Notification {
     @Column(name = "is_read", nullable = false)
     @Builder.Default
     private Boolean isRead = false;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    @Builder.Default
-    private LocalDateTime createdAt = LocalDateTime.now();
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
 }

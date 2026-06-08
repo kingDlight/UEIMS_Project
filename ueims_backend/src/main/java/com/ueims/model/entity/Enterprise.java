@@ -14,9 +14,11 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(exclude = {"approvedBy", "users", "jobPosts"})
+@EqualsAndHashCode(
+        callSuper = true,
+        exclude = {"approvedBy", "users", "jobPosts"})
 @ToString(exclude = {"approvedBy", "users", "jobPosts"})
-public class Enterprise {
+public class Enterprise extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "enterprise_id")
@@ -63,14 +65,6 @@ public class Enterprise {
     @Column(name = "rejection_reason", columnDefinition = "TEXT")
     private String rejectionReason;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    @Builder.Default
-    private LocalDateTime createdAt = LocalDateTime.now();
-
-    @Column(name = "updated_at", nullable = false)
-    @Builder.Default
-    private LocalDateTime updatedAt = LocalDateTime.now();
-
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
@@ -79,15 +73,4 @@ public class Enterprise {
 
     @OneToMany(mappedBy = "enterprise", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<JobPost> jobPosts;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
 }

@@ -9,10 +9,11 @@ import lombok.*;
 @Entity
 @Table(name = "final_reports")
 @Data
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class FinalReport {
+public class FinalReport extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "final_report_id")
@@ -35,14 +36,4 @@ public class FinalReport {
     @Column(name = "is_late", nullable = false)
     @Builder.Default
     private Boolean isLate = false;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    @Builder.Default
-    private LocalDateTime createdAt = LocalDateTime.now();
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        if (submittedAt == null) submittedAt = LocalDateTime.now();
-    }
 }

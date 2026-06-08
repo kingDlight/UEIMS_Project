@@ -1,6 +1,5 @@
 package com.ueims.model.entity;
 
-import java.time.LocalDateTime;
 import java.util.Set;
 
 import jakarta.persistence.*;
@@ -13,9 +12,9 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(exclude = "rolePermissions")
+@EqualsAndHashCode(callSuper = true, exclude = "rolePermissions")
 @ToString(exclude = "rolePermissions")
-public class Permission {
+public class Permission extends BaseEntity {
     @Id
     @Column(name = "permission_name", length = 100)
     private String permissionName;
@@ -23,15 +22,6 @@ public class Permission {
     @Column(name = "description", length = 500)
     private String description;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    @Builder.Default
-    private LocalDateTime createdAt = LocalDateTime.now();
-
     @OneToMany(mappedBy = "permission", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<RolePermission> rolePermissions;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
 }
