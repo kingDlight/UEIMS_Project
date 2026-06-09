@@ -29,7 +29,7 @@ export const AreaChart: React.FC<{ data: number[]; color: string }> = ({ data, c
       {data.map((value, index) => {
         const x = (index / (data.length - 1)) * width;
         const y = height - ((value - min) / range) * (height - 20) - 10;
-        return <circle key={index} cx={x} cy={y} r="3.5" fill="#fff" stroke={color} strokeWidth="2" />;
+        return <circle key={`${x}-${y}`} cx={x} cy={y} r="3.5" fill="#fff" stroke={color} strokeWidth="2" />;
       })}
     </svg>
   );

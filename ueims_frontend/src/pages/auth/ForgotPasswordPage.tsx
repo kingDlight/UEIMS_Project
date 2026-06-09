@@ -158,7 +158,7 @@ export const ForgotPasswordPage: React.FC = () => {
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: AUTH_PRIMARY, fontWeight: 700, fontSize: 13, marginBottom: 24 }}>
             <img src={logoUeims} alt="UEIMS Logo" style={{ height: 24, objectFit: 'contain' }} />
-            UEIMS
+            <span>UEIMS</span>
           </div>
 
           <h1 style={{ fontSize: 26, fontWeight: 800, color: AUTH_TEXT_DARK, margin: '0 0 12px 0' }}>
@@ -234,12 +234,13 @@ export const ForgotPasswordPage: React.FC = () => {
 
           <div style={{ marginTop: 20, display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'center' }}>
             <span style={{ color: AUTH_TEXT_GRAY, fontSize: 13 }}>Nhớ mật khẩu?</span>
-            <a
+            <button
+              type="button"
               onClick={() => navigate('/login')}
-              style={{ color: AUTH_PRIMARY, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}
+              style={{ background: 'none', border: 'none', padding: 0, color: AUTH_PRIMARY, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}
             >
               Quay lại đăng nhập
-            </a>
+            </button>
           </div>
         </div>
       </div>

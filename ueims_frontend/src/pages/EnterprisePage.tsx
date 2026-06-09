@@ -13,7 +13,7 @@ const EnterprisePage: React.FC = () => {
             <h1 className="text-2xl font-bold mb-4">Enterprise Management</h1>
             <ul className="list-disc pl-5">
                 {data.map((item, idx) => (
-                    <li key={idx}>{JSON.stringify(item)}</li>
+                    <li key={item.id || JSON.stringify(item)}>{JSON.stringify(item)}</li>
                 ))}
             </ul>
         </div>

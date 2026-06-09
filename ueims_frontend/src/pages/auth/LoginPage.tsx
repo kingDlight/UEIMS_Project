@@ -97,13 +97,15 @@ export const LoginPage: React.FC = () => {
       >
         {/* Back to home */}
         <div style={{ marginBottom: 40 }}>
-          <a
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
+          <button
+            type="button"
+            onClick={() => {
               navigate('/');
             }}
             style={{
+              background: 'none',
+              border: 'none',
+              padding: 0,
               color: AUTH_TEXT_GRAY,
               textDecoration: 'none',
               fontSize: 13,
@@ -120,7 +122,7 @@ export const LoginPage: React.FC = () => {
               <path d="M19 12H5M12 19l-7-7 7-7"/>
             </svg>
             Quay về trang chủ
-          </a>
+          </button>
         </div>
 
         <div style={{ marginBottom: 12 }}>
@@ -222,10 +224,9 @@ export const LoginPage: React.FC = () => {
 
         {/* Forgot Password */}
         <div style={{ marginTop: 12, marginBottom: 24 }}>
-          <a
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
+          <button
+            type="button"
+            onClick={() => {
               navigate('/forgot-password');
             }}
             style={{
@@ -236,7 +237,7 @@ export const LoginPage: React.FC = () => {
             }}
           >
             Quên mật khẩu?
-          </a>
+          </button>
         </div>
 
         {/* Divider + Register */}
@@ -244,10 +245,9 @@ export const LoginPage: React.FC = () => {
           <div style={{ color: AUTH_TEXT_GRAY, fontSize: 13, marginBottom: 6 }}>
             Bạn là nhà tuyển dụng?
           </div>
-          <a
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
+          <button
+            type="button"
+            onClick={() => {
               navigate('/register-enterprise');
             }}
             style={{
@@ -258,7 +258,7 @@ export const LoginPage: React.FC = () => {
             }}
           >
             Đăng ký tài khoản nhà tuyển dụng →
-          </a>
+          </button>
         </div>
       </div>
 

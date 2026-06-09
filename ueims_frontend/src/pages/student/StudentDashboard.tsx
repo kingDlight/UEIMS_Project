@@ -725,7 +725,6 @@ const JobBoardTab: React.FC = () => {
       {selectedJob && (
         <div
           onClick={() => setSelectedJob(null)}
-          role="presentation"
           style={{
             position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
             zIndex: 1000, display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
@@ -828,7 +827,6 @@ const JobBoardTab: React.FC = () => {
       {showConfirmModal && selectedJob && (
         <div
           onClick={() => setShowConfirmModal(false)}
-          role="presentation"
           style={{
             position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
             zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24,
