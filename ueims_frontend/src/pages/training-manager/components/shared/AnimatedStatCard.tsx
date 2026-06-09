@@ -44,9 +44,6 @@ export const AnimatedStatCard: React.FC<{
       <section
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      onFocus={() => setIsHovered(true)}
-      onBlur={() => setIsHovered(false)}
-      tabIndex={0}
       style={{
         background: '#fff',
         borderRadius: 22,
@@ -56,7 +53,6 @@ export const AnimatedStatCard: React.FC<{
         transform: transformValue,
         transition: 'all .25s ease',
         opacity: isLoaded ? 1 : 0,
-        cursor: 'pointer',
         minHeight: 128,
         display: 'flex',
         flexDirection: 'column',

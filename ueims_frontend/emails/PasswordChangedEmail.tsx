@@ -7,11 +7,11 @@ import { EmailShell } from './components/EmailShell';
 import { EmailLink } from './components/EmailLink';
 import { EmailText } from './components/EmailText';
 
-export type PasswordChangedEmailProps = {
+export type PasswordChangedEmailProps = Readonly<{
   fullName: string;
   changedAt: string;
   loginUrl: string;
-};
+}>;
 
 export function PasswordChangedEmail({ fullName, changedAt, loginUrl }: PasswordChangedEmailProps) {
   return (

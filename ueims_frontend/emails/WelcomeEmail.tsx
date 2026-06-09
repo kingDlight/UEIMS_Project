@@ -7,12 +7,12 @@ import { EmailShell } from './components/EmailShell';
 import { EmailLink } from './components/EmailLink';
 import { EmailText } from './components/EmailText';
 
-export type WelcomeEmailProps = {
+export type WelcomeEmailProps = Readonly<{
   fullName: string;
   email: string;
   tempPassword: string;
   loginUrl: string;
-};
+}>;
 
 export function WelcomeEmail({ fullName, email, tempPassword, loginUrl }: WelcomeEmailProps) {
   return (

@@ -27,7 +27,7 @@ api.interceptors.request.use(
 );
 
 let isRefreshing = false;
-let failedQueue: Array<{ resolve: (value?: unknown) => void, reject: (reason?: any) => void }> = [];
+let failedQueue: Array<{ resolve: (value: string | null) => void, reject: (reason?: any) => void }> = [];
 
 const processQueue = (error: any, token: string | null = null) => {
   failedQueue.forEach(prom => {
@@ -56,7 +56,7 @@ api.interceptors.response.use(
     if ((status === 401 || code === 1006) && !originalRequest._retry) {
       if (isRefreshing) {
         // If already refreshing, wait for the new token
-        const token = await new Promise((resolve, reject) => {
+        const token = await new Promise<string | null>((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         });
         originalRequest.headers.Authorization = `Bearer ${token}`;

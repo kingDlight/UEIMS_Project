@@ -1,7 +1,7 @@
 import React, { useState, useRef, useMemo } from 'react';
 import { Table, Modal, Select, Input, Upload, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import type { UploadProps, UploadFile } from 'antd/es/upload';
+import type { UploadFile } from 'antd/es/upload';
 import {
   Upload as UploadIcon,
   Download,
@@ -76,7 +76,7 @@ const AVATAR_PALETTE = [
 ];
 
 function getAvatarColor(name: string) {
-  const idx = name.split('').reduce((a, c) => a + c.charCodeAt(0), 0) % AVATAR_PALETTE.length;
+  const idx = name.split('').reduce((a, c) => a + (c.codePointAt(0) ?? 0), 0) % AVATAR_PALETTE.length;
   return AVATAR_PALETTE[idx];
 }
 
@@ -621,14 +621,14 @@ export const StudentsTab: React.FC = () => {
       const blob = await EligibleStudentService.exportToExcel(
         activeSemester?.semesterId ?? ''
       );
-      const url = window.URL.createObjectURL(blob);
+      const url = globalThis.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = `OJT_Students_${
         activeSemester?.semesterCode ?? 'list'
       }.xlsx`;
       a.click();
-      window.URL.revokeObjectURL(url);
+      globalThis.URL.revokeObjectURL(url);
       message.success({ content: 'Xuất file thành công!', key: 'export' });
     } catch {
       message.error({ content: 'Lỗi khi xuất file.', key: 'export' });
@@ -1073,7 +1073,7 @@ export const StudentsTab: React.FC = () => {
             accept=".xlsx,.xls"
             fileList={uploadedFile ? [uploadedFile] : []}
             onChange={(info) =>
-              setUploadedFile((info.fileList[0] as UploadFile) || null)
+              setUploadedFile(info.fileList[0] || null)
             }
             beforeUpload={() => false}
             maxCount={1}

@@ -291,12 +291,14 @@ export const OJTTab: React.FC = () => {
     setRunning(true);
     await new Promise((r) => setTimeout(r, 1800));
     setPlacementData((prev) => {
+      const next = [...prev];
       let unplacedCount = 0;
-      return prev.map((p) => {
+      for (let i = 0; i < next.length; i++) {
+        const p = next[i];
         if (p.status === 'UNPLACED' && unplacedCount < 3) {
           unplacedCount++;
           const ent = ENTERPRISES[Math.floor(Math.random() * ENTERPRISES.length)];
-          return {
+          next[i] = {
             ...p,
             status: 'INTERVIEWING',
             source: 'SYSTEM_MATCHED',
@@ -305,8 +307,8 @@ export const OJTTab: React.FC = () => {
             enterpriseColor: ent.color,
           };
         }
-        return p;
-      });
+      }
+      return next;
     });
     setRunning(false);
     message.success({ content: 'Successfully matched unplaced students!', duration: 3 });
@@ -328,7 +330,7 @@ export const OJTTab: React.FC = () => {
   }, []);
 
   const handleViewContract = useCallback((record: PlacementRecord) => {
-    void message.info({ content: `Opening contract for ${record.studentName} at ${record.enterprise}…`, duration: 2 });
+    message.info({ content: `Opening contract for ${record.studentName} at ${record.enterprise}…`, duration: 2 });
   }, []);
 
   const filteredData = placementData.filter((p) => {

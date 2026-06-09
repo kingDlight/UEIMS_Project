@@ -6,10 +6,10 @@ import { EmailDivider } from './components/EmailDivider';
 import { EmailShell } from './components/EmailShell';
 import { EmailText } from './components/EmailText';
 
-export type ResetPasswordEmailProps = {
+export type ResetPasswordEmailProps = Readonly<{
   fullName: string;
   resetUrl: string;
-};
+}>;
 
 export function ResetPasswordEmail({ fullName, resetUrl }: ResetPasswordEmailProps) {
   return (
