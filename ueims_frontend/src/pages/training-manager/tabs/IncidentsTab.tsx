@@ -359,15 +359,11 @@ const ResolutionWorkspace: React.FC<{
   const [submitting, setSubmitting] = useState(false);
 
   const severity = deriveSeverity(incident);
-  const cfg = SEVERITY_CONFIG[severity];
   const isResolved = severity === 'RESOLVED';
 
   const charCount = resolutionNote.trim().length;
   const isValid = charCount >= 20 && outcome !== '';
   const isInvalid = charCount > 0 && charCount < 20;
-
-  const student = incident.assignment?.student;
-  const enterprise = incident.assignment?.enterprise;
 
   const handleSubmit = async () => {
     if (!isValid) return;

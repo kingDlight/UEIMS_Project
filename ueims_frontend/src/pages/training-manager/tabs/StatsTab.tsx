@@ -133,7 +133,7 @@ const CustomTooltip: React.FC<{
         </div>
       )}
       {payload.map((entry, i) => (
-        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: i < payload.length - 1 ? 5 : 0 }}>
+        <div key={entry.id || JSON.stringify(entry)} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: i < payload.length - 1 ? 5 : 0 }}>
           <span style={{ width: 8, height: 8, borderRadius: '50%', background: entry.color, flexShrink: 0 }} />
           <span style={{ fontSize: 12.5, color: cc.textSecondary, fontWeight: 500 }}>
             {entry.name}

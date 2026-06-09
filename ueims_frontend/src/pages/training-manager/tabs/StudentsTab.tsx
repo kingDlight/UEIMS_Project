@@ -551,17 +551,8 @@ export const StudentsTab: React.FC = () => {
   // Use mock data (no API call in demo)
   const students = MOCK_STUDENTS;
 
-  const preRegCount = students.filter(
-    (s) => deriveStatus(s.currentSemester) === 'PRE_REGISTRATION'
-  ).length;
   const eligibleCount = students.filter(
     (s) => deriveStatus(s.currentSemester) === 'ELIGIBLE'
-  ).length;
-  const inOjtCount = students.filter(
-    (s) => deriveStatus(s.currentSemester) === 'IN_OJT'
-  ).length;
-  const completedCount = students.filter(
-    (s) => deriveStatus(s.currentSemester) === 'COMPLETED'
   ).length;
   const eligibleTotal = eligibleCount;
 

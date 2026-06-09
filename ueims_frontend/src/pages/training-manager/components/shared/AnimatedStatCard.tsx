@@ -35,17 +35,26 @@ export const AnimatedStatCard: React.FC<{
     return () => controls.stop();
   }, [value, delay]);
 
+  let transformValue = 'translateY(18px)';
+  if (isLoaded) {
+    transformValue = isHovered ? 'translateY(-5px)' : 'translateY(0)';
+  }
+
   return (
       <div
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onFocus={() => setIsHovered(true)}
+      onBlur={() => setIsHovered(false)}
+      role="region"
+      tabIndex={0}
       style={{
         background: '#fff',
         borderRadius: 22,
         padding: '18px 18px 16px',
         boxShadow: isHovered ? '0 14px 44px rgba(15,23,42,.10)' : '0 4px 20px rgba(15,23,42,.05)',
         border: '1px solid rgba(226,232,240,.9)',
-        transform: isLoaded ? (isHovered ? 'translateY(-5px)' : 'translateY(0)') : 'translateY(18px)',
+        transform: transformValue,
         transition: 'all .25s ease',
         opacity: isLoaded ? 1 : 0,
         cursor: 'pointer',
