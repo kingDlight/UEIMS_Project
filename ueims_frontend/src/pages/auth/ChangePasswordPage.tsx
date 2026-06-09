@@ -75,6 +75,9 @@ function PasswordStrengthMeter({ password }: { password: string }) {
   );
 }
 
+const renderPasswordIcon = (visible: boolean) =>
+  visible ? <Eye size={16} color={FPT_GRAY} /> : <EyeOff size={16} color={FPT_GRAY} />;
+
 export const ChangePasswordPage: React.FC = () => {
   const navigate = useNavigate();
   const logout = useAuthStore((state) => state.logout);
@@ -316,9 +319,7 @@ export const ChangePasswordPage: React.FC = () => {
                   placeholder="Nhập mật khẩu hiện tại"
                   size="large"
                   visibilityToggle={{ visible: showOld, onVisibleChange: setShowOld }}
-                  iconRender={(visible) =>
-                    visible ? <Eye size={16} color={FPT_GRAY} /> : <EyeOff size={16} color={FPT_GRAY} />
-                  }
+                  iconRender={renderPasswordIcon}
                   prefix={<Lock size={16} color={FPT_GRAY} style={{ marginRight: 8 }} />}
                   style={{
                     borderRadius: 12,
@@ -355,9 +356,7 @@ export const ChangePasswordPage: React.FC = () => {
                   placeholder="Ít nhất 8 ký tự (A-Z, a-z, 0-9, !@#...)"
                   size="large"
                   visibilityToggle={{ visible: showNew, onVisibleChange: setShowNew }}
-                  iconRender={(visible) =>
-                    visible ? <Eye size={16} color={FPT_GRAY} /> : <EyeOff size={16} color={FPT_GRAY} />
-                  }
+                  iconRender={renderPasswordIcon}
                   prefix={<Lock size={16} color={FPT_GRAY} style={{ marginRight: 8 }} />}
                   suffix={
                     newPassword.length >= 8 ? (
@@ -409,9 +408,7 @@ export const ChangePasswordPage: React.FC = () => {
                   placeholder="Nhập lại mật khẩu mới"
                   size="large"
                   visibilityToggle={{ visible: showConfirm, onVisibleChange: setShowConfirm }}
-                  iconRender={(visible) =>
-                    visible ? <Eye size={16} color={FPT_GRAY} /> : <EyeOff size={16} color={FPT_GRAY} />
-                  }
+                  iconRender={renderPasswordIcon}
                   prefix={<Lock size={16} color={FPT_GRAY} style={{ marginRight: 8 }} />}
                   style={{
                     borderRadius: 12,

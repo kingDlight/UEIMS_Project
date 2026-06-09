@@ -284,7 +284,15 @@ export const SemesterTab: React.FC = () => {
       fixed: isMobile ? undefined : 'left',
       align: 'left' as const,
       width: 190,
-      render: (name: string, record: SemesterRecord) => (
+      render: (name: string, record: SemesterRecord) => {
+        const getIconStyles = (status: SemesterStatus) => {
+          if (status === 'Current') return { bg: cc.successMuted, color: cc.success };
+          if (status === 'Upcoming') return { bg: cc.brandMuted, color: cc.brand };
+          return { bg: cc.neutralMuted, color: cc.neutral };
+        };
+        const iconStyles = getIconStyles(record.status);
+
+        return (
         <div style={row}>
           {/* Calendar icon */}
           <div
@@ -292,22 +300,14 @@ export const SemesterTab: React.FC = () => {
               width: 36,
               height: 36,
               borderRadius: 10,
-              background: record.status === 'Current'
-                ? cc.successMuted
-                : record.status === 'Upcoming'
-                  ? cc.brandMuted
-                  : cc.neutralMuted,
+              background: iconStyles.bg,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               flexShrink: 0,
             }}
           >
-            <CalendarDays size={16} color={
-              record.status === 'Current' ? cc.success
-                : record.status === 'Upcoming' ? cc.brand
-                  : cc.neutral
-            } />
+            <CalendarDays size={16} color={iconStyles.color} />
           </div>
           {/* Name + code */}
           <div style={{ minWidth: 0, marginLeft: 10 }}>
@@ -331,7 +331,8 @@ export const SemesterTab: React.FC = () => {
             </div>
           </div>
         </div>
-      ),
+        );
+      },
     },
     {
       title: <HeaderBadge>Start Date</HeaderBadge>,

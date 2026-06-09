@@ -626,6 +626,13 @@ export const WeeklyReportsTab: React.FC = () => {
   const allSelected = filteredReports.length > 0 && selectedIds.size === filteredReports.length;
   const someSelected = selectedIds.size > 0 && selectedIds.size < filteredReports.length;
 
+  let batchApproveLabel = 'Batch Approve';
+  if (batchLoading) {
+    batchApproveLabel = 'Approving...';
+  } else if (selectedIds.size > 0) {
+    batchApproveLabel = 'Batch Approve (' + selectedIds.size + ')';
+  }
+
   return (
     <div className="wr-container" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       <style>{`
@@ -811,7 +818,7 @@ export const WeeklyReportsTab: React.FC = () => {
               }}
             >
               <CheckSquare size={14} strokeWidth={2.5} />
-              {batchLoading ? 'Approving...' : `Batch Approve${selectedIds.size > 0 ? ` (${selectedIds.size})` : ''}`}
+              {batchApproveLabel}
             </button>
           </div>
 

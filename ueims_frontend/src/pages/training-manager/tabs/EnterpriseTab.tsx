@@ -447,6 +447,45 @@ export const EnterpriseTab: React.FC = () => {
 
   const pendingEnterprises = enterprises.filter((e) => e.status === 'PENDING');
 
+  const renderPendingContent = () => {
+    if (loading) {
+      return (
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 240 }}>
+          <span style={{ color: cc.textMuted, fontSize: 14 }}>Loading enterprises...</span>
+        </div>
+      );
+    }
+    if (pendingEnterprises.length === 0) {
+      return (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.97 }}
+          animate={{ opacity: 1, scale: 1 }}
+          style={{ textAlign: 'center', padding: '48px 24px', background: cc.surface, borderRadius: cc.radiusLg, border: `1px solid ${cc.borderSubtle}` }}
+        >
+          <div style={{ width: 48, height: 48, borderRadius: cc.radiusMd, background: cc.successMuted, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
+            <CheckCircle2 size={24} color={cc.success} />
+          </div>
+          <div style={{ fontSize: 15, fontWeight: 700, color: cc.textPrimary }}>All caught up!</div>
+          <div style={{ fontSize: 13, color: cc.textSecondary, marginTop: 4 }}>No pending enterprise registrations at the moment.</div>
+        </motion.div>
+      );
+    }
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {pendingEnterprises.map((enterprise, i) => (
+          <ApprovalRow
+            key={enterprise.enterpriseId}
+            enterprise={enterprise}
+            index={i}
+            onApprove={handleApprove}
+            onReject={openRejectModal}
+            submitting={submitting}
+          />
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="ent-container" style={{ fontFamily: 'Inter, sans-serif' }}>
       <style>{`
@@ -522,36 +561,7 @@ export const EnterpriseTab: React.FC = () => {
                 </div>
               </div>
 
-              {loading ? (
-                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 240 }}>
-                  <span style={{ color: cc.textMuted, fontSize: 14 }}>Loading enterprises...</span>
-                </div>
-              ) : pendingEnterprises.length === 0 ? (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.97 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  style={{ textAlign: 'center', padding: '48px 24px', background: cc.surface, borderRadius: cc.radiusLg, border: `1px solid ${cc.borderSubtle}` }}
-                >
-                  <div style={{ width: 48, height: 48, borderRadius: cc.radiusMd, background: cc.successMuted, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
-                    <CheckCircle2 size={24} color={cc.success} />
-                  </div>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: cc.textPrimary }}>All caught up!</div>
-                  <div style={{ fontSize: 13, color: cc.textSecondary, marginTop: 4 }}>No pending enterprise registrations at the moment.</div>
-                </motion.div>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  {pendingEnterprises.map((enterprise, i) => (
-                    <ApprovalRow
-                      key={enterprise.enterpriseId}
-                      enterprise={enterprise}
-                      index={i}
-                      onApprove={handleApprove}
-                      onReject={openRejectModal}
-                      submitting={submitting}
-                    />
-                  ))}
-                </div>
-              )}
+              {renderPendingContent()}
             </motion.div>
           )}
 

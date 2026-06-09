@@ -21,6 +21,8 @@ import {
   PasswordStrengthMeter,
 } from '@/theme/authTheme';
 
+const renderPasswordIcon = (visible: boolean) => visible ? <Eye size={18} color="#94A3B8" /> : <EyeOff size={18} color="#94A3B8" />;
+
 export const ResetPasswordPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -176,7 +178,7 @@ export const ResetPasswordPage: React.FC = () => {
                 size="large"
                 prefix={<Lock size={18} color="#94A3B8" style={{ marginRight: 8 }} />}
                 visibilityToggle={{ visible: showPassword, onVisibleChange: setShowPassword }}
-                iconRender={(visible) => visible ? <Eye size={18} color="#94A3B8" /> : <EyeOff size={18} color="#94A3B8" />}
+                iconRender={renderPasswordIcon}
                 onChange={(e) => setPassword(e.target.value)}
                 style={{ borderRadius: 8, border: `1px solid ${AUTH_BORDER}`, padding: '10px 14px', fontSize: 14 }}
               />
@@ -197,7 +199,7 @@ export const ResetPasswordPage: React.FC = () => {
                 size="large"
                 prefix={<Lock size={18} color="#94A3B8" style={{ marginRight: 8 }} />}
                 visibilityToggle={{ visible: showConfirm, onVisibleChange: setShowConfirm }}
-                iconRender={(visible) => visible ? <Eye size={18} color="#94A3B8" /> : <EyeOff size={18} color="#94A3B8" />}
+                iconRender={renderPasswordIcon}
                 style={{ borderRadius: 8, border: `1px solid ${AUTH_BORDER}`, padding: '10px 14px', fontSize: 14 }}
               />
             </Form.Item>

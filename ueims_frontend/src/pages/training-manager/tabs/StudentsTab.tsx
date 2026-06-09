@@ -534,6 +534,11 @@ const StudentDetailModal: React.FC<{
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
+const renderShowTotal = (total: number, range: [number, number]) => (
+  <span style={{ fontSize: 12, color: st.textMuted }}>
+    Showing {range[0]}-{range[1]} of {total} students
+  </span>
+);
 export const StudentsTab: React.FC = () => {
   const [search, setSearch] = useState('');
   const [major, setMajor] = useState<string>(MAJORS[0]);
@@ -984,11 +989,7 @@ export const StudentsTab: React.FC = () => {
             pageSize,
             total: filteredStudents.length,
             showSizeChanger: false,
-            showTotal: (total, range) => (
-              <span style={{ fontSize: 12, color: st.textMuted }}>
-                Showing {range[0]}-{range[1]} of {total} students
-              </span>
-            ),
+            showTotal: renderShowTotal,
             onChange: (p) => setPage(p),
           }}
           locale={{

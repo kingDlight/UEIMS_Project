@@ -20,6 +20,8 @@ import {
   PasswordStrengthMeter,
 } from '@/theme/authTheme';
 
+const renderPasswordIcon = (visible: boolean) => visible ? <Eye size={12} color="#94A3B8" /> : <EyeOff size={12} color="#94A3B8" />;
+
 export const RegisterEnterprisePage: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -269,7 +271,7 @@ export const RegisterEnterprisePage: React.FC = () => {
                 <Input.Password
                   placeholder="Nhập mật khẩu"
                   prefix={<Lock size={12} color="#94A3B8" style={{ marginRight: 5 }} />}
-                  iconRender={(visible) => visible ? <Eye size={12} color="#94A3B8" /> : <EyeOff size={12} color="#94A3B8" />}
+                  iconRender={renderPasswordIcon}
                   onChange={(e) => setPassword(e.target.value)}
                   style={{ borderRadius: 5, border: `1px solid ${AUTH_BORDER}`, padding: '5px 8px', fontSize: 11 }}
                 />
@@ -284,7 +286,7 @@ export const RegisterEnterprisePage: React.FC = () => {
                 <Input.Password
                   placeholder="Nhập lại mật khẩu"
                   prefix={<Lock size={12} color="#94A3B8" style={{ marginRight: 5 }} />}
-                  iconRender={(visible) => visible ? <Eye size={12} color="#94A3B8" /> : <EyeOff size={12} color="#94A3B8" />}
+                  iconRender={renderPasswordIcon}
                   style={{ borderRadius: 5, border: `1px solid ${AUTH_BORDER}`, padding: '5px 8px', fontSize: 11 }}
                 />
               </Form.Item>

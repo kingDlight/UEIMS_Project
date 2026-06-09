@@ -134,6 +134,12 @@ interface ModernLayoutProps {
   basePath?: string; // e.g. "/app/tm-dashboard"
 }
 
+const renderProfileModal = (modal: React.ReactNode) => (
+  <div style={{ borderRadius: 24, overflow: 'hidden', boxShadow: '0 24px 48px -12px rgba(15, 23, 42, 0.15), 0 0 0 1px rgba(15, 23, 42, 0.05)' }}>
+    {modal}
+  </div>
+);
+
 export const ModernLayout: React.FC<ModernLayoutProps> = ({ 
   navItems, 
   children,
@@ -458,11 +464,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
         closable={false}
         styles={{ body: { padding: 0, borderRadius: 24, overflow: 'hidden' } }}
         width={380}
-        modalRender={(modal) => (
-          <div style={{ borderRadius: 24, overflow: 'hidden', boxShadow: '0 24px 48px -12px rgba(15, 23, 42, 0.15), 0 0 0 1px rgba(15, 23, 42, 0.05)' }}>
-            {modal}
-          </div>
-        )}
+        modalRender={renderProfileModal}
       >
         {/* Cover & Avatar Section */}
         <div style={{ position: 'relative' }}>
