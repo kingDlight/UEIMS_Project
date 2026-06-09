@@ -80,8 +80,10 @@ async function main() {
   console.log(`Wrote ${jobs.length} template(s) to: ${outDir}`);
 }
 
-main().catch((err) => {
+try {
+  await main();
+} catch (err) {
   // eslint-disable-next-line no-console
   console.error(err);
   process.exit(1);
-});
+}

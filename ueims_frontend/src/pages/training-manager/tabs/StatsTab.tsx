@@ -210,6 +210,11 @@ const MetricCard: React.FC<{
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
+const formatProgress = (percent?: number) => (
+  <span style={{ fontSize: 11.5, fontWeight: 700, color: cc.success, fontFamily: 'Inter, sans-serif' }}>
+    {percent}%
+  </span>
+);
 export const StatsTab: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -262,11 +267,7 @@ export const StatsTab: React.FC = () => {
             size="small"
             strokeColor={cc.success}
             trailColor={cc.borderSubtle}
-            format={() => (
-              <span style={{ fontSize: 11.5, fontWeight: 700, color: cc.success, fontFamily: 'Inter, sans-serif' }}>
-                {rate}%
-              </span>
-            )}
+            format={formatProgress}
             style={{ width: 120 }}
           />
         </div>

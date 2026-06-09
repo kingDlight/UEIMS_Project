@@ -121,12 +121,14 @@ export function EmailPreviewPage() {
   const currentMeta = templates.find((t) => t.id === active)!;
   const currentProps = (form[active as keyof typeof form] ?? {}) as Record<string, string>;
 
-  const fields =
-    active === 'reset-password' || active === 'password-reset'
-      ? ['fullName', 'resetUrl']
-      : active === 'password-changed'
-        ? ['fullName', 'changedAt', 'loginUrl']
-        : ['fullName', 'email', 'tempPassword', 'loginUrl'];
+  let fields: string[];
+  if (active === 'reset-password' || active === 'password-reset') {
+    fields = ['fullName', 'resetUrl'];
+  } else if (active === 'password-changed') {
+    fields = ['fullName', 'changedAt', 'loginUrl'];
+  } else {
+    fields = ['fullName', 'email', 'tempPassword', 'loginUrl'];
+  }
 
   return (
     <div style={{ display: 'flex', height: '100vh', background: '#F0F2F5', fontFamily: "'Segoe UI', 'Helvetica Neue', Arial, sans-serif" }}>
