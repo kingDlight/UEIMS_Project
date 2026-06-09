@@ -1,10 +1,10 @@
 import React from 'react';
 import { Container, Html, Head, Preview, Body, Section, Row, Column, Text } from '@react-email/components';
 
-export type EmailShellProps = {
+export type EmailShellProps = Readonly<{
   previewText: string;
   children: React.ReactNode;
-};
+}>;
 
 export function EmailShell({ previewText, children }: EmailShellProps) {
   return (

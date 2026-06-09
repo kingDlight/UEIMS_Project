@@ -800,7 +800,7 @@ export const NoticesTab: React.FC = () => {
         open={isModalOpen}
         onCancel={() => { setIsModalOpen(false); form.resetFields(); setSelectedNotice(null); }}
         footer={null}
-        destroyOnClose
+        centered
         width={520}
         styles={{
           body: { paddingTop: 16 },

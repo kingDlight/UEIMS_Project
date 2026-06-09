@@ -43,7 +43,7 @@ function getPasswordStrength(password: string): { level: number; color: string; 
   return { level: 4, color: STRENGTH_GREEN, label: 'Mạnh' };
 }
 
-function PasswordStrengthMeter({ password }: { password: string }) {
+function PasswordStrengthMeter({ password }: { readonly password: string }) {
   const strength = getPasswordStrength(password);
   if (!password) return null;
 
@@ -300,6 +300,7 @@ export const ChangePasswordPage: React.FC = () => {
             {/* Old Password */}
             <div style={{ marginBottom: 18 }}>
               <label
+                htmlFor="oldPassword"
                 style={{
                   display: 'block',
                   color: FPT_DARK,
@@ -334,6 +335,7 @@ export const ChangePasswordPage: React.FC = () => {
             {/* New Password */}
             <div style={{ marginBottom: 6 }}>
               <label
+                htmlFor="newPassword"
                 style={{
                   display: 'block',
                   color: FPT_DARK,
@@ -379,6 +381,7 @@ export const ChangePasswordPage: React.FC = () => {
             {/* Confirm Password */}
             <div style={{ marginBottom: 28, marginTop: 18 }}>
               <label
+                htmlFor="confirmPassword"
                 style={{
                   display: 'block',
                   color: FPT_DARK,

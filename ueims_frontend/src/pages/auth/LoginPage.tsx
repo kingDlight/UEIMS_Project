@@ -139,7 +139,7 @@ export const LoginPage: React.FC = () => {
 
         <Form onFinish={onFinish}>
           <div style={{ width: '100%', maxWidth: 320, marginBottom: 20 }}>
-            <label style={{ display: 'block', color: AUTH_PRIMARY, fontSize: 14, fontWeight: 600, marginBottom: 6 }}>
+            <label htmlFor="email" style={{ display: 'block', color: AUTH_PRIMARY, fontSize: 14, fontWeight: 600, marginBottom: 6 }}>
               Email
             </label>
             <Form.Item
@@ -167,7 +167,7 @@ export const LoginPage: React.FC = () => {
           </div>
 
           <div style={{ width: '100%', maxWidth: 320, marginBottom: 20 }}>
-            <label style={{ display: 'block', color: AUTH_PRIMARY, fontSize: 14, fontWeight: 600, marginBottom: 6 }}>
+            <label htmlFor="password" style={{ display: 'block', color: AUTH_PRIMARY, fontSize: 14, fontWeight: 600, marginBottom: 6 }}>
               Password
             </label>
             <Form.Item

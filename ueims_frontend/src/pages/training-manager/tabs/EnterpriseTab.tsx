@@ -91,7 +91,6 @@ const RejectModal: React.FC<{
       footer={null}
       width={480}
       centered
-      destroyOnClose
       styles={{
         mask: { background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(2px)' },
         content: {

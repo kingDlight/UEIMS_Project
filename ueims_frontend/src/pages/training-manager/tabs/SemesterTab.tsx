@@ -680,7 +680,6 @@ export const SemesterTab: React.FC = () => {
         open={isModalOpen}
         onCancel={() => { setIsModalOpen(false); form.resetFields(); }}
         footer={null}
-        destroyOnClose
         width={480}
         styles={{
           body: { paddingTop: 16 },
@@ -786,7 +785,6 @@ export const SemesterTab: React.FC = () => {
         open={isEditModalOpen}
         onCancel={() => { setIsEditModalOpen(false); editForm.resetFields(); }}
         footer={null}
-        destroyOnClose
         width={480}
         styles={{
           body: { paddingTop: 16 },

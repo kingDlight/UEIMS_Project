@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text } from '@react-email/components';
 
-export type EmailTextProps = {
+export type EmailTextProps = Readonly<{
   children: React.ReactNode;
   align?: 'left' | 'center' | 'right';
   color?: string;
@@ -9,7 +9,7 @@ export type EmailTextProps = {
   lineHeight?: string;
   fontWeight?: number;
   margin?: string;
-};
+}>;
 
 export function EmailText({
   children,

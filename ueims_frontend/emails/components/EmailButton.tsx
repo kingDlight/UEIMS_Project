@@ -1,11 +1,11 @@
 import React from 'react';
 import { Button } from '@react-email/components';
 
-export type EmailButtonProps = {
+export type EmailButtonProps = Readonly<{
   href: string;
   children: React.ReactNode;
   backgroundColor?: string;
-};
+}>;
 
 export function EmailButton({ href, children, backgroundColor = '#E67E22' }: EmailButtonProps) {
   return (
