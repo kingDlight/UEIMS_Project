@@ -7,10 +7,10 @@ import { EmailShell } from './components/EmailShell';
 import { EmailLink } from './components/EmailLink';
 import { EmailText } from './components/EmailText';
 
-export type PasswordResetEmailProps = {
+export type PasswordResetEmailProps = Readonly<{
   fullName: string;
   resetUrl: string;
-};
+}>;
 
 export function PasswordResetEmail({ fullName, resetUrl }: PasswordResetEmailProps) {
   return (

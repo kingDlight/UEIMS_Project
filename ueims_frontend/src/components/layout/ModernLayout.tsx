@@ -89,7 +89,6 @@ const CropAvatarModal = ({
       onCancel={onCancel}
       onOk={handleSaveCrop}
       width={400}
-      destroyOnClose
       okText="Lưu ảnh"
       cancelText="Hủy"
       okButtonProps={{ style: { background: '#ea580c', borderColor: '#ea580c', fontWeight: 600, fontFamily: 'Inter, sans-serif' } }}
@@ -345,7 +344,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
 
           {/* Notification Dropdown */}
           {notificationOpen && (
-            <div onMouseDown={(e) => e.stopPropagation()} className="modern-floating-menu">
+            <div role="presentation" onMouseDown={(e) => e.stopPropagation()} className="modern-floating-menu">
               <div className="modern-floating-menu-arrow" style={{ left: 32 }} />
               <div style={{ padding: '14px 16px', borderBottom: '1px solid rgba(233,101,0,.10)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
@@ -370,7 +369,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
 
           {/* Account Dropdown */}
           {accountOpen && (
-            <div onMouseDown={(e) => e.stopPropagation()} className="modern-floating-menu">
+            <div role="presentation" onMouseDown={(e) => e.stopPropagation()} className="modern-floating-menu">
               <div className="modern-floating-menu-arrow" style={{ left: 110 }} />
               <div style={{ padding: '14px 16px', borderBottom: '1px solid rgba(233,101,0,.10)' }}>
                 <div style={{ fontSize: 14, fontWeight: 800, color: '#1e293b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>

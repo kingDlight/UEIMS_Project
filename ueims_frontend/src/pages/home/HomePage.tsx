@@ -274,6 +274,7 @@ const HeroSection = ({ isDark, handleMouseMove, spotlightRef, scrollToSection }:
   const navigate = useNavigate();
   return (
     <section 
+      role="presentation"
       onMouseMove={handleMouseMove}
       className={`relative pt-36 pb-20 md:pt-48 md:pb-32 px-6 md:px-12 flex items-center justify-center overflow-hidden z-10 border-b transition-colors duration-300 ease-in-out ${
         isDark ? 'border-zinc-900' : 'border-slate-200'
@@ -567,7 +568,7 @@ export const HomePage: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   const [isDark, setIsDark] = useState(() => {
     const saved = localStorage.getItem('homepage-theme');
-    return saved !== null ? JSON.parse(saved) : true;
+    return saved === null ? true : JSON.parse(saved);
   });
   const spotlightRef = React.useRef<HTMLDivElement>(null);
 
@@ -604,6 +605,7 @@ export const HomePage: React.FC = () => {
       try {
         element.scrollIntoView({ behavior: 'smooth', block: 'start' });
       } catch (err) {
+        console.warn('Smooth scroll fallback', err);
         // Fallback for older browsers
         const offset = 80;
         const elementPosition = element.getBoundingClientRect().top + (window.pageYOffset || window.scrollY);

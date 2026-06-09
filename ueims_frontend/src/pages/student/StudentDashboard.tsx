@@ -724,6 +724,7 @@ const JobBoardTab: React.FC = () => {
       {/* Job Detail Drawer */}
       {selectedJob && (
         <div
+          role="presentation"
           onClick={() => setSelectedJob(null)}
           style={{
             position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
@@ -826,6 +827,7 @@ const JobBoardTab: React.FC = () => {
       {/* Confirm Modal */}
       {showConfirmModal && selectedJob && (
         <div
+          role="presentation"
           onClick={() => setShowConfirmModal(false)}
           style={{
             position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
