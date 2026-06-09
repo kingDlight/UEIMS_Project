@@ -274,7 +274,6 @@ const HeroSection = ({ isDark, handleMouseMove, spotlightRef, scrollToSection }:
   const navigate = useNavigate();
   return (
     <section 
-      role="presentation"
       onMouseMove={handleMouseMove}
       className={`relative pt-36 pb-20 md:pt-48 md:pb-32 px-6 md:px-12 flex items-center justify-center overflow-hidden z-10 border-b transition-colors duration-300 ease-in-out ${
         isDark ? 'border-zinc-900' : 'border-slate-200'

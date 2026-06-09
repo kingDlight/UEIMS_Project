@@ -170,7 +170,7 @@ export const ForgotPasswordPage: React.FC = () => {
 
           <Form onFinish={onFinish} layout="vertical" style={{ width: '100%' }}>
             <div style={{ marginBottom: 24 }}>
-              <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: AUTH_TEXT_DARK, marginBottom: 8 }}>
+              <label htmlFor="email" style={{ display: 'block', fontSize: 12, fontWeight: 700, color: AUTH_TEXT_DARK, marginBottom: 8 }}>
                 Địa chỉ Email
               </label>
               <Form.Item

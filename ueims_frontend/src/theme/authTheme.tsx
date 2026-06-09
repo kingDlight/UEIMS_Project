@@ -38,7 +38,7 @@ export function getPasswordStrength(password: string): { level: number; color: s
   return { level: 4, color: AUTH_STRENGTH_GREEN, label: 'Manh' };
 }
 
-export function PasswordStrengthMeter({ password }: { password: string }) {
+export function PasswordStrengthMeter({ password }: { readonly password: string }) {
   const strength = getPasswordStrength(password);
   const { hints } = validatePassword(password);
   if (!password) return null;

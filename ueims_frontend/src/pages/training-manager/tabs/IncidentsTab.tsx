@@ -9,7 +9,6 @@ import {
   Clock,
   XCircle,
   ShieldAlert,
-  X,
   AlertTriangle,
 } from 'lucide-react';
 import { IncidentService } from '@/services/IncidentService';
@@ -428,6 +427,7 @@ const ResolutionWorkspace: React.FC<{
       {/* Outcome dropdown */}
       <div style={{ marginBottom: 16 }}>
         <label
+          htmlFor="outcome"
           style={{
             display: 'block',
             fontSize: 11.5,
@@ -442,6 +442,7 @@ const ResolutionWorkspace: React.FC<{
           Outcome
         </label>
         <Select
+          id="outcome"
           value={outcome || undefined}
           onChange={setOutcome}
           placeholder="Select outcome..."
@@ -460,6 +461,7 @@ const ResolutionWorkspace: React.FC<{
       {/* Resolution note textarea */}
       <div style={{ marginBottom: 24 }}>
         <label
+          htmlFor="resolutionNote"
           style={{
             display: 'block',
             fontSize: 11.5,
@@ -474,6 +476,7 @@ const ResolutionWorkspace: React.FC<{
           Resolution Note <span style={{ color: cc.error }}>*</span>
         </label>
         <Input.TextArea
+          id="resolutionNote"
           value={resolutionNote}
           onChange={(e) => setResolutionNote(e.target.value)}
           rows={5}

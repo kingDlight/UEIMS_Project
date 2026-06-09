@@ -41,7 +41,7 @@ export const AnimatedStatCard: React.FC<{
   }
 
   return (
-      <section
+      <div
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={{
@@ -90,6 +90,6 @@ export const AnimatedStatCard: React.FC<{
           <Sparkline data={sparkline} color={color} width={180} height={34} />
         </div>
       )}
-    </section>
+    </div>
   );
 };

@@ -1036,7 +1036,7 @@ export const OJTTab: React.FC = () => {
       <Modal
         title={null} open={reviewDrawerOpen}
         onCancel={() => setReviewDrawerOpen(false)} footer={null}
-        width={540} centered destroyOnClose
+        width={540} centered
         styles={{ body: { padding: 0 }, mask: { backdropFilter: 'blur(2px)' } }}
       >
         <div style={{

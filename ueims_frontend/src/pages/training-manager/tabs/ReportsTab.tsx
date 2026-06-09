@@ -580,10 +580,11 @@ export const ReportsTab: React.FC = () => {
         {/* Right: Filters */}
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <label style={{ fontSize: 10.5, fontWeight: 700, color: st.textMuted, textTransform: 'uppercase', letterSpacing: '0.07em', fontFamily: 'Inter, sans-serif' }}>
+            <label htmlFor="semesterSelect" style={{ fontSize: 10.5, fontWeight: 700, color: st.textMuted, textTransform: 'uppercase', letterSpacing: '0.07em', fontFamily: 'Inter, sans-serif' }}>
               Semester
             </label>
             <Select
+              id="semesterSelect"
               value={semester}
               onChange={setSemester}
               style={{ width: 160 }}
@@ -598,10 +599,11 @@ export const ReportsTab: React.FC = () => {
             />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <label style={{ fontSize: 10.5, fontWeight: 700, color: st.textMuted, textTransform: 'uppercase', letterSpacing: '0.07em', fontFamily: 'Inter, sans-serif' }}>
+            <label htmlFor="categorySelect" style={{ fontSize: 10.5, fontWeight: 700, color: st.textMuted, textTransform: 'uppercase', letterSpacing: '0.07em', fontFamily: 'Inter, sans-serif' }}>
               Category
             </label>
             <Select
+              id="categorySelect"
               value={category}
               onChange={setCategory}
               style={{ width: 170 }}

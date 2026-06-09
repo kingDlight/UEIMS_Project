@@ -1,12 +1,12 @@
 import React from 'react';
 import { Link } from '@react-email/components';
 
-export type EmailLinkProps = {
+export type EmailLinkProps = Readonly<{
   href: string;
   children: React.ReactNode;
   color?: string;
   fontWeight?: number;
-};
+}>;
 
 export function EmailLink({ href, children, color = '#E67E22', fontWeight = 700 }: EmailLinkProps) {
   return (
