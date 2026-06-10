@@ -97,6 +97,12 @@ public enum ErrorCode {
     FEEDBACK_DUPLICATE(
             1060, "You have already submitted feedback for this enterprise in this semester", HttpStatus.BAD_REQUEST),
     FEEDBACK_RATING_INVALID(1061, "Feedback rating scores must be between 1 and 5", HttpStatus.BAD_REQUEST),
+    FINAL_GRADE_NOT_FOUND(1062, "Final academic grade not found", HttpStatus.NOT_FOUND),
+    EVALUATION_NOT_FOUND(1063, "Enterprise evaluation not found", HttpStatus.NOT_FOUND),
+    ASSIGNMENT_NOT_FOUND(1064, "Enterprise assignment not found", HttpStatus.NOT_FOUND),
+    STUDENT_ID_REQUIRED(1065, "Student ID is mandatory", HttpStatus.BAD_REQUEST),
+    TM_ID_REQUIRED(1066, "Training Manager ID is mandatory", HttpStatus.BAD_REQUEST),
+    SEMESTER_ID_REQUIRED(1067, "Semester ID is mandatory", HttpStatus.BAD_REQUEST),
     FEEDBACK_TEXT_REQUIRED(1062, "Feedback text is required when rejecting a report", HttpStatus.BAD_REQUEST),
 
     // Account related
@@ -114,9 +120,9 @@ public enum ErrorCode {
             HttpStatus.INTERNAL_SERVER_ERROR),
 
     // JWT / Auth related
-    TOKEN_INVALIDATED(1053, "Token has been invalidated", HttpStatus.UNAUTHORIZED),
-    SESSION_EXPIRED(1054, "Session expired due to inactivity", HttpStatus.UNAUTHORIZED),
-    INVALID_TOKEN_FORMAT(1055, "Invalid token format", HttpStatus.UNAUTHORIZED),
+    TOKEN_INVALIDATED(1068, "Token has been invalidated", HttpStatus.UNAUTHORIZED),
+    SESSION_EXPIRED(1069, "Session expired due to inactivity", HttpStatus.UNAUTHORIZED),
+    INVALID_TOKEN_FORMAT(1070, "Invalid token format", HttpStatus.UNAUTHORIZED),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

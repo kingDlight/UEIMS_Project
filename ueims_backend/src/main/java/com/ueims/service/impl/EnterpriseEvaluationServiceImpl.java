@@ -31,6 +31,12 @@ public class EnterpriseEvaluationServiceImpl implements EnterpriseEvaluationServ
     private final EnterpriseAssignmentRepository assignmentRepository;
     private final EligibleStudentRepository eligibleStudentRepository;
 
+    // BR-47: Weighted Score Formula (Constants)
+    private static final BigDecimal WEIGHT_ATTITUDE = new BigDecimal("0.2");
+    private static final BigDecimal WEIGHT_PROFESSIONALISM = new BigDecimal("0.4");
+    private static final BigDecimal WEIGHT_SOFT_SKILLS = new BigDecimal("0.2");
+    private static final BigDecimal WEIGHT_PROGRESS = new BigDecimal("0.2");
+
     @Override
     @Transactional(readOnly = true)
     public List<EnterpriseEvaluation> findAll() {
@@ -41,7 +47,7 @@ public class EnterpriseEvaluationServiceImpl implements EnterpriseEvaluationServ
     @Transactional(readOnly = true)
     public EnterpriseEvaluation findById(UUID id) {
         EnterpriseEvaluation evaluation =
-                repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION));
+                repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.EVALUATION_NOT_FOUND));
 
         validateAccess(evaluation);
         return evaluation;
@@ -74,7 +80,7 @@ public class EnterpriseEvaluationServiceImpl implements EnterpriseEvaluationServ
         // Lấy thông tin phân công từ DB để đảm bảo tính xác thực
         EnterpriseAssignment assignment = assignmentRepository
                 .findById(entity.getAssignment().getAssignmentId())
-                .orElseThrow(() -> new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION));
+                .orElseThrow(() -> new AppException(ErrorCode.ASSIGNMENT_NOT_FOUND));
 
         // BR-14: Kiểm tra trạng thái học kỳ. Không cho phép đánh giá nếu học kỳ đã LOCKED hoặc CLOSED
         String semesterStatus = assignment.getSemester().getStatus();
@@ -108,12 +114,11 @@ public class EnterpriseEvaluationServiceImpl implements EnterpriseEvaluationServ
             entity.setEvaluationId(existing.getEvaluationId());
         });
 
-        // BR-43: Weighted Score Formula
-        // Final Score = (Attitude × 0.2) + (Professionalism × 0.4) + (Soft Skills × 0.2) + (Progress × 0.2)
-        BigDecimal totalScore = attitude.multiply(new BigDecimal("0.2"))
-                .add(prof.multiply(new BigDecimal("0.4")))
-                .add(softSkills.multiply(new BigDecimal("0.2")))
-                .add(progress.multiply(new BigDecimal("0.2")))
+        // BR-47: Weighted Score Formula
+        BigDecimal totalScore = attitude.multiply(WEIGHT_ATTITUDE)
+                .add(prof.multiply(WEIGHT_PROFESSIONALISM))
+                .add(softSkills.multiply(WEIGHT_SOFT_SKILLS))
+                .add(progress.multiply(WEIGHT_PROGRESS))
                 .setScale(1, RoundingMode.HALF_UP);
 
         entity.setTotalScore(totalScore);
