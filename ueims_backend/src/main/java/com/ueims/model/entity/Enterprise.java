@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.*;
 
 import lombok.*;
@@ -69,8 +71,10 @@ public class Enterprise extends BaseEntity {
     private LocalDateTime deletedAt;
 
     @OneToMany(mappedBy = "enterprise")
+    @JsonManagedReference(value = "enterprise-users")
     private Set<User> users;
 
     @OneToMany(mappedBy = "enterprise", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference(value = "enterprise-job-posts")
     private Set<JobPost> jobPosts;
 }

@@ -10,7 +10,7 @@ interface ApiResponse<T> {
 export const EnterpriseService = {
   async getAllEnterprises(): Promise<Enterprise[]> {
     const response = await api.get<ApiResponse<Enterprise[]>>('/enterprises');
-    return response.data.result;
+    return response.data.result ?? [];
   },
 
   async getAll(): Promise<Enterprise[]> {

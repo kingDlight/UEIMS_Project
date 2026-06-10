@@ -9,6 +9,8 @@ import jakarta.validation.constraints.NotNull;
 
 import org.hibernate.annotations.SQLRestriction;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import lombok.*;
 
 @Entity
@@ -27,6 +29,7 @@ public class JobPost extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "enterprise_id", nullable = false)
+    @JsonBackReference(value = "enterprise-job-posts")
     private Enterprise enterprise;
 
     @ManyToOne(fetch = FetchType.LAZY)

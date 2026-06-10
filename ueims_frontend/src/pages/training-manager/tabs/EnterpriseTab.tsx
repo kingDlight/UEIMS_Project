@@ -403,7 +403,7 @@ export const EnterpriseTab: React.FC = () => {
     try {
       setLoading(true);
       const data = await EnterpriseService.getAllEnterprises();
-      setEnterprises(data);
+      setEnterprises(Array.isArray(data) ? data : []);
     } catch {
       setEnterprises([]);
     } finally {
