@@ -234,6 +234,10 @@ export const LoginPage: React.FC = () => {
               textDecoration: 'none',
               fontSize: 13,
               fontWeight: 500,
+              border: 'none',
+              background: 'transparent',
+              padding: 0,
+              cursor: 'pointer',
             }}
           >
             Quên mật khẩu?
@@ -255,6 +259,10 @@ export const LoginPage: React.FC = () => {
               textDecoration: 'none',
               fontSize: 13,
               fontWeight: 700,
+              border: 'none',
+              background: 'transparent',
+              padding: 0,
+              cursor: 'pointer',
             }}
           >
             Đăng ký tài khoản nhà tuyển dụng →
