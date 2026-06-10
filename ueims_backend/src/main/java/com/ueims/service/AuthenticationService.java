@@ -88,6 +88,7 @@ public class AuthenticationService {
     private String googleClientId;
 
     private static final String ACCESS_TOKEN_TYPE = "ACCESS";
+    private static final String REFRESH_TOKEN_TYPE = "REFRESH";
     private static final String LOCAL_AUTH_PROVIDER = "LOCAL";
     private static final String GOOGLE_AUTH_PROVIDER = "GOOGLE";
 
@@ -111,33 +112,12 @@ public class AuthenticationService {
                 .findByEmail(request.getEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-        if ("LOCKED".equals(user.getStatus())) {
-            throw new AppException(ErrorCode.USER_BANNED);
-        }
-
-        if (user.getLockedUntil() != null && user.getLockedUntil().isAfter(LocalDateTime.now())) {
-            throw new AppException(ErrorCode.USER_BANNED);
-        } else if (user.getLockedUntil() != null) {
-            user.setFailedLoginAttempts(0);
-            user.setLockedUntil(null);
-            userRepository.updateLoginAttemptsAndStatus(user.getUserId(), 0, user.getStatus(), null);
-        }
+        checkAndResetLockStatus(user);
 
         boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
 
         if (!authenticated) {
-            // Tăng bộ đếm và lưu TRỰC TIẾP bằng SQL, bỏ qua Hibernate
-            int attempts = user.getFailedLoginAttempts() + 1;
-            LocalDateTime lockedUntil = null;
-            if (attempts >= 5) {
-                lockedUntil = LocalDateTime.now().plusMinutes(30);
-            }
-            userRepository.updateLoginAttemptsAndStatus(user.getUserId(), attempts, user.getStatus(), lockedUntil);
-
-            if (attempts >= 5) {
-                throw new AppException(ErrorCode.USER_BANNED);
-            }
-            throw new AppException(ErrorCode.UNAUTHENTICATED);
+            handleFailedLogin(user);
         }
 
         // Đăng nhập thành công → Reset bộ đếm
@@ -145,13 +125,46 @@ public class AuthenticationService {
             userRepository.updateLoginAttemptsAndStatus(user.getUserId(), 0, user.getStatus(), null);
         }
 
-        // BR-02: Simultaneous Session Control - Invalidate old sessions
+        return handleAuthenticationSuccess(user, request.getDeviceId());
+    }
+
+    private void checkAndResetLockStatus(User user) {
+        if ("LOCKED".equals(user.getStatus())) {
+            throw new AppException(ErrorCode.USER_BANNED);
+        }
+
+        if (user.getLockedUntil() != null) {
+            if (user.getLockedUntil().isAfter(LocalDateTime.now())) {
+                throw new AppException(ErrorCode.USER_BANNED);
+            } else {
+                user.setFailedLoginAttempts(0);
+                user.setLockedUntil(null);
+                userRepository.updateLoginAttemptsAndStatus(user.getUserId(), 0, user.getStatus(), null);
+            }
+        }
+    }
+
+    private void handleFailedLogin(User user) {
+        int attempts = user.getFailedLoginAttempts() + 1;
+        LocalDateTime lockedUntil = null;
+        if (attempts >= 5) {
+            lockedUntil = LocalDateTime.now().plusMinutes(30);
+        }
+        userRepository.updateLoginAttemptsAndStatus(user.getUserId(), attempts, user.getStatus(), lockedUntil);
+
+        if (attempts >= 5) {
+            throw new AppException(ErrorCode.USER_BANNED);
+        }
+        throw new AppException(ErrorCode.UNAUTHENTICATED);
+    }
+
+    private AuthenticationResponse handleAuthenticationSuccess(User user, String deviceId) {
         userSessionManagementService.invalidateOldSessions(user.getEmail());
 
-        var token = generateToken(user, validDuration, ACCESS_TOKEN_TYPE);
-        var refreshToken = generateToken(user, refreshableDuration, "REFRESH");
+        String token = generateToken(user, validDuration, ACCESS_TOKEN_TYPE);
+        String refreshToken = generateToken(user, refreshableDuration, REFRESH_TOKEN_TYPE);
 
-        saveAuthSessions(user, token, refreshToken, request.getDeviceId());
+        saveAuthSessions(user, token, refreshToken, deviceId);
         auditLoginSuccess(user);
 
         return AuthenticationResponse.builder()
@@ -206,9 +219,6 @@ public class AuthenticationService {
         }
 
         User user = userRepository.findByEmail(email).orElseGet(() -> createGoogleUser(email, fullName, pictureUrl));
-        if (user != null && isLocalUser(user)) {
-            throw new AppException(ErrorCode.ACCOUNT_COLLISION);
-        }
 
         if (GOOGLE_AUTH_PROVIDER.equals(user.getAuthProvider())) {
             boolean updated = false;
@@ -224,28 +234,9 @@ public class AuthenticationService {
                 userRepository.save(user);
             }
         }
-        if ("LOCKED".equals(user.getStatus())) {
-            throw new AppException(ErrorCode.USER_BANNED);
-        }
+        checkAndResetLockStatus(user);
 
-        if (user.getLockedUntil() != null && user.getLockedUntil().isAfter(LocalDateTime.now())) {
-            throw new AppException(ErrorCode.USER_BANNED);
-        }
-
-        userSessionManagementService.invalidateOldSessions(user.getEmail());
-
-        String token = generateToken(user, validDuration, ACCESS_TOKEN_TYPE);
-        String refreshToken = generateToken(user, refreshableDuration, "REFRESH");
-
-        saveAuthSessions(user, token, refreshToken, request.getDeviceId());
-        auditLoginSuccess(user);
-
-        return AuthenticationResponse.builder()
-                .token(token)
-                .refreshToken(refreshToken)
-                .authenticated(true)
-                .mustChangePassword(Boolean.TRUE.equals(user.getMustChangePassword()))
-                .build();
+        return handleAuthenticationSuccess(user, request.getDeviceId());
     }
 
     private User createGoogleUser(String email, String fullName, String pictureUrl) {
@@ -299,13 +290,12 @@ public class AuthenticationService {
         }
     }
 
-    private boolean isLocalUser(User user) {
-        return user.getAuthProvider() == null || LOCAL_AUTH_PROVIDER.equals(user.getAuthProvider());
-    }
-
     private void auditLoginSuccess(User user) {
-        HttpServletRequest httpRequest =
-                ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        if (attributes == null) {
+            return;
+        }
+        HttpServletRequest httpRequest = attributes.getRequest();
 
         AuditLog auditLog = AuditLog.builder()
                 .user(user)
@@ -336,7 +326,7 @@ public class AuthenticationService {
     @Transactional
     public AuthenticationResponse refreshToken(RefreshRequest request) {
         try {
-            var signedJWT = verifyToken(request.getToken(), "REFRESH");
+            var signedJWT = verifyToken(request.getToken(), REFRESH_TOKEN_TYPE);
 
             var jit = signedJWT.getJWTClaimsSet().getJWTID();
             var expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();

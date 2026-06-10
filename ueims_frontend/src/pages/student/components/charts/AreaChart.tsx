@@ -19,9 +19,8 @@ interface AreaChartProps {
 const CustomTooltip: React.FC<{
   active?: boolean;
   payload?: Array<{ value: number }>;
-  label?: string;
 }> = ({ active, payload }) => {
-  if (active && payload && payload.length) {
+  if (active && payload?.length) {
     return (
       <div style={{
         background: cc.surface,
