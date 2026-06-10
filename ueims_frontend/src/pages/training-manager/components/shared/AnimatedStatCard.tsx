@@ -42,6 +42,7 @@ export const AnimatedStatCard: React.FC<{
 
   return (
       <div
+      role="presentation"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={{

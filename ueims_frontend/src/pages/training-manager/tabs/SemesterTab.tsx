@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Table, Modal, Form, DatePicker, Input, Button, Popconfirm, message, Spin, Select } from 'antd';
+import { Table, Modal, Form, DatePicker, Input, Button, Popconfirm, message, Select } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import {
   Plus,
@@ -9,7 +9,6 @@ import {
   Star,
 } from 'lucide-react';
 import dayjs from 'dayjs';
-import { c } from '../constants';
 
 // ============================================================
 // COLOR UTILITY
@@ -605,7 +604,7 @@ export const SemesterTab: React.FC = () => {
                 fontWeight: 500,
               }}
             >
-              {semesters.length} semester{semesters.length !== 1 ? 's' : ''}
+              {semesters.length} semester{semesters.length === 1 ? '' : 's'}
             </span>
           </div>
 

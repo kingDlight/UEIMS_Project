@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { features } from '../constants';
+import React from 'react';
 
 export const Footer = ({ isDark, scrollToSection }: { isDark: boolean, scrollToSection: (h: string) => void }) => (
   <footer className={`border-t px-6 md:px-12 py-16 relative z-10 transition-colors duration-300 ease-in-out ${isDark ? 'bg-[#070a11] border-zinc-900/60 text-zinc-400' : 'bg-slate-100 border-slate-200 text-slate-600'}`}>
