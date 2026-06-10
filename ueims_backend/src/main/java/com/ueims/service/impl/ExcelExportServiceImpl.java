@@ -32,10 +32,9 @@ public class ExcelExportServiceImpl implements ExcelExportService {
 
     @Override
     public ResponseEntity<byte[]> exportAtRiskStudents(UUID semesterId) {
-        List<AtRiskStudent> students = atRiskStudentRepository.findBySemesterId(semesterId);
-        if (students.size() > 10000) {
-            students = students.subList(0, 10000);
-        }
+        List<AtRiskStudent> students = atRiskStudentRepository
+                .findBySemesterId(semesterId, PageRequest.of(0, 10000))
+                .getContent();
 
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("At-Risk Students");
