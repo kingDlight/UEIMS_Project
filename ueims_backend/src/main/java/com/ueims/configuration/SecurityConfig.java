@@ -30,6 +30,7 @@ public class SecurityConfig {
         "/api/auth/forgot-password",
         "/api/auth/reset-password",
         "/api/auth/register-enterprise",
+        "/api/auth/google",
         "/api/test/**"
     };
 
@@ -39,7 +40,11 @@ public class SecurityConfig {
             CustomJwtDecoder customJwtDecoder,
             RequirePasswordChangeFilter requirePasswordChangeFilter)
             throws Exception {
-        httpSecurity.authorizeHttpRequests(request -> request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS)
+        httpSecurity.authorizeHttpRequests(request -> request.requestMatchers(HttpMethod.OPTIONS, "/**")
+                .permitAll()
+                .requestMatchers(HttpMethod.GET, "/google-login-test.html")
+                .permitAll()
+                .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS)
                 .permitAll()
                 .anyRequest()
                 .authenticated());

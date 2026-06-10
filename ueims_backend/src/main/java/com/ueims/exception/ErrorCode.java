@@ -103,6 +103,14 @@ public enum ErrorCode {
     WRONG_OLD_PASSWORD(2002, "Mật khẩu cũ không chính xác", HttpStatus.BAD_REQUEST),
     PASSWORDS_NOT_MATCH(2003, "Mật khẩu mới và xác nhận không khớp", HttpStatus.BAD_REQUEST),
     USER_ALREADY_HAS_ROLE(2004, "Người dùng đã có vai trò. Chỉ được gán một vai trò duy nhất.", HttpStatus.BAD_REQUEST),
+    ACCOUNT_COLLISION(
+            2005,
+            "Tài khoản Google trùng với tài khoản nội bộ cùng email. Vui lòng đăng nhập bằng email/mật khẩu hoặc liên kết tài khoản.",
+            HttpStatus.CONFLICT),
+    GOOGLE_CLIENT_ID_NOT_CONFIGURED(
+            2006,
+            "Google client ID chưa được cấu hình. Vui lòng thiết lập GOOGLE_CLIENT_ID.",
+            HttpStatus.INTERNAL_SERVER_ERROR),
 
     // JWT / Auth related
     TOKEN_INVALIDATED(1053, "Token has been invalidated", HttpStatus.UNAUTHORIZED),

@@ -38,6 +38,13 @@ public class User extends BaseEntity {
     @Column(name = "full_name", nullable = false)
     private String fullName;
 
+    @Column(name = "avatar_url")
+    private String avatarUrl;
+
+    @Column(name = "auth_provider", length = 20)
+    @Builder.Default
+    private String authProvider = "LOCAL";
+
     @Column(name = "phone", length = 20)
     private String phone;
 
