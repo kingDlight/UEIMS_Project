@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { features } from '../constants';
 
 export const FeaturesSection = ({ isDark }: { isDark: boolean }) => (

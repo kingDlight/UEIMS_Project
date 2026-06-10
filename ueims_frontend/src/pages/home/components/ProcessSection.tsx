@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { steps } from '../constants';
 
 export const ProcessSection = ({ isDark }: { isDark: boolean }) => (

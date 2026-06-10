@@ -473,8 +473,8 @@ const JobBoardTab: React.FC = () => {
           </div>
           {/* UC-52: Match My Profile & Tech Filter */}
           <div style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-              <input type="checkbox" checked={matchProfile} onChange={(e) => setMatchProfile(e.target.checked)} style={{ width: 18, height: 18 }} />
+            <label htmlFor="matchProfile" style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+              <input id="matchProfile" type="checkbox" checked={matchProfile} onChange={(e) => setMatchProfile(e.target.checked)} style={{ width: 18, height: 18 }} />
               <span style={{ fontSize: 13, fontWeight: 600, color: cc.text }}>Match My Profile</span>
             </label>
             <span style={{ fontSize: 12, color: cc.textMuted }}>Filter by:</span>
@@ -787,9 +787,9 @@ const ScheduleTab: React.FC = () => {
               </p>
             </div>
             <div style={{ marginBottom: 16 }}>
-              <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>
+              <div>
                 Reason for Refusal <span style={{ color: cc.danger }}>*</span>
-              </label>
+              </div>
               <textarea
                 value={declineReason}
                 onChange={(e) => setDeclineReason(e.target.value)}
@@ -1034,11 +1034,11 @@ const ReportsTab: React.FC = () => {
           <NeuSurface style={{ padding: 24, marginBottom: 20 }}>
             <h3 style={{ fontSize: 16, fontWeight: 700, color: cc.text, margin: '0 0 16px' }}>Submit Weekly Report</h3>
             <div style={{ marginBottom: 16 }}>
-              <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>Week Number *</label>
+              <div>Week Number *</div>
               <input type="number" value={formData.weekNumber} onChange={(e) => setFormData({ ...formData, weekNumber: e.target.value })} style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13 }} />
             </div>
             <div style={{ marginBottom: 16 }}>
-              <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>Report Content *</label>
+              <div>Report Content *</div>
               <textarea value={formData.content} onChange={(e) => setFormData({ ...formData, content: e.target.value })} rows={5} placeholder="Describe your work progress this week..." style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13, fontFamily: "'Inter', sans-serif", resize: 'vertical' }} />
             </div>
             <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
@@ -1065,7 +1065,7 @@ const ReportsTab: React.FC = () => {
               </div>
             )}
             <div style={{ marginBottom: 16 }}>
-              <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>Revised Content *</label>
+              <div>Revised Content *</div>
               <textarea value={formData.content} onChange={(e) => setFormData({ ...formData, content: e.target.value })} rows={5} placeholder="Revise your report based on the feedback..." style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13, fontFamily: "'Inter', sans-serif", resize: 'vertical' }} />
             </div>
             <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
@@ -1122,9 +1122,9 @@ const ReportsTab: React.FC = () => {
 // ============================================================
 const RatingInput: React.FC<{ label: string; value: number; onChange: (v: number) => void; required?: boolean }> = ({ label, value, onChange, required }) => (
   <div style={{ marginBottom: 16 }}>
-    <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 8 }}>
+    <div>
       {label} {required && <span style={{ color: cc.danger }}>*</span>}
-    </label>
+    </div>
     <div style={{ display: 'flex', gap: 8 }}>
       {[1, 2, 3, 4, 5].map(star => (
         <button key={star} onClick={() => onChange(star)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 28, color: star <= value ? cc.warning : cc.border }}>
@@ -1216,7 +1216,7 @@ const FeedbackTab: React.FC = () => {
           </div>
 
           <div style={{ marginBottom: 16 }}>
-            <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>Written Comments (Optional)</label>
+            <div>Written Comments (Optional)</div>
             <textarea value={comment} onChange={(e) => setComment(e.target.value)} rows={4} placeholder="Share your detailed experience..." style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13, fontFamily: "'Inter', sans-serif", resize: 'vertical' }} />
           </div>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
@@ -1589,15 +1589,15 @@ const SettingsTab: React.FC = () => {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div>
-              <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>Current Password</label>
+              <div>Current Password</div>
               <input type="password" value={formData.currentPassword} onChange={(e) => setFormData({ ...formData, currentPassword: e.target.value })} style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13 }} />
             </div>
             <div>
-              <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>New Password</label>
+              <div>New Password</div>
               <input type="password" value={formData.newPassword} onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })} style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13 }} />
             </div>
             <div>
-              <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>Confirm New Password</label>
+              <div>Confirm New Password</div>
               <input type="password" value={formData.confirmPassword} onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })} style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13 }} />
             </div>
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>

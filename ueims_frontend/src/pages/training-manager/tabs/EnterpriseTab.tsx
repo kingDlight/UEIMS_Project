@@ -135,9 +135,9 @@ const RejectModal: React.FC<{
         </div>
 
         <div style={{ marginBottom: 8 }}>
-          <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: cc.textPrimary, marginBottom: 6 }}>
+          <div>
             Reason for rejection <span style={{ color: cc.error }}>*</span>
-          </label>
+          </div>
           <Input.TextArea
             value={reason}
             onChange={(e) => setReason(e.target.value)}
