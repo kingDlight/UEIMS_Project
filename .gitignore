@@ -163,9 +163,16 @@ prisma/
 .scannerwork
 
 # test files
+<<<<<<< HEAD
 create-collection.js
 query.js
 test-api.js
 test-prisma.js
+=======
+test-prisma.js
+create-collection.js
+test-api.js
+query.js
+>>>>>>> 151762983b290f852c0d37370dbf9f0e3353f0f3
 test-collection.json
 update-pass.js
