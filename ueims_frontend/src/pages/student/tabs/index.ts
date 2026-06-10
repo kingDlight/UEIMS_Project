@@ -1,0 +1,11 @@
+export { StudentDashboardTab } from './DashboardTab';
+export { ProfileTab } from './ProfileTab';
+export { JobBoardTab } from './JobBoardTab';
+export { ApplicationsTab } from './ApplicationsTab';
+export { ScheduleTab } from './ScheduleTab';
+export { TrainingPlanTab } from './TrainingPlanTab';
+export { ReportsTab } from './ReportsTab';
+export { FinalReportTab } from './FinalReportTab';
+export { EvaluationTab } from './EvaluationTab';
+export { FeedbackTab } from './FeedbackTab';
+export { SettingsTab } from './SettingsTab';

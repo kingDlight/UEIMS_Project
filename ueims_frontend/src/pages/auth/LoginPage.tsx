@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { AuthService } from '@/services/AuthService';
 import { getDeviceId } from '@/utils/device';
+import { extractUserFromToken } from '@/utils/jwt';
 import { GoogleLogin } from '@react-oauth/google';
 import type { CredentialResponse } from '@react-oauth/google';
 import {
@@ -19,6 +20,12 @@ export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const loginWithTokens = useAuthStore((state) => state.loginWithTokens);
   const [loading, setLoading] = useState(false);
+
+  const getRedirectPath = (roles: string[]): string => {
+    if (roles.includes('STUDENT')) return '/student-dashboard';
+    if (roles.includes('ENTERPRISE')) return '/student-dashboard';
+    return '/app/dashboard';
+  };
 
   const onFinish = async (values: { email: string; password: string }) => {
     setLoading(true);
@@ -38,7 +45,9 @@ export const LoginPage: React.FC = () => {
 
       loginWithTokens(result.token, result.refreshToken);
       message.success('Đăng nhập thành công!');
-      navigate('/app/dashboard');
+      const payload = extractUserFromToken(result.token);
+      const redirectPath = getRedirectPath(payload?.roles || []);
+      navigate(redirectPath);
     } catch (error: any) {
       const code = error.response?.data?.code;
       const errorMsg = error.response?.data?.message;
@@ -74,7 +83,9 @@ export const LoginPage: React.FC = () => {
 
       loginWithTokens(result.token, result.refreshToken);
       message.success('Đăng nhập với Google thành công!');
-      navigate('/app/dashboard');
+      const payload = extractUserFromToken(result.token);
+      const redirectPath = getRedirectPath(payload?.roles || []);
+      navigate(redirectPath);
     } catch (error: any) {
       const errorMsg = error.response?.data?.message;
       if (errorMsg) {

@@ -162,6 +162,7 @@ public class AuthenticationService {
                 .build();
     }
 
+    @NonFinal
     private NimbusJwtDecoder googleJwtDecoder;
 
     public AuthenticationResponse authenticateWithGoogle(GoogleAuthenticationRequest request) {
@@ -171,7 +172,8 @@ public class AuthenticationService {
         }
 
         if (googleJwtDecoder == null) {
-            googleJwtDecoder = NimbusJwtDecoder.withJwkSetUri("https://www.googleapis.com/oauth2/v3/certs").build();
+            googleJwtDecoder = NimbusJwtDecoder.withJwkSetUri("https://www.googleapis.com/oauth2/v3/certs")
+                    .build();
         }
 
         Jwt googleJwt;
@@ -302,8 +304,8 @@ public class AuthenticationService {
     }
 
     private void auditLoginSuccess(User user) {
-        HttpServletRequest httpRequest = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
-                .getRequest();
+        HttpServletRequest httpRequest =
+                ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
 
         AuditLog auditLog = AuditLog.builder()
                 .user(user)
@@ -437,16 +439,13 @@ public class AuthenticationService {
 
             var verified = signedJWT.verify(verifier);
 
-            if (!(verified && expiryTime.after(new Date())))
-                throw new AppException(ErrorCode.UNAUTHENTICATED);
+            if (!(verified && expiryTime.after(new Date()))) throw new AppException(ErrorCode.UNAUTHENTICATED);
 
             if (invalidatedTokenRepository.existsById(
-                    signedJWT.getJWTClaimsSet().getJWTID()))
-                throw new AppException(ErrorCode.UNAUTHENTICATED);
+                    signedJWT.getJWTClaimsSet().getJWTID())) throw new AppException(ErrorCode.UNAUTHENTICATED);
 
             String tokenType = signedJWT.getJWTClaimsSet().getStringClaim("token_type");
-            if (!expectedTokenType.equals(tokenType))
-                throw new AppException(ErrorCode.UNAUTHENTICATED);
+            if (!expectedTokenType.equals(tokenType)) throw new AppException(ErrorCode.UNAUTHENTICATED);
 
             return signedJWT;
         } catch (ParseException | JOSEException e) {
