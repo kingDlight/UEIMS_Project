@@ -1,10 +1,12 @@
 import logoUeims from '@/assets/logo_ueims.png';
 import React, { useState } from 'react';
-import { Form, Input, Button, message } from 'antd';
+import { Form, Input, Button, message, Divider } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { AuthService } from '@/services/AuthService';
 import { getDeviceId } from '@/utils/device';
+import { GoogleLogin } from '@react-oauth/google';
+import type { CredentialResponse } from '@react-oauth/google';
 import {
   AUTH_PRIMARY,
   AUTH_PRIMARY_DARK,
@@ -51,6 +53,34 @@ export const LoginPage: React.FC = () => {
         message.error(errorMsg);
       } else {
         message.error('Đăng nhập thất bại. Vui lòng thử lại!');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse: CredentialResponse) => {
+    if (!credentialResponse.credential) return;
+    setLoading(true);
+    try {
+      const result = await AuthService.loginWithGoogle(credentialResponse.credential);
+      
+      if (result.mustChangePassword) {
+        loginWithTokens(result.token, result.refreshToken);
+        message.warning('Bạn cần đổi mật khẩu trước khi tiếp tục!');
+        navigate('/change-password');
+        return;
+      }
+
+      loginWithTokens(result.token, result.refreshToken);
+      message.success('Đăng nhập với Google thành công!');
+      navigate('/app/dashboard');
+    } catch (error: any) {
+      const errorMsg = error.response?.data?.message;
+      if (errorMsg) {
+        message.error(errorMsg);
+      } else {
+        message.error('Đăng nhập với Google thất bại. Vui lòng thử lại!');
       }
     } finally {
       setLoading(false);
@@ -221,6 +251,24 @@ export const LoginPage: React.FC = () => {
             </Button>
           </Form.Item>
         </Form>
+
+        <div style={{ width: '100%', maxWidth: 320 }}>
+          <Divider plain style={{ borderColor: '#e0e0e0', color: AUTH_TEXT_GRAY, fontSize: 13, margin: '20px 0' }}>
+            HOẶC
+          </Divider>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: 20 }}>
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={() => {
+                message.error('Đăng nhập với Google thất bại!');
+              }}
+              useOneTap
+              shape="pill"
+              theme="outline"
+            />
+          </div>
+        </div>
 
         {/* Forgot Password */}
         <div style={{ marginTop: 12, marginBottom: 24 }}>

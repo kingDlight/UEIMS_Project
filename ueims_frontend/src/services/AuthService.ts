@@ -1,4 +1,5 @@
 import { api } from './api';
+import { getDeviceId } from '@/utils/device';
 
 export interface LoginRequest {
   email: string;
@@ -87,5 +88,14 @@ export const AuthService = {
 
   registerEnterprise: async (data: EnterpriseRegistrationRequest): Promise<void> => {
     await api.post('/auth/register-enterprise', data);
+  },
+
+  loginWithGoogle: async (idToken: string): Promise<LoginResponse> => {
+    const deviceId = getDeviceId();
+    const response = await api.post<{ code: number; message: string; result: LoginResponse }>(
+      '/auth/google',
+      { idToken, deviceId }
+    );
+    return response.data.result;
   },
 };
