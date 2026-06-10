@@ -31,6 +31,12 @@ public class EnterpriseEvaluationServiceImpl implements EnterpriseEvaluationServ
     private final EnterpriseAssignmentRepository assignmentRepository;
     private final EligibleStudentRepository eligibleStudentRepository;
 
+    // BR-43: Trọng số các tiêu chí (Constants)
+    private static final BigDecimal WEIGHT_ATTITUDE = new BigDecimal("0.2");
+    private static final BigDecimal WEIGHT_PROFESSIONALISM = new BigDecimal("0.4");
+    private static final BigDecimal WEIGHT_SOFT_SKILLS = new BigDecimal("0.2");
+    private static final BigDecimal WEIGHT_PROGRESS = new BigDecimal("0.2");
+
     @Override
     @Transactional(readOnly = true)
     public List<EnterpriseEvaluation> findAll() {
@@ -109,11 +115,10 @@ public class EnterpriseEvaluationServiceImpl implements EnterpriseEvaluationServ
         });
 
         // BR-43: Weighted Score Formula
-        // Final Score = (Attitude × 0.2) + (Professionalism × 0.4) + (Soft Skills × 0.2) + (Progress × 0.2)
-        BigDecimal totalScore = attitude.multiply(new BigDecimal("0.2"))
-                .add(prof.multiply(new BigDecimal("0.4")))
-                .add(softSkills.multiply(new BigDecimal("0.2")))
-                .add(progress.multiply(new BigDecimal("0.2")))
+        BigDecimal totalScore = attitude.multiply(WEIGHT_ATTITUDE)
+                .add(prof.multiply(WEIGHT_PROFESSIONALISM))
+                .add(softSkills.multiply(WEIGHT_SOFT_SKILLS))
+                .add(progress.multiply(WEIGHT_PROGRESS))
                 .setScale(1, RoundingMode.HALF_UP);
 
         entity.setTotalScore(totalScore);
