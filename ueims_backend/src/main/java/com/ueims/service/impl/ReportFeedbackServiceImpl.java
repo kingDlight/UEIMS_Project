@@ -5,6 +5,8 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import com.ueims.exception.AppException;
+import com.ueims.exception.ErrorCode;
 import com.ueims.model.entity.ReportFeedback;
 import com.ueims.repository.ReportFeedbackRepository;
 import com.ueims.service.ReportFeedbackService;
@@ -28,6 +30,10 @@ public class ReportFeedbackServiceImpl implements ReportFeedbackService {
 
     @Override
     public ReportFeedback save(ReportFeedback entity) {
+        if ("REJECTED".equalsIgnoreCase(entity.getAction())
+                && (entity.getFeedbackText() == null || entity.getFeedbackText().isBlank())) {
+            throw new AppException(ErrorCode.FEEDBACK_TEXT_REQUIRED);
+        }
         return repository.save(entity);
     }
 

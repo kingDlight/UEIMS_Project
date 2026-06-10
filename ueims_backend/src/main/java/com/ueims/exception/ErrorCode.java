@@ -97,6 +97,7 @@ public enum ErrorCode {
     FEEDBACK_DUPLICATE(
             1060, "You have already submitted feedback for this enterprise in this semester", HttpStatus.BAD_REQUEST),
     FEEDBACK_RATING_INVALID(1061, "Feedback rating scores must be between 1 and 5", HttpStatus.BAD_REQUEST),
+    FEEDBACK_TEXT_REQUIRED(1062, "Feedback text is required when rejecting a report", HttpStatus.BAD_REQUEST),
 
     // Account related
     USER_BANNED(2001, "Tài khoản của bạn đã bị khóa do nhập sai mật khẩu quá 5 lần", HttpStatus.FORBIDDEN),
