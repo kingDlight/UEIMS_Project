@@ -30,8 +30,16 @@ public class InternshipPlanItemController {
 
     @PostMapping
     public ResponseEntity<com.ueims.dto.response.InternshipPlanItemDTO> create(
-            @Valid @RequestBody com.ueims.dto.response.InternshipPlanItemDTO entity) {
-        return ResponseEntity.ok(mapper.toDto(service.save(mapper.toEntity(entity))));
+            @Valid @RequestBody com.ueims.dto.request.InternshipPlanItemRequestDTO request) {
+        return ResponseEntity.ok(mapper.toDto(service.save(mapper.toEntity(request))));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<com.ueims.dto.response.InternshipPlanItemDTO> update(
+            @PathVariable UUID id, @Valid @RequestBody com.ueims.dto.request.InternshipPlanItemRequestDTO request) {
+        com.ueims.model.entity.InternshipPlanItem entity = mapper.toEntity(request);
+        entity.setPlanItemId(id);
+        return ResponseEntity.ok(mapper.toDto(service.save(entity)));
     }
 
     @DeleteMapping("/{id}")

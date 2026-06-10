@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { message } from 'antd';
+import { message, Spin, Badge, Popover } from 'antd';
 import { 
   UserOutlined, MailOutlined, PhoneOutlined, IdcardOutlined, BookOutlined,
   UploadOutlined, FileTextOutlined, TrophyOutlined, CalendarOutlined,
@@ -21,7 +21,6 @@ import { AreaChart } from './components/charts/AreaChart';
 import { cc, hexToRgba } from './constants';
 import { api } from '@/services/api';
 import type { NavItem } from '@/components/layout/ModernLayout';
-import { Spin } from 'antd';
 
 // ============================================================
 // ANIMATED NUMBER
@@ -1620,6 +1619,81 @@ const SettingsTab: React.FC = () => {
 };
 
 // ============================================================
+// NOTIFICATION BELL
+// ============================================================
+const NotificationBell: React.FC = () => {
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+  const fetchNotifications = async () => {
+    try {
+      const res = await api.get('/notifications/my');
+      setNotifications(res.data);
+    } catch (err) {
+      console.error('Failed to fetch notifications');
+    }
+  };
+
+  const markAsRead = async (id: string) => {
+    try {
+      await api.put(`/notifications/${id}/read`);
+      fetchNotifications();
+    } catch (err) {
+      console.error('Failed to mark notification as read');
+    }
+  };
+
+  const unreadCount = notifications.filter(n => !n.isRead).length;
+
+  const content = (
+    <div style={{ width: 320, maxHeight: 400, overflowY: 'auto' }}>
+      {notifications.length === 0 ? (
+        <div style={{ padding: 16, textAlign: 'center', color: cc.textMuted }}>No notifications yet</div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          {notifications.map((notif: any) => (
+            <div 
+              key={notif.notificationId} 
+              onClick={() => { if (!notif.isRead) markAsRead(notif.notificationId); }}
+              style={{ 
+                padding: '12px 16px', 
+                borderBottom: `1px solid ${cc.borderSubtle}`,
+                background: notif.isRead ? '#fff' : cc.infoMuted,
+                cursor: notif.isRead ? 'default' : 'pointer',
+                transition: 'background 0.2s'
+              }}
+            >
+              <div style={{ fontSize: 13, fontWeight: 600, color: cc.text }}>{notif.title}</div>
+              <div style={{ fontSize: 12, color: cc.textMuted, margin: '4px 0' }}>{notif.message}</div>
+              <div style={{ fontSize: 11, color: cc.textMuted }}>{new Date(notif.createdAt).toLocaleString()}</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
+  return (
+    <Popover content={content} title="Notifications" trigger="click" open={open} onOpenChange={setOpen} placement="bottomRight">
+      <Badge count={unreadCount} size="small">
+        <button style={{ 
+          background: 'none', border: 'none', cursor: 'pointer', 
+          width: 40, height: 40, borderRadius: '50%', 
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: cc.textMuted, transition: 'all 0.2s',
+        }}>
+          <BellOutlined style={{ fontSize: 20 }} />
+        </button>
+      </Badge>
+    </Popover>
+  );
+};
+
+// ============================================================
 // MAIN STUDENT DASHBOARD
 // ============================================================
 export const StudentDashboard: React.FC = () => {
@@ -1794,8 +1868,9 @@ export const StudentDashboard: React.FC = () => {
     <div style={{ minHeight: '100vh', background: cc.bg }}>
       {/* Top Navigation */}
       <div style={{ background: cc.surface, borderBottom: `1px solid ${cc.border}`, padding: '0 24px', position: 'sticky', top: 0, zIndex: 100 }}>
-        <div style={{ display: 'flex', gap: 4, overflowX: 'auto', maxWidth: 1200, margin: '0 auto' }}>
-          {navItems.map(item => (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', maxWidth: 1200, margin: '0 auto' }}>
+          <div style={{ display: 'flex', gap: 4, overflowX: 'auto' }}>
+            {navItems.map(item => (
             <button
               key={item.key}
               onClick={() => setActiveTab(item.key)}
@@ -1809,7 +1884,9 @@ export const StudentDashboard: React.FC = () => {
             >
               {item.icon} {item.label}
             </button>
-          ))}
+            ))}
+          </div>
+          <NotificationBell />
         </div>
       </div>
 

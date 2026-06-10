@@ -3,6 +3,7 @@ package com.ueims.service;
 import java.util.List;
 import java.util.UUID;
 
+import com.ueims.dto.request.FinalGradeRequest;
 import com.ueims.model.entity.FinalGrade;
 
 public interface FinalGradeService {
@@ -10,7 +11,7 @@ public interface FinalGradeService {
 
     FinalGrade findById(UUID id);
 
-    FinalGrade save(FinalGrade entity);
+    FinalGrade create(FinalGradeRequest request);
 
     void deleteById(UUID id);
 }
