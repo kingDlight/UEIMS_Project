@@ -161,3 +161,11 @@ Ueims.postman_collection.json
 prisma.config.ts
 prisma/
 .scannerwork
+
+# test files
+create-collection.js
+query.js
+test-api.js
+test-prisma.js
+test-collection.json
+update-pass.js
