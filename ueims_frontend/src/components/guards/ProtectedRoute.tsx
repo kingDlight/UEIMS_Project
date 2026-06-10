@@ -22,8 +22,12 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles }) 
 
       try {
         const result = await AuthService.introspect(token);
+        if (!result.valid) {
+          useAuthStore.getState().logout();
+        }
         setIsValid(result.valid);
       } catch {
+        useAuthStore.getState().logout();
         setIsValid(false);
       } finally {
         setIsValidating(false);
