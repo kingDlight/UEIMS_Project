@@ -40,7 +40,8 @@ INSERT INTO roles (role_name, description) VALUES
 CREATE TABLE permissions (
     permission_name VARCHAR(100) PRIMARY KEY,
     description     VARCHAR(500),
-    created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- TABLE 3: role_permissions
