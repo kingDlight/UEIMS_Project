@@ -1,16 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { message } from 'antd';
+import { motion } from 'framer-motion';
+import { message, Spin } from 'antd';
 import { 
   UserOutlined, MailOutlined, PhoneOutlined, IdcardOutlined, BookOutlined,
   UploadOutlined, FileTextOutlined, TrophyOutlined, CalendarOutlined,
   ClockCircleOutlined, CheckCircleOutlined, WarningOutlined, ExclamationCircleOutlined,
   RightOutlined, BankOutlined, TeamOutlined, SettingOutlined, BellOutlined,
   EyeOutlined, DownloadOutlined, EditOutlined, SaveOutlined, PlusOutlined,
-  SendOutlined, CloseCircleOutlined, StarOutlined, ScheduleOutlined,
-  FileProtectOutlined, SnippetsOutlined, LogoutOutlined, LockOutlined,
-  UploadOutlined as UploadIcon, FileOutlined, SearchOutlined, FilterOutlined,
-  ArrowUpOutlined, ArrowDownOutlined, EnvironmentOutlined, LinkOutlined,
+  SendOutlined, CloseCircleOutlined, StarOutlined,
+  SnippetsOutlined, LockOutlined,
+  UploadOutlined as UploadIcon, FileOutlined, SearchOutlined, EnvironmentOutlined, LinkOutlined,
 } from '@ant-design/icons';
 import { NeuSurface } from './components/shared/NeuSurface';
 import { SmallPill } from './components/shared/SmallPill';
@@ -21,7 +20,6 @@ import { AreaChart } from './components/charts/AreaChart';
 import { cc, hexToRgba } from './constants';
 import { api } from '@/services/api';
 import type { NavItem } from '@/components/layout/ModernLayout';
-import { Spin } from 'antd';
 
 // ============================================================
 // ANIMATED NUMBER
@@ -48,15 +46,12 @@ const AnimatedNumber: React.FC<{ value: number }> = ({ value }) => {
 // HERO STAT MINI CARD (reused in hero section)
 // ============================================================
 const HeroMiniCard: React.FC<{ label: string; value: number; delay?: number }> = ({ label, value, delay = 0 }) => {
-  const [hovered, setHovered] = useState(false);
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay }}
       whileHover={{ y: -2, transition: { duration: 0.2 }, boxShadow: '0 8px 24px rgba(15,23,42,.12)' }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
       style={{
         padding: '10px 14px',
         borderRadius: 16,
@@ -106,7 +101,7 @@ const CTAButton: React.FC<{
   return (
     <motion.button
       onClick={onClick}
-      whileHover={disabled ? {} : { y: -1, boxShadow: hoverBg ? shadow : shadow }}
+      whileHover={disabled ? {} : { y: -1, boxShadow: shadow }}
       whileTap={disabled ? {} : { scale: 0.98 }}
       transition={{ duration: 0.15, ease: [0.32, 0.72, 0, 1] }}
       disabled={disabled || loading}
@@ -270,7 +265,7 @@ const ProfileTab: React.FC = () => {
             ) : profile?.phone || 'Not set', icon: <PhoneOutlined /> },
             { label: 'Major', value: profile?.major || 'Software Engineering', icon: <BookOutlined /> },
           ].map((item, i) => (
-            <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+            <div key={item.label} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
               <div style={{ width: 40, height: 40, borderRadius: cc.radiusMd, background: cc.primaryMuted, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.primary, flexShrink: 0 }}>
                 {item.icon}
               </div>
@@ -359,8 +354,8 @@ const ProfileTab: React.FC = () => {
           <h3 style={{ fontSize: 15, fontWeight: 700, color: cc.text, margin: 0 }}>Skills</h3>
         </div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-          {(profile?.skills || 'React, TypeScript, Java, Python').split(',').map((skill: string, i: number) => (
-            <span key={i} style={{ padding: '6px 14px', borderRadius: cc.radiusFull, background: cc.primaryMuted, color: cc.primary, fontSize: 12, fontWeight: 600 }}>
+          {(profile?.skills || 'React, TypeScript, Java, Python').split(',').map((skill: string) => (
+            <span key={skill.trim()} style={{ padding: '6px 14px', borderRadius: cc.radiusFull, background: cc.primaryMuted, color: cc.primary, fontSize: 12, fontWeight: 600 }}>
               {skill.trim()}
             </span>
           ))}
@@ -434,18 +429,23 @@ const JobBoardTab: React.FC = () => {
     
     // UC-52: Match My Profile filter
     const matchesProfile = !matchProfile || 
-      (job.requiredSkills && job.requiredSkills.some((skill: string) => 
+      job.requiredSkills?.some((skill: string) => 
         techFilter.includes(skill.toLowerCase())
-      ));
+      );
     
     // UC-52: Tech filter
     const matchesTech = techFilter.length === 0 || 
-      (job.requiredSkills && job.requiredSkills.some((skill: string) => 
+      job.requiredSkills?.some((skill: string) => 
         techFilter.includes(skill.toLowerCase())
-      ));
+      );
     
     return matchesSearch && matchesProfile && matchesTech;
   });
+
+  const toggleTechFilter = (tech: string) => {
+    const t = tech.toLowerCase();
+    setTechFilter(prev => prev.includes(t) ? prev.filter(item => item !== t) : [...prev, t]);
+  };
 
   if (loading) {
     return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}><Spin size="large" /></div>;
@@ -481,9 +481,7 @@ const JobBoardTab: React.FC = () => {
             {['React', 'Node.js', 'Python', 'Java', 'SQL', 'AWS'].map(tech => (
               <button
                 key={tech}
-                onClick={() => setTechFilter(prev => prev.includes(tech.toLowerCase()) 
-                  ? prev.filter(t => t !== tech.toLowerCase()) 
-                  : [...prev, tech.toLowerCase()])}
+                onClick={() => toggleTechFilter(tech)}
                 style={{
                   padding: '4px 10px', borderRadius: cc.radiusFull, fontSize: 12, fontWeight: 600,
                   border: `1px solid ${techFilter.includes(tech.toLowerCase()) ? cc.primary : cc.border}`,
@@ -833,7 +831,12 @@ const ScheduleTab: React.FC = () => {
                       )}
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
-                      <SmallBadge label={interview.status || 'PENDING'} variant={interview.status === 'CONFIRMED' ? 'success' : interview.status === 'DECLINED' ? 'error' : 'warning'} />
+                      {(() => {
+                        let v: "success" | "error" | "warning" = "warning";
+                        if (interview.status === 'CONFIRMED') v = 'success';
+                        else if (interview.status === 'DECLINED') v = 'error';
+                        return <SmallBadge label={interview.status || 'PENDING'} variant={v} />;
+                      })()}
                       {interview.status === 'PENDING' && (
                         <>
                           <CTAButton variant="success" size="sm" icon={<CheckCircleOutlined />} onClick={() => setConfirming(interview.interviewId)}>Confirm</CTAButton>
@@ -885,9 +888,7 @@ const TrainingPlanTab: React.FC = () => {
           <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}>Your internship training roadmap from Enterprise</p>
         </div>
 
-        {!plan ? (
-          <EmptyState icon={<BookOutlined style={{ fontSize: 32 }} />} title="No training plan yet" description="Your training plan will appear once assigned by your enterprise" />
-        ) : (
+        {plan ? (
           <NeuSurface style={{ padding: 24 }}>
             <div style={{ marginBottom: 20 }}>
               <h3 style={{ fontSize: 16, fontWeight: 700, color: cc.text, margin: '0 0 8px' }}>{plan.title || 'OJT Training Plan'}</h3>
@@ -895,7 +896,7 @@ const TrainingPlanTab: React.FC = () => {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {(plan.tasks || []).map((task: any, i: number) => (
-                <div key={i} style={{ display: 'flex', gap: 12, padding: 16, borderRadius: cc.radiusMd, background: cc.bgLight, border: `1px solid ${cc.borderSubtle}` }}>
+                <div key={task.title || i} style={{ display: 'flex', gap: 12, padding: 16, borderRadius: cc.radiusMd, background: cc.bgLight, border: `1px solid ${cc.borderSubtle}` }}>
                   <div style={{ width: 32, height: 32, borderRadius: cc.radiusFull, background: cc.primaryMuted, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.primary, fontSize: 12, fontWeight: 700, flexShrink: 0 }}>
                     {i + 1}
                   </div>
@@ -903,11 +904,18 @@ const TrainingPlanTab: React.FC = () => {
                     <h4 style={{ fontSize: 14, fontWeight: 600, color: cc.text, margin: '0 0 4px' }}>{task.title}</h4>
                     <p style={{ fontSize: 12, color: cc.textMuted, margin: 0 }}>{task.description}</p>
                   </div>
-                  <SmallBadge label={task.status || 'PENDING'} variant={task.status === 'COMPLETED' ? 'success' : task.status === 'IN_PROGRESS' ? 'info' : 'warning'} />
+                  {(() => {
+                    let v: "success" | "info" | "warning" = "warning";
+                    if (task.status === 'COMPLETED') v = 'success';
+                    else if (task.status === 'IN_PROGRESS') v = 'info';
+                    return <SmallBadge label={task.status || 'PENDING'} variant={v} />;
+                  })()}
                 </div>
               ))}
             </div>
           </NeuSurface>
+        ) : (
+          <EmptyState icon={<BookOutlined style={{ fontSize: 32 }} />} title="No training plan yet" description="Your training plan will appear once assigned by your enterprise" />
         )}
       </motion.div>
     </div>
@@ -1112,13 +1120,28 @@ const ReportsTab: React.FC = () => {
 // ============================================================
 // FEEDBACK TAB (UC-59)
 // ============================================================
+const RatingInput: React.FC<{ label: string; value: number; onChange: (v: number) => void; required?: boolean }> = ({ label, value, onChange, required }) => (
+  <div style={{ marginBottom: 16 }}>
+    <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 8 }}>
+      {label} {required && <span style={{ color: cc.danger }}>*</span>}
+    </label>
+    <div style={{ display: 'flex', gap: 8 }}>
+      {[1, 2, 3, 4, 5].map(star => (
+        <button key={star} onClick={() => onChange(star)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 28, color: star <= value ? cc.warning : cc.border }}>
+          <StarOutlined />
+        </button>
+      ))}
+      <span style={{ fontSize: 13, color: cc.textMuted, marginLeft: 8, alignSelf: 'center' }}>{value}/5</span>
+    </div>
+  </div>
+);
+
 const FeedbackTab: React.FC = () => {
   const [feedbacks, setFeedbacks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [ratings, setRatings] = useState({ trainingQuality: 5, supervisorSupport: 5, workEnvironment: 5, overall: 5 });
   const [comment, setComment] = useState('');
-  const [selectedFeedback, setSelectedFeedback] = useState<any>(null);
 
   useEffect(() => { fetchFeedbacks(); }, []);
 
@@ -1163,22 +1186,6 @@ const FeedbackTab: React.FC = () => {
       setSubmitting(false);
     }
   };
-
-  const RatingInput: React.FC<{ label: string; value: number; onChange: (v: number) => void; required?: boolean }> = ({ label, value, onChange, required }) => (
-    <div style={{ marginBottom: 16 }}>
-      <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 8 }}>
-        {label} {required && <span style={{ color: cc.danger }}>*</span>}
-      </label>
-      <div style={{ display: 'flex', gap: 8 }}>
-        {[1, 2, 3, 4, 5].map(star => (
-          <button key={star} onClick={() => onChange(star)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 28, color: star <= value ? cc.warning : cc.border }}>
-            <StarOutlined />
-          </button>
-        ))}
-        <span style={{ fontSize: 13, color: cc.textMuted, marginLeft: 8, alignSelf: 'center' }}>{value}/5</span>
-      </div>
-    </div>
-  );
 
   if (loading) {
     return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}><Spin size="large" /></div>;
@@ -1264,6 +1271,7 @@ const FinalReportTab: React.FC = () => {
       const res = await api.get('/final-reports/my-report');
       setFinalReport(res.data);
     } catch (err) {
+      console.error('Failed to fetch final report', err);
       setFinalReport(null);
     } finally {
       setLoading(false);
@@ -1387,7 +1395,12 @@ const FinalReportTab: React.FC = () => {
           <NeuSurface style={{ padding: 24 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
               <h3 style={{ fontSize: 15, fontWeight: 700, color: cc.text, margin: 0 }}>Submitted Report</h3>
-              <SmallBadge label={finalReport.status || 'SUBMITTED'} variant={finalReport.status === 'APPROVED' ? 'success' : finalReport.status === 'REJECTED' ? 'error' : 'warning'} />
+              {(() => {
+                let v: "success" | "error" | "warning" = "warning";
+                if (finalReport.status === 'APPROVED') v = 'success';
+                else if (finalReport.status === 'REJECTED') v = 'error';
+                return <SmallBadge label={finalReport.status || 'SUBMITTED'} variant={v} />;
+              })()}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: 16, borderRadius: cc.radiusMd, background: cc.bgLight }}>
               <FileOutlined style={{ fontSize: 32, color: cc.primary }} />
@@ -1419,6 +1432,7 @@ const EvaluationTab: React.FC = () => {
       const res = await api.get('/evaluations/my-evaluation');
       setEvaluation(res.data);
     } catch (err) {
+      console.error('Failed to fetch evaluation', err);
       setEvaluation(null);
     } finally {
       setLoading(false);
@@ -1459,9 +1473,7 @@ const EvaluationTab: React.FC = () => {
           <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}>View final Rubrics scores, enterprise feedback, and official course grades (UC-65)</p>
         </div>
 
-        {!evaluation ? (
-          <EmptyState icon={<TrophyOutlined style={{ fontSize: 32 }} />} title="Evaluation not available" description="Your final evaluation will appear after you complete your internship and submit all required reports" />
-        ) : (
+        {evaluation ? (
           <>
             {/* Grade Overview */}
             <NeuSurface style={{ padding: 24, marginBottom: 20 }}>
@@ -1486,11 +1498,11 @@ const EvaluationTab: React.FC = () => {
             <NeuSurface style={{ padding: 24, marginBottom: 20 }}>
               <h3 style={{ fontSize: 16, fontWeight: 700, color: cc.text, margin: '0 0 16px' }}>Rubric Breakdown</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                {rubricScores.map((rubric: any, i: number) => {
+                {rubricScores.map((rubric: any) => {
                   const pct = Math.round((rubric.score / rubric.maxScore) * 100);
                   const rubricColor = pct >= 80 ? cc.success : pct >= 60 ? cc.warning : cc.danger;
                   return (
-                    <div key={i}>
+                    <div key={rubric.name}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
                         <span style={{ fontSize: 13, fontWeight: 600, color: cc.text }}>{rubric.name}</span>
                         <span style={{ fontSize: 13, fontWeight: 700, color: rubricColor }}>{rubric.score}/{rubric.maxScore}</span>
@@ -1520,6 +1532,8 @@ const EvaluationTab: React.FC = () => {
               </NeuSurface>
             )}
           </>
+        ) : (
+          <EmptyState icon={<TrophyOutlined style={{ fontSize: 32 }} />} title="Evaluation not available" description="Your final evaluation will appear after you complete your internship and submit all required reports" />
         )}
       </motion.div>
     </div>
@@ -1637,6 +1651,7 @@ export const StudentDashboard: React.FC = () => {
       const res = await api.get('/dashboard/student-stats');
       setStats(res.data);
     } catch (err) {
+      console.error('Failed to fetch stats', err);
       setStats({ applications: 3, interviews: 1, reports: 4, daysRemaining: 28 });
     }
   };
@@ -1763,8 +1778,8 @@ export const StudentDashboard: React.FC = () => {
                 { title: 'Application submitted to TechCorp', meta: '2 hours ago', tone: cc.info },
                 { title: 'Weekly report W22 approved', meta: 'Yesterday', tone: cc.success },
                 { title: 'Interview scheduled for Jul 15', meta: '3 days ago', tone: cc.warning },
-              ].map((item, i) => (
-                <motion.div key={i} whileHover={{ x: 2, transition: { duration: 0.15 } }} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '12px 14px', borderRadius: 16, background: '#fff', border: '1px solid rgba(226,232,240,.9)', boxShadow: '0 4px 16px rgba(15,23,42,.04)', cursor: 'pointer' }}>
+              ].map((item) => (
+                <motion.div key={item.title} whileHover={{ x: 2, transition: { duration: 0.15 } }} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '12px 14px', borderRadius: 16, background: '#fff', border: '1px solid rgba(226,232,240,.9)', boxShadow: '0 4px 16px rgba(15,23,42,.04)', cursor: 'pointer' }}>
                   <div style={{ width: 10, height: 10, borderRadius: '50%', background: item.tone, boxShadow: `0 0 0 4px ${item.tone}20`, marginTop: 4 }} />
                   <div style={{ minWidth: 0 }}>
                     <div style={{ fontSize: 13.5, fontWeight: 800, color: cc.text }}>{item.title}</div>
