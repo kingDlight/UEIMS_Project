@@ -1,5 +1,7 @@
 package com.ueims.service.impl;
 
+import java.util.regex.Pattern;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -92,16 +94,16 @@ public class EnterpriseRegistrationServiceImpl implements EnterpriseRegistration
         if (password.length() < 8) {
             throw new AppException(ErrorCode.INVALID_PASSWORD);
         }
-        if (!password.matches(".*[A-Z].*")) {
+        if (!Pattern.compile("[A-Z]").matcher(password).find()) {
             throw new AppException(ErrorCode.INVALID_PASSWORD);
         }
-        if (!password.matches(".*[a-z].*")) {
+        if (!Pattern.compile("[a-z]").matcher(password).find()) {
             throw new AppException(ErrorCode.INVALID_PASSWORD);
         }
-        if (!password.matches(".*\\d.*")) {
+        if (!Pattern.compile("\\d").matcher(password).find()) {
             throw new AppException(ErrorCode.INVALID_PASSWORD);
         }
-        if (!password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?].*")) {
+        if (!Pattern.compile("[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]").matcher(password).find()) {
             throw new AppException(ErrorCode.INVALID_PASSWORD);
         }
     }
