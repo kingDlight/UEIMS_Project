@@ -13,6 +13,22 @@ import {
   Sun,
   Moon,
 } from 'lucide-react';
+import { motion } from 'framer-motion';
+
+const fadeInUp = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1
+    }
+  }
+};
 
 const navLinks = [
   { label: 'Giới thiệu', href: '#about' },
@@ -291,15 +307,20 @@ const HeroSection = ({ isDark, handleMouseMove, spotlightRef, scrollToSection }:
 
       <FloatingShapes isDark={isDark} />
 
-      <div className="max-w-6xl w-full text-center relative z-10">
-        <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border mb-8 animate-fade-in-up transition-colors duration-300 ease-in-out ${
+      <motion.div 
+        className="max-w-6xl w-full text-center relative z-10"
+        initial="hidden"
+        animate="visible"
+        variants={staggerContainer}
+      >
+        <motion.div variants={fadeInUp} className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border mb-8 transition-colors duration-300 ease-in-out ${
           isDark ? 'bg-[#f37021]/10 border-[#f37021]/30' : 'bg-[#f37021]/5 border-[#f37021]/20'
         }`}>
           <span className="flex h-2 w-2 rounded-full bg-[#f37021] animate-pulse"></span>
           <span className="text-xs font-semibold tracking-wider text-[#f37021] uppercase">OJT - FPT University</span>
-        </div>
+        </motion.div>
 
-        <h1 className={`text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-none mb-6 animate-fade-in-up transition-colors duration-300 ease-in-out ${
+        <motion.h1 variants={fadeInUp} className={`text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-none mb-6 transition-colors duration-300 ease-in-out ${
           isDark ? 'text-white' : 'text-slate-900'
         }`}>
           Chuyển Đổi Số Toàn Diện
@@ -307,15 +328,15 @@ const HeroSection = ({ isDark, handleMouseMove, spotlightRef, scrollToSection }:
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#f37021] via-amber-500 to-orange-400">
             Quy Trình Thực Tập OJT
           </span>
-        </h1>
+        </motion.h1>
 
-        <p className={`text-base sm:text-lg md:text-xl max-w-3xl mx-auto mb-10 leading-relaxed font-normal animate-fade-in-up transition-colors duration-300 ease-in-out ${
+        <motion.p variants={fadeInUp} className={`text-base sm:text-lg md:text-xl max-w-3xl mx-auto mb-10 leading-relaxed font-normal transition-colors duration-300 ease-in-out ${
           isDark ? 'text-zinc-300' : 'text-slate-600'
         }`}>
           Đơn giản hóa việc kết nối Doanh nghiệp, quản lý hồ sơ sinh viên, sắp xếp phỏng vấn và đánh giá điểm năng lực bằng hệ thống số hóa thông minh, minh bạch.
-        </p>
+        </motion.p>
 
-        <div className="flex gap-4 justify-center flex-wrap mb-20 animate-fade-in-up">
+        <motion.div variants={fadeInUp} className="flex gap-4 justify-center flex-wrap mb-20">
           <button
             onClick={() => navigate('/login')}
             className="text-sm font-bold text-white px-7 py-3.5 rounded-full bg-gradient-to-r from-[#f37021] to-[#e26215] shadow-lg shadow-[#f37021]/20 hover:shadow-[#f37021]/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 ease-in-out flex items-center gap-2"
@@ -331,9 +352,9 @@ const HeroSection = ({ isDark, handleMouseMove, spotlightRef, scrollToSection }:
           >
             Tìm hiểu tính năng
           </button>
-        </div>
+        </motion.div>
 
-        <div className={`grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 pt-10 backdrop-blur-md rounded-2xl p-6 border transition-all duration-300 ease-in-out ${
+        <motion.div variants={fadeInUp} className={`grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 pt-10 backdrop-blur-md rounded-2xl p-6 border transition-all duration-300 ease-in-out ${
           isDark ? 'border-zinc-800/30 bg-[#0e1322]/30 text-zinc-100' : 'border-slate-200 bg-white/85 shadow-lg shadow-slate-100/40 text-slate-800'
         }`}>
           {stats.map((stat) => (
@@ -346,8 +367,8 @@ const HeroSection = ({ isDark, handleMouseMove, spotlightRef, scrollToSection }:
               </div>
             </div>
           ))}
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </section>
   );
 };
@@ -356,8 +377,14 @@ const AboutSection = ({ isDark }: { isDark: boolean }) => (
   <section id="about" className={`py-20 md:py-28 px-6 md:px-12 relative z-10 border-b scroll-mt-20 transition-colors duration-300 ease-in-out ${
     isDark ? 'border-zinc-900 bg-[#070a11]/40' : 'border-slate-200 bg-slate-50/50'
   }`}>
-    <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-12 items-center">
-      <div className="flex-1">
+    <motion.div 
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.2 }}
+      variants={staggerContainer}
+      className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-12 items-center"
+    >
+      <motion.div variants={fadeInUp} className="flex-1">
         <span className="text-xs font-bold tracking-widest text-[#f37021] uppercase">Giới thiệu</span>
         <h2 className={`text-3xl sm:text-4xl md:text-5xl font-extrabold mt-3 mb-6 tracking-tight transition-colors duration-300 ease-in-out ${isDark ? 'text-white' : 'text-slate-900'}`}>
           Cầu nối hiện đại giữa Giảng đường & Doanh nghiệp
@@ -368,30 +395,36 @@ const AboutSection = ({ isDark }: { isDark: boolean }) => (
         <p className={`text-sm sm:text-base leading-relaxed transition-colors duration-300 ease-in-out ${isDark ? 'text-zinc-300' : 'text-slate-600'}`}>
           Chúng tôi loại bỏ hoàn toàn các rào cản hành chính thủ công, kết nối trực tiếp nhà trường, sinh viên và nhà tuyển dụng để cùng kiến tạo những trải nghiệm học tập thực tế chất lượng nhất.
         </p>
-      </div>
+      </motion.div>
 
-      <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-6 w-full">
+      <motion.div variants={staggerContainer} className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-6 w-full">
         {[
           { num: '01', title: 'Số hóa 100%', desc: 'Toàn bộ biểu mẫu báo cáo, phê duyệt CV và chấm điểm Rubric được thực hiện trực tuyến hoàn toàn.', colorClass: isDark ? 'bg-blue-600/10 text-blue-400' : 'bg-blue-50 text-blue-600' },
           { num: '02', title: 'Đồng bộ Đa bên', desc: 'Cập nhật thông tin tức thời giữa Sinh viên, Giảng viên Hướng dẫn và Doanh nghiệp đối tác.', colorClass: isDark ? 'bg-[#f37021]/10 text-[#f37021]' : 'bg-orange-50 text-[#f37021]' },
           { num: '03', title: 'Tuyển dụng Trực tiếp', desc: 'Doanh nghiệp đăng tin tuyển dụng OJT và chủ động lọc hồ sơ, xếp lịch phỏng vấn nhanh gọn.', colorClass: isDark ? 'bg-emerald-600/10 text-emerald-400' : 'bg-emerald-50 text-emerald-600' },
           { num: '04', title: 'Thống kê Minh bạch', desc: 'Theo dõi trực quan tiến độ và xuất dữ liệu báo cáo OJT đầy đủ chuẩn xác chỉ với một cú click.', colorClass: isDark ? 'bg-purple-600/10 text-purple-400' : 'bg-purple-50 text-purple-600' }
         ].map((item) => (
-          <div key={item.title} className={`border p-6 rounded-2xl transition-all duration-300 ease-in-out ${isDark ? 'bg-[#101524]/60 border-zinc-800/40' : 'bg-white border-slate-200 shadow-sm'}`}>
+          <motion.div variants={fadeInUp} key={item.title} className={`border p-6 rounded-2xl transition-all duration-300 ease-in-out ${isDark ? 'bg-[#101524]/60 border-zinc-800/40' : 'bg-white border-slate-200 shadow-sm'}`}>
             <div className={`h-9 w-9 rounded-lg flex items-center justify-center mb-4 font-semibold text-sm ${item.colorClass}`}>{item.num}</div>
             <h4 className={`text-sm font-bold mb-2 transition-colors duration-300 ease-in-out ${isDark ? 'text-zinc-100' : 'text-slate-800'}`}>{item.title}</h4>
             <p className={`text-xs leading-relaxed transition-colors duration-300 ease-in-out ${isDark ? 'text-zinc-300' : 'text-slate-600'}`}>{item.desc}</p>
-          </div>
+          </motion.div>
         ))}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   </section>
 );
 
 const FeaturesSection = ({ isDark }: { isDark: boolean }) => (
   <section id="features" className={`py-20 md:py-28 px-6 md:px-12 relative z-10 border-b scroll-mt-20 transition-colors duration-300 ease-in-out ${isDark ? 'border-zinc-900 bg-[#0e1322]/20' : 'border-slate-200 bg-white'}`}>
-    <div className="max-w-6xl mx-auto">
-      <div className="text-center mb-16 md:mb-20">
+    <motion.div 
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.1 }}
+      variants={staggerContainer}
+      className="max-w-6xl mx-auto"
+    >
+      <motion.div variants={fadeInUp} className="text-center mb-16 md:mb-20">
         <span className="text-xs font-bold tracking-widest text-[#f37021] uppercase">Tính Năng Cốt Lõi</span>
         <h2 className={`text-3xl sm:text-4xl md:text-5xl font-extrabold mt-3 mb-4 tracking-tight transition-colors duration-300 ease-in-out ${isDark ? 'text-white' : 'text-slate-900'}`}>
           Quản lý thực tập chuyên nghiệp
@@ -399,13 +432,14 @@ const FeaturesSection = ({ isDark }: { isDark: boolean }) => (
         <p className={`text-sm sm:text-base max-w-xl mx-auto transition-colors duration-300 ease-in-out ${isDark ? 'text-zinc-300' : 'text-slate-600'}`}>
           Thiết kế giải pháp phù hợp cho tất cả các đối tượng tham gia vào kỳ học doanh nghiệp OJT.
         </p>
-      </div>
+      </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <motion.div variants={staggerContainer} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {features.map((feat) => {
           const Icon = feat.icon;
           return (
-            <div
+            <motion.div
+              variants={fadeInUp}
               key={feat.title}
               className={`border rounded-2xl p-8 hover:-translate-y-1 transition-all duration-300 ease-in-out group ${isDark ? 'bg-[#101524] border-zinc-800/50 hover:border-zinc-700 hover:shadow-xl hover:shadow-black/20' : 'bg-white border-slate-200 hover:border-slate-300 hover:shadow-xl hover:shadow-slate-200/50'}`}
             >
@@ -418,18 +452,24 @@ const FeaturesSection = ({ isDark }: { isDark: boolean }) => (
               <p className={`text-xs sm:text-sm leading-relaxed font-normal transition-colors duration-300 ease-in-out ${isDark ? 'text-zinc-300' : 'text-slate-600'}`}>
                 {feat.desc}
               </p>
-            </div>
+            </motion.div>
           );
         })}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   </section>
 );
 
 const ProcessSection = ({ isDark }: { isDark: boolean }) => (
   <section id="process" className={`py-20 md:py-28 px-6 md:px-12 relative z-10 border-b scroll-mt-20 transition-colors duration-300 ease-in-out ${isDark ? 'border-zinc-900' : 'border-slate-200'}`}>
-    <div className="max-w-6xl mx-auto">
-      <div className="text-center mb-16 md:mb-20">
+    <motion.div 
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.2 }}
+      variants={staggerContainer}
+      className="max-w-6xl mx-auto"
+    >
+      <motion.div variants={fadeInUp} className="text-center mb-16 md:mb-20">
         <span className="text-xs font-bold tracking-widest text-blue-500 uppercase">Quy Trình Hoạt Động</span>
         <h2 className={`text-3xl sm:text-4xl md:text-5xl font-extrabold mt-3 mb-4 tracking-tight transition-colors duration-300 ease-in-out ${isDark ? 'text-white' : 'text-slate-900'}`}>
           Bốn bước khép kín thông minh
@@ -437,21 +477,21 @@ const ProcessSection = ({ isDark }: { isDark: boolean }) => (
         <p className={`text-sm sm:text-base max-w-xl mx-auto transition-colors duration-300 ease-in-out ${isDark ? 'text-zinc-300' : 'text-slate-600'}`}>
           Vận hành đồng bộ nhịp nhàng giữa Nhà trường - Sinh viên - Doanh nghiệp.
         </p>
-      </div>
+      </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative">
+      <motion.div variants={staggerContainer} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative">
         {steps.map((step, i) => (
-          <div key={step.num} className={`border rounded-xl p-6 relative overflow-hidden group transition-all duration-300 ease-in-out ${isDark ? 'bg-[#101524]/40 border-zinc-900' : 'bg-white border-slate-200 shadow-sm'}`}>
+          <motion.div variants={fadeInUp} key={step.num} className={`border rounded-xl p-6 relative overflow-hidden group transition-all duration-300 ease-in-out ${isDark ? 'bg-[#101524]/40 border-zinc-900' : 'bg-white border-slate-200 shadow-sm'}`}>
             {i < 3 && <div className={`hidden lg:block absolute top-[40%] right-[-16px] w-8 h-[1px] z-10 transition-colors duration-300 ease-in-out ${isDark ? 'bg-zinc-800' : 'bg-slate-200'}`}></div>}
             <div className="text-3xl font-extrabold text-[#f37021]/40 group-hover:text-[#f37021]/70 mb-4 transition-colors">
               {step.num}
             </div>
             <h3 className={`text-sm font-bold mb-2 transition-colors duration-300 ease-in-out ${isDark ? 'text-zinc-200' : 'text-slate-800'}`}>{step.title}</h3>
             <p className={`text-xs leading-relaxed transition-colors duration-300 ease-in-out ${isDark ? 'text-zinc-300' : 'text-slate-600'}`}>{step.desc}</p>
-          </div>
+          </motion.div>
         ))}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   </section>
 );
 
@@ -459,7 +499,13 @@ const PartnerSection = ({ isDark }: { isDark: boolean }) => {
   const navigate = useNavigate();
   return (
     <section id="partner" className={`py-20 md:py-28 px-6 md:px-12 relative z-10 border-b scroll-mt-20 transition-colors duration-300 ease-in-out ${isDark ? 'bg-[#0e1322]/20 border-zinc-900' : 'bg-slate-50 border-slate-200'}`}>
-      <div className={`max-w-5xl mx-auto border rounded-3xl p-8 md:p-14 shadow-2xl relative overflow-hidden flex flex-col md:flex-row gap-8 items-center transition-colors duration-300 ease-in-out ${isDark ? 'bg-[#101524] border-zinc-800/80' : 'bg-white border-slate-200'}`}>
+      <motion.div 
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.3 }}
+        variants={fadeInUp}
+        className={`max-w-5xl mx-auto border rounded-3xl p-8 md:p-14 shadow-2xl relative overflow-hidden flex flex-col md:flex-row gap-8 items-center transition-colors duration-300 ease-in-out ${isDark ? 'bg-[#101524] border-zinc-800/80' : 'bg-white border-slate-200'}`}
+      >
         <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-blue-500/10 blur-3xl rounded-full"></div>
         <div className="flex-1 z-10">
           <span className="text-xs font-bold uppercase tracking-wider text-[#f37021] bg-[#f37021]/10 px-2.5 py-1 rounded-md">
@@ -486,7 +532,7 @@ const PartnerSection = ({ isDark }: { isDark: boolean }) => {
             Hỗ trợ & Liên hệ OJT
           </button>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 };
@@ -496,23 +542,30 @@ const CTASection = ({ isDark }: { isDark: boolean }) => {
   return (
     <section className={`py-20 md:py-32 px-6 md:px-12 relative z-10 text-center overflow-hidden border-b transition-colors duration-300 ease-in-out ${isDark ? 'bg-gradient-to-b from-[#0b0f19] to-[#070a11] border-transparent' : 'bg-gradient-to-b from-white to-slate-50 border-slate-200'}`}>
       <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[400px] h-[400px] bg-[#f37021]/10 blur-[120px] rounded-full pointer-events-none"></div>
-      <div className="max-w-4xl mx-auto relative z-10">
-        <h2 className={`text-3xl sm:text-5xl font-extrabold tracking-tight mb-6 transition-colors duration-300 ease-in-out ${isDark ? 'text-white' : 'text-slate-900'}`}>
+      <motion.div 
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.5 }}
+        variants={staggerContainer}
+        className="max-w-4xl mx-auto relative z-10"
+      >
+        <motion.h2 variants={fadeInUp} className={`text-3xl sm:text-5xl font-extrabold tracking-tight mb-6 transition-colors duration-300 ease-in-out ${isDark ? 'text-white' : 'text-slate-900'}`}>
           Bắt đầu số hóa hành trình
           <br />
           <span className="text-[#f37021]">quản lý OJT</span> ngay hôm nay
-        </h2>
-        <p className={`text-sm sm:text-base max-w-xl mx-auto mb-10 leading-relaxed transition-colors duration-300 ease-in-out ${isDark ? 'text-zinc-300' : 'text-slate-600'}`}>
+        </motion.h2>
+        <motion.p variants={fadeInUp} className={`text-sm sm:text-base max-w-xl mx-auto mb-10 leading-relaxed transition-colors duration-300 ease-in-out ${isDark ? 'text-zinc-300' : 'text-slate-600'}`}>
           Hợp tác bền vững, theo dõi liền mạch, quản lý hiệu quả. Trải nghiệm hệ thống quản lý thực tập tốt nhất.
-        </p>
-        <button
+        </motion.p>
+        <motion.button
+          variants={fadeInUp}
           onClick={() => navigate('/login')}
           className="text-sm font-bold text-white px-8 py-4 rounded-full bg-gradient-to-r from-[#f37021] to-[#e26215] shadow-lg shadow-[#f37021]/20 hover:shadow-[#f37021]/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 ease-in-out inline-flex items-center gap-2"
         >
           Đăng nhập hệ thống
           <ArrowRight className="h-4 w-4" />
-        </button>
-      </div>
+        </motion.button>
+      </motion.div>
     </section>
   );
 };
