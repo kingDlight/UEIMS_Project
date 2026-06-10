@@ -666,7 +666,7 @@ export const StatsTab: React.FC = () => {
                   fill={cc.textPrimary}
                   fontSize={28}
                   fontWeight={800}
-                  fontFamily="Inter, sans-serif"
+                  fontFamily={"Inter, sans-serif"}
                   letterSpacing="-0.03em"
                 >
                   {overallRate}%
@@ -679,7 +679,7 @@ export const StatsTab: React.FC = () => {
                   fill={cc.textMuted}
                   fontSize={11}
                   fontWeight={600}
-                  fontFamily="Inter, sans-serif"
+                  fontFamily={"Inter, sans-serif"}
                 >
                   Placed
                 </text>
