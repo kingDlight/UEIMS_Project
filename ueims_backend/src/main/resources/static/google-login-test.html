@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Google Login Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 32px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .button {
+            display: inline-block;
+            margin: 16px 0;
+            padding: 12px 18px;
+            background: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        pre {
+            background: #f4f4f4;
+            padding: 16px;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+
+        .note {
+            margin: 12px 0;
+            color: #555;
+        }
+
+        label {
+            display: block;
+            margin: 12px 0 4px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+    </style>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Google Login Test</h1>
+        <p class="note">Click the button and choose a Google account. The returned ID token will be sent to backend at
+            <code>POST /api/auth/google</code>.</p>
+
+        <label for="deviceId">Device ID (optional)</label>
+        <input id="deviceId" type="text" value="test-device" />
+
+        <div id="g_id_onload" data-client_id="649296057409-icsso5qde43kicuol8fp0rbmub4938uc.apps.googleusercontent.com"
+            data-callback="handleCredentialResponse" data-auto_select="false" data-itp_support="true">
+        </div>
+
+        <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="sign_in_with"
+            data-shape="rectangular"></div>
+
+        <p class="note">If you see a blank area above, make sure this page is served over HTTP(S) from
+            <code>localhost</code>.</p>
+
+        <h2>Response</h2>
+        <pre id="response">Waiting for login...</pre>
+    </div>
+
+    <script>
+        function handleCredentialResponse(response) {
+            const idToken = response.credential;
+            const deviceId = document.getElementById('deviceId').value || 'test-device';
+            const payload = { idToken, deviceId };
+
+            document.getElementById('response').textContent = 'Sending Google ID token to backend...';
+
+            fetch('http://localhost:8080/api/auth/google', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+                .then(async res => {
+                    const json = await res.json().catch(() => ({ status: res.status, text: 'Invalid JSON' }));
+                    document.getElementById('response').textContent = JSON.stringify({ status: res.status, body: json }, null, 2);
+                })
+                .catch(error => {
+                    document.getElementById('response').textContent = 'Network error: ' + error;
+                });
+        }
+    </script>
+</body>
+
+</html>

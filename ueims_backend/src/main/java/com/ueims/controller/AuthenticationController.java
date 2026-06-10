@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ueims.dto.request.*;
+import com.ueims.dto.request.GoogleAuthenticationRequest;
 import com.ueims.dto.response.ApiResponse;
 import com.ueims.dto.response.AuthenticationResponse;
 import com.ueims.dto.response.IntrospectResponse;
@@ -29,6 +30,13 @@ public class AuthenticationController {
     @PostMapping("/token")
     public ApiResponse<AuthenticationResponse> authenticate(@Valid @RequestBody AuthenticationRequest request) {
         var result = authenticationService.authenticate(request);
+        return ApiResponse.<AuthenticationResponse>builder().result(result).build();
+    }
+
+    @PostMapping("/google")
+    public ApiResponse<AuthenticationResponse> authenticateWithGoogle(
+            @Valid @RequestBody GoogleAuthenticationRequest request) {
+        var result = authenticationService.authenticateWithGoogle(request);
         return ApiResponse.<AuthenticationResponse>builder().result(result).build();
     }
 

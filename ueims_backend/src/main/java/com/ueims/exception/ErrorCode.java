@@ -103,12 +103,21 @@ public enum ErrorCode {
     STUDENT_ID_REQUIRED(1065, "Student ID is mandatory", HttpStatus.BAD_REQUEST),
     TM_ID_REQUIRED(1066, "Training Manager ID is mandatory", HttpStatus.BAD_REQUEST),
     SEMESTER_ID_REQUIRED(1067, "Semester ID is mandatory", HttpStatus.BAD_REQUEST),
+    FEEDBACK_TEXT_REQUIRED(1062, "Feedback text is required when rejecting a report", HttpStatus.BAD_REQUEST),
 
     // Account related
     USER_BANNED(2001, "Tài khoản của bạn đã bị khóa do nhập sai mật khẩu quá 5 lần", HttpStatus.FORBIDDEN),
     WRONG_OLD_PASSWORD(2002, "Mật khẩu cũ không chính xác", HttpStatus.BAD_REQUEST),
     PASSWORDS_NOT_MATCH(2003, "Mật khẩu mới và xác nhận không khớp", HttpStatus.BAD_REQUEST),
     USER_ALREADY_HAS_ROLE(2004, "Người dùng đã có vai trò. Chỉ được gán một vai trò duy nhất.", HttpStatus.BAD_REQUEST),
+    ACCOUNT_COLLISION(
+            2005,
+            "Tài khoản Google trùng với tài khoản nội bộ cùng email. Vui lòng đăng nhập bằng email/mật khẩu hoặc liên kết tài khoản.",
+            HttpStatus.CONFLICT),
+    GOOGLE_CLIENT_ID_NOT_CONFIGURED(
+            2006,
+            "Google client ID chưa được cấu hình. Vui lòng thiết lập GOOGLE_CLIENT_ID.",
+            HttpStatus.INTERNAL_SERVER_ERROR),
 
     // JWT / Auth related
     TOKEN_INVALIDATED(1068, "Token has been invalidated", HttpStatus.UNAUTHORIZED),

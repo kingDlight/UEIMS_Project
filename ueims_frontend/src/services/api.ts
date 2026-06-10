@@ -13,7 +13,11 @@ export const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     // Do not attach old tokens to login or refresh endpoints to prevent 401 loop
-    if (config.url?.includes('/auth/token') || config.url?.includes('/auth/refresh')) {
+    if (
+      config.url?.includes('/auth/token') ||
+      config.url?.includes('/auth/refresh') ||
+      config.url?.includes('/auth/google')
+    ) {
       return config;
     }
 
