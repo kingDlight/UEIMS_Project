@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { message } from 'antd';
 import { ModernLayout } from '@/components/layout/ModernLayout';
 import type { NavItem } from '@/components/layout/ModernLayout';
@@ -8,25 +8,34 @@ import {
   User,
   Briefcase,
   FileText,
+  GraduationCap,
+  Bell,
   Settings,
   Home,
+  BookOpen,
+  BarChart3,
   Calendar,
   CheckCircle,
   Clock,
+  AlertCircle,
   Send,
   X,
   Upload,
   File,
+  Building2,
   MapPin,
+  DollarSign,
   Users,
   Star,
   ArrowRight,
   ChevronRight,
   RefreshCw,
   Eye,
+  Download,
   Inbox,
   TrendingUp,
   Award,
+  ExternalLink,
 } from 'lucide-react';
 import { api } from '@/services/api';
 
@@ -88,9 +97,9 @@ const cc = {
 // ============================================================
 function hexToRgba(hex: string, alpha: number): string {
   const h = hex.replace('#', '');
-  const r = Number.parseInt(h.substring(0, 2), 16);
-  const g = Number.parseInt(h.substring(2, 4), 16);
-  const b = Number.parseInt(h.substring(4, 6), 16);
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
@@ -348,6 +357,7 @@ const ProfileTab: React.FC = () => {
   const [uploading, setUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [cvFile, setCvFile] = useState<File | null>(null);
+  const [cvUrl, setCvUrl] = useState<string | null>(null);
 
   useEffect(() => { fetchProfile(); }, []);
 
@@ -385,6 +395,7 @@ const ProfileTab: React.FC = () => {
       const error = validateFile(file);
       if (error) { message.error(error); return; }
       setCvFile(file);
+      setCvUrl(URL.createObjectURL(file));
     }
   };
 
@@ -394,6 +405,7 @@ const ProfileTab: React.FC = () => {
       const error = validateFile(file);
       if (error) { message.error(error); return; }
       setCvFile(file);
+      setCvUrl(URL.createObjectURL(file));
     }
   };
 
@@ -467,15 +479,13 @@ const ProfileTab: React.FC = () => {
             </div>
           </div>
 
-          <button
-            type="button"
+          <div
             onDragEnter={handleDrag}
             onDragLeave={handleDrag}
             onDragOver={handleDrag}
             onDrop={handleDrop}
             onClick={() => document.getElementById('cv-input')?.click()}
             style={{
-              width: '100%',
               border: `2px dashed ${dragActive ? cc.primary : cc.border}`,
               borderRadius: cc.radiusLg,
               padding: '36px 24px',
@@ -483,8 +493,6 @@ const ProfileTab: React.FC = () => {
               background: dragActive ? cc.primaryLight : cc.bg,
               transition: 'all 0.2s ease',
               cursor: 'pointer',
-              color: 'inherit',
-              font: 'inherit',
             }}
           >
             <input id="cv-input" type="file" accept=".pdf" onChange={handleFileSelect} style={{ display: 'none' }} />
@@ -497,7 +505,7 @@ const ProfileTab: React.FC = () => {
                   <p style={{ fontSize: 12, color: cc.textMuted, margin: '2px 0 0' }}>{(cvFile.size / 1024 / 1024).toFixed(2)} MB</p>
                 </div>
                 <button
-                  onClick={(e) => { e.stopPropagation(); setCvFile(null); }}
+                  onClick={(e) => { e.stopPropagation(); setCvFile(null); setCvUrl(null); }}
                   style={{
                     marginLeft: 8, padding: 8, borderRadius: cc.radiusMd,
                     background: cc.errorMuted, border: 'none', cursor: 'pointer', color: cc.error,
@@ -513,11 +521,11 @@ const ProfileTab: React.FC = () => {
                 <p style={{ fontSize: 12, color: cc.textMuted, margin: 0 }}>or click to browse files</p>
               </>
             )}
-          </button>
+          </div>
 
           {cvFile && (
             <div style={{ marginTop: 16, display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
-              <CTAButton variant="ghost" onClick={() => { setCvFile(null); }}>Cancel</CTAButton>
+              <CTAButton variant="ghost" onClick={() => { setCvFile(null); setCvUrl(null); }}>Cancel</CTAButton>
               <CTAButton variant="primary" onClick={handleUploadCV} disabled={uploading} icon={uploading ? <motion.span animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}><RefreshCw size={14} /></motion.span> : <Upload size={14} />}>
                 {uploading ? 'Uploading...' : 'Upload CV'}
               </CTAButton>
@@ -865,58 +873,6 @@ const JobBoardTab: React.FC = () => {
   );
 };
 
-const ReportCardItem: React.FC<{ report: any, index: number }> = ({ report, index }) => {
-  const statusLabelMap: Record<string, string> = {
-    APPROVED: 'Approved',
-    REJECTED: 'Rejected',
-    SUBMITTED: 'Pending Review',
-    NOT_SUBMITTED: 'Not Submitted',
-  };
-  const label = statusLabelMap[report.status] || 'Draft';
-
-  const statusVariantMap: Record<string, 'success' | 'warning' | 'error' | 'info' | 'neutral'> = {
-    APPROVED: 'success',
-    REJECTED: 'error',
-    SUBMITTED: 'warning',
-    NOT_SUBMITTED: 'neutral',
-  };
-  const variant = statusVariantMap[report.status] || 'neutral';
-
-  return (
-    <motion.div
-      key={report.reportId || `report-${index}`}
-      initial={{ opacity: 0, x: -16 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.3, delay: index * 0.05 }}
-    >
-      <Card hoverable style={{ padding: 20 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
-            <div style={{
-              width: 52, height: 52, borderRadius: cc.radiusMd,
-              background: hexToRgba(cc.primary, 0.1), display: 'flex',
-              alignItems: 'center', justifyContent: 'center',
-              color: cc.primary, fontSize: 14, fontWeight: 700,
-            }}>
-              W{report.weekNumber}
-            </div>
-            <div>
-              <h4 style={{ fontSize: 14, fontWeight: 600, color: cc.textPrimary, margin: '0 0 4px' }}>
-                Week {report.weekNumber} Report
-              </h4>
-              <p style={{ fontSize: 12, color: cc.textMuted, margin: '0 0 8px' }}>
-                {report.submittedAt ? `Submitted: ${new Date(report.submittedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}` : 'Not submitted'}
-              </p>
-              <SmallPill label={label} variant={variant} />
-            </div>
-          </div>
-          <CTAButton variant="ghost" size="sm" icon={<Eye size={14} />}>View</CTAButton>
-        </div>
-      </Card>
-    </motion.div>
-  );
-};
-
 // ============================================================
 // REPORTS TAB
 // ============================================================
@@ -967,7 +923,49 @@ const ReportsTab: React.FC = () => {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {reports.map((report, index) => (
-              <ReportCardItem key={report.reportId || index} report={report} index={index} />
+              <motion.div
+                key={report.reportId || index}
+                initial={{ opacity: 0, x: -16 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.05 }}
+              >
+                <Card hoverable style={{ padding: 20 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+                      <div style={{
+                        width: 52, height: 52, borderRadius: cc.radiusMd,
+                        background: hexToRgba(cc.primary, 0.1), display: 'flex',
+                        alignItems: 'center', justifyContent: 'center',
+                        color: cc.primary, fontSize: 14, fontWeight: 700,
+                      }}>
+                        W{report.weekNumber}
+                      </div>
+                      <div>
+                        <h4 style={{ fontSize: 14, fontWeight: 600, color: cc.textPrimary, margin: '0 0 4px' }}>
+                          Week {report.weekNumber} Report
+                        </h4>
+                        <p style={{ fontSize: 12, color: cc.textMuted, margin: '0 0 8px' }}>
+                          {report.submittedAt ? `Submitted: ${new Date(report.submittedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}` : 'Not submitted'}
+                        </p>
+                        <SmallPill
+                          label={
+                            report.status === 'APPROVED' ? 'Approved' :
+                            report.status === 'REJECTED' ? 'Rejected' :
+                            report.status === 'SUBMITTED' ? 'Pending Review' :
+                            report.status === 'NOT_SUBMITTED' ? 'Not Submitted' : 'Draft'
+                          }
+                          variant={
+                            report.status === 'APPROVED' ? 'success' :
+                            report.status === 'REJECTED' ? 'error' :
+                            report.status === 'SUBMITTED' ? 'warning' : 'neutral'
+                          }
+                        />
+                      </div>
+                    </div>
+                    <CTAButton variant="ghost" size="sm" icon={<Eye size={14} />}>View</CTAButton>
+                  </div>
+                </Card>
+              </motion.div>
             ))}
           </div>
         )}
@@ -1052,8 +1050,8 @@ export const StudentDashboard: React.FC = () => {
                   { text: 'Application submitted to TechCorp Vietnam', time: '2 hours ago', icon: <Send size={14} />, color: cc.info },
                   { text: 'Weekly report W22 approved by TM', time: 'Yesterday', icon: <CheckCircle size={14} />, color: cc.success },
                   { text: 'Interview scheduled for Jul 15 at 2:00 PM', time: '3 days ago', icon: <Calendar size={14} />, color: cc.warning },
-                ].map((item) => (
-                  <div key={item.text} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                ].map((item, i) => (
+                  <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
                     <div style={{
                       width: 32, height: 32, borderRadius: '50%',
                       background: hexToRgba(item.color, 0.1),

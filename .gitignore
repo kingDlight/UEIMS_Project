@@ -160,5 +160,3 @@ env.json
 Ueims.postman_collection.json
 prisma.config.ts
 prisma/
-skills-lock.json
-.scannerwork
