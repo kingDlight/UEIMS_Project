@@ -31,7 +31,7 @@ public class EnterpriseEvaluationServiceImpl implements EnterpriseEvaluationServ
     private final EnterpriseAssignmentRepository assignmentRepository;
     private final EligibleStudentRepository eligibleStudentRepository;
 
-    // BR-43: Trọng số các tiêu chí (Constants)
+    // BR-47: Weighted Score Formula (Constants)
     private static final BigDecimal WEIGHT_ATTITUDE = new BigDecimal("0.2");
     private static final BigDecimal WEIGHT_PROFESSIONALISM = new BigDecimal("0.4");
     private static final BigDecimal WEIGHT_SOFT_SKILLS = new BigDecimal("0.2");
@@ -47,7 +47,7 @@ public class EnterpriseEvaluationServiceImpl implements EnterpriseEvaluationServ
     @Transactional(readOnly = true)
     public EnterpriseEvaluation findById(UUID id) {
         EnterpriseEvaluation evaluation =
-                repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION));
+                repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.EVALUATION_NOT_FOUND));
 
         validateAccess(evaluation);
         return evaluation;
@@ -80,7 +80,7 @@ public class EnterpriseEvaluationServiceImpl implements EnterpriseEvaluationServ
         // Lấy thông tin phân công từ DB để đảm bảo tính xác thực
         EnterpriseAssignment assignment = assignmentRepository
                 .findById(entity.getAssignment().getAssignmentId())
-                .orElseThrow(() -> new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION));
+                .orElseThrow(() -> new AppException(ErrorCode.ASSIGNMENT_NOT_FOUND));
 
         // BR-14: Kiểm tra trạng thái học kỳ. Không cho phép đánh giá nếu học kỳ đã LOCKED hoặc CLOSED
         String semesterStatus = assignment.getSemester().getStatus();
@@ -114,7 +114,7 @@ public class EnterpriseEvaluationServiceImpl implements EnterpriseEvaluationServ
             entity.setEvaluationId(existing.getEvaluationId());
         });
 
-        // BR-43: Weighted Score Formula
+        // BR-47: Weighted Score Formula
         BigDecimal totalScore = attitude.multiply(WEIGHT_ATTITUDE)
                 .add(prof.multiply(WEIGHT_PROFESSIONALISM))
                 .add(softSkills.multiply(WEIGHT_SOFT_SKILLS))

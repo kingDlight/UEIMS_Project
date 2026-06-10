@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ueims.dto.request.FinalGradeRequest;
+import com.ueims.exception.AppException;
+import com.ueims.exception.ErrorCode;
 import com.ueims.model.entity.FinalGrade;
 import com.ueims.model.entity.Semester;
 import com.ueims.model.entity.User;
@@ -31,10 +33,7 @@ public class FinalGradeServiceImpl implements FinalGradeService {
     @Override
     @Transactional(readOnly = true)
     public FinalGrade findById(UUID id) {
-        return repository
-                .findById(id)
-                .orElseThrow(() ->
-                        new com.ueims.exception.AppException(com.ueims.exception.ErrorCode.UNCATEGORIZED_EXCEPTION));
+        return repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.FINAL_GRADE_NOT_FOUND));
     }
 
     @Override
