@@ -15,6 +15,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -29,6 +31,7 @@ import com.nimbusds.jwt.SignedJWT;
 import com.ueims.dto.request.AuthenticationRequest;
 import com.ueims.dto.request.ChangePasswordRequest;
 import com.ueims.dto.request.ForgotPasswordRequest;
+import com.ueims.dto.request.GoogleAuthenticationRequest;
 import com.ueims.dto.request.IntrospectRequest;
 import com.ueims.dto.request.LogoutRequest;
 import com.ueims.dto.request.RefreshRequest;
@@ -80,7 +83,13 @@ public class AuthenticationService {
     @Value("${jwt.refreshable-duration}")
     private long refreshableDuration;
 
+    @NonFinal
+    @Value("${google.client-id}")
+    private String googleClientId;
+
     private static final String ACCESS_TOKEN_TYPE = "ACCESS";
+    private static final String LOCAL_AUTH_PROVIDER = "LOCAL";
+    private static final String GOOGLE_AUTH_PROVIDER = "GOOGLE";
 
     public IntrospectResponse introspect(IntrospectRequest request) {
         var token = request.getToken();
@@ -142,13 +151,125 @@ public class AuthenticationService {
         var token = generateToken(user, validDuration, ACCESS_TOKEN_TYPE);
         var refreshToken = generateToken(user, refreshableDuration, "REFRESH");
 
-        // Save new sessions for BOTH access token and refresh token
+        saveAuthSessions(user, token, refreshToken, request.getDeviceId());
+        auditLoginSuccess(user);
+
+        return AuthenticationResponse.builder()
+                .token(token)
+                .refreshToken(refreshToken)
+                .authenticated(true)
+                .mustChangePassword(Boolean.TRUE.equals(user.getMustChangePassword()))
+                .build();
+    }
+
+    private NimbusJwtDecoder googleJwtDecoder;
+
+    public AuthenticationResponse authenticateWithGoogle(GoogleAuthenticationRequest request) {
+        if (googleClientId == null || googleClientId.isBlank()) {
+            log.error("GOOGLE_CLIENT_ID is not configured. Set the environment variable or application property.");
+            throw new AppException(ErrorCode.GOOGLE_CLIENT_ID_NOT_CONFIGURED);
+        }
+
+        if (googleJwtDecoder == null) {
+            googleJwtDecoder = NimbusJwtDecoder.withJwkSetUri("https://www.googleapis.com/oauth2/v3/certs").build();
+        }
+
+        Jwt googleJwt;
+        try {
+            googleJwt = googleJwtDecoder.decode(request.getIdToken());
+        } catch (Exception exception) {
+            log.error("Invalid Google ID token", exception);
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
+
+        String issuer = googleJwt.getIssuer().toString();
+        if (!"https://accounts.google.com".equals(issuer) && !"accounts.google.com".equals(issuer)) {
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
+
+        if (googleJwt.getAudience() == null || !googleJwt.getAudience().contains(googleClientId)) {
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
+
+        Boolean emailVerified = googleJwt.getClaimAsBoolean("email_verified");
+        if (emailVerified == null || !emailVerified) {
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
+
+        String email = googleJwt.getClaimAsString("email");
+        String fullName = googleJwt.getClaimAsString("name");
+        String pictureUrl = googleJwt.getClaimAsString("picture");
+        if (email == null || email.isBlank()) {
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
+
+        User user = userRepository.findByEmail(email).orElseGet(() -> createGoogleUser(email, fullName, pictureUrl));
+        if (user != null && isLocalUser(user)) {
+            throw new AppException(ErrorCode.ACCOUNT_COLLISION);
+        }
+
+        if (GOOGLE_AUTH_PROVIDER.equals(user.getAuthProvider())) {
+            boolean updated = false;
+            if (fullName != null && !fullName.isBlank() && !fullName.equals(user.getFullName())) {
+                user.setFullName(fullName);
+                updated = true;
+            }
+            if (pictureUrl != null && !pictureUrl.isBlank() && !pictureUrl.equals(user.getAvatarUrl())) {
+                user.setAvatarUrl(pictureUrl);
+                updated = true;
+            }
+            if (updated) {
+                userRepository.save(user);
+            }
+        }
+        if ("LOCKED".equals(user.getStatus())) {
+            throw new AppException(ErrorCode.USER_BANNED);
+        }
+
+        if (user.getLockedUntil() != null && user.getLockedUntil().isAfter(LocalDateTime.now())) {
+            throw new AppException(ErrorCode.USER_BANNED);
+        }
+
+        userSessionManagementService.invalidateOldSessions(user.getEmail());
+
+        String token = generateToken(user, validDuration, ACCESS_TOKEN_TYPE);
+        String refreshToken = generateToken(user, refreshableDuration, "REFRESH");
+
+        saveAuthSessions(user, token, refreshToken, request.getDeviceId());
+        auditLoginSuccess(user);
+
+        return AuthenticationResponse.builder()
+                .token(token)
+                .refreshToken(refreshToken)
+                .authenticated(true)
+                .mustChangePassword(Boolean.TRUE.equals(user.getMustChangePassword()))
+                .build();
+    }
+
+    private User createGoogleUser(String email, String fullName, String pictureUrl) {
+        String name = (fullName == null || fullName.isBlank()) ? email : fullName;
+
+        User user = User.builder()
+                .email(email)
+                .password(passwordEncoder.encode(UUID.randomUUID().toString()))
+                .fullName(name)
+                .avatarUrl(pictureUrl)
+                .authProvider(GOOGLE_AUTH_PROVIDER)
+                .status("ACTIVE")
+                .failedLoginAttempts(0)
+                .mustChangePassword(false)
+                .build();
+
+        return userRepository.save(user);
+    }
+
+    private void saveAuthSessions(User user, String token, String refreshToken, String deviceId) {
         try {
             SignedJWT signedAccessJWT = SignedJWT.parse(token);
             UserSession accessSession = UserSession.builder()
                     .tokenId(signedAccessJWT.getJWTClaimsSet().getJWTID())
                     .email(user.getEmail())
-                    .deviceId(request.getDeviceId())
+                    .deviceId(deviceId)
                     .expiresAt(signedAccessJWT
                             .getJWTClaimsSet()
                             .getExpirationTime()
@@ -162,7 +283,7 @@ public class AuthenticationService {
             UserSession refreshSession = UserSession.builder()
                     .tokenId(signedRefreshJWT.getJWTClaimsSet().getJWTID())
                     .email(user.getEmail())
-                    .deviceId(request.getDeviceId())
+                    .deviceId(deviceId)
                     .expiresAt(signedRefreshJWT
                             .getJWTClaimsSet()
                             .getExpirationTime()
@@ -171,31 +292,28 @@ public class AuthenticationService {
                             .toLocalDateTime())
                     .build();
             userSessionRepository.save(refreshSession);
-
-            // BR-05 / Security: Log the successful login
-            HttpServletRequest httpRequest =
-                    ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-
-            AuditLog auditLog = AuditLog.builder()
-                    .user(user)
-                    .action("LOGIN_SUCCESS")
-                    .targetEntity("User")
-                    .targetId(user.getUserId())
-                    .ipAddress(httpRequest.getRemoteAddr())
-                    .userAgent(httpRequest.getHeader("User-Agent"))
-                    .build();
-            auditLogRepository.save(auditLog);
-
         } catch (ParseException e) {
             log.error("Failed to parse generated token", e);
         }
+    }
 
-        return AuthenticationResponse.builder()
-                .token(token)
-                .refreshToken(refreshToken)
-                .authenticated(true)
-                .mustChangePassword(Boolean.TRUE.equals(user.getMustChangePassword()))
+    private boolean isLocalUser(User user) {
+        return user.getAuthProvider() == null || LOCAL_AUTH_PROVIDER.equals(user.getAuthProvider());
+    }
+
+    private void auditLoginSuccess(User user) {
+        HttpServletRequest httpRequest = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
+                .getRequest();
+
+        AuditLog auditLog = AuditLog.builder()
+                .user(user)
+                .action("LOGIN_SUCCESS")
+                .targetEntity("User")
+                .targetId(user.getUserId())
+                .ipAddress(httpRequest.getRemoteAddr())
+                .userAgent(httpRequest.getHeader("User-Agent"))
                 .build();
+        auditLogRepository.save(auditLog);
     }
 
     public void logout(LogoutRequest request) {
@@ -319,13 +437,16 @@ public class AuthenticationService {
 
             var verified = signedJWT.verify(verifier);
 
-            if (!(verified && expiryTime.after(new Date()))) throw new AppException(ErrorCode.UNAUTHENTICATED);
+            if (!(verified && expiryTime.after(new Date())))
+                throw new AppException(ErrorCode.UNAUTHENTICATED);
 
             if (invalidatedTokenRepository.existsById(
-                    signedJWT.getJWTClaimsSet().getJWTID())) throw new AppException(ErrorCode.UNAUTHENTICATED);
+                    signedJWT.getJWTClaimsSet().getJWTID()))
+                throw new AppException(ErrorCode.UNAUTHENTICATED);
 
             String tokenType = signedJWT.getJWTClaimsSet().getStringClaim("token_type");
-            if (!expectedTokenType.equals(tokenType)) throw new AppException(ErrorCode.UNAUTHENTICATED);
+            if (!expectedTokenType.equals(tokenType))
+                throw new AppException(ErrorCode.UNAUTHENTICATED);
 
             return signedJWT;
         } catch (ParseException | JOSEException e) {
