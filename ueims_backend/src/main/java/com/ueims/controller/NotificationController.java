@@ -23,6 +23,15 @@ public class NotificationController {
         return ResponseEntity.ok(service.findAll().stream().map(mapper::toDto).toList());
     }
 
+    @GetMapping("/my")
+    public ResponseEntity<java.util.List<com.ueims.dto.response.NotificationDTO>> getMyNotifications() {
+        String email = org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+        return ResponseEntity.ok(
+                service.getMyNotifications(email).stream().map(mapper::toDto).toList());
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<com.ueims.dto.response.NotificationDTO> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(mapper.toDto(service.findById(id)));
@@ -38,5 +47,13 @@ public class NotificationController {
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         service.deleteById(id);
         return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{id}/read")
+    public ResponseEntity<com.ueims.dto.response.NotificationDTO> markAsRead(@PathVariable UUID id) {
+        String email = org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+        return ResponseEntity.ok(mapper.toDto(service.markAsRead(id, email)));
     }
 }
