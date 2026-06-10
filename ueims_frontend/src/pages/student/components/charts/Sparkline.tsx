@@ -55,8 +55,8 @@ export const Sparkline: React.FC<SparklineProps> = ({
       />
       {/* Last point dot */}
       <circle
-        cx={parseFloat(points[points.length - 1].split(',')[0])}
-        cy={parseFloat(points[points.length - 1].split(',')[1])}
+        cx={Number.parseFloat(points.at(-1)!.split(',')[0])}
+        cy={Number.parseFloat(points.at(-1)!.split(',')[1])}
         r={3}
         fill={color}
       />

@@ -172,6 +172,9 @@ export function EmailPreviewPage() {
           {templates.map((t) => (
             <div
               key={t.id}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActive(t.id); } }}
               onClick={() => setActive(t.id)}
               style={{
                 padding: '14px 16px',
@@ -283,8 +286,9 @@ export function EmailPreviewPage() {
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             {fields.map((f) => (
               <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: 8, padding: '5px 10px' }}>
-                <label style={{ fontSize: 11, color: '#9CA3AF', fontWeight: 600, whiteSpace: 'nowrap' }}>{f}:</label>
+                <label htmlFor={`input-${f}`} style={{ fontSize: 11, color: '#9CA3AF', fontWeight: 600, whiteSpace: 'nowrap' }}>{f}:</label>
                 <input
+                  id={`input-${f}`}
                   value={currentProps[f] ?? ''}
                   onChange={(e) => updateField(f, e.target.value)}
                   style={{

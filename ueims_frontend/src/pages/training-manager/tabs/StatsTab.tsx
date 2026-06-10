@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Table, Progress } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
@@ -132,7 +132,7 @@ const CustomTooltip: React.FC<{
         </div>
       )}
       {payload.map((entry, i) => (
-        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: i < payload.length - 1 ? 5 : 0 }}>
+        <div key={entry.name} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: i < payload.length - 1 ? 5 : 0 }}>
           <span style={{ width: 8, height: 8, borderRadius: '50%', background: entry.color, flexShrink: 0 }} />
           <span style={{ fontSize: 12.5, color: cc.textSecondary, fontWeight: 500 }}>
             {entry.name}
@@ -206,6 +206,12 @@ const MetricCard: React.FC<{
   </motion.div>
 );
 
+const ProgressFormat = (percent?: number) => (
+  <span style={{ fontSize: 11.5, fontWeight: 700, color: cc.success, fontFamily: 'Inter, sans-serif' }}>
+    {percent}%
+  </span>
+);
+
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
@@ -261,11 +267,7 @@ export const StatsTab: React.FC = () => {
             size="small"
             strokeColor={cc.success}
 trailColor={cc.borderSubtle}
-            format={() => (
-              <span style={{ fontSize: 11.5, fontWeight: 700, color: cc.success, fontFamily: 'Inter, sans-serif' }}>
-                {rate}%
-              </span>
-            )}
+            format={ProgressFormat}
             style={{ width: 120 }}
           />
         </div>
@@ -363,8 +365,8 @@ trailColor={cc.borderSubtle}
                   animationDuration={1200}
                   animationEasing="ease-out"
                 >
-                  {PLACEMENT_DATA.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} stroke="#FFFFFF" strokeWidth={4} />
+                  {PLACEMENT_DATA.map((entry) => (
+                    <Cell key={entry.name} fill={entry.color} stroke="#FFFFFF" strokeWidth={4} />
                   ))}
                 </Pie>
                 <text x="50%" y="43%" textAnchor="middle" dominantBaseline="central" fill={cc.textPrimary} fontSize={28} fontWeight={800} fontFamily="Inter, sans-serif" letterSpacing="-0.03em">

@@ -697,3 +697,15 @@ a:hover {
   .grid-cols-2 { grid-template-columns: 1fr; }
 }
 
+
+
+/* Scroll Animations - using data attribute to prevent React from wiping state on re-render */
+.scroll-animate {
+  opacity: 0;
+  transform: translateY(2rem);
+}
+.scroll-animate[data-animated="true"] {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+

@@ -1,5 +1,5 @@
 import logoUeims from '@/assets/logo_ueims.png';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Form, Input, Button, message, Divider } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -19,6 +19,7 @@ import {
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const loginWithTokens = useAuthStore((state) => state.loginWithTokens);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const [loading, setLoading] = useState(false);
 
   const getRedirectPath = (roles: string[]): string => {
@@ -26,6 +27,12 @@ export const LoginPage: React.FC = () => {
     if (roles.includes('ENTERPRISE')) return '/student-dashboard';
     return '/app/dashboard';
   };
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/app/dashboard');
+    }
+  }, [isAuthenticated, navigate]);
 
   const onFinish = async (values: { email: string; password: string }) => {
     setLoading(true);
