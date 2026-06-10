@@ -206,9 +206,6 @@ public class AuthenticationService {
         }
 
         User user = userRepository.findByEmail(email).orElseGet(() -> createGoogleUser(email, fullName, pictureUrl));
-        if (user != null && isLocalUser(user)) {
-            throw new AppException(ErrorCode.ACCOUNT_COLLISION);
-        }
 
         if (GOOGLE_AUTH_PROVIDER.equals(user.getAuthProvider())) {
             boolean updated = false;

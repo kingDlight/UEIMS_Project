@@ -173,3 +173,5 @@ test-api.js
 query.js
 test-collection.json
 update-pass.js
+test-internship-plan.js
+test-plan-collection.json
