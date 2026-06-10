@@ -1,355 +1,161 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { message } from 'antd';
-import { ModernLayout } from '@/components/layout/ModernLayout';
-import type { NavItem } from '@/components/layout/ModernLayout';
-import {
-  User,
-  Briefcase,
-  FileText,
-  GraduationCap,
-  Bell,
-  Settings,
-  Home,
-  BookOpen,
-  BarChart3,
-  Calendar,
-  CheckCircle,
-  Clock,
-  AlertCircle,
-  Send,
-  X,
-  Upload,
-  File,
-  Building2,
-  MapPin,
-  DollarSign,
-  Users,
-  Star,
-  ArrowRight,
-  ChevronRight,
-  RefreshCw,
-  Eye,
-  Download,
-  Inbox,
-  TrendingUp,
-  Award,
-  ExternalLink,
-} from 'lucide-react';
+import { 
+  UserOutlined, MailOutlined, PhoneOutlined, IdcardOutlined, BookOutlined,
+  UploadOutlined, FileTextOutlined, TrophyOutlined, CalendarOutlined,
+  ClockCircleOutlined, CheckCircleOutlined, WarningOutlined, ExclamationCircleOutlined,
+  RightOutlined, BankOutlined, TeamOutlined, SettingOutlined, BellOutlined,
+  EyeOutlined, DownloadOutlined, EditOutlined, SaveOutlined, PlusOutlined,
+  SendOutlined, CloseCircleOutlined, StarOutlined, ScheduleOutlined,
+  FileProtectOutlined, SnippetsOutlined, LogoutOutlined, LockOutlined,
+  UploadOutlined as UploadIcon, FileOutlined, SearchOutlined, FilterOutlined,
+  ArrowUpOutlined, ArrowDownOutlined, EnvironmentOutlined, LinkOutlined,
+} from '@ant-design/icons';
+import { NeuSurface } from './components/shared/NeuSurface';
+import { SmallPill } from './components/shared/SmallPill';
+import { SmallBadge } from './components/shared/SmallBadge';
+import { AnimatedStatCard } from './components/shared/AnimatedStatCard';
+import { Sparkline } from './components/charts/Sparkline';
+import { AreaChart } from './components/charts/AreaChart';
+import { cc, hexToRgba } from './constants';
 import { api } from '@/services/api';
+import type { NavItem } from '@/components/layout/ModernLayout';
+import { Spin } from 'antd';
 
 // ============================================================
-// DESIGN TOKENS — Student Portal (aligned with TM cc / constants)
+// ANIMATED NUMBER
 // ============================================================
-const cc = {
-  // Brand
-  primary: '#E96500',
-  primaryHover: '#CC5800',
-  primaryLight: '#FFF3E8',
-  brand: '#FF7A30',
-  brandStrong: '#9B4A10',
-
-  // Semantic
-  success: '#22c55e',
-  successMuted: '#dcfce7',
-  successText: '#166534',
-  warning: '#f59e0b',
-  warningMuted: '#fef3c7',
-  warningText: '#92400e',
-  error: '#ef4444',
-  errorMuted: '#fee2e2',
-  errorText: '#991b1b',
-  info: '#3b82f6',
-  infoMuted: '#dbeafe',
-  infoText: '#1e40af',
-
-  // Neutrals
-  textPrimary: '#1e293b',
-  textSecondary: '#64748b',
-  textMuted: '#94a3b8',
-  surface: '#ffffff',
-  bg: '#f8fafc',
-  border: '#e2e8f0',
-  borderSubtle: '#f1f5f9',
-
-  // Radii
-  radiusSm: 6,
-  radiusMd: 8,
-  radiusLg: 12,
-  radiusXl: 16,
-  radius2xl: 22,
-  radiusFull: 9999,
-
-  // Shadows
-  shadowSm: '0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)',
-  shadowMd: '0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04)',
-  shadowLg: '0 10px 20px rgba(0,0,0,0.08), 0 4px 8px rgba(0,0,0,0.04)',
-  shadowXl: '0 20px 40px rgba(0,0,0,0.10), 0 8px 16px rgba(0,0,0,0.06)',
-  shadowBrand: '0 4px 12px rgba(233,101,0,0.22)',
-  shadowSuccess: '0 4px 12px rgba(34,197,94,0.22)',
-  shadowError: '0 4px 12px rgba(239,68,68,0.22)',
-  shadowWarning: '0 4px 12px rgba(245,158,11,0.22)',
+const AnimatedNumber: React.FC<{ value: number }> = ({ value }) => {
+  const [displayValue, setDisplayValue] = useState(0);
+  useEffect(() => {
+    let start = 0;
+    const duration = 1200;
+    const startTime = Date.now();
+    const animate = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplayValue(Math.round(start + (value - start) * eased));
+      if (progress < 1) requestAnimationFrame(animate);
+    };
+    requestAnimationFrame(animate);
+  }, [value]);
+  return <>{displayValue.toLocaleString()}</>;
 };
 
 // ============================================================
-// HELPER UTILITIES
+// HERO STAT MINI CARD (reused in hero section)
 // ============================================================
-function hexToRgba(hex: string, alpha: number): string {
-  const h = hex.replace('#', '');
-  const r = parseInt(h.substring(0, 2), 16);
-  const g = parseInt(h.substring(2, 4), 16);
-  const b = parseInt(h.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-}
-
-// ============================================================
-// SHARED UI COMPONENTS (matching TM quality)
-// ============================================================
-const Card: React.FC<{
-  children: React.ReactNode;
-  className?: string;
-  style?: React.CSSProperties;
-  onClick?: () => void;
-  hoverable?: boolean;
-}> = ({ children, className = '', style, onClick, hoverable = false }) => {
+const HeroMiniCard: React.FC<{ label: string; value: number; delay?: number }> = ({ label, value, delay = 0 }) => {
   const [hovered, setHovered] = useState(false);
   return (
     <motion.div
-      className={className}
-      onClick={onClick}
-      onMouseEnter={() => hoverable && setHovered(true)}
-      onMouseLeave={() => hoverable && setHovered(false)}
-      animate={{
-        y: hovered && hoverable ? -2 : 0,
-        boxShadow: hovered && hoverable ? cc.shadowMd : cc.shadowSm,
-      }}
-      transition={{ duration: 0.15, ease: [0.32, 0.72, 0, 1] }}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay }}
+      whileHover={{ y: -2, transition: { duration: 0.2 }, boxShadow: '0 8px 24px rgba(15,23,42,.12)' }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       style={{
-        background: cc.surface,
-        borderRadius: cc.radiusLg,
-        border: `1px solid ${cc.border}`,
-        boxShadow: cc.shadowSm,
-        overflow: 'hidden',
-        cursor: onClick ? 'pointer' : 'default',
-        ...style,
+        padding: '10px 14px',
+        borderRadius: 16,
+        background: '#fff',
+        border: '1px solid rgba(226,232,240,.95)',
+        boxShadow: '0 4px 18px rgba(15,23,42,.06)',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        minHeight: 68,
+        cursor: 'default',
       }}
     >
-      {children}
+      <div style={{ fontSize: 11, color: cc.textMuted, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em' }}>{label}</div>
+      <div style={{ fontSize: 26, fontWeight: 900, color: cc.text, lineHeight: 1.1, fontVariantNumeric: 'tabular-nums', marginTop: 4 }}>
+        <AnimatedNumber value={value} />
+      </div>
     </motion.div>
   );
 };
 
-const NeuSurface: React.FC<{
-  children: React.ReactNode;
-  className?: string;
-  style?: React.CSSProperties;
-}> = ({ children, className = '', style }) => (
-  <div
-    className={className}
-    style={{
-      background: cc.surface,
-      borderRadius: cc.radius2xl,
-      boxShadow: '0 4px 20px rgba(15,23,42,.06)',
-      border: '1px solid rgba(226,232,240,.9)',
-      ...style,
-    }}
-  >
-    {children}
-  </div>
-);
-
-const StatCard: React.FC<{
-  label: string;
-  value: string | number;
-  icon: React.ReactNode;
-  color: string;
-  trend?: string;
-  trendUp?: boolean;
-}> = ({ label, value, icon, color, trend, trendUp }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 16 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.4 }}
-  >
-    <Card style={{ padding: 18 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-        <div style={{
-          width: 48,
-          height: 48,
-          borderRadius: cc.radiusMd,
-          background: hexToRgba(color, 0.12),
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: color,
-          flexShrink: 0,
-        }}>
-          {icon}
-        </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <p style={{ fontSize: 11, fontWeight: 600, color: cc.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em', margin: '0 0 2px' }}>
-            {label}
-          </p>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-            <p style={{ fontSize: 28, fontWeight: 700, color: cc.textPrimary, margin: 0, lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
-              {value}
-            </p>
-            {trend && (
-              <span style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 2,
-                fontSize: 11,
-                fontWeight: 600,
-                color: trendUp ? cc.success : cc.error,
-                background: trendUp ? cc.successMuted : cc.errorMuted,
-                padding: '2px 6px',
-                borderRadius: cc.radiusFull,
-              }}>
-                <TrendingUp size={10} style={{ transform: trendUp ? 'none' : 'rotate(180deg)' }} />
-                {trend}
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
-    </Card>
-  </motion.div>
-);
-
-const SectionTitle: React.FC<{ children: React.ReactNode; action?: React.ReactNode }> = ({ children, action }) => (
-  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-    <h3 style={{ fontSize: 15, fontWeight: 600, color: cc.textPrimary, margin: 0 }}>{children}</h3>
-    {action}
-  </div>
-);
-
-const TextLink: React.FC<{ children: React.ReactNode; onClick?: () => void; icon?: React.ReactNode }> = ({ children, onClick, icon }) => (
-  <motion.button
-    onClick={onClick}
-    whileHover={{ opacity: 0.75, x: 2 }}
-    whileTap={{ scale: 0.98 }}
-    transition={{ duration: 0.15 }}
-    style={{
-      display: 'inline-flex',
-      alignItems: 'center',
-      gap: 4,
-      fontSize: 12,
-      fontWeight: 600,
-      color: cc.primary,
-      background: 'none',
-      border: 'none',
-      cursor: 'pointer',
-      padding: 0,
-    }}
-  >
-    {children}
-    {icon || <ArrowRight size={13} />}
-  </motion.button>
-);
-
-const SmallPill: React.FC<{ label: string; variant: 'success' | 'warning' | 'error' | 'info' | 'neutral' }> = ({ label, variant }) => {
-  const map: Record<string, { bg: string; color: string }> = {
-    success: { bg: cc.successMuted, color: cc.successText },
-    warning: { bg: cc.warningMuted, color: cc.warningText },
-    error: { bg: cc.errorMuted, color: cc.errorText },
-    info: { bg: cc.infoMuted, color: cc.infoText },
-    neutral: { bg: cc.borderSubtle, color: cc.textSecondary },
-  };
-  const { bg, color } = map[variant];
-  return (
-    <span style={{
-      display: 'inline-flex',
-      alignItems: 'center',
-      padding: '3px 8px',
-      borderRadius: cc.radiusFull,
-      background: bg,
-      color,
-      fontSize: 10,
-      fontWeight: 700,
-      textTransform: 'uppercase',
-      letterSpacing: '0.05em',
-    }}>
-      {label}
-    </span>
-  );
-};
-
+// ============================================================
+// CTA BUTTON
+// ============================================================
 const CTAButton: React.FC<{
   children: React.ReactNode;
-  onClick?: () => void;
-  variant?: 'primary' | 'ghost' | 'success' | 'danger';
+  onClick?: (e?: React.MouseEvent) => void;
+  variant?: 'primary' | 'ghost' | 'success' | 'danger' | 'warning';
   size?: 'sm' | 'md' | 'lg';
   fullWidth?: boolean;
   icon?: React.ReactNode;
   disabled?: boolean;
-}> = ({ children, onClick, variant = 'primary', size = 'md', fullWidth = false, icon, disabled = false }) => {
-  const styles: Record<string, { bg: string; text: string; border: string; shadow: string }> = {
-    primary: { bg: cc.primary, text: '#fff', border: 'transparent', shadow: cc.shadowBrand },
-    ghost: { bg: 'transparent', text: cc.primary, border: cc.border, shadow: 'none' },
-    success: { bg: cc.success, text: '#fff', border: 'transparent', shadow: cc.shadowSuccess },
-    danger: { bg: cc.error, text: '#fff', border: 'transparent', shadow: cc.shadowError },
+  loading?: boolean;
+}> = ({ children, onClick, variant = 'primary', size = 'md', fullWidth = false, icon, disabled = false, loading = false }) => {
+  // TM-aligned button styles
+  const styles: Record<string, { bg: string; text: string; border: string; shadow: string; hoverBg?: string }> = {
+    primary: { bg: 'linear-gradient(135deg, #FF662C, #FF824D, #FF9B73)', text: '#fff', border: 'none', shadow: '0 12px 28px rgba(233,101,0,.22)', hoverBg: 'linear-gradient(135deg, #E86A20, #FF662C, #FF824D)' },
+    ghost: { bg: '#fff', text: cc.primary, border: cc.border, shadow: '0 8px 18px rgba(15,23,42,.05)' },
+    success: { bg: '#fff', text: cc.success, border: `${cc.success}40`, shadow: '0 8px 18px rgba(15,23,42,.05)' },
+    danger: { bg: '#fff1f2', text: cc.danger, border: `${cc.danger}30`, shadow: '0 8px 18px rgba(15,23,42,.05)' },
+    warning: { bg: '#fff', text: cc.warning, border: `${cc.warning}40`, shadow: '0 8px 18px rgba(15,23,42,.05)' },
   };
-  const { bg, text, border, shadow } = styles[variant];
-  const sizes = { sm: { padding: '6px 12px', fontSize: 12 }, md: { padding: '9px 16px', fontSize: 13 }, lg: { padding: '11px 20px', fontSize: 14 } };
+  const { bg, text, border, shadow, hoverBg } = styles[variant];
+  const sizes = { sm: { padding: '8px 14px', fontSize: 12 }, md: { padding: '11px 16px', fontSize: 13 }, lg: { padding: '13px 22px', fontSize: 14 } };
   const { padding, fontSize } = sizes[size];
 
   return (
     <motion.button
       onClick={onClick}
-      whileHover={disabled ? {} : { y: -1, boxShadow: shadow }}
+      whileHover={disabled ? {} : { y: -1, boxShadow: hoverBg ? shadow : shadow }}
       whileTap={disabled ? {} : { scale: 0.98 }}
       transition={{ duration: 0.15, ease: [0.32, 0.72, 0, 1] }}
-      disabled={disabled}
+      disabled={disabled || loading}
       style={{
         display: 'inline-flex',
         alignItems: 'center',
-        gap: 6,
+        gap: 8,
         padding,
         fontSize,
-        fontWeight: 600,
+        fontWeight: 700,
         color: disabled ? cc.textMuted : text,
-        background: disabled ? cc.borderSubtle : bg,
-        border: `1px solid ${border}`,
-        borderRadius: cc.radiusMd,
-        boxShadow: variant === 'ghost' ? 'none' : shadow,
+        background: disabled ? cc.bgLight : bg,
+        border: variant === 'primary' ? 'none' : `1px solid ${border}`,
+        borderRadius: 16,
+        boxShadow: disabled ? 'none' : shadow,
         cursor: disabled ? 'not-allowed' : 'pointer',
         width: fullWidth ? '100%' : 'auto',
         justifyContent: 'center',
-        fontFamily: "'Inter', -apple-system, sans-serif",
+        fontFamily: "'Inter', sans-serif",
         opacity: disabled ? 0.6 : 1,
       }}
     >
-      {icon && <span style={{ display: 'flex' }}>{icon}</span>}
+      {loading ? <Spin size="small" /> : icon && <span style={{ display: 'flex' }}>{icon}</span>}
       {children}
     </motion.button>
   );
 };
 
+// ============================================================
+// EMPTY STATE
+// ============================================================
 const EmptyState: React.FC<{ icon: React.ReactNode; title: string; description: string; action?: React.ReactNode }> = ({ icon, title, description, action }) => (
-  <Card style={{ padding: 56, textAlign: 'center' }}>
+  <NeuSurface style={{ padding: 56, textAlign: 'center' }}>
     <div style={{
-      width: 72,
-      height: 72,
-      borderRadius: '50%',
-      background: cc.primaryLight,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      margin: '0 auto 16px',
-      color: cc.primary,
+      width: 72, height: 72, borderRadius: '50%',
+      background: cc.primaryMuted, display: 'flex', alignItems: 'center', justifyContent: 'center',
+      margin: '0 auto 16px', color: cc.primary,
     }}>
       {icon}
     </div>
-    <h3 style={{ fontSize: 16, fontWeight: 600, color: cc.textPrimary, margin: '0 0 6px' }}>{title}</h3>
+    <h3 style={{ fontSize: 16, fontWeight: 600, color: cc.text, margin: '0 0 6px' }}>{title}</h3>
     <p style={{ fontSize: 13, color: cc.textMuted, margin: '0 0 20px', maxWidth: 340, marginLeft: 'auto', marginRight: 'auto' }}>{description}</p>
     {action}
-  </Card>
+  </NeuSurface>
 );
 
+
 // ============================================================
-// PROFILE TAB
+// PROFILE TAB (UC-42)
 // ============================================================
 const ProfileTab: React.FC = () => {
   const [profile, setProfile] = useState<any>(null);
@@ -357,7 +163,8 @@ const ProfileTab: React.FC = () => {
   const [uploading, setUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [cvFile, setCvFile] = useState<File | null>(null);
-  const [cvUrl, setCvUrl] = useState<string | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [formData, setFormData] = useState({ phone: '', skills: '' });
 
   useEffect(() => { fetchProfile(); }, []);
 
@@ -366,18 +173,12 @@ const ProfileTab: React.FC = () => {
       setLoading(true);
       const res = await api.get('/users/myInfo');
       setProfile(res.data);
+      setFormData({ phone: res.data.phone || '', skills: res.data.skills || '' });
     } catch (err) {
       console.error('Failed to fetch profile', err);
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleDrag = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === 'dragenter' || e.type === 'dragover') setDragActive(true);
-    else if (e.type === 'dragleave') setDragActive(false);
   };
 
   const validateFile = (file: File): string | null => {
@@ -388,24 +189,12 @@ const ProfileTab: React.FC = () => {
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    e.stopPropagation();
     setDragActive(false);
     const file = e.dataTransfer.files?.[0];
     if (file) {
       const error = validateFile(file);
       if (error) { message.error(error); return; }
       setCvFile(file);
-      setCvUrl(URL.createObjectURL(file));
-    }
-  };
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const error = validateFile(file);
-      if (error) { message.error(error); return; }
-      setCvFile(file);
-      setCvUrl(URL.createObjectURL(file));
     }
   };
 
@@ -422,156 +211,167 @@ const ProfileTab: React.FC = () => {
       message.error(err.response?.data?.message || 'Upload failed!');
     } finally {
       setUploading(false);
+      setCvFile(null);
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    try {
+      await api.put('/student-profiles', formData);
+      message.success('Profile updated successfully!');
+      setEditing(false);
+      fetchProfile();
+    } catch (err: any) {
+      message.error(err.response?.data?.message || 'Update failed!');
     }
   };
 
   if (loading) {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}>
-        <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}>
-          <RefreshCw size={28} color={cc.primary} />
-        </motion.div>
-      </div>
-    );
+    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}><Spin size="large" /></div>;
   }
 
   return (
-    <div style={{ maxWidth: 800, margin: '0 auto', padding: '0 24px 40px' }}>
-      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-
-        {/* Profile Header */}
-        <Card style={{ padding: 24, marginBottom: 20 }}>
-          <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
-            <div style={{
-              width: 80, height: 80,
-              borderRadius: cc.radiusLg,
-              background: `linear-gradient(135deg, ${cc.primary}, ${cc.primaryHover})`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: '#fff', fontSize: 28, fontWeight: 800, flexShrink: 0,
-              boxShadow: cc.shadowBrand,
-            }}>
-              {profile?.fullName?.substring(0, 2).toUpperCase() || 'ST'}
-            </div>
-            <div style={{ flex: 1 }}>
-              <h2 style={{ fontSize: 20, fontWeight: 700, color: cc.textPrimary, margin: '0 0 4px' }}>
-                {profile?.fullName || 'Student'}
-              </h2>
-              <p style={{ fontSize: 13, color: cc.textMuted, margin: '0 0 10px' }}>
-                {profile?.email || 'email@student.fpt.edu.vn'}
-              </p>
-              <SmallPill label="Active Intern" variant="success" />
-            </div>
+    <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} style={{ maxWidth: 800, margin: '0 auto', padding: '0 24px 40px' }}>
+      {/* Profile Header */}
+      <NeuSurface style={{ padding: 24, marginBottom: 16 }}>
+        <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
+          <div style={{
+            width: 80, height: 80, borderRadius: cc.radiusLg,
+            background: `linear-gradient(135deg, ${cc.primary}, ${cc.primaryDark})`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: '#fff', fontSize: 28, fontWeight: 800, flexShrink: 0,
+            boxShadow: cc.shadowBrand,
+          }}>
+            {profile?.fullName?.substring(0, 2).toUpperCase() || 'ST'}
           </div>
-        </Card>
-
-        {/* CV Upload */}
-        <Card style={{ padding: 24, marginBottom: 20 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-            <div style={{
-              width: 44, height: 44, borderRadius: cc.radiusMd,
-              background: hexToRgba(cc.info, 0.1), display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.info,
-            }}>
-              <FileText size={20} />
-            </div>
-            <div>
-              <h3 style={{ fontSize: 15, fontWeight: 600, color: cc.textPrimary, margin: 0 }}>Your CV / Resume</h3>
-              <p style={{ fontSize: 12, color: cc.textMuted, margin: '2px 0 0' }}>Upload in PDF format, max 5MB</p>
-            </div>
+          <div style={{ flex: 1 }}>
+            <h2 style={{ fontSize: 20, fontWeight: 700, color: cc.text, margin: '0 0 4px' }}>{profile?.fullName || 'Student'}</h2>
+            <p style={{ fontSize: 13, color: cc.textMuted, margin: '0 0 10px' }}>{profile?.email || 'email@student.fpt.edu.vn'}</p>
+            <SmallPill color={cc.success}><CheckCircleOutlined /> Active Intern</SmallPill>
           </div>
+          <CTAButton variant="ghost" icon={<EditOutlined />} onClick={() => setEditing(!editing)}>
+            {editing ? 'Cancel' : 'Edit Profile'}
+          </CTAButton>
+        </div>
+      </NeuSurface>
 
-          <div
-            onDragEnter={handleDrag}
-            onDragLeave={handleDrag}
-            onDragOver={handleDrag}
-            onDrop={handleDrop}
-            onClick={() => document.getElementById('cv-input')?.click()}
-            style={{
-              border: `2px dashed ${dragActive ? cc.primary : cc.border}`,
-              borderRadius: cc.radiusLg,
-              padding: '36px 24px',
-              textAlign: 'center',
-              background: dragActive ? cc.primaryLight : cc.bg,
-              transition: 'all 0.2s ease',
-              cursor: 'pointer',
-            }}
-          >
-            <input id="cv-input" type="file" accept=".pdf" onChange={handleFileSelect} style={{ display: 'none' }} />
-
-            {cvFile ? (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
-                <File size={32} color={cc.success} />
-                <div style={{ textAlign: 'left' }}>
-                  <p style={{ fontSize: 14, fontWeight: 600, color: cc.textPrimary, margin: 0 }}>{cvFile.name}</p>
-                  <p style={{ fontSize: 12, color: cc.textMuted, margin: '2px 0 0' }}>{(cvFile.size / 1024 / 1024).toFixed(2)} MB</p>
-                </div>
-                <button
-                  onClick={(e) => { e.stopPropagation(); setCvFile(null); setCvUrl(null); }}
-                  style={{
-                    marginLeft: 8, padding: 8, borderRadius: cc.radiusMd,
-                    background: cc.errorMuted, border: 'none', cursor: 'pointer', color: cc.error,
-                  }}
-                >
-                  <X size={16} />
-                </button>
+      {/* Personal Info */}
+      <NeuSurface style={{ padding: 24, marginBottom: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+          <h3 style={{ fontSize: 15, fontWeight: 700, color: cc.text, margin: 0 }}>Personal Information</h3>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+          {[
+            { label: 'Student ID (MSSV)', value: profile?.studentCode || 'N/A', icon: <IdcardOutlined /> },
+            { label: 'Email', value: profile?.email || 'N/A', icon: <MailOutlined /> },
+            { label: 'Phone', value: editing ? (
+              <input value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} 
+                style={{ border: `1px solid ${cc.border}`, borderRadius: cc.radiusSm, padding: '4px 8px', fontSize: 13, width: '100%' }} />
+            ) : profile?.phone || 'Not set', icon: <PhoneOutlined /> },
+            { label: 'Major', value: profile?.major || 'Software Engineering', icon: <BookOutlined /> },
+          ].map((item, i) => (
+            <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+              <div style={{ width: 40, height: 40, borderRadius: cc.radiusMd, background: cc.primaryMuted, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.primary, flexShrink: 0 }}>
+                {item.icon}
               </div>
-            ) : (
-              <>
-                <Upload size={40} color={cc.textMuted} style={{ marginBottom: 12 }} />
-                <p style={{ fontSize: 14, fontWeight: 600, color: cc.textPrimary, margin: '0 0 4px' }}>Drag & drop your CV here</p>
-                <p style={{ fontSize: 12, color: cc.textMuted, margin: 0 }}>or click to browse files</p>
-              </>
-            )}
-          </div>
-
-          {cvFile && (
-            <div style={{ marginTop: 16, display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
-              <CTAButton variant="ghost" onClick={() => { setCvFile(null); setCvUrl(null); }}>Cancel</CTAButton>
-              <CTAButton variant="primary" onClick={handleUploadCV} disabled={uploading} icon={uploading ? <motion.span animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}><RefreshCw size={14} /></motion.span> : <Upload size={14} />}>
-                {uploading ? 'Uploading...' : 'Upload CV'}
-              </CTAButton>
-            </div>
-          )}
-
-          {profile?.cvFileUrl && !cvFile && (
-            <div style={{
-              marginTop: 20, padding: 16, borderRadius: cc.radiusMd,
-              background: cc.successMuted, border: `1px solid ${hexToRgba(cc.success, 0.2)}`,
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <CheckCircle size={20} color={cc.success} />
-                <div>
-                  <p style={{ fontSize: 13, fontWeight: 600, color: cc.successText, margin: 0 }}>CV uploaded</p>
-                  <p style={{ fontSize: 12, color: cc.successText, opacity: 0.8, margin: '2px 0 0' }}>{profile.cvFileName || 'cv_document.pdf'}</p>
-                </div>
+              <div>
+                <div style={{ fontSize: 11, color: cc.textMuted, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.07em' }}>{item.label}</div>
+                <div style={{ fontSize: 14, color: cc.text, fontWeight: 600, marginTop: 2 }}>{item.value}</div>
               </div>
-              <CTAButton variant="ghost" size="sm" icon={<Eye size={14} />} onClick={() => window.open(profile.cvFileUrl, '_blank')}>View</CTAButton>
             </div>
-          )}
-        </Card>
-
-        {/* Skills */}
-        <Card style={{ padding: 24 }}>
-          <SectionTitle>Skills</SectionTitle>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {['React', 'TypeScript', 'Node.js', 'Java', 'Python', 'SQL'].map((skill) => (
-              <span key={skill} style={{
-                padding: '6px 14px', borderRadius: cc.radiusFull,
-                background: cc.primaryLight, color: cc.primary,
-                fontSize: 12, fontWeight: 600,
-              }}>
-                {skill}
-              </span>
-            ))}
+          ))}
+        </div>
+        {editing && (
+          <div style={{ marginTop: 20, display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+            <CTAButton variant="ghost" onClick={() => setEditing(false)}>Cancel</CTAButton>
+            <CTAButton variant="primary" icon={<SaveOutlined />} onClick={handleSaveProfile}>Save Changes</CTAButton>
           </div>
-        </Card>
-      </motion.div>
-    </div>
+        )}
+      </NeuSurface>
+
+      {/* CV Upload (UC-42) */}
+      <NeuSurface style={{ padding: 24, marginBottom: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+          <div style={{ width: 44, height: 44, borderRadius: cc.radiusMd, background: cc.infoMuted, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.info }}>
+            <FileTextOutlined style={{ fontSize: 20 }} />
+          </div>
+          <div>
+            <h3 style={{ fontSize: 15, fontWeight: 600, color: cc.text, margin: 0 }}>Your CV / Resume</h3>
+            <p style={{ fontSize: 12, color: cc.textMuted, margin: '2px 0 0' }}>Upload in PDF format, max 5MB (BR-27)</p>
+          </div>
+        </div>
+        <div
+          onDragEnter={(e) => { e.preventDefault(); setDragActive(true); }}
+          onDragLeave={() => setDragActive(false)}
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={handleDrop}
+          onClick={() => document.getElementById('cv-input')?.click()}
+          style={{
+            border: `2px dashed ${dragActive ? cc.primary : cc.border}`,
+            borderRadius: cc.radiusLg, padding: '36px 24px', textAlign: 'center',
+            background: dragActive ? cc.primaryMuted : cc.bgLight,
+            transition: 'all 0.2s ease', cursor: 'pointer',
+          }}
+        >
+          <input id="cv-input" type="file" accept=".pdf" onChange={(e) => { const f = e.target.files?.[0]; if (f) { const err = validateFile(f); if (err) message.error(err); else setCvFile(f); }}} style={{ display: 'none' }} />
+          {cvFile ? (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
+              <FileOutlined style={{ fontSize: 32, color: cc.success }} />
+              <div style={{ textAlign: 'left' }}>
+                <p style={{ fontSize: 14, fontWeight: 600, color: cc.text, margin: 0 }}>{cvFile.name}</p>
+                <p style={{ fontSize: 12, color: cc.textMuted, margin: '2px 0 0' }}>{(cvFile.size / 1024 / 1024).toFixed(2)} MB</p>
+              </div>
+            </div>
+          ) : (
+            <>
+              <UploadIcon style={{ fontSize: 40, color: cc.textMuted, marginBottom: 12 }} />
+              <p style={{ fontSize: 14, fontWeight: 600, color: cc.text, margin: '0 0 4px' }}>Drag & drop your CV here</p>
+              <p style={{ fontSize: 12, color: cc.textMuted, margin: 0 }}>or click to browse files</p>
+            </>
+          )}
+        </div>
+        {cvFile && (
+          <div style={{ marginTop: 16, display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+            <CTAButton variant="ghost" onClick={() => setCvFile(null)}>Cancel</CTAButton>
+            <CTAButton variant="primary" icon={<UploadOutlined />} onClick={handleUploadCV} loading={uploading}>Upload CV</CTAButton>
+          </div>
+        )}
+        {profile?.cvFileUrl && !cvFile && (
+          <div style={{ marginTop: 20, padding: 16, borderRadius: cc.radiusMd, background: cc.successMuted, border: `1px solid ${hexToRgba(cc.success, 0.2)}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <CheckCircleOutlined style={{ fontSize: 20, color: cc.success }} />
+              <div>
+                <p style={{ fontSize: 13, fontWeight: 600, color: cc.successText, margin: 0 }}>CV uploaded</p>
+                <p style={{ fontSize: 12, color: cc.successText, opacity: 0.8, margin: '2px 0 0' }}>{profile.cvFileName || 'cv_document.pdf'}</p>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <CTAButton variant="ghost" size="sm" icon={<EyeOutlined />} onClick={() => window.open(profile.cvFileUrl, '_blank')}>View</CTAButton>
+              <CTAButton variant="ghost" size="sm" icon={<DownloadOutlined />} onClick={() => window.open(profile.cvFileUrl, '_blank')}>Download</CTAButton>
+            </div>
+          </div>
+        )}
+      </NeuSurface>
+
+      {/* Skills */}
+      <NeuSurface style={{ padding: 24 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <h3 style={{ fontSize: 15, fontWeight: 700, color: cc.text, margin: 0 }}>Skills</h3>
+        </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+          {(profile?.skills || 'React, TypeScript, Java, Python').split(',').map((skill: string, i: number) => (
+            <span key={i} style={{ padding: '6px 14px', borderRadius: cc.radiusFull, background: cc.primaryMuted, color: cc.primary, fontSize: 12, fontWeight: 600 }}>
+              {skill.trim()}
+            </span>
+          ))}
+        </div>
+      </NeuSurface>
+    </motion.div>
   );
 };
 
 // ============================================================
-// JOB BOARD TAB
+// JOB BOARD TAB (UC-43, UC-44)
 // ============================================================
 const JobBoardTab: React.FC = () => {
   const [jobs, setJobs] = useState<any[]>([]);
@@ -579,7 +379,9 @@ const JobBoardTab: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedJob, setSelectedJob] = useState<any>(null);
   const [applying, setApplying] = useState(false);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [matchProfile, setMatchProfile] = useState(false);
+  const [techFilter, setTechFilter] = useState<string[]>([]);
+  const [confirmApply, setConfirmApply] = useState<any>(null);
 
   useEffect(() => { fetchJobs(); }, []);
 
@@ -587,7 +389,7 @@ const JobBoardTab: React.FC = () => {
     try {
       setLoading(true);
       const res = await api.get('/job-posts/active');
-      setJobs(res.data);
+      setJobs(res.data || []);
     } catch (err) {
       console.error('Failed to fetch jobs', err);
     } finally {
@@ -595,134 +397,158 @@ const JobBoardTab: React.FC = () => {
     }
   };
 
+  // UC-54: Apply with validation
   const handleApply = async () => {
-    if (!selectedJob) return;
+    if (!confirmApply) return;
+    
+    // Check deadline (UC-54 E1)
+    if (confirmApply.applicationDeadline && new Date(confirmApply.applicationDeadline) < new Date()) {
+      message.error('Application failed. This job posting has reached its deadline and is closed for registration.');
+      setConfirmApply(null);
+      return;
+    }
+    
     try {
       setApplying(true);
-      await api.post('/applications', { jobPostId: selectedJob.jobPostId, cvFileUrl: selectedJob.appliedCvUrl });
+      await api.post('/applications', { jobPostId: confirmApply.jobPostId });
       message.success('Application submitted successfully!');
-      setShowConfirmModal(false);
+      setConfirmApply(null);
       setSelectedJob(null);
+      fetchJobs();
     } catch (err: any) {
-      message.error(err.response?.data?.message || 'Application failed!');
+      // UC-54 E2: Duplicate application
+      if (err.response?.data?.message?.includes('already') || err.response?.data?.message?.includes('duplicate')) {
+        message.error('You have already applied for this position. Duplicate submissions are strictly prohibited.');
+      } else {
+        message.error(err.response?.data?.message || 'Application failed!');
+      }
     } finally {
       setApplying(false);
     }
   };
 
-  const filteredJobs = jobs.filter(job =>
-    job.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    job.enterpriseName?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredJobs = jobs.filter(job => {
+    const matchesSearch = !searchTerm || 
+      job.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      job.enterpriseName?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // UC-52: Match My Profile filter
+    const matchesProfile = !matchProfile || 
+      (job.requiredSkills && job.requiredSkills.some((skill: string) => 
+        techFilter.includes(skill.toLowerCase())
+      ));
+    
+    // UC-52: Tech filter
+    const matchesTech = techFilter.length === 0 || 
+      (job.requiredSkills && job.requiredSkills.some((skill: string) => 
+        techFilter.includes(skill.toLowerCase())
+      ));
+    
+    return matchesSearch && matchesProfile && matchesTech;
+  });
 
   if (loading) {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}>
-        <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}>
-          <RefreshCw size={28} color={cc.primary} />
-        </motion.div>
-      </div>
-    );
+    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}><Spin size="large" /></div>;
   }
 
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px 40px' }}>
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-
-        {/* Header */}
         <div style={{ marginBottom: 24 }}>
-          <h2 style={{ fontSize: 22, fontWeight: 700, color: cc.textPrimary, margin: '0 0 6px' }}>Job Board</h2>
-          <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}>Find the perfect internship opportunity for you</p>
+          <h2 style={{ fontSize: 22, fontWeight: 700, color: cc.text, margin: '0 0 6px' }}>Job Board</h2>
+          <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}>Browse and apply for internship positions (UC-52, UC-53, UC-54)</p>
         </div>
 
-        {/* Search */}
-        <Card style={{ padding: 16, marginBottom: 24 }}>
-          <div style={{ display: 'flex', gap: 12 }}>
+        {/* Search & Filters */}
+        <NeuSurface style={{ padding: 16, marginBottom: 24 }}>
+          <div style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
             <input
               type="text"
               placeholder="Search by position, company..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              style={{
-                flex: 1, padding: '10px 16px', borderRadius: cc.radiusMd,
-                border: `1px solid ${cc.border}`, fontSize: 13, outline: 'none',
-                fontFamily: "'Inter', sans-serif", color: cc.textPrimary,
-              }}
+              style={{ flex: 1, padding: '10px 16px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13, outline: 'none', fontFamily: "'Inter', sans-serif", color: cc.text }}
             />
-            <CTAButton variant="primary" icon={<span style={{ fontSize: 16 }}>🔍</span>}>Search</CTAButton>
+            <CTAButton variant="primary" icon={<SearchOutlined />}>Search</CTAButton>
           </div>
-        </Card>
+          {/* UC-52: Match My Profile & Tech Filter */}
+          <div style={{ display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+              <input type="checkbox" checked={matchProfile} onChange={(e) => setMatchProfile(e.target.checked)} style={{ width: 18, height: 18 }} />
+              <span style={{ fontSize: 13, fontWeight: 600, color: cc.text }}>Match My Profile</span>
+            </label>
+            <span style={{ fontSize: 12, color: cc.textMuted }}>Filter by:</span>
+            {['React', 'Node.js', 'Python', 'Java', 'SQL', 'AWS'].map(tech => (
+              <button
+                key={tech}
+                onClick={() => setTechFilter(prev => prev.includes(tech.toLowerCase()) 
+                  ? prev.filter(t => t !== tech.toLowerCase()) 
+                  : [...prev, tech.toLowerCase()])}
+                style={{
+                  padding: '4px 10px', borderRadius: cc.radiusFull, fontSize: 12, fontWeight: 600,
+                  border: `1px solid ${techFilter.includes(tech.toLowerCase()) ? cc.primary : cc.border}`,
+                  background: techFilter.includes(tech.toLowerCase()) ? cc.primaryMuted : 'transparent',
+                  color: techFilter.includes(tech.toLowerCase()) ? cc.primary : cc.textMuted,
+                  cursor: 'pointer'
+                }}
+              >
+                {tech}
+              </button>
+            ))}
+          </div>
+        </NeuSurface>
 
-        {/* Job Grid */}
+        {/* Apply Confirmation Modal (UC-54) */}
+        {confirmApply && (
+          <NeuSurface style={{ padding: 24, marginBottom: 20, border: `2px solid ${cc.warning}` }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+              <WarningOutlined style={{ fontSize: 24, color: cc.warning }} />
+              <h3 style={{ fontSize: 16, fontWeight: 700, color: cc.text, margin: 0 }}>Confirm Application</h3>
+            </div>
+            <p style={{ fontSize: 13, color: cc.textMuted, margin: '0 0 12px' }}>You are applying for:</p>
+            <div style={{ padding: 12, borderRadius: cc.radiusMd, background: cc.bgLight, marginBottom: 16 }}>
+              <p style={{ fontSize: 14, fontWeight: 600, color: cc.text, margin: 0 }}>{confirmApply.title}</p>
+              <p style={{ fontSize: 13, color: cc.textMuted, margin: '4px 0 0' }}>{confirmApply.enterpriseName}</p>
+            </div>
+            <div style={{ padding: 12, borderRadius: cc.radiusMd, background: cc.dangerMuted, marginBottom: 16 }}>
+              <p style={{ fontSize: 13, color: cc.dangerText, margin: 0, fontWeight: 600 }}>
+                Are you sure you want to apply? You can only submit your application ONCE for each job posting. No modifications are allowed after submission.
+              </p>
+            </div>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+              <CTAButton variant="ghost" onClick={() => setConfirmApply(null)}>Cancel</CTAButton>
+              <CTAButton variant="primary" icon={<SendOutlined />} onClick={handleApply} loading={applying}>Confirm & Submit</CTAButton>
+            </div>
+          </NeuSurface>
+        )}
+
+        {/* UC-52 E1: No results */}
         {filteredJobs.length === 0 ? (
-          <EmptyState
-            icon={<Inbox size={32} />}
-            title="No job postings found"
-            description={searchTerm ? 'Try adjusting your search terms' : 'No active internship positions available at the moment'}
-          />
+          <EmptyState icon={<TrophyOutlined style={{ fontSize: 32 }} />} title="No matching job postings found" description="Please try refining your keywords or filters" />
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 20 }}>
             {filteredJobs.map((job, index) => (
-              <motion.div
-                key={job.jobPostId || index}
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.05 }}
-              >
-                <Card hoverable onClick={() => setSelectedJob(job)} style={{ padding: 20 }}>
+              <motion.div key={job.jobPostId || index} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: index * 0.05 }}>
+                <NeuSurface style={{ padding: 20, cursor: 'pointer', transition: 'all 0.2s' }} onClick={() => setSelectedJob(job)}>
                   <div style={{ display: 'flex', gap: 12, marginBottom: 14 }}>
-                    <div style={{
-                      width: 48, height: 48, borderRadius: cc.radiusMd,
-                      background: hexToRgba(cc.primary, 0.1),
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      color: cc.primary, fontSize: 20, fontWeight: 700, flexShrink: 0,
-                    }}>
+                    <div style={{ width: 48, height: 48, borderRadius: cc.radiusMd, background: hexToRgba(cc.primary, 0.1), display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.primary, fontSize: 20, fontWeight: 700, flexShrink: 0 }}>
                       {job.enterpriseName?.charAt(0) || 'E'}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <h4 style={{
-                        fontSize: 14, fontWeight: 600, color: cc.textPrimary, margin: '0 0 2px',
-                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                      }}>
-                        {job.title || 'Internship Position'}
-                      </h4>
-                      <p style={{
-                        fontSize: 12, color: cc.textMuted, margin: 0,
-                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                      }}>
-                        {job.enterpriseName || 'Company'}
-                      </p>
+                      <h4 style={{ fontSize: 14, fontWeight: 600, color: cc.text, margin: '0 0 2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{job.title || 'Internship Position'}</h4>
+                      <p style={{ fontSize: 12, color: cc.textMuted, margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{job.enterpriseName || 'Company'}</p>
                     </div>
                   </div>
-
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
-                    {job.location && (
-                      <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: cc.textMuted }}>
-                        <MapPin size={12} />{job.location}
-                      </span>
-                    )}
-                    {job.maxPositions && (
-                      <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: cc.textMuted }}>
-                        <Users size={12} />{job.maxPositions} positions
-                      </span>
-                    )}
+                    {job.location && <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: cc.textMuted }}><CalendarOutlined style={{ fontSize: 12 }} />{job.location}</span>}
+                    {job.maxPositions && <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: cc.textMuted }}><TeamOutlined style={{ fontSize: 12 }} />{job.maxPositions} positions</span>}
                   </div>
-
-                  <p style={{
-                    fontSize: 13, color: cc.textSecondary, margin: '0 0 14px', lineHeight: 1.5,
-                    display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
-                  }}>
-                    {job.description || 'Job description...'}
-                  </p>
-
-                  <div style={{
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    paddingTop: 14, borderTop: `1px solid ${cc.borderSubtle}`,
-                  }}>
-                    <SmallPill label={job.status === 'OPEN' ? 'Open' : 'Closed'} variant={job.status === 'OPEN' ? 'success' : 'neutral'} />
-                    <TextLink onClick={() => setSelectedJob(job)}>View details <ChevronRight size={13} /></TextLink>
+                  <p style={{ fontSize: 13, color: cc.textMuted, margin: '0 0 14px', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{job.description || 'Job description...'}</p>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 14, borderTop: `1px solid ${cc.borderSubtle}` }}>
+                    <SmallBadge label={job.status === 'OPEN' ? 'Open' : 'Closed'} variant={job.status === 'OPEN' ? 'success' : 'neutral'} />
+                    <CTAButton variant="ghost" size="sm" icon={<RightOutlined />} onClick={(e) => { e.stopPropagation(); setSelectedJob(job); }}>View details</CTAButton>
                   </div>
-                </Card>
+                </NeuSurface>
               </motion.div>
             ))}
           </div>
@@ -731,141 +557,35 @@ const JobBoardTab: React.FC = () => {
 
       {/* Job Detail Drawer */}
       {selectedJob && (
-        <div
-          onClick={() => setSelectedJob(null)}
-          style={{
-            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
-            zIndex: 1000, display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
-          }}
-        >
-          <motion.div
-            initial={{ y: '100%' }}
-            animate={{ y: 0 }}
-            exit={{ y: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              background: cc.surface, borderRadius: `${cc.radiusXl}px ${cc.radiusXl}px 0 0`,
-              maxWidth: 600, width: '100%', maxHeight: '85vh', overflow: 'auto', padding: 28,
-            }}
-          >
+        <div onClick={() => setSelectedJob(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+          <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', damping: 25, stiffness: 300 }} onClick={(e) => e.stopPropagation()} style={{ background: cc.surface, borderRadius: `${cc.radiusXl}px ${cc.radiusXl}px 0 0`, maxWidth: 600, width: '100%', maxHeight: '85vh', overflow: 'auto', padding: 28 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
               <div style={{ display: 'flex', gap: 16 }}>
-                <div style={{
-                  width: 64, height: 64, borderRadius: cc.radiusLg,
-                  background: hexToRgba(cc.primary, 0.1), display: 'flex',
-                  alignItems: 'center', justifyContent: 'center', color: cc.primary,
-                  fontSize: 24, fontWeight: 700, flexShrink: 0,
-                }}>
-                  {selectedJob.enterpriseName?.charAt(0) || 'E'}
-                </div>
+                <div style={{ width: 64, height: 64, borderRadius: cc.radiusLg, background: hexToRgba(cc.primary, 0.1), display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.primary, fontSize: 24, fontWeight: 700, flexShrink: 0 }}>{selectedJob.enterpriseName?.charAt(0) || 'E'}</div>
                 <div>
-                  <h2 style={{ fontSize: 18, fontWeight: 700, color: cc.textPrimary, margin: '0 0 4px' }}>{selectedJob.title}</h2>
+                  <h2 style={{ fontSize: 18, fontWeight: 700, color: cc.text, margin: '0 0 4px' }}>{selectedJob.title}</h2>
                   <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}>{selectedJob.enterpriseName}</p>
                 </div>
               </div>
-              <button onClick={() => setSelectedJob(null)} style={{
-                padding: 8, borderRadius: cc.radiusMd, background: cc.bg, border: 'none', cursor: 'pointer', color: cc.textMuted,
-              }}>
-                <X size={20} />
-              </button>
+              <CTAButton variant="ghost" size="sm" icon={<CloseCircleOutlined />} onClick={() => setSelectedJob(null)}>Close</CTAButton>
             </div>
-
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 20 }}>
-              {selectedJob.location && (
-                <span style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 12px', borderRadius: cc.radiusMd, background: cc.bg, fontSize: 13, color: cc.textSecondary }}>
-                  <MapPin size={14} color={cc.textMuted} />{selectedJob.location}
-                </span>
-              )}
-              {selectedJob.maxPositions && (
-                <span style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 12px', borderRadius: cc.radiusMd, background: cc.bg, fontSize: 13, color: cc.textSecondary }}>
-                  <Users size={14} color={cc.textMuted} />{selectedJob.maxPositions} positions
-                </span>
-              )}
+              {selectedJob.location && <span style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 12px', borderRadius: cc.radiusMd, background: cc.bgLight, fontSize: 13, color: cc.textMuted }}><CalendarOutlined style={{ fontSize: 14 }} />{selectedJob.location}</span>}
+              {selectedJob.maxPositions && <span style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 12px', borderRadius: cc.radiusMd, background: cc.bgLight, fontSize: 13, color: cc.textMuted }}><TeamOutlined style={{ fontSize: 14 }} />{selectedJob.maxPositions} positions</span>}
             </div>
-
-            {selectedJob.description && (
-              <div style={{ marginBottom: 18 }}>
-                <h3 style={{ fontSize: 13, fontWeight: 600, color: cc.textPrimary, margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Description</h3>
-                <p style={{ fontSize: 13, color: cc.textSecondary, lineHeight: 1.6, margin: 0 }}>{selectedJob.description}</p>
-              </div>
-            )}
-
-            {selectedJob.requirements && (
-              <div style={{ marginBottom: 18 }}>
-                <h3 style={{ fontSize: 13, fontWeight: 600, color: cc.textPrimary, margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Requirements</h3>
-                <p style={{ fontSize: 13, color: cc.textSecondary, lineHeight: 1.6, margin: 0 }}>{selectedJob.requirements}</p>
-              </div>
-            )}
-
-            {selectedJob.benefits && (
-              <div style={{ marginBottom: 18 }}>
-                <h3 style={{ fontSize: 13, fontWeight: 600, color: cc.textPrimary, margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Benefits</h3>
-                <p style={{ fontSize: 13, color: cc.textSecondary, lineHeight: 1.6, margin: 0 }}>{selectedJob.benefits}</p>
-              </div>
-            )}
-
-            {selectedJob.applicationDeadline && (
-              <div style={{
-                padding: 16, borderRadius: cc.radiusMd, background: cc.warningMuted,
-                marginBottom: 20, display: 'flex', alignItems: 'center', gap: 12,
-              }}>
-                <Clock size={20} color={cc.warning} />
-                <div>
-                  <p style={{ fontSize: 11, color: cc.warningText, margin: 0, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Application Deadline</p>
-                  <p style={{ fontSize: 14, color: cc.warningText, margin: '2px 0 0', fontWeight: 600 }}>
-                    {new Date(selectedJob.applicationDeadline).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-                  </p>
-                </div>
-              </div>
-            )}
-
-            <CTAButton
-              variant="primary" size="lg" fullWidth icon={<Send size={16} />}
-              onClick={() => setShowConfirmModal(true)}
-              disabled={selectedJob.status !== 'OPEN'}
-            >
+            {selectedJob.description && <div style={{ marginBottom: 18 }}><h3 style={{ fontSize: 13, fontWeight: 600, color: cc.text, margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Description</h3><p style={{ fontSize: 13, color: cc.textMuted, lineHeight: 1.6, margin: 0 }}>{selectedJob.description}</p></div>}
+            {selectedJob.requirements && <div style={{ marginBottom: 18 }}><h3 style={{ fontSize: 13, fontWeight: 600, color: cc.text, margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Requirements</h3><p style={{ fontSize: 13, color: cc.textMuted, lineHeight: 1.6, margin: 0 }}>{selectedJob.requirements}</p></div>}
+            {selectedJob.benefits && <div style={{ marginBottom: 18 }}><h3 style={{ fontSize: 13, fontWeight: 600, color: cc.text, margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Benefits</h3><p style={{ fontSize: 13, color: cc.textMuted, lineHeight: 1.6, margin: 0 }}>{selectedJob.benefits}</p></div>}
+            {selectedJob.applicationDeadline && <div style={{ padding: 16, borderRadius: cc.radiusMd, background: cc.warningMuted, marginBottom: 20, display: 'flex', alignItems: 'center', gap: 12 }}><ClockCircleOutlined style={{ fontSize: 20, color: cc.warning }} /><div><p style={{ fontSize: 11, color: cc.warningText, margin: 0, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Application Deadline</p><p style={{ fontSize: 14, color: cc.warningText, margin: '2px 0 0', fontWeight: 600 }}>{new Date(selectedJob.applicationDeadline).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p></div></div>}
+            <CTAButton variant="primary" size="lg" fullWidth icon={<SendOutlined />} onClick={() => {
+              if (selectedJob.applicationDeadline && new Date(selectedJob.applicationDeadline) < new Date()) {
+                message.error('This job posting has reached its deadline and is closed for registration.');
+              } else {
+                setConfirmApply(selectedJob);
+              }
+            }} disabled={selectedJob.status !== 'OPEN'} loading={applying}>
               {selectedJob.status === 'OPEN' ? 'Apply Now' : 'Applications Closed'}
             </CTAButton>
-          </motion.div>
-        </div>
-      )}
-
-      {/* Confirm Modal */}
-      {showConfirmModal && selectedJob && (
-        <div
-          onClick={() => setShowConfirmModal(false)}
-          style={{
-            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
-            zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24,
-          }}
-        >
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            onClick={(e) => e.stopPropagation()}
-            style={{ background: cc.surface, borderRadius: cc.radiusXl, padding: 28, maxWidth: 420, width: '100%' }}
-          >
-            <div style={{ textAlign: 'center', marginBottom: 20 }}>
-              <div style={{
-                width: 64, height: 64, borderRadius: '50%', background: cc.primaryLight,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                margin: '0 auto 16px', color: cc.primary,
-              }}>
-                <Award size={32} />
-              </div>
-              <h3 style={{ fontSize: 17, fontWeight: 700, color: cc.textPrimary, margin: '0 0 8px' }}>Confirm Application</h3>
-              <p style={{ fontSize: 13, color: cc.textSecondary, margin: 0, lineHeight: 1.6 }}>
-                You are about to apply for <strong>{selectedJob.title}</strong> at <strong>{selectedJob.enterpriseName}</strong>.
-                You can only apply <strong>once</strong> and cannot change this after submission.
-              </p>
-            </div>
-            <div style={{ display: 'flex', gap: 12 }}>
-              <CTAButton variant="ghost" fullWidth onClick={() => setShowConfirmModal(false)}>Cancel</CTAButton>
-              <CTAButton variant="primary" fullWidth onClick={handleApply} disabled={applying}>
-                {applying ? 'Submitting...' : 'Confirm Apply'}
-              </CTAButton>
-            </div>
           </motion.div>
         </div>
       )}
@@ -874,11 +594,336 @@ const JobBoardTab: React.FC = () => {
 };
 
 // ============================================================
-// REPORTS TAB
+// APPLICATIONS TAB (UC-46, UC-55, UC-57)
+// ============================================================
+const ApplicationsTab: React.FC = () => {
+  const [applications, setApplications] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<string>('all');
+
+  useEffect(() => { fetchApplications(); }, []);
+
+  const fetchApplications = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get('/applications/my-applications');
+      setApplications(res.data || []);
+    } catch (err) {
+      console.error('Failed to fetch applications', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleWithdraw = async (applicationId: string) => {
+    try {
+      await api.put(`/applications/${applicationId}/withdraw`);
+      message.success('Application withdrawn successfully!');
+      fetchApplications();
+    } catch (err: any) {
+      message.error(err.response?.data?.message || 'Failed to withdraw application!');
+    }
+  };
+
+  const filteredApps = filter === 'all' ? applications : applications.filter(app => app.status === filter.toUpperCase());
+
+  const statusVariant = (status: string): 'success' | 'warning' | 'error' | 'info' | 'neutral' => {
+    switch (status?.toUpperCase()) {
+      case 'PASSED': case 'APPROVED': return 'success';
+      case 'PENDING': case 'SUBMITTED': return 'warning';
+      case 'REJECTED': case 'FAILED': return 'error';
+      case 'SCHEDULED': return 'info';
+      default: return 'neutral';
+    }
+  };
+
+  if (loading) {
+    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}><Spin size="large" /></div>;
+  }
+
+  return (
+    <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 24px 40px' }}>
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+        <div style={{ marginBottom: 24 }}>
+          <h2 style={{ fontSize: 22, fontWeight: 700, color: cc.text, margin: '0 0 6px' }}>My Applications</h2>
+          <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}>Track all your job applications in one place</p>
+        </div>
+
+        {/* Filter Tabs */}
+        <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+          {['all', 'pending', 'passed', 'rejected'].map(f => (
+            <CTAButton key={f} variant={filter === f ? 'primary' : 'ghost'} size="sm" onClick={() => setFilter(f)}>{f.charAt(0).toUpperCase() + f.slice(1)}</CTAButton>
+          ))}
+        </div>
+
+        {filteredApps.length === 0 ? (
+          <EmptyState icon={<FileTextOutlined style={{ fontSize: 32 }} />} title="No applications yet" description="Start applying to internships to see your applications here" />
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {filteredApps.map((app, index) => (
+              <motion.div key={app.applicationId || index} initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3, delay: index * 0.05 }}>
+                <NeuSurface style={{ padding: 20 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+                      <div style={{ width: 52, height: 52, borderRadius: cc.radiusMd, background: hexToRgba(cc.primary, 0.1), display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.primary, fontSize: 20, fontWeight: 700 }}>
+                        {app.enterpriseName?.charAt(0) || 'E'}
+                      </div>
+                      <div>
+                        <h4 style={{ fontSize: 14, fontWeight: 600, color: cc.text, margin: '0 0 4px' }}>{app.jobTitle || 'Internship Position'}</h4>
+                        <p style={{ fontSize: 12, color: cc.textMuted, margin: '0 0 8px' }}>{app.enterpriseName}</p>
+                        <SmallBadge label={app.status || 'PENDING'} variant={statusVariant(app.status)} />
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                      {app.status === 'PENDING' && (
+                        <CTAButton variant="danger" size="sm" icon={<CloseCircleOutlined />} onClick={() => handleWithdraw(app.applicationId)}>Withdraw</CTAButton>
+                      )}
+                      <CTAButton variant="ghost" size="sm" icon={<EyeOutlined />}>View</CTAButton>
+                    </div>
+                  </div>
+                </NeuSurface>
+              </motion.div>
+            ))}
+          </div>
+        )}
+      </motion.div>
+    </div>
+  );
+};
+
+// ============================================================
+// SCHEDULE TAB (UC-58, UC-59)
+// ============================================================
+const ScheduleTab: React.FC = () => {
+  const [interviews, setInterviews] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [confirming, setConfirming] = useState<string | null>(null);
+  const [declining, setDeclining] = useState<any>(null);
+  const [declineReason, setDeclineReason] = useState('');
+
+  useEffect(() => { fetchInterviews(); }, []);
+
+  const fetchInterviews = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get('/interviews/my-schedules');
+      setInterviews(res.data || []);
+    } catch (err) {
+      console.error('Failed to fetch interviews', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleConfirm = async (interviewId: string) => {
+    try {
+      await api.put(`/interviews/${interviewId}/confirm`);
+      message.success('Interview confirmed successfully! The company will be notified of your commitment.');
+      setConfirming(null);
+      fetchInterviews();
+    } catch (err: any) {
+      if (err.response?.data?.message?.includes('expired')) {
+        message.error('Action failed. This interview invitation has expired as the scheduled time has already passed.');
+      } else {
+        message.error(err.response?.data?.message || 'Failed to confirm!');
+      }
+    }
+  };
+
+  // BR-40: Reason for refusal is mandatory
+  const handleDecline = async () => {
+    if (!declineReason.trim()) {
+      message.error('Action denied. You must provide a valid reason for declining the interview invitation.');
+      return;
+    }
+    try {
+      await api.put(`/interviews/${declining.interviewId}/decline`, { reason: declineReason });
+      message.success('You have declined the interview invitation. The company has been notified.');
+      setDeclining(null);
+      setDeclineReason('');
+      fetchInterviews();
+    } catch (err: any) {
+      message.error(err.response?.data?.message || 'Failed to decline!');
+    }
+  };
+
+  if (loading) {
+    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}><Spin size="large" /></div>;
+  }
+
+  return (
+    <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 24px 40px' }}>
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+        <div style={{ marginBottom: 24 }}>
+          <h2 style={{ fontSize: 22, fontWeight: 700, color: cc.text, margin: '0 0 6px' }}>Interview Schedule</h2>
+          <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}>Your upcoming interviews and appointments (UC-57, UC-58, BR-49)</p>
+        </div>
+
+        {/* Confirm Modal (BR-49: Attendance Irreversibility) */}
+        {confirming && (
+          <NeuSurface style={{ padding: 24, marginBottom: 20, border: `2px solid ${cc.info}` }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+              <ExclamationCircleOutlined style={{ fontSize: 24, color: cc.info }} />
+              <h3 style={{ fontSize: 16, fontWeight: 700, color: cc.text, margin: 0 }}>Confirm Interview Attendance</h3>
+            </div>
+            <p style={{ fontSize: 13, color: cc.textMuted, margin: '0 0 20px', lineHeight: 1.6 }}>
+              Are you sure you want to accept this interview schedule? The company will be notified of your commitment. <strong>Note: This action cannot be undone (BR-49).</strong>
+            </p>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+              <CTAButton variant="ghost" onClick={() => setConfirming(null)}>Cancel</CTAButton>
+              <CTAButton variant="success" icon={<CheckCircleOutlined />} onClick={() => handleConfirm(confirming)}>Yes, Confirm</CTAButton>
+            </div>
+          </NeuSurface>
+        )}
+
+        {/* Decline Modal (BR-40: Mandatory reason) */}
+        {declining && (
+          <NeuSurface style={{ padding: 24, marginBottom: 20, border: `2px solid ${cc.danger}` }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+              <WarningOutlined style={{ fontSize: 24, color: cc.danger }} />
+              <h3 style={{ fontSize: 16, fontWeight: 700, color: cc.text, margin: 0 }}>Decline Interview Invitation</h3>
+            </div>
+            <div style={{ padding: 12, borderRadius: cc.radiusMd, background: cc.dangerMuted, marginBottom: 16 }}>
+              <p style={{ fontSize: 13, color: cc.dangerText, margin: 0, fontWeight: 600 }}>
+                Are you sure you want to decline this interview? This action will formally withdraw you from this application cycle.
+              </p>
+            </div>
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>
+                Reason for Refusal <span style={{ color: cc.danger }}>*</span>
+              </label>
+              <textarea
+                value={declineReason}
+                onChange={(e) => setDeclineReason(e.target.value)}
+                rows={3}
+                placeholder="Please provide your reason for declining..."
+                style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13, fontFamily: "'Inter', sans-serif", resize: 'vertical' }}
+              />
+            </div>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+              <CTAButton variant="ghost" onClick={() => { setDeclining(null); setDeclineReason(''); }}>No, Keep It</CTAButton>
+              <CTAButton variant="danger" icon={<CloseCircleOutlined />} onClick={handleDecline}>Confirm Decline</CTAButton>
+            </div>
+          </NeuSurface>
+        )}
+
+        {interviews.length === 0 ? (
+          <EmptyState icon={<CalendarOutlined style={{ fontSize: 32 }} />} title="No scheduled interviews" description="You have no upcoming interview invitations at this moment." />
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {interviews.map((interview, index) => (
+              <motion.div key={interview.interviewId || index} initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3, delay: index * 0.05 }}>
+                <NeuSurface style={{ padding: 20 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                      <h4 style={{ fontSize: 15, fontWeight: 600, color: cc.text, margin: '0 0 8px' }}>{interview.jobTitle || 'Interview'}</h4>
+                      <p style={{ fontSize: 13, color: cc.textMuted, margin: '0 0 8px' }}><BankOutlined /> {interview.enterpriseName}</p>
+                      <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: cc.text }}><CalendarOutlined /> {new Date(interview.scheduledAt).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: cc.text }}><ClockCircleOutlined /> {new Date(interview.scheduledAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
+                        {interview.type && <SmallBadge label={interview.type} variant="info" />}
+                      </div>
+                      {interview.meetingLink && (
+                        <p style={{ fontSize: 12, color: cc.info, margin: '8px 0 0' }}>
+                          <a href={interview.meetingLink} target="_blank" rel="noopener noreferrer" style={{ color: cc.info }}><LinkOutlined /> Join Meeting</a>
+                        </p>
+                      )}
+                      {interview.location && (
+                        <p style={{ fontSize: 12, color: cc.textMuted, margin: '4px 0 0' }}><EnvironmentOutlined /> {interview.location}</p>
+                      )}
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
+                      <SmallBadge label={interview.status || 'PENDING'} variant={interview.status === 'CONFIRMED' ? 'success' : interview.status === 'DECLINED' ? 'error' : 'warning'} />
+                      {interview.status === 'PENDING' && (
+                        <>
+                          <CTAButton variant="success" size="sm" icon={<CheckCircleOutlined />} onClick={() => setConfirming(interview.interviewId)}>Confirm</CTAButton>
+                          <CTAButton variant="danger" size="sm" icon={<CloseCircleOutlined />} onClick={() => setDeclining(interview)}>Decline</CTAButton>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </NeuSurface>
+              </motion.div>
+            ))}
+          </div>
+        )}
+      </motion.div>
+    </div>
+  );
+};
+
+// ============================================================
+// TRAINING PLAN TAB (UC-61)
+// ============================================================
+const TrainingPlanTab: React.FC = () => {
+  const [plan, setPlan] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => { fetchPlan(); }, []);
+
+  const fetchPlan = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get('/training-plans/my-plan');
+      setPlan(res.data);
+    } catch (err) {
+      console.error('Failed to fetch training plan', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}><Spin size="large" /></div>;
+  }
+
+  return (
+    <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 24px 40px' }}>
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+        <div style={{ marginBottom: 24 }}>
+          <h2 style={{ fontSize: 22, fontWeight: 700, color: cc.text, margin: '0 0 6px' }}>Training Plan</h2>
+          <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}>Your internship training roadmap from Enterprise</p>
+        </div>
+
+        {!plan ? (
+          <EmptyState icon={<BookOutlined style={{ fontSize: 32 }} />} title="No training plan yet" description="Your training plan will appear once assigned by your enterprise" />
+        ) : (
+          <NeuSurface style={{ padding: 24 }}>
+            <div style={{ marginBottom: 20 }}>
+              <h3 style={{ fontSize: 16, fontWeight: 700, color: cc.text, margin: '0 0 8px' }}>{plan.title || 'OJT Training Plan'}</h3>
+              <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}><BankOutlined /> {plan.enterpriseName} • Started: {plan.startDate ? new Date(plan.startDate).toLocaleDateString() : 'N/A'}</p>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {(plan.tasks || []).map((task: any, i: number) => (
+                <div key={i} style={{ display: 'flex', gap: 12, padding: 16, borderRadius: cc.radiusMd, background: cc.bgLight, border: `1px solid ${cc.borderSubtle}` }}>
+                  <div style={{ width: 32, height: 32, borderRadius: cc.radiusFull, background: cc.primaryMuted, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.primary, fontSize: 12, fontWeight: 700, flexShrink: 0 }}>
+                    {i + 1}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <h4 style={{ fontSize: 14, fontWeight: 600, color: cc.text, margin: '0 0 4px' }}>{task.title}</h4>
+                    <p style={{ fontSize: 12, color: cc.textMuted, margin: 0 }}>{task.description}</p>
+                  </div>
+                  <SmallBadge label={task.status || 'PENDING'} variant={task.status === 'COMPLETED' ? 'success' : task.status === 'IN_PROGRESS' ? 'info' : 'warning'} />
+                </div>
+              ))}
+            </div>
+          </NeuSurface>
+        )}
+      </motion.div>
+    </div>
+  );
+};
+
+// ============================================================
+// REPORTS TAB (UC-61, UC-62, UC-63)
 // ============================================================
 const ReportsTab: React.FC = () => {
   const [reports, setReports] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [editingReport, setEditingReport] = useState<any>(null);
+  const [formData, setFormData] = useState({ weekNumber: '', content: '', attachments: [] as File[] });
 
   useEffect(() => { fetchReports(); }, []);
 
@@ -889,82 +934,172 @@ const ReportsTab: React.FC = () => {
       setReports(res.data || []);
     } catch (err) {
       console.error('Failed to fetch reports', err);
-      setReports([]);
     } finally {
       setLoading(false);
     }
   };
 
+  const handleSubmit = async () => {
+    if (!formData.weekNumber || !formData.content) {
+      message.error('Please fill in all required fields!');
+      return;
+    }
+    try {
+      setSubmitting(true);
+      const data = new FormData();
+      data.append('weekNumber', formData.weekNumber);
+      data.append('content', formData.content);
+      formData.attachments.forEach(f => data.append('files', f));
+      await api.post('/weekly-reports', data, { headers: { 'Content-Type': 'multipart/form-data' } });
+      message.success('Report submitted successfully!');
+      setShowForm(false);
+      setFormData({ weekNumber: '', content: '', attachments: [] });
+      fetchReports();
+    } catch (err: any) {
+      message.error(err.response?.data?.message || 'Submit failed!');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleEdit = (report: any) => {
+    setEditingReport(report);
+    setFormData({ weekNumber: String(report.weekNumber), content: report.content || '', attachments: [] });
+  };
+
+  const handleUpdate = async () => {
+    if (!formData.content) {
+      message.error('Report content cannot be empty!');
+      return;
+    }
+    try {
+      setSubmitting(true);
+      await api.put(`/weekly-reports/${editingReport.reportId}`, { content: formData.content });
+      message.success('Report updated successfully!');
+      setEditingReport(null);
+      setFormData({ weekNumber: '', content: '', attachments: [] });
+      fetchReports();
+    } catch (err: any) {
+      message.error(err.response?.data?.message || 'Update failed!');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const getStatusVariant = (status: string): 'success' | 'warning' | 'error' | 'info' | 'neutral' => {
+    switch (status?.toUpperCase()) {
+      case 'APPROVED': return 'success';
+      case 'REJECTED': return 'error';
+      case 'SUBMITTED': return 'warning';
+      default: return 'neutral';
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status?.toUpperCase()) {
+      case 'APPROVED': return 'Approved';
+      case 'REJECTED': return 'Rejected';
+      case 'SUBMITTED': return 'Pending';
+      case 'NOT_SUBMITTED': return 'Not Submitted';
+      default: return status || 'Draft';
+    }
+  };
+
   if (loading) {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}>
-        <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}>
-          <RefreshCw size={28} color={cc.primary} />
-        </motion.div>
-      </div>
-    );
+    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}><Spin size="large" /></div>;
   }
 
   return (
     <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 24px 40px' }}>
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
         <div style={{ marginBottom: 24 }}>
-          <h2 style={{ fontSize: 22, fontWeight: 700, color: cc.textPrimary, margin: '0 0 6px' }}>Weekly Reports</h2>
-          <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}>Track your internship progress on a weekly basis</p>
+          <h2 style={{ fontSize: 22, fontWeight: 700, color: cc.text, margin: '0 0 6px' }}>Weekly Reports</h2>
+          <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}>Track your internship progress on a weekly basis (UC-61, UC-62, UC-63)</p>
         </div>
 
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 20 }}>
+          <CTAButton variant="primary" icon={<PlusOutlined />} onClick={() => setShowForm(true)}>Submit Report</CTAButton>
+        </div>
+
+        {/* Submit Form Modal (UC-62) */}
+        {showForm && (
+          <NeuSurface style={{ padding: 24, marginBottom: 20 }}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: cc.text, margin: '0 0 16px' }}>Submit Weekly Report</h3>
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>Week Number *</label>
+              <input type="number" value={formData.weekNumber} onChange={(e) => setFormData({ ...formData, weekNumber: e.target.value })} style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13 }} />
+            </div>
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>Report Content *</label>
+              <textarea value={formData.content} onChange={(e) => setFormData({ ...formData, content: e.target.value })} rows={5} placeholder="Describe your work progress this week..." style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13, fontFamily: "'Inter', sans-serif", resize: 'vertical' }} />
+            </div>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+              <CTAButton variant="ghost" onClick={() => { setShowForm(false); setFormData({ weekNumber: '', content: '', attachments: [] }); }}>Cancel</CTAButton>
+              <CTAButton variant="primary" icon={<SendOutlined />} onClick={handleSubmit} loading={submitting}>Submit</CTAButton>
+            </div>
+          </NeuSurface>
+        )}
+
+        {/* Edit Form Modal (UC-63) */}
+        {editingReport && (
+          <NeuSurface style={{ padding: 24, marginBottom: 20, border: `2px solid ${cc.warning}` }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, padding: 12, borderRadius: cc.radiusMd, background: cc.warningMuted }}>
+              <WarningOutlined style={{ fontSize: 20, color: cc.warning }} />
+              <div>
+                <h3 style={{ fontSize: 14, fontWeight: 700, color: cc.warningText, margin: 0 }}>Edit Rejected Report</h3>
+                <p style={{ fontSize: 12, color: cc.warningText, margin: '4px 0 0' }}>Week {editingReport.weekNumber} - Resubmit based on enterprise feedback</p>
+              </div>
+            </div>
+            {editingReport.feedback && (
+              <div style={{ marginBottom: 16, padding: 12, borderRadius: cc.radiusMd, background: cc.dangerMuted }}>
+                <p style={{ fontSize: 12, fontWeight: 600, color: cc.dangerText, margin: '0 0 6px' }}>Enterprise Feedback:</p>
+                <p style={{ fontSize: 13, color: cc.dangerText, margin: 0 }}>{editingReport.feedback}</p>
+              </div>
+            )}
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>Revised Content *</label>
+              <textarea value={formData.content} onChange={(e) => setFormData({ ...formData, content: e.target.value })} rows={5} placeholder="Revise your report based on the feedback..." style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13, fontFamily: "'Inter', sans-serif", resize: 'vertical' }} />
+            </div>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+              <CTAButton variant="ghost" onClick={() => { setEditingReport(null); setFormData({ weekNumber: '', content: '', attachments: [] }); }}>Cancel</CTAButton>
+              <CTAButton variant="warning" icon={<SendOutlined />} onClick={handleUpdate} loading={submitting}>Resubmit Report</CTAButton>
+            </div>
+          </NeuSurface>
+        )}
+
         {reports.length === 0 ? (
-          <EmptyState
-            icon={<FileText size={32} />}
-            title="No reports yet"
-            description="Your weekly reports will appear once you start your internship"
-            action={<CTAButton variant="primary" icon={<FileText size={14} />} onClick={() => {}}>Submit First Report</CTAButton>}
-          />
+          <EmptyState icon={<SnippetsOutlined style={{ fontSize: 32 }} />} title="No reports yet" description="Your weekly reports will appear once you start your internship" action={<CTAButton variant="primary" icon={<PlusOutlined />} onClick={() => setShowForm(true)}>Submit First Report</CTAButton>} />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {reports.map((report, index) => (
-              <motion.div
-                key={report.reportId || index}
-                initial={{ opacity: 0, x: -16 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.05 }}
-              >
-                <Card hoverable style={{ padding: 20 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <motion.div key={report.reportId || index} initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3, delay: index * 0.05 }}>
+                <NeuSurface style={{ padding: 20 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
-                      <div style={{
-                        width: 52, height: 52, borderRadius: cc.radiusMd,
-                        background: hexToRgba(cc.primary, 0.1), display: 'flex',
-                        alignItems: 'center', justifyContent: 'center',
-                        color: cc.primary, fontSize: 14, fontWeight: 700,
-                      }}>
+                      <div style={{ width: 52, height: 52, borderRadius: cc.radiusMd, background: hexToRgba(cc.primary, 0.1), display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.primary, fontSize: 14, fontWeight: 700 }}>
                         W{report.weekNumber}
                       </div>
                       <div>
-                        <h4 style={{ fontSize: 14, fontWeight: 600, color: cc.textPrimary, margin: '0 0 4px' }}>
-                          Week {report.weekNumber} Report
-                        </h4>
-                        <p style={{ fontSize: 12, color: cc.textMuted, margin: '0 0 8px' }}>
-                          {report.submittedAt ? `Submitted: ${new Date(report.submittedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}` : 'Not submitted'}
-                        </p>
-                        <SmallPill
-                          label={
-                            report.status === 'APPROVED' ? 'Approved' :
-                            report.status === 'REJECTED' ? 'Rejected' :
-                            report.status === 'SUBMITTED' ? 'Pending Review' :
-                            report.status === 'NOT_SUBMITTED' ? 'Not Submitted' : 'Draft'
-                          }
-                          variant={
-                            report.status === 'APPROVED' ? 'success' :
-                            report.status === 'REJECTED' ? 'error' :
-                            report.status === 'SUBMITTED' ? 'warning' : 'neutral'
-                          }
-                        />
+                        <h4 style={{ fontSize: 14, fontWeight: 600, color: cc.text, margin: '0 0 4px' }}>Week {report.weekNumber} Report</h4>
+                        <p style={{ fontSize: 12, color: cc.textMuted, margin: '0 0 8px' }}>Submitted: {report.submittedAt ? new Date(report.submittedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}</p>
+                        <SmallBadge label={getStatusLabel(report.status)} variant={getStatusVariant(report.status)} />
                       </div>
                     </div>
-                    <CTAButton variant="ghost" size="sm" icon={<Eye size={14} />}>View</CTAButton>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', flexDirection: 'column' }}>
+                      {report.feedback && (
+                        <div style={{ fontSize: 12, color: cc.dangerText, maxWidth: 200, textAlign: 'right', padding: '4px 8px', background: cc.dangerMuted, borderRadius: cc.radiusSm }}>
+                          {report.feedback.length > 60 ? report.feedback.substring(0, 60) + '...' : report.feedback}
+                        </div>
+                      )}
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        {report.status === 'REJECTED' && (
+                          <CTAButton variant="warning" size="sm" icon={<EditOutlined />} onClick={() => handleEdit(report)}>Edit & Resubmit</CTAButton>
+                        )}
+                        <CTAButton variant="ghost" size="sm" icon={<EyeOutlined />}>View</CTAButton>
+                      </div>
+                    </div>
                   </div>
-                </Card>
+                </NeuSurface>
               </motion.div>
             ))}
           </div>
@@ -975,182 +1110,714 @@ const ReportsTab: React.FC = () => {
 };
 
 // ============================================================
+// FEEDBACK TAB (UC-59)
+// ============================================================
+const FeedbackTab: React.FC = () => {
+  const [feedbacks, setFeedbacks] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [ratings, setRatings] = useState({ trainingQuality: 5, supervisorSupport: 5, workEnvironment: 5, overall: 5 });
+  const [comment, setComment] = useState('');
+  const [selectedFeedback, setSelectedFeedback] = useState<any>(null);
+
+  useEffect(() => { fetchFeedbacks(); }, []);
+
+  const fetchFeedbacks = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get('/feedbacks/my-feedbacks');
+      setFeedbacks(res.data || []);
+    } catch (err) {
+      console.error('Failed to fetch feedbacks', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async () => {
+    // BR-55: Validate all ratings are 1-5
+    const { trainingQuality, supervisorSupport, workEnvironment, overall } = ratings;
+    if (!trainingQuality || !supervisorSupport || !workEnvironment || !overall) {
+      message.error('Please complete all rating categories!');
+      return;
+    }
+    if (trainingQuality < 1 || trainingQuality > 5 || supervisorSupport < 1 || supervisorSupport > 5 ||
+        workEnvironment < 1 || workEnvironment > 5 || overall < 1 || overall > 5) {
+      message.error('All ratings must be between 1 and 5 stars!');
+      return;
+    }
+    try {
+      setSubmitting(true);
+      await api.post('/feedbacks', { ...ratings, comment });
+      message.success('Thank you! Your feedback has been submitted successfully.');
+      setRatings({ trainingQuality: 5, supervisorSupport: 5, workEnvironment: 5, overall: 5 });
+      setComment('');
+      fetchFeedbacks();
+    } catch (err: any) {
+      if (err.response?.data?.message?.includes('already')) {
+        message.error('You have already submitted feedback for this enterprise. You can only submit once per semester.');
+      } else {
+        message.error(err.response?.data?.message || 'Submit failed!');
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const RatingInput: React.FC<{ label: string; value: number; onChange: (v: number) => void; required?: boolean }> = ({ label, value, onChange, required }) => (
+    <div style={{ marginBottom: 16 }}>
+      <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 8 }}>
+        {label} {required && <span style={{ color: cc.danger }}>*</span>}
+      </label>
+      <div style={{ display: 'flex', gap: 8 }}>
+        {[1, 2, 3, 4, 5].map(star => (
+          <button key={star} onClick={() => onChange(star)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 28, color: star <= value ? cc.warning : cc.border }}>
+            <StarOutlined />
+          </button>
+        ))}
+        <span style={{ fontSize: 13, color: cc.textMuted, marginLeft: 8, alignSelf: 'center' }}>{value}/5</span>
+      </div>
+    </div>
+  );
+
+  if (loading) {
+    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}><Spin size="large" /></div>;
+  }
+
+  return (
+    <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 24px 40px' }}>
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+        <div style={{ marginBottom: 24 }}>
+          <h2 style={{ fontSize: 22, fontWeight: 700, color: cc.text, margin: '0 0 6px' }}>Enterprise Feedback</h2>
+          <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}>Rate your internship experience (UC-59, BR-28, BR-53, BR-55)</p>
+        </div>
+
+        {/* Submit Feedback Form (UC-59) */}
+        <NeuSurface style={{ padding: 24, marginBottom: 20 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20, padding: 12, borderRadius: cc.radiusMd, background: cc.infoMuted }}>
+            <ExclamationCircleOutlined style={{ fontSize: 20, color: cc.info }} />
+            <p style={{ fontSize: 12, color: cc.infoText, margin: 0 }}>Your feedback is confidential and only visible to the Training Manager (BR-28)</p>
+          </div>
+          <h3 style={{ fontSize: 16, fontWeight: 700, color: cc.text, margin: '0 0 16px' }}>Rate Your Internship Experience</h3>
+          
+          <RatingInput label="Training Quality" value={ratings.trainingQuality} onChange={(v) => setRatings({ ...ratings, trainingQuality: v })} required />
+          <RatingInput label="Supervisor Support" value={ratings.supervisorSupport} onChange={(v) => setRatings({ ...ratings, supervisorSupport: v })} required />
+          <RatingInput label="Work Environment" value={ratings.workEnvironment} onChange={(v) => setRatings({ ...ratings, workEnvironment: v })} required />
+          
+          <div style={{ borderTop: `1px solid ${cc.borderSubtle}`, paddingTop: 16, marginTop: 8 }}>
+            <RatingInput label="Overall Rating" value={ratings.overall} onChange={(v) => setRatings({ ...ratings, overall: v })} required />
+          </div>
+
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>Written Comments (Optional)</label>
+            <textarea value={comment} onChange={(e) => setComment(e.target.value)} rows={4} placeholder="Share your detailed experience..." style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13, fontFamily: "'Inter', sans-serif", resize: 'vertical' }} />
+          </div>
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+            <CTAButton variant="ghost" onClick={() => { setRatings({ trainingQuality: 5, supervisorSupport: 5, workEnvironment: 5, overall: 5 }); setComment(''); }}>Clear</CTAButton>
+            <CTAButton variant="primary" icon={<SendOutlined />} onClick={handleSubmit} loading={submitting}>Submit Feedback</CTAButton>
+          </div>
+        </NeuSurface>
+
+        {/* Feedback List */}
+        {feedbacks.length === 0 ? (
+          <EmptyState icon={<StarOutlined style={{ fontSize: 32 }} />} title="No feedback yet" description="Company feedback will appear after you complete your internship" />
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {feedbacks.map((fb, index) => (
+              <motion.div key={fb.feedbackId || index} initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3, delay: index * 0.05 }}>
+                <NeuSurface style={{ padding: 20 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                        <span style={{ fontSize: 18 }}>{'★'.repeat(fb.rating || 0)}</span>
+                        <SmallBadge label={fb.isAnonymous ? 'Anonymous' : fb.enterpriseName || 'Company'} variant="info" />
+                      </div>
+                      <p style={{ fontSize: 14, color: cc.text, margin: 0, lineHeight: 1.5 }}>{fb.comment}</p>
+                      <p style={{ fontSize: 12, color: cc.textMuted, margin: '8px 0 0' }}>{fb.createdAt ? new Date(fb.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}</p>
+                    </div>
+                  </div>
+                </NeuSurface>
+              </motion.div>
+            ))}
+          </div>
+        )}
+      </motion.div>
+    </div>
+  );
+};
+
+// ============================================================
+// FINAL REPORT TAB (UC-64)
+// ============================================================
+const FinalReportTab: React.FC = () => {
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [finalReport, setFinalReport] = useState<any>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [dragActive, setDragActive] = useState(false);
+
+  useEffect(() => { fetchFinalReport(); }, []);
+
+  const fetchFinalReport = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get('/final-reports/my-report');
+      setFinalReport(res.data);
+    } catch (err) {
+      setFinalReport(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragActive(false);
+    const f = e.dataTransfer.files?.[0];
+    if (f) {
+      // BR-50: Must be PDF format
+      if (f.type !== 'application/pdf') {
+        message.error('Invalid file. Please upload your final report strictly in PDF format under 20MB.');
+        return;
+      }
+      // BR-45: File size limit 20MB
+      if (f.size > 20 * 1024 * 1024) {
+        message.error('File too large. Final report must not exceed 20MB.');
+        return;
+      }
+      setFile(f);
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!file) {
+      message.error('Please upload your final report PDF!');
+      return;
+    }
+    try {
+      setSubmitting(true);
+      const formData = new FormData();
+      formData.append('file', file);
+      await api.post('/final-reports', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+      message.success('Final report submitted successfully!');
+      fetchFinalReport();
+    } catch (err: any) {
+      message.error(err.response?.data?.message || 'Submit failed!');
+    } finally {
+      setSubmitting(false);
+      setFile(null);
+    }
+  };
+
+  if (loading) {
+    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}><Spin size="large" /></div>;
+  }
+
+  return (
+    <div style={{ maxWidth: 800, margin: '0 auto', padding: '0 24px 40px' }}>
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+        <div style={{ marginBottom: 24 }}>
+          <h2 style={{ fontSize: 22, fontWeight: 700, color: cc.text, margin: '0 0 6px' }}>Final Internship Report</h2>
+          <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}>Compile and submit your official final internship report (PDF) for academic grading (UC-64)</p>
+        </div>
+
+        {/* Instructions */}
+        <NeuSurface style={{ padding: 24, marginBottom: 20 }}>
+          <h3 style={{ fontSize: 15, fontWeight: 700, color: cc.text, margin: '0 0 12px' }}>Report Requirements</h3>
+          <ul style={{ fontSize: 13, color: cc.textMuted, margin: 0, paddingLeft: 20, lineHeight: 1.8 }}>
+            <li>File format: <strong>PDF only</strong> (BR-50)</li>
+            <li>Maximum file size: <strong>20MB</strong> (BR-45)</li>
+            <li>Include: Cover page, table of contents, weekly summaries, learning outcomes</li>
+            <li>Must be approved by your enterprise supervisor before submission</li>
+          </ul>
+        </NeuSurface>
+
+        {/* Upload Area */}
+        <NeuSurface style={{ padding: 24, marginBottom: 20 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+            <div style={{ width: 44, height: 44, borderRadius: cc.radiusMd, background: cc.primaryMuted, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.primary }}>
+              <FileOutlined style={{ fontSize: 20 }} />
+            </div>
+            <div>
+              <h3 style={{ fontSize: 15, fontWeight: 600, color: cc.text, margin: 0 }}>Upload Final Report</h3>
+              <p style={{ fontSize: 12, color: cc.textMuted, margin: '2px 0 0' }}>Submit your completed internship report in PDF format</p>
+            </div>
+          </div>
+
+          <div
+            onDragEnter={(e) => { e.preventDefault(); setDragActive(true); }}
+            onDragLeave={() => setDragActive(false)}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={handleDrop}
+            onClick={() => document.getElementById('final-report-input')?.click()}
+            style={{
+              border: `2px dashed ${dragActive ? cc.primary : cc.border}`,
+              borderRadius: cc.radiusLg, padding: '36px 24px', textAlign: 'center',
+              background: dragActive ? cc.primaryMuted : cc.bgLight,
+              transition: 'all 0.2s ease', cursor: 'pointer',
+            }}
+          >
+            <input id="final-report-input" type="file" accept=".pdf" onChange={(e) => { const f = e.target.files?.[0]; if (f) { if (f.type !== 'application/pdf') message.error('Only PDF allowed! (BR-50)'); else if (f.size > 20 * 1024 * 1024) message.error('Max 20MB allowed! (BR-45)'); else setFile(f); }}} style={{ display: 'none' }} />
+            {file ? (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
+                <FileOutlined style={{ fontSize: 32, color: cc.success }} />
+                <div style={{ textAlign: 'left' }}>
+                  <p style={{ fontSize: 14, fontWeight: 600, color: cc.text, margin: 0 }}>{file.name}</p>
+                  <p style={{ fontSize: 12, color: cc.textMuted, margin: '2px 0 0' }}>{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                </div>
+              </div>
+            ) : (
+              <>
+                <UploadOutlined style={{ fontSize: 40, color: cc.textMuted, marginBottom: 12 }} />
+                <p style={{ fontSize: 14, fontWeight: 600, color: cc.text, margin: '0 0 4px' }}>Drag & drop your final report here</p>
+                <p style={{ fontSize: 12, color: cc.textMuted, margin: 0 }}>or click to browse files</p>
+              </>
+            )}
+          </div>
+          {file && (
+            <div style={{ marginTop: 16, display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+              <CTAButton variant="ghost" onClick={() => setFile(null)}>Cancel</CTAButton>
+              <CTAButton variant="primary" icon={<UploadOutlined />} onClick={handleSubmit} loading={submitting}>Submit Report</CTAButton>
+            </div>
+          )}
+        </NeuSurface>
+
+        {/* Submitted Report */}
+        {finalReport && (
+          <NeuSurface style={{ padding: 24 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+              <h3 style={{ fontSize: 15, fontWeight: 700, color: cc.text, margin: 0 }}>Submitted Report</h3>
+              <SmallBadge label={finalReport.status || 'SUBMITTED'} variant={finalReport.status === 'APPROVED' ? 'success' : finalReport.status === 'REJECTED' ? 'error' : 'warning'} />
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: 16, borderRadius: cc.radiusMd, background: cc.bgLight }}>
+              <FileOutlined style={{ fontSize: 32, color: cc.primary }} />
+              <div style={{ flex: 1 }}>
+                <p style={{ fontSize: 14, fontWeight: 600, color: cc.text, margin: 0 }}>{finalReport.fileName || 'Final_Report.pdf'}</p>
+                <p style={{ fontSize: 12, color: cc.textMuted, margin: '4px 0 0' }}>Submitted: {finalReport.submittedAt ? new Date(finalReport.submittedAt).toLocaleDateString() : 'N/A'}</p>
+              </div>
+              <CTAButton variant="ghost" size="sm" icon={<EyeOutlined />} onClick={() => window.open(finalReport.fileUrl, '_blank')}>View</CTAButton>
+            </div>
+          </NeuSurface>
+        )}
+      </motion.div>
+    </div>
+  );
+};
+
+// ============================================================
+// EVALUATION TAB (UC-65)
+// ============================================================
+const EvaluationTab: React.FC = () => {
+  const [loading, setLoading] = useState(true);
+  const [evaluation, setEvaluation] = useState<any>(null);
+
+  useEffect(() => { fetchEvaluation(); }, []);
+
+  const fetchEvaluation = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get('/evaluations/my-evaluation');
+      setEvaluation(res.data);
+    } catch (err) {
+      setEvaluation(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}><Spin size="large" /></div>;
+  }
+
+  const rubricScores = evaluation?.rubricScores || [
+    { name: 'Weekly Reports (20%)', score: 18, maxScore: 20 },
+    { name: 'Final Report (25%)', score: 22, maxScore: 25 },
+    { name: 'Enterprise Evaluation (30%)', score: 27, maxScore: 30 },
+    { name: 'Final Presentation (15%)', score: 14, maxScore: 15 },
+    { name: 'Documentation (10%)', score: 9, maxScore: 10 },
+  ];
+
+  const totalScore = rubricScores.reduce((sum: number, r: any) => sum + r.score, 0);
+  const maxScore = rubricScores.reduce((sum: number, r: any) => sum + r.maxScore, 0);
+  const percentage = Math.round((totalScore / maxScore) * 100);
+
+  const getGrade = (pct: number) => {
+    if (pct >= 90) return { grade: 'A', color: cc.success };
+    if (pct >= 80) return { grade: 'B', color: cc.info };
+    if (pct >= 70) return { grade: 'C', color: cc.warning };
+    if (pct >= 60) return { grade: 'D', color: '#f97316' };
+    return { grade: 'F', color: cc.danger };
+  };
+
+  const { grade, color } = getGrade(percentage);
+
+  return (
+    <div style={{ maxWidth: 800, margin: '0 auto', padding: '0 24px 40px' }}>
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+        <div style={{ marginBottom: 24 }}>
+          <h2 style={{ fontSize: 22, fontWeight: 700, color: cc.text, margin: '0 0 6px' }}>Internship Evaluation</h2>
+          <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}>View final Rubrics scores, enterprise feedback, and official course grades (UC-65)</p>
+        </div>
+
+        {!evaluation ? (
+          <EmptyState icon={<TrophyOutlined style={{ fontSize: 32 }} />} title="Evaluation not available" description="Your final evaluation will appear after you complete your internship and submit all required reports" />
+        ) : (
+          <>
+            {/* Grade Overview */}
+            <NeuSurface style={{ padding: 24, marginBottom: 20 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+                <div style={{ width: 100, height: 100, borderRadius: cc.radiusXl, background: `linear-gradient(135deg, ${color}20, ${color}10)`, border: `3px solid ${color}`, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ fontSize: 36, fontWeight: 900, color, lineHeight: 1 }}>{grade}</span>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: cc.textMuted, marginTop: 4 }}>{percentage}%</span>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <h3 style={{ fontSize: 18, fontWeight: 700, color: cc.text, margin: '0 0 8px' }}>Final Grade: {grade}</h3>
+                  <p style={{ fontSize: 13, color: cc.textMuted, margin: 0, lineHeight: 1.6 }}>
+                    Total Score: {totalScore}/{maxScore} points
+                  </p>
+                  <div style={{ marginTop: 12, height: 8, borderRadius: 4, background: cc.borderSubtle, overflow: 'hidden' }}>
+                    <div style={{ width: `${percentage}%`, height: '100%', background: color, borderRadius: 4, transition: 'width 0.5s ease' }} />
+                  </div>
+                </div>
+              </div>
+            </NeuSurface>
+
+            {/* Rubric Scores */}
+            <NeuSurface style={{ padding: 24, marginBottom: 20 }}>
+              <h3 style={{ fontSize: 16, fontWeight: 700, color: cc.text, margin: '0 0 16px' }}>Rubric Breakdown</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                {rubricScores.map((rubric: any, i: number) => {
+                  const pct = Math.round((rubric.score / rubric.maxScore) * 100);
+                  const rubricColor = pct >= 80 ? cc.success : pct >= 60 ? cc.warning : cc.danger;
+                  return (
+                    <div key={i}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                        <span style={{ fontSize: 13, fontWeight: 600, color: cc.text }}>{rubric.name}</span>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: rubricColor }}>{rubric.score}/{rubric.maxScore}</span>
+                      </div>
+                      <div style={{ height: 6, borderRadius: 3, background: cc.borderSubtle, overflow: 'hidden' }}>
+                        <div style={{ width: `${pct}%`, height: '100%', background: rubricColor, borderRadius: 3, transition: 'width 0.5s ease' }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </NeuSurface>
+
+            {/* Enterprise Feedback */}
+            {evaluation.enterpriseFeedback && (
+              <NeuSurface style={{ padding: 24, marginBottom: 20 }}>
+                <h3 style={{ fontSize: 16, fontWeight: 700, color: cc.text, margin: '0 0 12px' }}>Enterprise Feedback</h3>
+                <p style={{ fontSize: 13, color: cc.textMuted, lineHeight: 1.6, margin: 0 }}>{evaluation.enterpriseFeedback}</p>
+              </NeuSurface>
+            )}
+
+            {/* TM Feedback */}
+            {evaluation.tmFeedback && (
+              <NeuSurface style={{ padding: 24 }}>
+                <h3 style={{ fontSize: 16, fontWeight: 700, color: cc.text, margin: '0 0 12px' }}>Training Manager Feedback</h3>
+                <p style={{ fontSize: 13, color: cc.textMuted, lineHeight: 1.6, margin: 0 }}>{evaluation.tmFeedback}</p>
+              </NeuSurface>
+            )}
+          </>
+        )}
+      </motion.div>
+    </div>
+  );
+};
+
+// ============================================================
+// SETTINGS TAB (UC-05)
+// ============================================================
+const SettingsTab: React.FC = () => {
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+
+  const handleChangePassword = async () => {
+    if (formData.newPassword !== formData.confirmPassword) {
+      message.error('New passwords do not match!');
+      return;
+    }
+    if (formData.newPassword.length < 8) {
+      message.error('Password must be at least 8 characters!');
+      return;
+    }
+    try {
+      setLoading(true);
+      await api.put('/users/change-password', { currentPassword: formData.currentPassword, newPassword: formData.newPassword });
+      message.success('Password changed successfully!');
+      setFormData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    } catch (err: any) {
+      message.error(err.response?.data?.message || 'Failed to change password!');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div style={{ maxWidth: 600, margin: '0 auto', padding: '0 24px 40px' }}>
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+        <div style={{ marginBottom: 24 }}>
+          <h2 style={{ fontSize: 22, fontWeight: 700, color: cc.text, margin: '0 0 6px' }}>Settings</h2>
+          <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}>Manage your account and preferences</p>
+        </div>
+
+        {/* Change Password */}
+        <NeuSurface style={{ padding: 24, marginBottom: 20 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+            <div style={{ width: 44, height: 44, borderRadius: cc.radiusMd, background: cc.primaryMuted, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.primary }}>
+              <LockOutlined style={{ fontSize: 20 }} />
+            </div>
+            <div>
+              <h3 style={{ fontSize: 15, fontWeight: 600, color: cc.text, margin: 0 }}>Change Password</h3>
+              <p style={{ fontSize: 12, color: cc.textMuted, margin: '2px 0 0' }}>Update your account password (BR-04)</p>
+            </div>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div>
+              <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>Current Password</label>
+              <input type="password" value={formData.currentPassword} onChange={(e) => setFormData({ ...formData, currentPassword: e.target.value })} style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13 }} />
+            </div>
+            <div>
+              <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>New Password</label>
+              <input type="password" value={formData.newPassword} onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })} style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13 }} />
+            </div>
+            <div>
+              <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>Confirm New Password</label>
+              <input type="password" value={formData.confirmPassword} onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })} style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13 }} />
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <CTAButton variant="primary" icon={<SaveOutlined />} onClick={handleChangePassword} loading={loading}>Save Changes</CTAButton>
+            </div>
+          </div>
+        </NeuSurface>
+
+        {/* Notifications */}
+        <NeuSurface style={{ padding: 24 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+            <div style={{ width: 44, height: 44, borderRadius: cc.radiusMd, background: cc.infoMuted, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.info }}>
+              <BellOutlined style={{ fontSize: 20 }} />
+            </div>
+            <div>
+              <h3 style={{ fontSize: 15, fontWeight: 600, color: cc.text, margin: 0 }}>Notifications</h3>
+              <p style={{ fontSize: 12, color: cc.textMuted, margin: '2px 0 0' }}>Manage your notification preferences</p>
+            </div>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {['Email notifications', 'Interview reminders', 'Report deadline alerts', 'Application status updates'].map((item, i) => (
+              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: i < 3 ? `1px solid ${cc.borderSubtle}` : 'none' }}>
+                <span style={{ fontSize: 13, color: cc.text }}>{item}</span>
+                <div style={{ width: 44, height: 24, borderRadius: 12, background: cc.success, cursor: 'pointer', position: 'relative' }}>
+                  <div style={{ position: 'absolute', right: 2, top: 2, width: 20, height: 20, borderRadius: '50%', background: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.15)' }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </NeuSurface>
+      </motion.div>
+    </div>
+  );
+};
+
+// ============================================================
 // MAIN STUDENT DASHBOARD
 // ============================================================
 export const StudentDashboard: React.FC = () => {
-  const { tab } = useParams<{ tab: string }>();
-  const navigate = useNavigate();
-  const activeTab = tab || 'dashboard';
+  const [activeTab, setActiveTab] = useState<string>('dashboard');
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [stats, setStats] = useState({ applications: 0, interviews: 0, reports: 0, daysRemaining: 0 });
 
-  const handleNavigate = (key: string) => {
-    navigate(`/student-dashboard/${key}`);
+  useEffect(() => {
+    setTimeout(() => setIsLoaded(true), 100);
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      const res = await api.get('/dashboard/student-stats');
+      setStats(res.data);
+    } catch (err) {
+      setStats({ applications: 3, interviews: 1, reports: 4, daysRemaining: 28 });
+    }
   };
 
   const navItems: NavItem[] = [
-    { key: 'dashboard', label: 'Dashboard', icon: <Home size={18} /> },
-    { key: 'profile', label: 'Profile', icon: <User size={18} /> },
-    { key: 'jobs', label: 'Jobs', icon: <Briefcase size={18} /> },
-    { key: 'reports', label: 'Reports', icon: <FileText size={18} /> },
-    { key: 'applications', label: 'Applications', icon: <Send size={18} /> },
-    { key: 'schedule', label: 'Schedule', icon: <Calendar size={18} /> },
-    { key: 'feedback', label: 'Feedback', icon: <Star size={18} /> },
-    { key: 'settings', label: 'Settings', icon: <Settings size={18} /> },
+    { key: 'dashboard', label: 'Dashboard', icon: <CalendarOutlined /> },
+    { key: 'profile', label: 'Profile', icon: <UserOutlined /> },
+    { key: 'jobs', label: 'Job Board', icon: <TrophyOutlined /> },
+    { key: 'applications', label: 'Applications', icon: <FileTextOutlined /> },
+    { key: 'schedule', label: 'Interview', icon: <CalendarOutlined /> },
+    { key: 'training-plan', label: 'Training', icon: <BookOutlined /> },
+    { key: 'reports', label: 'Reports', icon: <SnippetsOutlined /> },
+    { key: 'final-report', label: 'Final Report', icon: <FileOutlined /> },
+    { key: 'evaluation', label: 'Evaluation', icon: <TrophyOutlined /> },
+    { key: 'feedback', label: 'Feedback', icon: <CheckCircleOutlined /> },
+    { key: 'settings', label: 'Settings', icon: <SettingOutlined /> },
   ];
+
+  const sparklineData = [12, 19, 15, 22, 18, 25, 20];
 
   const tabComponents: Record<string, React.ReactNode> = {
     dashboard: (
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px 40px' }}>
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-
-          {/* Welcome */}
-          <div style={{ marginBottom: 28 }}>
-            <h1 style={{ fontSize: 26, fontWeight: 700, color: cc.textPrimary, margin: '0 0 6px' }}>
-              Welcome back! 👋
-            </h1>
-            <p style={{ fontSize: 14, color: cc.textMuted, margin: 0 }}>
-              Track your internship progress and manage your profile
-            </p>
-          </div>
-
-          {/* Stats Grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 28 }} className="sp-grid-4">
-            <StatCard label="Applications" value="3" icon={<Send size={22} />} color={cc.info} trend="+2" trendUp />
-            <StatCard label="Interviews" value="1" icon={<Calendar size={22} />} color={cc.warning} />
-            <StatCard label="Reports This Week" value="1" icon={<CheckCircle size={22} />} color={cc.success} />
-            <StatCard label="Days Remaining" value="28" icon={<Clock size={22} />} color={cc.primary} />
-          </div>
-
-          {/* Quick Actions + Recent Activity */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }} className="sp-grid-2">
-            <Card style={{ padding: 24 }}>
-              <SectionTitle>Quick Actions</SectionTitle>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {[
-                  { label: 'Submit Weekly Report', icon: <FileText size={15} />, key: 'reports', variant: 'primary' as const },
-                  { label: 'Browse Job Postings', icon: <Briefcase size={15} />, key: 'jobs', variant: 'ghost' as const },
-                  { label: 'Update My Profile', icon: <User size={15} />, key: 'profile', variant: 'ghost' as const },
-                ].map(action => (
-                  <CTAButton
-                    key={action.key}
-                    variant={action.variant}
-                    icon={action.icon}
-                    fullWidth
-                    onClick={() => handleNavigate(action.key)}
-                  >
-                    {action.label}
-                  </CTAButton>
-                ))}
-              </div>
-            </Card>
-
-            <Card style={{ padding: 24 }}>
-              <SectionTitle>Recent Activity</SectionTitle>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                {[
-                  { text: 'Application submitted to TechCorp Vietnam', time: '2 hours ago', icon: <Send size={14} />, color: cc.info },
-                  { text: 'Weekly report W22 approved by TM', time: 'Yesterday', icon: <CheckCircle size={14} />, color: cc.success },
-                  { text: 'Interview scheduled for Jul 15 at 2:00 PM', time: '3 days ago', icon: <Calendar size={14} />, color: cc.warning },
-                ].map((item, i) => (
-                  <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-                    <div style={{
-                      width: 32, height: 32, borderRadius: '50%',
-                      background: hexToRgba(item.color, 0.1),
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      color: item.color, flexShrink: 0,
-                    }}>
-                      {item.icon}
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <p style={{ fontSize: 13, fontWeight: 500, color: cc.textPrimary, margin: 0, lineHeight: 1.4 }}>{item.text}</p>
-                      <p style={{ fontSize: 11, color: cc.textMuted, margin: '2px 0 0' }}>{item.time}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
-          </div>
-        </motion.div>
-
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 22, opacity: isLoaded ? 1 : 0, transform: isLoaded ? 'translateY(0)' : 'translateY(20px)', transition: 'all .4s ease-out' }}>
         <style>{`
+          .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; align-items: stretch; }
+          .bottom-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; align-items: stretch; }
           @media (max-width: 1024px) {
-            .sp-grid-4 { grid-template-columns: repeat(2, 1fr) !important; }
-            .sp-grid-2 { grid-template-columns: 1fr !important; }
+            .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+            .bottom-grid { grid-template-columns: 1fr; }
           }
           @media (max-width: 640px) {
-            .sp-grid-4 { grid-template-columns: 1fr !important; }
+            .kpi-grid { grid-template-columns: 1fr; }
           }
         `}</style>
+
+        {/* HERO CARD */}
+        <div style={{ position: 'relative', padding: '28px 30px', borderRadius: 28, background: 'linear-gradient(135deg, rgba(255,255,255,.98) 0%, rgba(255,244,236,.92) 48%, rgba(255,250,246,.96) 100%)', border: '1px solid rgba(233,101,0,.12)', boxShadow: '0 20px 50px rgba(15,23,42,.10), 0 8px 22px rgba(233,101,0,.10)', overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'radial-gradient(circle at top right, rgba(233,101,0,.14), transparent 30%), radial-gradient(circle at 20% 20%, rgba(255,138,90,.10), transparent 25%)' }} />
+          <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 5, background: 'linear-gradient(180deg, #FF662C, #FF824D, #FF9B73)' }} />
+          <div style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', gap: 20, alignItems: 'stretch', flexWrap: 'wrap' }}>
+            <div style={{ minWidth: 0, flex: '1 1 480px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <div>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '7px 12px', borderRadius: 999, background: 'rgba(233,101,0,.08)', color: cc.primaryDark, fontSize: 12, fontWeight: 700, marginBottom: 14 }}>
+                  <CalendarOutlined /> Summer 2026
+                </div>
+                <h1 style={{ fontSize: 34, lineHeight: 1.06, fontWeight: 900, color: cc.text, margin: 0, letterSpacing: '-1.2px' }}>Your internship journey, at a glance.</h1>
+                <p style={{ fontSize: 14.5, color: cc.textMuted, marginTop: 10, maxWidth: 720, lineHeight: 1.7 }}>
+                  {stats.applications} applications, {stats.interviews} interviews scheduled, {stats.reports} reports submitted this semester.
+                </p>
+              </div>
+              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 18 }}>
+                <HeroMiniCard label="Applications" value={stats.applications} delay={0.1} />
+                <HeroMiniCard label="Interviews" value={stats.interviews} delay={0.2} />
+                <HeroMiniCard label="Reports" value={stats.reports} delay={0.3} />
+                <HeroMiniCard label="Days Left" value={stats.daysRemaining} delay={0.4} />
+              </div>
+            </div>
+            <div style={{ flex: '0 1 320px', minWidth: 280, display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <motion.div whileHover={{ y: -2, transition: { duration: 0.2 }, boxShadow: '0 8px 24px rgba(15,23,42,.12)' }} style={{ padding: 16, borderRadius: 20, background: 'rgba(255,255,255,.72)', border: '1px solid rgba(226,232,240,.9)', boxShadow: '0 6px 18px rgba(15,23,42,.06)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+                  <div>
+                    <div style={{ fontSize: 12, color: cc.textMuted, fontWeight: 700 }}>Progress</div>
+                    <div style={{ fontSize: 28, fontWeight: 900, color: cc.text, lineHeight: 1.05, fontVariantNumeric: 'tabular-nums' }}>68%</div>
+                    <div style={{ fontSize: 12, color: cc.success, fontWeight: 700, marginTop: 4 }}>On track</div>
+                  </div>
+                  <div style={{ width: 62, height: 62, borderRadius: 18, background: `linear-gradient(135deg, ${cc.primary}26, ${cc.primaryLight}10)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <TrophyOutlined style={{ fontSize: 22, color: cc.primary }} />
+                  </div>
+                </div>
+                <div style={{ marginTop: 12 }}><Sparkline data={sparklineData} color={cc.primary} width={260} height={42} /></div>
+              </motion.div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, alignItems: 'stretch' }}>
+                <motion.div whileHover={{ y: -2, transition: { duration: 0.2 }, boxShadow: '0 8px 24px rgba(15,23,42,.12)' }} style={{ padding: 14, borderRadius: 18, background: 'rgba(255,255,255,.72)', border: '1px solid rgba(226,232,240,.9)', boxShadow: '0 6px 18px rgba(15,23,42,.06)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: 80 }}>
+                  <div>
+                    <div style={{ fontSize: 12, color: cc.textMuted, fontWeight: 700 }}>Status</div>
+                    <div style={{ fontSize: 20, fontWeight: 900, color: cc.success, lineHeight: 1.1, marginTop: 4, fontVariantNumeric: 'tabular-nums' }}>Active</div>
+                  </div>
+                  <div style={{ fontSize: 12, color: cc.success, marginTop: 4, fontWeight: 600 }}>Internship running</div>
+                </motion.div>
+                <motion.div whileHover={{ y: -2, transition: { duration: 0.2 }, boxShadow: '0 8px 24px rgba(15,23,42,.12)' }} style={{ padding: 14, borderRadius: 18, background: 'rgba(255,255,255,.72)', border: '1px solid rgba(226,232,240,.9)', boxShadow: '0 6px 18px rgba(15,23,42,.06)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: 80 }}>
+                  <div>
+                    <div style={{ fontSize: 12, color: cc.textMuted, fontWeight: 700 }}>Reports Due</div>
+                    <div style={{ fontSize: 20, fontWeight: 900, color: cc.warning, lineHeight: 1.1, marginTop: 4, fontVariantNumeric: 'tabular-nums' }}>1</div>
+                  </div>
+                  <div style={{ fontSize: 12, color: cc.warning, marginTop: 4, fontWeight: 600 }}>This week</div>
+                </motion.div>
+              </div>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                <CTAButton variant="primary" icon={<PlusOutlined />} onClick={() => setActiveTab('reports')}>Submit Report</CTAButton>
+                <CTAButton variant="ghost" icon={<SearchOutlined />} onClick={() => setActiveTab('jobs')}>Browse Jobs</CTAButton>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 4 KPI STAT CARDS */}
+        <div className="kpi-grid">
+          <AnimatedStatCard label="Applications" value={stats.applications} icon={<FileTextOutlined style={{ fontSize: 20 }} />} color={cc.info} trend="Total" insight="Job applications sent" sparkline={[1, 2, 1, 3, 2, 3, 3]} delay={100} />
+          <AnimatedStatCard label="Interviews" value={stats.interviews} icon={<CalendarOutlined style={{ fontSize: 20 }} />} color={cc.warning} trend="Scheduled" insight="Upcoming interviews" sparkline={[0, 0, 1, 1, 0, 1, 1]} delay={200} />
+          <AnimatedStatCard label="Reports Submitted" value={stats.reports} icon={<SnippetsOutlined style={{ fontSize: 20 }} />} color={cc.success} trend="This semester" insight="Weekly reports completed" sparkline={[0, 1, 2, 2, 3, 4, 4]} delay={300} />
+          <AnimatedStatCard label="Days Remaining" value={stats.daysRemaining} icon={<ClockCircleOutlined style={{ fontSize: 20 }} />} color={cc.primary} trend="Until end" insight="OJT duration" sparkline={[90, 85, 80, 75, 70, 65, 60]} delay={400} />
+        </div>
+
+        {/* BOTTOM ROW */}
+        <div className="bottom-grid">
+          <NeuSurface style={{ padding: 24, opacity: isLoaded ? 1 : 0, transform: isLoaded ? 'translateY(0)' : 'translateY(20px)', transition: 'all .4s ease-out .3s' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
+              <div>
+                <h2 style={{ fontSize: 18, fontWeight: 800, color: cc.text, margin: 0 }}>Report Progress</h2>
+                <span style={{ fontSize: 12, color: cc.textMuted }}>Weekly submission trend</span>
+              </div>
+              <SmallPill color={cc.success} glow>Live tracking</SmallPill>
+            </div>
+            <div style={{ height: 170 }}><AreaChart data={[0, 1, 2, 2, 3, 4, 4]} color={cc.primary} /></div>
+          </NeuSurface>
+
+          <NeuSurface style={{ padding: 24, opacity: isLoaded ? 1 : 0, transform: isLoaded ? 'translateY(0)' : 'translateY(20px)', transition: 'all .4s ease-out .4s', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
+              <h2 style={{ fontSize: 18, fontWeight: 800, color: cc.text, margin: 0 }}>Recent Activity</h2>
+              <SmallPill color={cc.warning}>Live</SmallPill>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, flex: 1 }}>
+              {[
+                { title: 'Application submitted to TechCorp', meta: '2 hours ago', tone: cc.info },
+                { title: 'Weekly report W22 approved', meta: 'Yesterday', tone: cc.success },
+                { title: 'Interview scheduled for Jul 15', meta: '3 days ago', tone: cc.warning },
+              ].map((item, i) => (
+                <motion.div key={i} whileHover={{ x: 2, transition: { duration: 0.15 } }} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '12px 14px', borderRadius: 16, background: '#fff', border: '1px solid rgba(226,232,240,.9)', boxShadow: '0 4px 16px rgba(15,23,42,.04)', cursor: 'pointer' }}>
+                  <div style={{ width: 10, height: 10, borderRadius: '50%', background: item.tone, boxShadow: `0 0 0 4px ${item.tone}20`, marginTop: 4 }} />
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: 13.5, fontWeight: 800, color: cc.text }}>{item.title}</div>
+                    <div style={{ fontSize: 11.5, color: cc.textMuted, marginTop: 3 }}>{item.meta}</div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </NeuSurface>
+        </div>
       </div>
     ),
 
     profile: <ProfileTab />,
     jobs: <JobBoardTab />,
+    applications: <ApplicationsTab />,
+    schedule: <ScheduleTab />,
+    'training-plan': <TrainingPlanTab />,
     reports: <ReportsTab />,
-
-    applications: (
-      <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 24px 40px' }}>
-        <div style={{ marginBottom: 24 }}>
-          <h2 style={{ fontSize: 22, fontWeight: 700, color: cc.textPrimary, margin: '0 0 6px' }}>My Applications</h2>
-          <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}>Track all your job applications in one place</p>
-        </div>
-        <EmptyState
-          icon={<FileText size={32} />}
-          title="No applications yet"
-          description="Start applying to internships to see your applications here"
-          action={<CTAButton variant="primary" icon={<Briefcase size={14} />} onClick={() => handleNavigate('jobs')}>Browse Jobs</CTAButton>}
-        />
-      </div>
-    ),
-
-    schedule: (
-      <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 24px 40px' }}>
-        <div style={{ marginBottom: 24 }}>
-          <h2 style={{ fontSize: 22, fontWeight: 700, color: cc.textPrimary, margin: '0 0 6px' }}>Interview Schedule</h2>
-          <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}>Your upcoming interviews and appointments</p>
-        </div>
-        <EmptyState
-          icon={<Calendar size={32} />}
-          title="No scheduled interviews"
-          description="Interviews will appear here once they are scheduled by companies"
-        />
-      </div>
-    ),
-
-    feedback: (
-      <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 24px 40px' }}>
-        <div style={{ marginBottom: 24 }}>
-          <h2 style={{ fontSize: 22, fontWeight: 700, color: cc.textPrimary, margin: '0 0 6px' }}>Company Feedback</h2>
-          <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}>Reviews and ratings from companies you've interned with</p>
-        </div>
-        <EmptyState
-          icon={<Star size={32} />}
-          title="No feedback received"
-          description="Company feedback will appear after you complete your internship"
-        />
-      </div>
-    ),
-
-    settings: (
-      <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 24px 40px' }}>
-        <div style={{ marginBottom: 24 }}>
-          <h2 style={{ fontSize: 22, fontWeight: 700, color: cc.textPrimary, margin: '0 0 6px' }}>Settings</h2>
-          <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}>Manage your account and preferences</p>
-        </div>
-        <Card style={{ padding: 24 }}>
-          <p style={{ fontSize: 14, color: cc.textMuted, textAlign: 'center' }}>Account settings coming soon...</p>
-        </Card>
-      </div>
-    ),
+    'final-report': <FinalReportTab />,
+    evaluation: <EvaluationTab />,
+    feedback: <FeedbackTab />,
+    settings: <SettingsTab />,
   };
 
   return (
-    <ModernLayout
-      navItems={navItems}
-      defaultRoute="dashboard"
-      basePath="/student-dashboard"
-    >
-      {tabComponents[activeTab] || tabComponents['dashboard']}
-    </ModernLayout>
+    <div style={{ minHeight: '100vh', background: cc.bg }}>
+      {/* Top Navigation */}
+      <div style={{ background: cc.surface, borderBottom: `1px solid ${cc.border}`, padding: '0 24px', position: 'sticky', top: 0, zIndex: 100 }}>
+        <div style={{ display: 'flex', gap: 4, overflowX: 'auto', maxWidth: 1200, margin: '0 auto' }}>
+          {navItems.map(item => (
+            <button
+              key={item.key}
+              onClick={() => setActiveTab(item.key)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6, padding: '14px 16px',
+                background: 'none', border: 'none', borderBottom: activeTab === item.key ? `3px solid ${cc.primary}` : '3px solid transparent',
+                color: activeTab === item.key ? cc.primary : cc.textMuted,
+                fontSize: 13, fontWeight: activeTab === item.key ? 700 : 500,
+                cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.2s ease',
+              }}
+            >
+              {item.icon} {item.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Content */}
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '24px 24px 40px' }}>
+        {tabComponents[activeTab] || tabComponents['dashboard']}
+      </div>
+    </div>
   );
 };
 
