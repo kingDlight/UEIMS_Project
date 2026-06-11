@@ -22,8 +22,8 @@ import org.thymeleaf.templateresolver.StringTemplateResolver;
 @ExtendWith(MockitoExtension.class)
 class MailServiceTest {
 
-    private static final String TEST_EMAIL = TEST_EMAIL;
-    private static final String TEST_USER = TEST_USER;
+    private static final String TEST_EMAIL = "test@test.com";
+    private static final String TEST_USER = "Test User";
 
     @Mock
     private JavaMailSender javaMailSender;

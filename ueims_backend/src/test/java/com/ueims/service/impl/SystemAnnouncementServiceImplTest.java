@@ -43,7 +43,6 @@ class SystemAnnouncementServiceImplTest {
     private static final String UPDATED_CONTENT = "Updated Content";
     private static final String NEW_TITLE = "New Title";
 
-
     @Mock
     private SystemAnnouncementRepository repository;
 
