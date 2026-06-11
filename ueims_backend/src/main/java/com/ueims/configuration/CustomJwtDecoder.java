@@ -7,6 +7,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
+import org.springframework.security.oauth2.jwt.BadJwtException;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
@@ -36,18 +37,18 @@ public class CustomJwtDecoder implements JwtDecoder {
 
             String tokenType = signedJWT.getJWTClaimsSet().getStringClaim("token_type");
             if (!"ACCESS".equals(tokenType)) {
-                throw new JwtException("Invalid token type");
+                throw new BadJwtException("Invalid token type");
             }
 
             String jit = signedJWT.getJWTClaimsSet().getJWTID();
             if (jit != null && invalidatedTokenRepository.existsById(jit)) {
-                throw new JwtException("Token has been invalidated");
+                throw new BadJwtException("Token has been invalidated");
             }
 
             if (jit != null) {
                 var sessionOpt = userSessionRepository.findById(jit);
                 if (sessionOpt.isEmpty()) {
-                    throw new JwtException("Session not found or expired");
+                    throw new BadJwtException("Session not found or expired");
                 }
 
                 UserSession session = sessionOpt.get();
@@ -59,7 +60,7 @@ public class CustomJwtDecoder implements JwtDecoder {
                             .expiresAt(session.getExpiresAt())
                             .build());
                     userSessionRepository.delete(session);
-                    throw new JwtException("Session expired due to inactivity");
+                    throw new BadJwtException("Session expired due to inactivity");
                 }
 
                 session.setLastActivity(LocalDateTime.now());
@@ -67,7 +68,7 @@ public class CustomJwtDecoder implements JwtDecoder {
             }
 
         } catch (ParseException e) {
-            throw new JwtException("Invalid token format", e);
+            throw new BadJwtException("Invalid token format", e);
         }
 
         if (Objects.isNull(nimbusJwtDecoder)) {
