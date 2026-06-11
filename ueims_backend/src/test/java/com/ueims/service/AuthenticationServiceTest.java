@@ -89,6 +89,21 @@ class AuthenticationServiceTest {
     private User user;
     private String validToken;
 
+    private static final String TEST_EMAIL = "test@test.com";
+    private static final String HASHED_PASSWORD = "hashedPassword";
+    private static final String GOOGLE_CLIENT_ID_STR = "google-client-id";
+    private static final String GOOGLE_CLIENT_ID_FIELD = "googleClientId";
+    private static final String GOOGLE_JWT_DECODER_FIELD = "googleJwtDecoder";
+    private static final String DUMMY_ID_TOKEN = "dummyIdToken";
+    private static final String DUMMY = "dummy";
+    private static final String DEV_ID = "dev1";
+    private static final String GOOGLE_ISSUER = "https://accounts.google.com";
+    private static final String GOOGLE_EMAIL = "google@test.com";
+    private static final String NEW_GOOGLE_EMAIL = "newgoogle@test.com";
+    private static final String CLAIM_EMAIL_VERIFIED = "email_verified";
+    private static final String VALID_HASH = "validHash";
+    private static final String NEW_HASHED = "newHashed";
+
     @BeforeEach
     void setUp() throws Exception {
         mailService = new MailService(null, null) {
@@ -124,12 +139,12 @@ class AuthenticationServiceTest {
         ReflectionTestUtils.setField(service, "signerKey", signerKey);
         ReflectionTestUtils.setField(service, "validDuration", 3600L);
         ReflectionTestUtils.setField(service, "refreshableDuration", 7200L);
-        ReflectionTestUtils.setField(service, "googleClientId", "google-client-id");
+        ReflectionTestUtils.setField(service, GOOGLE_CLIENT_ID_FIELD, GOOGLE_CLIENT_ID_STR);
 
         user = User.builder()
                 .userId(UUID.randomUUID())
-                .email("test@test.com")
-                .password("hashedPassword")
+                .email(TEST_EMAIL)
+                .password(HASHED_PASSWORD)
                 .fullName("Test User")
                 .status("ACTIVE")
                 .failedLoginAttempts(0)
@@ -161,12 +176,12 @@ class AuthenticationServiceTest {
     @Test
     void authenticate_success() {
         AuthenticationRequest request = AuthenticationRequest.builder()
-                .email("test@test.com")
+                .email(TEST_EMAIL)
                 .password("pass")
-                .deviceId("dev1")
+                .deviceId(DEV_ID)
                 .build();
         when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.of(user));
-        when(passwordEncoder.matches("pass", "hashedPassword")).thenReturn(true);
+        when(passwordEncoder.matches("pass", HASHED_PASSWORD)).thenReturn(true);
 
         AuthenticationResponse response = service.authenticate(request);
 
@@ -180,11 +195,11 @@ class AuthenticationServiceTest {
     @Test
     void authenticate_whenWrongPassword_throwsException() {
         AuthenticationRequest request = AuthenticationRequest.builder()
-                .email("test@test.com")
+                .email(TEST_EMAIL)
                 .password("wrong")
                 .build();
         when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.of(user));
-        when(passwordEncoder.matches("wrong", "hashedPassword")).thenReturn(false);
+        when(passwordEncoder.matches("wrong", HASHED_PASSWORD)).thenReturn(false);
 
         AppException e = assertThrows(AppException.class, () -> service.authenticate(request));
         assertEquals(ErrorCode.UNAUTHENTICATED, e.getErrorCode());
@@ -195,7 +210,7 @@ class AuthenticationServiceTest {
     void authenticate_whenLocked_throwsException() {
         user.setStatus("LOCKED");
         AuthenticationRequest request = AuthenticationRequest.builder()
-                .email("test@test.com")
+                .email(TEST_EMAIL)
                 .password("pass")
                 .build();
         when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.of(user));
@@ -236,36 +251,34 @@ class AuthenticationServiceTest {
 
     @Test
     void changePassword_success() {
-        SecurityContextHolder.getContext()
-                .setAuthentication(new UsernamePasswordAuthenticationToken("test@test.com", null));
+        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(TEST_EMAIL, null));
         ChangePasswordRequest request = ChangePasswordRequest.builder()
                 .oldPassword("old")
                 .newPassword("new")
                 .confirmPassword("new")
                 .build();
 
-        when(userRepository.findByEmail("test@test.com")).thenReturn(Optional.of(user));
-        when(passwordEncoder.matches("old", "hashedPassword")).thenReturn(true);
-        when(passwordEncoder.encode("new")).thenReturn("newHashed");
+        when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("old", HASHED_PASSWORD)).thenReturn(true);
+        when(passwordEncoder.encode("new")).thenReturn(NEW_HASHED);
 
         service.changePassword(request);
 
-        assertEquals("newHashed", user.getPassword());
+        assertEquals(NEW_HASHED, user.getPassword());
         verify(userRepository).save(user);
     }
 
     @Test
     void changePassword_whenPasswordsNotMatch_throwsException() {
-        SecurityContextHolder.getContext()
-                .setAuthentication(new UsernamePasswordAuthenticationToken("test@test.com", null));
+        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(TEST_EMAIL, null));
         ChangePasswordRequest request = ChangePasswordRequest.builder()
                 .oldPassword("old")
                 .newPassword("new")
                 .confirmPassword("diff")
                 .build();
 
-        when(userRepository.findByEmail("test@test.com")).thenReturn(Optional.of(user));
-        when(passwordEncoder.matches("old", "hashedPassword")).thenReturn(true);
+        when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("old", HASHED_PASSWORD)).thenReturn(true);
 
         AppException e = assertThrows(AppException.class, () -> service.changePassword(request));
         assertEquals(ErrorCode.PASSWORDS_NOT_MATCH, e.getErrorCode());
@@ -274,8 +287,8 @@ class AuthenticationServiceTest {
     @Test
     void forgotPassword_success() {
         ForgotPasswordRequest request =
-                ForgotPasswordRequest.builder().email("test@test.com").build();
-        when(userRepository.findByEmail("test@test.com")).thenReturn(Optional.of(user));
+                ForgotPasswordRequest.builder().email(TEST_EMAIL).build();
+        when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(user));
 
         service.forgotPassword(request);
 
@@ -285,24 +298,24 @@ class AuthenticationServiceTest {
     @Test
     void resetPassword_success() {
         ResetPasswordRequest request = ResetPasswordRequest.builder()
-                .token("validHash")
+                .token(VALID_HASH)
                 .newPassword("new")
                 .confirmPassword("new")
                 .build();
         PasswordResetToken token = PasswordResetToken.builder()
                 .user(user)
-                .tokenHash("validHash")
+                .tokenHash(VALID_HASH)
                 .expiresAt(LocalDateTime.now().plusMinutes(10))
                 .isUsed(false)
                 .build();
 
-        when(passwordResetTokenRepository.findByTokenHash("validHash")).thenReturn(Optional.of(token));
-        when(passwordEncoder.encode("new")).thenReturn("newHashed");
+        when(passwordResetTokenRepository.findByTokenHash(VALID_HASH)).thenReturn(Optional.of(token));
+        when(passwordEncoder.encode("new")).thenReturn(NEW_HASHED);
 
         service.resetPassword(request);
 
         assertTrue(token.getIsUsed());
-        assertEquals("newHashed", user.getPassword());
+        assertEquals(NEW_HASHED, user.getPassword());
         verify(userRepository).save(user);
         assertTrue(sessionInvalidated);
     }
@@ -311,13 +324,13 @@ class AuthenticationServiceTest {
     void refreshToken_success() throws Exception {
         String refreshTok = generateTestToken(user, "REFRESH", 7200L);
         RefreshRequest request =
-                RefreshRequest.builder().token(refreshTok).deviceId("dev1").build();
+                RefreshRequest.builder().token(refreshTok).deviceId(DEV_ID).build();
 
         UserSession session =
-                UserSession.builder().deviceId("dev1").email("test@test.com").build();
+                UserSession.builder().deviceId(DEV_ID).email(TEST_EMAIL).build();
         when(invalidatedTokenRepository.existsById(anyString())).thenReturn(false);
         when(userSessionRepository.findById(anyString())).thenReturn(Optional.of(session));
-        when(userRepository.findByEmail("test@test.com")).thenReturn(Optional.of(user));
+        when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(user));
 
         AuthenticationResponse response = service.refreshToken(request);
 
@@ -328,59 +341,59 @@ class AuthenticationServiceTest {
     @Test
     void authenticateWithGoogleSuccess() throws Exception {
         GoogleAuthenticationRequest request = GoogleAuthenticationRequest.builder()
-                .idToken("dummyIdToken")
-                .deviceId("dev1")
+                .idToken(DUMMY_ID_TOKEN)
+                .deviceId(DEV_ID)
                 .build();
 
-        ReflectionTestUtils.setField(service, "googleJwtDecoder", googleJwtDecoder);
-        ReflectionTestUtils.setField(service, "googleClientId", "google-client-id");
+        ReflectionTestUtils.setField(service, GOOGLE_JWT_DECODER_FIELD, googleJwtDecoder);
+        ReflectionTestUtils.setField(service, GOOGLE_CLIENT_ID_FIELD, GOOGLE_CLIENT_ID_STR);
 
-        Jwt jwt = Jwt.withTokenValue("dummyIdToken")
+        Jwt jwt = Jwt.withTokenValue(DUMMY_ID_TOKEN)
                 .header("alg", "none")
-                .issuer("https://accounts.google.com")
-                .audience(java.util.List.of("google-client-id"))
-                .claim("email_verified", true)
-                .claim("email", "google@test.com")
+                .issuer(GOOGLE_ISSUER)
+                .audience(java.util.List.of(GOOGLE_CLIENT_ID_STR))
+                .claim(CLAIM_EMAIL_VERIFIED, true)
+                .claim("email", GOOGLE_EMAIL)
                 .claim("name", "Google User")
                 .claim("picture", "http://picture.url")
                 .build();
-        when(googleJwtDecoder.decode("dummyIdToken")).thenReturn(jwt);
+        when(googleJwtDecoder.decode(DUMMY_ID_TOKEN)).thenReturn(jwt);
 
-        when(userRepository.findByEmail("google@test.com")).thenReturn(Optional.of(user));
+        when(userRepository.findByEmail(GOOGLE_EMAIL)).thenReturn(Optional.of(user));
 
         AuthenticationResponse response = service.authenticateWithGoogle(request);
 
         assertTrue(response.isAuthenticated());
         assertNotNull(response.getToken());
-        verify(userRepository).findByEmail("google@test.com");
+        verify(userRepository).findByEmail(GOOGLE_EMAIL);
     }
 
     @Test
     void authenticateWithGoogleNewUserSuccess() throws Exception {
         GoogleAuthenticationRequest request = GoogleAuthenticationRequest.builder()
-                .idToken("dummyIdToken")
-                .deviceId("dev1")
+                .idToken(DUMMY_ID_TOKEN)
+                .deviceId(DEV_ID)
                 .build();
 
-        ReflectionTestUtils.setField(service, "googleJwtDecoder", googleJwtDecoder);
-        ReflectionTestUtils.setField(service, "googleClientId", "google-client-id");
+        ReflectionTestUtils.setField(service, GOOGLE_JWT_DECODER_FIELD, googleJwtDecoder);
+        ReflectionTestUtils.setField(service, GOOGLE_CLIENT_ID_FIELD, GOOGLE_CLIENT_ID_STR);
 
-        Jwt jwt = Jwt.withTokenValue("dummyIdToken")
+        Jwt jwt = Jwt.withTokenValue(DUMMY_ID_TOKEN)
                 .header("alg", "none")
-                .issuer("https://accounts.google.com")
-                .audience(java.util.List.of("google-client-id"))
-                .claim("email_verified", true)
-                .claim("email", "newgoogle@test.com")
+                .issuer(GOOGLE_ISSUER)
+                .audience(java.util.List.of(GOOGLE_CLIENT_ID_STR))
+                .claim(CLAIM_EMAIL_VERIFIED, true)
+                .claim("email", NEW_GOOGLE_EMAIL)
                 .claim("name", "New Google User")
                 .claim("picture", "http://picture.url")
                 .build();
-        when(googleJwtDecoder.decode("dummyIdToken")).thenReturn(jwt);
+        when(googleJwtDecoder.decode(DUMMY_ID_TOKEN)).thenReturn(jwt);
 
-        when(userRepository.findByEmail("newgoogle@test.com")).thenReturn(Optional.empty());
+        when(userRepository.findByEmail(NEW_GOOGLE_EMAIL)).thenReturn(Optional.empty());
         when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
 
         User newUser = User.builder()
-                .email("newgoogle@test.com")
+                .email(NEW_GOOGLE_EMAIL)
                 .userId(UUID.randomUUID())
                 .status("ACTIVE")
                 .failedLoginAttempts(0)
@@ -396,26 +409,26 @@ class AuthenticationServiceTest {
     @Test
     void authenticateWithGoogleUpdateUserSuccess() throws Exception {
         GoogleAuthenticationRequest request = GoogleAuthenticationRequest.builder()
-                .idToken("dummyIdToken")
-                .deviceId("dev1")
+                .idToken(DUMMY_ID_TOKEN)
+                .deviceId(DEV_ID)
                 .build();
 
-        ReflectionTestUtils.setField(service, "googleJwtDecoder", googleJwtDecoder);
-        ReflectionTestUtils.setField(service, "googleClientId", "google-client-id");
+        ReflectionTestUtils.setField(service, GOOGLE_JWT_DECODER_FIELD, googleJwtDecoder);
+        ReflectionTestUtils.setField(service, GOOGLE_CLIENT_ID_FIELD, GOOGLE_CLIENT_ID_STR);
 
-        Jwt jwt = Jwt.withTokenValue("dummyIdToken")
+        Jwt jwt = Jwt.withTokenValue(DUMMY_ID_TOKEN)
                 .header("alg", "none")
-                .issuer("https://accounts.google.com")
-                .audience(java.util.List.of("google-client-id"))
-                .claim("email_verified", true)
-                .claim("email", "test@test.com")
+                .issuer(GOOGLE_ISSUER)
+                .audience(java.util.List.of(GOOGLE_CLIENT_ID_STR))
+                .claim(CLAIM_EMAIL_VERIFIED, true)
+                .claim("email", TEST_EMAIL)
                 .claim("name", "Updated Google User")
                 .claim("picture", "http://new-picture.url")
                 .build();
-        when(googleJwtDecoder.decode("dummyIdToken")).thenReturn(jwt);
+        when(googleJwtDecoder.decode(DUMMY_ID_TOKEN)).thenReturn(jwt);
 
         user.setAuthProvider("GOOGLE");
-        when(userRepository.findByEmail("test@test.com")).thenReturn(Optional.of(user));
+        when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(user));
 
         AuthenticationResponse response = service.authenticateWithGoogle(request);
 
@@ -427,8 +440,8 @@ class AuthenticationServiceTest {
     @Test
     void authenticateWithGoogleNoClientIdThrowsException() {
         GoogleAuthenticationRequest request =
-                GoogleAuthenticationRequest.builder().idToken("dummy").build();
-        ReflectionTestUtils.setField(service, "googleClientId", null);
+                GoogleAuthenticationRequest.builder().idToken(DUMMY).build();
+        ReflectionTestUtils.setField(service, GOOGLE_CLIENT_ID_FIELD, null);
 
         AppException e = assertThrows(AppException.class, () -> service.authenticateWithGoogle(request));
         assertEquals(ErrorCode.GOOGLE_CLIENT_ID_NOT_CONFIGURED, e.getErrorCode());
@@ -437,16 +450,16 @@ class AuthenticationServiceTest {
     @Test
     void authenticateWithGoogleInvalidIssuerThrowsException() throws Exception {
         GoogleAuthenticationRequest request =
-                GoogleAuthenticationRequest.builder().idToken("dummy").build();
-        ReflectionTestUtils.setField(service, "googleJwtDecoder", googleJwtDecoder);
-        ReflectionTestUtils.setField(service, "googleClientId", "google-client-id");
+                GoogleAuthenticationRequest.builder().idToken(DUMMY).build();
+        ReflectionTestUtils.setField(service, GOOGLE_JWT_DECODER_FIELD, googleJwtDecoder);
+        ReflectionTestUtils.setField(service, GOOGLE_CLIENT_ID_FIELD, GOOGLE_CLIENT_ID_STR);
 
-        Jwt jwt = Jwt.withTokenValue("dummy")
+        Jwt jwt = Jwt.withTokenValue(DUMMY)
                 .header("alg", "none")
                 .issuer("https://invalid.issuer.com")
-                .claim("dummy", "dummy")
+                .claim(DUMMY, DUMMY)
                 .build();
-        when(googleJwtDecoder.decode("dummy")).thenReturn(jwt);
+        when(googleJwtDecoder.decode(DUMMY)).thenReturn(jwt);
 
         AppException e = assertThrows(AppException.class, () -> service.authenticateWithGoogle(request));
         assertEquals(ErrorCode.UNAUTHENTICATED, e.getErrorCode());
@@ -455,17 +468,17 @@ class AuthenticationServiceTest {
     @Test
     void authenticateWithGoogleInvalidAudienceThrowsException() throws Exception {
         GoogleAuthenticationRequest request =
-                GoogleAuthenticationRequest.builder().idToken("dummy").build();
-        ReflectionTestUtils.setField(service, "googleJwtDecoder", googleJwtDecoder);
-        ReflectionTestUtils.setField(service, "googleClientId", "google-client-id");
+                GoogleAuthenticationRequest.builder().idToken(DUMMY).build();
+        ReflectionTestUtils.setField(service, GOOGLE_JWT_DECODER_FIELD, googleJwtDecoder);
+        ReflectionTestUtils.setField(service, GOOGLE_CLIENT_ID_FIELD, GOOGLE_CLIENT_ID_STR);
 
-        Jwt jwt = Jwt.withTokenValue("dummy")
+        Jwt jwt = Jwt.withTokenValue(DUMMY)
                 .header("alg", "none")
-                .issuer("https://accounts.google.com")
+                .issuer(GOOGLE_ISSUER)
                 .audience(java.util.List.of("wrong-audience"))
-                .claim("dummy", "dummy")
+                .claim(DUMMY, DUMMY)
                 .build();
-        when(googleJwtDecoder.decode("dummy")).thenReturn(jwt);
+        when(googleJwtDecoder.decode(DUMMY)).thenReturn(jwt);
 
         AppException e = assertThrows(AppException.class, () -> service.authenticateWithGoogle(request));
         assertEquals(ErrorCode.UNAUTHENTICATED, e.getErrorCode());
