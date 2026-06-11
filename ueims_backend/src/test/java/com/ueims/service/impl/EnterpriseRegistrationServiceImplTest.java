@@ -7,9 +7,9 @@ import static org.mockito.Mockito.*;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -125,13 +125,7 @@ class EnterpriseRegistrationServiceImplTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {
-        "P@1w",
-        "password123!",
-        "PASSWORD123!",
-        "Password!@#",
-        "Password1234"
-    })
+    @ValueSource(strings = {"P@1w", "password123!", "PASSWORD123!", "Password!@#", "Password1234"})
     void register_whenPasswordInvalid_throwsException(String invalidPassword) {
         EnterpriseRegistrationRequest request = createValidRequest();
         request.setPassword(invalidPassword);

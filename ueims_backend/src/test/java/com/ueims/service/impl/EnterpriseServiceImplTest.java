@@ -231,8 +231,7 @@ class EnterpriseServiceImplTest {
         when(repository.findById(enterprise.getEnterpriseId())).thenReturn(Optional.of(enterprise));
 
         UUID id = enterprise.getEnterpriseId();
-        AppException e = assertThrows(
-                AppException.class, () -> service.approveReject(id, "REJECTED", "   "));
+        AppException e = assertThrows(AppException.class, () -> service.approveReject(id, "REJECTED", "   "));
         assertEquals(ErrorCode.FIELD_REQUIRED, e.getErrorCode());
     }
 

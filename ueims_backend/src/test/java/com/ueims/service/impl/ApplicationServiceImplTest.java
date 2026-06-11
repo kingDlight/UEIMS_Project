@@ -354,8 +354,7 @@ class ApplicationServiceImplTest {
         when(repository.findById(application.getApplicationId())).thenReturn(Optional.of(application));
 
         UUID id = application.getApplicationId();
-        AppException e =
-                assertThrows(AppException.class, () -> service.withdrawApplication(id));
+        AppException e = assertThrows(AppException.class, () -> service.withdrawApplication(id));
         assertEquals(ErrorCode.UNAUTHORIZED, e.getErrorCode());
     }
 
@@ -367,8 +366,7 @@ class ApplicationServiceImplTest {
         when(repository.findById(application.getApplicationId())).thenReturn(Optional.of(application));
 
         UUID id = application.getApplicationId();
-        AppException e =
-                assertThrows(AppException.class, () -> service.withdrawApplication(id));
+        AppException e = assertThrows(AppException.class, () -> service.withdrawApplication(id));
         assertEquals(ErrorCode.APPLICATION_STATUS_CHANGED, e.getErrorCode());
     }
 
@@ -379,8 +377,7 @@ class ApplicationServiceImplTest {
         when(repository.findById(application.getApplicationId())).thenReturn(Optional.of(application));
 
         UUID id = application.getApplicationId();
-        AppException e =
-                assertThrows(AppException.class, () -> service.withdrawApplication(id));
+        AppException e = assertThrows(AppException.class, () -> service.withdrawApplication(id));
         assertEquals(ErrorCode.APPLICATION_DEADLINE_EXPIRED, e.getErrorCode());
     }
 
@@ -431,8 +428,7 @@ class ApplicationServiceImplTest {
         when(repository.findById(application.getApplicationId())).thenReturn(Optional.of(application));
 
         UUID id = application.getApplicationId();
-        AppException e =
-                assertThrows(AppException.class, () -> service.screenApplication(id, req));
+        AppException e = assertThrows(AppException.class, () -> service.screenApplication(id, req));
         assertEquals(ErrorCode.UNAUTHORIZED, e.getErrorCode());
     }
 
@@ -446,8 +442,7 @@ class ApplicationServiceImplTest {
         when(repository.findById(application.getApplicationId())).thenReturn(Optional.of(application));
 
         UUID id = application.getApplicationId();
-        AppException e =
-                assertThrows(AppException.class, () -> service.screenApplication(id, req));
+        AppException e = assertThrows(AppException.class, () -> service.screenApplication(id, req));
         assertEquals(ErrorCode.INVALID_PARAMETER_FORMAT, e.getErrorCode());
     }
 
@@ -462,8 +457,7 @@ class ApplicationServiceImplTest {
         when(repository.findById(application.getApplicationId())).thenReturn(Optional.of(application));
 
         UUID id = application.getApplicationId();
-        AppException e =
-                assertThrows(AppException.class, () -> service.screenApplication(id, req));
+        AppException e = assertThrows(AppException.class, () -> service.screenApplication(id, req));
         assertEquals(ErrorCode.APPLICATION_STATUS_CHANGED, e.getErrorCode());
     }
 }

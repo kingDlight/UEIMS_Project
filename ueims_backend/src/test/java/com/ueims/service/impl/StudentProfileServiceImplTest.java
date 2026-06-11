@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -223,8 +222,7 @@ class StudentProfileServiceImplTest {
         when(repository.findById(profileId)).thenReturn(Optional.of(profile));
 
         StudentProfileUpdateRequest request = new StudentProfileUpdateRequest();
-        AppException e = assertThrows(
-                AppException.class, () -> service.updateProfile(profileId, request));
+        AppException e = assertThrows(AppException.class, () -> service.updateProfile(profileId, request));
         assertEquals(ErrorCode.UNAUTHORIZED, e.getErrorCode());
     }
 

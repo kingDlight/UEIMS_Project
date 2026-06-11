@@ -16,8 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ueims.dto.request.FinalGradeRequest;
 import com.ueims.dto.response.ApiResponse;
 import com.ueims.model.entity.FinalGrade;
-import com.ueims.model.entity.Semester;
-import com.ueims.model.entity.User;
 import com.ueims.service.ExcelExportService;
 import com.ueims.service.FinalGradeService;
 
