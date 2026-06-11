@@ -1,24 +1,32 @@
 import React from 'react';
 import {
+  CalendarOutlined,
   UserOutlined,
   BookOutlined,
   FileTextOutlined,
   TrophyOutlined,
-  CalendarOutlined,
+  SnippetsOutlined,
   CheckCircleOutlined,
+  SettingOutlined,
+  FileProtectOutlined,
 } from '@ant-design/icons';
+import type { NavItem } from '@/components/layout/ModernLayout';
 
 // ============================================================
-// DESIGN TOKENS — Student Portal (ALIGNED with Training Manager)
+// DESIGN TOKENS — TM-Aligned Color System (matching StatsTab, StudentsTab, etc.)
 // ============================================================
 export const cc = {
   bg: '#e8ecf2',
   bgLight: '#f5f7fa',
   gradient: 'linear-gradient(135deg, #fff5ed, #ffe8d6)',
-  primary: '#E96500',
-  primaryLight: '#FF8533',
+  
+  // Brand colors (TM-aligned)
+  primary: '#FF7A30',
+  primaryHover: '#E86A20',
   primaryDark: '#C45200',
-  primaryMuted: '#fff0e6',
+  primaryMuted: '#FFF3E8',
+  primarySubtle: '#FFF8F0',
+  
   secondary: '#271c45',
   cardOrange: '#ffdfcf',
   cardPeach: '#fff0e6',
@@ -26,37 +34,45 @@ export const cc = {
   cardGreen: '#e8f5e9',
   cardBlue: '#e3f2fd',
   cardPurple: '#f3e5f5',
-  text: '#1e293b',
-  textMuted: '#64748b',
+  
+  // Text colors (TM-aligned)
+  text: '#1A1A2E',
+  textPrimary: '#1A1A2E',
+  textSecondary: '#6B7280',
+  textMuted: '#9CA3AF',
   textLight: '#94a3b8',
-  success: '#22c55e',
-  successMuted: '#dcfce7',
-  successText: '#166534',
-  warning: '#f59e0b',
-  warningMuted: '#fef3c7',
-  warningText: '#92400e',
-  danger: '#ef4444',
-  dangerMuted: '#fee2e2',
-  dangerText: '#991b1b',
-  info: '#3b82f6',
-  infoMuted: '#dbeafe',
-  infoText: '#1e40af',
+  
+  // Semantic colors (TM-aligned)
+  success: '#10B981',
+  successMuted: '#D1FAE5',
+  successText: '#065F46',
+  warning: '#F59E0B',
+  warningMuted: '#FEF3C7',
+  warningText: '#92400E',
+  danger: '#EF4444',
+  dangerMuted: '#FEE2E2',
+  dangerText: '#991B1B',
+  info: '#3B82F6',
+  infoMuted: '#DBEAFE',
+  infoText: '#1E40AF',
   purple: '#8b5cf6',
+  
   shadow: '0 30px 60px rgba(233, 101, 0, 0.15)',
   borderRadius: 16,
-  border: '#e2e8f0',
-  borderSubtle: '#f1f5f9',
+  border: '#E5E7EB',
+  borderSubtle: '#F3F4F6',
   surface: '#ffffff',
+  neutralBg: '#F9FAFB',
 
   // Semantic shadows
-  shadowSm: '0 1px 3px rgba(0,0,0,0.08)',
-  shadowMd: '0 4px 12px rgba(0,0,0,0.08)',
-  shadowLg: '0 10px 20px rgba(0,0,0,0.08)',
-  shadowXl: '0 20px 40px rgba(0,0,0,0.10)',
-  shadowBrand: '0 4px 12px rgba(233,101,0,0.25)',
-  shadowSuccess: '0 4px 12px rgba(34,197,94,0.25)',
-  shadowError: '0 4px 12px rgba(239,68,68,0.25)',
-  shadowWarning: '0 4px 12px rgba(245,158,11,0.25)',
+  shadowSm: '0 1px 3px rgba(0,0,0,.08)',
+  shadowMd: '0 4px 6px rgba(0,0,0,.07)',
+  shadowLg: '0 10px 15px rgba(0,0,0,.08)',
+  shadowXl: '0 20px 40px rgba(0,0,0,.10)',
+  shadowBrand: '0 4px 12px rgba(255,122,48,.25)',
+  shadowSuccess: '0 4px 12px rgba(16,185,129,.25)',
+  shadowError: '0 4px 12px rgba(239,68,68,.25)',
+  shadowWarning: '0 4px 12px rgba(245,158,11,.25)',
 
   // Radius
   radiusSm: 6,
@@ -78,10 +94,13 @@ export function hexToRgba(hex: string, alpha: number): string {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
+// Alias for backward compatibility
+export const st = cc;
+
 // ============================================================
-// NAV ITEMS — Student specific
+// NAV ITEMS — ModernLayout compatible
 // ============================================================
-export type StudentTabKey = 
+export type StudentPageKey = 
   | 'dashboard'
   | 'profile'
   | 'jobs'
@@ -89,23 +108,23 @@ export type StudentTabKey =
   | 'schedule'
   | 'training-plan'
   | 'reports'
+  | 'final-report'
+  | 'evaluation'
   | 'feedback'
   | 'settings';
 
-export interface StudentNavItem {
-  key: StudentTabKey;
-  label: string;
-  icon: React.ReactNode;
-}
-
-export const studentNavItems: StudentNavItem[] = [
-  { key: 'dashboard', label: 'Dashboard', icon: React.createElement(CalendarOutlined) },
-  { key: 'profile', label: 'Profile', icon: React.createElement(UserOutlined) },
-  { key: 'jobs', label: 'Job Board', icon: React.createElement(TrophyOutlined) },
-  { key: 'applications', label: 'Applications', icon: React.createElement(FileTextOutlined) },
-  { key: 'schedule', label: 'Interview', icon: React.createElement(CalendarOutlined) },
-  { key: 'training-plan', label: 'Training Plan', icon: React.createElement(BookOutlined) },
-  { key: 'reports', label: 'Reports', icon: React.createElement(FileTextOutlined) },
-  { key: 'feedback', label: 'Feedback', icon: React.createElement(CheckCircleOutlined) },
-  { key: 'settings', label: 'Settings', icon: React.createElement(UserOutlined) },
+export const navItems: NavItem[] = [
+  { key: 'dashboard', label: 'Dashboard', icon: React.createElement(CalendarOutlined), roles: ['STUDENT'] },
+  { key: 'profile', label: 'Profile', icon: React.createElement(UserOutlined), roles: ['STUDENT'] },
+  { key: 'jobs', label: 'Job Board', icon: React.createElement(TrophyOutlined), roles: ['STUDENT'] },
+  { key: 'applications', label: 'Applications', icon: React.createElement(FileTextOutlined), roles: ['STUDENT'] },
+  { key: 'schedule', label: 'Interview', icon: React.createElement(CalendarOutlined), roles: ['STUDENT'] },
+  { key: 'training-plan', label: 'Training', icon: React.createElement(BookOutlined), roles: ['STUDENT'] },
+  { key: 'reports', label: 'Reports', icon: React.createElement(SnippetsOutlined), roles: ['STUDENT'] },
+  { key: 'final-report', label: 'Final Report', icon: React.createElement(FileProtectOutlined), roles: ['STUDENT'] },
+  { key: 'evaluation', label: 'Evaluation', icon: React.createElement(TrophyOutlined), roles: ['STUDENT'] },
+  { key: 'feedback', label: 'Feedback', icon: React.createElement(CheckCircleOutlined), roles: ['STUDENT'] },
+  { key: 'settings', label: 'Settings', icon: React.createElement(SettingOutlined), roles: ['STUDENT'] },
 ];
+
+export const defaultPage: StudentPageKey = 'dashboard';

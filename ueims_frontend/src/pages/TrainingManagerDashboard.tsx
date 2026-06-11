@@ -21,6 +21,13 @@ export const TrainingManagerDashboard: React.FC = () => {
   const { tab } = useParams<{ tab: string }>();
   const currentTab = (tab || 'dashboard') as PageKey;
 
+  const { currentRole } = useAuthStore();
+
+  // Redirect STUDENT to their own dashboard
+  if (currentRole === 'STUDENT') {
+    return <Navigate to={`/student-dashboard/${tab || 'dashboard'}`} replace />;
+  }
+
   const pages: Record<string, React.ReactNode> = {
     dashboard: <CommandCenterDashboard />,
     enterprises: <EnterpriseTab />,
@@ -34,7 +41,6 @@ export const TrainingManagerDashboard: React.FC = () => {
     notifications: <NoticesTab />,
   };
 
-  const { currentRole } = useAuthStore();
   const allowedItem = navItems.find((item) => item.key === currentTab);
 
   if (!allowedItem || (allowedItem.roles && currentRole && !allowedItem.roles.includes(currentRole))) {

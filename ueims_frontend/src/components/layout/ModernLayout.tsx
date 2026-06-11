@@ -7,7 +7,6 @@ import type { MenuProps } from 'antd';
 import { BellOutlined, DownOutlined, MenuOutlined } from '@ant-design/icons';
 import { X, Mail, Phone, ShieldCheck, Activity, Camera } from 'lucide-react';
 import { SmallPill } from '@/pages/training-manager/components/shared/SmallPill';
-import { floatingNotifications } from '@/pages/training-manager/data';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { AuthService } from '@/services/AuthService';
 import { api } from '@/services/api';
@@ -177,6 +176,34 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
   const [cropModalOpen, setCropModalOpen] = useState(false);
   const [tempImageUrl, setTempImageUrl] = useState<string | null>(null);
 
+  const [notifications, setNotifications] = useState<any[]>([]);
+
+  const fetchNotifications = async () => {
+    if (!token) return;
+    try {
+      const res = await api.get('/notifications/my');
+      setNotifications(res.data);
+    } catch (err) {
+      console.error('Failed to fetch notifications', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+    // Optionally set up an interval to poll notifications here
+  }, [token]);
+
+  const markAsRead = async (id: string) => {
+    try {
+      await api.put(`/notifications/${id}/read`);
+      fetchNotifications();
+    } catch (err) {
+      console.error('Failed to mark notification as read', err);
+    }
+  };
+
+  const unreadCount = notifications.filter(n => !n.isRead).length;
+
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -314,7 +341,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
                 style={{ background: 'none', border: 'none', padding: 0 }}
               >
                 <BellOutlined style={{ fontSize: 18 }} />
-                <div className="modern-bell-badge" />
+                {unreadCount > 0 && <div className="modern-bell-badge" />}
               </button>
             </div>
             
@@ -351,18 +378,33 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
                   <div style={{ fontSize: 14, fontWeight: 800, color: '#1e293b' }}>Alerts</div>
                   <div style={{ fontSize: 11.5, color: '#64748b' }}>Latest reminders and urgent items</div>
                 </div>
-                <SmallPill color="#E96500" glow>3 new</SmallPill>
+                {unreadCount > 0 && <SmallPill color="#E96500" glow>{unreadCount} new</SmallPill>}
               </div>
-              <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {floatingNotifications.map((item, index) => (
-                  <div key={item.title || index} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 12px', borderRadius: 16, background: 'rgba(255,255,255,.78)', border: '1px solid rgba(233,101,0,.08)', boxShadow: '0 8px 18px rgba(15,23,42,.04)' }}>
-                    <div style={{ width: 10, height: 10, borderRadius: '50%', background: item.tone, boxShadow: `0 0 0 4px ${item.tone}20`, marginTop: 4 }} />
-                    <div style={{ minWidth: 0, flex: 1 }}>
-                      <div style={{ fontSize: 13.5, fontWeight: 800, color: '#1e293b' }}>{item.title}</div>
-                      <div style={{ fontSize: 11.5, color: '#64748b', marginTop: 2 }}>{item.meta}</div>
+              <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 10, maxHeight: 400, overflowY: 'auto' }}>
+                {notifications.length === 0 ? (
+                  <div style={{ padding: 16, textAlign: 'center', color: '#64748b' }}>No notifications yet</div>
+                ) : (
+                  notifications.map((item: any) => (
+                    <div 
+                      key={item.notificationId} 
+                      onClick={() => { if (!item.isRead) markAsRead(item.notificationId); }}
+                      style={{ 
+                        display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 12px', borderRadius: 16, 
+                        background: item.isRead ? 'rgba(255,255,255,.78)' : '#fff3ed', 
+                        border: '1px solid rgba(233,101,0,.08)', 
+                        boxShadow: '0 8px 18px rgba(15,23,42,.04)',
+                        cursor: item.isRead ? 'default' : 'pointer',
+                        transition: 'all 0.2s'
+                      }}>
+                      <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#E96500', boxShadow: `0 0 0 4px #E9650020`, marginTop: 4 }} />
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <div style={{ fontSize: 13.5, fontWeight: 800, color: '#1e293b' }}>{item.title}</div>
+                        <div style={{ fontSize: 11.5, color: '#64748b', marginTop: 2 }}>{item.message}</div>
+                        <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 4 }}>{new Date(item.createdAt).toLocaleString()}</div>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
           )}
