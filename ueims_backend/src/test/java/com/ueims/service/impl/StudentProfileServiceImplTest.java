@@ -16,6 +16,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -260,12 +263,15 @@ class StudentProfileServiceImplTest {
         assertEquals(ErrorCode.CV_NOT_UPLOADED, e.getErrorCode());
     }
 
-    @Test
-    void uploadCv_invalidFormat() {
+    @ParameterizedTest
+    @NullAndEmptySource
+    @ValueSource(strings = {"cv.docx"})
+    void uploadCv_invalidFormat(String filename) {
         mockSecurityContext(currentUser, "STUDENT");
         when(repository.findById(profileId)).thenReturn(Optional.of(profile));
 
-        MultipartFile mockFile = new MockMultipartFile("file", "cv.docx", "application/msword", "dummy".getBytes());
+        MultipartFile mockFile =
+                new MockMultipartFile("file", filename, "application/octet-stream", "dummy".getBytes());
 
         AppException e = assertThrows(AppException.class, () -> service.uploadCv(profileId, mockFile));
         assertEquals(ErrorCode.INVALID_CV_FORMAT, e.getErrorCode());
@@ -327,17 +333,6 @@ class StudentProfileServiceImplTest {
 
         AppException e = assertThrows(AppException.class, () -> service.uploadCv(profileId, null));
         assertEquals(ErrorCode.CV_NOT_UPLOADED, e.getErrorCode());
-    }
-
-    @Test
-    void uploadCv_nullFilename() {
-        mockSecurityContext(currentUser, "STUDENT");
-        when(repository.findById(profileId)).thenReturn(Optional.of(profile));
-
-        MultipartFile mockFile = new MockMultipartFile("file", null, "application/pdf", "dummy content".getBytes());
-
-        AppException e = assertThrows(AppException.class, () -> service.uploadCv(profileId, mockFile));
-        assertEquals(ErrorCode.INVALID_CV_FORMAT, e.getErrorCode());
     }
 
     @Test
