@@ -178,3 +178,6 @@ test-plan-collection.json
 get_student.js
 replace_hash.js
 update_db.js
+generate_additional_dataset.js
+check_schema.js
+check_counts.js
