@@ -137,14 +137,16 @@ class EnterpriseServiceImplTest {
 
         when(repository.findById(enterprise.getEnterpriseId())).thenReturn(Optional.of(enterprise));
 
-        AppException e = assertThrows(AppException.class, () -> service.findById(enterprise.getEnterpriseId()));
+        UUID id = enterprise.getEnterpriseId();
+        AppException e = assertThrows(AppException.class, () -> service.findById(id));
         assertEquals(ErrorCode.UNAUTHORIZED, e.getErrorCode());
     }
 
     @Test
     void findById_notFound() {
         when(repository.findById(any())).thenReturn(Optional.empty());
-        AppException e = assertThrows(AppException.class, () -> service.findById(UUID.randomUUID()));
+        UUID randomId = UUID.randomUUID();
+        AppException e = assertThrows(AppException.class, () -> service.findById(randomId));
         assertEquals(ErrorCode.ENTERPRISE_NOT_FOUND, e.getErrorCode());
     }
 
@@ -192,7 +194,8 @@ class EnterpriseServiceImplTest {
         mockSecurityContext(otherUser, "ROLE_ENTERPRISE");
         when(repository.findById(enterprise.getEnterpriseId())).thenReturn(Optional.of(enterprise));
 
-        AppException e = assertThrows(AppException.class, () -> service.update(enterprise.getEnterpriseId(), request));
+        UUID id = enterprise.getEnterpriseId();
+        AppException e = assertThrows(AppException.class, () -> service.update(id, request));
         assertEquals(ErrorCode.UNAUTHORIZED, e.getErrorCode());
     }
 
@@ -227,8 +230,9 @@ class EnterpriseServiceImplTest {
     void approveReject_reject_missingReason() {
         when(repository.findById(enterprise.getEnterpriseId())).thenReturn(Optional.of(enterprise));
 
+        UUID id = enterprise.getEnterpriseId();
         AppException e = assertThrows(
-                AppException.class, () -> service.approveReject(enterprise.getEnterpriseId(), "REJECTED", "   "));
+                AppException.class, () -> service.approveReject(id, "REJECTED", "   "));
         assertEquals(ErrorCode.FIELD_REQUIRED, e.getErrorCode());
     }
 

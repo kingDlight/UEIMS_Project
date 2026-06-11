@@ -79,7 +79,7 @@ class AuthenticationServiceTest {
 
     private AuthenticationService service;
 
-    private final String SIGNER_KEY = "1234567890123456789012345678901234567890123456789012345678901234";
+    private final String signerKey = "1234567890123456789012345678901234567890123456789012345678901234";
     private User user;
     private String validToken;
 
@@ -87,10 +87,14 @@ class AuthenticationServiceTest {
     void setUp() throws Exception {
         mailService = new MailService(null, null) {
             @Override
-            public void sendPasswordChangedMail(String to, String fullName, String time) {}
+            public void sendPasswordChangedMail(String to, String fullName, String time) {
+                // Empty mock method
+            }
 
             @Override
-            public void sendPasswordResetMail(String to, String fullName, String resetLink) {}
+            public void sendPasswordResetMail(String to, String fullName, String resetLink) {
+                // Empty mock method
+            }
         };
 
         sessionInvalidated = false;
@@ -111,7 +115,7 @@ class AuthenticationServiceTest {
                 passwordEncoder,
                 userSessionManagementService);
 
-        ReflectionTestUtils.setField(service, "signerKey", SIGNER_KEY);
+        ReflectionTestUtils.setField(service, "signerKey", signerKey);
         ReflectionTestUtils.setField(service, "validDuration", 3600L);
         ReflectionTestUtils.setField(service, "refreshableDuration", 7200L);
         ReflectionTestUtils.setField(service, "googleClientId", "google-client-id");
@@ -144,7 +148,7 @@ class AuthenticationServiceTest {
                 .build();
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
         JWSObject jwsObject = new JWSObject(header, payload);
-        jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
+        jwsObject.sign(new MACSigner(signerKey.getBytes()));
         return jwsObject.serialize();
     }
 
@@ -215,7 +219,7 @@ class AuthenticationServiceTest {
     }
 
     @Test
-    void logout_success() throws Exception {
+    void logout_success() {
         LogoutRequest request = LogoutRequest.builder().token(validToken).build();
         when(invalidatedTokenRepository.existsById(anyString())).thenReturn(false);
 

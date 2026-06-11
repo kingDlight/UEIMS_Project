@@ -141,7 +141,7 @@ class EligibleStudentServiceImplTest {
     }
 
     @Test
-    void importFromExcel_whenValid_returnsImportedList() throws Exception {
+    void importFromExcel_whenValid_returnsImportedList() {
         MockMultipartFile file =
                 new MockMultipartFile("file", "test.xlsx", "application/vnd.ms-excel", new byte[] {1, 2, 3});
 
@@ -169,7 +169,7 @@ class EligibleStudentServiceImplTest {
     }
 
     @Test
-    void importFromExcel_whenException_throwsAppException() throws Exception {
+    void importFromExcel_whenException_throwsAppException() {
         MockMultipartFile file =
                 new MockMultipartFile("file", "test.xlsx", "application/vnd.ms-excel", new byte[] {1, 2, 3});
         when(semesterRepository.findById(semesterId)).thenReturn(Optional.of(semester));

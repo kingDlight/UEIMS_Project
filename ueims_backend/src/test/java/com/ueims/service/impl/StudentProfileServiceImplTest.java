@@ -222,13 +222,14 @@ class StudentProfileServiceImplTest {
 
         when(repository.findById(profileId)).thenReturn(Optional.of(profile));
 
+        StudentProfileUpdateRequest request = new StudentProfileUpdateRequest();
         AppException e = assertThrows(
-                AppException.class, () -> service.updateProfile(profileId, new StudentProfileUpdateRequest()));
+                AppException.class, () -> service.updateProfile(profileId, request));
         assertEquals(ErrorCode.UNAUTHORIZED, e.getErrorCode());
     }
 
     @Test
-    void uploadCv_success() throws IOException {
+    void uploadCv_success() {
         mockSecurityContext(currentUser, "STUDENT");
         when(repository.findById(profileId)).thenReturn(Optional.of(profile));
         when(repository.save(any(StudentProfile.class))).thenAnswer(i -> i.getArgument(0));

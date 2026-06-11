@@ -7,6 +7,8 @@ import static org.mockito.Mockito.*;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -122,51 +124,18 @@ class EnterpriseRegistrationServiceImplTest {
         assertFalse(welcomeMailSent);
     }
 
-    @Test
-    void register_whenPasswordTooShort_throwsException() {
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "P@1w",
+        "password123!",
+        "PASSWORD123!",
+        "Password!@#",
+        "Password1234"
+    })
+    void register_whenPasswordInvalid_throwsException(String invalidPassword) {
         EnterpriseRegistrationRequest request = createValidRequest();
-        request.setPassword("P@1w");
-        request.setConfirmPassword("P@1w");
-
-        AppException exception = assertThrows(AppException.class, () -> service.register(request));
-        assertEquals(ErrorCode.INVALID_PASSWORD, exception.getErrorCode());
-    }
-
-    @Test
-    void register_whenPasswordNoUppercase_throwsException() {
-        EnterpriseRegistrationRequest request = createValidRequest();
-        request.setPassword("password123!");
-        request.setConfirmPassword("password123!");
-
-        AppException exception = assertThrows(AppException.class, () -> service.register(request));
-        assertEquals(ErrorCode.INVALID_PASSWORD, exception.getErrorCode());
-    }
-
-    @Test
-    void register_whenPasswordNoLowercase_throwsException() {
-        EnterpriseRegistrationRequest request = createValidRequest();
-        request.setPassword("PASSWORD123!");
-        request.setConfirmPassword("PASSWORD123!");
-
-        AppException exception = assertThrows(AppException.class, () -> service.register(request));
-        assertEquals(ErrorCode.INVALID_PASSWORD, exception.getErrorCode());
-    }
-
-    @Test
-    void register_whenPasswordNoDigit_throwsException() {
-        EnterpriseRegistrationRequest request = createValidRequest();
-        request.setPassword("Password!@#");
-        request.setConfirmPassword("Password!@#");
-
-        AppException exception = assertThrows(AppException.class, () -> service.register(request));
-        assertEquals(ErrorCode.INVALID_PASSWORD, exception.getErrorCode());
-    }
-
-    @Test
-    void register_whenPasswordNoSpecialChar_throwsException() {
-        EnterpriseRegistrationRequest request = createValidRequest();
-        request.setPassword("Password1234");
-        request.setConfirmPassword("Password1234");
+        request.setPassword(invalidPassword);
+        request.setConfirmPassword(invalidPassword);
 
         AppException exception = assertThrows(AppException.class, () -> service.register(request));
         assertEquals(ErrorCode.INVALID_PASSWORD, exception.getErrorCode());
