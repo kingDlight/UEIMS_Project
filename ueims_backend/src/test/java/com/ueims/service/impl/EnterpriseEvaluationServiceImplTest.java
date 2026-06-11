@@ -203,7 +203,7 @@ class EnterpriseEvaluationServiceImplTest {
         when(repository.findById(any())).thenReturn(Optional.empty());
         UUID randomId = UUID.randomUUID();
         AppException e = assertThrows(AppException.class, () -> service.findById(randomId));
-        assertEquals(ErrorCode.UNCATEGORIZED_EXCEPTION, e.getErrorCode());
+        assertEquals(ErrorCode.EVALUATION_NOT_FOUND, e.getErrorCode());
     }
 
     @Test
