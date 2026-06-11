@@ -4,6 +4,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -227,7 +231,7 @@ class StudentProfileServiceImplTest {
     }
 
     @Test
-    void uploadCv_success() {
+    void uploadCv_success() throws IOException {
         mockSecurityContext(currentUser, "STUDENT");
         when(repository.findById(profileId)).thenReturn(Optional.of(profile));
         when(repository.save(any(StudentProfile.class))).thenAnswer(i -> i.getArgument(0));
@@ -238,6 +242,11 @@ class StudentProfileServiceImplTest {
         StudentProfile updated = service.uploadCv(profileId, mockFile);
         assertNotNull(updated.getCvUrl());
         assertTrue(updated.getCvUrl().contains(".pdf"));
+
+        // Clean up
+        Path uploadDir = Paths.get(System.getProperty("user.dir"), "uploads", "cv");
+        String filename = updated.getCvUrl().substring(updated.getCvUrl().lastIndexOf("/") + 1);
+        Files.deleteIfExists(uploadDir.resolve(filename));
     }
 
     @Test
