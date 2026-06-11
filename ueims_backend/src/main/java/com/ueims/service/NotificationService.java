@@ -13,4 +13,8 @@ public interface NotificationService {
     Notification save(Notification entity);
 
     void deleteById(UUID id);
+
+    List<Notification> getMyNotifications(String email);
+
+    Notification markAsRead(UUID id, String email);
 }

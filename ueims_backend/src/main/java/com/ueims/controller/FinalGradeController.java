@@ -1,7 +1,5 @@
 package com.ueims.controller;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.List;
 import java.util.UUID;
 
@@ -44,45 +42,7 @@ public class FinalGradeController {
 
     @PostMapping
     public ApiResponse<FinalGrade> create(@Valid @RequestBody FinalGradeRequest request) {
-        FinalGrade entity = new FinalGrade();
-        entity.setEnterpriseTotalScore(request.getEnterpriseTotalScore());
-        // Determine final grade: use provided finalGrade if present, otherwise derive from enterpriseTotalScore
-        BigDecimal finalGrade = request.getFinalGrade();
-        if (finalGrade == null) {
-            finalGrade = request.getEnterpriseTotalScore();
-        }
-        if (finalGrade == null) {
-            finalGrade = BigDecimal.ZERO;
-        }
-
-        // Round to 1 decimal place to match DB precision
-        finalGrade = finalGrade.setScale(1, RoundingMode.HALF_UP);
-        entity.setGradeValue(finalGrade);
-
-        // Compute overall status based on threshold: >= 5.0 => PASS, otherwise FAIL
-        BigDecimal passThreshold = new BigDecimal("5.0");
-        String overallStatus = finalGrade.compareTo(passThreshold) >= 0 ? "PASS" : "FAIL";
-        entity.setOverallStatus(overallStatus);
-
-        if (request.getStudentId() != null) {
-            User student = new User();
-            student.setUserId(request.getStudentId());
-            entity.setStudent(student);
-        }
-
-        if (request.getTmId() != null) {
-            User tm = new User();
-            tm.setUserId(request.getTmId());
-            entity.setTm(tm);
-        }
-
-        if (request.getSemesterId() != null) {
-            Semester semester = new Semester();
-            semester.setSemesterId(request.getSemesterId());
-            entity.setSemester(semester);
-        }
-
-        return ApiResponse.<FinalGrade>builder().result(service.save(entity)).build();
+        return ApiResponse.<FinalGrade>builder().result(service.create(request)).build();
     }
 
     @DeleteMapping("/{id}")

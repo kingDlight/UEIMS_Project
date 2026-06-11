@@ -14,4 +14,8 @@ public interface InternshipPlanItemMapper {
     InternshipPlanItemDTO toDto(InternshipPlanItem entity);
 
     InternshipPlanItem toEntity(InternshipPlanItemDTO dto);
+
+    @org.mapstruct.Mapping(target = "plan.planId", source = "planId")
+    @org.mapstruct.Mapping(target = "orderIndex", source = "orderIndex", defaultValue = "0")
+    InternshipPlanItem toEntity(com.ueims.dto.request.InternshipPlanItemRequestDTO dto);
 }
