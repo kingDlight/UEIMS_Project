@@ -284,6 +284,78 @@ class StudentProfileServiceImplTest {
     }
 
     @Test
+    void findById_success_trainingManager() {
+        User tm = new User();
+        tm.setEmail("tm@test.com");
+        mockSecurityContext(tm, "TRAINING_MANAGER");
+        when(repository.findById(profileId)).thenReturn(Optional.of(profile));
+
+        StudentProfile result = service.findById(profileId);
+        assertNotNull(result);
+    }
+
+    @Test
+    void findById_unauthorized_noRole() {
+        User guest = new User();
+        guest.setEmail("guest@test.com");
+        mockSecurityContext(guest, "GUEST");
+        when(repository.findById(profileId)).thenReturn(Optional.of(profile));
+
+        AppException e = assertThrows(AppException.class, () -> service.findById(profileId));
+        assertEquals(ErrorCode.UNAUTHORIZED, e.getErrorCode());
+    }
+
+    @Test
+    void uploadCv_unauthorized() {
+        User otherUser = new User();
+        otherUser.setUserId(UUID.randomUUID());
+        otherUser.setEmail("other@test.com");
+        mockSecurityContext(otherUser, "STUDENT");
+
+        when(repository.findById(profileId)).thenReturn(Optional.of(profile));
+
+        MultipartFile mockFile = new MockMultipartFile("file", "cv.pdf", "application/pdf", "dummy content".getBytes());
+
+        AppException e = assertThrows(AppException.class, () -> service.uploadCv(profileId, mockFile));
+        assertEquals(ErrorCode.UNAUTHORIZED, e.getErrorCode());
+    }
+
+    @Test
+    void uploadCv_nullFile() {
+        mockSecurityContext(currentUser, "STUDENT");
+        when(repository.findById(profileId)).thenReturn(Optional.of(profile));
+
+        AppException e = assertThrows(AppException.class, () -> service.uploadCv(profileId, null));
+        assertEquals(ErrorCode.CV_NOT_UPLOADED, e.getErrorCode());
+    }
+
+    @Test
+    void uploadCv_nullFilename() {
+        mockSecurityContext(currentUser, "STUDENT");
+        when(repository.findById(profileId)).thenReturn(Optional.of(profile));
+
+        MultipartFile mockFile = new MockMultipartFile("file", null, "application/pdf", "dummy content".getBytes());
+
+        AppException e = assertThrows(AppException.class, () -> service.uploadCv(profileId, mockFile));
+        assertEquals(ErrorCode.INVALID_CV_FORMAT, e.getErrorCode());
+    }
+
+    @Test
+    void uploadCv_ioException() throws IOException {
+        mockSecurityContext(currentUser, "STUDENT");
+        when(repository.findById(profileId)).thenReturn(Optional.of(profile));
+
+        MultipartFile mockFile = mock(MultipartFile.class);
+        when(mockFile.isEmpty()).thenReturn(false);
+        when(mockFile.getOriginalFilename()).thenReturn("cv.pdf");
+        when(mockFile.getSize()).thenReturn(100L);
+        doThrow(new IOException("Disk error")).when(mockFile).transferTo(any(java.io.File.class));
+
+        AppException e = assertThrows(AppException.class, () -> service.uploadCv(profileId, mockFile));
+        assertEquals(ErrorCode.UNCATEGORIZED_EXCEPTION, e.getErrorCode());
+    }
+
+    @Test
     void deleteById_success() {
         service.deleteById(profileId);
         verify(repository).deleteById(profileId);
