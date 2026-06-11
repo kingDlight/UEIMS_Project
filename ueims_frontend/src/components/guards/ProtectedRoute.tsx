@@ -23,9 +23,28 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles }) 
       try {
         const result = await AuthService.introspect(token);
         if (!result.valid) {
-          useAuthStore.getState().logout();
+          const { refreshToken } = useAuthStore.getState();
+          if (refreshToken) {
+            try {
+              const refreshResult = await AuthService.refreshToken(refreshToken);
+              if (refreshResult && refreshResult.token) {
+                useAuthStore.getState().setTokens(refreshResult.token, refreshResult.refreshToken);
+                setIsValid(true);
+              } else {
+                useAuthStore.getState().logout();
+                setIsValid(false);
+              }
+            } catch {
+              useAuthStore.getState().logout();
+              setIsValid(false);
+            }
+          } else {
+            useAuthStore.getState().logout();
+            setIsValid(false);
+          }
+        } else {
+          setIsValid(true);
         }
-        setIsValid(result.valid);
       } catch {
         useAuthStore.getState().logout();
         setIsValid(false);
