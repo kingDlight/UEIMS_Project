@@ -147,4 +147,60 @@ class TrainingWarningServiceImplTest {
         assertEquals("Nguyen Van A", mailService.lastFullName);
         assertEquals(3, mailService.lastWeekNumber);
     }
+
+    @Test
+    void scanAndSendLateWarnings_nullTmId_processesSuccessfully() {
+        UUID semesterId = UUID.randomUUID();
+
+        User student = new User();
+        student.setUserId(UUID.randomUUID());
+        student.setFullName("Nguyen Van B");
+        student.setEmail("nvb@example.com");
+
+        EnterpriseAssignment assignment = new EnterpriseAssignment();
+        assignment.setAssignmentId(UUID.randomUUID());
+        assignment.setStudent(student);
+
+        when(enterpriseAssignmentRepository.findAssignmentsWithLateReports(semesterId, 4))
+                .thenReturn(List.of(assignment));
+
+        int count = service.scanAndSendLateWarnings(semesterId, 4, null);
+
+        assertEquals(1, count);
+        verify(repository).saveAll(any());
+        assertEquals("nvb@example.com", mailService.lastTo);
+    }
+
+    @Test
+    void scanAndSendLateWarnings_emptyOrNullEmail_doesNotSendMail() {
+        UUID semesterId = UUID.randomUUID();
+        UUID tmId = UUID.randomUUID();
+
+        User student1 = new User();
+        student1.setUserId(UUID.randomUUID());
+        student1.setFullName("Nguyen Van C");
+        student1.setEmail(null);
+
+        User student2 = new User();
+        student2.setUserId(UUID.randomUUID());
+        student2.setFullName("Nguyen Van D");
+        student2.setEmail("");
+
+        EnterpriseAssignment assignment1 = new EnterpriseAssignment();
+        assignment1.setAssignmentId(UUID.randomUUID());
+        assignment1.setStudent(student1);
+
+        EnterpriseAssignment assignment2 = new EnterpriseAssignment();
+        assignment2.setAssignmentId(UUID.randomUUID());
+        assignment2.setStudent(student2);
+
+        when(enterpriseAssignmentRepository.findAssignmentsWithLateReports(semesterId, 5))
+                .thenReturn(List.of(assignment1, assignment2));
+
+        int count = service.scanAndSendLateWarnings(semesterId, 5, tmId);
+
+        assertEquals(2, count);
+        verify(repository).saveAll(any());
+        assertNull(mailService.lastTo); // No mail should be sent
+    }
 }
