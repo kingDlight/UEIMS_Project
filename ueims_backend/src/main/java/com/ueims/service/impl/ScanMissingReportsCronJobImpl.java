@@ -8,6 +8,7 @@ import com.ueims.dto.response.MissingReportDto;
 import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
 import com.ueims.service.CronJobService;
+import com.ueims.service.ScanMissingReportsService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
