@@ -1,5 +1,6 @@
 package com.ueims.service.impl;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
@@ -15,8 +16,7 @@ class PlaceholderCronJobImplTest {
 
     @Test
     void executeSuccess() {
-        // Method only logs, so we just call it to cover it
-        service.execute();
+        assertDoesNotThrow(() -> service.execute());
     }
 
     @Test
