@@ -14,6 +14,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -98,14 +100,14 @@ class WeeklyReportServiceImplTest {
     }
 
     @Test
-    void findAll_returnsList() {
+    void findAllReturnsList() {
         when(repository.findAll()).thenReturn(List.of(report));
         List<WeeklyReport> result = service.findAll();
         assertEquals(1, result.size());
     }
 
     @Test
-    void findMyReports_success() {
+    void findMyReportsSuccess() {
         mockSecurityContext(currentUser);
         when(repository.findByAssignment_Student_UserId(currentUser.getUserId()))
                 .thenReturn(List.of(report));
@@ -116,7 +118,7 @@ class WeeklyReportServiceImplTest {
     }
 
     @Test
-    void findById_exists_returnsReport() {
+    void findByIdExistsReturnsReport() {
         when(repository.findById(reportId)).thenReturn(Optional.of(report));
         WeeklyReport result = service.findById(reportId);
         assertNotNull(result);
@@ -124,14 +126,14 @@ class WeeklyReportServiceImplTest {
     }
 
     @Test
-    void findById_notExists_returnsNull() {
+    void findByIdNotExistsReturnsNull() {
         when(repository.findById(any())).thenReturn(Optional.empty());
         WeeklyReport result = service.findById(UUID.randomUUID());
         assertNull(result);
     }
 
     @Test
-    void save_success() {
+    void saveSuccess() {
         mockSecurityContext(currentUser);
 
         when(enterpriseAssignmentRepository.findById(assignment.getAssignmentId()))
@@ -157,7 +159,7 @@ class WeeklyReportServiceImplTest {
     }
 
     @Test
-    void save_assignmentNotFound_throwsException() {
+    void saveAssignmentNotFoundThrowsException() {
         mockSecurityContext(currentUser);
 
         WeeklyReport newReport = new WeeklyReport();
@@ -172,7 +174,7 @@ class WeeklyReportServiceImplTest {
     }
 
     @Test
-    void save_unauthorized_notStudent_throwsException() {
+    void saveUnauthorizedNotStudentThrowsException() {
         mockSecurityContext(currentUser);
 
         User otherStudent = new User();
@@ -190,7 +192,7 @@ class WeeklyReportServiceImplTest {
     }
 
     @Test
-    void save_studentNotEligible_throwsException() {
+    void saveStudentNotEligibleThrowsException() {
         mockSecurityContext(currentUser);
 
         when(enterpriseAssignmentRepository.findById(assignment.getAssignmentId()))
@@ -206,7 +208,7 @@ class WeeklyReportServiceImplTest {
     }
 
     @Test
-    void save_weekNumberMismatch_throwsException() {
+    void saveWeekNumberMismatchThrowsException() {
         mockSecurityContext(currentUser);
 
         when(enterpriseAssignmentRepository.findById(assignment.getAssignmentId()))
@@ -224,7 +226,7 @@ class WeeklyReportServiceImplTest {
     }
 
     @Test
-    void updateReport_success() {
+    void updateReportSuccess() {
         mockSecurityContext(currentUser);
 
         when(repository.findById(reportId)).thenReturn(Optional.of(report));
@@ -232,6 +234,10 @@ class WeeklyReportServiceImplTest {
 
         WeeklyReportRequest request = new WeeklyReportRequest();
         request.setTasksCompleted("Tasks <script>alert(1)</script>");
+        request.setIssuesChallenges("Issues");
+        request.setLessonsLearned("Lessons");
+        request.setPlanNextWeek("Plan");
+        request.setAttachmentUrls("url1");
         request.setStatus("SUBMITTED");
 
         WeeklyReport result = service.updateReport(reportId, request);
@@ -239,10 +245,14 @@ class WeeklyReportServiceImplTest {
         assertNotNull(result);
         assertEquals("SUBMITTED", result.getStatus());
         assertFalse(result.getTasksCompleted().contains("<script>"));
+        assertEquals("Issues", result.getIssuesChallenges());
+        assertEquals("Lessons", result.getLessonsLearned());
+        assertEquals("Plan", result.getPlanNextWeek());
+        assertEquals("url1", result.getAttachmentUrls());
     }
 
     @Test
-    void updateReport_reportNotFound_throwsException() {
+    void updateReportReportNotFoundThrowsException() {
         when(repository.findById(any())).thenReturn(Optional.empty());
         WeeklyReportRequest request = new WeeklyReportRequest();
 
@@ -251,7 +261,7 @@ class WeeklyReportServiceImplTest {
     }
 
     @Test
-    void updateReport_unauthorized_notOwner_throwsException() {
+    void updateReportUnauthorizedNotOwnerThrowsException() {
         User otherUser = new User();
         otherUser.setUserId(UUID.randomUUID());
         otherUser.setEmail("other@test.com");
@@ -265,11 +275,12 @@ class WeeklyReportServiceImplTest {
         assertEquals(ErrorCode.UNAUTHORIZED, e.getErrorCode());
     }
 
-    @Test
-    void updateReport_statusNotAllowed_throwsException() {
+    @ParameterizedTest
+    @ValueSource(strings = {"APPROVED", "PENDING_REVIEW", "REVIEWED"})
+    void updateReportStatusNotAllowedThrowsException(String status) {
         mockSecurityContext(currentUser);
 
-        report.setStatus("APPROVED");
+        report.setStatus(status);
         when(repository.findById(reportId)).thenReturn(Optional.of(report));
 
         WeeklyReportRequest request = new WeeklyReportRequest();
@@ -279,7 +290,7 @@ class WeeklyReportServiceImplTest {
     }
 
     @Test
-    void deleteById_success() {
+    void deleteByIdSuccess() {
         service.deleteById(reportId);
         verify(repository).deleteById(reportId);
     }
