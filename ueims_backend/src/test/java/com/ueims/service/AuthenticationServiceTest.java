@@ -21,6 +21,8 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -34,6 +36,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.ueims.dto.request.AuthenticationRequest;
 import com.ueims.dto.request.ChangePasswordRequest;
 import com.ueims.dto.request.ForgotPasswordRequest;
+import com.ueims.dto.request.GoogleAuthenticationRequest;
 import com.ueims.dto.request.IntrospectRequest;
 import com.ueims.dto.request.LogoutRequest;
 import com.ueims.dto.request.RefreshRequest;
@@ -71,6 +74,9 @@ class AuthenticationServiceTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private JwtDecoder googleJwtDecoder;
 
     private UserSessionManagementService userSessionManagementService;
     private boolean sessionInvalidated;
@@ -317,5 +323,151 @@ class AuthenticationServiceTest {
 
         assertTrue(response.isAuthenticated());
         assertNotNull(response.getToken());
+    }
+
+    @Test
+    void authenticateWithGoogleSuccess() throws Exception {
+        GoogleAuthenticationRequest request = GoogleAuthenticationRequest.builder()
+                .idToken("dummyIdToken")
+                .deviceId("dev1")
+                .build();
+
+        ReflectionTestUtils.setField(service, "googleJwtDecoder", googleJwtDecoder);
+        ReflectionTestUtils.setField(service, "googleClientId", "google-client-id");
+
+        Jwt jwt = Jwt.withTokenValue("dummyIdToken")
+                .header("alg", "none")
+                .issuer("https://accounts.google.com")
+                .audience(java.util.List.of("google-client-id"))
+                .claim("email_verified", true)
+                .claim("email", "google@test.com")
+                .claim("name", "Google User")
+                .claim("picture", "http://picture.url")
+                .build();
+        when(googleJwtDecoder.decode("dummyIdToken")).thenReturn(jwt);
+
+        when(userRepository.findByEmail("google@test.com")).thenReturn(Optional.of(user));
+
+        AuthenticationResponse response = service.authenticateWithGoogle(request);
+
+        assertTrue(response.isAuthenticated());
+        assertNotNull(response.getToken());
+        verify(userRepository).findByEmail("google@test.com");
+    }
+
+    @Test
+    void authenticateWithGoogleNewUserSuccess() throws Exception {
+        GoogleAuthenticationRequest request = GoogleAuthenticationRequest.builder()
+                .idToken("dummyIdToken")
+                .deviceId("dev1")
+                .build();
+
+        ReflectionTestUtils.setField(service, "googleJwtDecoder", googleJwtDecoder);
+        ReflectionTestUtils.setField(service, "googleClientId", "google-client-id");
+
+        Jwt jwt = Jwt.withTokenValue("dummyIdToken")
+                .header("alg", "none")
+                .issuer("https://accounts.google.com")
+                .audience(java.util.List.of("google-client-id"))
+                .claim("email_verified", true)
+                .claim("email", "newgoogle@test.com")
+                .claim("name", "New Google User")
+                .claim("picture", "http://picture.url")
+                .build();
+        when(googleJwtDecoder.decode("dummyIdToken")).thenReturn(jwt);
+
+        when(userRepository.findByEmail("newgoogle@test.com")).thenReturn(Optional.empty());
+        when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
+
+        User newUser = User.builder()
+                .email("newgoogle@test.com")
+                .userId(UUID.randomUUID())
+                .status("ACTIVE")
+                .failedLoginAttempts(0)
+                .build();
+        when(userRepository.save(any(User.class))).thenReturn(newUser);
+
+        AuthenticationResponse response = service.authenticateWithGoogle(request);
+
+        assertTrue(response.isAuthenticated());
+        verify(userRepository).save(any(User.class));
+    }
+
+    @Test
+    void authenticateWithGoogleUpdateUserSuccess() throws Exception {
+        GoogleAuthenticationRequest request = GoogleAuthenticationRequest.builder()
+                .idToken("dummyIdToken")
+                .deviceId("dev1")
+                .build();
+
+        ReflectionTestUtils.setField(service, "googleJwtDecoder", googleJwtDecoder);
+        ReflectionTestUtils.setField(service, "googleClientId", "google-client-id");
+
+        Jwt jwt = Jwt.withTokenValue("dummyIdToken")
+                .header("alg", "none")
+                .issuer("https://accounts.google.com")
+                .audience(java.util.List.of("google-client-id"))
+                .claim("email_verified", true)
+                .claim("email", "test@test.com")
+                .claim("name", "Updated Google User")
+                .claim("picture", "http://new-picture.url")
+                .build();
+        when(googleJwtDecoder.decode("dummyIdToken")).thenReturn(jwt);
+
+        user.setAuthProvider("GOOGLE");
+        when(userRepository.findByEmail("test@test.com")).thenReturn(Optional.of(user));
+
+        AuthenticationResponse response = service.authenticateWithGoogle(request);
+
+        assertTrue(response.isAuthenticated());
+        verify(userRepository).save(user);
+        assertEquals("Updated Google User", user.getFullName());
+    }
+
+    @Test
+    void authenticateWithGoogleNoClientIdThrowsException() {
+        GoogleAuthenticationRequest request =
+                GoogleAuthenticationRequest.builder().idToken("dummy").build();
+        ReflectionTestUtils.setField(service, "googleClientId", null);
+
+        AppException e = assertThrows(AppException.class, () -> service.authenticateWithGoogle(request));
+        assertEquals(ErrorCode.GOOGLE_CLIENT_ID_NOT_CONFIGURED, e.getErrorCode());
+    }
+
+    @Test
+    void authenticateWithGoogleInvalidIssuerThrowsException() throws Exception {
+        GoogleAuthenticationRequest request =
+                GoogleAuthenticationRequest.builder().idToken("dummy").build();
+        ReflectionTestUtils.setField(service, "googleJwtDecoder", googleJwtDecoder);
+        ReflectionTestUtils.setField(service, "googleClientId", "google-client-id");
+
+        Jwt jwt = Jwt.withTokenValue("dummy")
+                .header("alg", "none")
+                .issuer("https://invalid.issuer.com")
+                .claim("dummy", "dummy")
+                .build();
+        when(googleJwtDecoder.decode("dummy")).thenReturn(jwt);
+
+        AppException e = assertThrows(AppException.class, () -> service.authenticateWithGoogle(request));
+        assertEquals(ErrorCode.UNAUTHENTICATED, e.getErrorCode());
+    }
+
+    @Test
+    void authenticateWithGoogleInvalidAudienceThrowsException() throws Exception {
+        GoogleAuthenticationRequest request =
+                GoogleAuthenticationRequest.builder().idToken("dummy").build();
+        ReflectionTestUtils.setField(service, "googleJwtDecoder", googleJwtDecoder);
+        ReflectionTestUtils.setField(service, "googleClientId", "google-client-id");
+
+        Jwt jwt = Jwt.withTokenValue("dummy")
+                .header("alg", "none")
+                .issuer("https://accounts.google.com")
+                .audience(java.util.List.of("wrong-audience"))
+                .claim("dummy", "dummy")
+                .build();
+        when(googleJwtDecoder.decode("dummy")).thenReturn(jwt);
+
+        AppException e = assertThrows(AppException.class, () -> service.authenticateWithGoogle(request));
+        assertEquals(ErrorCode.UNAUTHENTICATED, e.getErrorCode());
     }
 }
