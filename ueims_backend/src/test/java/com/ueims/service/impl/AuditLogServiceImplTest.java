@@ -113,8 +113,7 @@ class AuditLogServiceImplTest {
                 .thenReturn(largeList);
 
         LocalDate date = LocalDate.now();
-        AppException exception =
-                assertThrows(AppException.class, () -> service.exportExcel(date, date));
+        AppException exception = assertThrows(AppException.class, () -> service.exportExcel(date, date));
 
         assertEquals(ErrorCode.EXPORT_LOG_EXCEED_LIMIT, exception.getErrorCode());
     }
