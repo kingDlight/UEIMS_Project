@@ -35,4 +35,18 @@ public class NotificationServiceImpl implements NotificationService {
     public void deleteById(UUID id) {
         repository.deleteById(id);
     }
+
+    @Override
+    public List<Notification> getMyNotifications(String email) {
+        return repository.findByRecipient_EmailOrderByCreatedAtDesc(email);
+    }
+
+    @Override
+    public Notification markAsRead(UUID id, String email) {
+        Notification notification = repository
+                .findByNotificationIdAndRecipient_Email(id, email)
+                .orElseThrow(() -> new com.ueims.exception.ResourceNotFoundException("Notification not found"));
+        notification.setIsRead(true);
+        return repository.save(notification);
+    }
 }
