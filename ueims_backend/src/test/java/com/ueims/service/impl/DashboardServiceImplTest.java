@@ -87,7 +87,8 @@ class DashboardServiceImplTest {
     void getEmploymentRateChart_semesterNotFound_throwsException() {
         when(semesterStatisticsRepository.findById(any())).thenReturn(Optional.empty());
 
-        AppException e = assertThrows(AppException.class, () -> service.getEmploymentRateChart(UUID.randomUUID()));
+        UUID id = UUID.randomUUID();
+        AppException e = assertThrows(AppException.class, () -> service.getEmploymentRateChart(id));
         assertEquals(ErrorCode.SEMESTER_NOT_FOUND, e.getErrorCode());
     }
 
@@ -121,7 +122,8 @@ class DashboardServiceImplTest {
     void getInterviewPassRateChart_semesterNotFound_throwsException() {
         when(semesterStatisticsRepository.findById(any())).thenReturn(Optional.empty());
 
-        AppException e = assertThrows(AppException.class, () -> service.getInterviewPassRateChart(UUID.randomUUID()));
+        UUID id = UUID.randomUUID();
+        AppException e = assertThrows(AppException.class, () -> service.getInterviewPassRateChart(id));
         assertEquals(ErrorCode.SEMESTER_NOT_FOUND, e.getErrorCode());
     }
 
@@ -191,7 +193,8 @@ class DashboardServiceImplTest {
     void getAverageRatingChart_semesterNotFound_throwsException() {
         when(semesterStatisticsRepository.findById(any())).thenReturn(Optional.empty());
 
-        AppException e = assertThrows(AppException.class, () -> service.getAverageRatingChart(UUID.randomUUID()));
+        UUID id = UUID.randomUUID();
+        AppException e = assertThrows(AppException.class, () -> service.getAverageRatingChart(id));
         assertEquals(ErrorCode.SEMESTER_NOT_FOUND, e.getErrorCode());
     }
 }

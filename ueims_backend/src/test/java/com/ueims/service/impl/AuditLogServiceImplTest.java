@@ -112,8 +112,9 @@ class AuditLogServiceImplTest {
         when(repository.findByDateRange(any(LocalDateTime.class), any(LocalDateTime.class)))
                 .thenReturn(largeList);
 
+        LocalDate date = LocalDate.now();
         AppException exception =
-                assertThrows(AppException.class, () -> service.exportExcel(LocalDate.now(), LocalDate.now()));
+                assertThrows(AppException.class, () -> service.exportExcel(date, date));
 
         assertEquals(ErrorCode.EXPORT_LOG_EXCEED_LIMIT, exception.getErrorCode());
     }

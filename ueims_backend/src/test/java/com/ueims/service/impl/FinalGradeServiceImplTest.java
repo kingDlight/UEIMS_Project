@@ -62,7 +62,8 @@ class FinalGradeServiceImplTest {
     @Test
     void findById_notExists_throwsException() {
         when(repository.findById(any())).thenReturn(Optional.empty());
-        AppException e = assertThrows(AppException.class, () -> service.findById(UUID.randomUUID()));
+        UUID id = UUID.randomUUID();
+        AppException e = assertThrows(AppException.class, () -> service.findById(id));
         assertEquals(ErrorCode.FINAL_GRADE_NOT_FOUND, e.getErrorCode());
     }
 
