@@ -44,7 +44,8 @@ public class InternshipPlanItemServiceImpl implements InternshipPlanItemService 
         Semester semester = plan.getAssignment().getSemester();
         LocalDate targetDate = entity.getTargetDate();
 
-        if (targetDate != null && semester != null
+        if (targetDate != null
+                && semester != null
                 && (targetDate.isBefore(semester.getStartDate()) || targetDate.isAfter(semester.getEndDate()))) {
             throw new IllegalArgumentException("Target date must be within the semester boundaries ("
                     + semester.getStartDate() + " to " + semester.getEndDate() + ")");
