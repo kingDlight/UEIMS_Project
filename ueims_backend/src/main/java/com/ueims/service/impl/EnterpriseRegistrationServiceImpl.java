@@ -103,7 +103,9 @@ public class EnterpriseRegistrationServiceImpl implements EnterpriseRegistration
         if (!Pattern.compile("\\d").matcher(password).find()) {
             throw new AppException(ErrorCode.INVALID_PASSWORD);
         }
-        if (!Pattern.compile("[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]").matcher(password).find()) {
+        if (!Pattern.compile("[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]")
+                .matcher(password)
+                .find()) {
             throw new AppException(ErrorCode.INVALID_PASSWORD);
         }
     }
