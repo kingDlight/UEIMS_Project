@@ -27,7 +27,7 @@ import com.ueims.repository.ReportFeedbackRepository;
 @ExtendWith(MockitoExtension.class)
 class ReportFeedbackServiceImplTest {
 
-    private static final String REJECTED = REJECTED;
+    private static final String REJECTED = "REJECTED";
 
     @Mock
     private ReportFeedbackRepository repository;
