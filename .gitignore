@@ -175,3 +175,6 @@ test-collection.json
 update-pass.js
 test-internship-plan.js
 test-plan-collection.json
+get_student.js
+replace_hash.js
+update_db.js
