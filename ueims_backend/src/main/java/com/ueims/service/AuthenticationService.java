@@ -179,6 +179,28 @@ public class AuthenticationService {
     private NimbusJwtDecoder googleJwtDecoder;
 
     public AuthenticationResponse authenticateWithGoogle(GoogleAuthenticationRequest request) {
+        validateGoogleConfig();
+
+        Jwt googleJwt = decodeGoogleToken(request.getIdToken());
+        validateGoogleTokenClaims(googleJwt);
+
+        String email = googleJwt.getClaimAsString("email");
+        String fullName = googleJwt.getClaimAsString("name");
+        String pictureUrl = googleJwt.getClaimAsString("picture");
+        if (email == null || email.isBlank()) {
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
+
+        User user = userRepository.findByEmail(email).orElseGet(() -> createGoogleUser(email, fullName, pictureUrl));
+
+        updateGoogleUserIfNeeded(user, fullName, pictureUrl);
+
+        checkAndResetLockStatus(user);
+
+        return handleAuthenticationSuccess(user, request.getDeviceId());
+    }
+
+    private void validateGoogleConfig() {
         if (googleClientId == null || googleClientId.isBlank()) {
             log.error("GOOGLE_CLIENT_ID is not configured. Set the environment variable or application property.");
             throw new AppException(ErrorCode.GOOGLE_CLIENT_ID_NOT_CONFIGURED);
@@ -188,15 +210,18 @@ public class AuthenticationService {
             googleJwtDecoder = NimbusJwtDecoder.withJwkSetUri("https://www.googleapis.com/oauth2/v3/certs")
                     .build();
         }
+    }
 
-        Jwt googleJwt;
+    private Jwt decodeGoogleToken(String idToken) {
         try {
-            googleJwt = googleJwtDecoder.decode(request.getIdToken());
+            return googleJwtDecoder.decode(idToken);
         } catch (Exception exception) {
             log.error("Invalid Google ID token", exception);
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
+    }
 
+    private void validateGoogleTokenClaims(Jwt googleJwt) {
         String issuer = googleJwt.getIssuer().toString();
         if (!"https://accounts.google.com".equals(issuer) && !"accounts.google.com".equals(issuer)) {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
@@ -210,16 +235,9 @@ public class AuthenticationService {
         if (emailVerified == null || !emailVerified) {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
+    }
 
-        String email = googleJwt.getClaimAsString("email");
-        String fullName = googleJwt.getClaimAsString("name");
-        String pictureUrl = googleJwt.getClaimAsString("picture");
-        if (email == null || email.isBlank()) {
-            throw new AppException(ErrorCode.UNAUTHENTICATED);
-        }
-
-        User user = userRepository.findByEmail(email).orElseGet(() -> createGoogleUser(email, fullName, pictureUrl));
-
+    private void updateGoogleUserIfNeeded(User user, String fullName, String pictureUrl) {
         if (GOOGLE_AUTH_PROVIDER.equals(user.getAuthProvider())) {
             boolean updated = false;
             if (fullName != null && !fullName.isBlank() && !fullName.equals(user.getFullName())) {
@@ -234,9 +252,6 @@ public class AuthenticationService {
                 userRepository.save(user);
             }
         }
-        checkAndResetLockStatus(user);
-
-        return handleAuthenticationSuccess(user, request.getDeviceId());
     }
 
     private User createGoogleUser(String email, String fullName, String pictureUrl) {
