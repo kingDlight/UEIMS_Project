@@ -1,0 +1,180 @@
+package com.ueims.service.impl;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.ueims.model.entity.EnterpriseAssignment;
+import com.ueims.model.entity.InternshipPlan;
+import com.ueims.model.entity.InternshipPlanItem;
+import com.ueims.model.entity.Semester;
+import com.ueims.repository.InternshipPlanItemRepository;
+import com.ueims.repository.InternshipPlanRepository;
+
+@ExtendWith(MockitoExtension.class)
+class InternshipPlanItemServiceImplTest {
+
+    @Mock
+    private InternshipPlanItemRepository repository;
+
+    @Mock
+    private InternshipPlanRepository planRepository;
+
+    @InjectMocks
+    private InternshipPlanItemServiceImpl service;
+
+    private InternshipPlanItem item;
+    private InternshipPlan plan;
+    private UUID itemId;
+    private UUID planId;
+
+    @BeforeEach
+    void setUp() {
+        itemId = UUID.randomUUID();
+        planId = UUID.randomUUID();
+
+        Semester semester = Semester.builder()
+                .startDate(LocalDate.of(2023, 9, 1))
+                .endDate(LocalDate.of(2023, 12, 31))
+                .build();
+
+        EnterpriseAssignment assignment =
+                EnterpriseAssignment.builder().semester(semester).build();
+
+        plan = InternshipPlan.builder().planId(planId).assignment(assignment).build();
+
+        item = InternshipPlanItem.builder()
+                .planItemId(itemId)
+                .plan(plan)
+                .targetDate(LocalDate.of(2023, 10, 15))
+                .build();
+    }
+
+    @Test
+    void findAllSuccess() {
+        when(repository.findAll()).thenReturn(List.of(item));
+
+        List<InternshipPlanItem> result = service.findAll();
+
+        assertEquals(1, result.size());
+        assertEquals(itemId, result.get(0).getPlanItemId());
+    }
+
+    @Test
+    void findByIdSuccess() {
+        when(repository.findById(itemId)).thenReturn(Optional.of(item));
+
+        InternshipPlanItem result = service.findById(itemId);
+
+        assertNotNull(result);
+        assertEquals(itemId, result.getPlanItemId());
+    }
+
+    @Test
+    void findByIdNotFound() {
+        when(repository.findById(itemId)).thenReturn(Optional.empty());
+
+        InternshipPlanItem result = service.findById(itemId);
+
+        assertNull(result);
+    }
+
+    @Test
+    void saveSuccess() {
+        when(planRepository.findById(planId)).thenReturn(Optional.of(plan));
+        when(repository.save(any(InternshipPlanItem.class))).thenReturn(item);
+
+        InternshipPlanItem result = service.save(item);
+
+        assertNotNull(result);
+        assertEquals(itemId, result.getPlanItemId());
+    }
+
+    @Test
+    void savePlanNullThrowsException() {
+        item.setPlan(null);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.save(item));
+
+        assertEquals("Plan ID is required", exception.getMessage());
+    }
+
+    @Test
+    void savePlanIdNullThrowsException() {
+        item.getPlan().setPlanId(null);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.save(item));
+
+        assertEquals("Plan ID is required", exception.getMessage());
+    }
+
+    @Test
+    void savePlanNotFoundThrowsException() {
+        when(planRepository.findById(planId)).thenReturn(Optional.empty());
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.save(item));
+
+        assertEquals("Plan not found", exception.getMessage());
+    }
+
+    @Test
+    void saveTargetDateBeforeSemesterThrowsException() {
+        item.setTargetDate(LocalDate.of(2023, 8, 31)); // Before start date
+
+        when(planRepository.findById(planId)).thenReturn(Optional.of(plan));
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.save(item));
+
+        assertEquals(
+                "Target date must be within the semester boundaries (2023-09-01 to 2023-12-31)",
+                exception.getMessage());
+    }
+
+    @Test
+    void saveTargetDateAfterSemesterThrowsException() {
+        item.setTargetDate(LocalDate.of(2024, 1, 1)); // After end date
+
+        when(planRepository.findById(planId)).thenReturn(Optional.of(plan));
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.save(item));
+
+        assertEquals(
+                "Target date must be within the semester boundaries (2023-09-01 to 2023-12-31)",
+                exception.getMessage());
+    }
+
+    @Test
+    void saveTargetDateNullSuccess() {
+        item.setTargetDate(null);
+
+        when(planRepository.findById(planId)).thenReturn(Optional.of(plan));
+        when(repository.save(any(InternshipPlanItem.class))).thenReturn(item);
+
+        InternshipPlanItem result = service.save(item);
+
+        assertNotNull(result);
+    }
+
+    @Test
+    void deleteByIdSuccess() {
+        service.deleteById(itemId);
+
+        verify(repository).deleteById(itemId);
+    }
+}
