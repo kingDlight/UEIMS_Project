@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { message, Spin, Pagination } from 'antd';
+import { message, Spin, Pagination, Collapse } from 'antd';
 import { motion } from 'framer-motion';
-import { SnippetsOutlined, PlusOutlined, SendOutlined, EditOutlined, EyeOutlined, WarningOutlined } from '@ant-design/icons';
+import { SnippetsOutlined, PlusOutlined, SendOutlined, EditOutlined, EyeOutlined, WarningOutlined, DownOutlined, UpOutlined } from '@ant-design/icons';
 import { NeuSurface } from '../components/shared/NeuSurface';
 import { SmallBadge } from '../components/shared/SmallBadge';
 import { WeeklyReportService } from '@/services/WeeklyReportService';
+import { EnterpriseAssignmentService } from '@/services/EnterpriseAssignmentService';
 import { cc, hexToRgba } from '../constants';
 
 const CTAButton: React.FC<{
@@ -60,11 +61,25 @@ export const ReportsTab: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [editingReport, setEditingReport] = useState<any>(null);
+  const [expandedReport, setExpandedReport] = useState<string | null>(null);
+  const [currentAssignment, setCurrentAssignment] = useState<any>(null);
   const [formData, setFormData] = useState({ weekNumber: '', tasksCompleted: '', issuesChallenges: '', lessonsLearned: '', planNextWeek: '' });
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 5;
 
-  useEffect(() => { fetchReports(); }, []);
+  useEffect(() => { fetchReports(); fetchAssignment(); }, []);
+
+  const fetchAssignment = async () => {
+    try {
+      const res = await EnterpriseAssignmentService.getMyAssignment();
+      const data = res.data?.result ?? res.data;
+      if (data) {
+        setCurrentAssignment(data);
+      }
+    } catch (err) {
+      console.error('No active assignment found', err);
+    }
+  };
 
   const fetchReports = async () => {
     try {
@@ -84,9 +99,14 @@ export const ReportsTab: React.FC = () => {
       message.error('Please fill in all required fields!');
       return;
     }
+    if (!currentAssignment?.assignmentId) {
+      message.error('No active internship assignment found. Please complete your internship assignment first.');
+      return;
+    }
     try {
       setSubmitting(true);
       await WeeklyReportService.create({
+        assignmentId: currentAssignment.assignmentId,
         weekNumber: parseInt(formData.weekNumber),
         tasksCompleted: formData.tasksCompleted,
         issuesChallenges: formData.issuesChallenges,
@@ -132,7 +152,8 @@ export const ReportsTab: React.FC = () => {
     switch (status?.toUpperCase()) {
       case 'APPROVED': return 'success';
       case 'REJECTED': return 'error';
-      case 'SUBMITTED': return 'warning';
+      case 'PENDING_REVIEW': return 'warning';
+      case 'NOT_SUBMITTED': return 'warning';
       default: return 'warning';
     }
   };
@@ -141,7 +162,9 @@ export const ReportsTab: React.FC = () => {
     switch (status?.toUpperCase()) {
       case 'APPROVED': return 'Approved';
       case 'REJECTED': return 'Rejected';
-      case 'SUBMITTED': return 'Pending';
+      case 'PENDING_REVIEW': return 'Pending Review';
+      case 'NOT_SUBMITTED': return 'Not Submitted';
+      case 'REVIEWED': return 'Reviewed';
       default: return status || 'Draft';
     }
   };
@@ -167,6 +190,37 @@ export const ReportsTab: React.FC = () => {
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 20 }}>
         <CTAButton variant="primary" icon={<PlusOutlined />} onClick={() => setShowForm(true)}>Submit Report</CTAButton>
       </div>
+
+      {/* Submit Form */}
+      {showForm && (
+        <NeuSurface style={{ padding: 24, marginBottom: 20 }}>
+          <h3 style={{ fontSize: 16, fontWeight: 700, color: cc.textPrimary, margin: '0 0 16px' }}>Submit Weekly Report</h3>
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>Week Number *</label>
+            <input type="number" value={formData.weekNumber} onChange={(e) => setFormData({ ...formData, weekNumber: e.target.value })} style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13, fontFamily: "'Inter', sans-serif" }} />
+          </div>
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>Tasks Completed *</label>
+            <textarea value={formData.tasksCompleted} onChange={(e) => setFormData({ ...formData, tasksCompleted: e.target.value })} rows={3} placeholder="What did you accomplish this week?" style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13, fontFamily: "'Inter', sans-serif", resize: 'vertical' }} />
+          </div>
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>Issues & Challenges</label>
+            <textarea value={formData.issuesChallenges} onChange={(e) => setFormData({ ...formData, issuesChallenges: e.target.value })} rows={2} placeholder="Any challenges you faced..." style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13, fontFamily: "'Inter', sans-serif", resize: 'vertical' }} />
+          </div>
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>Lessons Learned</label>
+            <textarea value={formData.lessonsLearned} onChange={(e) => setFormData({ ...formData, lessonsLearned: e.target.value })} rows={2} placeholder="What did you learn this week?" style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13, fontFamily: "'Inter', sans-serif", resize: 'vertical' }} />
+          </div>
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>Plan for Next Week</label>
+            <textarea value={formData.planNextWeek} onChange={(e) => setFormData({ ...formData, planNextWeek: e.target.value })} rows={2} placeholder="What are you planning for next week?" style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13, fontFamily: "'Inter', sans-serif", resize: 'vertical' }} />
+          </div>
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+            <CTAButton variant="ghost" onClick={() => { setShowForm(false); setFormData({ weekNumber: '', tasksCompleted: '', issuesChallenges: '', lessonsLearned: '', planNextWeek: '' }); }}>Cancel</CTAButton>
+            <CTAButton variant="primary" icon={<SendOutlined />} onClick={handleSubmit} loading={submitting}>Submit</CTAButton>
+          </div>
+        </NeuSurface>
+      )}
 
       {/* Submit Form */}
       {showForm && (
@@ -267,10 +321,38 @@ export const ReportsTab: React.FC = () => {
                         {report.status === 'REJECTED' && (
                           <CTAButton variant="warning" size="sm" icon={<EditOutlined />} onClick={() => { setEditingReport(report); setFormData({ weekNumber: String(report.weekNumber), tasksCompleted: report.tasksCompleted || '', issuesChallenges: report.issuesChallenges || '', lessonsLearned: report.lessonsLearned || '', planNextWeek: report.planNextWeek || '' }); }}>Edit & Resubmit</CTAButton>
                         )}
-                        <CTAButton variant="ghost" size="sm" icon={<EyeOutlined />}>View</CTAButton>
+                        <CTAButton variant="ghost" size="sm" icon={expandedReport === report.reportId ? <UpOutlined /> : <DownOutlined />} onClick={() => setExpandedReport(expandedReport === report.reportId ? null : report.reportId)}>{expandedReport === report.reportId ? 'Collapse' : 'Expand'}</CTAButton>
                       </div>
                     </div>
                   </div>
+                  {expandedReport === report.reportId && (
+                    <div style={{ marginTop: 16, paddingTop: 16, borderTop: `1px solid ${cc.border}` }}>
+                      <div style={{ display: 'grid', gap: 12 }}>
+                        <div>
+                          <p style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, margin: '0 0 4px' }}>Tasks Completed</p>
+                          <p style={{ fontSize: 13, color: cc.textPrimary, margin: 0, whiteSpace: 'pre-wrap' }}>{report.tasksCompleted || 'N/A'}</p>
+                        </div>
+                        <div>
+                          <p style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, margin: '0 0 4px' }}>Issues & Challenges</p>
+                          <p style={{ fontSize: 13, color: cc.textPrimary, margin: 0, whiteSpace: 'pre-wrap' }}>{report.issuesChallenges || 'N/A'}</p>
+                        </div>
+                        <div>
+                          <p style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, margin: '0 0 4px' }}>Lessons Learned</p>
+                          <p style={{ fontSize: 13, color: cc.textPrimary, margin: 0, whiteSpace: 'pre-wrap' }}>{report.lessonsLearned || 'N/A'}</p>
+                        </div>
+                        <div>
+                          <p style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, margin: '0 0 4px' }}>Plan for Next Week</p>
+                          <p style={{ fontSize: 13, color: cc.textPrimary, margin: 0, whiteSpace: 'pre-wrap' }}>{report.planNextWeek || 'N/A'}</p>
+                        </div>
+                        {report.feedback && (
+                          <div style={{ padding: 12, borderRadius: cc.radiusMd, background: cc.dangerMuted }}>
+                            <p style={{ fontSize: 12, fontWeight: 600, color: cc.dangerText, margin: '0 0 4px' }}>Enterprise Feedback:</p>
+                            <p style={{ fontSize: 13, color: cc.dangerText, margin: 0, whiteSpace: 'pre-wrap' }}>{report.feedback}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </NeuSurface>
               </motion.div>
             ))}

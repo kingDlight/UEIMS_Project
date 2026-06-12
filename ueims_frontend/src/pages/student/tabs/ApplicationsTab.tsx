@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { message, Spin, Pagination } from 'antd';
 import { motion } from 'framer-motion';
-import { FileTextOutlined, EyeOutlined, CloseCircleOutlined, BankOutlined } from '@ant-design/icons';
+import { FileTextOutlined, CloseCircleOutlined, DownOutlined, UpOutlined } from '@ant-design/icons';
 import { NeuSurface } from '../components/shared/NeuSurface';
 import { SmallBadge } from '../components/shared/SmallBadge';
 import { ApplicationService } from '@/services/ApplicationService';
@@ -57,6 +57,7 @@ export const ApplicationsTab: React.FC = () => {
   const [applications, setApplications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>('all');
+  const [expandedApp, setExpandedApp] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 5;
 
@@ -176,9 +177,37 @@ export const ApplicationsTab: React.FC = () => {
                       {app.status === 'PENDING' && (
                         <CTAButton variant="danger" icon={<CloseCircleOutlined />} onClick={() => handleWithdraw(app.applicationId)}>Withdraw</CTAButton>
                       )}
-                      <CTAButton variant="ghost" icon={<EyeOutlined />}>View</CTAButton>
+                      <CTAButton variant="ghost" icon={expandedApp === app.applicationId ? <UpOutlined /> : <DownOutlined />} onClick={() => setExpandedApp(expandedApp === app.applicationId ? null : app.applicationId)}>
+                        {expandedApp === app.applicationId ? 'Collapse' : 'Expand'}
+                      </CTAButton>
                     </div>
                   </div>
+                  {expandedApp === app.applicationId && (
+                    <div style={{ marginTop: 16, paddingTop: 16, borderTop: `1px solid ${cc.border}` }}>
+                      <div style={{ display: 'grid', gap: 12 }}>
+                        <div>
+                          <p style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, margin: '0 0 4px' }}>Position</p>
+                          <p style={{ fontSize: 13, color: cc.textPrimary, margin: 0 }}>{app.jobTitle || 'N/A'}</p>
+                        </div>
+                        <div>
+                          <p style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, margin: '0 0 4px' }}>Enterprise</p>
+                          <p style={{ fontSize: 13, color: cc.textPrimary, margin: 0 }}>{app.enterpriseName || 'N/A'}</p>
+                        </div>
+                        {app.coverLetter && (
+                          <div>
+                            <p style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, margin: '0 0 4px' }}>Cover Letter</p>
+                            <p style={{ fontSize: 13, color: cc.textPrimary, margin: 0, whiteSpace: 'pre-wrap' }}>{app.coverLetter}</p>
+                          </div>
+                        )}
+                        {app.appliedAt && (
+                          <div>
+                            <p style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, margin: '0 0 4px' }}>Applied At</p>
+                            <p style={{ fontSize: 13, color: cc.textPrimary, margin: 0 }}>{new Date(app.appliedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </NeuSurface>
               </motion.div>
             ))}
