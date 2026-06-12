@@ -1,6 +1,7 @@
 import React, { useState, useCallback, forwardRef } from 'react';
+import { useScrollAnimation } from '../../../hooks/useScrollAnimation';
 import { message, Checkbox } from 'antd';
-import { motion, AnimatePresence } from 'framer-motion';
+
 import {
   CheckSquare,
   Clock,
@@ -201,11 +202,11 @@ const ReportCard = forwardRef<HTMLDivElement, ReportCardProps>((
   const isPending = report.status === 'PENDING';
 
   return (
-    <motion.div
+    <div
       ref={ref}
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: index * 0.05, ease: [0.32, 0.72, 0, 1] }}
+     
+     
+     
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
@@ -217,7 +218,7 @@ const ReportCard = forwardRef<HTMLDivElement, ReportCardProps>((
         transition: 'all 0.25s cubic-bezier(0.32, 0.72, 0, 1)',
         overflow: 'hidden',
       }}
-    >
+     className="scroll-animate">
       <div className="report-card-inner">
         {/* Left: Checkbox */}
         <div className="rc-checkbox" style={{ background: checked ? st.successMuted : 'transparent' }}>
@@ -359,7 +360,7 @@ const ReportCard = forwardRef<HTMLDivElement, ReportCardProps>((
           </div>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 });
 
@@ -537,6 +538,8 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
 // MAIN COMPONENT
 // ============================================================
 export const WeeklyReportsTab: React.FC = () => {
+  useScrollAnimation();
+
   const [reports, setReports] = useState<WeeklyReport[]>(MOCK_WEEKLY_REPORTS);
   const [selectedWeek, setSelectedWeek] = useState<string>('');
   const [checkedStatuses, setCheckedStatuses] = useState<Set<string>>(new Set(['PENDING']));
@@ -827,13 +830,13 @@ export const WeeklyReportsTab: React.FC = () => {
             className="wr-scroll"
             style={{ display: 'flex', flexDirection: 'column', gap: 10, maxHeight: 580, overflowY: 'auto', paddingRight: 2 }}
           >
-            <AnimatePresence mode="popLayout">
+            
               {filteredReports.length === 0 ? (
-                <motion.div
+                <div
                   key="empty"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
+                 
+                 
+                 
                   style={{
                     display: 'flex',
                     flexDirection: 'column',
@@ -845,7 +848,7 @@ export const WeeklyReportsTab: React.FC = () => {
                     borderRadius: st.radiusXl,
                     gap: 8,
                   }}
-                >
+                 className="scroll-animate">
                   <FileText size={40} strokeWidth={1.5} style={{ color: st.border }} />
                   <div style={{ fontSize: 14, fontWeight: 700, color: st.textSecondary, fontFamily: 'Inter, sans-serif' }}>
                     No reports found
@@ -853,7 +856,7 @@ export const WeeklyReportsTab: React.FC = () => {
                   <div style={{ fontSize: 12.5, color: st.textMuted, fontFamily: 'Inter, sans-serif', textAlign: 'center' }}>
                     Try adjusting the week or status filters
                   </div>
-                </motion.div>
+                </div>
               ) : (
                 filteredReports.map((report, i) => (
                   <ReportCard
@@ -867,7 +870,7 @@ export const WeeklyReportsTab: React.FC = () => {
                   />
                 ))
               )}
-            </AnimatePresence>
+            
           </div>
         </div>
       </div>

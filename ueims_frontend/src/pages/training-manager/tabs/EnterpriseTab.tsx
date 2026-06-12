@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useScrollAnimation } from '../../../hooks/useScrollAnimation';
+
 import { Table, Modal, Button, Input, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import {
@@ -154,14 +155,14 @@ const RejectModal: React.FC<{
         </div>
 
         {charCount > 0 && charCount < 20 && (
-          <motion.div
-            initial={{ opacity: 0, y: -4 }}
-            animate={{ opacity: 1, y: 0 }}
+          <div
+           
+           
             style={{ fontSize: 11, color: cc.error, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 4 }}
-          >
+           className="scroll-animate">
             <AlertTriangle size={11} />
             {20 - charCount} more characters required
-          </motion.div>
+          </div>
         )}
 
         <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 20 }}>
@@ -203,10 +204,10 @@ const ApprovalRow: React.FC<{
   const isApproved = enterprise.status === 'APPROVED';
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: index * 0.06, ease: [0.32, 0.72, 0, 1] }}
+    <div
+     
+     
+     
       style={{
         background: cc.surface,
         border: `1px solid ${cc.border}`,
@@ -214,7 +215,7 @@ const ApprovalRow: React.FC<{
         overflow: 'hidden',
         boxShadow: cc.shadowSm,
       }}
-    >
+     className="scroll-animate">
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px' }}>
         <div style={{
           width: 42, height: 42, borderRadius: cc.radiusMd, background: cc.brandMuted,
@@ -244,10 +245,10 @@ const ApprovalRow: React.FC<{
             <span style={{ fontFamily: 'monospace', fontSize: 11 }}>{enterprise.taxCode}</span>
           </div>
         </div>
-        <motion.button
+        <button
           onClick={() => setExpanded(!expanded)}
-          animate={{ rotate: expanded ? 180 : 0 }}
-          transition={{ duration: 0.2 }}
+         
+         
           style={{
             width: 32, height: 32, borderRadius: cc.radiusMd, background: 'transparent',
             border: `1px solid ${cc.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -255,18 +256,18 @@ const ApprovalRow: React.FC<{
           }}
         >
           <ChevronDown size={16} />
-        </motion.button>
+        </button>
       </div>
 
-      <AnimatePresence>
+      
         {expanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.25, ease: [0.32, 0.72, 0, 1] }}
+          <div
+           
+           
+           
+           
             style={{ overflow: 'hidden' }}
-          >
+           className="scroll-animate">
             <div style={{ borderTop: `1px solid ${cc.borderSubtle}`, padding: '14px 16px', background: cc.bg }}>
               <div className="ent-info-grid">
                 {[
@@ -305,10 +306,10 @@ const ApprovalRow: React.FC<{
                 </div>
               )}
             </div>
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
-    </motion.div>
+      
+    </div>
   );
 };
 
@@ -387,6 +388,8 @@ const AllEnterprisesTable: React.FC<{ data: Enterprise[] }> = ({ data }) => {
 };
 
 export const EnterpriseTab: React.FC = () => {
+  useScrollAnimation();
+
   const [activeView, setActiveView] = useState<'pending' | 'all'>('pending');
   const [enterprises, setEnterprises] = useState<Enterprise[]>([]);
   const [loading, setLoading] = useState(false);
@@ -456,17 +459,17 @@ export const EnterpriseTab: React.FC = () => {
     }
     if (pendingEnterprises.length === 0) {
       return (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.97 }}
-          animate={{ opacity: 1, scale: 1 }}
+        <div
+         
+         
           style={{ textAlign: 'center', padding: '48px 24px', background: cc.surface, borderRadius: cc.radiusLg, border: `1px solid ${cc.borderSubtle}` }}
-        >
+         className="scroll-animate">
           <div style={{ width: 48, height: 48, borderRadius: cc.radiusMd, background: cc.successMuted, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
             <CheckCircle2 size={24} color={cc.success} />
           </div>
           <div style={{ fontSize: 15, fontWeight: 700, color: cc.textPrimary }}>All caught up!</div>
           <div style={{ fontSize: 13, color: cc.textSecondary, marginTop: 4 }}>No pending enterprise registrations at the moment.</div>
-        </motion.div>
+        </div>
       );
     }
     return (
@@ -512,10 +515,10 @@ export const EnterpriseTab: React.FC = () => {
           border: `1px solid ${cc.border}`, borderRadius: cc.radiusMd, padding: 4, marginBottom: 20, boxShadow: cc.shadowSm,
         }}>
           {(['pending', 'all'] as const).map((view) => (
-            <motion.button
+            <button
               key={view}
               onClick={() => setActiveView(view)}
-              whileTap={{ scale: 0.98 }}
+             
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 18px',
                 borderRadius: cc.radiusMd, fontSize: 13,
@@ -538,19 +541,19 @@ export const EnterpriseTab: React.FC = () => {
                   {pendingCount}
                 </span>
               )}
-            </motion.button>
+            </button>
           ))}
         </div>
 
-        <AnimatePresence mode="wait">
+        
           {activeView === 'pending' && (
-            <motion.div
+            <div
               key="pending"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.25, ease: [0.32, 0.72, 0, 1] }}
-            >
+             
+             
+             
+             
+             className="scroll-animate">
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
                 <span style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                   Showing {pendingEnterprises.length} pending registrations
@@ -561,21 +564,21 @@ export const EnterpriseTab: React.FC = () => {
               </div>
 
               {renderPendingContent()}
-            </motion.div>
+            </div>
           )}
 
           {activeView === 'all' && (
-            <motion.div
+            <div
               key="all"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.25, ease: [0.32, 0.72, 0, 1] }}
-            >
+             
+             
+             
+             
+             className="scroll-animate">
               <AllEnterprisesTable data={enterprises.filter((e) => e.status === 'APPROVED')} />
-            </motion.div>
+            </div>
           )}
-        </AnimatePresence>
+        
       </div>
 
       <RejectModal

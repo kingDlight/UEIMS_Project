@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
-import { motion } from 'framer-motion';
+import { useScrollAnimation } from '../../../hooks/useScrollAnimation';
+
 import { Table, Progress } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import {
@@ -158,10 +159,10 @@ const MetricCard: React.FC<{
   bgMuted: string;
   index: number;
 }> = ({ label, value, suffix, icon, color, bgMuted, index }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 14 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.45, delay: index * 0.08, ease: [0.32, 0.72, 0, 1] }}
+  <div
+   
+   
+   
     style={{
       background: cc.surface,
       border: `1px solid ${cc.border}`,
@@ -173,7 +174,7 @@ const MetricCard: React.FC<{
       gap: 14,
       flex: '1 1 200px',
     }}
-  >
+   className="scroll-animate">
     <div
       style={{
         width: 44,
@@ -203,7 +204,7 @@ const MetricCard: React.FC<{
         {label}
       </div>
     </div>
-  </motion.div>
+  </div>
 );
 
 const ProgressFormat = (percent?: number) => (
@@ -216,6 +217,8 @@ const ProgressFormat = (percent?: number) => (
 // MAIN COMPONENT
 // ============================================================
 export const StatsTab: React.FC = () => {
+  useScrollAnimation();
+
   const containerRef = useRef<HTMLDivElement>(null);
 
   const totalPlaced = MAJOR_TABLE_DATA.reduce((s, r) => s + r.placed, 0);

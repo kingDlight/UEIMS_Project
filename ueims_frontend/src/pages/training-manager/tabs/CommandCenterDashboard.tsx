@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
+import { BackgroundEffects } from '../../home/components/BackgroundEffects';
+import { useScrollAnimation } from '../../../hooks/useScrollAnimation';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+
 import {
   AlertTriangle,
   Clock,
@@ -54,7 +56,7 @@ export const cc = {
   textDisabled: '#94A3B8',
 
   // Surface
-  surface: '#FFFFFF',
+  surface: 'rgba(255, 255, 255, 0.72)',
   bg: '#F8FAFC',
   neutralBg: '#F1F5F9',
   border: '#E2E8F0',
@@ -178,16 +180,13 @@ const CardWrapper: React.FC<{
 }> = ({ children, className = '', style, onClick, hoverable = false }) => {
   const [hovered, setHovered] = useState(false);
   return (
-    <motion.div
+    <div
       className={className}
       onClick={onClick}
       onMouseEnter={() => hoverable && setHovered(true)}
       onMouseLeave={() => hoverable && setHovered(false)}
-      animate={{
-        y: hovered && hoverable ? -2 : 0,
-        boxShadow: hovered && hoverable ? cc.shadowMd : cc.shadowSm,
-      }}
-      transition={{ duration: 0.15, ease: [0.32, 0.72, 0, 1] }}
+     
+     
       style={{
         background: cc.surface,
         borderRadius: cc.radiusLg,
@@ -199,7 +198,7 @@ const CardWrapper: React.FC<{
       }}
     >
       {children}
-    </motion.div>
+    </div>
   );
 };
 
@@ -302,11 +301,11 @@ const CTAButton: React.FC<{
   };
   const { padding, fontSize } = sizes[size];
   return (
-    <motion.button
+    <button
       onClick={onClick}
-      whileHover={{ y: -1, boxShadow: shadow }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ duration: 0.15, ease: [0.32, 0.72, 0, 1] }}
+     
+     
+     
       style={{
         display: 'inline-flex',
         alignItems: 'center',
@@ -324,18 +323,18 @@ const CTAButton: React.FC<{
         justifyContent: 'center',
         fontFamily: 'Inter, -apple-system, sans-serif',
       }}
-    >
+     className="hover-lift">
       {children}
       {icon === false ? null : (icon || <ArrowRight size={size === 'sm' ? 12 : 14} />)}
-    </motion.button>
+    </button>
   );
 };
 
 const TextLink: React.FC<{ children: React.ReactNode; onClick?: () => void; color?: string }> = ({ children, onClick, color }) => (
-  <motion.button
+  <button
     onClick={onClick}
-    whileHover={{ opacity: 0.8, x: 2 }}
-    transition={{ duration: 0.15 }}
+   
+   
     style={{
       display: 'inline-flex',
       alignItems: 'center',
@@ -350,10 +349,10 @@ const TextLink: React.FC<{ children: React.ReactNode; onClick?: () => void; colo
       fontFamily: 'Inter, -apple-system, sans-serif',
       borderRadius: cc.radiusMd,
     }}
-  >
+   className="hover-lift">
     {children}
     <ArrowRight size={13} />
-  </motion.button>
+  </button>
 );
 
 // ============================================================
@@ -361,7 +360,7 @@ const TextLink: React.FC<{ children: React.ReactNode; onClick?: () => void; colo
 // ============================================================
 const SemesterContextBar: React.FC = () => (
   <div className="cc-semester-bar" style={{
-    maxWidth: 1200,
+    maxWidth: 1600,
     margin: '0 auto',
     padding: '0 24px',
     marginBottom: 24,
@@ -369,12 +368,12 @@ const SemesterContextBar: React.FC = () => (
     alignItems: 'center',
     justifyContent: 'space-between',
   }}>
-    <motion.div
-      initial={{ opacity: 0, x: -12 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
+    <div
+     
+     
+     
       style={{ display: 'flex', alignItems: 'center', gap: 10 }}
-    >
+     className="scroll-animate">
       <span style={{
         fontSize: 13,
         fontWeight: 600,
@@ -403,14 +402,14 @@ const SemesterContextBar: React.FC = () => (
       <span style={{ fontSize: 12, color: cc.textSecondary }}>
         OJT Day 38 of 56
       </span>
-    </motion.div>
+    </div>
 
-    <motion.div
-      initial={{ opacity: 0, x: 12 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.4, delay: 0.1, ease: [0.32, 0.72, 0, 1] }}
+    <div
+     
+     
+     
       style={{ display: 'flex', alignItems: 'center', gap: 10 }}
-    >
+     className="scroll-animate">
       <span style={{
         fontSize: 11,
         color: cc.textMuted,
@@ -438,7 +437,7 @@ const SemesterContextBar: React.FC = () => (
         }} />
         {' 18 days remaining'}
       </span>
-    </motion.div>
+    </div>
   </div>
 );
 
@@ -459,12 +458,12 @@ const UrgencyCard: React.FC<{
   ctaVariant?: 'red' | 'amber' | 'ghost';
   delay?: number;
 }> = ({ title, value, trend, trendDirection, trendColor, icon, iconColor, iconBg, body, cta, ctaVariant = 'ghost', delay = 0 }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 16 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.5, delay: delay / 1000, ease: [0.32, 0.72, 0, 1] }}
-    style={{ position: 'relative', display: 'flex', flexDirection: 'column' }}
-  >
+  <div
+   
+   
+   
+    style={{ position: 'relative', display: 'flex', flexDirection: 'column', height: '100%', transitionDelay: `${delay}ms` }}
+   className="scroll-animate">
     <CardWrapper
       hoverable
       style={{ padding: 20, flex: 1, display: 'flex', flexDirection: 'column' }}
@@ -525,7 +524,7 @@ const UrgencyCard: React.FC<{
         </div>
       )}
     </CardWrapper>
-  </motion.div>
+  </div>
 );
 
 const UrgencyCardsRow: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => (
@@ -637,12 +636,12 @@ const WeeklyReportsCard: React.FC<{ onNavigate: (route: string) => void }> = ({ 
   const { week, submitted, pending, late, notStarted, students } = mockWeeklyReports;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.2, ease: [0.32, 0.72, 0, 1] }}
-      style={{ display: 'flex', flexDirection: 'column' }}
-    >
+    <div
+     
+     
+     
+      style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
+     className="scroll-animate">
       <CardWrapper style={{ padding: 20, flex: 1, display: 'flex', flexDirection: 'column' }}>
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
@@ -748,7 +747,7 @@ const WeeklyReportsCard: React.FC<{ onNavigate: (route: string) => void }> = ({ 
           <CTAButton variant="primary" size="sm" icon={null} onClick={() => onNavigate('incidents')}>Send Warnings ({late})</CTAButton>
         </div>
       </CardWrapper>
-    </motion.div>
+    </div>
   );
 };
 
@@ -763,12 +762,12 @@ const PlacementPipelineCard: React.FC<{ onNavigate: (route: string) => void }> =
   ];
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.25, ease: [0.32, 0.72, 0, 1] }}
-      style={{ display: 'flex', flexDirection: 'column' }}
-    >
+    <div
+     
+     
+     
+      style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
+     className="scroll-animate">
       <CardWrapper style={{ padding: 20, flex: 1, display: 'flex', flexDirection: 'column' }}>
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
@@ -886,7 +885,7 @@ const PlacementPipelineCard: React.FC<{ onNavigate: (route: string) => void }> =
           <TextLink color={cc.brand} onClick={() => onNavigate('enterprises')}>View Enterprises</TextLink>
         </div>
       </CardWrapper>
-    </motion.div>
+    </div>
   );
 };
 
@@ -901,12 +900,12 @@ const CompliancePipelineRow: React.FC<{ onNavigate: (route: string) => void }> =
 // SECTION E: QUICK ACTIONS
 // ============================================================
 const QuickActionsRow: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 16 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.5, delay: 0.3, ease: [0.32, 0.72, 0, 1] }}
+  <div
+   
+   
+   
     style={{ marginBottom: 16 }}
-  >
+   className="scroll-animate">
     <div style={{
       fontSize: 12,
       fontWeight: 600,
@@ -921,11 +920,11 @@ const QuickActionsRow: React.FC<{ onNavigate: (route: string) => void }> = ({ on
     <div className="cc-grid-4" style={{ alignItems: 'stretch' }}>
       {mockQuickActions.map((action, i) => (
         <div key={action.label} style={{ display: 'flex', flexDirection: 'column' }}>
-        <motion.div
+        <div
           onClick={() => action.route && onNavigate(action.route)}
-          whileHover={{ y: -3, boxShadow: cc.shadowMd }}
-          whileTap={{ scale: 0.98 }}
-          transition={{ duration: 0.15, ease: [0.32, 0.72, 0, 1] }}
+         
+         
+         
           style={{
             background: cc.surface,
             borderRadius: cc.radiusLg,
@@ -940,7 +939,7 @@ const QuickActionsRow: React.FC<{ onNavigate: (route: string) => void }> = ({ on
             position: 'relative',
             overflow: 'hidden',
           }}
-        >
+         className="hover-lift">
           {/* Subtle brand tint on hover */}
           <div style={{
             position: 'absolute',
@@ -991,23 +990,23 @@ const QuickActionsRow: React.FC<{ onNavigate: (route: string) => void }> = ({ on
           }}>
             <ArrowRight size={14} />
           </div>
-        </motion.div>
+        </div>
         </div>
       ))}
     </div>
-  </motion.div>
+  </div>
 );
 
 // ============================================================
 // SECTION F: TIMELINE
 // ============================================================
 const TimelineCard: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 16 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.5, delay: 0.35, ease: [0.32, 0.72, 0, 1] }}
+  <div
+   
+   
+   
     style={{ display: 'flex', flexDirection: 'column' }}
-  >
+   className="scroll-animate">
     <CardWrapper style={{ padding: 20, flex: 1, display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
@@ -1103,9 +1102,9 @@ const TimelineCard: React.FC<{ onNavigate: (route: string) => void }> = ({ onNav
                     <NodeIcon size={12} color={nodeColor} />
                   </div>
                   {isCurrent && (
-                    <motion.div
-                      animate={{ scale: [1, 1.4, 1], opacity: [0.6, 0, 0.6] }}
-                      transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                    <div
+                     
+                     
                       style={{
                         position: 'absolute',
                         inset: -4,
@@ -1149,7 +1148,7 @@ const TimelineCard: React.FC<{ onNavigate: (route: string) => void }> = ({ onNav
         <TextLink color={cc.brand} onClick={() => onNavigate('calendar')}>Edit timeline</TextLink>
       </div>
     </CardWrapper>
-  </motion.div>
+  </div>
 );
 
 const AlertItem: React.FC<{
@@ -1166,10 +1165,10 @@ const AlertItem: React.FC<{
   const { dot, label, labelColor } = config[severity];
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: 8 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.4, delay: delay / 1000, ease: [0.32, 0.72, 0, 1] }}
+    <div
+     
+     
+     
       style={{
         display: 'flex',
         alignItems: 'flex-start',
@@ -1180,10 +1179,11 @@ const AlertItem: React.FC<{
         border: `1px solid ${hexToRgba(dot, 0.2)}`,
         cursor: 'pointer',
         transition: 'background-color 0.12s',
+        transitionDelay: `${delay}ms`,
       }}
       onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = hexToRgba(dot, 0.1))}
       onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = hexToRgba(dot, 0.06))}
-    >
+     className="scroll-animate">
       <div style={{ paddingTop: 2, flexShrink: 0 }}>
         <StatusDot color={dot} pulse={severity === 'high'} />
       </div>
@@ -1216,17 +1216,17 @@ const AlertItem: React.FC<{
       <div style={{ flexShrink: 0, paddingTop: 2 }}>
         <ArrowRight size={14} color={cc.textMuted} />
       </div>
-    </motion.div>
+    </div>
   );
 };
 
 const RecentAlertsCard: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 16 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.5, delay: 0.4, ease: [0.32, 0.72, 0, 1] }}
+  <div
+   
+   
+   
     style={{ display: 'flex', flexDirection: 'column' }}
-  >
+   className="scroll-animate">
     <CardWrapper style={{ padding: 20, flex: 1, display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
@@ -1293,19 +1293,19 @@ const RecentAlertsCard: React.FC<{ onNavigate: (route: string) => void }> = ({ o
         </button>
       </div>
     </CardWrapper>
-  </motion.div>
+  </div>
 );
 
 // ============================================================
 // SECTION G: ANALYTICS (UC-26)
 // ============================================================
 const AnalyticsRow: React.FC = () => (
-  <motion.div
-    initial={{ opacity: 0, y: 16 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.5, delay: 0.45, ease: [0.32, 0.72, 0, 1] }}
+  <div
+   
+   
+   
     style={{ marginBottom: 16 }}
-  >
+   className="scroll-animate">
     <div style={{
       fontSize: 12,
       fontWeight: 600,
@@ -1370,13 +1370,15 @@ const AnalyticsRow: React.FC = () => (
         </div>
       </CardWrapper>
     </div>
-  </motion.div>
+  </div>
 );
 
 // ============================================================
 // MAIN COMMAND CENTER COMPONENT
 // ============================================================
 export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => void }> = ({ onNavigate }) => {
+  useScrollAnimation();
+
   const [mounted, setMounted] = useState(false);
   const navigate = useNavigate();
 
@@ -1396,42 +1398,37 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
     <div style={{
       fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
     }}>
+      <BackgroundEffects isDark={false} />
       {/* Main Content */}
       <div style={{
-        maxWidth: 1200,
+        maxWidth: 1600,
         margin: '0 auto',
         padding: '0 24px 40px',
       }}>
-        <AnimatePresence>
-          {mounted && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
-            >
-              {/* Semester Context Bar */}
-              <SemesterContextBar />
+        {mounted && (
+          <div className="scroll-animate">
+            {/* Semester Context Bar */}
+            <SemesterContextBar />
 
-              {/* TOP: Quick Actions */}
-              <QuickActionsRow onNavigate={handleNavigate} />
+            {/* TOP: Quick Actions */}
+            <QuickActionsRow onNavigate={handleNavigate} />
 
-              <div className="cc-dashboard-grid" style={{ marginTop: 24 }}>
-                {/* Left Column (Main Data) */}
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <UrgencyCardsRow onNavigate={handleNavigate} />
-                  <CompliancePipelineRow onNavigate={handleNavigate} />
-                  <AnalyticsRow />
-                </div>
-
-                {/* Right Column (Alerts & Timeline) */}
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <RecentAlertsCard onNavigate={handleNavigate} />
-                  <TimelineCard onNavigate={handleNavigate} />
-                </div>
+            <div className="cc-dashboard-grid" style={{ marginTop: 24 }}>
+              {/* Left Column (Main Data) */}
+              <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                <UrgencyCardsRow onNavigate={handleNavigate} />
+                <CompliancePipelineRow onNavigate={handleNavigate} />
+                <AnalyticsRow />
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+
+              {/* Right Column (Alerts & Timeline) */}
+              <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                <RecentAlertsCard onNavigate={handleNavigate} />
+                <TimelineCard onNavigate={handleNavigate} />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Keyframe for pulsing dot */}

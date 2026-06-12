@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useScrollAnimation } from '../../../hooks/useScrollAnimation';
+
 import { Select, Input, message } from 'antd';
 import {
   AlertOctagon,
@@ -13,6 +14,7 @@ import {
 } from 'lucide-react';
 import { IncidentService } from '@/services/IncidentService';
 import type { Incident } from '../types';
+import { useAnimatedNumber } from '../../../hooks/useAnimatedNumber';
 
 // ============================================================
 // DESIGN TOKENS — aligned with project brand system
@@ -205,11 +207,11 @@ const IncidentCard: React.FC<{
   const enterprise = incident.assignment?.enterprise;
 
   return (
-    <motion.button
-      className="incident-card-btn"
-      initial={{ opacity: 0, x: -12 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.4, delay: index * 0.07, ease: [0.32, 0.72, 0, 1] }}
+    <button
+      className="hover-lift scroll-animate incident-card-btn"
+     
+     
+     
       onClick={() => onSelect(incident)}
       style={{
         width: '100%',
@@ -229,8 +231,8 @@ const IncidentCard: React.FC<{
         outline: isSelected ? `2px solid ${cc.brand}30` : 'none',
         outlineOffset: 1,
       }}
-      whileHover={{ scale: 1.01 }}
-      whileTap={{ scale: 0.99 }}
+     
+     
     >
       {/* Icon */}
       <div
@@ -247,9 +249,9 @@ const IncidentCard: React.FC<{
         }}
       >
         {isCritical ? (
-          <motion.span
-            animate={{ scale: [1, 1.4, 1], opacity: [0.12, 0, 0.12] }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+          <span
+           
+           
             style={{
               position: 'absolute',
               inset: 0,
@@ -329,20 +331,20 @@ const IncidentCard: React.FC<{
       </div>
 
       {/* Chevron */}
-      <AnimatePresence>
+      
         {isSelected && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.7 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.7 }}
-            transition={{ duration: 0.18 }}
+          <div
+           
+           
+           
+           
             style={{ color: cc.brand, flexShrink: 0 }}
-          >
+           className="scroll-animate">
             <ChevronRight size={14} />
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
-    </motion.button>
+      
+    </button>
   );
 };
 
@@ -495,13 +497,13 @@ const ResolutionWorkspace: React.FC<{
       </div>
 
       {/* BR-26 validation message */}
-      <AnimatePresence>
+      
         {isInvalid && (
-          <motion.div
-            initial={{ opacity: 0, y: -6, height: 0 }}
-            animate={{ opacity: 1, y: 0, height: 'auto' }}
-            exit={{ opacity: 0, y: -6, height: 0 }}
-            transition={{ duration: 0.25 }}
+          <div
+           
+           
+           
+           
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -512,19 +514,19 @@ const ResolutionWorkspace: React.FC<{
               background: cc.errorMuted,
               border: `1px solid ${cc.error}30`,
             }}
-          >
+           className="scroll-animate">
             <AlertTriangle size={12} color={cc.error} style={{ flexShrink: 0 }} />
             <span style={{ fontSize: 11, fontWeight: 600, color: cc.errorText }}>
               BR-26: {20 - charCount} more characters required before closing.
             </span>
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
+      
 
       {/* BR-26 helper */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
+      <div
+       
+       
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -535,12 +537,12 @@ const ResolutionWorkspace: React.FC<{
           background: cc.warningMuted,
           border: `1px solid ${cc.warning}25`,
         }}
-      >
+       className="scroll-animate">
         <ShieldAlert size={12} color={cc.warning} style={{ flexShrink: 0 }} />
         <span style={{ fontSize: 11, color: cc.warningText, lineHeight: 1.4 }}>
           <strong>BR-26:</strong> A minimum of 20 characters is required for the resolution note. The incident will be closed and the student notified.
         </span>
-      </motion.div>
+      </div>
 
       {/* Submit button */}
       <div style={{ display: 'flex', gap: 8 }}>
@@ -594,30 +596,12 @@ const MetricCard: React.FC<{
   color: string;
   bgMuted: string;
 }> = ({ label, value, icon, color, bgMuted }) => {
-  const [displayValue, setDisplayValue] = React.useState(typeof value === 'number' ? 0 : value);
-  
-  React.useEffect(() => {
-    let isMounted = true;
-    let controls: any;
-    if (typeof value === 'number') {
-      import('framer-motion').then(({ animate }) => {
-        if (!isMounted) return;
-        controls = animate(0, value, { duration: 1.2, onUpdate: v => setDisplayValue(Math.round(v)) });
-      });
-      return () => {
-        isMounted = false;
-        if (controls) controls.stop();
-      };
-    } else {
-      setDisplayValue(value);
-    }
-  }, [value]);
+  const numericValue = typeof value === 'number' ? value : 0;
+  const animatedNum = useAnimatedNumber(numericValue, 1200);
+  const displayValue = typeof value === 'number' ? animatedNum : value;
 
   return (
-  <motion.div
-    initial={{ opacity: 0, y: 10 }}
-    animate={{ opacity: 1, y: 0 }}
-    whileHover={{ y: -2, boxShadow: '0 8px 24px rgba(15,23,42,.12)', transition: { duration: 0.2 } }}
+  <div
     style={{
       background: cc.surface,
       border: `1px solid ${cc.border}`,
@@ -629,7 +613,7 @@ const MetricCard: React.FC<{
       gap: 12,
       flex: '1 1 200px',
     }}
-  >
+   className="hover-lift scroll-animate">
     <div
       style={{
         width: 38,
@@ -652,13 +636,15 @@ const MetricCard: React.FC<{
         {label}
       </div>
     </div>
-  </motion.div>
+  </div>
 )};
 
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
 export const IncidentsTab: React.FC = () => {
+  useScrollAnimation();
+
   const [incidents, setIncidents] = useState<Incident[]>(MOCK_INCIDENTS);
   const [selected, setSelected] = useState<Incident | null>(null);
 
@@ -865,11 +851,11 @@ export const IncidentsTab: React.FC = () => {
               paddingRight: 4,
             }}
           >
-            <AnimatePresence mode="sync">
+            
               {open.length === 0 ? (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
+                <div
+                 
+                 
                   style={{
                     padding: '40px 20px', 
                     textAlign: 'center', 
@@ -877,11 +863,11 @@ export const IncidentsTab: React.FC = () => {
                     borderRadius: cc.radiusLg,
                     border: `1px dashed ${cc.border}`
                   }}
-                >
+                 className="scroll-animate">
                   <CheckCircle2 size={32} color={cc.success} style={{ marginBottom: 12, opacity: 0.5, display: 'inline-block' }} />
                   <div style={{ fontSize: 13, fontWeight: 700, color: cc.textSecondary, fontFamily: 'Inter, sans-serif' }}>Inbox Zero!</div>
                   <div style={{ fontSize: 11.5, color: cc.textMuted, fontFamily: 'Inter, sans-serif', marginTop: 4 }}>No open incidents require your attention.</div>
-                </motion.div>
+                </div>
               ) : (
                 open.map((inc, i) => (
                   <IncidentCard
@@ -893,7 +879,7 @@ export const IncidentsTab: React.FC = () => {
                   />
                 ))
               )}
-            </AnimatePresence>
+            
 
             {/* Resolved section */}
             {resolved.length > 0 && (
@@ -925,11 +911,11 @@ export const IncidentsTab: React.FC = () => {
         </div>
 
         {/* RIGHT WORKSPACE */}
-        <motion.div
+        <div
           key={selected?.incidentId ?? 'empty'}
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
+         
+         
+         
           style={{
             background: cc.surface,
             border: `1px solid ${cc.border}`,
@@ -937,7 +923,7 @@ export const IncidentsTab: React.FC = () => {
             boxShadow: cc.shadowSm,
             overflow: 'hidden',
           }}
-        >
+         className="scroll-animate">
           {!selected ? (
             <div
               style={{
@@ -1074,7 +1060,7 @@ export const IncidentsTab: React.FC = () => {
               {/* Bottom padding */}
               <div style={{ height: 20 }} />
             </>)}
-        </motion.div>
+        </div>
       </div>
     </div>
   );

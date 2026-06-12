@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { useScrollAnimation } from '../../../hooks/useScrollAnimation';
+
 import { Table, Select, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import {
@@ -150,10 +151,10 @@ const TemplateCard: React.FC<{
   const [hovered, setHovered] = useState(false);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: index * 0.1, ease: [0.32, 0.72, 0, 1] }}
+    <div
+     
+     
+     
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
@@ -168,11 +169,11 @@ const TemplateCard: React.FC<{
         position: 'relative',
         overflow: 'hidden',
       }}
-    >
+     className="scroll-animate">
       {/* Brand glow on hover */}
-      <motion.div
-        animate={{ opacity: hovered ? 1 : 0 }}
-        transition={{ duration: 0.3 }}
+      <div
+       
+       
         style={{
           position: 'absolute',
           inset: 0,
@@ -269,7 +270,7 @@ const TemplateCard: React.FC<{
           Export {template.format}
         </button>
       </div>
-    </motion.div>
+    </div>
   );
 };
 
@@ -277,6 +278,8 @@ const TemplateCard: React.FC<{
 // MAIN COMPONENT
 // ============================================================
 export const ReportsTab: React.FC = () => {
+  useScrollAnimation();
+
   const [semester, setSemester] = useState<string>('SUMMER_2026');
   const [category, setCategory] = useState<string>('ALL');
   const [exportingId, setExportingId] = useState<string | null>(null);
@@ -638,11 +641,11 @@ export const ReportsTab: React.FC = () => {
       </div>
 
       {/* ── Report History Table ─────────────────────────── */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, delay: 0.35, ease: [0.32, 0.72, 0, 1] }}
-      >
+      <div
+       
+       
+       
+       className="scroll-animate">
         <div style={{
           background: st.surface,
           border: `1px solid ${st.border}`,
@@ -692,7 +695,7 @@ export const ReportsTab: React.FC = () => {
             />
           </div>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 };
