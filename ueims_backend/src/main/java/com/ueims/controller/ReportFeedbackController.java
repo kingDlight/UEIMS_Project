@@ -11,11 +11,14 @@ import org.springframework.web.bind.annotation.*;
 import com.ueims.service.ReportFeedbackService;
 import com.ueims.service.UserService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @RestController
 @RequestMapping("/api/report-feedbacks")
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ReportFeedbackController {
     private final ReportFeedbackService service;
     private final com.ueims.mapper.ReportFeedbackMapper mapper;

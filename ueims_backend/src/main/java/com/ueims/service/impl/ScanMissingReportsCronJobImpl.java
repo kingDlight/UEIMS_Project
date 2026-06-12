@@ -10,7 +10,9 @@ import com.ueims.exception.ErrorCode;
 import com.ueims.service.CronJobService;
 import com.ueims.service.ScanMissingReportsService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -22,9 +24,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ScanMissingReportsCronJobImpl implements CronJobService {
 
-    private final ScanMissingReportsService scanService;
+    ScanMissingReportsService scanService;
 
     @Override
     public void execute() {

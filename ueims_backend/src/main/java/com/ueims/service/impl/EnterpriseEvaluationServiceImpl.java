@@ -21,15 +21,18 @@ import com.ueims.repository.EnterpriseEvaluationRepository;
 import com.ueims.repository.UserRepository;
 import com.ueims.service.EnterpriseEvaluationService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class EnterpriseEvaluationServiceImpl implements EnterpriseEvaluationService {
-    private final EnterpriseEvaluationRepository repository;
-    private final UserRepository userRepository;
-    private final EnterpriseAssignmentRepository assignmentRepository;
-    private final EligibleStudentRepository eligibleStudentRepository;
+    EnterpriseEvaluationRepository repository;
+    UserRepository userRepository;
+    EnterpriseAssignmentRepository assignmentRepository;
+    EligibleStudentRepository eligibleStudentRepository;
 
     // BR-47: Weighted Score Formula (Constants)
     private static final BigDecimal WEIGHT_ATTITUDE = new BigDecimal("0.2");

@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { extractUserFromToken } from '@/utils/jwt';
 
 interface RoleGuardProps {
   allowedRoles: string[];
@@ -7,11 +8,13 @@ interface RoleGuardProps {
 }
 
 export const RoleGuard: React.FC<RoleGuardProps> = ({ allowedRoles, children }) => {
-  const { currentRole } = useAuthStore();
+  const { token } = useAuthStore();
+  const payload = token ? extractUserFromToken(token) : null;
+  const roles = payload?.roles || [];
 
-  if (!currentRole) return null;
+  if (roles.length === 0) return null;
 
-  if (allowedRoles.includes(currentRole)) {
+  if (roles.some(role => allowedRoles.includes(role))) {
     return <>{children}</>;
   }
 

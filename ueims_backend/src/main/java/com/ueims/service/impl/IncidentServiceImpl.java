@@ -18,14 +18,17 @@ import com.ueims.repository.IncidentRepository;
 import com.ueims.repository.UserRepository;
 import com.ueims.service.IncidentService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class IncidentServiceImpl implements IncidentService {
-    private final IncidentRepository repository;
-    private final EnterpriseAssignmentRepository assignmentRepository;
-    private final UserRepository userRepository;
+    IncidentRepository repository;
+    EnterpriseAssignmentRepository assignmentRepository;
+    UserRepository userRepository;
 
     private static final String ASSIGNMENT_NOT_FOUND = "Assignment not found";
 

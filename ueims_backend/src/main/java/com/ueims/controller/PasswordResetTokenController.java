@@ -9,14 +9,17 @@ import org.springframework.web.bind.annotation.*;
 
 import com.ueims.service.PasswordResetTokenService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @RestController
 @RequestMapping("/api/password-reset-tokens")
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PasswordResetTokenController {
-    private final PasswordResetTokenService service;
-    private final com.ueims.mapper.PasswordResetTokenMapper mapper;
+    PasswordResetTokenService service;
+    com.ueims.mapper.PasswordResetTokenMapper mapper;
 
     @GetMapping
     public ResponseEntity<java.util.List<com.ueims.dto.response.PasswordResetTokenDTO>> getAll() {

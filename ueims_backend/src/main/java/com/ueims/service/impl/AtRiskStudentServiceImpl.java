@@ -16,16 +16,19 @@ import com.ueims.repository.SemesterRepository;
 import com.ueims.service.AtRiskStudentService;
 import com.ueims.service.TrainingWarningService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 public class AtRiskStudentServiceImpl implements AtRiskStudentService {
-    private final AtRiskStudentRepository atRiskStudentRepository;
-    private final SemesterRepository semesterRepository;
-    private final TrainingWarningService trainingWarningService;
+    AtRiskStudentRepository atRiskStudentRepository;
+    SemesterRepository semesterRepository;
+    TrainingWarningService trainingWarningService;
 
     @Override
     @Transactional(readOnly = true)

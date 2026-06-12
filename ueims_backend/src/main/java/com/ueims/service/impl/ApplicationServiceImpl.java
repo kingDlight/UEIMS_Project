@@ -25,16 +25,19 @@ import com.ueims.repository.JobPostRepository;
 import com.ueims.repository.UserRepository;
 import com.ueims.service.ApplicationService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ApplicationServiceImpl implements ApplicationService {
-    private final ApplicationRepository repository;
-    private final JobPostRepository jobPostRepository;
-    private final UserRepository userRepository;
-    private final EligibleStudentRepository eligibleStudentRepository;
-    private final ApplicationMapper mapper;
+    ApplicationRepository repository;
+    JobPostRepository jobPostRepository;
+    UserRepository userRepository;
+    EligibleStudentRepository eligibleStudentRepository;
+    ApplicationMapper mapper;
 
     @Override
     @Transactional(readOnly = true)

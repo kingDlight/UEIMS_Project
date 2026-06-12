@@ -6,7 +6,7 @@ import { AuthService } from '@/services/AuthService';
 import { api } from '@/services/api';
 
 const cc = {
-  primary: '#E96500',
+  primary: '#E67E22',
   primaryMuted: '#fff0e6',
   text: '#1e293b',
   textMuted: '#64748b',
@@ -31,7 +31,7 @@ const CTAButton: React.FC<{
   loading?: boolean;
 }> = ({ children, onClick, variant = 'primary', icon, disabled = false, loading = false }) => {
   const styles: Record<string, { bg: string; text: string; border: string }> = {
-    primary: { bg: 'linear-gradient(135deg, #FF662C, #FF824D)', text: '#fff', border: 'none' },
+    primary: { bg: 'linear-gradient(135deg, #E67E22, #E67E22)', text: '#fff', border: 'none' },
     ghost: { bg: '#fff', text: cc.primary, border: cc.border },
   };
   const { bg, text, border } = styles[variant];

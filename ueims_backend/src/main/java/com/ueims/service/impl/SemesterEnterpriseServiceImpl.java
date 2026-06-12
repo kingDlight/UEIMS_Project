@@ -9,12 +9,15 @@ import com.ueims.model.entity.SemesterEnterpriseId;
 import com.ueims.repository.SemesterEnterpriseRepository;
 import com.ueims.service.SemesterEnterpriseService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class SemesterEnterpriseServiceImpl implements SemesterEnterpriseService {
-    private final SemesterEnterpriseRepository repository;
+    SemesterEnterpriseRepository repository;
 
     @Override
     public List<SemesterEnterprise> findAll() {

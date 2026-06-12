@@ -7,14 +7,17 @@ import org.springframework.web.bind.annotation.*;
 
 import com.ueims.service.RoleService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @RestController
 @RequestMapping("/api/roles")
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RoleController {
-    private final RoleService service;
-    private final com.ueims.mapper.RoleMapper mapper;
+    RoleService service;
+    com.ueims.mapper.RoleMapper mapper;
 
     @GetMapping
     public ResponseEntity<java.util.List<com.ueims.dto.response.RoleDTO>> getAll() {

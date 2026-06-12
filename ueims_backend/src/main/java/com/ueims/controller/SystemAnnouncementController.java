@@ -13,13 +13,16 @@ import com.ueims.dto.request.AnnouncementCreationRequest;
 import com.ueims.model.entity.SystemAnnouncement;
 import com.ueims.service.SystemAnnouncementService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @RestController
 @RequestMapping("/api/system-announcements")
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class SystemAnnouncementController {
-    private final SystemAnnouncementService service;
+    SystemAnnouncementService service;
 
     @GetMapping
     @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")

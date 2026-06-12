@@ -3,13 +3,14 @@ import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { LoginPage } from '@/pages/auth/LoginPage';
 import { ForgotPasswordPage } from '@/pages/auth/ForgotPasswordPage';
 import { ResetPasswordPage } from '@/pages/auth/ResetPasswordPage';
-import { ChangePasswordPage } from '@/pages/auth/ChangePasswordPage';
+
 import { RegisterEnterprisePage } from '@/pages/auth/RegisterEnterprisePage';
 import { HomePage } from '@/pages/home/HomePage';
 import { ProtectedRoute } from '@/components/guards/ProtectedRoute';
 import { EmailPreviewPage } from '@/pages/dev/EmailPreviewPage';
 import { TrainingManagerDashboard } from '@/pages/TrainingManagerDashboard';
 import { StudentDashboard } from '@/pages/student/StudentDashboard';
+import { NoRolePage } from '@/pages/auth/NoRolePage';
 
 export const router = createBrowserRouter([
   {
@@ -28,13 +29,14 @@ export const router = createBrowserRouter([
     path: '/reset-password',
     element: <ResetPasswordPage />,
   },
-  {
-    path: '/change-password',
-    element: <ChangePasswordPage />,
-  },
+
   {
     path: '/register-enterprise',
     element: <RegisterEnterprisePage />,
+  },
+  {
+    path: '/no-role',
+    element: <NoRolePage />,
   },
   {
     path: '/app',

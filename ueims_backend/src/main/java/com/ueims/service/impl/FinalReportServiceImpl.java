@@ -19,13 +19,16 @@ import com.ueims.repository.EnterpriseAssignmentRepository;
 import com.ueims.repository.FinalReportRepository;
 import com.ueims.service.FinalReportService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class FinalReportServiceImpl implements FinalReportService {
-    private final FinalReportRepository repository;
-    private final EnterpriseAssignmentRepository enterpriseAssignmentRepository;
+    FinalReportRepository repository;
+    EnterpriseAssignmentRepository enterpriseAssignmentRepository;
 
     @Override
     public List<FinalReport> findAll() {

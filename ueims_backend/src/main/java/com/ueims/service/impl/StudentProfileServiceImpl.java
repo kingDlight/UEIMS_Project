@@ -23,15 +23,18 @@ import com.ueims.repository.StudentProfileRepository;
 import com.ueims.repository.UserRepository;
 import com.ueims.service.StudentProfileService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class StudentProfileServiceImpl implements StudentProfileService {
-    private final StudentProfileRepository repository;
-    private final UserRepository userRepository;
-    private final ApplicationRepository applicationRepository;
-    private final EnterpriseAssignmentRepository enterpriseAssignmentRepository;
+    StudentProfileRepository repository;
+    UserRepository userRepository;
+    ApplicationRepository applicationRepository;
+    EnterpriseAssignmentRepository enterpriseAssignmentRepository;
 
     private User getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();

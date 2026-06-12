@@ -77,7 +77,7 @@ const MOCK_PLACEMENTS: PlacementRecord[] = [
     studentName: 'Nguyen Van A', studentCode: 'SE161234', avatar: 'NVA',
     major: 'SE', gpa: 3.8, targetRole: 'Frontend Developer',
     source: 'SYSTEM_MATCHED', status: 'PLACED',
-    enterprise: 'FPT Software', enterpriseInitials: 'FP', enterpriseColor: '#E96500',
+    enterprise: 'FPT Software', enterpriseInitials: 'FP', enterpriseColor: '#E67E22',
   },
   {
     key: 'p-002', id: 'p-002',

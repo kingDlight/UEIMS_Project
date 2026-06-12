@@ -95,17 +95,17 @@ export const DashboardTab: React.FC<{ animationDelay?: number; onNavigate?: (pag
           padding: '28px 30px',
           borderRadius: 28,
           background: 'linear-gradient(135deg, rgba(255,255,255,.98) 0%, rgba(255,244,236,.92) 48%, rgba(255,250,246,.96) 100%)',
-          border: '1px solid rgba(233,101,0,.12)',
-          boxShadow: '0 20px 50px rgba(15,23,42,.10), 0 8px 22px rgba(233,101,0,.10)',
+          border: '1px solid rgba(230, 126, 34,.12)',
+          boxShadow: '0 20px 50px rgba(15,23,42,.10), 0 8px 22px rgba(230, 126, 34,.10)',
           overflow: 'hidden',
         }}
       >
-        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'radial-gradient(circle at top right, rgba(233,101,0,.14), transparent 30%), radial-gradient(circle at 20% 20%, rgba(255,138,90,.10), transparent 25%)' }} />
-        <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 5, background: 'linear-gradient(180deg, #FF662C, #FF824D, #FF9B73)' }} />
+        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'radial-gradient(circle at top right, rgba(230, 126, 34,.14), transparent 30%), radial-gradient(circle at 20% 20%, rgba(255,138,90,.10), transparent 25%)' }} />
+        <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 5, background: 'linear-gradient(180deg, #E67E22, #E67E22, #F39C12)' }} />
         <div style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', gap: 20, alignItems: 'stretch', flexWrap: 'wrap' }}>
           <div style={{ minWidth: 0, flex: '1 1 480px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <div>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '7px 12px', borderRadius: 999, background: 'rgba(233,101,0,.08)', color: c.primaryDark, fontSize: 12, fontWeight: 700, marginBottom: 14 }}>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '7px 12px', borderRadius: 999, background: 'rgba(230, 126, 34,.08)', color: c.primaryDark, fontSize: 12, fontWeight: 700, marginBottom: 14 }}>
                 Current Semester: {currentSemesterCode}
               </div>
               <h1 style={{ fontSize: 34, lineHeight: 1.06, fontWeight: 900, color: c.text, margin: 0, letterSpacing: '-1.2px' }}>Internship operations at a glance.</h1>
@@ -137,7 +137,7 @@ export const DashboardTab: React.FC<{ animationDelay?: number; onNavigate?: (pag
                   <div style={{ fontSize: 28, fontWeight: 900, color: c.text, lineHeight: 1.05, fontVariantNumeric: 'tabular-nums' }}><AnimatedNumber value={pendingApprovals} /></div>
                   <div style={{ fontSize: 12, color: c.warning, fontWeight: 700, marginTop: 4 }}>Enterprise registrations pending</div>
                 </div>
-                <div style={{ width: 62, height: 62, borderRadius: 18, background: 'linear-gradient(135deg, rgba(233,101,0,.16), rgba(255,138,90,.10))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: 62, height: 62, borderRadius: 18, background: 'linear-gradient(135deg, rgba(230, 126, 34,.16), rgba(255,138,90,.10))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <BankOutlined style={{ fontSize: 22, color: c.primary }} />
                 </div>
               </div>
@@ -160,7 +160,7 @@ export const DashboardTab: React.FC<{ animationDelay?: number; onNavigate?: (pag
               </motion.div>
             </div>
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-              <button onClick={() => onNavigate?.('enterprises')} style={{ padding: '11px 16px', borderRadius: 16, border: 'none', background: 'linear-gradient(135deg, #FF662C, #FF824D, #FF9B73)', color: '#fff', fontWeight: 800, boxShadow: '0 12px 28px rgba(233,101,0,.22)', cursor: 'pointer' }}>Review Approvals</button>
+              <button onClick={() => onNavigate?.('enterprises')} style={{ padding: '11px 16px', borderRadius: 16, border: 'none', background: 'linear-gradient(135deg, #E67E22, #E67E22, #F39C12)', color: '#fff', fontWeight: 800, boxShadow: '0 12px 28px rgba(230, 126, 34,.22)', cursor: 'pointer' }}>Review Approvals</button>
               <button onClick={() => onNavigate?.('incidents')} style={{ padding: '11px 16px', borderRadius: 16, border: 'none', background: '#fff1f2', color: c.danger, fontWeight: 800, boxShadow: '0 8px 18px rgba(15,23,42,.05)', cursor: 'pointer' }}>Escalate now</button>
             </div>
           </div>

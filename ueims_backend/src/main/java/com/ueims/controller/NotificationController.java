@@ -9,14 +9,17 @@ import org.springframework.web.bind.annotation.*;
 
 import com.ueims.service.NotificationService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @RestController
 @RequestMapping("/api/notifications")
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class NotificationController {
-    private final NotificationService service;
-    private final com.ueims.mapper.NotificationMapper mapper;
+    NotificationService service;
+    com.ueims.mapper.NotificationMapper mapper;
 
     @GetMapping
     public ResponseEntity<java.util.List<com.ueims.dto.response.NotificationDTO>> getAll() {

@@ -125,7 +125,7 @@
   --fpt-orange: #E67E22;
   --fpt-orange-dark: #D35400;
   --fpt-orange-light: #F39C12;
-  --fpt-orange-accent: #FF662C;
+  --fpt-orange-accent: #E67E22;
   --fpt-dark: #1A1A2E;
   --fpt-navy: #16213E;
   --fpt-light: #F8F9FA;
@@ -196,6 +196,8 @@
 }
 
 html {
+  scrollbar-gutter: stable;
+  overflow-y: scroll;
   scroll-behavior: smooth;
   /* Fixed 16px — never change this. Tailwind's rem-based classes (text-xs, text-sm, etc.)
      all assume 16px root. Changing html font-size at breakpoints causes cross-browser

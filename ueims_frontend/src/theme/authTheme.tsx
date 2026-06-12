@@ -1,4 +1,4 @@
-export const AUTH_PRIMARY = '#E96500';
+export const AUTH_PRIMARY = '#E67E22';
 export const AUTH_PRIMARY_DARK = '#C45200';
 export const AUTH_PRIMARY_LIGHT = '#FFF2E8';
 export const AUTH_TEXT_DARK = '#1E293B';
@@ -10,7 +10,7 @@ export const AUTH_STRENGTH_ORANGE = '#F97316';
 export const AUTH_STRENGTH_YELLOW = '#EAB308';
 export const AUTH_STRENGTH_GREEN = '#22C55E';
 
-export const AUTH_SHADOW = '0 30px 60px rgba(233, 101, 0, 0.15)';
+export const AUTH_SHADOW = '0 30px 60px rgba(230, 126, 34, 0.15)';
 export const AUTH_BORDER_RADIUS = 16;
 export const AUTH_FONT = "'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif";
 

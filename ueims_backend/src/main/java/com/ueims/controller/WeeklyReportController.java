@@ -22,14 +22,17 @@ import com.ueims.mapper.WeeklyReportMapper;
 import com.ueims.service.WeeklyReportService;
 import com.ueims.util.HtmlSanitizer;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @RestController
 @RequestMapping("/api/weekly-reports")
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class WeeklyReportController {
-    private final WeeklyReportService service;
-    private final WeeklyReportMapper mapper;
+    WeeklyReportService service;
+    WeeklyReportMapper mapper;
 
     @GetMapping
     public ResponseEntity<List<WeeklyReportDTO>> getAll() {

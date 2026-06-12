@@ -22,7 +22,9 @@ import com.ueims.dto.response.ApiResponse;
 import com.ueims.dto.response.ApplicationResponse;
 import com.ueims.service.ApplicationService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 /**
  * Controller handling Student Job Applications (CV Submissions)
@@ -30,8 +32,9 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/applications")
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ApplicationController {
-    private final ApplicationService service;
+    ApplicationService service;
 
     /**
      * Get all job applications

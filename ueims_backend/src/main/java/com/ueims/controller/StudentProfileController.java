@@ -13,11 +13,14 @@ import com.ueims.dto.request.StudentProfileUpdateRequest;
 import com.ueims.service.StudentProfileService;
 import com.ueims.service.UserService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @RestController
 @RequestMapping("/api/student-profiles")
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class StudentProfileController {
     private final StudentProfileService service;
     private final com.ueims.mapper.StudentProfileMapper mapper;

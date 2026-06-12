@@ -15,7 +15,9 @@ import com.ueims.repository.SemesterRepository;
 import com.ueims.service.ScanMissingReportsService;
 import com.ueims.util.WeekCalculator;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -24,10 +26,11 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ScanMissingReportsServiceImpl implements ScanMissingReportsService {
 
-    private final SemesterRepository semesterRepository;
-    private final EnterpriseAssignmentRepository assignmentRepository;
+    SemesterRepository semesterRepository;
+    EnterpriseAssignmentRepository assignmentRepository;
 
     /**
      * Scan for missing reports in the current active semester.

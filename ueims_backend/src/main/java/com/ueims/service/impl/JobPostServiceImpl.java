@@ -19,14 +19,17 @@ import com.ueims.repository.SemesterRepository;
 import com.ueims.repository.UserRepository;
 import com.ueims.service.JobPostService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class JobPostServiceImpl implements JobPostService {
-    private final JobPostRepository repository;
-    private final UserRepository userRepository;
-    private final SemesterRepository semesterRepository;
+    JobPostRepository repository;
+    UserRepository userRepository;
+    SemesterRepository semesterRepository;
 
     @Override
     public List<JobPost> findAll() {

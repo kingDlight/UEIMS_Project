@@ -20,19 +20,22 @@ import com.ueims.repository.UserRoleRepository;
 import com.ueims.service.EnterpriseRegistrationService;
 import com.ueims.service.MailService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class EnterpriseRegistrationServiceImpl implements EnterpriseRegistrationService {
     private static final String ENTERPRISE_ROLE = "ENTERPRISE";
 
-    private final EnterpriseRepository enterpriseRepository;
-    private final UserRepository userRepository;
-    private final UserRoleRepository userRoleRepository;
-    private final RoleRepository roleRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final MailService mailService;
+    EnterpriseRepository enterpriseRepository;
+    UserRepository userRepository;
+    UserRoleRepository userRoleRepository;
+    RoleRepository roleRepository;
+    PasswordEncoder passwordEncoder;
+    MailService mailService;
 
     @Override
     @Transactional

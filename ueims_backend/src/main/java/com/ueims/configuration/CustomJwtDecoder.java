@@ -19,16 +19,24 @@ import com.ueims.model.entity.UserSession;
 import com.ueims.repository.InvalidatedTokenRepository;
 import com.ueims.repository.UserSessionRepository;
 
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
+
 @Component
-@lombok.RequiredArgsConstructor
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CustomJwtDecoder implements JwtDecoder {
+    @NonFinal
     @Value("${jwt.signerKey}")
-    private String signerKey;
+    String signerKey;
 
-    private final InvalidatedTokenRepository invalidatedTokenRepository;
-    private final UserSessionRepository userSessionRepository;
+    InvalidatedTokenRepository invalidatedTokenRepository;
+    UserSessionRepository userSessionRepository;
 
-    private NimbusJwtDecoder nimbusJwtDecoder = null;
+    @NonFinal
+    NimbusJwtDecoder nimbusJwtDecoder = null;
 
     @Override
     public Jwt decode(String token) throws JwtException {
@@ -55,11 +63,7 @@ public class CustomJwtDecoder implements JwtDecoder {
 
                 if (session.getLastActivity() != null
                         && session.getLastActivity().plusMinutes(15).isBefore(LocalDateTime.now())) {
-                    invalidatedTokenRepository.save(InvalidatedToken.builder()
-                            .tokenId(session.getTokenId())
-                            .expiresAt(session.getExpiresAt())
-                            .build());
-                    userSessionRepository.delete(session);
+                    invalidateSessionToken(session);
                     throw new BadJwtException("Session expired due to inactivity");
                 }
 
@@ -79,5 +83,17 @@ public class CustomJwtDecoder implements JwtDecoder {
         }
 
         return nimbusJwtDecoder.decode(token);
+    }
+
+    private void invalidateSessionToken(UserSession session) {
+        try {
+            invalidatedTokenRepository.save(InvalidatedToken.builder()
+                    .tokenId(session.getTokenId())
+                    .expiresAt(session.getExpiresAt())
+                    .build());
+            userSessionRepository.delete(session);
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            // Concurrent requests might try to invalidate the same token, ignore duplicate key error
+        }
     }
 }

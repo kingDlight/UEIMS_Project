@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { CalendarOutlined, TrophyOutlined, FileTextOutlined, SnippetsOutlined, ClockCircleOutlined } from '@ant-design/icons';
-import { Spin } from 'antd';
+import { Spin, Skeleton } from 'antd';
 import { motion, animate } from 'framer-motion';
 import { cc, hexToRgba } from '../constants';
 import { NeuSurface } from '../components/shared/NeuSurface';
@@ -50,7 +50,56 @@ export const StudentDashboardTab: React.FC = () => {
   const sparklineData = [12, 19, 15, 22, 18, 25, 20];
 
   if (loading) {
-    return <div style={{ padding: 40, textAlign: 'center' }}><Spin size="large" /></div>;
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 22, fontFamily: 'Inter, sans-serif' }}>
+        <style>{`
+          .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; align-items: stretch; }
+          .bottom-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; align-items: stretch; }
+          @media (max-width: 1024px) {
+            .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+            .bottom-grid { grid-template-columns: 1fr; }
+          }
+          @media (max-width: 640px) {
+            .kpi-grid { grid-template-columns: 1fr; }
+          }
+        `}</style>
+        
+        {/* Skeleton Hero Card */}
+        <div style={{ padding: '28px 30px', borderRadius: 28, background: '#fff', border: '1px solid rgba(226,232,240,.9)' }}>
+          <Skeleton active title={{ width: '60%' }} paragraph={{ rows: 2, width: ['40%', '30%'] }} />
+          <div style={{ display: 'flex', gap: 12, marginTop: 18 }}>
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} style={{ width: 100, height: 68, borderRadius: 16, background: '#f5f7fa', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Skeleton.Button active shape="round" block style={{ height: 32, width: 60 }} />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Skeleton KPI Grid */}
+        <div className="kpi-grid">
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} style={{ padding: 20, borderRadius: 18, background: '#fff', border: '1px solid rgba(226,232,240,.9)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
+                <Skeleton.Avatar active shape="square" size="small" />
+                <Skeleton.Button active size="small" shape="round" style={{ width: 60 }} />
+              </div>
+              <Skeleton active paragraph={{ rows: 1 }} title={{ width: '40%' }} />
+            </div>
+          ))}
+        </div>
+
+        {/* Skeleton Bottom Grid */}
+        <div className="bottom-grid">
+          <div style={{ padding: 24, borderRadius: 18, background: '#fff', border: '1px solid rgba(226,232,240,.9)' }}>
+             <Skeleton active title={{ width: '30%' }} paragraph={{ rows: 4 }} />
+          </div>
+          <div style={{ padding: 24, borderRadius: 18, background: '#fff', border: '1px solid rgba(226,232,240,.9)' }}>
+             <Skeleton active title={{ width: '40%' }} paragraph={{ rows: 3 }} />
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -73,12 +122,12 @@ export const StudentDashboardTab: React.FC = () => {
         padding: '28px 30px',
         borderRadius: 28,
         background: 'linear-gradient(135deg, rgba(255,255,255,.98) 0%, rgba(255,244,236,.92) 48%, rgba(255,250,246,.96) 100%)',
-        border: '1px solid rgba(233,101,0,.12)',
-        boxShadow: '0 20px 50px rgba(15,23,42,.10), 0 8px 22px rgba(233,101,0,.10)',
+        border: '1px solid rgba(230, 126, 34,.12)',
+        boxShadow: '0 20px 50px rgba(15,23,42,.10), 0 8px 22px rgba(230, 126, 34,.10)',
         overflow: 'hidden',
       }}>
-        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'radial-gradient(circle at top right, rgba(233,101,0,.14), transparent 30%), radial-gradient(circle at 20% 20%, rgba(255,138,90,.10), transparent 25%)' }} />
-        <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 5, background: 'linear-gradient(180deg, #FF662C, #FF824D, #FF9B73)' }} />
+        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'radial-gradient(circle at top right, rgba(230, 126, 34,.14), transparent 30%), radial-gradient(circle at 20% 20%, rgba(255,138,90,.10), transparent 25%)' }} />
+        <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 5, background: 'linear-gradient(180deg, #E67E22, #E67E22, #F39C12)' }} />
         <div style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', gap: 20, alignItems: 'stretch', flexWrap: 'wrap' }}>
           <div style={{ minWidth: 0, flex: '1 1 480px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <div>

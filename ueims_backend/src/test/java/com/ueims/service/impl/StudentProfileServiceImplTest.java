@@ -5,9 +5,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -239,17 +236,15 @@ class StudentProfileServiceImplTest {
         when(repository.findById(profileId)).thenReturn(Optional.of(profile));
         when(repository.save(any(StudentProfile.class))).thenAnswer(i -> i.getArgument(0));
 
-        // Create mock multipart file
-        MultipartFile mockFile = new MockMultipartFile("file", "cv.pdf", "application/pdf", "dummy content".getBytes());
+        MultipartFile mockFile = mock(MultipartFile.class);
+        when(mockFile.isEmpty()).thenReturn(false);
+        when(mockFile.getOriginalFilename()).thenReturn("cv.pdf");
+        when(mockFile.getSize()).thenReturn(100L);
+        doNothing().when(mockFile).transferTo(any(java.io.File.class));
 
         StudentProfile updated = service.uploadCv(profileId, mockFile);
         assertNotNull(updated.getCvUrl());
         assertTrue(updated.getCvUrl().contains(".pdf"));
-
-        // Clean up
-        Path uploadDir = Paths.get(System.getProperty("user.dir"), "uploads", "cv");
-        String filename = updated.getCvUrl().substring(updated.getCvUrl().lastIndexOf("/") + 1);
-        Files.deleteIfExists(uploadDir.resolve(filename));
     }
 
     @Test

@@ -1,4 +1,4 @@
-import logoUeims from '@/assets/logo_ueims.png';
+import { LogoIcon } from '@/components/LogoIcon';
 import React, { useState, useEffect } from 'react';
 import { Form, Input, Button, message, Divider } from 'antd';
 import { useNavigate } from 'react-router-dom';
@@ -21,8 +21,10 @@ export const LoginPage: React.FC = () => {
   const loginWithTokens = useAuthStore((state) => state.loginWithTokens);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const [loading, setLoading] = useState(false);
+  const [form] = Form.useForm();
 
   const getRedirectPath = (roles: string[]): string => {
+    if (!roles || roles.length === 0) return '/no-role';
     if (roles.includes('STUDENT')) return '/student-dashboard';
     if (roles.includes('ENTERPRISE')) return '/student-dashboard';
     return '/app/dashboard';
@@ -62,9 +64,9 @@ export const LoginPage: React.FC = () => {
       if (code === 2001) {
         message.error('Tài khoản bị khóa do nhập sai mật khẩu 5 lần. Vui lòng thử lại sau 30 phút.');
       } else if (code === 1006) {
-        message.error('Xác thực thất bại. Vui lòng kiểm tra lại thông tin đăng nhập.');
+        form.setFields([{ name: 'password', errors: ['Xác thực thất bại. Vui lòng kiểm tra lại thông tin đăng nhập.'] }]);
       } else if (code === 1005) {
-        message.error('Tài khoản không tồn tại trong hệ thống.');
+        form.setFields([{ name: 'email', errors: ['Tài khoản không tồn tại trong hệ thống.'] }]);
       } else if (errorMsg) {
         message.error(errorMsg);
       } else {
@@ -174,7 +176,7 @@ export const LoginPage: React.FC = () => {
         </div>
 
         <div style={{ marginBottom: 12 }}>
-          <img src={logoUeims} alt="UEIMS Logo" style={{ height: 48, objectFit: 'contain' }} />
+          <LogoIcon style={{ height: 48, width: 'auto' }} />
         </div>
 
         <div style={{ color: AUTH_PRIMARY, fontSize: 15, fontWeight: 600, marginBottom: 4 }}>
@@ -185,7 +187,7 @@ export const LoginPage: React.FC = () => {
           UEIMS
         </div>
 
-        <Form onFinish={onFinish}>
+        <Form form={form} onFinish={onFinish}>
           <div style={{ width: '100%', maxWidth: 320, marginBottom: 20 }}>
             <label htmlFor="email" style={{ display: 'block', color: AUTH_PRIMARY, fontSize: 14, fontWeight: 600, marginBottom: 6 }}>
               Email
@@ -200,16 +202,7 @@ export const LoginPage: React.FC = () => {
             >
               <Input
                 placeholder="email@example.com"
-                style={{
-                  width: '100%',
-                  border: 'none',
-                  borderBottom: '1px solid #a8a8a8',
-                  background: 'transparent',
-                  padding: '8px 0',
-                  fontSize: 15,
-                  outline: 'none',
-                  borderRadius: 0,
-                }}
+                className="auth-input"
               />
             </Form.Item>
           </div>
@@ -225,16 +218,7 @@ export const LoginPage: React.FC = () => {
             >
               <Input.Password
                 placeholder="••••••••"
-                style={{
-                  width: '100%',
-                  border: 'none',
-                  borderBottom: '1px solid #a8a8a8',
-                  background: 'transparent',
-                  padding: '8px 0',
-                  fontSize: 15,
-                  outline: 'none',
-                  borderRadius: 0,
-                }}
+                className="auth-input-password"
               />
             </Form.Item>
           </div>
@@ -376,26 +360,54 @@ export const LoginPage: React.FC = () => {
       </div>
 
       <style>{`
-        .ant-input {
-          background: transparent !important;
-          border: none !important;
-          font-size: 15px !important;
-        }
-        .ant-input-affix-wrapper {
-          background: transparent !important;
+        .auth-input {
+          width: 100%;
           border: none !important;
           border-bottom: 1px solid #a8a8a8 !important;
-          border-radius: 0 !important;
+          background: transparent !important;
           padding: 8px 0 !important;
+          font-size: 15px !important;
+          outline: none !important;
+          border-radius: 0 !important;
+          transition: all 0.3s ease;
         }
-        .ant-input-affix-wrapper:hover,
-        .ant-input-affix-wrapper-focused {
-          border-color: ${AUTH_PRIMARY} !important;
+        .auth-input:focus, .auth-input:hover {
+          border-bottom-color: ${AUTH_PRIMARY} !important;
           box-shadow: none !important;
         }
-        .ant-input:focus {
+
+        .auth-input-password.ant-input-affix-wrapper {
+          width: 100%;
+          border: none !important;
+          border-bottom: 1px solid #a8a8a8 !important;
+          background: transparent !important;
+          padding: 8px 0 !important;
+          font-size: 15px !important;
+          outline: none !important;
+          border-radius: 0 !important;
+          transition: all 0.3s ease;
+        }
+        .auth-input-password.ant-input-affix-wrapper:hover,
+        .auth-input-password.ant-input-affix-wrapper-focused {
+          border-bottom-color: ${AUTH_PRIMARY} !important;
           box-shadow: none !important;
         }
+        .auth-input-password.ant-input-affix-wrapper .ant-input {
+          background: transparent !important;
+          font-size: 15px !important;
+        }
+
+        /* Error States matching F8 style */
+        .ant-form-item-has-error .auth-input,
+        .ant-form-item-has-error .auth-input-password.ant-input-affix-wrapper {
+          border-bottom-color: #f33a58 !important;
+        }
+        .ant-form-item-has-error .ant-form-item-explain-error {
+          color: #f33a58 !important;
+          font-size: 13px;
+          margin-top: 4px;
+        }
+
         @media (max-width: 1100px) {
           .login-left-panel {
             padding: 32px 40px !important;

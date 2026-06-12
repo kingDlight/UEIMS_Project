@@ -12,13 +12,16 @@ import com.ueims.dto.response.ApiResponse;
 import com.ueims.model.entity.JobPost;
 import com.ueims.service.JobPostService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @RestController
 @RequestMapping("/api/job-posts")
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class JobPostController {
-    private final JobPostService service;
+    JobPostService service;
 
     @GetMapping
     public ApiResponse<List<JobPost>> getAll() {

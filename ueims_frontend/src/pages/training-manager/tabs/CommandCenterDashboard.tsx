@@ -16,62 +16,66 @@ import {
   MinusCircle,
   Activity,
 } from 'lucide-react';
+import {
+  PieChart, Pie, Cell,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend
+} from 'recharts';
 
 // ============================================================
 // DESIGN TOKENS — UEIMS Command Center
 // ============================================================
 export const cc = {
   // Brand
-  brand: '#FF7A30',
-  brandHover: '#E86A20',
-  brandActive: '#CC5A18',
-  brandMuted: '#FFF3E8',
-  brandSubtle: '#FFF8F0',
-  brandStrong: '#9B4A10',
+  brand: '#E67E22',
+  brandHover: '#D35400',
+  brandActive: '#E67E22',
+  brandMuted: 'rgba(230, 126, 34, 0.08)',
+  brandSubtle: 'rgba(230, 126, 34, 0.04)',
+  brandStrong: '#D35400',
 
   // Semantic
   success: '#10B981',
-  successMuted: '#D1FAE5',
-  successText: '#065F46',
+  successMuted: 'rgba(16, 185, 129, 0.08)',
+  successText: '#059669',
   error: '#EF4444',
-  errorMuted: '#FEE2E2',
-  errorText: '#991B1B',
+  errorMuted: 'rgba(239, 68, 68, 0.08)',
+  errorText: '#DC2626',
   warning: '#F59E0B',
-  warningMuted: '#FEF3C7',
-  warningText: '#92400E',
+  warningMuted: 'rgba(245, 158, 11, 0.08)',
+  warningText: '#D97706',
   info: '#3B82F6',
-  infoMuted: '#DBEAFE',
-  infoText: '#1E40AF',
+  infoMuted: 'rgba(59, 130, 246, 0.08)',
+  infoText: '#2563EB',
 
   // Text
-  textPrimary: '#1A1A2E',
-  textSecondary: '#6B7280',
-  textMuted: '#9CA3AF',
-  textDisabled: '#D1D5DB',
+  textPrimary: '#0F172A',
+  textSecondary: '#475569',
+  textMuted: '#64748B',
+  textDisabled: '#94A3B8',
 
   // Surface
   surface: '#FFFFFF',
-  bg: 'transparent',
-  neutralBg: '#F9FAFB',
-  border: '#E5E7EB',
-  borderSubtle: '#F3F4F6',
+  bg: '#F8FAFC',
+  neutralBg: '#F1F5F9',
+  border: '#E2E8F0',
+  borderSubtle: '#F1F5F9',
 
   // Radius
-  radiusSm: 6,
-  radiusMd: 8,
-  radiusLg: 12,
-  radiusXl: 16,
+  radiusSm: 8,
+  radiusMd: 12,
+  radiusLg: 16,
+  radiusXl: 24,
   radiusFull: 9999,
 
   // Shadows
-  shadowSm: '0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)',
-  shadowMd: '0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.04)',
-  shadowLg: '0 10px 15px rgba(0,0,0,0.08), 0 4px 6px rgba(0,0,0,0.04)',
-  shadowXl: '0 20px 25px rgba(0,0,0,0.10), 0 8px 10px rgba(0,0,0,0.04)',
-  shadowBrand: '0 4px 12px rgba(255,122,48,0.25)',
-  shadowSuccess: '0 4px 12px rgba(16,185,129,0.25)',
-  shadowError: '0 4px 12px rgba(239,68,68,0.25)',
-  shadowWarning: '0 4px 12px rgba(245,158,11,0.25)',
+  shadowSm: '0 4px 16px rgba(15,23,42,0.04)',
+  shadowMd: '0 8px 24px rgba(15,23,42,0.08)',
+  shadowLg: '0 12px 32px rgba(15,23,42,0.12)',
+  shadowXl: '0 20px 50px rgba(15,23,42,0.15)',
+  shadowBrand: '0 8px 22px rgba(230, 126, 34, 0.22)',
+  shadowSuccess: '0 8px 22px rgba(16, 185, 129, 0.22)',
+  shadowError: '0 8px 22px rgba(239, 68, 68, 0.22)',
+  shadowWarning: '0 8px 22px rgba(245, 158, 11, 0.22)',
   shadowInner: 'inset 0 2px 4px rgba(0,0,0,0.04)',
 };
 
@@ -128,6 +132,26 @@ const mockQuickActions = [
   { label: 'Review Enterprises', icon: <Building2 size={24} />, description: 'Approve or reject enterprise registrations', route: 'enterprises' },
   { label: 'Send Reminders', icon: <SendHorizontal size={24} />, description: 'Send weekly report reminders to students', route: 'incidents' },
   { label: 'View Reports', icon: <FileBarChart size={24} />, description: 'View compliance, grades, and rubrics', route: 'reports' },
+];
+
+const mockPassRateData = [
+  { name: 'Passed', value: 85, color: cc.success },
+  { name: 'Failed', value: 15, color: cc.error },
+];
+
+const mockMajorData = [
+  { name: 'Software Eng', value: 350, color: cc.brand },
+  { name: 'Info Assurance', value: 120, color: cc.info },
+  { name: 'Graphic Design', value: 80, color: cc.success },
+  { name: 'Biz Admin', value: 200, color: cc.warning },
+];
+
+const mockGradeData = [
+  { name: 'Excellent', count: 140 },
+  { name: 'Good', count: 210 },
+  { name: 'Average', count: 85 },
+  { name: 'Pass', count: 30 },
+  { name: 'Fail', count: 12 },
 ];
 
 // ============================================================
@@ -427,7 +451,6 @@ const UrgencyCard: React.FC<{
   trend: string;
   trendDirection: 'up' | 'down' | 'neutral';
   trendColor?: string;
-  borderColor: string;
   icon: React.ReactNode;
   iconColor: string;
   iconBg: string;
@@ -435,27 +458,16 @@ const UrgencyCard: React.FC<{
   cta?: React.ReactNode;
   ctaVariant?: 'red' | 'amber' | 'ghost';
   delay?: number;
-}> = ({ title, value, trend, trendDirection, trendColor, borderColor, icon, iconColor, iconBg, body, cta, ctaVariant = 'ghost', delay = 0 }) => (
+}> = ({ title, value, trend, trendDirection, trendColor, icon, iconColor, iconBg, body, cta, ctaVariant = 'ghost', delay = 0 }) => (
   <motion.div
     initial={{ opacity: 0, y: 16 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.5, delay: delay / 1000, ease: [0.32, 0.72, 0, 1] }}
     style={{ position: 'relative', display: 'flex', flexDirection: 'column' }}
   >
-    {/* Urgency top border */}
-    <div style={{
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      height: 3,
-      background: borderColor,
-      borderRadius: `${cc.radiusLg}px ${cc.radiusLg}px 0 0`,
-      zIndex: 1,
-    }} />
     <CardWrapper
       hoverable
-      style={{ padding: 20, paddingTop: 23, flex: 1, display: 'flex', flexDirection: 'column' }}
+      style={{ padding: 20, flex: 1, display: 'flex', flexDirection: 'column' }}
     >
       {/* Header row */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
@@ -525,7 +537,6 @@ const UrgencyCardsRow: React.FC<{ onNavigate: (route: string) => void }> = ({ on
       trend="↑ +1 today"
       trendDirection="up"
       trendColor={cc.error}
-      borderColor={cc.error}
       icon={<AlertTriangle size={18} />}
       iconColor={cc.error}
       iconBg={cc.errorMuted}
@@ -558,7 +569,6 @@ const UrgencyCardsRow: React.FC<{ onNavigate: (route: string) => void }> = ({ on
       trend="↑ +2 today"
       trendDirection="up"
       trendColor={cc.warning}
-      borderColor={cc.warning}
       icon={<Clock size={18} />}
       iconColor={cc.warning}
       iconBg={cc.warningMuted}
@@ -1287,6 +1297,83 @@ const RecentAlertsCard: React.FC<{ onNavigate: (route: string) => void }> = ({ o
 );
 
 // ============================================================
+// SECTION G: ANALYTICS (UC-26)
+// ============================================================
+const AnalyticsRow: React.FC = () => (
+  <motion.div
+    initial={{ opacity: 0, y: 16 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5, delay: 0.45, ease: [0.32, 0.72, 0, 1] }}
+    style={{ marginBottom: 16 }}
+  >
+    <div style={{
+      fontSize: 12,
+      fontWeight: 600,
+      textTransform: 'uppercase',
+      letterSpacing: '0.06em',
+      color: cc.textMuted,
+      marginBottom: 10,
+      paddingLeft: 2,
+    }}>
+      General Statistical Dashboard
+    </div>
+    <div className="cc-grid-3" style={{ alignItems: 'stretch' }}>
+      {/* Pass Rate */}
+      <CardWrapper style={{ padding: 20, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ fontSize: 14, fontWeight: 600, color: cc.textPrimary, marginBottom: 16 }}>Interview Pass Rate</div>
+        <div style={{ height: 200, width: '100%' }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie data={mockPassRateData} innerRadius={55} outerRadius={75} paddingAngle={3} dataKey="value" stroke="none">
+                {mockPassRateData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Pie>
+              <RechartsTooltip contentStyle={{ borderRadius: 8, border: 'none', boxShadow: cc.shadowSm }} />
+              <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: 11 }} />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      </CardWrapper>
+
+      {/* Major Distribution */}
+      <CardWrapper style={{ padding: 20, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ fontSize: 14, fontWeight: 600, color: cc.textPrimary, marginBottom: 16 }}>Major Distribution</div>
+        <div style={{ height: 200, width: '100%' }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie data={mockMajorData} outerRadius={75} dataKey="value" stroke="none" label={false}>
+                {mockMajorData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Pie>
+              <RechartsTooltip contentStyle={{ borderRadius: 8, border: 'none', boxShadow: cc.shadowSm }} />
+              <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: 11 }} />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+      </CardWrapper>
+
+      {/* Grade Distribution */}
+      <CardWrapper style={{ padding: 20, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ fontSize: 14, fontWeight: 600, color: cc.textPrimary, marginBottom: 16 }}>OJT Grade Distribution</div>
+        <div style={{ height: 200, width: '100%' }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={mockGradeData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={cc.borderSubtle} />
+              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: cc.textMuted }} />
+              <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: cc.textMuted }} />
+              <RechartsTooltip cursor={{ fill: cc.neutralBg }} contentStyle={{ borderRadius: 8, border: 'none', boxShadow: cc.shadowSm }} />
+              <Bar dataKey="count" fill={cc.brand} radius={[4, 4, 0, 0]} barSize={24} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </CardWrapper>
+    </div>
+  </motion.div>
+);
+
+// ============================================================
 // MAIN COMMAND CENTER COMPONENT
 // ============================================================
 export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => void }> = ({ onNavigate }) => {
@@ -1325,19 +1412,22 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
               {/* Semester Context Bar */}
               <SemesterContextBar />
 
-              {/* ROW 1: Urgency Cards */}
-              <UrgencyCardsRow onNavigate={handleNavigate} />
-
-              {/* ROW 2: Weekly Reports + Pipeline */}
-              <CompliancePipelineRow onNavigate={handleNavigate} />
-
-              {/* ROW 3: Quick Actions */}
+              {/* TOP: Quick Actions */}
               <QuickActionsRow onNavigate={handleNavigate} />
 
-              {/* ROW 4: Timeline + Alerts */}
-              <div className="cc-grid-2" style={{ alignItems: 'stretch' }}>
-                <TimelineCard onNavigate={handleNavigate} />
-                <RecentAlertsCard onNavigate={handleNavigate} />
+              <div className="cc-dashboard-grid" style={{ marginTop: 24 }}>
+                {/* Left Column (Main Data) */}
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <UrgencyCardsRow onNavigate={handleNavigate} />
+                  <CompliancePipelineRow onNavigate={handleNavigate} />
+                  <AnalyticsRow />
+                </div>
+
+                {/* Right Column (Alerts & Timeline) */}
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <RecentAlertsCard onNavigate={handleNavigate} />
+                  <TimelineCard onNavigate={handleNavigate} />
+                </div>
               </div>
             </motion.div>
           )}
@@ -1350,6 +1440,11 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
           0%, 100% { opacity: 1; transform: scale(1); }
           50% { opacity: 0.5; transform: scale(1.15); }
         }
+        .cc-dashboard-grid {
+          display: grid;
+          grid-template-columns: 7fr 3fr;
+          gap: 24px;
+        }
         .cc-grid-2 {
           display: grid;
           grid-template-columns: repeat(2, 1fr);
@@ -1360,12 +1455,20 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
           grid-template-columns: 7fr 5fr;
           gap: 16px;
         }
+        .cc-grid-3 {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 16px;
+        }
         .cc-grid-4 {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
           gap: 12px;
         }
         @media (max-width: 1024px) {
+          .cc-dashboard-grid {
+            grid-template-columns: 1fr;
+          }
           .cc-grid-pipeline {
             grid-template-columns: 1fr;
           }
@@ -1374,7 +1477,7 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
           }
         }
         @media (max-width: 768px) {
-          .cc-grid-2 {
+          .cc-grid-2, .cc-grid-3 {
             grid-template-columns: 1fr;
           }
           .cc-grid-4 {

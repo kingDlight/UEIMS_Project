@@ -17,16 +17,19 @@ import com.ueims.repository.FinalGradeRepository;
 import com.ueims.repository.SemesterStatisticsRepository;
 import com.ueims.service.DashboardService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Transactional(readOnly = true)
 public class DashboardServiceImpl implements DashboardService {
 
-    private final SemesterStatisticsRepository semesterStatisticsRepository;
-    private final EligibleStudentRepository eligibleStudentRepository;
-    private final FinalGradeRepository finalGradeRepository;
+    SemesterStatisticsRepository semesterStatisticsRepository;
+    EligibleStudentRepository eligibleStudentRepository;
+    FinalGradeRepository finalGradeRepository;
 
     @Override
     public List<ChartDataDTO> getEmploymentRateChart(UUID semesterId) {

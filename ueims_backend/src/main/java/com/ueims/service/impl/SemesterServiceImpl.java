@@ -12,10 +12,13 @@ import com.ueims.model.entity.Semester;
 import com.ueims.repository.SemesterRepository;
 import com.ueims.service.SemesterService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class SemesterServiceImpl implements SemesterService {
     private static final String STATUS_DRAFT = "DRAFT";
     private static final String STATUS_OPEN = "OPEN";
@@ -24,7 +27,7 @@ public class SemesterServiceImpl implements SemesterService {
     private static final String STATUS_LOCKED = "LOCKED";
     private static final List<String> LOCKED_STATUSES = List.of(STATUS_ACTIVE, STATUS_CLOSED, STATUS_LOCKED);
 
-    private final SemesterRepository repository;
+    SemesterRepository repository;
 
     @Override
     public List<Semester> findAll() {

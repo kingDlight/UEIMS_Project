@@ -1,5 +1,6 @@
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Navigate } from 'react-router-dom';
+import { useAuthStore } from '@/stores/useAuthStore';
 import { ModernLayout } from '@/components/layout/ModernLayout';
 import { navItems } from './constants';
 import {
@@ -13,7 +14,6 @@ import {
   FinalReportTab,
   EvaluationTab,
   FeedbackTab,
-  SettingsTab,
 } from './tabs';
 
 export type StudentPageKey = 
@@ -24,16 +24,25 @@ export type StudentPageKey =
   | 'schedule'
   | 'training-plan'
   | 'reports'
-  | 'final-report'
-  | 'evaluation'
   | 'feedback'
-  | 'settings';
+  | 'final-report'
+  | 'evaluation';
 
 export const studentNavItems = navItems;
+
+import { extractUserFromToken } from '@/utils/jwt';
 
 export const StudentDashboard: React.FC = () => {
   const { tab } = useParams<{ tab: string }>();
   const currentTab = (tab || 'dashboard') as StudentPageKey;
+  const { token } = useAuthStore();
+  
+  const payload = token ? extractUserFromToken(token) : null;
+  const roles = payload?.roles || [];
+
+  if (roles.length === 0) {
+    return <Navigate to="/no-role" replace />;
+  }
 
   const pages: Record<string, React.ReactNode> = {
     dashboard: <StudentDashboardTab />,
@@ -43,10 +52,9 @@ export const StudentDashboard: React.FC = () => {
     schedule: <ScheduleTab />,
     'training-plan': <TrainingPlanTab />,
     reports: <ReportsTab />,
+    feedback: <FeedbackTab />,
     'final-report': <FinalReportTab />,
     evaluation: <EvaluationTab />,
-    feedback: <FeedbackTab />,
-    settings: <SettingsTab />,
   };
 
   return (

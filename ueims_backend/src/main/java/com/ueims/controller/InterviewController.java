@@ -16,14 +16,17 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ueims.service.InterviewService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @RestController
 @RequestMapping("/api/interviews")
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class InterviewController {
-    private final InterviewService service;
-    private final com.ueims.mapper.InterviewMapper mapper;
+    InterviewService service;
+    com.ueims.mapper.InterviewMapper mapper;
 
     @GetMapping
     public ResponseEntity<java.util.List<com.ueims.dto.response.InterviewDTO>> getAll() {
