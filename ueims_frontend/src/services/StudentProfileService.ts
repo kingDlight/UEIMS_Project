@@ -6,7 +6,6 @@ export const StudentProfileService = {
     getAll: () => api.get(API_URL),
     getById: (id: string) => api.get(`${API_URL}/${id}`),
     getMyProfile: () => api.get(`${API_URL}/my-profile`),
-    getMyInfo: () => api.get('/users/myInfo'),
     uploadCV: (formData: FormData) => api.post(`${API_URL}/upload-cv`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
     }),
