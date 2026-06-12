@@ -70,9 +70,9 @@
   flex: 0 0 auto;
   min-width: max-content;
   justify-content: center;
-  padding: 8px 16px;
+  padding: 8px 18px;
   border-radius: 999px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;

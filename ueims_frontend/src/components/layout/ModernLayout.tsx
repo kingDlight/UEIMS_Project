@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react'
 import Cropper from 'react-easy-crop';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Modal, Dropdown, Drawer } from 'antd';
+import { Modal, Dropdown, Drawer, Form, Input, Button, message } from 'antd';
 import type { MenuProps } from 'antd';
 import { BellOutlined, DownOutlined, MenuOutlined } from '@ant-design/icons';
 import { X, Mail, Phone, ShieldCheck, Activity, Camera } from 'lucide-react';
@@ -152,6 +152,40 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
   const { tab } = useParams<{ tab: string }>();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
+  // Change Password state
+  const [changePasswordVisible, setChangePasswordVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleChangePassword = async (values: {
+    oldPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+  }) => {
+    setLoading(true);
+    try {
+      await AuthService.changePassword({
+        oldPassword: values.oldPassword,
+        newPassword: values.newPassword,
+        confirmPassword: values.confirmPassword,
+      });
+      message.success('Đổi mật khẩu thành công!');
+      setChangePasswordVisible(false);
+    } catch (error: any) {
+      const code = error.response?.data?.code;
+      if (code === 2002) {
+        message.error('Mật khẩu cũ không chính xác!');
+      } else if (code === 2003) {
+        message.error('Mật khẩu xác nhận không khớp!');
+      } else if (code === 1015) {
+        message.error('Mật khẩu mới không hợp lệ. Phải có ít nhất 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt!');
+      } else {
+        message.error(error.response?.data?.message || 'Đổi mật khẩu thất bại!');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Determine current active tab
   const activeTab = tab || defaultRoute;
 
@@ -289,9 +323,8 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
                     type="button"
                     onClick={() => handleNavigate(item.key)}
                     className={`modern-nav-item ${isActive ? 'active' : 'inactive'}`}
-                    style={{ background: 'none', border: 'none', padding: 0, font: 'inherit', color: 'inherit' }}
                   >
-                    <span style={{ fontSize: 14 }}>{item.icon}</span>
+                    <span style={{ fontSize: 16, display: 'flex', alignItems: 'center' }}>{item.icon}</span>
                     <span>{item.label}</span>
                   </button>
                 );
@@ -318,7 +351,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
                       className={`modern-nav-item ${isMoreActive ? 'active' : 'inactive'}`}
                       style={{ cursor: 'pointer', userSelect: 'none' }}
                     >
-                      <span style={{ fontSize: 14 }}><DownOutlined /></span>
+                      <span style={{ fontSize: 16, display: 'flex', alignItems: 'center' }}><DownOutlined /></span>
                       <span>More</span>
                     </div>
                   </Dropdown>
@@ -338,7 +371,6 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
                 type="button"
                 onClick={() => { setNotificationOpen((prev) => !prev); setAccountOpen(false); }} 
                 className="modern-bell-icon-wrapper"
-                style={{ background: 'none', border: 'none', padding: 0 }}
               >
                 <BellOutlined style={{ fontSize: 18 }} />
                 {unreadCount > 0 && <div className="modern-bell-badge" />}
@@ -352,7 +384,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
                 type="button"
                 onClick={() => { setAccountOpen((prev) => !prev); setNotificationOpen(false); }} 
                 className="modern-account-wrapper"
-                style={{ background: 'none', border: 'none', padding: 0, font: 'inherit', textAlign: 'left' }}
+                style={{ textAlign: 'left' }}
               >
                 <div className="modern-account-avatar" style={{ 
                   display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', color: '#fff',
@@ -429,7 +461,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
                     onClick={() => {
                       setAccountOpen(false);
                       if (item === 'Logout') handleLogout();
-                      if (item === 'Change Password') navigate('/change-password');
+                      if (item === 'Change Password') setChangePasswordVisible(true);
                       if (item === 'View Profile') setProfileOpen(true);
                     }} 
                     className="modern-menu-item"
@@ -616,6 +648,102 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
               </span>
             </div>
         </div>
+      </Modal>
+
+      {/* Change Password Modal */}
+      <Modal
+        title={
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontFamily: 'Inter, sans-serif', fontWeight: 800, color: '#0f172a', fontSize: 18 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 40, height: 40, borderRadius: 12, background: '#fff7ed', border: '1px solid #ffedd5' }}>
+              <ShieldCheck size={22} color="#ea580c" />
+            </div>
+            Bảo mật tài khoản
+          </div>
+        }
+        open={changePasswordVisible}
+        onCancel={() => setChangePasswordVisible(false)}
+        footer={null}
+        destroyOnClose
+        width={420}
+        closeIcon={<X size={20} color="#94a3b8" style={{ marginTop: 8, marginRight: 8 }} />}
+        styles={{ 
+          content: { borderRadius: 24, padding: '24px 32px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15)' },
+          header: { marginBottom: 24 },
+          body: { padding: 0 }
+        }}
+      >
+        <Form layout="vertical" onFinish={handleChangePassword} requiredMark={false}>
+          <Form.Item
+            name="oldPassword"
+            label={<span style={{ fontWeight: 700, color: '#334155', fontSize: 13, fontFamily: 'Inter, sans-serif' }}>Mật khẩu hiện tại</span>}
+            rules={[{ required: true, message: 'Vui lòng nhập mật khẩu hiện tại!' }]}
+          >
+            <Input.Password 
+              size="large" 
+              placeholder="Nhập mật khẩu đang sử dụng" 
+              style={{ borderRadius: 12, background: '#f8fafc', border: '1px solid #e2e8f0', padding: '8px 16px', fontSize: 14 }}
+            />
+          </Form.Item>
+          
+          <div style={{ height: 1, background: '#f1f5f9', margin: '20px 0' }} />
+
+          <Form.Item
+            name="newPassword"
+            label={<span style={{ fontWeight: 700, color: '#334155', fontSize: 13, fontFamily: 'Inter, sans-serif' }}>Mật khẩu mới</span>}
+            rules={[
+              { required: true, message: 'Vui lòng nhập mật khẩu mới!' },
+              { min: 8, message: 'Mật khẩu phải có ít nhất 8 ký tự!' },
+            ]}
+          >
+            <Input.Password 
+              size="large" 
+              placeholder="Tạo mật khẩu mới" 
+              style={{ borderRadius: 12, background: '#f8fafc', border: '1px solid #e2e8f0', padding: '8px 16px', fontSize: 14 }}
+            />
+          </Form.Item>
+          <Form.Item
+            name="confirmPassword"
+            label={<span style={{ fontWeight: 700, color: '#334155', fontSize: 13, fontFamily: 'Inter, sans-serif' }}>Xác nhận mật khẩu</span>}
+            dependencies={['newPassword']}
+            rules={[
+              { required: true, message: 'Vui lòng xác nhận mật khẩu!' },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value || getFieldValue('newPassword') === value) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(new Error('Mật khẩu xác nhận không khớp!'));
+                },
+              }),
+            ]}
+            style={{ marginBottom: 32 }}
+          >
+            <Input.Password 
+              size="large" 
+              placeholder="Nhập lại mật khẩu mới" 
+              style={{ borderRadius: 12, background: '#f8fafc', border: '1px solid #e2e8f0', padding: '8px 16px', fontSize: 14 }}
+            />
+          </Form.Item>
+          
+          <div style={{ display: 'flex', gap: 12 }}>
+            <Button 
+              size="large"
+              onClick={() => setChangePasswordVisible(false)} 
+              style={{ flex: 1, borderRadius: 12, fontWeight: 700, color: '#475569', border: '1px solid #cbd5e1', background: '#fff', height: 44, fontFamily: 'Inter, sans-serif' }}
+            >
+              Hủy bỏ
+            </Button>
+            <Button 
+              size="large"
+              type="primary" 
+              htmlType="submit" 
+              loading={loading}
+              style={{ flex: 1, borderRadius: 12, fontWeight: 700, background: '#ea580c', borderColor: '#ea580c', boxShadow: '0 4px 12px rgba(234, 88, 12, 0.25)', height: 44, fontFamily: 'Inter, sans-serif' }}
+            >
+              Cập nhật
+            </Button>
+          </div>
+        </Form>
       </Modal>
 
       <CropAvatarModal 
