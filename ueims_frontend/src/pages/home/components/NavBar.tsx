@@ -3,11 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Menu, X, Sun, Moon } from 'lucide-react';
 import { navLinks } from '../constants';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { isTokenExpired } from '@/utils/jwt';
 
 export const NavBar = ({ isDark, toggleTheme, scrolled, scrollToSection }: { isDark: boolean, toggleTheme: () => void, scrolled: boolean, scrollToSection: (h: string) => void }) => {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, user, token } = useAuthStore();
+
+  const isReallyAuthenticated = isAuthenticated && token && !isTokenExpired(token);
 
   const customAvatarUrl = localStorage.getItem('ueims_custom_avatar');
   const finalAvatarUrl = customAvatarUrl || user?.avatarUrl;
@@ -58,7 +61,7 @@ export const NavBar = ({ isDark, toggleTheme, scrolled, scrollToSection }: { isD
           {isDark ? <Sun className="h-4 w-4 relative" /> : <Moon className="h-4 w-4 relative" />}
         </button>
 
-        {!isAuthenticated ? (
+        {!isReallyAuthenticated ? (
           <>
             <button
               onClick={() => navigate('/login')}
@@ -134,7 +137,7 @@ export const NavBar = ({ isDark, toggleTheme, scrolled, scrollToSection }: { isD
           ))}
           <button
             onClick={() => {
-              if (isAuthenticated) {
+              if (isReallyAuthenticated) {
                 const roles = user?.roles?.map((r: any) => r.roleName || r) || [];
                 if (roles.includes('STUDENT') || roles.includes('ROLE_STUDENT') || roles.includes('ENTERPRISE') || roles.includes('ROLE_ENTERPRISE')) {
                   navigate('/student-dashboard');
@@ -147,7 +150,7 @@ export const NavBar = ({ isDark, toggleTheme, scrolled, scrollToSection }: { isD
             }}
             className="text-sm font-bold text-white px-4 py-2.5 rounded-lg bg-[#f37021] flex justify-center items-center gap-1.5 shadow-md shadow-[#f37021]/15 mt-2"
           >
-            {isAuthenticated ? 'Bảng điều khiển' : 'Vào hệ thống'}
+            {isReallyAuthenticated ? 'Bảng điều khiển' : 'Vào hệ thống'}
             <ArrowRight className="h-4 w-4" />
           </button>
         </div>

@@ -55,11 +55,15 @@ public class CustomJwtDecoder implements JwtDecoder {
 
                 if (session.getLastActivity() != null
                         && session.getLastActivity().plusMinutes(15).isBefore(LocalDateTime.now())) {
-                    invalidatedTokenRepository.save(InvalidatedToken.builder()
-                            .tokenId(session.getTokenId())
-                            .expiresAt(session.getExpiresAt())
-                            .build());
-                    userSessionRepository.delete(session);
+                    try {
+                        invalidatedTokenRepository.save(InvalidatedToken.builder()
+                                .tokenId(session.getTokenId())
+                                .expiresAt(session.getExpiresAt())
+                                .build());
+                        userSessionRepository.delete(session);
+                    } catch (org.springframework.dao.DataIntegrityViolationException e) {
+                        // Concurrent requests might try to invalidate the same token, ignore duplicate key error
+                    }
                     throw new BadJwtException("Session expired due to inactivity");
                 }
 
