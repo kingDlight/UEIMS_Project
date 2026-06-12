@@ -651,6 +651,24 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
                 ACTIVE
               </span>
             </div>
+            
+            <div style={{ marginTop: 24 }}>
+              <Button 
+                type="primary" 
+                block 
+                style={{ 
+                  background: '#ea580c', 
+                  borderColor: '#ea580c', 
+                  fontWeight: 700, 
+                  height: 44, 
+                  borderRadius: 12, 
+                  fontFamily: 'Inter, sans-serif',
+                  boxShadow: '0 4px 12px rgba(234, 88, 12, 0.25)'
+                }}
+              >
+                Cập nhật thông tin
+              </Button>
+            </div>
         </div>
       </Modal>
 
