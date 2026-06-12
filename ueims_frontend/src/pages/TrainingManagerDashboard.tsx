@@ -24,7 +24,11 @@ export const TrainingManagerDashboard: React.FC = () => {
   const currentTab = (tab || 'dashboard') as PageKey;
 
   const { token } = useAuthStore();
-  const payload = token ? extractUserFromToken(token) : null;
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+
+  const payload = extractUserFromToken(token);
   const roles = payload?.roles || [];
 
   // Redirect if no role

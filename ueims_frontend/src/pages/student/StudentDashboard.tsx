@@ -37,7 +37,11 @@ export const StudentDashboard: React.FC = () => {
   const currentTab = (tab || 'dashboard') as StudentPageKey;
   const { token } = useAuthStore();
   
-  const payload = token ? extractUserFromToken(token) : null;
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+
+  const payload = extractUserFromToken(token);
   const roles = payload?.roles || [];
 
   if (roles.length === 0) {

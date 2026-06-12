@@ -203,6 +203,14 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
   }, [user]);
 
   const handleUpdateProfile = async () => {
+    const currentPhone = (user as any)?.phone || '';
+    const newPhone = phone || '';
+    
+    if (currentPhone === newPhone) {
+      message.info('Không có thay đổi nào để cập nhật');
+      return;
+    }
+
     try {
       setUpdatingProfile(true);
       await api.put('/users/myInfo', { ...(user as any), phone });
