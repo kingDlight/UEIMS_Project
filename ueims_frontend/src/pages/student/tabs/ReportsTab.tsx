@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { message, Spin } from 'antd';
+import React, { useEffect, useState, useMemo } from 'react';
+import { message, Spin, Pagination } from 'antd';
 import { motion } from 'framer-motion';
 import { SnippetsOutlined, PlusOutlined, SendOutlined, EditOutlined, EyeOutlined, WarningOutlined } from '@ant-design/icons';
 import { NeuSurface } from '../components/shared/NeuSurface';
@@ -61,6 +61,8 @@ export const ReportsTab: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
   const [editingReport, setEditingReport] = useState<any>(null);
   const [formData, setFormData] = useState({ weekNumber: '', tasksCompleted: '', issuesChallenges: '', lessonsLearned: '', planNextWeek: '' });
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 5;
 
   useEffect(() => { fetchReports(); }, []);
 
@@ -143,6 +145,13 @@ export const ReportsTab: React.FC = () => {
       default: return status || 'Draft';
     }
   };
+
+  useEffect(() => { setCurrentPage(1); }, [reports.length]);
+
+  const paginatedReports = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return reports.slice(start, start + pageSize);
+  }, [reports, currentPage]);
 
   if (loading) {
     return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}><Spin size="large" /></div>;
@@ -232,39 +241,51 @@ export const ReportsTab: React.FC = () => {
       {reports.length === 0 ? (
         <EmptyState icon={<SnippetsOutlined style={{ fontSize: 32 }} />} title="No reports yet" description="Your weekly reports will appear once you start your internship" />
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {reports.map((report, index) => (
-            <motion.div key={report.reportId || index} initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3, delay: index * 0.05 }}>
-              <NeuSurface style={{ padding: 20 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
-                    <div style={{ width: 52, height: 52, borderRadius: cc.radiusMd, background: hexToRgba(cc.primary, 0.08), display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.primary, fontSize: 14, fontWeight: 700 }}>
-                      W{report.weekNumber}
-                    </div>
-                    <div>
-                      <h4 style={{ fontSize: 14, fontWeight: 600, color: cc.textPrimary, margin: '0 0 4px' }}>Week {report.weekNumber} Report</h4>
-                      <p style={{ fontSize: 12, color: cc.textMuted, margin: '0 0 8px' }}>Submitted: {report.submittedAt ? new Date(report.submittedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}</p>
-                      <SmallBadge label={getStatusLabel(report.status)} variant={getStatusVariant(report.status)} />
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', flexDirection: 'column' }}>
-                    {report.feedback && (
-                      <div style={{ fontSize: 12, color: cc.dangerText, maxWidth: 200, textAlign: 'right', padding: '4px 8px', background: cc.dangerMuted, borderRadius: cc.radiusSm }}>
-                        {report.feedback.length > 60 ? report.feedback.substring(0, 60) + '...' : report.feedback}
+        <>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {paginatedReports.map((report, index) => (
+              <motion.div key={report.reportId || index} initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3, delay: index * 0.05 }}>
+                <NeuSurface style={{ padding: 20 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+                      <div style={{ width: 52, height: 52, borderRadius: cc.radiusMd, background: hexToRgba(cc.primary, 0.08), display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.primary, fontSize: 14, fontWeight: 700 }}>
+                        W{report.weekNumber}
                       </div>
-                    )}
-                    <div style={{ display: 'flex', gap: 8 }}>
-                      {report.status === 'REJECTED' && (
-                        <CTAButton variant="warning" size="sm" icon={<EditOutlined />} onClick={() => { setEditingReport(report); setFormData({ weekNumber: String(report.weekNumber), tasksCompleted: report.tasksCompleted || '', issuesChallenges: report.issuesChallenges || '', lessonsLearned: report.lessonsLearned || '', planNextWeek: report.planNextWeek || '' }); }}>Edit & Resubmit</CTAButton>
+                      <div>
+                        <h4 style={{ fontSize: 14, fontWeight: 600, color: cc.textPrimary, margin: '0 0 4px' }}>Week {report.weekNumber} Report</h4>
+                        <p style={{ fontSize: 12, color: cc.textMuted, margin: '0 0 8px' }}>Submitted: {report.submittedAt ? new Date(report.submittedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}</p>
+                        <SmallBadge label={getStatusLabel(report.status)} variant={getStatusVariant(report.status)} />
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', flexDirection: 'column' }}>
+                      {report.feedback && (
+                        <div style={{ fontSize: 12, color: cc.dangerText, maxWidth: 200, textAlign: 'right', padding: '4px 8px', background: cc.dangerMuted, borderRadius: cc.radiusSm }}>
+                          {report.feedback.length > 60 ? report.feedback.substring(0, 60) + '...' : report.feedback}
+                        </div>
                       )}
-                      <CTAButton variant="ghost" size="sm" icon={<EyeOutlined />}>View</CTAButton>
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        {report.status === 'REJECTED' && (
+                          <CTAButton variant="warning" size="sm" icon={<EditOutlined />} onClick={() => { setEditingReport(report); setFormData({ weekNumber: String(report.weekNumber), tasksCompleted: report.tasksCompleted || '', issuesChallenges: report.issuesChallenges || '', lessonsLearned: report.lessonsLearned || '', planNextWeek: report.planNextWeek || '' }); }}>Edit & Resubmit</CTAButton>
+                        )}
+                        <CTAButton variant="ghost" size="sm" icon={<EyeOutlined />}>View</CTAButton>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </NeuSurface>
-            </motion.div>
-          ))}
-        </div>
+                </NeuSurface>
+              </motion.div>
+            ))}
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 24 }}>
+            <Pagination
+              current={currentPage}
+              pageSize={pageSize}
+              total={reports.length}
+              onChange={setCurrentPage}
+              showSizeChanger={false}
+              showTotal={(total, range) => `${range[0]}-${range[1]} of ${total}`}
+            />
+          </div>
+        </>
       )}
     </div>
   );

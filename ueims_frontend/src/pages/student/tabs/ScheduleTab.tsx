@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { message, Spin } from 'antd';
+import React, { useEffect, useState, useMemo } from 'react';
+import { message, Spin, Pagination } from 'antd';
 import { motion } from 'framer-motion';
 import { CalendarOutlined, ClockCircleOutlined, BankOutlined, CheckCircleOutlined, CloseCircleOutlined, WarningOutlined, ExclamationCircleOutlined, LinkOutlined, EnvironmentOutlined } from '@ant-design/icons';
 import { NeuSurface } from '../components/shared/NeuSurface';
@@ -59,8 +59,15 @@ export const ScheduleTab: React.FC = () => {
   const [confirming, setConfirming] = useState<string | null>(null);
   const [declining, setDeclining] = useState<any>(null);
   const [declineReason, setDeclineReason] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 5;
 
   useEffect(() => { fetchInterviews(); }, []);
+
+  const paginatedInterviews = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return interviews.slice(start, start + pageSize);
+  }, [interviews, currentPage]);
 
   const fetchInterviews = async () => {
     try {
@@ -167,42 +174,54 @@ export const ScheduleTab: React.FC = () => {
       {interviews.length === 0 ? (
         <EmptyState icon={<CalendarOutlined style={{ fontSize: 32 }} />} title="No scheduled interviews" description="You have no upcoming interview invitations at this moment." />
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {interviews.map((interview, index) => (
-            <motion.div key={interview.interviewId || index} initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3, delay: index * 0.05 }}>
-              <NeuSurface style={{ padding: 20 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <div>
-                    <h4 style={{ fontSize: 15, fontWeight: 600, color: cc.textPrimary, margin: '0 0 8px' }}>{interview.jobTitle || 'Interview'}</h4>
-                    <p style={{ fontSize: 13, color: cc.textMuted, margin: '0 0 8px' }}><BankOutlined /> {interview.enterpriseName}</p>
-                    <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: cc.textSecondary }}><CalendarOutlined /> {new Date(interview.scheduledAt).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: cc.textSecondary }}><ClockCircleOutlined /> {new Date(interview.scheduledAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
-                      {interview.type && <SmallBadge label={interview.type} variant="info" />}
+        <>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {paginatedInterviews.map((interview, index) => (
+              <motion.div key={interview.interviewId || index} initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3, delay: index * 0.05 }}>
+                <NeuSurface style={{ padding: 20 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                      <h4 style={{ fontSize: 15, fontWeight: 600, color: cc.textPrimary, margin: '0 0 8px' }}>{interview.jobTitle || 'Interview'}</h4>
+                      <p style={{ fontSize: 13, color: cc.textMuted, margin: '0 0 8px' }}><BankOutlined /> {interview.enterpriseName}</p>
+                      <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: cc.textSecondary }}><CalendarOutlined /> {new Date(interview.scheduledAt).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: cc.textSecondary }}><ClockCircleOutlined /> {new Date(interview.scheduledAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
+                        {interview.type && <SmallBadge label={interview.type} variant="info" />}
+                      </div>
+                      {interview.meetingLink && (
+                        <p style={{ fontSize: 12, color: cc.info, margin: '8px 0 0' }}>
+                          <a href={interview.meetingLink} target="_blank" rel="noopener noreferrer" style={{ color: cc.info }}><LinkOutlined /> Join Meeting</a>
+                        </p>
+                      )}
+                      {interview.location && (
+                        <p style={{ fontSize: 12, color: cc.textMuted, margin: '4px 0 0' }}><EnvironmentOutlined /> {interview.location}</p>
+                      )}
                     </div>
-                    {interview.meetingLink && (
-                      <p style={{ fontSize: 12, color: cc.info, margin: '8px 0 0' }}>
-                        <a href={interview.meetingLink} target="_blank" rel="noopener noreferrer" style={{ color: cc.info }}><LinkOutlined /> Join Meeting</a>
-                      </p>
-                    )}
-                    {interview.location && (
-                      <p style={{ fontSize: 12, color: cc.textMuted, margin: '4px 0 0' }}><EnvironmentOutlined /> {interview.location}</p>
-                    )}
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
+                      <SmallBadge label={interview.status || 'PENDING'} variant={interview.status === 'CONFIRMED' ? 'success' : interview.status === 'DECLINED' ? 'error' : 'warning'} />
+                      {interview.status === 'PENDING' && (
+                        <>
+                          <CTAButton variant="success" icon={<CheckCircleOutlined />} onClick={() => setConfirming(interview.interviewId)}>Confirm</CTAButton>
+                          <CTAButton variant="danger" icon={<CloseCircleOutlined />} onClick={() => setDeclining(interview)}>Decline</CTAButton>
+                        </>
+                      )}
+                    </div>
                   </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
-                    <SmallBadge label={interview.status || 'PENDING'} variant={interview.status === 'CONFIRMED' ? 'success' : interview.status === 'DECLINED' ? 'error' : 'warning'} />
-                    {interview.status === 'PENDING' && (
-                      <>
-                        <CTAButton variant="success" icon={<CheckCircleOutlined />} onClick={() => setConfirming(interview.interviewId)}>Confirm</CTAButton>
-                        <CTAButton variant="danger" icon={<CloseCircleOutlined />} onClick={() => setDeclining(interview)}>Decline</CTAButton>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </NeuSurface>
-            </motion.div>
-          ))}
-        </div>
+                </NeuSurface>
+              </motion.div>
+            ))}
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 24 }}>
+            <Pagination
+              current={currentPage}
+              pageSize={pageSize}
+              total={interviews.length}
+              onChange={setCurrentPage}
+              showSizeChanger={false}
+              showTotal={(total, range) => `${range[0]}-${range[1]} of ${total}`}
+            />
+          </div>
+        </>
       )}
     </div>
   );

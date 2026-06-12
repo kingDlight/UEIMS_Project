@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { message, Spin } from 'antd';
+import React, { useEffect, useState, useMemo } from 'react';
+import { message, Spin, Pagination } from 'antd';
 import { motion } from 'framer-motion';
 import { StarOutlined, CheckCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { NeuSurface } from '../components/shared/NeuSurface';
@@ -62,8 +62,15 @@ export const FeedbackTab: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
   const [ratings, setRatings] = useState({ trainingQuality: 5, supervisorSupport: 5, workEnvironment: 5, overall: 5 });
   const [comment, setComment] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 5;
 
   useEffect(() => { fetchFeedbacks(); }, []);
+
+  const paginatedFeedbacks = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return feedbacks.slice(start, start + pageSize);
+  }, [feedbacks, currentPage]);
 
   const fetchFeedbacks = async () => {
     try {
@@ -169,26 +176,38 @@ export const FeedbackTab: React.FC = () => {
 
       {/* Feedback List */}
       {feedbacks.length > 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {feedbacks.map((fb, index) => (
-            <motion.div key={fb.feedbackId || index} initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3, delay: index * 0.05 }}>
-              <NeuSurface style={{ padding: 20 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                      <span style={{ fontSize: 18 }}>{'★'.repeat(fb.overallScore || 0)}</span>
-                      <span style={{ fontSize: 12, color: cc.info, background: cc.infoMuted, padding: '2px 8px', borderRadius: 4 }}>{fb.enterprise?.enterpriseName || 'Company'}</span>
+        <>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {paginatedFeedbacks.map((fb, index) => (
+              <motion.div key={fb.feedbackId || index} initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3, delay: index * 0.05 }}>
+                <NeuSurface style={{ padding: 20 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                        <span style={{ fontSize: 18 }}>{'★'.repeat(fb.overallScore || 0)}</span>
+                        <span style={{ fontSize: 12, color: cc.info, background: cc.infoMuted, padding: '2px 8px', borderRadius: 4 }}>{fb.enterprise?.enterpriseName || 'Company'}</span>
+                      </div>
+                      {fb.positiveFeedback && (
+                        <p style={{ fontSize: 14, color: cc.text, margin: '0 0 4px', lineHeight: 1.5 }}>{fb.positiveFeedback}</p>
+                      )}
+                      <p style={{ fontSize: 12, color: cc.textMuted, margin: '8px 0 0' }}>{fb.submittedAt ? new Date(fb.submittedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}</p>
                     </div>
-                    {fb.positiveFeedback && (
-                      <p style={{ fontSize: 14, color: cc.text, margin: '0 0 4px', lineHeight: 1.5 }}>{fb.positiveFeedback}</p>
-                    )}
-                    <p style={{ fontSize: 12, color: cc.textMuted, margin: '8px 0 0' }}>{fb.submittedAt ? new Date(fb.submittedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}</p>
                   </div>
-                </div>
-              </NeuSurface>
-            </motion.div>
-          ))}
-        </div>
+                </NeuSurface>
+              </motion.div>
+            ))}
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 24 }}>
+            <Pagination
+              current={currentPage}
+              pageSize={pageSize}
+              total={feedbacks.length}
+              onChange={setCurrentPage}
+              showSizeChanger={false}
+              showTotal={(total, range) => `${range[0]}-${range[1]} of ${total}`}
+            />
+          </div>
+        </>
       )}
     </div>
   );
