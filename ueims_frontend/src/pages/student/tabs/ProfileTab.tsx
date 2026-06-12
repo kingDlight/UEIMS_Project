@@ -4,10 +4,10 @@ import {
   FileTextOutlined, EyeOutlined, DownloadOutlined,
   PlusOutlined, UploadOutlined, IdcardOutlined,
   MailOutlined, BookOutlined, UserOutlined,
+  CalendarOutlined, TrophyOutlined,
 } from '@ant-design/icons';
 import { NeuSurface } from '../components/shared/NeuSurface';
 import { SmallPill } from '../components/shared/SmallPill';
-import { api } from '@/services/api';
 import { StudentProfileService } from '@/services/StudentProfileService';
 
 const CTAButton: React.FC<{
@@ -82,6 +82,31 @@ const cc = {
   radiusFull: 9999,
 };
 
+// ── Types ─────────────────────────────────────────────────────────────────────
+interface MyProfile {
+  userId?: string;
+  email?: string;
+  fullName?: string;
+  phone?: string;
+  avatarUrl?: string;
+  status?: string;
+  profileId?: string;
+  studentCode?: string;
+  major?: string;
+  skills?: string;
+  cvUrl?: string;
+  cvFileName?: string;
+  linkedinUrl?: string;
+  githubUrl?: string;
+  portfolioUrl?: string;
+  bio?: string;
+  semesterName?: string;
+  semesterCode?: string;
+  currentSemester?: number;
+  gpa?: number;
+  ojtStatus?: string;
+}
+
 // ── Tab switcher ─────────────────────────────────────────────────────────────
 type ProfileView = 'profile' | 'cv';
 
@@ -109,8 +134,25 @@ const TabSwitcher: React.FC<{ active: ProfileView; onChange: (v: ProfileView) =>
   </div>
 );
 
+// ── Status pill helper ────────────────────────────────────────────────────────
+const StatusPill: React.FC<{ status?: string }> = ({ status }) => {
+  const statusMap: Record<string, { color: string; bg: string; label: string }> = {
+    OJT: { color: cc.success, bg: cc.successMuted, label: 'On OJT' },
+    ACCEPTED: { color: '#3b82f6', bg: '#dbeafe', label: 'Accepted' },
+    MATCHED: { color: '#a855f7', bg: '#f3e8ff', label: 'Matched' },
+    ELIGIBLE: { color: cc.primary, bg: cc.primaryMuted, label: 'Eligible' },
+    CANCELLED: { color: cc.danger, bg: cc.dangerMuted, label: 'Cancelled' },
+  };
+  const s = statusMap[status || ''] || { color: cc.textMuted, bg: cc.bgLight, label: status || 'Unknown' };
+  return (
+    <SmallPill color={s.color} style={{ background: s.bg }}>
+      <span style={{ marginRight: 4 }}>&#10003;</span> {s.label}
+    </SmallPill>
+  );
+};
+
 // ── Profile Info View ─────────────────────────────────────────────────────────
-const ProfileInfoView: React.FC<{ profile: any }> = ({ profile }) => (
+const ProfileInfoView: React.FC<{ profile: MyProfile }> = ({ profile }) => (
   <>
     {/* Header */}
     <NeuSurface style={{ padding: 24, marginBottom: 16 }}>
@@ -127,23 +169,50 @@ const ProfileInfoView: React.FC<{ profile: any }> = ({ profile }) => (
         <div style={{ flex: 1 }}>
           <h2 style={{ fontSize: 20, fontWeight: 700, color: cc.text, margin: '0 0 4px' }}>{profile?.fullName || 'Student'}</h2>
           <p style={{ fontSize: 13, color: cc.textMuted, margin: '0 0 10px' }}>{profile?.email || 'email@student.fpt.edu.vn'}</p>
-          <SmallPill color={cc.success}><span style={{ marginRight: 4 }}>&#10003;</span> Active Intern</SmallPill>
+          <StatusPill status={profile?.ojtStatus} />
         </div>
       </div>
     </NeuSurface>
+
+    {/* Academic Information (from EligibleStudent) */}
+    {(profile?.semesterName || profile?.currentSemester || (profile?.gpa != null)) && (
+      <NeuSurface style={{ padding: 24, marginBottom: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+          <h3 style={{ fontSize: 15, fontWeight: 700, color: cc.text, margin: 0 }}>Academic Information</h3>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+          {([
+            ...(profile?.semesterName ? [{ label: 'Semester', value: `${profile.semesterName}${profile.semesterCode ? ` (${profile.semesterCode})` : ''}`, icon: <CalendarOutlined /> }] : []),
+            ...(profile?.currentSemester ? [{ label: 'Current Semester', value: `Semester ${profile.currentSemester}`, icon: <BookOutlined /> }] : []),
+            ...(profile?.gpa != null ? [{ label: 'GPA', value: profile.gpa.toString(), icon: <TrophyOutlined /> }] : []),
+          ] as { label: string; value: string; icon: React.ReactNode }[]).map((item, i) => (
+            <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+              <div style={{ width: 40, height: 40, borderRadius: cc.radiusMd, background: cc.primaryMuted, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.primary, flexShrink: 0 }}>
+                {item.icon}
+              </div>
+              <div>
+                <div style={{ fontSize: 11, color: cc.textMuted, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.07em' }}>{item.label}</div>
+                <div style={{ fontSize: 14, color: cc.text, fontWeight: 600, marginTop: 2 }}>{item.value}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </NeuSurface>
+    )}
 
     {/* School Information (read-only) */}
     <NeuSurface style={{ padding: 24, marginBottom: 16 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
         <h3 style={{ fontSize: 15, fontWeight: 700, color: cc.text, margin: 0 }}>School Information</h3>
+        <span style={{ fontSize: 11, color: cc.textMuted }}>Managed by administrator</span>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
-        {[
+        {([
           { label: 'Student ID (MSSV)', value: profile?.studentCode || 'N/A', icon: <IdcardOutlined /> },
           { label: 'Email', value: profile?.email || 'N/A', icon: <MailOutlined /> },
           { label: 'Major / Department', value: profile?.major || 'N/A', icon: <BookOutlined /> },
           { label: 'Full Name', value: profile?.fullName || 'N/A', icon: <UserOutlined /> },
-        ].map((item, i) => (
+        ] as { label: string; value: string; icon: React.ReactNode }[]).map((item, i) => (
           <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
             <div style={{ width: 40, height: 40, borderRadius: cc.radiusMd, background: cc.primaryMuted, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.primary, flexShrink: 0 }}>
               {item.icon}
@@ -156,11 +225,27 @@ const ProfileInfoView: React.FC<{ profile: any }> = ({ profile }) => (
         ))}
       </div>
     </NeuSurface>
+
+    {/* Skills */}
+    {profile?.skills && (
+      <NeuSurface style={{ padding: 24 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <h3 style={{ fontSize: 15, fontWeight: 700, color: cc.text, margin: 0 }}>Skills</h3>
+        </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+          {profile.skills.split(',').map((skill: string, i: number) => (
+            <span key={i} style={{ padding: '6px 14px', borderRadius: cc.radiusFull, background: cc.primaryMuted, color: cc.primary, fontSize: 12, fontWeight: 600 }}>
+              {skill.trim()}
+            </span>
+          ))}
+        </div>
+      </NeuSurface>
+    )}
   </>
 );
 
 // ── CV View ───────────────────────────────────────────────────────────────────
-const CvView: React.FC<{ cvUrl: string; cvFileName: string; onRefresh: () => void }> = ({ cvUrl, cvFileName, onRefresh }) => {
+const CvView: React.FC<{ cvUrl?: string; cvFileName?: string; onRefresh: () => void }> = ({ cvUrl, cvFileName, onRefresh }) => {
   const [uploading, setUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [cvFile, setCvFile] = useState<File | null>(null);
@@ -359,8 +444,7 @@ const CvView: React.FC<{ cvUrl: string; cvFileName: string; onRefresh: () => voi
 
 // ── Main ProfileTab ───────────────────────────────────────────────────────────
 export const ProfileTab: React.FC = () => {
-  const [profile, setProfile] = useState<any>(null);
-  const [profileId, setProfileId] = useState<string | null>(null);
+  const [profile, setProfile] = useState<MyProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeView, setActiveView] = useState<ProfileView>('profile');
 
@@ -369,18 +453,10 @@ export const ProfileTab: React.FC = () => {
   const fetchProfile = async () => {
     try {
       setLoading(true);
-      const [userRes, profileRes] = await Promise.all([
-        api.get('/users/myInfo').catch((err) => { console.error('Failed to fetch user info:', err); return { data: null }; }),
-        StudentProfileService.getMyProfile().catch(() => ({ data: null })),
-      ]);
-
-      const userInfo = userRes?.data;
-      const profileData = profileRes?.data?.result ?? profileRes?.data;
-
-      if (!userInfo && !profileData) { console.warn('Unable to fetch profile data'); return; }
-
-      setProfile({ ...userInfo, ...profileData });
-      if (profileData?.profileId) setProfileId(profileData.profileId);
+      const res = await StudentProfileService.getMyProfile();
+      const data = res?.data?.result;
+      if (!data) { console.warn('Unable to fetch profile data'); return; }
+      setProfile(data);
     } catch (err) {
       console.error('Failed to fetch profile', err);
     } finally {
@@ -390,6 +466,10 @@ export const ProfileTab: React.FC = () => {
 
   if (loading) {
     return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}><Spin size="large" /></div>;
+  }
+
+  if (!profile) {
+    return <div style={{ textAlign: 'center', padding: 40, color: cc.textMuted }}>Unable to load profile data.</div>;
   }
 
   return (
@@ -404,8 +484,8 @@ export const ProfileTab: React.FC = () => {
         <ProfileInfoView profile={profile} />
       ) : (
         <CvView
-          cvUrl={profile?.cvUrl}
-          cvFileName={profile?.cvFileName}
+          cvUrl={profile.cvUrl}
+          cvFileName={profile.cvFileName}
           onRefresh={fetchProfile}
         />
       )}

@@ -3,6 +3,7 @@ package com.ueims.service;
 import java.util.List;
 import java.util.UUID;
 
+import com.ueims.dto.response.MyProfileResponse;
 import com.ueims.model.entity.StudentProfile;
 
 public interface StudentProfileService {
@@ -21,4 +22,6 @@ public interface StudentProfileService {
     StudentProfile deleteCv(UUID id);
 
     void deleteById(UUID id);
+
+    MyProfileResponse getMyFullProfile(UUID userId);
 }

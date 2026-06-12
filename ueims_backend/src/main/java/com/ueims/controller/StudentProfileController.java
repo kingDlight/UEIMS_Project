@@ -42,7 +42,7 @@ public class StudentProfileController {
         if (profile == null) {
             return ResponseEntity.ok(java.util.Map.of("result", java.util.Map.of()));
         }
-        return ResponseEntity.ok(java.util.Map.of("result", mapper.toDto(profile)));
+        return ResponseEntity.ok(java.util.Map.of("result", service.getMyFullProfile(userId)));
     }
 
     @GetMapping("/{id}")
