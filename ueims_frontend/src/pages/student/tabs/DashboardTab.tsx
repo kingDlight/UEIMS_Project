@@ -166,7 +166,7 @@ export const StudentDashboardTab: React.FC = () => {
                   <div style={{ fontSize: 28, fontWeight: 900, color: cc.text, lineHeight: 1.05, fontVariantNumeric: 'tabular-nums' }}>68%</div>
                   <div style={{ fontSize: 12, color: cc.success, fontWeight: 700, marginTop: 4 }}>On track</div>
                 </div>
-                <div style={{ width: 62, height: 62, borderRadius: 18, background: `linear-gradient(135deg, ${cc.primary}26, ${cc.primary}10)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: 62, height: 62, borderRadius: 18, background: `linear-gradient(135deg, ${cc.primary}26, ${cc.primaryDark}10)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <TrophyOutlined style={{ fontSize: 22, color: cc.primary }} />
                 </div>
               </div>

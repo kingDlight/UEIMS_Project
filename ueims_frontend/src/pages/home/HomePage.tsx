@@ -130,7 +130,7 @@ export const HomePage: React.FC = () => {
 
   const toggleTheme = useCallback(() => {
     document.documentElement.classList.add('theme-transitioning');
-    setIsDark(prev => !prev);
+    setIsDark((prev: boolean) => !prev);
     if (themeTimeoutRef.current) clearTimeout(themeTimeoutRef.current);
     themeTimeoutRef.current = setTimeout(() => {
       document.documentElement.classList.remove('theme-transitioning');
