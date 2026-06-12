@@ -229,7 +229,7 @@ export const JobBoardTab: React.FC = () => {
                 <p style={{ fontSize: 13, color: cc.textMuted, margin: '0 0 14px', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{job.description || 'Job description...'}</p>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 14, borderTop: `1px solid ${cc.borderSubtle}` }}>
                   <SmallBadge label={job.status === 'OPEN' ? 'Open' : 'Closed'} variant={job.status === 'OPEN' ? 'success' : 'neutral'} />
-                  <CTAButton variant="ghost" size="sm" icon={<RightOutlined />} onClick={(e) => { e.stopPropagation(); setSelectedJob(job); }}>View details</CTAButton>
+                  <CTAButton variant="ghost" size="sm" icon={<RightOutlined />} onClick={(e) => { e?.stopPropagation(); setSelectedJob(job); }}>View details</CTAButton>
                 </div>
               </NeuSurface>
             </motion.div>

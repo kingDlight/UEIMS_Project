@@ -199,13 +199,21 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
   const [updatingProfile, setUpdatingProfile] = useState(false);
 
   useEffect(() => {
-    if (user?.phone) setPhone(user.phone);
+    if ((user as any)?.phone) setPhone((user as any).phone);
   }, [user]);
 
   const handleUpdateProfile = async () => {
+    const currentPhone = (user as any)?.phone || '';
+    const newPhone = phone || '';
+    
+    if (currentPhone === newPhone) {
+      message.info('Không có thay đổi nào để cập nhật');
+      return;
+    }
+
     try {
       setUpdatingProfile(true);
-      await api.put('/users/myInfo', { ...user, phone });
+      await api.put('/users/myInfo', { ...(user as any), phone });
       message.success('Cập nhật hồ sơ thành công!');
     } catch (err: any) {
       message.error(err.response?.data?.message || 'Cập nhật thất bại!');
