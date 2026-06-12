@@ -122,9 +122,9 @@ public class ApplicationServiceImpl implements ApplicationService {
         String cvUrl = request.getCvFileUrl();
         if (cvUrl == null || cvUrl.trim().isEmpty()) {
             // Try to get from student's profile
-            var studentProfile = studentProfileRepository.findByUser_UserId(student.getUserId()).orElse(null);
-            if (studentProfile != null && studentProfile.getCvFileUrl() != null && !studentProfile.getCvFileUrl().isEmpty()) {
-                cvUrl = studentProfile.getCvFileUrl();
+            var studentProfile = studentProfileRepository.findByUser_UserId(student.getUserId());
+            if (studentProfile != null && studentProfile.getCvUrl() != null && !studentProfile.getCvUrl().isEmpty()) {
+                cvUrl = studentProfile.getCvUrl();
             } else {
                 throw new AppException(ErrorCode.CV_NOT_UPLOADED);
             }

@@ -112,16 +112,26 @@ export const ProfileTab: React.FC = () => {
     try {
       setLoading(true);
       const [userRes, profileRes] = await Promise.all([
-        api.get('/users/myInfo'),
+        api.get('/users/myInfo').catch((err) => {
+          console.error('Failed to fetch user info:', err);
+          return { data: null, error: err };
+        }),
         StudentProfileService.getMyProfile().catch(() => ({ data: null })),
       ]);
-      const userInfo = userRes.data;
-      const profileData = profileRes.data?.result ?? profileRes.data;
+      
+      const userInfo = userRes?.data;
+      const profileData = profileRes?.data?.result ?? profileRes?.data;
+      
+      if (!userInfo && !profileData) {
+        console.warn('Unable to fetch profile data');
+        return;
+      }
+      
       setProfile({ ...userInfo, ...profileData });
       if (profileData?.profileId) {
         setProfileId(profileData.profileId);
       }
-      setFormData({ phone: userInfo.phone || '', skills: userInfo.skills || profileData?.skills || '' });
+      setFormData({ phone: userInfo?.phone || '', skills: userInfo?.skills || profileData?.skills || '' });
     } catch (err) {
       console.error('Failed to fetch profile', err);
     } finally {

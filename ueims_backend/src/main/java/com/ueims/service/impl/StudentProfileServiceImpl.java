@@ -153,8 +153,13 @@ public class StudentProfileServiceImpl implements StudentProfileService {
             Path path = uploadDir.resolve(stored);
             file.transferTo(path.toFile());
             profile.setCvUrl("/uploads/cv/" + stored);
-            return repository.save(profile);
+            System.out.println("[CV Upload] Saving CV URL to profile: " + profile.getCvUrl());
+            StudentProfile saved = repository.save(profile);
+            System.out.println("[CV Upload] Profile saved successfully with CV: " + saved.getCvUrl());
+            return saved;
         } catch (IOException e) {
+            System.err.println("[CV Upload] IOException: " + e.getMessage());
+            e.printStackTrace();
             throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
         }
     }
