@@ -3,7 +3,7 @@ import { Spin } from 'antd';
 import { BookOutlined, BankOutlined } from '@ant-design/icons';
 import { NeuSurface } from '../components/shared/NeuSurface';
 import { SmallBadge } from '../components/shared/SmallBadge';
-import { api } from '@/services/api';
+import { InternshipPlanService } from '@/services/InternshipPlanService';
 import { cc, hexToRgba } from '../constants';
 
 const EmptyState: React.FC<{ icon: React.ReactNode; title: string; description: string }> = ({ icon, title, description }) => (
@@ -23,8 +23,9 @@ export const TrainingPlanTab: React.FC = () => {
   const fetchPlan = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/training-plans/my-plan');
-      setPlan(res.data);
+      const res = await InternshipPlanService.getMyPlan();
+      const data = res.data?.result ?? res.data;
+      setPlan(data || null);
     } catch (err) {
       console.error('Failed to fetch training plan', err);
     } finally {

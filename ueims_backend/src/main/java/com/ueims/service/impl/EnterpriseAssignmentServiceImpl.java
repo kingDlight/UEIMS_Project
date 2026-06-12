@@ -27,6 +27,11 @@ public class EnterpriseAssignmentServiceImpl implements EnterpriseAssignmentServ
     }
 
     @Override
+    public EnterpriseAssignment findMyAssignment(UUID studentId) {
+        return repository.findByStudent_UserId(studentId).orElse(null);
+    }
+
+    @Override
     public EnterpriseAssignment save(EnterpriseAssignment entity) {
         return repository.save(entity);
     }

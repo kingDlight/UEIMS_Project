@@ -10,6 +10,8 @@ public interface FinalReportService {
 
     FinalReport findById(UUID id);
 
+    FinalReport findMyReport(UUID studentId);
+
     FinalReport save(FinalReport entity);
 
     FinalReport uploadFinalReport(UUID assignmentId, org.springframework.web.multipart.MultipartFile file);

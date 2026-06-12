@@ -34,6 +34,11 @@ public class JobPostServiceImpl implements JobPostService {
     }
 
     @Override
+    public List<JobPost> findActive() {
+        return repository.findByStatus("OPEN");
+    }
+
+    @Override
     public JobPost findById(UUID id) {
         return repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.JOB_POST_NOT_FOUND));
     }

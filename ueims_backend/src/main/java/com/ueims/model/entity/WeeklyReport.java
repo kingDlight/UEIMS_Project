@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import lombok.*;
 
 @Entity
@@ -21,6 +23,7 @@ public class WeeklyReport extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "assignment_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "enterprise", "student", "semester"})
     private EnterpriseAssignment assignment;
 
     @Column(name = "week_number", nullable = false)
@@ -44,6 +47,9 @@ public class WeeklyReport extends BaseEntity {
     @Column(name = "status", nullable = false, length = 20)
     @Builder.Default
     private String status = "NOT_SUBMITTED";
+
+    @Column(name = "feedback", columnDefinition = "TEXT")
+    private String feedback;
 
     @Column(name = "submitted_at")
     private LocalDateTime submittedAt;

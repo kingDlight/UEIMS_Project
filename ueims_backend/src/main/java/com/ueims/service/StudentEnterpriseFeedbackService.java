@@ -8,6 +8,8 @@ import com.ueims.model.entity.StudentEnterpriseFeedback;
 public interface StudentEnterpriseFeedbackService {
     List<StudentEnterpriseFeedback> findAll();
 
+    List<StudentEnterpriseFeedback> findMyFeedbacks(UUID studentId);
+
     StudentEnterpriseFeedback findById(UUID id);
 
     StudentEnterpriseFeedback save(StudentEnterpriseFeedback entity);

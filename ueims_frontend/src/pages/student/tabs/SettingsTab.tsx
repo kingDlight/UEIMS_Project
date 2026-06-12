@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { message } from 'antd';
 import { LockOutlined, BellOutlined, SaveOutlined } from '@ant-design/icons';
 import { NeuSurface } from '../components/shared/NeuSurface';
+import { AuthService } from '@/services/AuthService';
 import { api } from '@/services/api';
 
 const cc = {
@@ -63,7 +64,7 @@ export const SettingsTab: React.FC = () => {
     }
     try {
       setLoading(true);
-      await api.put('/users/change-password', { currentPassword: formData.currentPassword, newPassword: formData.newPassword });
+      await AuthService.changePassword({ oldPassword: formData.currentPassword, newPassword: formData.newPassword });
       message.success('Password changed successfully!');
       setFormData({ currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch (err: any) {

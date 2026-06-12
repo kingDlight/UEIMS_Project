@@ -40,6 +40,11 @@ public class StudentEnterpriseFeedbackServiceImpl implements StudentEnterpriseFe
     }
 
     @Override
+    public List<StudentEnterpriseFeedback> findMyFeedbacks(UUID studentId) {
+        return repository.findByStudent_UserId(studentId);
+    }
+
+    @Override
     public StudentEnterpriseFeedback save(StudentEnterpriseFeedback entity) {
         User currentUser = getCurrentUser();
 

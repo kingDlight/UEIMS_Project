@@ -10,6 +10,8 @@ public interface StudentProfileService {
 
     StudentProfile findById(UUID id);
 
+    StudentProfile findByUserId(UUID userId);
+
     StudentProfile save(StudentProfile entity);
 
     StudentProfile updateProfile(UUID id, com.ueims.dto.request.StudentProfileUpdateRequest request);

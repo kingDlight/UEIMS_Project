@@ -9,6 +9,7 @@ import { AnimatedStatCard } from '../components/shared/AnimatedStatCard';
 import { Sparkline } from '../components/charts/Sparkline';
 import { AreaChart } from '../components/charts/AreaChart';
 import { useNavigate } from 'react-router-dom';
+import { StudentDashboardService, type StudentDashboardStats } from '@/services/StudentDashboardService';
 
 const AnimatedNumber: React.FC<{ value: number }> = ({ value }) => {
   const [displayValue, setDisplayValue] = useState(0);
@@ -22,7 +23,9 @@ const AnimatedNumber: React.FC<{ value: number }> = ({ value }) => {
 export const StudentDashboardTab: React.FC = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({ applications: 0, interviews: 0, reports: 0, daysRemaining: 0 });
+  const [stats, setStats] = useState<StudentDashboardStats>({
+    applications: 0, interviews: 0, reports: 0, daysRemaining: 0, semesterName: '—', semesterStatus: 'N/A',
+  });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -33,17 +36,10 @@ export const StudentDashboardTab: React.FC = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await fetch('http://localhost:8080/api/dashboard/student-stats', {
-          headers: { Authorization: `Bearer ${localStorage.getItem('ueims_token')}` }
-        });
-        if (res.ok) {
-          const data = await res.json();
-          setStats(data);
-        } else {
-          setStats({ applications: 3, interviews: 1, reports: 4, daysRemaining: 28 });
-        }
+        const data = await StudentDashboardService.getStats();
+        setStats(data);
       } catch {
-        setStats({ applications: 3, interviews: 1, reports: 4, daysRemaining: 28 });
+        // fallback: keep zero values
       } finally {
         setLoading(false);
       }
@@ -87,7 +83,7 @@ export const StudentDashboardTab: React.FC = () => {
           <div style={{ minWidth: 0, flex: '1 1 480px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <div>
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '7px 12px', borderRadius: 999, background: 'rgba(233,101,0,.08)', color: cc.primaryDark, fontSize: 12, fontWeight: 700, marginBottom: 14 }}>
-                <CalendarOutlined /> Summer 2026
+                <CalendarOutlined /> {stats.semesterName || 'Semester'}
               </div>
               <h1 style={{ fontSize: 34, lineHeight: 1.06, fontWeight: 900, color: cc.text, margin: 0, letterSpacing: '-1.2px' }}>Your internship journey, at a glance.</h1>
               <p style={{ fontSize: 14.5, color: cc.textMuted, marginTop: 10, maxWidth: 720, lineHeight: 1.7 }}>
@@ -121,7 +117,7 @@ export const StudentDashboardTab: React.FC = () => {
                   <div style={{ fontSize: 28, fontWeight: 900, color: cc.text, lineHeight: 1.05, fontVariantNumeric: 'tabular-nums' }}>68%</div>
                   <div style={{ fontSize: 12, color: cc.success, fontWeight: 700, marginTop: 4 }}>On track</div>
                 </div>
-                <div style={{ width: 62, height: 62, borderRadius: 18, background: `linear-gradient(135deg, ${cc.primary}26, ${cc.primaryLight}10)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: 62, height: 62, borderRadius: 18, background: `linear-gradient(135deg, ${cc.primary}26, ${cc.primary}10)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <TrophyOutlined style={{ fontSize: 22, color: cc.primary }} />
                 </div>
               </div>
@@ -145,7 +141,7 @@ export const StudentDashboardTab: React.FC = () => {
             </div>
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
               <button onClick={() => navigate('/student-dashboard/reports')} style={{ padding: '11px 16px', borderRadius: 16, border: 'none', background: 'linear-gradient(135deg, #FF662C, #FF824D, #FF9B73)', color: '#fff', fontWeight: 800, boxShadow: '0 12px 28px rgba(233,101,0,.22)', cursor: 'pointer' }}>Submit Report</button>
-              <button onClick={() => navigate('/student-dashboard/jobs')} style={{ padding: '11px 16px', borderRadius: 16, border: 'none', background: '#fff', color: cc.primary, fontWeight: 800, boxShadow: '0 8px 18px rgba(15,23,42,.05)', cursor: 'pointer', border: `1.5px solid ${cc.primary}` }}>Browse Jobs</button>
+              <button onClick={() => navigate('/student-dashboard/jobs')} style={{ padding: '11px 16px', borderRadius: 16, border: `1.5px solid ${cc.primary}`, background: '#fff', color: cc.primary, fontWeight: 800, boxShadow: '0 8px 18px rgba(15,23,42,.05)', cursor: 'pointer' }}>Browse Jobs</button>
             </div>
           </div>
         </div>

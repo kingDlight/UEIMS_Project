@@ -8,6 +8,8 @@ import com.ueims.model.entity.ReportFeedback;
 public interface ReportFeedbackService {
     List<ReportFeedback> findAll();
 
+    List<ReportFeedback> findMyFeedbacks(UUID studentId);
+
     ReportFeedback findById(UUID id);
 
     ReportFeedback save(ReportFeedback entity);

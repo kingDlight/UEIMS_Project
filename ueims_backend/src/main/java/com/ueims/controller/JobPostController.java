@@ -25,6 +25,11 @@ public class JobPostController {
         return ApiResponse.<List<JobPost>>builder().result(service.findAll()).build();
     }
 
+    @GetMapping("/active")
+    public ApiResponse<List<JobPost>> getActive() {
+        return ApiResponse.<List<JobPost>>builder().result(service.findActive()).build();
+    }
+
     @GetMapping("/{id}")
     public ApiResponse<JobPost> getById(@PathVariable UUID id) {
         return ApiResponse.<JobPost>builder().result(service.findById(id)).build();

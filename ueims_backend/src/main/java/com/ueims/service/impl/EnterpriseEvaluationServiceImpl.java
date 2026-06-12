@@ -54,6 +54,12 @@ public class EnterpriseEvaluationServiceImpl implements EnterpriseEvaluationServ
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public EnterpriseEvaluation findMyEvaluation(UUID studentId) {
+        return repository.findByAssignment_Student_UserId(studentId).orElse(null);
+    }
+
+    @Override
     @Transactional
     public EnterpriseEvaluation save(EnterpriseEvaluation entity) {
         if (entity.getAssignment() == null || entity.getAssignment().getAssignmentId() == null) {

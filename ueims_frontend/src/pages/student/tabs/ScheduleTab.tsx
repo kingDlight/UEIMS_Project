@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { CalendarOutlined, ClockCircleOutlined, BankOutlined, CheckCircleOutlined, CloseCircleOutlined, WarningOutlined, ExclamationCircleOutlined, LinkOutlined, EnvironmentOutlined } from '@ant-design/icons';
 import { NeuSurface } from '../components/shared/NeuSurface';
 import { SmallBadge } from '../components/shared/SmallBadge';
-import { api } from '@/services/api';
+import { InterviewService } from '@/services/InterviewService';
 import { cc, hexToRgba } from '../constants';
 
 const CTAButton: React.FC<{
@@ -65,7 +65,7 @@ export const ScheduleTab: React.FC = () => {
   const fetchInterviews = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/interviews/my-schedules');
+      const res = await InterviewService.getMySchedules();
       setInterviews(res.data || []);
     } catch (err) {
       console.error('Failed to fetch interviews', err);
@@ -76,7 +76,7 @@ export const ScheduleTab: React.FC = () => {
 
   const handleConfirm = async (interviewId: string) => {
     try {
-      await api.put(`/interviews/${interviewId}/confirm`);
+      await InterviewService.confirm(interviewId);
       message.success('Interview confirmed successfully!');
       setConfirming(null);
       fetchInterviews();
@@ -95,7 +95,7 @@ export const ScheduleTab: React.FC = () => {
       return;
     }
     try {
-      await api.put(`/interviews/${declining.interviewId}/decline`, { reason: declineReason });
+      await InterviewService.decline(declining.interviewId, declineReason);
       message.success('You have declined the interview invitation.');
       setDeclining(null);
       setDeclineReason('');

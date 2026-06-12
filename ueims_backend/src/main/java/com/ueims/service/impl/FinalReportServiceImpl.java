@@ -38,6 +38,11 @@ public class FinalReportServiceImpl implements FinalReportService {
     }
 
     @Override
+    public FinalReport findMyReport(UUID studentId) {
+        return repository.findByAssignment_Student_UserId(studentId).orElse(null);
+    }
+
+    @Override
     public FinalReport save(FinalReport entity) {
         return repository.save(entity);
     }

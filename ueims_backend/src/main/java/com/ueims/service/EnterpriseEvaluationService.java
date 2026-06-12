@@ -10,6 +10,8 @@ public interface EnterpriseEvaluationService {
 
     EnterpriseEvaluation findById(UUID id);
 
+    EnterpriseEvaluation findMyEvaluation(UUID studentId);
+
     EnterpriseEvaluation save(EnterpriseEvaluation entity);
 
     void deleteById(UUID id);

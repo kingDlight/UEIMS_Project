@@ -3,6 +3,7 @@ import { message, Spin } from 'antd';
 import { motion } from 'framer-motion';
 import { StarOutlined, CheckCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { NeuSurface } from '../components/shared/NeuSurface';
+import { StudentEnterpriseFeedbackService } from '@/services/StudentEnterpriseFeedbackService';
 import { api } from '@/services/api';
 
 const cc = {
@@ -67,7 +68,7 @@ export const FeedbackTab: React.FC = () => {
   const fetchFeedbacks = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/feedbacks/my-feedbacks');
+      const res = await StudentEnterpriseFeedbackService.getMyFeedbacks();
       setFeedbacks(res.data || []);
     } catch (err) {
       console.error('Failed to fetch feedbacks', err);
@@ -89,7 +90,15 @@ export const FeedbackTab: React.FC = () => {
     }
     try {
       setSubmitting(true);
-      await api.post('/feedbacks', { ...ratings, comment });
+      await StudentEnterpriseFeedbackService.create({
+        trainingQualityScore: trainingQuality,
+        supervisorSupportScore: supervisorSupport,
+        workEnvironmentScore: workEnvironment,
+        overallScore: overall,
+        positiveFeedback: comment,
+        improvementFeedback: '',
+        additionalComments: '',
+      });
       message.success('Thank you! Your feedback has been submitted successfully.');
       setRatings({ trainingQuality: 5, supervisorSupport: 5, workEnvironment: 5, overall: 5 });
       setComment('');
@@ -167,11 +176,13 @@ export const FeedbackTab: React.FC = () => {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                      <span style={{ fontSize: 18 }}>{'★'.repeat(fb.rating || 0)}</span>
-                      <span style={{ fontSize: 12, color: cc.info, background: cc.infoMuted, padding: '2px 8px', borderRadius: 4 }}>{fb.enterpriseName || 'Company'}</span>
+                      <span style={{ fontSize: 18 }}>{'★'.repeat(fb.overallScore || 0)}</span>
+                      <span style={{ fontSize: 12, color: cc.info, background: cc.infoMuted, padding: '2px 8px', borderRadius: 4 }}>{fb.enterprise?.enterpriseName || 'Company'}</span>
                     </div>
-                    <p style={{ fontSize: 14, color: cc.text, margin: 0, lineHeight: 1.5 }}>{fb.comment}</p>
-                    <p style={{ fontSize: 12, color: cc.textMuted, margin: '8px 0 0' }}>{fb.createdAt ? new Date(fb.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}</p>
+                    {fb.positiveFeedback && (
+                      <p style={{ fontSize: 14, color: cc.text, margin: '0 0 4px', lineHeight: 1.5 }}>{fb.positiveFeedback}</p>
+                    )}
+                    <p style={{ fontSize: 12, color: cc.textMuted, margin: '8px 0 0' }}>{fb.submittedAt ? new Date(fb.submittedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}</p>
                   </div>
                 </div>
               </NeuSurface>

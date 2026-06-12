@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { FileTextOutlined, EyeOutlined, CloseCircleOutlined, BankOutlined } from '@ant-design/icons';
 import { NeuSurface } from '../components/shared/NeuSurface';
 import { SmallBadge } from '../components/shared/SmallBadge';
-import { api } from '@/services/api';
+import { ApplicationService } from '@/services/ApplicationService';
 import { cc, hexToRgba } from '../constants';
 
 const CTAButton: React.FC<{
@@ -63,8 +63,9 @@ export const ApplicationsTab: React.FC = () => {
   const fetchApplications = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/applications/my-applications');
-      setApplications(res.data || []);
+      const res = await ApplicationService.getMyApplications();
+      const apps = res.data?.result ?? res.data ?? [];
+      setApplications(Array.isArray(apps) ? apps : []);
     } catch (err) {
       console.error('Failed to fetch applications', err);
     } finally {
@@ -74,7 +75,7 @@ export const ApplicationsTab: React.FC = () => {
 
   const handleWithdraw = async (applicationId: string) => {
     try {
-      await api.put(`/applications/${applicationId}/withdraw`);
+      await ApplicationService.withdraw(applicationId);
       message.success('Application withdrawn successfully!');
       fetchApplications();
     } catch (err: any) {

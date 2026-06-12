@@ -83,4 +83,13 @@ public class UserServiceImpl implements UserService {
                 .status(user.getStatus())
                 .build();
     }
+
+    @Override
+    public UUID getCurrentUserId() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return repository
+                .findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED))
+                .getUserId();
+    }
 }

@@ -9,6 +9,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.ueims.service.EnterpriseEvaluationService;
+import com.ueims.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,11 +19,22 @@ import lombok.RequiredArgsConstructor;
 public class EnterpriseEvaluationController {
     private final EnterpriseEvaluationService service;
     private final com.ueims.mapper.EnterpriseEvaluationMapper mapper;
+    private final UserService userService;
 
     @GetMapping
     @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
     public ResponseEntity<java.util.List<com.ueims.dto.response.EnterpriseEvaluationDTO>> getAll() {
         return ResponseEntity.ok(service.findAll().stream().map(mapper::toDto).toList());
+    }
+
+    @GetMapping("/my-evaluation")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<?> getMyEvaluation() {
+        var evaluation = service.findMyEvaluation(userService.getCurrentUserId());
+        if (evaluation == null) {
+            return ResponseEntity.ok(java.util.Map.of("result", java.util.Map.of()));
+        }
+        return ResponseEntity.ok(java.util.Map.of("result", mapper.toDto(evaluation)));
     }
 
     @GetMapping("/{id}")

@@ -1,5 +1,7 @@
 package com.ueims.model.entity;
 
+import java.util.List;
+
 import jakarta.persistence.*;
 
 import lombok.*;
@@ -27,4 +29,8 @@ public class InternshipPlan extends BaseEntity {
     @Column(name = "is_locked", nullable = false)
     @Builder.Default
     private Boolean isLocked = false;
+
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "plan_id")
+    private List<InternshipPlanItem> items;
 }

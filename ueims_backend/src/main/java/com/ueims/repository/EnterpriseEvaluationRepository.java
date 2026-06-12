@@ -11,4 +11,6 @@ import com.ueims.model.entity.*;
 @Repository
 public interface EnterpriseEvaluationRepository extends JpaRepository<EnterpriseEvaluation, UUID> {
     Optional<EnterpriseEvaluation> findByAssignment_AssignmentId(UUID assignmentId);
+
+    Optional<EnterpriseEvaluation> findByAssignment_Student_UserId(UUID studentId);
 }

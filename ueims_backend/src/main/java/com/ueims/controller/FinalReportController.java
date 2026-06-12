@@ -5,10 +5,12 @@ import java.util.UUID;
 import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.ueims.service.FinalReportService;
+import com.ueims.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -18,10 +20,17 @@ import lombok.RequiredArgsConstructor;
 public class FinalReportController {
     private final FinalReportService service;
     private final com.ueims.mapper.FinalReportMapper mapper;
+    private final UserService userService;
 
     @GetMapping
     public ResponseEntity<java.util.List<com.ueims.dto.response.FinalReportDTO>> getAll() {
         return ResponseEntity.ok(service.findAll().stream().map(mapper::toDto).toList());
+    }
+
+    @GetMapping("/my-report")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<com.ueims.dto.response.FinalReportDTO> getMyReport() {
+        return ResponseEntity.ok(mapper.toDto(service.findMyReport(userService.getCurrentUserId())));
     }
 
     @GetMapping("/{id}")

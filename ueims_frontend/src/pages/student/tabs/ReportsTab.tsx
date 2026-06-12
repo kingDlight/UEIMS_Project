@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { SnippetsOutlined, PlusOutlined, SendOutlined, EditOutlined, EyeOutlined, WarningOutlined } from '@ant-design/icons';
 import { NeuSurface } from '../components/shared/NeuSurface';
 import { SmallBadge } from '../components/shared/SmallBadge';
-import { api } from '@/services/api';
+import { WeeklyReportService } from '@/services/WeeklyReportService';
 import { cc, hexToRgba } from '../constants';
 
 const CTAButton: React.FC<{
@@ -60,15 +60,16 @@ export const ReportsTab: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [editingReport, setEditingReport] = useState<any>(null);
-  const [formData, setFormData] = useState({ weekNumber: '', content: '', attachments: [] as File[] });
+  const [formData, setFormData] = useState({ weekNumber: '', tasksCompleted: '', issuesChallenges: '', lessonsLearned: '', planNextWeek: '' });
 
   useEffect(() => { fetchReports(); }, []);
 
   const fetchReports = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/weekly-reports/my-reports');
-      setReports(res.data || []);
+      const res = await WeeklyReportService.getMyReports();
+      const data = res.data?.result ?? res.data;
+      setReports(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error('Failed to fetch reports', err);
     } finally {
@@ -77,20 +78,22 @@ export const ReportsTab: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    if (!formData.weekNumber || !formData.content) {
+    if (!formData.weekNumber || (!formData.tasksCompleted && !formData.lessonsLearned)) {
       message.error('Please fill in all required fields!');
       return;
     }
     try {
       setSubmitting(true);
-      const data = new FormData();
-      data.append('weekNumber', formData.weekNumber);
-      data.append('content', formData.content);
-      formData.attachments.forEach(f => data.append('files', f));
-      await api.post('/weekly-reports', data, { headers: { 'Content-Type': 'multipart/form-data' } });
+      await WeeklyReportService.create({
+        weekNumber: parseInt(formData.weekNumber),
+        tasksCompleted: formData.tasksCompleted,
+        issuesChallenges: formData.issuesChallenges,
+        lessonsLearned: formData.lessonsLearned,
+        planNextWeek: formData.planNextWeek,
+      });
       message.success('Report submitted successfully!');
       setShowForm(false);
-      setFormData({ weekNumber: '', content: '', attachments: [] });
+      setFormData({ weekNumber: '', tasksCompleted: '', issuesChallenges: '', lessonsLearned: '', planNextWeek: '' });
       fetchReports();
     } catch (err: any) {
       message.error(err.response?.data?.message || 'Submit failed!');
@@ -100,16 +103,21 @@ export const ReportsTab: React.FC = () => {
   };
 
   const handleUpdate = async () => {
-    if (!formData.content) {
+    if (!formData.lessonsLearned) {
       message.error('Report content cannot be empty!');
       return;
     }
     try {
       setSubmitting(true);
-      await api.put(`/weekly-reports/${editingReport.reportId}`, { content: formData.content });
+      await WeeklyReportService.update(editingReport.reportId, {
+        tasksCompleted: formData.tasksCompleted,
+        issuesChallenges: formData.issuesChallenges,
+        lessonsLearned: formData.lessonsLearned,
+        planNextWeek: formData.planNextWeek,
+      });
       message.success('Report updated successfully!');
       setEditingReport(null);
-      setFormData({ weekNumber: '', content: '', attachments: [] });
+      setFormData({ weekNumber: '', tasksCompleted: '', issuesChallenges: '', lessonsLearned: '', planNextWeek: '' });
       fetchReports();
     } catch (err: any) {
       message.error(err.response?.data?.message || 'Update failed!');
@@ -160,11 +168,23 @@ export const ReportsTab: React.FC = () => {
             <input type="number" value={formData.weekNumber} onChange={(e) => setFormData({ ...formData, weekNumber: e.target.value })} style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13, fontFamily: "'Inter', sans-serif" }} />
           </div>
           <div style={{ marginBottom: 16 }}>
-            <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>Report Content *</label>
-            <textarea value={formData.content} onChange={(e) => setFormData({ ...formData, content: e.target.value })} rows={5} placeholder="Describe your work progress this week..." style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13, fontFamily: "'Inter', sans-serif", resize: 'vertical' }} />
+            <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>Tasks Completed *</label>
+            <textarea value={formData.tasksCompleted} onChange={(e) => setFormData({ ...formData, tasksCompleted: e.target.value })} rows={3} placeholder="What did you accomplish this week?" style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13, fontFamily: "'Inter', sans-serif", resize: 'vertical' }} />
+          </div>
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>Issues & Challenges</label>
+            <textarea value={formData.issuesChallenges} onChange={(e) => setFormData({ ...formData, issuesChallenges: e.target.value })} rows={2} placeholder="Any challenges you faced..." style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13, fontFamily: "'Inter', sans-serif", resize: 'vertical' }} />
+          </div>
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>Lessons Learned</label>
+            <textarea value={formData.lessonsLearned} onChange={(e) => setFormData({ ...formData, lessonsLearned: e.target.value })} rows={2} placeholder="What did you learn this week?" style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13, fontFamily: "'Inter', sans-serif", resize: 'vertical' }} />
+          </div>
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>Plan for Next Week</label>
+            <textarea value={formData.planNextWeek} onChange={(e) => setFormData({ ...formData, planNextWeek: e.target.value })} rows={2} placeholder="What are you planning for next week?" style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13, fontFamily: "'Inter', sans-serif", resize: 'vertical' }} />
           </div>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
-            <CTAButton variant="ghost" onClick={() => { setShowForm(false); setFormData({ weekNumber: '', content: '', attachments: [] }); }}>Cancel</CTAButton>
+            <CTAButton variant="ghost" onClick={() => { setShowForm(false); setFormData({ weekNumber: '', tasksCompleted: '', issuesChallenges: '', lessonsLearned: '', planNextWeek: '' }); }}>Cancel</CTAButton>
             <CTAButton variant="primary" icon={<SendOutlined />} onClick={handleSubmit} loading={submitting}>Submit</CTAButton>
           </div>
         </NeuSurface>
@@ -187,11 +207,23 @@ export const ReportsTab: React.FC = () => {
             </div>
           )}
           <div style={{ marginBottom: 16 }}>
-            <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>Revised Content *</label>
-            <textarea value={formData.content} onChange={(e) => setFormData({ ...formData, content: e.target.value })} rows={5} style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13, fontFamily: "'Inter', sans-serif", resize: 'vertical' }} />
+            <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>Tasks Completed *</label>
+            <textarea value={formData.tasksCompleted} onChange={(e) => setFormData({ ...formData, tasksCompleted: e.target.value })} rows={3} style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13, fontFamily: "'Inter', sans-serif", resize: 'vertical' }} />
+          </div>
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>Issues & Challenges</label>
+            <textarea value={formData.issuesChallenges} onChange={(e) => setFormData({ ...formData, issuesChallenges: e.target.value })} rows={2} style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13, fontFamily: "'Inter', sans-serif", resize: 'vertical' }} />
+          </div>
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>Lessons Learned</label>
+            <textarea value={formData.lessonsLearned} onChange={(e) => setFormData({ ...formData, lessonsLearned: e.target.value })} rows={2} style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13, fontFamily: "'Inter', sans-serif", resize: 'vertical' }} />
+          </div>
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>Plan for Next Week</label>
+            <textarea value={formData.planNextWeek} onChange={(e) => setFormData({ ...formData, planNextWeek: e.target.value })} rows={2} style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13, fontFamily: "'Inter', sans-serif", resize: 'vertical' }} />
           </div>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
-            <CTAButton variant="ghost" onClick={() => { setEditingReport(null); setFormData({ weekNumber: '', content: '', attachments: [] }); }}>Cancel</CTAButton>
+            <CTAButton variant="ghost" onClick={() => { setEditingReport(null); setFormData({ weekNumber: '', tasksCompleted: '', issuesChallenges: '', lessonsLearned: '', planNextWeek: '' }); }}>Cancel</CTAButton>
             <CTAButton variant="warning" icon={<SendOutlined />} onClick={handleUpdate} loading={submitting}>Resubmit Report</CTAButton>
           </div>
         </NeuSurface>
@@ -223,7 +255,7 @@ export const ReportsTab: React.FC = () => {
                     )}
                     <div style={{ display: 'flex', gap: 8 }}>
                       {report.status === 'REJECTED' && (
-                        <CTAButton variant="warning" size="sm" icon={<EditOutlined />} onClick={() => { setEditingReport(report); setFormData({ weekNumber: String(report.weekNumber), content: report.content || '', attachments: [] }); }}>Edit & Resubmit</CTAButton>
+                        <CTAButton variant="warning" size="sm" icon={<EditOutlined />} onClick={() => { setEditingReport(report); setFormData({ weekNumber: String(report.weekNumber), tasksCompleted: report.tasksCompleted || '', issuesChallenges: report.issuesChallenges || '', lessonsLearned: report.lessonsLearned || '', planNextWeek: report.planNextWeek || '' }); }}>Edit & Resubmit</CTAButton>
                       )}
                       <CTAButton variant="ghost" size="sm" icon={<EyeOutlined />}>View</CTAButton>
                     </div>

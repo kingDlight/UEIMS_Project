@@ -8,6 +8,7 @@ import {
 import { NeuSurface } from '../components/shared/NeuSurface';
 import { SmallPill } from '../components/shared/SmallPill';
 import { api } from '@/services/api';
+import { StudentProfileService } from '@/services/StudentProfileService';
 
 const CTAButton: React.FC<{
   children: React.ReactNode;
@@ -97,6 +98,7 @@ const cc = {
 
 export const ProfileTab: React.FC = () => {
   const [profile, setProfile] = useState<any>(null);
+  const [profileId, setProfileId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
@@ -109,9 +111,17 @@ export const ProfileTab: React.FC = () => {
   const fetchProfile = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/users/myInfo');
-      setProfile(res.data);
-      setFormData({ phone: res.data.phone || '', skills: res.data.skills || '' });
+      const [userRes, profileRes] = await Promise.all([
+        api.get('/users/myInfo'),
+        StudentProfileService.getMyProfile().catch(() => ({ data: null })),
+      ]);
+      const userInfo = userRes.data;
+      const profileData = profileRes.data?.result ?? profileRes.data;
+      setProfile({ ...userInfo, ...profileData });
+      if (profileData?.profileId) {
+        setProfileId(profileData.profileId);
+      }
+      setFormData({ phone: userInfo.phone || '', skills: userInfo.skills || profileData?.skills || '' });
     } catch (err) {
       console.error('Failed to fetch profile', err);
     } finally {
@@ -137,25 +147,32 @@ export const ProfileTab: React.FC = () => {
   };
 
   const handleUploadCV = async () => {
-    if (!cvFile) return;
+    if (!cvFile || !profileId) {
+      message.error('Profile not loaded yet. Please wait.');
+      return;
+    }
     try {
       setUploading(true);
-      const formData = new FormData();
-      formData.append('file', cvFile);
-      await api.post('/student-profiles/upload-cv', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+      const fd = new FormData();
+      fd.append('file', cvFile);
+      await StudentProfileService.uploadCV(profileId, fd);
       message.success('CV uploaded successfully!');
+      setCvFile(null);
       fetchProfile();
     } catch (err: any) {
       message.error(err.response?.data?.message || 'Upload failed!');
     } finally {
       setUploading(false);
-      setCvFile(null);
     }
   };
 
   const handleSaveProfile = async () => {
+    if (!profileId) {
+      message.error('Profile not loaded yet. Please wait.');
+      return;
+    }
     try {
-      await api.put('/student-profiles', formData);
+      await StudentProfileService.update(profileId, { skills: formData.skills });
       message.success('Profile updated successfully!');
       setEditing(false);
       fetchProfile();

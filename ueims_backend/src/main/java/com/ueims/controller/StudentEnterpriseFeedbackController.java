@@ -5,9 +5,11 @@ import java.util.UUID;
 import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.ueims.service.StudentEnterpriseFeedbackService;
+import com.ueims.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -17,10 +19,19 @@ import lombok.RequiredArgsConstructor;
 public class StudentEnterpriseFeedbackController {
     private final StudentEnterpriseFeedbackService service;
     private final com.ueims.mapper.StudentEnterpriseFeedbackMapper mapper;
+    private final UserService userService;
 
     @GetMapping
     public ResponseEntity<java.util.List<com.ueims.dto.response.StudentEnterpriseFeedbackDTO>> getAll() {
         return ResponseEntity.ok(service.findAll().stream().map(mapper::toDto).toList());
+    }
+
+    @GetMapping("/my-feedbacks")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<java.util.List<com.ueims.dto.response.StudentEnterpriseFeedbackDTO>> getMyFeedbacks() {
+        return ResponseEntity.ok(service.findMyFeedbacks(userService.getCurrentUserId()).stream()
+                .map(mapper::toDto)
+                .toList());
     }
 
     @GetMapping("/{id}")

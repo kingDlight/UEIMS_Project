@@ -24,6 +24,11 @@ public class ReportFeedbackServiceImpl implements ReportFeedbackService {
     }
 
     @Override
+    public List<ReportFeedback> findMyFeedbacks(UUID studentId) {
+        return repository.findByReport_Assignment_Student_UserId(studentId);
+    }
+
+    @Override
     public ReportFeedback findById(UUID id) {
         return repository.findById(id).orElse(null);
     }

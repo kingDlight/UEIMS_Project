@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.ueims.dto.request.StudentProfileUpdateRequest;
 import com.ueims.service.StudentProfileService;
+import com.ueims.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -20,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 public class StudentProfileController {
     private final StudentProfileService service;
     private final com.ueims.mapper.StudentProfileMapper mapper;
+    private final UserService userService;
 
     @GetMapping
     @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
@@ -27,11 +29,26 @@ public class StudentProfileController {
         return ResponseEntity.ok(service.findAll().stream().map(mapper::toDto).toList());
     }
 
+    @GetMapping("/my-profile")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<?> getMyProfile() {
+        UUID userId = userService.getCurrentUserId();
+        com.ueims.model.entity.StudentProfile profile = service.findByUserId(userId);
+        if (profile == null) {
+            return ResponseEntity.ok(java.util.Map.of("result", java.util.Map.of()));
+        }
+        return ResponseEntity.ok(java.util.Map.of("result", mapper.toDto(profile)));
+    }
+
     @GetMapping("/{id}")
     @PreAuthorize(
             "hasRole('STUDENT') or hasRole('ENTERPRISE') or hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
     public ResponseEntity<com.ueims.dto.response.StudentProfileDTO> getById(@PathVariable UUID id) {
-        return ResponseEntity.ok(mapper.toDto(service.findById(id)));
+        com.ueims.model.entity.StudentProfile profile = service.findById(id);
+        if (profile == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(mapper.toDto(profile));
     }
 
     @PostMapping

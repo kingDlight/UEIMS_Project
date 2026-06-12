@@ -44,6 +44,11 @@ public class StudentProfileServiceImpl implements StudentProfileService {
     }
 
     @Override
+    public StudentProfile findByUserId(UUID userId) {
+        return repository.findByUser_UserId(userId);
+    }
+
+    @Override
     public StudentProfile findById(UUID id) {
         StudentProfile profile =
                 repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.STUDENT_PROFILE_NOT_FOUND));

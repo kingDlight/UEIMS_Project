@@ -1,5 +1,8 @@
 package com.ueims.dto.response;
 
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.ueims.model.entity.InternshipPlan;
 
 import lombok.Data;
@@ -9,6 +12,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
+@JsonIgnoreProperties({"assignment", "createdAt", "updatedAt", "createdBy", "updatedBy"})
 public class InternshipPlanDTO extends InternshipPlan {
-    // DTO subclass to resolve java:S4684 while maintaining exact JSON serialization contract.
+    private String enterpriseName;
+    private String startDate;
+    private List<InternshipPlanItemDTO> tasks;
 }

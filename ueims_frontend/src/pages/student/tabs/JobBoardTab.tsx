@@ -4,7 +4,8 @@ import { motion } from 'framer-motion';
 import { TrophyOutlined, CalendarOutlined, TeamOutlined, ClockCircleOutlined, RightOutlined, SendOutlined, CloseCircleOutlined, WarningOutlined, SearchOutlined, EnvironmentOutlined } from '@ant-design/icons';
 import { NeuSurface } from '../components/shared/NeuSurface';
 import { SmallBadge } from '../components/shared/SmallBadge';
-import { api } from '@/services/api';
+import { JobPostService } from '@/services/JobPostService';
+import { ApplicationService } from '@/services/ApplicationService';
 import { cc, hexToRgba } from '../constants';
 
 const CTAButton: React.FC<{
@@ -71,8 +72,9 @@ export const JobBoardTab: React.FC = () => {
   const fetchJobs = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/job-posts/active');
-      setJobs(res.data || []);
+      const res = await JobPostService.getActive();
+      const jobs = res.data?.result ?? res.data ?? [];
+      setJobs(Array.isArray(jobs) ? jobs : []);
     } catch (err) {
       console.error('Failed to fetch jobs', err);
     } finally {
@@ -91,7 +93,7 @@ export const JobBoardTab: React.FC = () => {
     
     try {
       setApplying(true);
-      await api.post('/applications', { jobPostId: confirmApply.jobPostId });
+      await ApplicationService.create({ jobPostId: confirmApply.jobPostId });
       message.success('Application submitted successfully!');
       setConfirmApply(null);
       setSelectedJob(null);

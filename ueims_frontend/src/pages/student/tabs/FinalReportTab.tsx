@@ -3,6 +3,8 @@ import { message, Spin } from 'antd';
 import { FileOutlined, UploadOutlined, EyeOutlined } from '@ant-design/icons';
 import { NeuSurface } from '../components/shared/NeuSurface';
 import { SmallBadge } from '../components/shared/SmallBadge';
+import { FinalReportService } from '@/services/FinalReportService';
+import { EnterpriseAssignmentService } from '@/services/EnterpriseAssignmentService';
 import { api } from '@/services/api';
 import { cc, hexToRgba } from '../constants';
 
@@ -48,8 +50,9 @@ export const FinalReportTab: React.FC = () => {
   const fetchFinalReport = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/final-reports/my-report');
-      setFinalReport(res.data);
+      const res = await FinalReportService.getMyReport();
+      const data = res.data?.result ?? res.data;
+      setFinalReport(data || null);
     } catch {
       setFinalReport(null);
     } finally {
@@ -81,16 +84,21 @@ export const FinalReportTab: React.FC = () => {
     }
     try {
       setSubmitting(true);
-      const formData = new FormData();
-      formData.append('file', file);
-      await api.post('/final-reports', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+      // Get current student's assignment ID first
+      const assignmentRes = await EnterpriseAssignmentService.getMyAssignment();
+      const assignment = assignmentRes.data?.result ?? assignmentRes.data;
+      if (!assignment?.assignmentId) {
+        message.error('You do not have an active internship assignment yet.');
+        return;
+      }
+      await FinalReportService.upload(assignment.assignmentId, file);
       message.success('Final report submitted successfully!');
+      setFile(null);
       fetchFinalReport();
     } catch (err: any) {
       message.error(err.response?.data?.message || 'Submit failed!');
     } finally {
       setSubmitting(false);
-      setFile(null);
     }
   };
 
