@@ -81,6 +81,7 @@ public class UserServiceImpl implements UserService {
                 .fullName(user.getFullName())
                 .phone(user.getPhone())
                 .status(user.getStatus())
+                .avatarUrl(user.getAvatarUrl())
                 .build();
     }
 }

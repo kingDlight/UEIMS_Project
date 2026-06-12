@@ -356,9 +356,9 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
               >
                 <div className="modern-account-avatar" style={{ 
                   display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', color: '#fff',
-                  background: customAvatarUrl ? `url(${customAvatarUrl}) center/cover no-repeat` : undefined
+                  background: (customAvatarUrl || myProfile?.avatarUrl) ? `url(${customAvatarUrl || myProfile?.avatarUrl}) center/cover no-repeat` : undefined
                 }}>
-                  {!customAvatarUrl && (realName ? realName.substring(0, 2) : 'U')}
+                  {!(customAvatarUrl || myProfile?.avatarUrl) && (realName ? realName.substring(0, 2) : 'U')}
                 </div>
                 <div className="modern-account-info">
                   <div className="modern-account-name">{realName}</div>
@@ -532,12 +532,12 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
             <div style={{ position: 'relative' }}>
               <div style={{ 
                 width: 80, height: 80, borderRadius: '50%', 
-                background: customAvatarUrl ? `url(${customAvatarUrl}) center/cover no-repeat` : 'linear-gradient(135deg, #f97316, #fb923c)', 
+                background: (customAvatarUrl || myProfile?.avatarUrl) ? `url(${customAvatarUrl || myProfile?.avatarUrl}) center/cover no-repeat` : 'linear-gradient(135deg, #f97316, #fb923c)', 
                 display: 'flex', alignItems: 'center', justifyContent: 'center', 
                 color: '#fff', fontSize: 28, fontWeight: 800, fontFamily: 'Inter, sans-serif',
                 border: '4px solid #fff', boxShadow: '0 8px 16px -4px rgba(249, 115, 22, 0.3)'
               }}>
-                {!customAvatarUrl && (myProfile?.fullName ? myProfile.fullName.substring(0, 2).toUpperCase() : 'U')}
+                {!(customAvatarUrl || myProfile?.avatarUrl) && (myProfile?.fullName ? myProfile.fullName.substring(0, 2).toUpperCase() : 'U')}
               </div>
               
               <button
