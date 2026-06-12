@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { message, Spin, Pagination } from 'antd';
 import { motion } from 'framer-motion';
-import { FileTextOutlined, EyeOutlined, CloseCircleOutlined, BankOutlined } from '@ant-design/icons';
+import { FileTextOutlined, CloseCircleOutlined, DownOutlined, UpOutlined } from '@ant-design/icons';
 import { NeuSurface } from '../components/shared/NeuSurface';
 import { SmallBadge } from '../components/shared/SmallBadge';
 import { ApplicationService } from '@/services/ApplicationService';
@@ -57,7 +57,7 @@ export const ApplicationsTab: React.FC = () => {
   const [applications, setApplications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>('all');
-  const [viewingApp, setViewingApp] = useState<any>(null);
+  const [expandedApp, setExpandedApp] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 5;
 
@@ -154,42 +154,6 @@ export const ApplicationsTab: React.FC = () => {
         ))}
       </div>
 
-      {/* View Application Modal */}
-      {viewingApp && (
-        <NeuSurface style={{ padding: 24, marginBottom: 20, border: `2px solid ${cc.primary}` }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <h3 style={{ fontSize: 16, fontWeight: 700, color: cc.textPrimary, margin: 0 }}>Application Details</h3>
-            <CTAButton variant="ghost" size="sm" onClick={() => setViewingApp(null)}>Close</CTAButton>
-          </div>
-          <div style={{ display: 'grid', gap: 16 }}>
-            <div>
-              <p style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, margin: '0 0 4px' }}>Position</p>
-              <p style={{ fontSize: 13, color: cc.textPrimary, margin: 0 }}>{viewingApp.jobTitle || 'N/A'}</p>
-            </div>
-            <div>
-              <p style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, margin: '0 0 4px' }}>Enterprise</p>
-              <p style={{ fontSize: 13, color: cc.textPrimary, margin: 0 }}>{viewingApp.enterpriseName || 'N/A'}</p>
-            </div>
-            <div>
-              <p style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, margin: '0 0 4px' }}>Status</p>
-              <SmallBadge label={statusLabel(viewingApp.status)} variant={statusVariant(viewingApp.status)} />
-            </div>
-            {viewingApp.coverLetter && (
-              <div>
-                <p style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, margin: '0 0 4px' }}>Cover Letter</p>
-                <p style={{ fontSize: 13, color: cc.textPrimary, margin: 0, whiteSpace: 'pre-wrap' }}>{viewingApp.coverLetter}</p>
-              </div>
-            )}
-            {viewingApp.appliedAt && (
-              <div>
-                <p style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, margin: '0 0 4px' }}>Applied At</p>
-                <p style={{ fontSize: 13, color: cc.textPrimary, margin: 0 }}>{new Date(viewingApp.appliedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
-              </div>
-            )}
-          </div>
-        </NeuSurface>
-      )}
-
       {filteredApps.length === 0 ? (
         <EmptyState icon={<FileTextOutlined style={{ fontSize: 32 }} />} title="No applications yet" description="Start applying to internships to see your applications here" />
       ) : (
@@ -213,9 +177,37 @@ export const ApplicationsTab: React.FC = () => {
                       {app.status === 'PENDING' && (
                         <CTAButton variant="danger" icon={<CloseCircleOutlined />} onClick={() => handleWithdraw(app.applicationId)}>Withdraw</CTAButton>
                       )}
-                      <CTAButton variant="ghost" icon={<EyeOutlined />} onClick={() => setViewingApp(app)}>View</CTAButton>
+                      <CTAButton variant="ghost" icon={expandedApp === app.applicationId ? <UpOutlined /> : <DownOutlined />} onClick={() => setExpandedApp(expandedApp === app.applicationId ? null : app.applicationId)}>
+                        {expandedApp === app.applicationId ? 'Collapse' : 'Expand'}
+                      </CTAButton>
                     </div>
                   </div>
+                  {expandedApp === app.applicationId && (
+                    <div style={{ marginTop: 16, paddingTop: 16, borderTop: `1px solid ${cc.border}` }}>
+                      <div style={{ display: 'grid', gap: 12 }}>
+                        <div>
+                          <p style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, margin: '0 0 4px' }}>Position</p>
+                          <p style={{ fontSize: 13, color: cc.textPrimary, margin: 0 }}>{app.jobTitle || 'N/A'}</p>
+                        </div>
+                        <div>
+                          <p style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, margin: '0 0 4px' }}>Enterprise</p>
+                          <p style={{ fontSize: 13, color: cc.textPrimary, margin: 0 }}>{app.enterpriseName || 'N/A'}</p>
+                        </div>
+                        {app.coverLetter && (
+                          <div>
+                            <p style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, margin: '0 0 4px' }}>Cover Letter</p>
+                            <p style={{ fontSize: 13, color: cc.textPrimary, margin: 0, whiteSpace: 'pre-wrap' }}>{app.coverLetter}</p>
+                          </div>
+                        )}
+                        {app.appliedAt && (
+                          <div>
+                            <p style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, margin: '0 0 4px' }}>Applied At</p>
+                            <p style={{ fontSize: 13, color: cc.textPrimary, margin: 0 }}>{new Date(app.appliedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </NeuSurface>
               </motion.div>
             ))}
