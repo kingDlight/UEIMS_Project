@@ -15,28 +15,48 @@ export interface StudentDashboardStats {
 
 export const StudentDashboardService = {
   async getStats(): Promise<StudentDashboardStats> {
-    const [appsRes, interviewsRes, reportsRes, semester] = await Promise.allSettled([
+    const [appsRes, interviewsRes, reportsRes, semesterRes] = await Promise.allSettled([
       ApplicationService.getMyApplications(),
       InterviewService.getMySchedules(),
       WeeklyReportService.getMyReports(),
       SemesterService.getActiveSemester(),
     ]);
 
-    const applications = appsRes.status === 'fulfilled'
-      ? (appsRes.value.data?.result ?? appsRes.value.data ?? []).length : 0;
+    // Applications count
+    let applications = 0;
+    if (appsRes.status === 'fulfilled') {
+      const res = appsRes.value;
+      const data = (res as any).data?.result ?? (res as any).data ?? [];
+      applications = Array.isArray(data) ? data.length : 0;
+    }
 
-    const interviews = interviewsRes.status === 'fulfilled'
-      ? ((interviewsRes.value.data ?? []) as any[]).filter(i => i.status !== 'DECLINED' && i.status !== 'CANCELLED').length : 0;
+    // Interviews count (exclude declined/cancelled)
+    let interviews = 0;
+    if (interviewsRes.status === 'fulfilled') {
+      const res = interviewsRes.value;
+      const data = (res as any).data ?? [];
+      interviews = (Array.isArray(data) ? data : []).filter(
+        (i: any) => i.status !== 'DECLINED' && i.status !== 'CANCELLED'
+      ).length;
+    }
 
-    const reports = reportsRes.status === 'fulfilled'
-      ? ((reportsRes.value.data ?? []) as any[]).filter(r => r.status !== 'NOT_SUBMITTED').length : 0;
+    // Reports count (exclude NOT_SUBMITTED)
+    let reports = 0;
+    if (reportsRes.status === 'fulfilled') {
+      const res = reportsRes.value;
+      const data = (res as any).data?.result ?? (res as any).data ?? [];
+      reports = (Array.isArray(data) ? data : []).filter(
+        (r: any) => r.status !== 'NOT_SUBMITTED' && r.status !== 'DRAFT'
+      ).length;
+    }
 
+    // Semester info
     let daysRemaining = 0;
     let semesterName = '—';
     let semesterStatus = 'N/A';
 
-    if (semester.status === 'fulfilled' && semester.value) {
-      const sem = semester.value;
+    if (semesterRes.status === 'fulfilled' && semesterRes.value) {
+      const sem = (semesterRes.value as any);
       semesterName = sem.name || sem.semesterCode || '—';
       semesterStatus = sem.status || 'N/A';
       if (sem.endDate) {

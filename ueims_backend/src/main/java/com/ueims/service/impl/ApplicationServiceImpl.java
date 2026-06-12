@@ -18,10 +18,12 @@ import com.ueims.model.entity.Application;
 import com.ueims.model.entity.ApplicationStatus;
 import com.ueims.model.entity.EligibleStudent;
 import com.ueims.model.entity.JobPost;
+import com.ueims.model.entity.StudentProfile;
 import com.ueims.model.entity.User;
 import com.ueims.repository.ApplicationRepository;
 import com.ueims.repository.EligibleStudentRepository;
 import com.ueims.repository.JobPostRepository;
+import com.ueims.repository.StudentProfileRepository;
 import com.ueims.repository.UserRepository;
 import com.ueims.service.ApplicationService;
 
@@ -37,6 +39,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     JobPostRepository jobPostRepository;
     UserRepository userRepository;
     EligibleStudentRepository eligibleStudentRepository;
+    StudentProfileRepository studentProfileRepository;
     ApplicationMapper mapper;
 
     @Override
@@ -70,10 +73,16 @@ public class ApplicationServiceImpl implements ApplicationService {
                 .findById(request.getJobPostId())
                 .orElseThrow(() -> new AppException(ErrorCode.JOB_POST_NOT_FOUND));
 
-        // 2. Verify Student exists
-        User student = userRepository
-                .findById(request.getStudentId())
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        // 2. Get Student from security context (auto-populated - BR-47 Application Snapshot)
+        User student;
+        if (request.getStudentId() != null) {
+            student = userRepository.findById(request.getStudentId()).orElse(null);
+        } else {
+            student = getCurrentUser();
+        }
+        if (student == null) {
+            throw new AppException(ErrorCode.USER_NOT_EXISTED);
+        }
 
         // 3. Verify JobPost is not closed
         if ("CLOSED".equalsIgnoreCase(jobPost.getStatus())) {
@@ -94,7 +103,7 @@ public class ApplicationServiceImpl implements ApplicationService {
             throw new AppException(ErrorCode.STUDENT_NOT_IN_SEMESTER_5);
         }
 
-        // 6. Verify no active application for this job post
+        // 6. Verify no active application for this job post (BR-46)
         boolean hasActiveApplication =
                 repository.existsByJobPost_JobPostIdAndStudent_UserIdAndStatusNotAndDeletedAtIsNull(
                         jobPost.getJobPostId(), student.getUserId(), ApplicationStatus.WITHDRAWN);
@@ -109,12 +118,16 @@ public class ApplicationServiceImpl implements ApplicationService {
             throw new AppException(ErrorCode.MAX_APPLICATIONS_LIMIT_REACHED);
         }
 
-        // 8. Validate CV File Url & optional size
+        // 8. Get CV File Url from student's profile (auto-populated - BR-47)
         String cvUrl = request.getCvFileUrl();
-        Long cvSize = request.getCvFileSize();
-
         if (cvUrl == null || cvUrl.trim().isEmpty()) {
-            throw new AppException(ErrorCode.CV_NOT_UPLOADED);
+            // Try to get from student's profile
+            var studentProfile = studentProfileRepository.findByUser_UserId(student.getUserId()).orElse(null);
+            if (studentProfile != null && studentProfile.getCvFileUrl() != null && !studentProfile.getCvFileUrl().isEmpty()) {
+                cvUrl = studentProfile.getCvFileUrl();
+            } else {
+                throw new AppException(ErrorCode.CV_NOT_UPLOADED);
+            }
         }
         cvUrl = cvUrl.trim();
 
@@ -124,6 +137,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         }
 
         // Validate CV size (Max 5MB)
+        Long cvSize = request.getCvFileSize();
         if (cvSize != null && cvSize > 5242880) {
             throw new AppException(ErrorCode.CV_SIZE_EXCEEDED);
         }
