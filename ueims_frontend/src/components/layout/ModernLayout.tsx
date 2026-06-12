@@ -156,6 +156,8 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
   const [changePasswordVisible, setChangePasswordVisible] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const [form] = Form.useForm();
+
   const handleChangePassword = async (values: {
     oldPassword: string;
     newPassword: string;
@@ -173,11 +175,11 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
     } catch (error: any) {
       const code = error.response?.data?.code;
       if (code === 2002) {
-        message.error('Mật khẩu cũ không chính xác!');
+        form.setFields([{ name: 'oldPassword', errors: ['Mật khẩu hiện tại không chính xác!'] }]);
       } else if (code === 2003) {
-        message.error('Mật khẩu xác nhận không khớp!');
+        form.setFields([{ name: 'confirmPassword', errors: ['Mật khẩu xác nhận không khớp!'] }]);
       } else if (code === 1015) {
-        message.error('Mật khẩu mới không hợp lệ. Phải có ít nhất 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt!');
+        form.setFields([{ name: 'newPassword', errors: ['Mật khẩu mới phải có ít nhất 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt!'] }]);
       } else {
         message.error(error.response?.data?.message || 'Đổi mật khẩu thất bại!');
       }
@@ -379,12 +381,12 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
             
             <div className="modern-bar-divider" />
             
-            <div ref={accountMenuRef} style={{ position: 'relative', zIndex: 1, flex: '1 1 auto' }}>
+            <div ref={accountMenuRef} style={{ position: 'relative', zIndex: 1, flex: '1 1 auto', minWidth: 0 }}>
               <button 
                 type="button"
                 onClick={() => { setAccountOpen((prev) => !prev); setNotificationOpen(false); }} 
                 className="modern-account-wrapper"
-                style={{ textAlign: 'left' }}
+                style={{ textAlign: 'left', width: '100%' }}
               >
                 <div className="modern-account-avatar" style={{ 
                   display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', color: '#fff',
@@ -672,7 +674,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
           body: { padding: 0 }
         }}
       >
-        <Form layout="vertical" onFinish={handleChangePassword} requiredMark={false}>
+        <Form form={form} layout="vertical" onFinish={handleChangePassword} requiredMark={false}>
           <Form.Item
             name="oldPassword"
             label={<span style={{ fontWeight: 700, color: '#334155', fontSize: 13, fontFamily: 'Inter, sans-serif' }}>Mật khẩu hiện tại</span>}
@@ -681,7 +683,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
             <Input.Password 
               size="large" 
               placeholder="Nhập mật khẩu đang sử dụng" 
-              style={{ borderRadius: 12, background: '#f8fafc', border: '1px solid #e2e8f0', padding: '8px 16px', fontSize: 14 }}
+              className="modern-password-input"
             />
           </Form.Item>
           
@@ -698,7 +700,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
             <Input.Password 
               size="large" 
               placeholder="Tạo mật khẩu mới" 
-              style={{ borderRadius: 12, background: '#f8fafc', border: '1px solid #e2e8f0', padding: '8px 16px', fontSize: 14 }}
+              className="modern-password-input"
             />
           </Form.Item>
           <Form.Item
@@ -721,7 +723,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
             <Input.Password 
               size="large" 
               placeholder="Nhập lại mật khẩu mới" 
-              style={{ borderRadius: 12, background: '#f8fafc', border: '1px solid #e2e8f0', padding: '8px 16px', fontSize: 14 }}
+              className="modern-password-input"
             />
           </Form.Item>
           
