@@ -1412,22 +1412,22 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
               {/* Semester Context Bar */}
               <SemesterContextBar />
 
-              {/* ROW 1: Urgency Cards */}
-              <UrgencyCardsRow onNavigate={handleNavigate} />
-
-              {/* ROW 2: Weekly Reports + Pipeline */}
-              <CompliancePipelineRow onNavigate={handleNavigate} />
-
-              {/* ROW 3: Quick Actions */}
+              {/* TOP: Quick Actions */}
               <QuickActionsRow onNavigate={handleNavigate} />
 
-              {/* ROW 4: Analytics (UC-26) */}
-              <AnalyticsRow />
+              <div className="cc-dashboard-grid" style={{ marginTop: 24 }}>
+                {/* Left Column (Main Data) */}
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <UrgencyCardsRow onNavigate={handleNavigate} />
+                  <CompliancePipelineRow onNavigate={handleNavigate} />
+                  <AnalyticsRow />
+                </div>
 
-              {/* ROW 5: Timeline + Alerts */}
-              <div className="cc-grid-2" style={{ alignItems: 'stretch' }}>
-                <TimelineCard onNavigate={handleNavigate} />
-                <RecentAlertsCard onNavigate={handleNavigate} />
+                {/* Right Column (Alerts & Timeline) */}
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <RecentAlertsCard onNavigate={handleNavigate} />
+                  <TimelineCard onNavigate={handleNavigate} />
+                </div>
               </div>
             </motion.div>
           )}
@@ -1439,6 +1439,11 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
         @keyframes pulse-dot {
           0%, 100% { opacity: 1; transform: scale(1); }
           50% { opacity: 0.5; transform: scale(1.15); }
+        }
+        .cc-dashboard-grid {
+          display: grid;
+          grid-template-columns: 7fr 3fr;
+          gap: 24px;
         }
         .cc-grid-2 {
           display: grid;
@@ -1461,6 +1466,9 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
           gap: 12px;
         }
         @media (max-width: 1024px) {
+          .cc-dashboard-grid {
+            grid-template-columns: 1fr;
+          }
           .cc-grid-pipeline {
             grid-template-columns: 1fr;
           }
