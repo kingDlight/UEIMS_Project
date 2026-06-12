@@ -1,6 +1,6 @@
 import bgRegis from '@/assets/bg-regis.png';
 import registerIllustration from '@/assets/register_illustration.png';
-import logoUeims from '@/assets/logo_ueims.png';
+import { LogoIcon } from '@/components/LogoIcon';
 import React, { useState } from 'react';
 import { Form, Input, Button, message } from 'antd';
 import { useNavigate } from 'react-router-dom';
@@ -104,7 +104,7 @@ export const RegisterEnterprisePage: React.FC = () => {
         >
           {/* Logo */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-            <img src={logoUeims} alt="UEIMS Logo" style={{ height: 30, objectFit: 'contain' }} />
+            <LogoIcon style={{ height: 30, width: 'auto' }} />
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               <h1 style={{ fontSize: 12, fontWeight: 800, color: AUTH_PRIMARY, margin: 0, lineHeight: 1.1, letterSpacing: 0.5 }}>UEIMS</h1>
               <p style={{ fontSize: 5, color: AUTH_TEXT_DARK, textTransform: 'uppercase', fontWeight: 700, margin: '1px 0 0 0' }}>Hệ thống quản lý thực tập sinh<br />và doanh nghiệp</p>

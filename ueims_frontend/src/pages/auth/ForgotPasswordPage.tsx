@@ -1,6 +1,6 @@
 import bgAuth from '@/assets/bg-auth.png';
 import authShield3d from '@/assets/auth_shield_3d.png';
-import logoUeims from '@/assets/logo_ueims.png';
+import { LogoIcon } from '@/components/LogoIcon';
 import React, { useState } from 'react';
 import { Form, Input, Button, message } from 'antd';
 import { useNavigate } from 'react-router-dom';
@@ -64,7 +64,7 @@ export const ForgotPasswordPage: React.FC = () => {
           zIndex: 10,
         }}
       >
-        <img src={logoUeims} alt="UEIMS Logo" style={{ height: 48, objectFit: 'contain' }} />
+        <LogoIcon style={{ height: 48, width: 'auto' }} />
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           <h1 style={{ fontSize: 18, fontWeight: 800, color: AUTH_PRIMARY, margin: 0, lineHeight: 1.1, letterSpacing: 1 }}>
             UEIMS
@@ -157,7 +157,7 @@ export const ForgotPasswordPage: React.FC = () => {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: AUTH_PRIMARY, fontWeight: 700, fontSize: 13, marginBottom: 24 }}>
-            <img src={logoUeims} alt="UEIMS Logo" style={{ height: 24, objectFit: 'contain' }} />
+            <LogoIcon style={{ height: 24, width: 'auto' }} />
             <span>UEIMS</span>
           </div>
 

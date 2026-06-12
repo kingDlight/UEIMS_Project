@@ -1,4 +1,5 @@
 import React from 'react';
+import { LogoIcon } from '../../../components/LogoIcon';
 
 export const Footer = ({ isDark, scrollToSection }: { isDark: boolean, scrollToSection: (h: string) => void }) => (
   <footer className={`border-t px-6 md:px-12 py-16 relative z-10 transition-colors duration-300 ease-in-out ${isDark ? 'bg-[#070a11] border-zinc-900/60 text-zinc-400' : 'bg-slate-100 border-slate-200 text-slate-600'}`}>
@@ -6,7 +7,7 @@ export const Footer = ({ isDark, scrollToSection }: { isDark: boolean, scrollToS
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
         <div className="lg:col-span-2">
           <div className="flex items-center gap-3 mb-4">
-            <img src="/src/assets/logo_ueims.png" alt="UEIMS Logo" style={{ height: '32px', objectFit: 'contain' }} />
+            <LogoIcon style={{ height: '32px', width: 'auto' }} />
             <span className={`font-bold text-base tracking-wide transition-colors duration-300 ease-in-out ${isDark ? 'text-white' : 'text-slate-900'}`}>UEIMS</span>
           </div>
           <p className={`text-xs leading-relaxed max-w-sm transition-colors duration-300 ease-in-out ${isDark ? 'text-zinc-400' : 'text-slate-600'}`}>

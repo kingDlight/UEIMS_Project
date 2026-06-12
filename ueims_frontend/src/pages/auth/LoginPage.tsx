@@ -1,4 +1,4 @@
-import logoUeims from '@/assets/logo_ueims.png';
+import { LogoIcon } from '@/components/LogoIcon';
 import React, { useState, useEffect } from 'react';
 import { Form, Input, Button, message, Divider } from 'antd';
 import { useNavigate } from 'react-router-dom';
@@ -176,7 +176,7 @@ export const LoginPage: React.FC = () => {
         </div>
 
         <div style={{ marginBottom: 12 }}>
-          <img src={logoUeims} alt="UEIMS Logo" style={{ height: 48, objectFit: 'contain' }} />
+          <LogoIcon style={{ height: 48, width: 'auto' }} />
         </div>
 
         <div style={{ color: AUTH_PRIMARY, fontSize: 15, fontWeight: 600, marginBottom: 4 }}>

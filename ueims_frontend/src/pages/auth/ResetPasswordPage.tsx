@@ -1,6 +1,6 @@
 import bgAuth from '@/assets/bg-auth.png';
 import authShield3d from '@/assets/auth_shield_3d.png';
-import logoUeims from '@/assets/logo_ueims.png';
+import { LogoIcon } from '@/components/LogoIcon';
 import React, { useState, useEffect } from 'react';
 import { Form, Input, Button, message } from 'antd';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -100,7 +100,7 @@ export const ResetPasswordPage: React.FC = () => {
           zIndex: 10,
         }}
       >
-        <img src={logoUeims} alt="UEIMS Logo" style={{ height: 48, objectFit: 'contain' }} />
+        <LogoIcon style={{ height: 48, width: 'auto' }} />
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           <h1 style={{ fontSize: 18, fontWeight: 800, color: AUTH_PRIMARY, margin: 0, lineHeight: 1.1, letterSpacing: 1 }}>
             UEIMS
@@ -156,7 +156,7 @@ export const ResetPasswordPage: React.FC = () => {
         <div className="reset-right-panel" style={{ width: '55%', padding: '48px 40px', display: 'flex', flexDirection: 'column', position: 'relative' }}>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 32 }}>
-            <img src={logoUeims} alt="UEIMS Logo" style={{ height: 40, objectFit: 'contain' }} />
+            <LogoIcon style={{ height: 40, width: 'auto' }} />
             <h1 style={{ fontSize: 16, fontWeight: 800, color: AUTH_PRIMARY, margin: 0, letterSpacing: 0.5 }}>UEIMS</h1>
           </div>
 

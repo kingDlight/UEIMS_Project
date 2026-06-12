@@ -3,7 +3,7 @@ import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { LoginPage } from '@/pages/auth/LoginPage';
 import { ForgotPasswordPage } from '@/pages/auth/ForgotPasswordPage';
 import { ResetPasswordPage } from '@/pages/auth/ResetPasswordPage';
-import { ChangePasswordPage } from '@/pages/auth/ChangePasswordPage';
+
 import { RegisterEnterprisePage } from '@/pages/auth/RegisterEnterprisePage';
 import { HomePage } from '@/pages/home/HomePage';
 import { ProtectedRoute } from '@/components/guards/ProtectedRoute';
@@ -29,10 +29,7 @@ export const router = createBrowserRouter([
     path: '/reset-password',
     element: <ResetPasswordPage />,
   },
-  {
-    path: '/change-password',
-    element: <ChangePasswordPage />,
-  },
+
   {
     path: '/register-enterprise',
     element: <RegisterEnterprisePage />,

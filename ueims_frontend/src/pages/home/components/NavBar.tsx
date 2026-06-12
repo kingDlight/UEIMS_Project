@@ -4,6 +4,7 @@ import { ArrowRight, Menu, X, Sun, Moon } from 'lucide-react';
 import { navLinks } from '../constants';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { extractUserFromToken, isTokenExpired } from '@/utils/jwt';
+import { LogoIcon } from '../../../components/LogoIcon';
 
 export const NavBar = ({ isDark, toggleTheme, scrolled, scrollToSection }: { isDark: boolean, toggleTheme: () => void, scrolled: boolean, scrollToSection: (h: string) => void }) => {
   const navigate = useNavigate();
@@ -31,7 +32,7 @@ export const NavBar = ({ isDark, toggleTheme, scrolled, scrollToSection }: { isD
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         style={{ background: 'none', border: 'none', padding: 0 }}
       >
-        <img src="/src/assets/logo_ueims.png" alt="UEIMS Logo" style={{ height: '36px', objectFit: 'contain' }} />
+        <LogoIcon style={{ height: '36px', width: 'auto' }} />
         <span className={`font-bold text-lg tracking-wide transition-colors duration-300 ease-in-out ${isDark ? 'text-white' : 'text-slate-900'}`}>UEIMS</span>
       </button>
 
