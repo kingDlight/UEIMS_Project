@@ -222,7 +222,7 @@ export const ForgotPasswordPage: React.FC = () => {
             </Form.Item>
           </Form>
 
-          <div style={{ marginTop: 24, backgroundColor: AUTH_PRIMARY_LIGHT, border: '1px solid rgba(233, 101, 0, 0.1)', borderRadius: 8, padding: '14px', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+          <div style={{ marginTop: 24, backgroundColor: AUTH_PRIMARY_LIGHT, border: '1px solid rgba(230, 126, 34, 0.1)', borderRadius: 8, padding: '14px', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
             <Info size={18} fill={AUTH_PRIMARY} color={AUTH_WHITE} style={{ flexShrink: 0 }} />
             <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
               <strong style={{ color: AUTH_PRIMARY, fontSize: 12 }}>Lưu ý</strong>

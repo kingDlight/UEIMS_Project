@@ -366,19 +366,19 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
                 </div>
               </button>
             </div>
-            <div style={{ position: 'absolute', left: 0, right: 0, bottom: -1, height: 1, background: 'linear-gradient(90deg, transparent, rgba(233,101,0,.18), transparent)', pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', left: 0, right: 0, bottom: -1, height: 1, background: 'linear-gradient(90deg, transparent, rgba(230, 126, 34,.18), transparent)', pointerEvents: 'none' }} />
           </div>
 
           {/* Notification Dropdown */}
           {notificationOpen && (
             <div onMouseDown={(e) => e.stopPropagation()} className="modern-floating-menu">
               <div className="modern-floating-menu-arrow" style={{ left: 32 }} />
-              <div style={{ padding: '14px 16px', borderBottom: '1px solid rgba(233,101,0,.10)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ padding: '14px 16px', borderBottom: '1px solid rgba(230, 126, 34,.10)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <div style={{ fontSize: 14, fontWeight: 800, color: '#1e293b' }}>Alerts</div>
                   <div style={{ fontSize: 11.5, color: '#64748b' }}>Latest reminders and urgent items</div>
                 </div>
-                {unreadCount > 0 && <SmallPill color="#E96500" glow>{unreadCount} new</SmallPill>}
+                {unreadCount > 0 && <SmallPill color="#E67E22" glow>{unreadCount} new</SmallPill>}
               </div>
               <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 10, maxHeight: 400, overflowY: 'auto' }}>
                 {notifications.length === 0 ? (
@@ -391,12 +391,12 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
                       style={{ 
                         display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 12px', borderRadius: 16, 
                         background: item.isRead ? 'rgba(255,255,255,.78)' : '#fff3ed', 
-                        border: '1px solid rgba(233,101,0,.08)', 
+                        border: '1px solid rgba(230, 126, 34,.08)', 
                         boxShadow: '0 8px 18px rgba(15,23,42,.04)',
                         cursor: item.isRead ? 'default' : 'pointer',
                         transition: 'all 0.2s'
                       }}>
-                      <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#E96500', boxShadow: `0 0 0 4px #E9650020`, marginTop: 4 }} />
+                      <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#E67E22', boxShadow: `0 0 0 4px #E67E2220`, marginTop: 4 }} />
                       <div style={{ minWidth: 0, flex: 1 }}>
                         <div style={{ fontSize: 13.5, fontWeight: 800, color: '#1e293b' }}>{item.title}</div>
                         <div style={{ fontSize: 11.5, color: '#64748b', marginTop: 2 }}>{item.message}</div>
@@ -413,7 +413,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
           {accountOpen && (
             <div onMouseDown={(e) => e.stopPropagation()} className="modern-floating-menu">
               <div className="modern-floating-menu-arrow" style={{ left: 110 }} />
-              <div style={{ padding: '14px 16px', borderBottom: '1px solid rgba(233,101,0,.10)' }}>
+              <div style={{ padding: '14px 16px', borderBottom: '1px solid rgba(230, 126, 34,.10)' }}>
                 <div style={{ fontSize: 14, fontWeight: 800, color: '#1e293b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {realName}
                 </div>
@@ -450,7 +450,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
           onClose={() => setDrawerOpen(false)}
           open={drawerOpen}
           width={280}
-          styles={{ body: { padding: 0 }, header: { borderBottom: '1px solid rgba(233,101,0,.10)' } }}
+          styles={{ body: { padding: 0 }, header: { borderBottom: '1px solid rgba(230, 126, 34,.10)' } }}
         >
           <div style={{ display: 'flex', flexDirection: 'column', padding: '16px 0' }}>
             {filteredNavItems.map((item) => {
@@ -466,10 +466,10 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
                     alignItems: 'center',
                     gap: 12,
                     cursor: 'pointer',
-                    background: isActive ? 'rgba(233,101,0,.08)' : 'transparent',
-                    color: isActive ? '#E96500' : '#475569',
+                    background: isActive ? 'rgba(230, 126, 34,.08)' : 'transparent',
+                    color: isActive ? '#E67E22' : '#475569',
                     border: 'none',
-                    borderRight: isActive ? '3px solid #E96500' : '3px solid transparent',
+                    borderRight: isActive ? '3px solid #E67E22' : '3px solid transparent',
                     fontWeight: isActive ? 700 : 500,
                     width: '100%',
                     textAlign: 'left'

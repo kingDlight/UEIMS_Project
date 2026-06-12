@@ -5,7 +5,7 @@ import { NeuSurface } from '../components/shared/NeuSurface';
 import { api } from '@/services/api';
 
 const cc = {
-  primary: '#E96500',
+  primary: '#E67E22',
   primaryMuted: '#fff0e6',
   text: '#1e293b',
   textMuted: '#64748b',

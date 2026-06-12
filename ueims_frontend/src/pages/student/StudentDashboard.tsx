@@ -13,7 +13,6 @@ import {
   FinalReportTab,
   EvaluationTab,
   FeedbackTab,
-  SettingsTab,
 } from './tabs';
 
 export type StudentPageKey = 
@@ -24,10 +23,9 @@ export type StudentPageKey =
   | 'schedule'
   | 'training-plan'
   | 'reports'
-  | 'final-report'
-  | 'evaluation'
   | 'feedback'
-  | 'settings';
+  | 'final-report'
+  | 'evaluation';
 
 export const studentNavItems = navItems;
 
@@ -43,10 +41,9 @@ export const StudentDashboard: React.FC = () => {
     schedule: <ScheduleTab />,
     'training-plan': <TrainingPlanTab />,
     reports: <ReportsTab />,
+    feedback: <FeedbackTab />,
     'final-report': <FinalReportTab />,
     evaluation: <EvaluationTab />,
-    feedback: <FeedbackTab />,
-    settings: <SettingsTab />,
   };
 
   return (

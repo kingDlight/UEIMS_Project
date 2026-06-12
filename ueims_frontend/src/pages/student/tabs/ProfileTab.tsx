@@ -20,7 +20,7 @@ const CTAButton: React.FC<{
   loading?: boolean;
 }> = ({ children, onClick, variant = 'primary', size = 'md', fullWidth = false, icon, disabled = false, loading = false }) => {
   const cc = {
-    primary: '#E96500',
+    primary: '#E67E22',
     primaryDark: '#C45200',
     textMuted: '#64748b',
     bgLight: '#f5f7fa',
@@ -30,7 +30,7 @@ const CTAButton: React.FC<{
     warning: '#f59e0b',
   };
   const styles: Record<string, { bg: string; text: string; border: string; shadow: string; hoverBg?: string }> = {
-    primary: { bg: 'linear-gradient(135deg, #FF662C, #FF824D, #FF9B73)', text: '#fff', border: 'none', shadow: '0 12px 28px rgba(233,101,0,.22)', hoverBg: 'linear-gradient(135deg, #E86A20, #FF662C, #FF824D)' },
+    primary: { bg: 'linear-gradient(135deg, #E67E22, #E67E22, #F39C12)', text: '#fff', border: 'none', shadow: '0 12px 28px rgba(230, 126, 34,.22)', hoverBg: 'linear-gradient(135deg, #E86A20, #E67E22, #E67E22)' },
     ghost: { bg: '#fff', text: cc.primary, border: cc.border, shadow: '0 8px 18px rgba(15,23,42,.05)' },
     success: { bg: '#fff', text: cc.success, border: `${cc.success}40`, shadow: '0 8px 18px rgba(15,23,42,.05)' },
     danger: { bg: '#fff1f2', text: cc.danger, border: `${cc.danger}30`, shadow: '0 8px 18px rgba(15,23,42,.05)' },
@@ -78,7 +78,7 @@ const hexToRgba = (hex: string, alpha: number): string => {
 };
 
 const cc = {
-  primary: '#E96500',
+  primary: '#E67E22',
   primaryDark: '#C45200',
   primaryMuted: '#fff0e6',
   text: '#1e293b',
@@ -178,7 +178,7 @@ export const ProfileTab: React.FC = () => {
             background: `linear-gradient(135deg, ${cc.primary}, ${cc.primaryDark})`,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             color: '#fff', fontSize: 28, fontWeight: 800, flexShrink: 0,
-            boxShadow: '0 4px 12px rgba(233,101,0,.25)',
+            boxShadow: '0 4px 12px rgba(230, 126, 34,.25)',
           }}>
             {profile?.fullName?.substring(0, 2).toUpperCase() || 'ST'}
           </div>

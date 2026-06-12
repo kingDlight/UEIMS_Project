@@ -99,7 +99,7 @@ export const RegisterEnterprisePage: React.FC = () => {
             display: 'flex',
             flexDirection: 'column',
             position: 'relative',
-            borderRight: '1px solid rgba(233, 101, 0, 0.05)',
+            borderRight: '1px solid rgba(230, 126, 34, 0.05)',
           }}
         >
           {/* Logo */}
@@ -121,7 +121,7 @@ export const RegisterEnterprisePage: React.FC = () => {
           <div style={{ display: 'flex', flex: 1, position: 'relative', alignItems: 'flex-start' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6, zIndex: 2, width: '55%', position: 'relative' }}>
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
-                <div style={{ width: 22, height: 22, background: AUTH_WHITE, borderRadius: 5, display: 'flex', alignItems: 'center', justifyContent: 'center', color: AUTH_PRIMARY, boxShadow: '0 1px 4px rgba(233, 101, 0, 0.1)', flexShrink: 0 }}>
+                <div style={{ width: 22, height: 22, background: AUTH_WHITE, borderRadius: 5, display: 'flex', alignItems: 'center', justifyContent: 'center', color: AUTH_PRIMARY, boxShadow: '0 1px 4px rgba(230, 126, 34, 0.1)', flexShrink: 0 }}>
                   <Briefcase size={11} fill={AUTH_PRIMARY} color={AUTH_PRIMARY} />
                 </div>
                 <div>
@@ -130,7 +130,7 @@ export const RegisterEnterprisePage: React.FC = () => {
                 </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
-                <div style={{ width: 22, height: 22, background: AUTH_WHITE, borderRadius: 5, display: 'flex', alignItems: 'center', justifyContent: 'center', color: AUTH_PRIMARY, boxShadow: '0 1px 4px rgba(233, 101, 0, 0.1)', flexShrink: 0 }}>
+                <div style={{ width: 22, height: 22, background: AUTH_WHITE, borderRadius: 5, display: 'flex', alignItems: 'center', justifyContent: 'center', color: AUTH_PRIMARY, boxShadow: '0 1px 4px rgba(230, 126, 34, 0.1)', flexShrink: 0 }}>
                   <Users size={11} fill={AUTH_PRIMARY} color={AUTH_PRIMARY} />
                 </div>
                 <div>
@@ -139,7 +139,7 @@ export const RegisterEnterprisePage: React.FC = () => {
                 </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
-                <div style={{ width: 22, height: 22, background: AUTH_WHITE, borderRadius: 5, display: 'flex', alignItems: 'center', justifyContent: 'center', color: AUTH_PRIMARY, boxShadow: '0 1px 4px rgba(233, 101, 0, 0.1)', flexShrink: 0 }}>
+                <div style={{ width: 22, height: 22, background: AUTH_WHITE, borderRadius: 5, display: 'flex', alignItems: 'center', justifyContent: 'center', color: AUTH_PRIMARY, boxShadow: '0 1px 4px rgba(230, 126, 34, 0.1)', flexShrink: 0 }}>
                   <BarChart2 size={11} fill={AUTH_PRIMARY} color={AUTH_PRIMARY} />
                 </div>
                 <div>
@@ -151,7 +151,7 @@ export const RegisterEnterprisePage: React.FC = () => {
             <img src={registerIllustration} alt="Illustration" style={{ position: 'absolute', right: -5, bottom: -3, width: 110, height: 110, objectFit: 'contain', zIndex: 1 }} />
           </div>
 
-          <div style={{ marginTop: 'auto', background: AUTH_PRIMARY, borderRadius: 8, padding: 8, display: 'flex', justifyContent: 'space-between', color: AUTH_WHITE, zIndex: 2, boxShadow: '0 4px 12px rgba(233, 101, 0, 0.3)' }}>
+          <div style={{ marginTop: 'auto', background: AUTH_PRIMARY, borderRadius: 8, padding: 8, display: 'flex', justifyContent: 'space-between', color: AUTH_WHITE, zIndex: 2, boxShadow: '0 4px 12px rgba(230, 126, 34, 0.3)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <Building2 size={14} color={AUTH_WHITE} opacity={0.9} />
               <div>

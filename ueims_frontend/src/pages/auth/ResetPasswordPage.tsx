@@ -136,7 +136,7 @@ export const ResetPasswordPage: React.FC = () => {
             display: 'flex',
             flexDirection: 'column',
             position: 'relative',
-            borderRight: '1px solid rgba(233, 101, 0, 0.05)',
+            borderRight: '1px solid rgba(230, 126, 34, 0.05)',
           }}
         >
           <h2 style={{ fontSize: 24, fontWeight: 800, color: AUTH_TEXT_DARK, lineHeight: 1.3, margin: '20px 0 12px 0' }}>
