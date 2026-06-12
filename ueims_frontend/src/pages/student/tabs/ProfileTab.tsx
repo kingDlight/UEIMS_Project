@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { message, Spin } from 'antd';
 import {
-  FileTextOutlined, EyeOutlined, DownloadOutlined,
+  FileTextOutlined, EyeOutlined,
   PlusOutlined, UploadOutlined, IdcardOutlined,
   MailOutlined, BookOutlined, UserOutlined,
   CalendarOutlined, TrophyOutlined,
@@ -16,15 +16,6 @@ const resolveFileUrl = (url: string | undefined): string => {
   if (!url) return '';
   if (url.startsWith('http://') || url.startsWith('https://')) return url;
   return `${BACKEND_BASE}${url.startsWith('/') ? '' : '/'}${url}`;
-};
-
-const downloadFile = (url: string, filename: string) => {
-  const a = document.createElement('a');
-  a.href = resolveFileUrl(url);
-  a.download = filename || 'download';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
 };
 
 const CTAButton: React.FC<{
@@ -393,7 +384,6 @@ const CvView: React.FC<{ cvUrl?: string; cvFileName?: string; onRefresh: () => v
           </div>
           <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
             <CTAButton variant="ghost" size="sm" icon={<EyeOutlined />} onClick={() => window.open(resolveFileUrl(cvUrl), '_blank')}>View</CTAButton>
-            <CTAButton variant="ghost" size="sm" icon={<DownloadOutlined />} onClick={() => downloadFile(cvUrl, displayName)}>Download</CTAButton>
             <CTAButton variant="danger" size="sm" icon={<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>} onClick={handleDelete} loading={uploading}>Delete</CTAButton>
           </div>
         </div>
