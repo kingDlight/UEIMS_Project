@@ -112,16 +112,26 @@ export const ProfileTab: React.FC = () => {
     try {
       setLoading(true);
       const [userRes, profileRes] = await Promise.all([
-        api.get('/users/myInfo'),
+        api.get('/users/myInfo').catch((err) => {
+          console.error('Failed to fetch user info:', err);
+          return { data: null, error: err };
+        }),
         StudentProfileService.getMyProfile().catch(() => ({ data: null })),
       ]);
-      const userInfo = userRes.data;
-      const profileData = profileRes.data?.result ?? profileRes.data;
+      
+      const userInfo = userRes?.data;
+      const profileData = profileRes?.data?.result ?? profileRes?.data;
+      
+      if (!userInfo && !profileData) {
+        console.warn('Unable to fetch profile data');
+        return;
+      }
+      
       setProfile({ ...userInfo, ...profileData });
       if (profileData?.profileId) {
         setProfileId(profileData.profileId);
       }
-      setFormData({ phone: userInfo.phone || '', skills: userInfo.skills || profileData?.skills || '' });
+      setFormData({ phone: userInfo?.phone || '', skills: userInfo?.skills || profileData?.skills || '' });
     } catch (err) {
       console.error('Failed to fetch profile', err);
     } finally {
@@ -147,15 +157,15 @@ export const ProfileTab: React.FC = () => {
   };
 
   const handleUploadCV = async () => {
-    if (!cvFile || !profileId) {
-      message.error('Profile not loaded yet. Please wait.');
+    if (!cvFile) {
+      message.error('Please select a CV file first.');
       return;
     }
     try {
       setUploading(true);
       const fd = new FormData();
       fd.append('file', cvFile);
-      await StudentProfileService.uploadCV(profileId, fd);
+      await StudentProfileService.uploadCV(fd);
       message.success('CV uploaded successfully!');
       setCvFile(null);
       fetchProfile();

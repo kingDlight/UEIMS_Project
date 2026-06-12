@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.ueims.dto.request.StudentProfileUpdateRequest;
+import com.ueims.exception.AppException;
+import com.ueims.exception.ErrorCode;
 import com.ueims.service.StudentProfileService;
 import com.ueims.service.UserService;
 
@@ -68,11 +70,15 @@ public class StudentProfileController {
         return ResponseEntity.ok(mapper.toDto(service.updateProfile(id, request)));
     }
 
-    @PostMapping("/{id}/upload-cv")
+    @PostMapping("/upload-cv")
     @PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<com.ueims.dto.response.StudentProfileDTO> uploadCv(
-            @PathVariable UUID id, @RequestParam("file") MultipartFile file) {
-        return ResponseEntity.ok(mapper.toDto(service.uploadCv(id, file)));
+    public ResponseEntity<com.ueims.dto.response.StudentProfileDTO> uploadCv(@RequestParam("file") MultipartFile file) {
+        UUID userId = userService.getCurrentUserId();
+        com.ueims.model.entity.StudentProfile profile = service.findByUserId(userId);
+        if (profile == null) {
+            throw new AppException(ErrorCode.STUDENT_PROFILE_NOT_FOUND);
+        }
+        return ResponseEntity.ok(mapper.toDto(service.uploadCv(profile.getProfileId(), file)));
     }
 
     @DeleteMapping("/{id}")
