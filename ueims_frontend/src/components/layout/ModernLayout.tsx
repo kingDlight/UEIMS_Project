@@ -205,7 +205,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
   const handleUpdateProfile = async () => {
     try {
       setUpdatingProfile(true);
-      await api.put(`/users/${user?.id || user?.userId}`, { ...user, phone });
+      await api.put('/users/myInfo', { ...user, phone });
       message.success('Cập nhật hồ sơ thành công!');
     } catch (err: any) {
       message.error(err.response?.data?.message || 'Cập nhật thất bại!');
