@@ -192,7 +192,6 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
   const activeTab = tab || defaultRoute;
 
   const { user, token, logout, currentRole } = useAuthStore();
-  const [realName, setRealName] = useState(user?.fullName || 'User');
 
   const filteredNavItems = useMemo(() => {
     return navItems.filter((item) => {
@@ -201,7 +200,6 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
     });
   }, [navItems, currentRole]);
 
-  const [myProfile, setMyProfile] = useState<any>(null);
   const [profileOpen, setProfileOpen] = useState(false);
   
   const [customAvatarUrl, setCustomAvatarUrl] = useState<string | null>(() => {
@@ -262,23 +260,6 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-  useEffect(() => {
-    const fetchMyInfo = async () => {
-      try {
-        const res = await api.get('/users/myInfo');
-        setMyProfile(res.data);
-        if (res.data?.fullName) {
-          setRealName(res.data.fullName);
-        }
-      } catch (e) {
-        console.error('Failed to fetch myInfo', e);
-      }
-    };
-    if (token) {
-      fetchMyInfo();
-    }
-  }, [token]);
 
   const handleLogout = async () => {
     if (token) {
@@ -397,12 +378,12 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
               >
                 <div className="modern-account-avatar" style={{ 
                   display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', color: '#fff',
-                  background: (customAvatarUrl || myProfile?.avatarUrl) ? `url(${customAvatarUrl || myProfile?.avatarUrl}) center/cover no-repeat` : undefined
+                  background: (customAvatarUrl || user?.avatarUrl) ? `url(${customAvatarUrl || user?.avatarUrl}) center/cover no-repeat` : undefined
                 }}>
-                  {!(customAvatarUrl || myProfile?.avatarUrl) && (realName ? realName.substring(0, 2) : 'U')}
+                  {!(customAvatarUrl || user?.avatarUrl) && (user?.fullName ? user.fullName.substring(0, 2).toUpperCase() : 'U')}
                 </div>
                 <div className="modern-account-info">
-                  <div className="modern-account-name">{realName}</div>
+                  <div className="modern-account-name">{user?.fullName || 'User'}</div>
                   <div className="modern-account-email">{user?.email || 'admin@ueims.com'}</div>
                 </div>
               </button>
@@ -456,7 +437,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
               <div className="modern-floating-menu-arrow" style={{ left: 110 }} />
               <div style={{ padding: '14px 16px', borderBottom: '1px solid rgba(230, 126, 34,.10)' }}>
                 <div style={{ fontSize: 14, fontWeight: 800, color: '#1e293b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {realName}
+                  {user?.fullName || 'User'}
                 </div>
                 <div style={{ fontSize: 11.5, color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {user?.email || 'admin@ueims.com'}
@@ -582,12 +563,12 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
             <div style={{ position: 'relative' }}>
               <div style={{ 
                 width: 80, height: 80, borderRadius: '50%', 
-                background: (customAvatarUrl || myProfile?.avatarUrl) ? `url(${customAvatarUrl || myProfile?.avatarUrl}) center/cover no-repeat` : 'linear-gradient(135deg, #f97316, #fb923c)', 
+                background: (customAvatarUrl || user?.avatarUrl) ? `url(${customAvatarUrl || user?.avatarUrl}) center/cover no-repeat` : 'linear-gradient(135deg, #f97316, #fb923c)', 
                 display: 'flex', alignItems: 'center', justifyContent: 'center', 
                 color: '#fff', fontSize: 28, fontWeight: 800, fontFamily: 'Inter, sans-serif',
                 border: '4px solid #fff', boxShadow: '0 8px 16px -4px rgba(249, 115, 22, 0.3)'
               }}>
-                {!(customAvatarUrl || myProfile?.avatarUrl) && (myProfile?.fullName ? myProfile.fullName.substring(0, 2).toUpperCase() : 'U')}
+                {!(customAvatarUrl || user?.avatarUrl) && (user?.fullName ? user.fullName.substring(0, 2).toUpperCase() : 'U')}
               </div>
               
               <button
@@ -617,12 +598,12 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
             {/* Name & Role */}
             <div style={{ marginTop: 12, textAlign: 'center' }}>
               <div style={{ color: '#0f172a', fontSize: 20, fontWeight: 800, letterSpacing: '-0.02em', fontFamily: 'Inter, sans-serif' }}>
-                {myProfile?.fullName || 'Đang tải...'}
+                {user?.fullName || 'Đang tải...'}
               </div>
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 4, background: '#f1f5f9', padding: '4px 10px', borderRadius: 100 }}>
                 <ShieldCheck size={14} color="#64748b" />
                 <span style={{ color: '#475569', fontSize: 12, fontWeight: 600, fontFamily: 'Inter, sans-serif' }}>
-                  {myProfile?.roles?.map((r: any) => r.roleName.replace('ROLE_', '')).join(', ') || 'User'}
+                  {user?.roles?.map((r: any) => typeof r === 'string' ? r.replace('ROLE_', '') : r.roleName?.replace('ROLE_', '')).join(', ') || 'User'}
                 </span>
               </div>
             </div>
@@ -634,8 +615,8 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
           <div style={{ height: 1, background: '#f1f5f9', width: '100%', marginBottom: 8 }}></div>
           
           {[
-            { icon: <Mail size={16} color="#64748b" />, label: 'Email Address', value: myProfile?.email },
-            { icon: <Phone size={16} color="#64748b" />, label: 'Phone Number', value: myProfile?.phone || 'Chưa cập nhật' },
+            { icon: <Mail size={16} color="#64748b" />, label: 'Email Address', value: user?.email },
+            { icon: <Phone size={16} color="#64748b" />, label: 'Phone Number', value: 'Chưa cập nhật' },
           ].map((item) => (
             <div key={item.label} style={{ 
               display: 'flex', flexDirection: 'column', gap: 4, padding: '12px 0', borderBottom: '1px solid #f8fafc'
@@ -658,11 +639,11 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
               </div>
               <span style={{ 
                 padding: '4px 12px', borderRadius: 100, 
-                background: myProfile?.status === 'ACTIVE' ? '#ecfdf5' : '#fef2f2', 
-                color: myProfile?.status === 'ACTIVE' ? '#10b981' : '#ef4444', 
-                fontWeight: 700, fontSize: 11, fontFamily: 'Inter, sans-serif', letterSpacing: '0.02em', border: `1px solid ${myProfile?.status === 'ACTIVE' ? '#a7f3d0' : '#fecaca'}`
+                background: '#ecfdf5', 
+                color: '#10b981', 
+                fontWeight: 700, fontSize: 11, fontFamily: 'Inter, sans-serif', letterSpacing: '0.02em', border: '1px solid #a7f3d0'
               }}>
-                {myProfile?.status || 'UNKNOWN'}
+                ACTIVE
               </span>
             </div>
         </div>

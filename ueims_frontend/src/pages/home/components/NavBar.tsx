@@ -2,10 +2,16 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Menu, X, Sun, Moon } from 'lucide-react';
 import { navLinks } from '../constants';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 export const NavBar = ({ isDark, toggleTheme, scrolled, scrollToSection }: { isDark: boolean, toggleTheme: () => void, scrolled: boolean, scrollToSection: (h: string) => void }) => {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+  const { isAuthenticated, user } = useAuthStore();
+
+  const customAvatarUrl = localStorage.getItem('ueims_custom_avatar');
+  const finalAvatarUrl = customAvatarUrl || user?.avatarUrl;
+  const finalFullName = user?.fullName;
   
   let navBgClass = 'h-20 bg-transparent';
   if (scrolled) {
@@ -52,21 +58,49 @@ export const NavBar = ({ isDark, toggleTheme, scrolled, scrollToSection }: { isD
           {isDark ? <Sun className="h-4 w-4 relative" /> : <Moon className="h-4 w-4 relative" />}
         </button>
 
-        <button
-          onClick={() => navigate('/login')}
-          className={`text-xs font-semibold bg-transparent px-4 py-2 border rounded-lg transition-all duration-300 ease-in-out ${
-            isDark ? 'text-zinc-100 border-zinc-500 hover:text-white hover:border-[#f37021] hover:bg-[#f37021]/5' : 'text-slate-800 border-slate-400 hover:text-[#f37021] hover:border-[#f37021] hover:bg-[#f37021]/5'
-          }`}
-        >
-          Đăng nhập
-        </button>
-        <button
-          onClick={() => navigate('/login')}
-          className="hidden sm:flex text-xs font-bold text-white px-4 py-2 rounded-lg bg-gradient-to-r from-[#f37021] to-[#e26215] shadow-lg shadow-[#f37021]/20 hover:shadow-[#f37021]/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 ease-in-out gap-1.5 items-center"
-        >
-          Vào hệ thống
-          <ArrowRight className="h-3.5 w-3.5" />
-        </button>
+        {!isAuthenticated ? (
+          <>
+            <button
+              onClick={() => navigate('/login')}
+              className={`text-xs font-semibold bg-transparent px-4 py-2 border rounded-lg transition-all duration-300 ease-in-out ${
+                isDark ? 'text-zinc-100 border-zinc-500 hover:text-white hover:border-[#f37021] hover:bg-[#f37021]/5' : 'text-slate-800 border-slate-400 hover:text-[#f37021] hover:border-[#f37021] hover:bg-[#f37021]/5'
+              }`}
+            >
+              Đăng nhập
+            </button>
+            <button
+              onClick={() => navigate('/login')}
+              className="hidden sm:flex text-xs font-bold text-white px-4 py-2 rounded-lg bg-gradient-to-r from-[#f37021] to-[#e26215] shadow-lg shadow-[#f37021]/20 hover:shadow-[#f37021]/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 ease-in-out gap-1.5 items-center"
+            >
+              Vào hệ thống
+              <ArrowRight className="h-3.5 w-3.5" />
+            </button>
+          </>
+        ) : (
+          <button
+            onClick={() => {
+              const roles = user?.roles?.map((r: any) => r.roleName || r) || [];
+              if (roles.includes('STUDENT') || roles.includes('ROLE_STUDENT') || roles.includes('ENTERPRISE') || roles.includes('ROLE_ENTERPRISE')) {
+                navigate('/student-dashboard');
+              } else {
+                navigate('/app/dashboard');
+              }
+            }}
+            className="flex items-center gap-2 cursor-pointer transition-transform hover:scale-105 active:scale-95"
+            style={{ background: 'none', border: 'none', padding: 0 }}
+            title="Vào bảng điều khiển"
+          >
+            <div style={{ 
+              width: 38, height: 38, borderRadius: '50%', color: '#fff', fontSize: 14, fontWeight: 'bold',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: finalAvatarUrl ? `url(${finalAvatarUrl}) center/cover no-repeat` : 'linear-gradient(135deg, #f97316, #fb923c)',
+              border: isDark ? '2px solid #3f3f46' : '2px solid #e2e8f0',
+              boxShadow: '0 4px 10px rgba(0,0,0,0.1)'
+            }}>
+              {!finalAvatarUrl && (finalFullName ? finalFullName.substring(0, 2).toUpperCase() : 'U')}
+            </div>
+          </button>
+        )}
         
         <button 
           onClick={() => setMenuOpen(!menuOpen)} 
@@ -99,10 +133,21 @@ export const NavBar = ({ isDark, toggleTheme, scrolled, scrollToSection }: { isD
             </a>
           ))}
           <button
-            onClick={() => navigate('/login')}
+            onClick={() => {
+              if (isAuthenticated) {
+                const roles = user?.roles?.map((r: any) => r.roleName || r) || [];
+                if (roles.includes('STUDENT') || roles.includes('ROLE_STUDENT') || roles.includes('ENTERPRISE') || roles.includes('ROLE_ENTERPRISE')) {
+                  navigate('/student-dashboard');
+                } else {
+                  navigate('/app/dashboard');
+                }
+              } else {
+                navigate('/login');
+              }
+            }}
             className="text-sm font-bold text-white px-4 py-2.5 rounded-lg bg-[#f37021] flex justify-center items-center gap-1.5 shadow-md shadow-[#f37021]/15 mt-2"
           >
-            Vào hệ thống
+            {isAuthenticated ? 'Bảng điều khiển' : 'Vào hệ thống'}
             <ArrowRight className="h-4 w-4" />
           </button>
         </div>

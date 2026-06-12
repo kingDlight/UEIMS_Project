@@ -10,6 +10,7 @@ export interface User {
   fullName: string;
   roles: UserRole[];
   mustChangePassword?: boolean;
+  avatarUrl?: string;
 }
 
 interface AuthState {
@@ -51,9 +52,10 @@ export const useAuthStore = create<AuthState>()(
           user: {
             id: '',
             email: payload.email,
-            fullName: payload.email.split('@')[0],
+            fullName: payload.fullName || payload.email.split('@')[0],
             roles: payload.roles as UserRole[],
             mustChangePassword: payload.mustChangePassword,
+            avatarUrl: payload.avatarUrl,
           },
           token,
           refreshToken,

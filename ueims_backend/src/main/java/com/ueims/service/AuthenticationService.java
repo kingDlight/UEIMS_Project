@@ -420,6 +420,8 @@ public class AuthenticationService {
                         .toEpochMilli()))
                 .jwtID(UUID.randomUUID().toString())
                 .claim("must_change_password", Boolean.TRUE.equals(user.getMustChangePassword()))
+                .claim("full_name", user.getFullName())
+                .claim("avatar_url", user.getAvatarUrl())
                 .build();
 
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());

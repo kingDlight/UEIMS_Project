@@ -29,5 +29,7 @@ export function extractUserFromToken(token: string) {
     email: payload.sub,
     roles,
     mustChangePassword: payload.must_change_password,
+    fullName: payload.full_name,
+    avatarUrl: payload.avatar_url,
   };
 }
