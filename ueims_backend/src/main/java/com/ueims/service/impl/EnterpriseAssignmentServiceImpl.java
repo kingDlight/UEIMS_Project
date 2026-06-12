@@ -9,12 +9,15 @@ import com.ueims.model.entity.EnterpriseAssignment;
 import com.ueims.repository.EnterpriseAssignmentRepository;
 import com.ueims.service.EnterpriseAssignmentService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class EnterpriseAssignmentServiceImpl implements EnterpriseAssignmentService {
-    private final EnterpriseAssignmentRepository repository;
+    EnterpriseAssignmentRepository repository;
 
     @Override
     public List<EnterpriseAssignment> findAll() {

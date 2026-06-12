@@ -12,13 +12,16 @@ import org.springframework.web.bind.annotation.*;
 import com.ueims.model.entity.Incident;
 import com.ueims.service.IncidentService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @RestController
 @RequestMapping("/api/incidents")
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class IncidentController {
-    private final IncidentService service;
+    IncidentService service;
 
     @GetMapping
     @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")

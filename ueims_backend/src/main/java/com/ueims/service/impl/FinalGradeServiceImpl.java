@@ -17,12 +17,15 @@ import com.ueims.model.entity.User;
 import com.ueims.repository.FinalGradeRepository;
 import com.ueims.service.FinalGradeService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class FinalGradeServiceImpl implements FinalGradeService {
-    private final FinalGradeRepository repository;
+    FinalGradeRepository repository;
 
     @Override
     @Transactional(readOnly = true)

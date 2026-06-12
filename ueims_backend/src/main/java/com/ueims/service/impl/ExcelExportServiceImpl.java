@@ -22,13 +22,16 @@ import com.ueims.repository.AtRiskStudentRepository;
 import com.ueims.repository.FinalGradeRepository;
 import com.ueims.service.ExcelExportService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ExcelExportServiceImpl implements ExcelExportService {
-    private final AtRiskStudentRepository atRiskStudentRepository;
-    private final FinalGradeRepository finalGradeRepository;
+    AtRiskStudentRepository atRiskStudentRepository;
+    FinalGradeRepository finalGradeRepository;
 
     @Override
     public ResponseEntity<byte[]> exportAtRiskStudents(UUID semesterId) {

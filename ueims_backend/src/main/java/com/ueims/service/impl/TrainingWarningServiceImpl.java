@@ -17,17 +17,20 @@ import com.ueims.repository.WeeklyReportRepository;
 import com.ueims.service.MailService;
 import com.ueims.service.TrainingWarningService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 public class TrainingWarningServiceImpl implements TrainingWarningService {
-    private final TrainingWarningRepository repository;
-    private final WeeklyReportRepository weeklyReportRepository;
-    private final EnterpriseAssignmentRepository enterpriseAssignmentRepository;
-    private final MailService mailService;
+    TrainingWarningRepository repository;
+    WeeklyReportRepository weeklyReportRepository;
+    EnterpriseAssignmentRepository enterpriseAssignmentRepository;
+    MailService mailService;
 
     @Override
     public List<TrainingWarning> findAll() {

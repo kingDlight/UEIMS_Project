@@ -16,14 +16,17 @@ import com.ueims.repository.UserRepository;
 import com.ueims.service.MailService;
 import com.ueims.service.UserService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserServiceImpl implements UserService {
-    private final UserRepository repository;
-    private final MailService mailService;
-    private final PasswordEncoder passwordEncoder;
+    UserRepository repository;
+    MailService mailService;
+    PasswordEncoder passwordEncoder;
 
     @Override
     public List<User> findAll() {

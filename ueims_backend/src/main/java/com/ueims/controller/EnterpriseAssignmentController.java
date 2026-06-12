@@ -9,14 +9,17 @@ import org.springframework.web.bind.annotation.*;
 
 import com.ueims.service.EnterpriseAssignmentService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @RestController
 @RequestMapping("/api/enterprise-assignments")
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class EnterpriseAssignmentController {
-    private final EnterpriseAssignmentService service;
-    private final com.ueims.mapper.EnterpriseAssignmentMapper mapper;
+    EnterpriseAssignmentService service;
+    com.ueims.mapper.EnterpriseAssignmentMapper mapper;
 
     @GetMapping
     public ResponseEntity<java.util.List<com.ueims.dto.response.EnterpriseAssignmentDTO>> getAll() {

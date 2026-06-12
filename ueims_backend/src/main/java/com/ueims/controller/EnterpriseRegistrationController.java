@@ -11,13 +11,16 @@ import com.ueims.dto.request.EnterpriseRegistrationRequest;
 import com.ueims.dto.response.ApiResponse;
 import com.ueims.service.EnterpriseRegistrationService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class EnterpriseRegistrationController {
-    private final EnterpriseRegistrationService registrationService;
+    EnterpriseRegistrationService registrationService;
 
     @PostMapping("/register-enterprise")
     public ApiResponse<Void> registerEnterprise(@Valid @RequestBody EnterpriseRegistrationRequest request) {

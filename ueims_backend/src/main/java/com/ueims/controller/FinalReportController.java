@@ -10,14 +10,17 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.ueims.service.FinalReportService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @RestController
 @RequestMapping("/api/final-reports")
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class FinalReportController {
-    private final FinalReportService service;
-    private final com.ueims.mapper.FinalReportMapper mapper;
+    FinalReportService service;
+    com.ueims.mapper.FinalReportMapper mapper;
 
     @GetMapping
     public ResponseEntity<java.util.List<com.ueims.dto.response.FinalReportDTO>> getAll() {

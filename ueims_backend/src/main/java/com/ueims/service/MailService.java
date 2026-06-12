@@ -9,12 +9,16 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class MailService {
 
     private static final String VAR_FULL_NAME = "fullName";
@@ -22,11 +26,12 @@ public class MailService {
     private static final String PATH_LOGIN = "/login";
     private static final String VAR_LOGIN_URL = "loginUrl";
 
-    private final JavaMailSender javaMailSender;
-    private final TemplateEngine templateEngine;
+    JavaMailSender javaMailSender;
+    TemplateEngine templateEngine;
 
     @Value("${app.base-url:http://localhost:5173}")
-    private String appBaseUrl;
+    @NonFinal
+    String appBaseUrl;
 
     // ===== Password Reset (VI) =====
     public void sendPasswordResetMail(String to, String fullName, String token) {

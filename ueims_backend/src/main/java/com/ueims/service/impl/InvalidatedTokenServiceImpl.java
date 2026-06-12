@@ -8,12 +8,15 @@ import com.ueims.model.entity.InvalidatedToken;
 import com.ueims.repository.InvalidatedTokenRepository;
 import com.ueims.service.InvalidatedTokenService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class InvalidatedTokenServiceImpl implements InvalidatedTokenService {
-    private final InvalidatedTokenRepository repository;
+    InvalidatedTokenRepository repository;
 
     @Override
     public List<InvalidatedToken> findAll() {

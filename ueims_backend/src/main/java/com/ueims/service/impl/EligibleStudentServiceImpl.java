@@ -24,15 +24,18 @@ import com.ueims.repository.SemesterRepository;
 import com.ueims.service.EligibleStudentService;
 import com.ueims.util.ExcelImportUtil;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 public class EligibleStudentServiceImpl implements EligibleStudentService {
-    private final EligibleStudentRepository repository;
-    private final SemesterRepository semesterRepository;
+    EligibleStudentRepository repository;
+    SemesterRepository semesterRepository;
 
     @Override
     public List<EligibleStudent> findAll() {

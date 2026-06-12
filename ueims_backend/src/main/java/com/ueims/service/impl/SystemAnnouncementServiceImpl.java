@@ -19,14 +19,17 @@ import com.ueims.repository.SystemAnnouncementRepository;
 import com.ueims.repository.UserRepository;
 import com.ueims.service.SystemAnnouncementService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class SystemAnnouncementServiceImpl implements SystemAnnouncementService {
-    private final SystemAnnouncementRepository repository;
-    private final UserRepository userRepository;
-    private final SemesterRepository semesterRepository;
+    SystemAnnouncementRepository repository;
+    UserRepository userRepository;
+    SemesterRepository semesterRepository;
 
     @Override
     public List<SystemAnnouncement> findAll() {

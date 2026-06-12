@@ -12,15 +12,18 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ueims.model.dto.dashboard.ChartDataDTO;
 import com.ueims.service.DashboardService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @RestController
 @RequestMapping("/dashboard")
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
 public class DashboardController {
 
-    private final DashboardService dashboardService;
+    DashboardService dashboardService;
 
     @GetMapping("/employment-rate/{semesterId}")
     public List<ChartDataDTO> getEmploymentRateChart(@PathVariable UUID semesterId) {

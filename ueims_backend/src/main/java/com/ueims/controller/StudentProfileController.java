@@ -12,14 +12,17 @@ import org.springframework.web.multipart.MultipartFile;
 import com.ueims.dto.request.StudentProfileUpdateRequest;
 import com.ueims.service.StudentProfileService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @RestController
 @RequestMapping("/api/student-profiles")
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class StudentProfileController {
-    private final StudentProfileService service;
-    private final com.ueims.mapper.StudentProfileMapper mapper;
+    StudentProfileService service;
+    com.ueims.mapper.StudentProfileMapper mapper;
 
     @GetMapping
     @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")

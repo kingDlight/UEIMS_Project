@@ -15,14 +15,17 @@ import com.ueims.repository.StudentEnterpriseFeedbackRepository;
 import com.ueims.repository.UserRepository;
 import com.ueims.service.StudentEnterpriseFeedbackService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class StudentEnterpriseFeedbackServiceImpl implements StudentEnterpriseFeedbackService {
-    private final StudentEnterpriseFeedbackRepository repository;
-    private final UserRepository userRepository;
-    private final EligibleStudentRepository eligibleStudentRepository;
+    StudentEnterpriseFeedbackRepository repository;
+    UserRepository userRepository;
+    EligibleStudentRepository eligibleStudentRepository;
 
     private User getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();

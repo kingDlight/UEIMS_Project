@@ -10,14 +10,17 @@ import org.springframework.web.bind.annotation.*;
 
 import com.ueims.service.EnterpriseEvaluationService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @RestController
 @RequestMapping("/api/enterprise-evaluations")
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class EnterpriseEvaluationController {
-    private final EnterpriseEvaluationService service;
-    private final com.ueims.mapper.EnterpriseEvaluationMapper mapper;
+    EnterpriseEvaluationService service;
+    com.ueims.mapper.EnterpriseEvaluationMapper mapper;
 
     @GetMapping
     @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")

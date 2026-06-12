@@ -19,14 +19,17 @@ import com.ueims.model.entity.FinalGrade;
 import com.ueims.service.ExcelExportService;
 import com.ueims.service.FinalGradeService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @RestController
 @RequestMapping("/api/final-grades")
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class FinalGradeController {
-    private final FinalGradeService service;
-    private final ExcelExportService excelExportService;
+    FinalGradeService service;
+    ExcelExportService excelExportService;
 
     @GetMapping
     public ApiResponse<List<FinalGrade>> getAll() {

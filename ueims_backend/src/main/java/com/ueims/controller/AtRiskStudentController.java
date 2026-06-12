@@ -12,15 +12,18 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ueims.model.entity.AtRiskStudent;
 import com.ueims.service.AtRiskStudentService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @RestController
 @RequestMapping("/api/at-risk-students")
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AtRiskStudentController {
 
-    private final AtRiskStudentService atRiskStudentService;
-    private final com.ueims.service.ExcelExportService excelExportService;
+    AtRiskStudentService atRiskStudentService;
+    com.ueims.service.ExcelExportService excelExportService;
 
     @GetMapping
     public ResponseEntity<List<AtRiskStudent>> getAtRiskStudents(@RequestParam UUID semesterId) {

@@ -12,13 +12,16 @@ import com.ueims.dto.response.ApiResponse;
 import com.ueims.model.entity.Enterprise;
 import com.ueims.service.EnterpriseService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @RestController
 @RequestMapping("/api/enterprises")
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class EnterpriseController {
-    private final EnterpriseService service;
+    EnterpriseService service;
 
     @GetMapping
     @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')") // UC-18

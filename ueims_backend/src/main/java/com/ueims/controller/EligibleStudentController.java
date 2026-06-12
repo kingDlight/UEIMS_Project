@@ -18,14 +18,17 @@ import com.ueims.dto.response.EligibleStudentResponse;
 import com.ueims.mapper.EligibleStudentMapper;
 import com.ueims.service.EligibleStudentService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @RestController
 @RequestMapping("/api/eligible-students")
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class EligibleStudentController {
-    private final EligibleStudentService service;
-    private final EligibleStudentMapper mapper;
+    EligibleStudentService service;
+    EligibleStudentMapper mapper;
 
     @GetMapping
     public ResponseEntity<List<EligibleStudentDTO>> getAll() {

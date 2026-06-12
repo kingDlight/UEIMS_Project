@@ -15,14 +15,17 @@ import com.ueims.dto.response.UserResponse;
 import com.ueims.model.entity.User;
 import com.ueims.service.UserService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserController {
-    private final UserService service;
-    private final PasswordEncoder passwordEncoder;
+    UserService service;
+    PasswordEncoder passwordEncoder;
 
     @GetMapping("/myInfo")
     public ResponseEntity<UserResponse> getMyInfo() {

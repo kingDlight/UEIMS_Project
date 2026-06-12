@@ -9,12 +9,15 @@ import com.ueims.model.entity.InternshipPlan;
 import com.ueims.repository.InternshipPlanRepository;
 import com.ueims.service.InternshipPlanService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class InternshipPlanServiceImpl implements InternshipPlanService {
-    private final InternshipPlanRepository repository;
+    InternshipPlanRepository repository;
 
     @Override
     public List<InternshipPlan> findAll() {

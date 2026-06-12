@@ -14,13 +14,16 @@ import com.ueims.model.entity.TrainingWarning;
 import com.ueims.model.entity.User;
 import com.ueims.service.TrainingWarningService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @RestController
 @RequestMapping("/api/training-warnings")
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class TrainingWarningController {
-    private final TrainingWarningService service;
+    TrainingWarningService service;
 
     @GetMapping
     public ResponseEntity<List<TrainingWarning>> getAll() {

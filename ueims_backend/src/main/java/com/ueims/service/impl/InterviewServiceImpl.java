@@ -19,14 +19,17 @@ import com.ueims.repository.InterviewRepository;
 import com.ueims.repository.UserRepository;
 import com.ueims.service.InterviewService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class InterviewServiceImpl implements InterviewService {
-    private final InterviewRepository repository;
-    private final ApplicationRepository applicationRepository;
-    private final UserRepository userRepository;
+    InterviewRepository repository;
+    ApplicationRepository applicationRepository;
+    UserRepository userRepository;
 
     @Override
     public List<Interview> findAll() {

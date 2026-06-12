@@ -18,16 +18,19 @@ import com.ueims.model.entity.User;
 import com.ueims.repository.UserRepository;
 import com.ueims.service.SemesterService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
 @RequestMapping("/api/semesters")
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class SemesterController {
-    private final SemesterService service;
-    private final UserRepository userRepository;
+    SemesterService service;
+    UserRepository userRepository;
 
     @GetMapping
     public ResponseEntity<List<SemesterResponse>> getAll() {

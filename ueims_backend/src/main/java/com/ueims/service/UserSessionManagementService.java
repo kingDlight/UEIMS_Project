@@ -11,14 +11,17 @@ import com.ueims.model.entity.UserSession;
 import com.ueims.repository.InvalidatedTokenRepository;
 import com.ueims.repository.UserSessionRepository;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserSessionManagementService {
 
-    private final UserSessionRepository userSessionRepository;
-    private final InvalidatedTokenRepository invalidatedTokenRepository;
+    UserSessionRepository userSessionRepository;
+    InvalidatedTokenRepository invalidatedTokenRepository;
 
     @Transactional
     public void invalidateOldSessions(String email) {
