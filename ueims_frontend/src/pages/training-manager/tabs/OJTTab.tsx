@@ -35,7 +35,7 @@ const cc = {
   textPrimary: '#1A1A2E',
   textSecondary: '#6B7280',
   textMuted: '#9CA3AF',
-  surface: '#FFFFFF',
+  surface: 'rgba(255, 255, 255, 0.72)',
   neutralBg: '#F9FAFB',
   border: '#E5E7EB',
   borderSubtle: '#F3F4F6',
@@ -648,7 +648,7 @@ export const OJTTab: React.FC = () => {
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         gap: 10, marginBottom: 12, padding: '10px 14px',
-        background: cc.surface, border: `1px solid ${cc.border}`,
+        background: cc.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: `1px solid ${cc.border}`,
         borderRadius: cc.radiusLg, boxShadow: cc.shadowSm, flexWrap: 'wrap',
       }}>
         {/* Left: CTAs */}
@@ -830,7 +830,7 @@ export const OJTTab: React.FC = () => {
             )}
           </div>
         </div>
-        <div style={{ padding: '20px 24px', background: cc.surface }}>
+        <div style={{ padding: '20px 24px', background: cc.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
           <p style={{ fontSize: 12.5, color: cc.textSecondary, marginBottom: 14, fontFamily: 'Inter, sans-serif', lineHeight: 1.6 }}>
             Assign an enterprise to this student. Status will move to <strong style={{ color: cc.warning }}>Interviewing</strong>.
           </p>
@@ -850,7 +850,7 @@ export const OJTTab: React.FC = () => {
                 style={{
                   display: 'flex', alignItems: 'center', gap: 10,
                   padding: '9px 12px', borderRadius: cc.radiusMd,
-                  border: `1px solid ${cc.border}`, background: cc.surface,
+                  border: `1px solid ${cc.border}`, background: cc.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
                   cursor: 'pointer', transition: 'all 0.15s ease', textAlign: 'left',
                 }}
                 onMouseEnter={(e) => {
@@ -905,7 +905,7 @@ export const OJTTab: React.FC = () => {
             )}
           </div>
         </div>
-        <div style={{ padding: '20px 24px', background: cc.surface }}>
+        <div style={{ padding: '20px 24px', background: cc.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
           {selectedRecord && (
             <div style={{
               display: 'flex', alignItems: 'center', gap: 10,
@@ -992,7 +992,7 @@ export const OJTTab: React.FC = () => {
             )}
           </div>
         </div>
-        <div style={{ padding: '20px 24px', background: cc.surface }}>
+        <div style={{ padding: '20px 24px', background: cc.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {[
               { label: 'Mark as Placed', sub: 'Generate OJT contract', c: cc.success, bg: cc.successMuted, b: '#6EE7B7' },
@@ -1053,7 +1053,7 @@ export const OJTTab: React.FC = () => {
             </div>
           </div>
         </div>
-        <div style={{ padding: '16px 20px', background: cc.surface, maxHeight: 380, overflowY: 'auto' }}>
+        <div style={{ padding: '16px 20px', background: cc.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', maxHeight: 380, overflowY: 'auto' }}>
           {placementData
             .filter((p) => p.status === 'PENDING_APPROVAL')
             .map((record) => (

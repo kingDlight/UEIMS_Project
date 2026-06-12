@@ -40,7 +40,7 @@ const st = {
   textPrimary: '#1A1A2E',
   textSecondary: '#6B7280',
   textMuted: '#9CA3AF',
-  surface: '#FFFFFF',
+  surface: 'rgba(255, 255, 255, 0.72)',
   neutralBg: '#F9FAFB',
   border: '#E5E7EB',
   borderSubtle: '#F3F4F6',
@@ -324,7 +324,7 @@ const MetricCard: React.FC<{
     style={{
       flex: 1,
       minWidth: 140,
-      background: st.surface,
+      background: st.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
       border: `1px solid ${st.border}`,
       borderRadius: st.radiusXl,
       padding: '14px 16px',
@@ -418,7 +418,7 @@ const StudentDetailModal: React.FC<{
       }}
     >
       {/* HEADER SECTION */}
-      <div style={{ padding: '24px 24px 20px', background: st.surface, position: 'relative' }}>
+      <div style={{ padding: '24px 24px 20px', background: st.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', position: 'relative' }}>
         <button
           onClick={onClose}
           style={{
@@ -464,7 +464,7 @@ const StudentDetailModal: React.FC<{
       </div>
 
       {/* BODY SECTION */}
-      <div style={{ padding: '0 24px 24px', background: st.surface }}>
+      <div style={{ padding: '0 24px 24px', background: st.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
         {/* Simple Grid for Info (No borders) */}
         <div className="ent-info-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px 24px', marginBottom: 28 }}>
           {[
@@ -499,12 +499,12 @@ const StudentDetailModal: React.FC<{
       </div>
 
       {/* FOOTER SECTION */}
-      <div style={{ padding: '18px 24px', borderTop: `1px solid ${st.borderSubtle}`, background: st.surface, display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+      <div style={{ padding: '18px 24px', borderTop: `1px solid ${st.borderSubtle}`, background: st.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
         <button
           onClick={onClose}
           style={{
             padding: '9px 18px', borderRadius: st.radiusMd, border: `1px solid ${st.border}`,
-            background: st.surface, color: st.textSecondary, fontSize: 13, fontWeight: 600,
+            background: st.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', color: st.textSecondary, fontSize: 13, fontWeight: 600,
             cursor: 'pointer', fontFamily: 'Inter, sans-serif', transition: 'all 0.2s',
           }}
           onMouseEnter={(e) => { e.currentTarget.style.background = st.neutralBg; e.currentTarget.style.color = st.textPrimary; }}
@@ -848,7 +848,7 @@ export const StudentsTab: React.FC = () => {
       {/* Filter Bar */}
       <div
         style={{
-          background: st.surface,
+          background: st.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
           border: `1px solid ${st.border}`,
           borderRadius: st.radiusLg,
           padding: '12px 16px',
@@ -969,7 +969,7 @@ export const StudentsTab: React.FC = () => {
       {/* Data Table */}
       <div
         style={{
-          background: st.surface,
+          background: st.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
           border: `1px solid ${st.border}`,
           borderRadius: st.radiusLg,
           boxShadow: st.shadowSm,

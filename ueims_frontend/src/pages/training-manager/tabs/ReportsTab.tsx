@@ -158,7 +158,7 @@ const TemplateCard: React.FC<{
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        background: st.surface,
+        background: st.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
         border: `1px solid ${hovered ? st.brand + '60' : st.border}`,
         borderRadius: st.radiusXl,
         padding: '24px',
@@ -397,7 +397,7 @@ export const ReportsTab: React.FC = () => {
               height: 30,
               borderRadius: st.radiusMd,
               border: `1px solid ${st.border}`,
-              background: st.surface,
+              background: st.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
               color: st.textSecondary,
               display: 'inline-flex',
               alignItems: 'center',
@@ -426,7 +426,7 @@ export const ReportsTab: React.FC = () => {
               height: 30,
               borderRadius: st.radiusMd,
               border: `1px solid ${st.border}`,
-              background: st.surface,
+              background: st.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
               color: st.textSecondary,
               display: 'inline-flex',
               alignItems: 'center',
@@ -647,7 +647,7 @@ export const ReportsTab: React.FC = () => {
        
        className="scroll-animate">
         <div style={{
-          background: st.surface,
+          background: st.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
           border: `1px solid ${st.border}`,
           borderRadius: st.radiusXl,
           boxShadow: st.shadowSm,

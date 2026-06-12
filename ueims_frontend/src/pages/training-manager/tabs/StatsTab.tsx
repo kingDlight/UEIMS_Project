@@ -47,7 +47,7 @@ const cc = {
   textPrimary: '#1A1A2E',
   textSecondary: '#6B7280',
   textMuted: '#9CA3AF',
-  surface: '#FFFFFF',
+  surface: 'rgba(255, 255, 255, 0.72)',
   neutralBg: '#F9FAFB',
   border: '#E5E7EB',
   borderSubtle: '#F3F4F6',
@@ -118,7 +118,7 @@ const CustomTooltip: React.FC<{
   return (
     <div
       style={{
-        background: cc.surface,
+        background: cc.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
         border: `1px solid ${cc.border}`,
         borderRadius: cc.radiusLg,
         boxShadow: cc.shadowMd,
@@ -164,7 +164,7 @@ const MetricCard: React.FC<{
    
    
     style={{
-      background: cc.surface,
+      background: cc.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
       border: `1px solid ${cc.border}`,
       borderRadius: cc.radiusLg,
       padding: '18px 20px',
@@ -347,7 +347,7 @@ trailColor={cc.borderSubtle}
       {/* Charts Section — 2-column grid */}
       <div ref={containerRef} className="stats-charts-grid">
         {/* LEFT: Donut Chart */}
-        <div style={{ background: cc.surface, border: `1px solid ${cc.border}`, borderRadius: cc.radiusLg, boxShadow: cc.shadowSm, padding: 20 }}>
+        <div style={{ background: cc.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: `1px solid ${cc.border}`, borderRadius: cc.radiusLg, boxShadow: cc.shadowSm, padding: 20 }}>
           <div style={{ fontSize: 13.5, fontWeight: 700, color: cc.textPrimary, marginBottom: 4 }}>Placement Overview</div>
           <div style={{ fontSize: 12, color: cc.textMuted, marginBottom: 20 }}>Placed vs. still searching — current semester</div>
           <div style={{ height: 220, minHeight: 0 }}>
@@ -398,7 +398,7 @@ trailColor={cc.borderSubtle}
         </div>
 
         {/* RIGHT: Bar Chart */}
-        <div style={{ background: cc.surface, border: `1px solid ${cc.border}`, borderRadius: cc.radiusLg, boxShadow: cc.shadowSm, padding: 20 }}>
+        <div style={{ background: cc.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: `1px solid ${cc.border}`, borderRadius: cc.radiusLg, boxShadow: cc.shadowSm, padding: 20 }}>
           <div style={{ fontSize: 13.5, fontWeight: 700, color: cc.textPrimary, marginBottom: 4 }}>GPA by Major</div>
           <div style={{ fontSize: 12, color: cc.textMuted, marginBottom: 16 }}>Average GPA distribution across majors</div>
           <div style={{ height: 220, minHeight: 0, paddingRight: 24 }}>
@@ -431,7 +431,7 @@ trailColor={cc.borderSubtle}
       </div>
 
       {/* Bottom: Trend Area Chart */}
-      <div style={{ background: cc.surface, border: `1px solid ${cc.border}`, borderRadius: cc.radiusLg, boxShadow: cc.shadowSm, padding: 20, marginBottom: 16, minWidth: 0 }}>
+      <div style={{ background: cc.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: `1px solid ${cc.border}`, borderRadius: cc.radiusLg, boxShadow: cc.shadowSm, padding: 20, marginBottom: 16, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 4 }}>
           <div>
             <div style={{ fontSize: 13.5, fontWeight: 700, color: cc.textPrimary, fontFamily: 'Inter, sans-serif' }}>Placement Trend</div>
@@ -495,7 +495,7 @@ animationDuration={1200}
       </div>
 
       {/* Bottom Table */}
-      <div style={{ background: cc.surface, border: `1px solid ${cc.border}`, borderRadius: cc.radiusLg, boxShadow: cc.shadowSm, overflowX: 'auto', maxWidth: '100%', minWidth: 0 }}>
+      <div style={{ background: cc.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: `1px solid ${cc.border}`, borderRadius: cc.radiusLg, boxShadow: cc.shadowSm, overflowX: 'auto', maxWidth: '100%', minWidth: 0 }}>
         <div style={{ padding: '16px 20px 12px', borderBottom: `1px solid ${cc.borderSubtle}` }}>
           <div style={{ fontSize: 13.5, fontWeight: 700, color: cc.textPrimary, fontFamily: 'Inter, sans-serif' }}>Performance by Major</div>
           <div style={{ fontSize: 12, color: cc.textMuted, marginTop: 2, fontFamily: 'Inter, sans-serif' }}>OJT placement rates and GPA averages across all majors — AY 2025–2026</div>

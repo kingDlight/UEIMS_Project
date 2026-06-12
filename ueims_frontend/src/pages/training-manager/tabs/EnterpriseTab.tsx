@@ -45,7 +45,7 @@ const cc = {
   textPrimary: '#1A1A2E',
   textSecondary: '#6B7280',
   textMuted: '#9CA3AF',
-  surface: '#FFFFFF',
+  surface: 'rgba(255, 255, 255, 0.72)',
   bg: '#FFF3E8',
   border: '#E5E7EB',
   borderSubtle: '#F3F4F6',
@@ -209,7 +209,7 @@ const ApprovalRow: React.FC<{
      
      
       style={{
-        background: cc.surface,
+        background: cc.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
         border: `1px solid ${cc.border}`,
         borderRadius: cc.radiusLg,
         overflow: 'hidden',
@@ -381,7 +381,7 @@ const AllEnterprisesTable: React.FC<{ data: Enterprise[] }> = ({ data }) => {
         rowKey="enterpriseId"
         pagination={false}
         scroll={{ x: 800 }}
-        style={{ background: cc.surface, borderRadius: cc.radiusLg, overflow: 'hidden' }}
+        style={{ background: cc.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderRadius: cc.radiusLg, overflow: 'hidden' }}
       />
     </div>
   );
@@ -462,7 +462,7 @@ export const EnterpriseTab: React.FC = () => {
         <div
          
          
-          style={{ textAlign: 'center', padding: '48px 24px', background: cc.surface, borderRadius: cc.radiusLg, border: `1px solid ${cc.borderSubtle}` }}
+          style={{ textAlign: 'center', padding: '48px 24px', background: cc.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderRadius: cc.radiusLg, border: `1px solid ${cc.borderSubtle}` }}
          className="scroll-animate">
           <div style={{ width: 48, height: 48, borderRadius: cc.radiusMd, background: cc.successMuted, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
             <CheckCircle2 size={24} color={cc.success} />
@@ -498,7 +498,7 @@ export const EnterpriseTab: React.FC = () => {
           .ent-info-grid { grid-template-columns: 1fr !important; }
         }
       `}</style>
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ maxWidth: 1600, margin: '0 auto', padding: '0 24px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
           <h1 style={{ fontSize: 22, fontWeight: 800, color: cc.textPrimary, margin: 0, letterSpacing: '-0.02em' }}>
             Enterprise Management
@@ -509,9 +509,9 @@ export const EnterpriseTab: React.FC = () => {
         </div>
       </div>
 
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px' }}>
+      <div style={{ maxWidth: 1600, margin: '0 auto', padding: '0 24px' }}>
         <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: 0, background: cc.surface,
+          display: 'inline-flex', alignItems: 'center', gap: 0, background: cc.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
           border: `1px solid ${cc.border}`, borderRadius: cc.radiusMd, padding: 4, marginBottom: 20, boxShadow: cc.shadowSm,
         }}>
           {(['pending', 'all'] as const).map((view) => (

@@ -39,7 +39,7 @@ const cc = {
   textPrimary: '#1A1A2E',
   textSecondary: '#6B7280',
   textMuted: '#9CA3AF',
-  surface: '#FFFFFF',
+  surface: 'rgba(255, 255, 255, 0.72)',
   neutralBg: '#F9FAFB',
   border: '#E5E7EB',
   borderSubtle: '#F3F4F6',
@@ -603,7 +603,7 @@ const MetricCard: React.FC<{
   return (
   <div
     style={{
-      background: cc.surface,
+      background: cc.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
       border: `1px solid ${cc.border}`,
       borderRadius: cc.radiusLg,
       padding: '14px 16px',
@@ -859,7 +859,7 @@ export const IncidentsTab: React.FC = () => {
                   style={{
                     padding: '40px 20px', 
                     textAlign: 'center', 
-                    background: cc.surface, 
+                    background: cc.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', 
                     borderRadius: cc.radiusLg,
                     border: `1px dashed ${cc.border}`
                   }}
@@ -917,7 +917,7 @@ export const IncidentsTab: React.FC = () => {
          
          
           style={{
-            background: cc.surface,
+            background: cc.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
             border: `1px solid ${cc.border}`,
             borderRadius: cc.radiusLg,
             boxShadow: cc.shadowSm,
@@ -958,7 +958,7 @@ export const IncidentsTab: React.FC = () => {
                       width: 36,
                       height: 36,
                       borderRadius: cc.radiusMd,
-                      background: cc.surface,
+                      background: cc.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
                       border: `1px solid ${cc.border}`,
                       display: 'flex',
                       alignItems: 'center',

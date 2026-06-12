@@ -40,7 +40,7 @@ const cc = {
   textPrimary: '#1A1A2E',
   textSecondary: '#6B7280',
   textMuted: '#9CA3AF',
-  surface: '#FFFFFF',
+  surface: 'rgba(255, 255, 255, 0.72)',
   neutralBg: '#F9FAFB',
   border: '#E5E7EB',
   borderSubtle: '#F3F4F6',
@@ -650,7 +650,7 @@ export const NoticesTab: React.FC = () => {
       {/* TABLE CARD */}
       <div
         style={{
-          background: cc.surface,
+          background: cc.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
           borderRadius: cc.radiusXl,
           boxShadow: cc.shadowSm,
           border: `1px solid ${cc.border}`,

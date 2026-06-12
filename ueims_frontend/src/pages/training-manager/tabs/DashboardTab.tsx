@@ -83,7 +83,6 @@ export const DashboardTab: React.FC<{ animationDelay?: number; onNavigate?: (pag
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 22, opacity: isLoaded ? 1 : 0, transform: isLoaded ? 'translateY(0)' : 'translateY(20px)', transition: 'all .4s ease-out' }}>
-      <BackgroundEffects isDark={false} />
       <style>{`
         .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; align-items: stretch; }
         .bottom-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; align-items: stretch; }

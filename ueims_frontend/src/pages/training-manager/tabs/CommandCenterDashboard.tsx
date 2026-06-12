@@ -1398,7 +1398,6 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
     <div style={{
       fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
     }}>
-      <BackgroundEffects isDark={false} />
       {/* Main Content */}
       <div style={{
         maxWidth: 1600,

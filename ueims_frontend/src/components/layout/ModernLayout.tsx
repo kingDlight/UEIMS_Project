@@ -11,6 +11,7 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { AuthService } from '@/services/AuthService';
 import { api } from '@/services/api';
 import './ModernLayout.css';
+import { BackgroundEffects } from '@/pages/home/components/BackgroundEffects';
 
 export interface NavItem {
   key: string;
@@ -547,6 +548,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
         </Drawer>
 
         {/* Page Content */}
+        <BackgroundEffects isDark={false} />
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}

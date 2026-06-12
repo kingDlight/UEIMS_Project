@@ -210,7 +210,7 @@ const ReportCard = forwardRef<HTMLDivElement, ReportCardProps>((
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        background: st.surface,
+        background: st.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
         border: `1px solid ${hovered ? st.border : st.borderSubtle}`,
         borderRadius: st.radiusXl,
         boxShadow: hovered ? st.shadowMd : st.shadowSm,
@@ -380,7 +380,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
 }) => {
   return (
     <div style={{
-      background: st.surface,
+      background: st.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
       border: `1px solid ${st.border}`,
       borderRadius: st.radiusXl,
       boxShadow: st.shadowSm,
@@ -843,7 +843,7 @@ export const WeeklyReportsTab: React.FC = () => {
                     alignItems: 'center',
                     justifyContent: 'center',
                     padding: '60px 24px',
-                    background: st.surface,
+                    background: st.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
                     border: `1px dashed ${st.border}`,
                     borderRadius: st.radiusXl,
                     gap: 8,
