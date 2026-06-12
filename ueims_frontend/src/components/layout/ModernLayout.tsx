@@ -195,6 +195,25 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
 
   const { user, token, logout } = useAuthStore();
 
+  const [phone, setPhone] = useState('');
+  const [updatingProfile, setUpdatingProfile] = useState(false);
+
+  useEffect(() => {
+    if (user?.phone) setPhone(user.phone);
+  }, [user]);
+
+  const handleUpdateProfile = async () => {
+    try {
+      setUpdatingProfile(true);
+      await api.put(`/users/${user?.id || user?.userId}`, { ...user, phone });
+      message.success('Cập nhật hồ sơ thành công!');
+    } catch (err: any) {
+      message.error(err.response?.data?.message || 'Cập nhật thất bại!');
+    } finally {
+      setUpdatingProfile(false);
+    }
+  };
+
   const filteredNavItems = useMemo(() => {
     return navItems.filter((item) => {
       if (!item.roles) return true;
@@ -619,20 +638,27 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
         <div style={{ padding: '0 24px 24px', display: 'flex', flexDirection: 'column' }}>
           <div style={{ height: 1, background: '#f1f5f9', width: '100%', marginBottom: 8 }}></div>
           
-          {[
-            { icon: <Mail size={16} color="#64748b" />, label: 'Email Address', value: user?.email },
-            { icon: <Phone size={16} color="#64748b" />, label: 'Phone Number', value: 'Chưa cập nhật' },
-          ].map((item) => (
-            <div key={item.label} style={{ 
-              display: 'flex', flexDirection: 'column', gap: 4, padding: '12px 0', borderBottom: '1px solid #f8fafc'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                {item.icon}
-                <span style={{ fontSize: 11, color: '#64748b', fontWeight: 600, fontFamily: 'Inter, sans-serif', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{item.label}</span>
-              </div>
-              <span style={{ fontSize: 14, color: '#0f172a', fontWeight: 600, fontFamily: 'Inter, sans-serif', paddingLeft: 24 }}>{item.value}</span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: '12px 0', borderBottom: '1px solid #f8fafc' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Mail size={16} color="#64748b" />
+              <span style={{ fontSize: 11, color: '#64748b', fontWeight: 600, fontFamily: 'Inter, sans-serif', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Email Address</span>
             </div>
-          ))}
+            <span style={{ fontSize: 14, color: '#0f172a', fontWeight: 600, fontFamily: 'Inter, sans-serif', paddingLeft: 24 }}>{user?.email}</span>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: '12px 0', borderBottom: '1px solid #f8fafc' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Phone size={16} color="#64748b" />
+              <span style={{ fontSize: 11, color: '#64748b', fontWeight: 600, fontFamily: 'Inter, sans-serif', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Phone Number</span>
+            </div>
+            <Input 
+              value={phone} 
+              onChange={(e) => setPhone(e.target.value)} 
+              placeholder="Chưa cập nhật"
+              bordered={false}
+              style={{ fontSize: 14, color: '#0f172a', fontWeight: 600, fontFamily: 'Inter, sans-serif', padding: '0 0 0 12px', boxShadow: 'none' }}
+            />
+          </div>
 
           {/* Status row special casing */}
           <div style={{ 
@@ -656,6 +682,8 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
               <Button 
                 type="primary" 
                 block 
+                onClick={handleUpdateProfile}
+                loading={updatingProfile}
                 style={{ 
                   background: '#ea580c', 
                   borderColor: '#ea580c', 
