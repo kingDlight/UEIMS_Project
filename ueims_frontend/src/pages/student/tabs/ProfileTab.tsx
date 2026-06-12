@@ -10,6 +10,23 @@ import { NeuSurface } from '../components/shared/NeuSurface';
 import { SmallPill } from '../components/shared/SmallPill';
 import { StudentProfileService } from '@/services/StudentProfileService';
 
+const BACKEND_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+
+const resolveFileUrl = (url: string | undefined): string => {
+  if (!url) return '';
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  return `${BACKEND_BASE}${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
+const downloadFile = (url: string, filename: string) => {
+  const a = document.createElement('a');
+  a.href = resolveFileUrl(url);
+  a.download = filename || 'download';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+};
+
 const CTAButton: React.FC<{
   children: React.ReactNode;
   onClick?: (e?: React.MouseEvent) => void;
@@ -299,7 +316,7 @@ const CvView: React.FC<{ cvUrl?: string; cvFileName?: string; onRefresh: () => v
     }
   };
 
-  const displayName = cvFileName || (cvUrl ? cvUrl.split('_').slice(2).join('_').replace('/uploads/cv/', '') : '');
+  const displayName = cvFileName || (cvUrl ? cvUrl.split('_').slice(2).join('_').replace('/uploads/cv/', '') : 'CV Document');
 
   if (!cvUrl && !showUpload) {
     return (
@@ -375,8 +392,8 @@ const CvView: React.FC<{ cvUrl?: string; cvFileName?: string; onRefresh: () => v
             <p style={{ fontSize: 12, color: cc.textMuted, margin: '3px 0 0' }}>Uploaded CV</p>
           </div>
           <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-            <CTAButton variant="ghost" size="sm" icon={<EyeOutlined />} onClick={() => window.open(cvUrl, '_blank')}>View</CTAButton>
-            <CTAButton variant="ghost" size="sm" icon={<DownloadOutlined />} onClick={() => window.open(cvUrl, '_blank')}>Download</CTAButton>
+            <CTAButton variant="ghost" size="sm" icon={<EyeOutlined />} onClick={() => window.open(resolveFileUrl(cvUrl), '_blank')}>View</CTAButton>
+            <CTAButton variant="ghost" size="sm" icon={<DownloadOutlined />} onClick={() => downloadFile(cvUrl, displayName)}>Download</CTAButton>
             <CTAButton variant="danger" size="sm" icon={<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>} onClick={handleDelete} loading={uploading}>Delete</CTAButton>
           </div>
         </div>

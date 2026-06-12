@@ -31,7 +31,10 @@ public class SecurityConfig {
         "/api/auth/reset-password",
         "/api/auth/register-enterprise",
         "/api/auth/google",
-        "/api/test/**",
+        "/api/test/**"
+    };
+
+    private static final String[] PUBLIC_GET_ENDPOINTS = {
         "/uploads/**"
     };
 
@@ -46,6 +49,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/google-login-test.html")
                 .permitAll()
                 .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS)
+                .permitAll()
+                .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS)
                 .permitAll()
                 .anyRequest()
                 .authenticated());
