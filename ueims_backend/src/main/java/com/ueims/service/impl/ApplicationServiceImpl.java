@@ -67,12 +67,10 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     @Transactional
     public ApplicationResponse applyForJob(ApplicationRequest request) {
-        // 1. Verify JobPost exists
         JobPost jobPost = jobPostRepository
                 .findById(request.getJobPostId())
                 .orElseThrow(() -> new AppException(ErrorCode.JOB_POST_NOT_FOUND));
 
-        // 2. Get Student from security context (auto-populated - BR-47 Application Snapshot)
         User student;
         if (request.getStudentId() != null) {
             student = userRepository.findById(request.getStudentId()).orElse(null);
@@ -83,65 +81,9 @@ public class ApplicationServiceImpl implements ApplicationService {
             throw new AppException(ErrorCode.USER_NOT_EXISTED);
         }
 
-        // 3. Verify JobPost is not closed
-        if ("CLOSED".equalsIgnoreCase(jobPost.getStatus())) {
-            throw new AppException(ErrorCode.JOB_POST_CLOSED);
-        }
-
-        // 4. Verify deadline
-        if (jobPost.getApplicationDeadline() != null && LocalDate.now().isAfter(jobPost.getApplicationDeadline())) {
-            throw new AppException(ErrorCode.APPLICATION_DEADLINE_EXPIRED);
-        }
-
-        // 5. Verify Student is eligible (semester etc.)
-        EligibleStudent eligibleStudent = eligibleStudentRepository
-                .findByUser_UserIdAndSemester_SemesterId(
-                        student.getUserId(), jobPost.getSemester().getSemesterId())
-                .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_ELIGIBLE));
-        if (eligibleStudent.getCurrentSemester() == null || eligibleStudent.getCurrentSemester() != 5) {
-            throw new AppException(ErrorCode.STUDENT_NOT_IN_SEMESTER_5);
-        }
-
-        // 6. Verify no active application for this job post (BR-46)
-        boolean hasActiveApplication =
-                repository.existsByJobPost_JobPostIdAndStudent_UserIdAndStatusNotAndDeletedAtIsNull(
-                        jobPost.getJobPostId(), student.getUserId(), ApplicationStatus.WITHDRAWN);
-        if (hasActiveApplication) {
-            throw new AppException(ErrorCode.DUPLICATE_APPLICATION);
-        }
-
-        // 7. Verify max 3 applications per student
-        long activeCount = repository.countByStudent_UserIdAndStatusNotAndDeletedAtIsNull(
-                student.getUserId(), ApplicationStatus.WITHDRAWN);
-        if (activeCount >= 3) {
-            throw new AppException(ErrorCode.MAX_APPLICATIONS_LIMIT_REACHED);
-        }
-
-        // 8. Get CV File Url from student's profile (auto-populated - BR-47)
-        String cvUrl = request.getCvFileUrl();
-        if (cvUrl == null || cvUrl.trim().isEmpty()) {
-            // Try to get from student's profile
-            var studentProfile = studentProfileRepository.findByUser_UserId(student.getUserId());
-            if (studentProfile != null
-                    && studentProfile.getCvUrl() != null
-                    && !studentProfile.getCvUrl().isEmpty()) {
-                cvUrl = studentProfile.getCvUrl();
-            } else {
-                throw new AppException(ErrorCode.CV_NOT_UPLOADED);
-            }
-        }
-        cvUrl = cvUrl.trim();
-
-        // Validate CV format (Strictly PDF)
-        if (!cvUrl.toLowerCase().endsWith(".pdf")) {
-            throw new AppException(ErrorCode.INVALID_CV_FORMAT);
-        }
-
-        // Validate CV size (Max 5MB)
-        Long cvSize = request.getCvFileSize();
-        if (cvSize != null && cvSize > 5242880) {
-            throw new AppException(ErrorCode.CV_SIZE_EXCEEDED);
-        }
+        validateJobPost(jobPost);
+        validateStudentEligibility(student, jobPost);
+        String cvUrl = getAndValidateCvUrl(request, student);
 
         // Persist Application entity
         Application entity = Application.builder()
@@ -154,6 +96,63 @@ public class ApplicationServiceImpl implements ApplicationService {
 
         Application saved = repository.save(entity);
         return mapper.toApplicationResponse(saved);
+    }
+
+    private void validateJobPost(JobPost jobPost) {
+        if ("CLOSED".equalsIgnoreCase(jobPost.getStatus())) {
+            throw new AppException(ErrorCode.JOB_POST_CLOSED);
+        }
+        if (jobPost.getApplicationDeadline() != null && LocalDate.now().isAfter(jobPost.getApplicationDeadline())) {
+            throw new AppException(ErrorCode.APPLICATION_DEADLINE_EXPIRED);
+        }
+    }
+
+    private void validateStudentEligibility(User student, JobPost jobPost) {
+        EligibleStudent eligibleStudent = eligibleStudentRepository
+                .findByUser_UserIdAndSemester_SemesterId(
+                        student.getUserId(), jobPost.getSemester().getSemesterId())
+                .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_ELIGIBLE));
+        if (eligibleStudent.getCurrentSemester() == null || eligibleStudent.getCurrentSemester() != 5) {
+            throw new AppException(ErrorCode.STUDENT_NOT_IN_SEMESTER_5);
+        }
+
+        boolean hasActiveApplication =
+                repository.existsByJobPost_JobPostIdAndStudent_UserIdAndStatusNotAndDeletedAtIsNull(
+                        jobPost.getJobPostId(), student.getUserId(), ApplicationStatus.WITHDRAWN);
+        if (hasActiveApplication) {
+            throw new AppException(ErrorCode.DUPLICATE_APPLICATION);
+        }
+
+        long activeCount = repository.countByStudent_UserIdAndStatusNotAndDeletedAtIsNull(
+                student.getUserId(), ApplicationStatus.WITHDRAWN);
+        if (activeCount >= 3) {
+            throw new AppException(ErrorCode.MAX_APPLICATIONS_LIMIT_REACHED);
+        }
+    }
+
+    private String getAndValidateCvUrl(ApplicationRequest request, User student) {
+        String cvUrl = request.getCvFileUrl();
+        if (cvUrl == null || cvUrl.trim().isEmpty()) {
+            var studentProfile = studentProfileRepository.findByUser_UserId(student.getUserId());
+            if (studentProfile != null
+                    && studentProfile.getCvUrl() != null
+                    && !studentProfile.getCvUrl().isEmpty()) {
+                cvUrl = studentProfile.getCvUrl();
+            } else {
+                throw new AppException(ErrorCode.CV_NOT_UPLOADED);
+            }
+        }
+        cvUrl = cvUrl.trim();
+
+        if (!cvUrl.toLowerCase().endsWith(".pdf")) {
+            throw new AppException(ErrorCode.INVALID_CV_FORMAT);
+        }
+
+        Long cvSize = request.getCvFileSize();
+        if (cvSize != null && cvSize > 5242880) {
+            throw new AppException(ErrorCode.CV_SIZE_EXCEEDED);
+        }
+        return cvUrl;
     }
 
     @Override
