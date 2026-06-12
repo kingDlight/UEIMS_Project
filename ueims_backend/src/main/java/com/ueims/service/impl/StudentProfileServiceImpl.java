@@ -28,11 +28,15 @@ import com.ueims.service.StudentProfileService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Slf4j
 public class StudentProfileServiceImpl implements StudentProfileService {
+    private static final String USER_DIR_PROPERTY = "user.dir";
+
     StudentProfileRepository repository;
     UserRepository userRepository;
     ApplicationRepository applicationRepository;
@@ -153,13 +157,13 @@ public class StudentProfileServiceImpl implements StudentProfileService {
             // Delete existing CV file if present (prevent spam / orphan files)
             String oldCvUrl = profile.getCvUrl();
             if (oldCvUrl != null && !oldCvUrl.isBlank()) {
-                Path oldPath = Paths.get(System.getProperty("user.dir"), oldCvUrl.replace("/uploads/", "uploads/"));
+                Path oldPath =
+                        Paths.get(System.getProperty(USER_DIR_PROPERTY), oldCvUrl.replace("/uploads/", "uploads/"));
                 Files.deleteIfExists(oldPath);
             }
 
-            Path uploadDir = Paths.get(System.getProperty("user.dir"), "uploads", "cv");
+            Path uploadDir = Paths.get(System.getProperty(USER_DIR_PROPERTY), "uploads", "cv");
             Files.createDirectories(uploadDir);
-            originalFilename = StringUtils.getFilename(file.getOriginalFilename());
             String stored =
                     id.toString() + "_" + System.currentTimeMillis() + "_" + StringUtils.cleanPath(originalFilename);
             Path path = uploadDir.resolve(stored);
@@ -168,8 +172,7 @@ public class StudentProfileServiceImpl implements StudentProfileService {
             profile.setCvFileName(originalFilename);
             return repository.save(profile);
         } catch (IOException e) {
-            System.err.println("[CV Upload] IOException: " + e.getMessage());
-            e.printStackTrace();
+            log.error("[CV Upload] IOException: {}", e.getMessage(), e);
             throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
         }
     }
@@ -187,10 +190,11 @@ public class StudentProfileServiceImpl implements StudentProfileService {
         String oldCvUrl = profile.getCvUrl();
         if (oldCvUrl != null && !oldCvUrl.isBlank()) {
             try {
-                Path oldPath = Paths.get(System.getProperty("user.dir"), oldCvUrl.replace("/uploads/", "uploads/"));
+                Path oldPath =
+                        Paths.get(System.getProperty(USER_DIR_PROPERTY), oldCvUrl.replace("/uploads/", "uploads/"));
                 Files.deleteIfExists(oldPath);
             } catch (IOException e) {
-                System.err.println("[CV Delete] Failed to delete file: " + e.getMessage());
+                log.error("[CV Delete] Failed to delete file: {}", e.getMessage(), e);
             }
             profile.setCvUrl(null);
             profile.setCvFileName(null);
