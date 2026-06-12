@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { message, Spin } from 'antd';
 import {
-  UserOutlined, MailOutlined, PhoneOutlined, IdcardOutlined, BookOutlined,
-  UploadOutlined, FileTextOutlined, EditOutlined, SaveOutlined,
-  FileOutlined, EyeOutlined, DownloadOutlined, DeleteOutlined,
+  FileTextOutlined, EyeOutlined, DownloadOutlined,
+  PlusOutlined, UploadOutlined, IdcardOutlined,
+  MailOutlined, BookOutlined, UserOutlined,
 } from '@ant-design/icons';
 import { NeuSurface } from '../components/shared/NeuSurface';
 import { SmallPill } from '../components/shared/SmallPill';
@@ -30,15 +30,15 @@ const CTAButton: React.FC<{
     danger: '#ef4444',
     warning: '#f59e0b',
   };
-  const styles: Record<string, { bg: string; text: string; border: string; shadow: string; hoverBg?: string }> = {
-    primary: { bg: 'linear-gradient(135deg, #E67E22, #E67E22, #F39C12)', text: '#fff', border: 'none', shadow: '0 12px 28px rgba(230, 126, 34,.22)', hoverBg: 'linear-gradient(135deg, #E86A20, #E67E22, #E67E22)' },
+  const styles: Record<string, { bg: string; text: string; border: string; shadow: string }> = {
+    primary: { bg: 'linear-gradient(135deg, #E67E22, #E67E22, #F39C12)', text: '#fff', border: 'none', shadow: '0 12px 28px rgba(230,126,34,.22)' },
     ghost: { bg: '#fff', text: cc.primary, border: cc.border, shadow: '0 8px 18px rgba(15,23,42,.05)' },
     success: { bg: '#fff', text: cc.success, border: `${cc.success}40`, shadow: '0 8px 18px rgba(15,23,42,.05)' },
     danger: { bg: '#fff1f2', text: cc.danger, border: `${cc.danger}30`, shadow: '0 8px 18px rgba(15,23,42,.05)' },
     warning: { bg: '#fff', text: cc.warning, border: `${cc.warning}40`, shadow: '0 8px 18px rgba(15,23,42,.05)' },
   };
-  const { bg, text, border, shadow, hoverBg } = styles[variant];
-  const sizes = { sm: { padding: '8px 14px', fontSize: 12 }, md: { padding: '11px 16px', fontSize: 13 }, lg: { padding: '13px 22px', fontSize: 14 } };
+  const { bg, text, border, shadow } = styles[variant];
+  const sizes = { sm: { padding: '7px 14px', fontSize: 12 }, md: { padding: '10px 16px', fontSize: 13 }, lg: { padding: '13px 22px', fontSize: 14 } };
   const { padding, fontSize } = sizes[size];
 
   return (
@@ -46,36 +46,20 @@ const CTAButton: React.FC<{
       onClick={onClick}
       disabled={disabled || loading}
       style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 8,
-        padding,
-        fontSize,
-        fontWeight: 700,
+        display: 'inline-flex', alignItems: 'center', gap: 6, padding, fontSize, fontWeight: 700,
         color: disabled ? cc.textMuted : text,
         background: disabled ? cc.bgLight : bg,
         border: variant === 'primary' ? 'none' : `1px solid ${border}`,
-        borderRadius: 16,
-        boxShadow: disabled ? 'none' : shadow,
+        borderRadius: 16, boxShadow: disabled ? 'none' : shadow,
         cursor: disabled ? 'not-allowed' : 'pointer',
-        width: fullWidth ? '100%' : 'auto',
-        justifyContent: 'center',
-        fontFamily: "'Inter', sans-serif",
-        opacity: disabled ? 0.6 : 1,
+        width: fullWidth ? '100%' : 'auto', justifyContent: 'center',
+        fontFamily: "'Inter', sans-serif", opacity: disabled ? 0.6 : 1,
       }}
     >
       {loading ? <Spin size="small" /> : icon && <span style={{ display: 'flex' }}>{icon}</span>}
       {children}
     </button>
   );
-};
-
-const hexToRgba = (hex: string, alpha: number): string => {
-  const h = hex.replace('#', '');
-  const r = parseInt(h.substring(0, 2), 16);
-  const g = parseInt(h.substring(2, 4), 16);
-  const b = parseInt(h.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 };
 
 const cc = {
@@ -87,6 +71,8 @@ const cc = {
   success: '#22c55e',
   successMuted: '#dcfce7',
   successText: '#166534',
+  danger: '#ef4444',
+  dangerMuted: '#fff1f2',
   bgLight: '#f5f7fa',
   border: '#e2e8f0',
   borderSubtle: '#f1f5f9',
@@ -96,48 +82,89 @@ const cc = {
   radiusFull: 9999,
 };
 
-export const ProfileTab: React.FC = () => {
-  const [profile, setProfile] = useState<any>(null);
-  const [profileId, setProfileId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+// ── Tab switcher ─────────────────────────────────────────────────────────────
+type ProfileView = 'profile' | 'cv';
+
+const TabSwitcher: React.FC<{ active: ProfileView; onChange: (v: ProfileView) => void }> = ({ active, onChange }) => (
+  <div style={{ display: 'inline-flex', background: cc.bgLight, borderRadius: cc.radiusMd, padding: 3, gap: 2 }}>
+    {(['profile', 'cv'] as ProfileView[]).map((v) => {
+      const isActive = active === v;
+      return (
+        <button
+          key={v}
+          onClick={() => onChange(v)}
+          style={{
+            padding: '8px 20px', borderRadius: cc.radiusMd - 2, border: 'none', cursor: 'pointer',
+            fontSize: 13, fontWeight: 700, fontFamily: "'Inter', sans-serif",
+            background: isActive ? '#fff' : 'transparent',
+            color: isActive ? cc.primary : cc.textMuted,
+            boxShadow: isActive ? '0 2px 6px rgba(0,0,0,.08)' : 'none',
+            transition: 'all 0.2s ease',
+          }}
+        >
+          {v === 'profile' ? 'Profile Info' : 'My CVs'}
+        </button>
+      );
+    })}
+  </div>
+);
+
+// ── Profile Info View ─────────────────────────────────────────────────────────
+const ProfileInfoView: React.FC<{ profile: any }> = ({ profile }) => (
+  <>
+    {/* Header */}
+    <NeuSurface style={{ padding: 24, marginBottom: 16 }}>
+      <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
+        <div style={{
+          width: 80, height: 80, borderRadius: cc.radiusLg,
+          background: `linear-gradient(135deg, ${cc.primary}, ${cc.primaryDark})`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: '#fff', fontSize: 28, fontWeight: 800, flexShrink: 0,
+          boxShadow: '0 4px 12px rgba(230,126,34,.25)',
+        }}>
+          {profile?.fullName?.substring(0, 2).toUpperCase() || 'ST'}
+        </div>
+        <div style={{ flex: 1 }}>
+          <h2 style={{ fontSize: 20, fontWeight: 700, color: cc.text, margin: '0 0 4px' }}>{profile?.fullName || 'Student'}</h2>
+          <p style={{ fontSize: 13, color: cc.textMuted, margin: '0 0 10px' }}>{profile?.email || 'email@student.fpt.edu.vn'}</p>
+          <SmallPill color={cc.success}><span style={{ marginRight: 4 }}>&#10003;</span> Active Intern</SmallPill>
+        </div>
+      </div>
+    </NeuSurface>
+
+    {/* School Information (read-only) */}
+    <NeuSurface style={{ padding: 24, marginBottom: 16 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+        <h3 style={{ fontSize: 15, fontWeight: 700, color: cc.text, margin: 0 }}>School Information</h3>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+        {[
+          { label: 'Student ID (MSSV)', value: profile?.studentCode || 'N/A', icon: <IdcardOutlined /> },
+          { label: 'Email', value: profile?.email || 'N/A', icon: <MailOutlined /> },
+          { label: 'Major / Department', value: profile?.major || 'N/A', icon: <BookOutlined /> },
+          { label: 'Full Name', value: profile?.fullName || 'N/A', icon: <UserOutlined /> },
+        ].map((item, i) => (
+          <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+            <div style={{ width: 40, height: 40, borderRadius: cc.radiusMd, background: cc.primaryMuted, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.primary, flexShrink: 0 }}>
+              {item.icon}
+            </div>
+            <div>
+              <div style={{ fontSize: 11, color: cc.textMuted, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.07em' }}>{item.label}</div>
+              <div style={{ fontSize: 14, color: cc.text, fontWeight: 600, marginTop: 2 }}>{item.value}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </NeuSurface>
+  </>
+);
+
+// ── CV View ───────────────────────────────────────────────────────────────────
+const CvView: React.FC<{ cvUrl: string; cvFileName: string; onRefresh: () => void }> = ({ cvUrl, cvFileName, onRefresh }) => {
   const [uploading, setUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [cvFile, setCvFile] = useState<File | null>(null);
-  const [editing, setEditing] = useState(false);
-  const [formData, setFormData] = useState({ phone: '', skills: '' });
-
-  useEffect(() => { fetchProfile(); }, []);
-
-  const fetchProfile = async () => {
-    try {
-      setLoading(true);
-      const [userRes, profileRes] = await Promise.all([
-        api.get('/users/myInfo').catch((err) => {
-          console.error('Failed to fetch user info:', err);
-          return { data: null, error: err };
-        }),
-        StudentProfileService.getMyProfile().catch(() => ({ data: null })),
-      ]);
-      
-      const userInfo = userRes?.data;
-      const profileData = profileRes?.data?.result ?? profileRes?.data;
-      
-      if (!userInfo && !profileData) {
-        console.warn('Unable to fetch profile data');
-        return;
-      }
-      
-      setProfile({ ...userInfo, ...profileData });
-      if (profileData?.profileId) {
-        setProfileId(profileData.profileId);
-      }
-      setFormData({ phone: userInfo?.phone || '', skills: userInfo?.skills || profileData?.skills || '' });
-    } catch (err) {
-      console.error('Failed to fetch profile', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [showUpload, setShowUpload] = useState(false);
 
   const validateFile = (file: File): string | null => {
     if (file.type !== 'application/pdf') return 'Only PDF files are accepted!';
@@ -156,19 +183,17 @@ export const ProfileTab: React.FC = () => {
     }
   };
 
-  const handleUploadCV = async () => {
-    if (!cvFile) {
-      message.error('Please select a CV file first.');
-      return;
-    }
+  const handleUpload = async () => {
+    if (!cvFile) return;
     try {
       setUploading(true);
       const fd = new FormData();
       fd.append('file', cvFile);
       await StudentProfileService.uploadCV(fd);
-      message.success('Profile and CV updated successfully!');
+      message.success('CV uploaded successfully!');
       setCvFile(null);
-      fetchProfile();
+      setShowUpload(false);
+      onRefresh();
     } catch (err: any) {
       message.error(err.response?.data?.message || 'Upload failed!');
     } finally {
@@ -176,12 +201,12 @@ export const ProfileTab: React.FC = () => {
     }
   };
 
-  const handleDeleteCV = async () => {
+  const handleDelete = async () => {
     try {
       setUploading(true);
       await StudentProfileService.deleteCV();
       message.success('CV deleted successfully!');
-      fetchProfile();
+      onRefresh();
     } catch (err: any) {
       message.error(err.response?.data?.message || 'Delete failed!');
     } finally {
@@ -189,18 +214,177 @@ export const ProfileTab: React.FC = () => {
     }
   };
 
-  const handleSaveProfile = async () => {
-    if (!profileId) {
-      message.error('Profile not loaded yet. Please wait.');
-      return;
-    }
+  const displayName = cvFileName || (cvUrl ? cvUrl.split('_').slice(2).join('_').replace('/uploads/cv/', '') : '');
+
+  if (!cvUrl && !showUpload) {
+    return (
+      <NeuSurface style={{ padding: 24 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+          <div style={{ width: 44, height: 44, borderRadius: cc.radiusMd, background: '#dbeafe', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#3b82f6' }}>
+            <FileTextOutlined style={{ fontSize: 20 }} />
+          </div>
+          <div>
+            <h3 style={{ fontSize: 15, fontWeight: 600, color: cc.text, margin: 0 }}>My CVs</h3>
+            <p style={{ fontSize: 12, color: cc.textMuted, margin: '2px 0 0' }}>PDF format only, max 5MB</p>
+          </div>
+        </div>
+        <div
+          onDragEnter={(e) => { e.preventDefault(); setDragActive(true); }}
+          onDragLeave={() => setDragActive(false)}
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={handleDrop}
+          onClick={() => document.getElementById('cv-upload-input')?.click()}
+          style={{
+            border: `2px dashed ${dragActive ? cc.primary : cc.border}`,
+            borderRadius: cc.radiusLg, padding: '48px 24px', textAlign: 'center',
+            background: dragActive ? cc.primaryMuted : cc.bgLight,
+            transition: 'all 0.2s ease', cursor: 'pointer',
+          }}
+        >
+          <input id="cv-upload-input" type="file" accept=".pdf" style={{ display: 'none' }}
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) { const err = validateFile(f); if (err) message.error(err); else { setCvFile(f); setShowUpload(true); } }
+            }}
+          />
+          <div style={{ width: 56, height: 56, borderRadius: cc.radiusMd, background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', boxShadow: '0 2px 8px rgba(0,0,0,.08)' }}>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={cc.primary} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="12" y1="18" x2="12" y2="12"/>
+              <line x1="9" y1="15" x2="15" y2="15"/>
+            </svg>
+          </div>
+          <p style={{ fontSize: 15, fontWeight: 700, color: cc.text, margin: '0 0 4px' }}>Drop your CV here</p>
+          <p style={{ fontSize: 12, color: cc.textMuted, margin: 0 }}>or click to browse &mdash; PDF only, max 5MB</p>
+        </div>
+      </NeuSurface>
+    );
+  }
+
+  return (
+    <NeuSurface style={{ padding: 24 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ width: 44, height: 44, borderRadius: cc.radiusMd, background: '#dbeafe', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#3b82f6' }}>
+            <FileTextOutlined style={{ fontSize: 20 }} />
+          </div>
+          <div>
+            <h3 style={{ fontSize: 15, fontWeight: 600, color: cc.text, margin: 0 }}>My CVs</h3>
+            <p style={{ fontSize: 12, color: cc.textMuted, margin: '2px 0 0' }}>Only one CV is allowed &mdash; uploading a new file replaces the current one</p>
+          </div>
+        </div>
+        {!showUpload && (
+          <CTAButton variant="primary" size="sm" icon={<PlusOutlined />} onClick={() => setShowUpload(true)}>Upload</CTAButton>
+        )}
+      </div>
+
+      {/* Current CV card */}
+      {cvUrl && !showUpload && (
+        <div style={{ background: cc.surface, border: `1px solid ${cc.border}`, borderRadius: cc.radiusLg, padding: 20, display: 'flex', alignItems: 'center', gap: 16 }}>
+          <div style={{ width: 48, height: 48, borderRadius: cc.radiusMd, background: cc.primaryMuted, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.primary, flexShrink: 0 }}>
+            <FileTextOutlined style={{ fontSize: 22 }} />
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{ fontSize: 14, fontWeight: 700, color: cc.text, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayName}</p>
+            <p style={{ fontSize: 12, color: cc.textMuted, margin: '3px 0 0' }}>Uploaded CV</p>
+          </div>
+          <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+            <CTAButton variant="ghost" size="sm" icon={<EyeOutlined />} onClick={() => window.open(cvUrl, '_blank')}>View</CTAButton>
+            <CTAButton variant="ghost" size="sm" icon={<DownloadOutlined />} onClick={() => window.open(cvUrl, '_blank')}>Download</CTAButton>
+            <CTAButton variant="danger" size="sm" icon={<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>} onClick={handleDelete} loading={uploading}>Delete</CTAButton>
+          </div>
+        </div>
+      )}
+
+      {/* Upload panel */}
+      {showUpload && (
+        <div style={{ background: cc.bgLight, border: `1px solid ${cc.border}`, borderRadius: cc.radiusLg, padding: 24 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+            <h4 style={{ fontSize: 14, fontWeight: 700, color: cc.text, margin: 0 }}>Upload New CV</h4>
+            <button onClick={() => { setShowUpload(false); setCvFile(null); }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 18, color: cc.textMuted, padding: 0 }}>&#x2715;</button>
+          </div>
+
+          <div
+            onDragEnter={(e) => { e.preventDefault(); setDragActive(true); }}
+            onDragLeave={() => setDragActive(false)}
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={handleDrop}
+            onClick={() => document.getElementById('cv-upload-input-2')?.click()}
+            style={{
+              border: `2px dashed ${dragActive ? cc.primary : cc.border}`,
+              borderRadius: cc.radiusMd, padding: '28px 16px', textAlign: 'center',
+              background: dragActive ? cc.primaryMuted : '#fff',
+              transition: 'all 0.2s ease', cursor: 'pointer', marginBottom: 16,
+            }}
+          >
+            <input id="cv-upload-input-2" type="file" accept=".pdf" style={{ display: 'none' }}
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) { const err = validateFile(f); if (err) message.error(err); else setCvFile(f); }
+              }}
+            />
+            {cvFile ? (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
+                <FileTextOutlined style={{ fontSize: 28, color: cc.success }} />
+                <div style={{ textAlign: 'left' }}>
+                  <p style={{ fontSize: 14, fontWeight: 600, color: cc.text, margin: 0 }}>{cvFile.name}</p>
+                  <p style={{ fontSize: 12, color: cc.textMuted, margin: '2px 0 0' }}>{(cvFile.size / 1024 / 1024).toFixed(2)} MB</p>
+                </div>
+              </div>
+            ) : (
+              <>
+                <UploadOutlined style={{ fontSize: 32, color: cc.textMuted, marginBottom: 8, display: 'block' }} />
+                <p style={{ fontSize: 13, fontWeight: 600, color: cc.text, margin: '0 0 2px' }}>Drop file here or click to browse</p>
+                <p style={{ fontSize: 11, color: cc.textMuted, margin: 0 }}>PDF only, max 5MB</p>
+              </>
+            )}
+          </div>
+
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+            <CTAButton variant="ghost" onClick={() => { setShowUpload(false); setCvFile(null); }}>Cancel</CTAButton>
+            <CTAButton variant="primary" icon={<UploadOutlined />} onClick={handleUpload} loading={uploading} disabled={!cvFile}>Upload</CTAButton>
+          </div>
+        </div>
+      )}
+
+      {cvUrl && !showUpload && (
+        <p style={{ fontSize: 11, color: cc.textMuted, marginTop: 12, textAlign: 'center' }}>
+          To replace your CV, click the <strong>Upload</strong> button above.
+        </p>
+      )}
+    </NeuSurface>
+  );
+};
+
+// ── Main ProfileTab ───────────────────────────────────────────────────────────
+export const ProfileTab: React.FC = () => {
+  const [profile, setProfile] = useState<any>(null);
+  const [profileId, setProfileId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [activeView, setActiveView] = useState<ProfileView>('profile');
+
+  useEffect(() => { fetchProfile(); }, []);
+
+  const fetchProfile = async () => {
     try {
-      await StudentProfileService.update(profileId, { skills: formData.skills });
-      message.success('Profile updated successfully!');
-      setEditing(false);
-      fetchProfile();
-    } catch (err: any) {
-      message.error(err.response?.data?.message || 'Update failed!');
+      setLoading(true);
+      const [userRes, profileRes] = await Promise.all([
+        api.get('/users/myInfo').catch((err) => { console.error('Failed to fetch user info:', err); return { data: null }; }),
+        StudentProfileService.getMyProfile().catch(() => ({ data: null })),
+      ]);
+
+      const userInfo = userRes?.data;
+      const profileData = profileRes?.data?.result ?? profileRes?.data;
+
+      if (!userInfo && !profileData) { console.warn('Unable to fetch profile data'); return; }
+
+      setProfile({ ...userInfo, ...profileData });
+      if (profileData?.profileId) setProfileId(profileData.profileId);
+    } catch (err) {
+      console.error('Failed to fetch profile', err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -210,144 +394,21 @@ export const ProfileTab: React.FC = () => {
 
   return (
     <div style={{ maxWidth: 800, margin: '0 auto', padding: '0 24px 40px', fontFamily: 'Inter, sans-serif' }}>
-      {/* Profile Header */}
-      <NeuSurface style={{ padding: 24, marginBottom: 16 }}>
-        <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
-          <div style={{
-            width: 80, height: 80, borderRadius: cc.radiusLg,
-            background: `linear-gradient(135deg, ${cc.primary}, ${cc.primaryDark})`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: '#fff', fontSize: 28, fontWeight: 800, flexShrink: 0,
-            boxShadow: '0 4px 12px rgba(230, 126, 34,.25)',
-          }}>
-            {profile?.fullName?.substring(0, 2).toUpperCase() || 'ST'}
-          </div>
-          <div style={{ flex: 1 }}>
-            <h2 style={{ fontSize: 20, fontWeight: 700, color: cc.text, margin: '0 0 4px' }}>{profile?.fullName || 'Student'}</h2>
-            <p style={{ fontSize: 13, color: cc.textMuted, margin: '0 0 10px' }}>{profile?.email || 'email@student.fpt.edu.vn'}</p>
-            <SmallPill color={cc.success}><span style={{ marginRight: 4 }}>✓</span> Active Intern</SmallPill>
-          </div>
-          <CTAButton variant="ghost" icon={<EditOutlined />} onClick={() => setEditing(!editing)}>
-            {editing ? 'Cancel' : 'Edit Profile'}
-          </CTAButton>
-        </div>
-      </NeuSurface>
+      {/* Tab Switcher */}
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>
+        <TabSwitcher active={activeView} onChange={setActiveView} />
+      </div>
 
-      {/* Personal Info */}
-      <NeuSurface style={{ padding: 24, marginBottom: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-          <h3 style={{ fontSize: 15, fontWeight: 700, color: cc.text, margin: 0 }}>Personal Information</h3>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
-          {[
-            { label: 'Student ID (MSSV)', value: profile?.studentCode || 'N/A', icon: <IdcardOutlined /> },
-            { label: 'Email', value: profile?.email || 'N/A', icon: <MailOutlined /> },
-            { label: 'Phone', value: editing ? (
-              <input value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} 
-                style={{ border: `1px solid ${cc.border}`, borderRadius: cc.radiusMd, padding: '4px 8px', fontSize: 13, width: '100%' }} />
-            ) : profile?.phone || 'Not set', icon: <PhoneOutlined /> },
-            { label: 'Major', value: profile?.major || 'Software Engineering', icon: <BookOutlined /> },
-          ].map((item, i) => (
-            <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-              <div style={{ width: 40, height: 40, borderRadius: cc.radiusMd, background: cc.primaryMuted, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.primary, flexShrink: 0 }}>
-                {item.icon}
-              </div>
-              <div>
-                <div style={{ fontSize: 11, color: cc.textMuted, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.07em' }}>{item.label}</div>
-                <div style={{ fontSize: 14, color: cc.text, fontWeight: 600, marginTop: 2 }}>{item.value}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-        {editing && (
-          <div style={{ marginTop: 20, display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
-            <CTAButton variant="ghost" onClick={() => setEditing(false)}>Cancel</CTAButton>
-            <CTAButton variant="primary" icon={<SaveOutlined />} onClick={handleSaveProfile}>Save Changes</CTAButton>
-          </div>
-        )}
-      </NeuSurface>
-
-      {/* CV Upload */}
-      <NeuSurface style={{ padding: 24, marginBottom: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-          <div style={{ width: 44, height: 44, borderRadius: cc.radiusMd, background: '#dbeafe', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#3b82f6' }}>
-            <FileTextOutlined style={{ fontSize: 20 }} />
-          </div>
-          <div>
-            <h3 style={{ fontSize: 15, fontWeight: 600, color: cc.text, margin: 0 }}>Your CV / Resume</h3>
-            <p style={{ fontSize: 12, color: cc.textMuted, margin: '2px 0 0' }}>Upload in PDF format, max 5MB</p>
-          </div>
-        </div>
-        <div
-          onDragEnter={(e) => { e.preventDefault(); setDragActive(true); }}
-          onDragLeave={() => setDragActive(false)}
-          onDragOver={(e) => e.preventDefault()}
-          onDrop={handleDrop}
-          onClick={() => document.getElementById('cv-input')?.click()}
-          style={{
-            border: `2px dashed ${dragActive ? cc.primary : cc.border}`,
-            borderRadius: cc.radiusLg, padding: '36px 24px', textAlign: 'center',
-            background: dragActive ? cc.primaryMuted : cc.bgLight,
-            transition: 'all 0.2s ease', cursor: 'pointer',
-          }}
-        >
-          <input id="cv-input" type="file" accept=".pdf" onChange={(e) => { const f = e.target.files?.[0]; if (f) { const err = validateFile(f); if (err) message.error(err); else setCvFile(f); }}} style={{ display: 'none' }} />
-          {cvFile ? (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
-              <FileOutlined style={{ fontSize: 32, color: cc.success }} />
-              <div style={{ textAlign: 'left' }}>
-                <p style={{ fontSize: 14, fontWeight: 600, color: cc.text, margin: 0 }}>{cvFile.name}</p>
-                <p style={{ fontSize: 12, color: cc.textMuted, margin: '2px 0 0' }}>{(cvFile.size / 1024 / 1024).toFixed(2)} MB</p>
-              </div>
-            </div>
-          ) : (
-            <>
-              <UploadOutlined style={{ fontSize: 40, color: cc.textMuted, marginBottom: 12 }} />
-              <p style={{ fontSize: 14, fontWeight: 600, color: cc.text, margin: '0 0 4px' }}>Drag & drop your CV here</p>
-              <p style={{ fontSize: 12, color: cc.textMuted, margin: 0 }}>or click to browse files</p>
-            </>
-          )}
-        </div>
-        {cvFile && (
-          <div style={{ marginTop: 16, display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
-            <CTAButton variant="ghost" onClick={() => setCvFile(null)}>Cancel</CTAButton>
-            <CTAButton variant="primary" icon={<UploadOutlined />} onClick={handleUploadCV} loading={uploading}>Upload CV</CTAButton>
-          </div>
-        )}
-        {profile?.cvUrl && !cvFile && (
-          <div style={{ marginTop: 20, padding: 16, borderRadius: cc.radiusMd, background: cc.successMuted, border: `1px solid ${cc.success}20`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <span style={{ fontSize: 20 }}>✓</span>
-              <div>
-                <p style={{ fontSize: 13, fontWeight: 600, color: cc.successText, margin: 0 }}>CV uploaded</p>
-                <p style={{ fontSize: 12, color: cc.successText, opacity: 0.8, margin: '2px 0 0' }}>
-                  {profile.cvFileName || profile.cvUrl.split('_').slice(2).join('_').replace('/uploads/cv/', '')}
-                </p>
-              </div>
-            </div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <CTAButton variant="ghost" size="sm" icon={<EyeOutlined />} onClick={() => window.open(profile.cvUrl, '_blank')}>View</CTAButton>
-              <CTAButton variant="ghost" size="sm" icon={<DownloadOutlined />} onClick={() => window.open(profile.cvUrl, '_blank')}>Download</CTAButton>
-              <CTAButton variant="ghost" size="sm" icon={<UploadOutlined />} onClick={() => document.getElementById('cv-input')?.click()}>Replace</CTAButton>
-              <CTAButton variant="danger" size="sm" icon={<DeleteOutlined />} onClick={handleDeleteCV}>Delete</CTAButton>
-            </div>
-          </div>
-        )}
-      </NeuSurface>
-
-      {/* Skills */}
-      <NeuSurface style={{ padding: 24 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-          <h3 style={{ fontSize: 15, fontWeight: 700, color: cc.text, margin: 0 }}>Skills</h3>
-        </div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-          {(profile?.skills || 'React, TypeScript, Java, Python').split(',').map((skill: string, i: number) => (
-            <span key={i} style={{ padding: '6px 14px', borderRadius: cc.radiusFull, background: cc.primaryMuted, color: cc.primary, fontSize: 12, fontWeight: 600 }}>
-              {skill.trim()}
-            </span>
-          ))}
-        </div>
-      </NeuSurface>
+      {/* Views */}
+      {activeView === 'profile' ? (
+        <ProfileInfoView profile={profile} />
+      ) : (
+        <CvView
+          cvUrl={profile?.cvUrl}
+          cvFileName={profile?.cvFileName}
+          onRefresh={fetchProfile}
+        />
+      )}
     </div>
   );
 };
