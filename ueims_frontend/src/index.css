@@ -196,6 +196,8 @@
 }
 
 html {
+  scrollbar-gutter: stable;
+  overflow-y: scroll;
   scroll-behavior: smooth;
   /* Fixed 16px — never change this. Tailwind's rem-based classes (text-xs, text-sm, etc.)
      all assume 16px root. Changing html font-size at breakpoints causes cross-browser
