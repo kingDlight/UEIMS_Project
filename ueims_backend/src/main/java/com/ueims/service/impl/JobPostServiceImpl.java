@@ -33,12 +33,12 @@ public class JobPostServiceImpl implements JobPostService {
 
     @Override
     public List<JobPost> findAll() {
-        return repository.findAll();
+        return repository.findAllByDeletedAtIsNull();
     }
 
     @Override
     public List<JobPost> findActive() {
-        return repository.findByStatus("OPEN");
+        return repository.findByStatusAndDeletedAtIsNull("OPEN");
     }
 
     @Override
