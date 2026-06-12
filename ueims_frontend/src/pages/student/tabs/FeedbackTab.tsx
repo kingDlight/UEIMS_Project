@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { StarOutlined, CheckCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { NeuSurface } from '../components/shared/NeuSurface';
 import { StudentEnterpriseFeedbackService } from '@/services/StudentEnterpriseFeedbackService';
+import { EnterpriseAssignmentService } from '@/services/EnterpriseAssignmentService';
 import { api } from '@/services/api';
 
 const cc = {
@@ -63,9 +64,22 @@ export const FeedbackTab: React.FC = () => {
   const [ratings, setRatings] = useState({ trainingQuality: 5, supervisorSupport: 5, workEnvironment: 5, overall: 5 });
   const [comment, setComment] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [currentAssignment, setCurrentAssignment] = useState<any>(null);
   const pageSize = 5;
 
-  useEffect(() => { fetchFeedbacks(); }, []);
+  useEffect(() => { fetchFeedbacks(); fetchAssignment(); }, []);
+
+  const fetchAssignment = async () => {
+    try {
+      const res = await EnterpriseAssignmentService.getMyAssignment();
+      const data = res.data?.result ?? res.data;
+      if (data) {
+        setCurrentAssignment(data);
+      }
+    } catch (err) {
+      console.error('No active assignment found', err);
+    }
+  };
 
   const paginatedFeedbacks = useMemo(() => {
     const start = (currentPage - 1) * pageSize;
@@ -85,6 +99,10 @@ export const FeedbackTab: React.FC = () => {
   };
 
   const handleSubmit = async () => {
+    if (!currentAssignment?.assignmentId) {
+      message.error('You must have an active internship assignment to submit feedback.');
+      return;
+    }
     const { trainingQuality, supervisorSupport, workEnvironment, overall } = ratings;
     if (!trainingQuality || !supervisorSupport || !workEnvironment || !overall) {
       message.error('Please complete all rating categories!');
@@ -98,6 +116,8 @@ export const FeedbackTab: React.FC = () => {
     try {
       setSubmitting(true);
       await StudentEnterpriseFeedbackService.create({
+        enterpriseId: currentAssignment.enterprise?.enterpriseId || currentAssignment.enterpriseId,
+        semesterId: currentAssignment.semester?.semesterId || currentAssignment.semesterId,
         trainingQualityScore: trainingQuality,
         supervisorSupportScore: supervisorSupport,
         workEnvironmentScore: workEnvironment,

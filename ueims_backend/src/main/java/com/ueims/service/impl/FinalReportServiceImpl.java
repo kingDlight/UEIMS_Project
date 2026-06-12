@@ -90,7 +90,9 @@ public class FinalReportServiceImpl implements FinalReportService {
             report.setFileSizeBytes((int) file.getSize());
             return repository.save(report);
         } catch (IOException e) {
-            throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
+            System.err.println("File upload error: " + e.getMessage());
+            e.printStackTrace();
+            throw new AppException(ErrorCode.FIELD_REQUIRED);
         }
     }
 
