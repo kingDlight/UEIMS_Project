@@ -157,15 +157,15 @@ export const ProfileTab: React.FC = () => {
   };
 
   const handleUploadCV = async () => {
-    if (!cvFile || !profileId) {
-      message.error('Profile not loaded yet. Please wait.');
+    if (!cvFile) {
+      message.error('Please select a CV file first.');
       return;
     }
     try {
       setUploading(true);
       const fd = new FormData();
       fd.append('file', cvFile);
-      await StudentProfileService.uploadCV(profileId, fd);
+      await StudentProfileService.uploadCV(fd);
       message.success('CV uploaded successfully!');
       setCvFile(null);
       fetchProfile();
