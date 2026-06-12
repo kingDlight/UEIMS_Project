@@ -17,14 +17,23 @@ import {
 } from './training-manager/tabs';
 import { ModernLayout } from '@/components/layout/ModernLayout';
 
+import { extractUserFromToken } from '@/utils/jwt';
+
 export const TrainingManagerDashboard: React.FC = () => {
   const { tab } = useParams<{ tab: string }>();
   const currentTab = (tab || 'dashboard') as PageKey;
 
-  const { currentRole } = useAuthStore();
+  const { token } = useAuthStore();
+  const payload = token ? extractUserFromToken(token) : null;
+  const roles = payload?.roles || [];
+
+  // Redirect if no role
+  if (roles.length === 0) {
+    return <Navigate to="/no-role" replace />;
+  }
 
   // Redirect STUDENT to their own dashboard
-  if (currentRole === 'STUDENT') {
+  if (roles.includes('STUDENT') || roles.includes('ROLE_STUDENT') || roles.includes('ENTERPRISE') || roles.includes('ROLE_ENTERPRISE')) {
     return <Navigate to={`/student-dashboard/${tab || 'dashboard'}`} replace />;
   }
 
@@ -43,9 +52,9 @@ export const TrainingManagerDashboard: React.FC = () => {
 
   const allowedItem = navItems.find((item) => item.key === currentTab);
 
-  if (!allowedItem || (allowedItem.roles && currentRole && !allowedItem.roles.includes(currentRole))) {
+  if (!allowedItem || (allowedItem.roles && !roles.some((r: string) => allowedItem.roles?.includes(r)))) {
     // Redirect to the first available tab for this role
-    const firstAllowed = navItems.find((item) => !item.roles || (currentRole && item.roles.includes(currentRole)));
+    const firstAllowed = navItems.find((item) => !item.roles || roles.some((r: string) => item.roles?.includes(r)));
     if (firstAllowed) {
       return <Navigate to={`/tm-dashboard/${firstAllowed.key}`} replace />;
     }

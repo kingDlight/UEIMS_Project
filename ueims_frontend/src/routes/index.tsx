@@ -10,6 +10,7 @@ import { ProtectedRoute } from '@/components/guards/ProtectedRoute';
 import { EmailPreviewPage } from '@/pages/dev/EmailPreviewPage';
 import { TrainingManagerDashboard } from '@/pages/TrainingManagerDashboard';
 import { StudentDashboard } from '@/pages/student/StudentDashboard';
+import { NoRolePage } from '@/pages/auth/NoRolePage';
 
 export const router = createBrowserRouter([
   {
@@ -35,6 +36,10 @@ export const router = createBrowserRouter([
   {
     path: '/register-enterprise',
     element: <RegisterEnterprisePage />,
+  },
+  {
+    path: '/no-role',
+    element: <NoRolePage />,
   },
   {
     path: '/app',

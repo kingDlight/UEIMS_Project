@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Menu, X, Sun, Moon } from 'lucide-react';
 import { navLinks } from '../constants';
 import { useAuthStore } from '@/stores/useAuthStore';
-import { isTokenExpired } from '@/utils/jwt';
+import { extractUserFromToken, isTokenExpired } from '@/utils/jwt';
 
 export const NavBar = ({ isDark, toggleTheme, scrolled, scrollToSection }: { isDark: boolean, toggleTheme: () => void, scrolled: boolean, scrollToSection: (h: string) => void }) => {
   const navigate = useNavigate();
@@ -82,8 +82,11 @@ export const NavBar = ({ isDark, toggleTheme, scrolled, scrollToSection }: { isD
         ) : (
           <button
             onClick={() => {
-              const roles = user?.roles?.map((r: any) => r.roleName || r) || [];
-              if (roles.includes('STUDENT') || roles.includes('ROLE_STUDENT') || roles.includes('ENTERPRISE') || roles.includes('ROLE_ENTERPRISE')) {
+              const payload = token ? extractUserFromToken(token) : null;
+              const roles = payload?.roles || [];
+              if (roles.length === 0) {
+                navigate('/no-role');
+              } else if (roles.includes('STUDENT') || roles.includes('ROLE_STUDENT') || roles.includes('ENTERPRISE') || roles.includes('ROLE_ENTERPRISE')) {
                 navigate('/student-dashboard');
               } else {
                 navigate('/app/dashboard');
@@ -138,8 +141,11 @@ export const NavBar = ({ isDark, toggleTheme, scrolled, scrollToSection }: { isD
           <button
             onClick={() => {
               if (isReallyAuthenticated) {
-                const roles = user?.roles?.map((r: any) => r.roleName || r) || [];
-                if (roles.includes('STUDENT') || roles.includes('ROLE_STUDENT') || roles.includes('ENTERPRISE') || roles.includes('ROLE_ENTERPRISE')) {
+                const payload = token ? extractUserFromToken(token) : null;
+                const roles = payload?.roles || [];
+                if (roles.length === 0) {
+                  navigate('/no-role');
+                } else if (roles.includes('STUDENT') || roles.includes('ROLE_STUDENT') || roles.includes('ENTERPRISE') || roles.includes('ROLE_ENTERPRISE')) {
                   navigate('/student-dashboard');
                 } else {
                   navigate('/app/dashboard');

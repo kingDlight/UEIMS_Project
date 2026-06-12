@@ -138,6 +138,8 @@ const renderProfileModal = (modal: React.ReactNode) => (
   </div>
 );
 
+import { extractUserFromToken } from '@/utils/jwt';
+
 export const ModernLayout: React.FC<ModernLayoutProps> = ({ 
   navItems, 
   children,
@@ -191,14 +193,17 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
   // Determine current active tab
   const activeTab = tab || defaultRoute;
 
-  const { user, token, logout, currentRole } = useAuthStore();
+  const { user, token, logout } = useAuthStore();
 
   const filteredNavItems = useMemo(() => {
     return navItems.filter((item) => {
       if (!item.roles) return true;
-      return currentRole && item.roles.includes(currentRole);
+      
+      const payload = token ? extractUserFromToken(token) : null;
+      const userRoles: string[] = payload?.roles || [];
+      return item.roles.some(r => userRoles.includes(r) || userRoles.includes(`ROLE_${r}`));
     });
-  }, [navItems, currentRole]);
+  }, [navItems, token]);
 
   const [profileOpen, setProfileOpen] = useState(false);
   

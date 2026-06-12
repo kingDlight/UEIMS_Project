@@ -24,6 +24,7 @@ export const LoginPage: React.FC = () => {
   const [form] = Form.useForm();
 
   const getRedirectPath = (roles: string[]): string => {
+    if (!roles || roles.length === 0) return '/no-role';
     if (roles.includes('STUDENT')) return '/student-dashboard';
     if (roles.includes('ENTERPRISE')) return '/student-dashboard';
     return '/app/dashboard';
