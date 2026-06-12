@@ -60,6 +60,7 @@ export const ReportsTab: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [editingReport, setEditingReport] = useState<any>(null);
+  const [viewingReport, setViewingReport] = useState<any>(null);
   const [formData, setFormData] = useState({ weekNumber: '', tasksCompleted: '', issuesChallenges: '', lessonsLearned: '', planNextWeek: '' });
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 5;
@@ -132,7 +133,8 @@ export const ReportsTab: React.FC = () => {
     switch (status?.toUpperCase()) {
       case 'APPROVED': return 'success';
       case 'REJECTED': return 'error';
-      case 'SUBMITTED': return 'warning';
+      case 'PENDING_REVIEW': return 'warning';
+      case 'NOT_SUBMITTED': return 'warning';
       default: return 'warning';
     }
   };
@@ -141,7 +143,9 @@ export const ReportsTab: React.FC = () => {
     switch (status?.toUpperCase()) {
       case 'APPROVED': return 'Approved';
       case 'REJECTED': return 'Rejected';
-      case 'SUBMITTED': return 'Pending';
+      case 'PENDING_REVIEW': return 'Pending Review';
+      case 'NOT_SUBMITTED': return 'Not Submitted';
+      case 'REVIEWED': return 'Reviewed';
       default: return status || 'Draft';
     }
   };
@@ -195,6 +199,40 @@ export const ReportsTab: React.FC = () => {
           <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
             <CTAButton variant="ghost" onClick={() => { setShowForm(false); setFormData({ weekNumber: '', tasksCompleted: '', issuesChallenges: '', lessonsLearned: '', planNextWeek: '' }); }}>Cancel</CTAButton>
             <CTAButton variant="primary" icon={<SendOutlined />} onClick={handleSubmit} loading={submitting}>Submit</CTAButton>
+          </div>
+        </NeuSurface>
+      )}
+
+      {/* View Report Modal */}
+      {viewingReport && (
+        <NeuSurface style={{ padding: 24, marginBottom: 20, border: `2px solid ${cc.primary}` }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: cc.textPrimary, margin: 0 }}>Week {viewingReport.weekNumber} Report</h3>
+            <CTAButton variant="ghost" size="sm" onClick={() => setViewingReport(null)}>Close</CTAButton>
+          </div>
+          <div style={{ display: 'grid', gap: 16 }}>
+            <div>
+              <p style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, margin: '0 0 4px' }}>Tasks Completed</p>
+              <p style={{ fontSize: 13, color: cc.textPrimary, margin: 0, whiteSpace: 'pre-wrap' }}>{viewingReport.tasksCompleted || 'N/A'}</p>
+            </div>
+            <div>
+              <p style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, margin: '0 0 4px' }}>Issues & Challenges</p>
+              <p style={{ fontSize: 13, color: cc.textPrimary, margin: 0, whiteSpace: 'pre-wrap' }}>{viewingReport.issuesChallenges || 'N/A'}</p>
+            </div>
+            <div>
+              <p style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, margin: '0 0 4px' }}>Lessons Learned</p>
+              <p style={{ fontSize: 13, color: cc.textPrimary, margin: 0, whiteSpace: 'pre-wrap' }}>{viewingReport.lessonsLearned || 'N/A'}</p>
+            </div>
+            <div>
+              <p style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, margin: '0 0 4px' }}>Plan for Next Week</p>
+              <p style={{ fontSize: 13, color: cc.textPrimary, margin: 0, whiteSpace: 'pre-wrap' }}>{viewingReport.planNextWeek || 'N/A'}</p>
+            </div>
+            {viewingReport.feedback && (
+              <div style={{ padding: 12, borderRadius: cc.radiusMd, background: cc.dangerMuted }}>
+                <p style={{ fontSize: 12, fontWeight: 600, color: cc.dangerText, margin: '0 0 4px' }}>Enterprise Feedback:</p>
+                <p style={{ fontSize: 13, color: cc.dangerText, margin: 0, whiteSpace: 'pre-wrap' }}>{viewingReport.feedback}</p>
+              </div>
+            )}
           </div>
         </NeuSurface>
       )}
@@ -267,7 +305,7 @@ export const ReportsTab: React.FC = () => {
                         {report.status === 'REJECTED' && (
                           <CTAButton variant="warning" size="sm" icon={<EditOutlined />} onClick={() => { setEditingReport(report); setFormData({ weekNumber: String(report.weekNumber), tasksCompleted: report.tasksCompleted || '', issuesChallenges: report.issuesChallenges || '', lessonsLearned: report.lessonsLearned || '', planNextWeek: report.planNextWeek || '' }); }}>Edit & Resubmit</CTAButton>
                         )}
-                        <CTAButton variant="ghost" size="sm" icon={<EyeOutlined />}>View</CTAButton>
+                        <CTAButton variant="ghost" size="sm" icon={<EyeOutlined />} onClick={() => setViewingReport(report)}>View</CTAButton>
                       </div>
                     </div>
                   </div>
