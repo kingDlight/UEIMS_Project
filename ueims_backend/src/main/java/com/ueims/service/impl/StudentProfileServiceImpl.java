@@ -150,7 +150,8 @@ public class StudentProfileServiceImpl implements StudentProfileService {
             Path uploadDir = Paths.get(System.getProperty("user.dir"), "uploads", "cv");
             Files.createDirectories(uploadDir);
             originalFilename = StringUtils.getFilename(file.getOriginalFilename());
-            String stored = id.toString() + "_" + System.currentTimeMillis() + "_" + StringUtils.cleanPath(originalFilename);
+            String stored =
+                    id.toString() + "_" + System.currentTimeMillis() + "_" + StringUtils.cleanPath(originalFilename);
             Path path = uploadDir.resolve(stored);
             file.transferTo(path.toFile());
             profile.setCvUrl("/uploads/cv/" + stored);

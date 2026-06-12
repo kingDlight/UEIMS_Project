@@ -18,7 +18,6 @@ import com.ueims.model.entity.Application;
 import com.ueims.model.entity.ApplicationStatus;
 import com.ueims.model.entity.EligibleStudent;
 import com.ueims.model.entity.JobPost;
-import com.ueims.model.entity.StudentProfile;
 import com.ueims.model.entity.User;
 import com.ueims.repository.ApplicationRepository;
 import com.ueims.repository.EligibleStudentRepository;
@@ -123,7 +122,9 @@ public class ApplicationServiceImpl implements ApplicationService {
         if (cvUrl == null || cvUrl.trim().isEmpty()) {
             // Try to get from student's profile
             var studentProfile = studentProfileRepository.findByUser_UserId(student.getUserId());
-            if (studentProfile != null && studentProfile.getCvUrl() != null && !studentProfile.getCvUrl().isEmpty()) {
+            if (studentProfile != null
+                    && studentProfile.getCvUrl() != null
+                    && !studentProfile.getCvUrl().isEmpty()) {
                 cvUrl = studentProfile.getCvUrl();
             } else {
                 throw new AppException(ErrorCode.CV_NOT_UPLOADED);
