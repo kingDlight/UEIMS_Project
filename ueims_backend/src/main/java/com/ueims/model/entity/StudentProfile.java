@@ -30,6 +30,9 @@ public class StudentProfile extends BaseEntity {
     @Column(name = "cv_url", length = 500)
     private String cvUrl;
 
+    @Column(name = "cv_file_name", length = 255)
+    private String cvFileName;
+
     @Column(name = "skills", columnDefinition = "TEXT")
     private String skills;
 

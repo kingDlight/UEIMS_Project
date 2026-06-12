@@ -10,6 +10,7 @@ export const StudentProfileService = {
     uploadCV: (formData: FormData) => api.post(`${API_URL}/upload-cv`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
     }),
+    deleteCV: () => api.delete(`${API_URL}/upload-cv`),
     update: (id: string, data: any) => api.put(`${API_URL}/${id}`, data),
     create: (data: any) => api.post(API_URL, data),
     delete: (id: string) => api.delete(`${API_URL}/${id}`)

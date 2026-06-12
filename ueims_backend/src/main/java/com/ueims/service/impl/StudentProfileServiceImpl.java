@@ -137,8 +137,8 @@ public class StudentProfileServiceImpl implements StudentProfileService {
             throw new AppException(ErrorCode.CV_NOT_UPLOADED);
         }
 
-        String filename = StringUtils.getFilename(file.getOriginalFilename());
-        if (filename == null || !filename.toLowerCase().endsWith(".pdf")) {
+        String originalFilename = StringUtils.getFilename(file.getOriginalFilename());
+        if (originalFilename == null || !originalFilename.toLowerCase().endsWith(".pdf")) {
             throw new AppException(ErrorCode.INVALID_CV_FORMAT);
         }
 
@@ -149,19 +149,42 @@ public class StudentProfileServiceImpl implements StudentProfileService {
         try {
             Path uploadDir = Paths.get(System.getProperty("user.dir"), "uploads", "cv");
             Files.createDirectories(uploadDir);
-            String stored = id.toString() + "_" + System.currentTimeMillis() + "_" + StringUtils.cleanPath(filename);
+            originalFilename = StringUtils.getFilename(file.getOriginalFilename());
+            String stored = id.toString() + "_" + System.currentTimeMillis() + "_" + StringUtils.cleanPath(originalFilename);
             Path path = uploadDir.resolve(stored);
             file.transferTo(path.toFile());
             profile.setCvUrl("/uploads/cv/" + stored);
-            System.out.println("[CV Upload] Saving CV URL to profile: " + profile.getCvUrl());
-            StudentProfile saved = repository.save(profile);
-            System.out.println("[CV Upload] Profile saved successfully with CV: " + saved.getCvUrl());
-            return saved;
+            profile.setCvFileName(originalFilename);
+            return repository.save(profile);
         } catch (IOException e) {
             System.err.println("[CV Upload] IOException: " + e.getMessage());
             e.printStackTrace();
             throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
         }
+    }
+
+    @Override
+    public StudentProfile deleteCv(UUID id) {
+        StudentProfile profile =
+                repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.STUDENT_PROFILE_NOT_FOUND));
+
+        User currentUser = getCurrentUser();
+        if (!profile.getUser().getUserId().equals(currentUser.getUserId())) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        String oldCvUrl = profile.getCvUrl();
+        if (oldCvUrl != null && !oldCvUrl.isBlank()) {
+            try {
+                Path oldPath = Paths.get(System.getProperty("user.dir"), oldCvUrl.replace("/uploads/", "uploads/"));
+                Files.deleteIfExists(oldPath);
+            } catch (IOException e) {
+                System.err.println("[CV Delete] Failed to delete file: " + e.getMessage());
+            }
+            profile.setCvUrl(null);
+            profile.setCvFileName(null);
+        }
+        return repository.save(profile);
     }
 
     @Override

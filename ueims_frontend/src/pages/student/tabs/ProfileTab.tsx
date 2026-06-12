@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { message, Spin } from 'antd';
-import { 
+import {
   UserOutlined, MailOutlined, PhoneOutlined, IdcardOutlined, BookOutlined,
   UploadOutlined, FileTextOutlined, EditOutlined, SaveOutlined,
-  FileOutlined, EyeOutlined, DownloadOutlined,
+  FileOutlined, EyeOutlined, DownloadOutlined, DeleteOutlined,
 } from '@ant-design/icons';
 import { NeuSurface } from '../components/shared/NeuSurface';
 import { SmallPill } from '../components/shared/SmallPill';
@@ -166,11 +166,24 @@ export const ProfileTab: React.FC = () => {
       const fd = new FormData();
       fd.append('file', cvFile);
       await StudentProfileService.uploadCV(fd);
-      message.success('CV uploaded successfully!');
+      message.success('Profile and CV updated successfully!');
       setCvFile(null);
       fetchProfile();
     } catch (err: any) {
       message.error(err.response?.data?.message || 'Upload failed!');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDeleteCV = async () => {
+    try {
+      setUploading(true);
+      await StudentProfileService.deleteCV();
+      message.success('CV deleted successfully!');
+      fetchProfile();
+    } catch (err: any) {
+      message.error(err.response?.data?.message || 'Delete failed!');
     } finally {
       setUploading(false);
     }
@@ -301,18 +314,22 @@ export const ProfileTab: React.FC = () => {
             <CTAButton variant="primary" icon={<UploadOutlined />} onClick={handleUploadCV} loading={uploading}>Upload CV</CTAButton>
           </div>
         )}
-        {profile?.cvFileUrl && !cvFile && (
+        {profile?.cvUrl && !cvFile && (
           <div style={{ marginTop: 20, padding: 16, borderRadius: cc.radiusMd, background: cc.successMuted, border: `1px solid ${cc.success}20`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <span style={{ fontSize: 20 }}>✓</span>
               <div>
                 <p style={{ fontSize: 13, fontWeight: 600, color: cc.successText, margin: 0 }}>CV uploaded</p>
-                <p style={{ fontSize: 12, color: cc.successText, opacity: 0.8, margin: '2px 0 0' }}>{profile.cvFileName || 'cv_document.pdf'}</p>
+                <p style={{ fontSize: 12, color: cc.successText, opacity: 0.8, margin: '2px 0 0' }}>
+                  {profile.cvFileName || profile.cvUrl.split('_').slice(2).join('_').replace('/uploads/cv/', '')}
+                </p>
               </div>
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
-              <CTAButton variant="ghost" size="sm" icon={<EyeOutlined />} onClick={() => window.open(profile.cvFileUrl, '_blank')}>View</CTAButton>
-              <CTAButton variant="ghost" size="sm" icon={<DownloadOutlined />} onClick={() => window.open(profile.cvFileUrl, '_blank')}>Download</CTAButton>
+              <CTAButton variant="ghost" size="sm" icon={<EyeOutlined />} onClick={() => window.open(profile.cvUrl, '_blank')}>View</CTAButton>
+              <CTAButton variant="ghost" size="sm" icon={<DownloadOutlined />} onClick={() => window.open(profile.cvUrl, '_blank')}>Download</CTAButton>
+              <CTAButton variant="ghost" size="sm" icon={<UploadOutlined />} onClick={() => document.getElementById('cv-input')?.click()}>Replace</CTAButton>
+              <CTAButton variant="danger" size="sm" icon={<DeleteOutlined />} onClick={handleDeleteCV}>Delete</CTAButton>
             </div>
           </div>
         )}

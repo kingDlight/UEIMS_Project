@@ -81,6 +81,17 @@ public class StudentProfileController {
         return ResponseEntity.ok(mapper.toDto(service.uploadCv(profile.getProfileId(), file)));
     }
 
+    @DeleteMapping("/upload-cv")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<com.ueims.dto.response.StudentProfileDTO> deleteCv() {
+        UUID userId = userService.getCurrentUserId();
+        com.ueims.model.entity.StudentProfile profile = service.findByUserId(userId);
+        if (profile == null) {
+            throw new AppException(ErrorCode.STUDENT_PROFILE_NOT_FOUND);
+        }
+        return ResponseEntity.ok(mapper.toDto(service.deleteCv(profile.getProfileId())));
+    }
+
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('SYSTEM_ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {

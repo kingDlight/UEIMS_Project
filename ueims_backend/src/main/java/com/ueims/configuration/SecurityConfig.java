@@ -31,7 +31,8 @@ public class SecurityConfig {
         "/api/auth/reset-password",
         "/api/auth/register-enterprise",
         "/api/auth/google",
-        "/api/test/**"
+        "/api/test/**",
+        "/uploads/**"
     };
 
     @Bean

@@ -18,5 +18,7 @@ public interface StudentProfileService {
 
     StudentProfile uploadCv(UUID id, org.springframework.web.multipart.MultipartFile file);
 
+    StudentProfile deleteCv(UUID id);
+
     void deleteById(UUID id);
 }
