@@ -95,21 +95,21 @@ public class EnterpriseRegistrationServiceImpl implements EnterpriseRegistration
 
     private void validatePasswordComplexity(String password) {
         if (password.length() < 8) {
-            throw new AppException(ErrorCode.INVALID_PASSWORD);
+            throw new AppException(ErrorCode.INVALID_PASSWORD, "Password must be at least 8 characters");
         }
         if (!Pattern.compile("[A-Z]").matcher(password).find()) {
-            throw new AppException(ErrorCode.INVALID_PASSWORD);
+            throw new AppException(ErrorCode.INVALID_PASSWORD, "Password must contain at least 1 uppercase letter");
         }
         if (!Pattern.compile("[a-z]").matcher(password).find()) {
-            throw new AppException(ErrorCode.INVALID_PASSWORD);
+            throw new AppException(ErrorCode.INVALID_PASSWORD, "Password must contain at least 1 lowercase letter");
         }
         if (!Pattern.compile("\\d").matcher(password).find()) {
-            throw new AppException(ErrorCode.INVALID_PASSWORD);
+            throw new AppException(ErrorCode.INVALID_PASSWORD, "Password must contain at least 1 number");
         }
         if (!Pattern.compile("[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]")
                 .matcher(password)
                 .find()) {
-            throw new AppException(ErrorCode.INVALID_PASSWORD);
+            throw new AppException(ErrorCode.INVALID_PASSWORD, "Password must contain at least 1 special character (!@#$%^&*...)");
         }
     }
 }
