@@ -297,7 +297,9 @@ export const OJTTab: React.FC = () => {
         const p = next[i];
         if (p.status === 'UNPLACED' && unplacedCount < 3) {
           unplacedCount++;
-          const ent = ENTERPRISES[Math.floor(Math.random() * ENTERPRISES.length)];
+          const array = new Uint32Array(1);
+          window.crypto.getRandomValues(array);
+          const ent = ENTERPRISES[array[0] % ENTERPRISES.length];
           next[i] = {
             ...p,
             status: 'INTERVIEWING',
