@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import jakarta.validation.Valid;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,28 +33,39 @@ public class FinalGradeController {
     ExcelExportService excelExportService;
 
     @GetMapping
+    @PreAuthorize("hasRole('TRAINING_MANAGER')")
     public ApiResponse<List<FinalGrade>> getAll() {
         return ApiResponse.<List<FinalGrade>>builder().result(service.findAll()).build();
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('TRAINING_MANAGER')")
     public ApiResponse<FinalGrade> getById(@PathVariable UUID id) {
         return ApiResponse.<FinalGrade>builder().result(service.findById(id)).build();
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('TRAINING_MANAGER')")
     public ApiResponse<FinalGrade> create(@Valid @RequestBody FinalGradeRequest request) {
         return ApiResponse.<FinalGrade>builder().result(service.create(request)).build();
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('TRAINING_MANAGER')")
     public ApiResponse<Void> delete(@PathVariable UUID id) {
         service.deleteById(id);
         return ApiResponse.<Void>builder().build();
     }
 
     @GetMapping("/export")
+    @PreAuthorize("hasRole('TRAINING_MANAGER')")
     public org.springframework.http.ResponseEntity<byte[]> exportFinalGrades() {
         return excelExportService.exportFinalGrades();
+    }
+
+    @GetMapping("/export/pdf")
+    @PreAuthorize("hasRole('TRAINING_MANAGER')")
+    public org.springframework.http.ResponseEntity<byte[]> exportFinalGradesPdf() {
+        return excelExportService.exportFinalGradesPdf();
     }
 }

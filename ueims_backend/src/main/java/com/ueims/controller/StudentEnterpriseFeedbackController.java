@@ -25,6 +25,7 @@ public class StudentEnterpriseFeedbackController {
     private final UserService userService;
 
     @GetMapping
+    @PreAuthorize("hasRole('TRAINING_MANAGER')")
     public ResponseEntity<java.util.List<com.ueims.dto.response.StudentEnterpriseFeedbackDTO>> getAll() {
         return ResponseEntity.ok(service.findAll().stream().map(mapper::toDto).toList());
     }
