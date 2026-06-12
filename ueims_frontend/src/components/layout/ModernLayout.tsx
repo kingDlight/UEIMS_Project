@@ -313,7 +313,14 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
               >
                 <MenuOutlined />
               </button>
-              <div className="modern-brand-logo">UEIMS</div>
+              <a 
+                href="/"
+                className="modern-brand-logo" 
+                onClick={(e) => { e.preventDefault(); navigate('/'); }}
+                style={{ textDecoration: 'none', color: 'inherit' }}
+              >
+                UEIMS
+              </a>
             </div>
             <div className="modern-nav-items desktop-only">
               {/* Visible pills: first 7 items */}
@@ -479,7 +486,16 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
 
         {/* Mobile Drawer */}
         <Drawer
-          title={<div className="modern-brand-logo">UEIMS</div>}
+          title={
+            <a 
+              href="/"
+              className="modern-brand-logo" 
+              onClick={(e) => { e.preventDefault(); setDrawerOpen(false); navigate('/'); }}
+              style={{ textDecoration: 'none', color: 'inherit' }}
+            >
+              UEIMS
+            </a>
+          }
           placement="left"
           onClose={() => setDrawerOpen(false)}
           open={drawerOpen}
