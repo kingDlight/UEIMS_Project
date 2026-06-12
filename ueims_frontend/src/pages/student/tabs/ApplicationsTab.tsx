@@ -86,7 +86,18 @@ export const ApplicationsTab: React.FC = () => {
   };
 
   const filteredApps = useMemo(() => {
-    return filter === 'all' ? applications : applications.filter(app => app.status === filter.toUpperCase());
+    if (filter === 'all') return applications;
+    return applications.filter(app => {
+      const status = app.status?.toUpperCase();
+      switch (filter) {
+        case 'pending': return status === 'PENDING';
+        case 'screening': return status === 'SCREENING_PASSED';
+        case 'interview': return status === 'INTERVIEW_SCHEDULED';
+        case 'rejected': return status === 'SCREENING_REJECTED' || status === 'REJECTED';
+        case 'accepted': return status === 'ACCEPTED';
+        default: return true;
+      }
+    });
   }, [applications, filter]);
 
   useEffect(() => { setCurrentPage(1); }, [filter]);
@@ -98,11 +109,22 @@ export const ApplicationsTab: React.FC = () => {
 
   const statusVariant = (status: string): 'success' | 'warning' | 'error' | 'info' | 'neutral' => {
     switch (status?.toUpperCase()) {
-      case 'PASSED': case 'APPROVED': return 'success';
-      case 'PENDING': case 'SUBMITTED': return 'warning';
-      case 'REJECTED': case 'FAILED': return 'error';
-      case 'SCHEDULED': return 'info';
+      case 'SCREENING_PASSED': return 'success';
+      case 'INTERVIEW_SCHEDULED': return 'info';
+      case 'ACCEPTED': return 'success';
+      case 'SCREENING_REJECTED':
+      case 'REJECTED': return 'error';
+      case 'PENDING': return 'warning';
       default: return 'neutral';
+    }
+  };
+
+  const statusLabel = (status: string): string => {
+    switch (status?.toUpperCase()) {
+      case 'SCREENING_PASSED': return 'Screening Passed';
+      case 'INTERVIEW_SCHEDULED': return 'Interview Scheduled';
+      case 'SCREENING_REJECTED': return 'Screening Rejected';
+      default: return status || 'Unknown';
     }
   };
 
@@ -119,8 +141,15 @@ export const ApplicationsTab: React.FC = () => {
 
       {/* Filter Tabs */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
-        {['all', 'pending', 'passed', 'rejected'].map(f => (
-          <CTAButton key={f} variant={filter === f ? 'primary' : 'ghost'} onClick={() => setFilter(f)}>{f.charAt(0).toUpperCase() + f.slice(1)}</CTAButton>
+        {[
+          { key: 'all', label: 'All' },
+          { key: 'pending', label: 'Pending' },
+          { key: 'screening', label: 'Screening' },
+          { key: 'interview', label: 'Interview' },
+          { key: 'accepted', label: 'Accepted' },
+          { key: 'rejected', label: 'Rejected' },
+        ].map(f => (
+          <CTAButton key={f.key} variant={filter === f.key ? 'primary' : 'ghost'} onClick={() => setFilter(f.key)}>{f.label}</CTAButton>
         ))}
       </div>
 
@@ -140,7 +169,7 @@ export const ApplicationsTab: React.FC = () => {
                       <div>
                         <h4 style={{ fontSize: 14, fontWeight: 600, color: cc.textPrimary, margin: '0 0 4px' }}>{app.jobTitle || 'Internship Position'}</h4>
                         <p style={{ fontSize: 12, color: cc.textMuted, margin: '0 0 8px' }}>{app.enterpriseName}</p>
-                        <SmallBadge label={app.status || 'PENDING'} variant={statusVariant(app.status)} />
+                        <SmallBadge label={statusLabel(app.status)} variant={statusVariant(app.status)} />
                       </div>
                     </div>
                     <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>

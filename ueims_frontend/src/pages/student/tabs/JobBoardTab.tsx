@@ -77,7 +77,7 @@ export const JobBoardTab: React.FC = () => {
     try {
       const res = await StudentProfileService.getMyProfile();
       const profile = res.data?.result ?? res.data;
-      setHasCv(!!(profile?.cvFileUrl));
+      setHasCv(!!(profile?.cvUrl));
     } catch {
       setHasCv(false);
     }
