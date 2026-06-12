@@ -721,7 +721,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
         open={changePasswordVisible}
         onCancel={() => setChangePasswordVisible(false)}
         footer={null}
-        destroyOnClose
+        destroyOnHidden
         width={420}
         closeIcon={<X size={20} color="#94a3b8" style={{ marginTop: 8, marginRight: 8 }} />}
         styles={{ 
