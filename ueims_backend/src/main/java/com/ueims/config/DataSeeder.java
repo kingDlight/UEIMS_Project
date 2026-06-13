@@ -16,6 +16,7 @@ import com.ueims.model.entity.Role;
 import com.ueims.model.entity.User;
 import com.ueims.model.entity.UserRole;
 import com.ueims.model.entity.UserRoleId;
+import com.ueims.repository.ApplicationRepository;
 import com.ueims.repository.EnterpriseAssignmentRepository;
 import com.ueims.repository.EnterpriseEvaluationRepository;
 import com.ueims.repository.EnterpriseRepository;
@@ -25,6 +26,8 @@ import com.ueims.repository.InternshipPlanItemRepository;
 import com.ueims.repository.InternshipPlanRepository;
 import com.ueims.repository.JobPostRepository;
 import com.ueims.repository.RoleRepository;
+import com.ueims.repository.SemesterEnterpriseRepository;
+import com.ueims.repository.StudentEnterpriseFeedbackRepository;
 import com.ueims.repository.UserRepository;
 import com.ueims.repository.UserRoleRepository;
 import com.ueims.repository.WeeklyReportRepository;
@@ -41,6 +44,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DataSeeder implements CommandLineRunner {
 
+    ApplicationRepository applicationRepository;
     EnterpriseAssignmentRepository enterpriseAssignmentRepository;
     EnterpriseEvaluationRepository enterpriseEvaluationRepository;
     EnterpriseRepository enterpriseRepository;
@@ -49,6 +53,8 @@ public class DataSeeder implements CommandLineRunner {
     InternshipPlanItemRepository internshipPlanItemRepository;
     InternshipPlanRepository internshipPlanRepository;
     JobPostRepository jobPostRepository;
+    SemesterEnterpriseRepository semesterEnterpriseRepository;
+    StudentEnterpriseFeedbackRepository studentEnterpriseFeedbackRepository;
     UserRepository userRepository;
     RoleRepository roleRepository;
     UserRoleRepository userRoleRepository;
@@ -67,16 +73,20 @@ public class DataSeeder implements CommandLineRunner {
             if (Arrays.asList("FPT Software", "VNG Corporation", "NashTech Vietnam", "TMA Solutions")
                     .contains(e.getCompanyName())) {
                 log.info("Deleting enterprise: {} ({})", e.getCompanyName(), e.getEnterpriseId());
+                UUID enterpriseId = e.getEnterpriseId();
 
-                // Step 1: Get all assignment IDs for this enterprise
+                // --- Delete in correct FK dependency order ---
+
+                // 1. Get all assignment IDs for this enterprise (needed for child-of-assignment deletes)
                 List<EnterpriseAssignment> assignments =
-                        enterpriseAssignmentRepository.findByEnterprise_EnterpriseId(e.getEnterpriseId());
+                        enterpriseAssignmentRepository.findByEnterprise_EnterpriseId(enterpriseId);
                 List<UUID> assignmentIds = assignments.stream()
                         .map(EnterpriseAssignment::getAssignmentId)
                         .collect(Collectors.toList());
 
+                // 2. Delete children of EnterpriseAssignment (Assignment -> X chain)
                 if (!assignmentIds.isEmpty()) {
-                    // Step 2: Delete InternshipPlanItems -> InternshipPlans (via assignment IDs)
+                    // 2a. InternshipPlanItems -> InternshipPlans (via planId)
                     List<UUID> planIds = internshipPlanRepository
                             .findByAssignment_AssignmentIdIn(assignmentIds)
                             .stream()
@@ -84,36 +94,41 @@ public class DataSeeder implements CommandLineRunner {
                             .collect(Collectors.toList());
                     if (!planIds.isEmpty()) {
                         internshipPlanItemRepository.deleteByPlan_PlanIdIn(planIds);
-                        log.info("Deleted {} internship plan items", planIds.size());
                     }
                     internshipPlanRepository.findByAssignment_AssignmentIdIn(assignmentIds)
                             .forEach(p -> internshipPlanRepository.delete(p));
-                    log.info("Deleted {} internship plans", planIds.size());
 
-                    // Step 3: Delete child records of assignments
+                    // 2b. WeeklyReports
                     weeklyReportRepository.deleteByAssignment_AssignmentIdIn(assignmentIds);
-                    log.info("Deleted weekly reports for {} assignments", assignmentIds.size());
 
+                    // 2c. FinalReports
                     finalReportRepository.deleteByAssignment_AssignmentIdIn(assignmentIds);
-                    log.info("Deleted final reports for {} assignments", assignmentIds.size());
 
+                    // 2d. EnterpriseEvaluations
                     enterpriseEvaluationRepository.deleteByAssignment_AssignmentIdIn(assignmentIds);
-                    log.info("Deleted enterprise evaluations for {} assignments", assignmentIds.size());
 
+                    // 2e. Incidents
                     incidentRepository.findByAssignment_AssignmentIdIn(assignmentIds)
                             .forEach(i -> incidentRepository.delete(i));
-                    log.info("Deleted incidents for {} assignments", assignmentIds.size());
                 }
 
-                // Step 4: Delete job posts
-                jobPostRepository.deleteByEnterprise_EnterpriseId(e.getEnterpriseId());
-                log.info("Deleted job posts for enterprise {}", e.getEnterpriseId());
+                // 3. Delete Applications (via job_post -> enterprise)
+                applicationRepository.deleteByJobPost_Enterprise_EnterpriseId(enterpriseId);
 
-                // Step 5: Delete enterprise assignments
-                enterpriseAssignmentRepository.deleteByEnterprise_EnterpriseId(e.getEnterpriseId());
-                log.info("Deleted enterprise assignments for enterprise {}", e.getEnterpriseId());
+                // 4. Delete JobPosts
+                jobPostRepository.deleteByEnterprise_EnterpriseId(enterpriseId);
 
-                // Step 6: Delete enterprise
+                // 5. Delete StudentEnterpriseFeedbacks
+                studentEnterpriseFeedbackRepository.deleteByEnterprise_EnterpriseId(enterpriseId);
+
+                // 6. Delete SemesterEnterprises
+                semesterEnterpriseRepository.deleteById_EnterpriseId(enterpriseId);
+
+                // 7. Delete Users linked to this enterprise
+                userRepository.findByEnterprise_EnterpriseId(enterpriseId)
+                        .forEach(u -> userRepository.delete(u));
+
+                // 8. Delete the Enterprise
                 enterpriseRepository.delete(e);
                 log.info("Deleted enterprise: {}", e.getCompanyName());
             }

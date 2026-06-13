@@ -25,4 +25,6 @@ public interface ApplicationRepository extends JpaRepository<Application, UUID> 
     List<Application> findByJobPost_Enterprise_EnterpriseIdAndDeletedAtIsNull(UUID enterpriseId);
 
     long countByStudent_UserIdAndStatusNotAndDeletedAtIsNull(UUID studentId, ApplicationStatus status);
+
+    void deleteByJobPost_Enterprise_EnterpriseId(UUID enterpriseId);
 }
