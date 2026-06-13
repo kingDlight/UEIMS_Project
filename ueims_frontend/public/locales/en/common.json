@@ -1,0 +1,34 @@
+{
+  "layout": {
+    "alerts": "Alerts",
+    "alertsDesc": "Latest reminders and urgent items",
+    "noNotifications": "No notifications yet",
+    "viewProfile": "View Profile",
+    "changePassword": "Change Password",
+    "logout": "Logout",
+    "accountStatus": "Account Status",
+    "emailAddress": "Email Address",
+    "phoneNumber": "Phone Number",
+    "updateInfo": "Update Information",
+    "more": "More",
+    "accountSecurity": "Account Security",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm Password",
+    "saveChanges": "Save Changes",
+    "cancel": "Cancel",
+    "zoom": "Zoom"
+  },
+  "nav": {
+    "dashboard": "Student Dashboard",
+    "profile": "Profile & CV",
+    "jobs": "Job Board",
+    "applications": "My Applications",
+    "schedule": "My Interviews",
+    "training-plan": "Internship Progress",
+    "reports": "Weekly Reports",
+    "feedback": "Evaluate Enterprise",
+    "final-report": "Final Report Submission",
+    "evaluation": "My Evaluation"
+  }
+}

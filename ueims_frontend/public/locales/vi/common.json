@@ -1,0 +1,34 @@
+{
+  "layout": {
+    "alerts": "Thông báo",
+    "alertsDesc": "Nhắc nhở và các thông báo mới nhất",
+    "noNotifications": "Chưa có thông báo nào",
+    "viewProfile": "Xem Hồ sơ",
+    "changePassword": "Đổi mật khẩu",
+    "logout": "Đăng xuất",
+    "accountStatus": "Trạng thái",
+    "emailAddress": "Địa chỉ Email",
+    "phoneNumber": "Số điện thoại",
+    "updateInfo": "Cập nhật thông tin",
+    "more": "Thêm",
+    "accountSecurity": "Bảo mật tài khoản",
+    "currentPassword": "Mật khẩu hiện tại",
+    "newPassword": "Mật khẩu mới",
+    "confirmPassword": "Xác nhận mật khẩu",
+    "saveChanges": "Lưu thay đổi",
+    "cancel": "Hủy",
+    "zoom": "Thu phóng"
+  },
+  "nav": {
+    "dashboard": "Bảng Điều Khiển",
+    "profile": "Hồ Sơ & CV",
+    "jobs": "Bảng Việc Làm",
+    "applications": "Hồ Sơ Của Tôi",
+    "schedule": "Lịch Phỏng Vấn",
+    "training-plan": "Tiến Độ Thực Tập",
+    "reports": "Báo Cáo Hàng Tuần",
+    "feedback": "Đánh Giá Doanh Nghiệp",
+    "final-report": "Nộp Báo Cáo Cuối Kỳ",
+    "evaluation": "Kết Quả Đánh Giá"
+  }
+}

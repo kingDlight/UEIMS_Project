@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { message, Spin, Pagination } from 'antd';
 import { motion } from 'framer-motion';
 import { CalendarOutlined, ClockCircleOutlined, BankOutlined, CheckCircleOutlined, CloseCircleOutlined, WarningOutlined, ExclamationCircleOutlined, LinkOutlined, EnvironmentOutlined } from '@ant-design/icons';
@@ -54,6 +55,7 @@ const EmptyState: React.FC<{ icon: React.ReactNode; title: string; description: 
 );
 
 export const ScheduleTab: React.FC = () => {
+  const { t } = useTranslation(['schedule', 'common']);
   const [interviews, setInterviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [confirming, setConfirming] = useState<string | null>(null);
@@ -119,8 +121,8 @@ export const ScheduleTab: React.FC = () => {
   return (
     <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 24px 40px', fontFamily: 'Inter, sans-serif' }}>
       <div style={{ marginBottom: 24 }}>
-        <h2 style={{ fontSize: 22, fontWeight: 800, color: cc.textPrimary, margin: '0 0 6px', letterSpacing: '-0.01em' }}>Interview Schedule</h2>
-        <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}>Your upcoming interviews and appointments</p>
+        <h2 style={{ fontSize: 22, fontWeight: 800, color: cc.textPrimary, margin: '0 0 6px', letterSpacing: '-0.01em' }}>{t('pageTitle', 'Interview Schedule')}</h2>
+        <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}>{t('pageSubtitle', 'Your upcoming interviews and appointments')}</p>
       </div>
 
       {/* Confirm Modal */}
@@ -128,14 +130,14 @@ export const ScheduleTab: React.FC = () => {
         <NeuSurface style={{ padding: 24, marginBottom: 20, border: `2px solid ${cc.info}` }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
             <ExclamationCircleOutlined style={{ fontSize: 24, color: cc.info }} />
-            <h3 style={{ fontSize: 16, fontWeight: 700, color: cc.textPrimary, margin: 0 }}>Confirm Interview Attendance</h3>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: cc.textPrimary, margin: 0 }}>{t('confirmAttendanceTitle', 'Confirm Interview Attendance')}</h3>
           </div>
           <p style={{ fontSize: 13, color: cc.textMuted, margin: '0 0 20px', lineHeight: 1.6 }}>
-            Are you sure you want to accept this interview schedule? The company will be notified of your commitment. <strong>This action cannot be undone.</strong>
+            {t('confirmAttendanceBody', 'Are you sure you want to accept this interview schedule? The company will be notified of your commitment.')} <strong>{t('cannotUndo', 'This action cannot be undone.')}</strong>
           </p>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
-            <CTAButton variant="ghost" onClick={() => setConfirming(null)}>Cancel</CTAButton>
-            <CTAButton variant="success" icon={<CheckCircleOutlined />} onClick={() => handleConfirm(confirming)}>Yes, Confirm</CTAButton>
+            <CTAButton variant="ghost" onClick={() => setConfirming(null)}>{t('cancel', 'Cancel')}</CTAButton>
+            <CTAButton variant="success" icon={<CheckCircleOutlined />} onClick={() => handleConfirm(confirming)}>{t('yesConfirm', 'Yes, Confirm')}</CTAButton>
           </div>
         </NeuSurface>
       )}
@@ -145,34 +147,34 @@ export const ScheduleTab: React.FC = () => {
         <NeuSurface style={{ padding: 24, marginBottom: 20, border: `2px solid ${cc.danger}` }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
             <WarningOutlined style={{ fontSize: 24, color: cc.danger }} />
-            <h3 style={{ fontSize: 16, fontWeight: 700, color: cc.textPrimary, margin: 0 }}>Decline Interview Invitation</h3>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: cc.textPrimary, margin: 0 }}>{t('declineTitle', 'Decline Interview Invitation')}</h3>
           </div>
           <div style={{ padding: 12, borderRadius: cc.radiusMd, background: cc.dangerMuted, marginBottom: 16 }}>
             <p style={{ fontSize: 13, color: cc.dangerText, margin: 0, fontWeight: 600 }}>
-              Are you sure you want to decline this interview? This action will formally withdraw you from this application cycle.
+              {t('declineWarning', 'Are you sure you want to decline this interview? This action will formally withdraw you from this application cycle.')}
             </p>
           </div>
           <div style={{ marginBottom: 16 }}>
             <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>
-              Reason for Refusal <span style={{ color: cc.danger }}>*</span>
+              {t('reasonLabel', 'Reason for Refusal')} <span style={{ color: cc.danger }}>*</span>
             </label>
             <textarea
               value={declineReason}
               onChange={(e) => setDeclineReason(e.target.value)}
               rows={3}
-              placeholder="Please provide your reason for declining..."
+              placeholder={t('declineReasonPlaceholder', 'Please provide your reason for declining...')}
               style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13, fontFamily: "'Inter', sans-serif", resize: 'vertical' }}
             />
           </div>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
-            <CTAButton variant="ghost" onClick={() => { setDeclining(null); setDeclineReason(''); }}>No, Keep It</CTAButton>
-            <CTAButton variant="danger" icon={<CloseCircleOutlined />} onClick={handleDecline}>Confirm Decline</CTAButton>
+            <CTAButton variant="ghost" onClick={() => { setDeclining(null); setDeclineReason(''); }}>{t('noKeepIt', 'No, Keep It')}</CTAButton>
+            <CTAButton variant="danger" icon={<CloseCircleOutlined />} onClick={handleDecline}>{t('confirmDecline', 'Confirm Decline')}</CTAButton>
           </div>
         </NeuSurface>
       )}
 
       {interviews.length === 0 ? (
-        <EmptyState icon={<CalendarOutlined style={{ fontSize: 32 }} />} title="No scheduled interviews" description="You have no upcoming interview invitations at this moment." />
+        <EmptyState icon={<CalendarOutlined style={{ fontSize: 32 }} />} title={t('noInterviews', 'No scheduled interviews')} description={t('noInterviewsDesc', 'You have no upcoming interview invitations at this moment.')} />
       ) : (
         <>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -190,7 +192,7 @@ export const ScheduleTab: React.FC = () => {
                       </div>
                       {interview.meetingLink && (
                         <p style={{ fontSize: 12, color: cc.info, margin: '8px 0 0' }}>
-                          <a href={interview.meetingLink} target="_blank" rel="noopener noreferrer" style={{ color: cc.info }}><LinkOutlined /> Join Meeting</a>
+                          <a href={interview.meetingLink} target="_blank" rel="noopener noreferrer" style={{ color: cc.info }}><LinkOutlined /> {t('joinMeeting', 'Join Meeting')}</a>
                         </p>
                       )}
                       {interview.location && (
@@ -201,8 +203,8 @@ export const ScheduleTab: React.FC = () => {
                       <SmallBadge label={interview.status || 'PENDING'} variant={interview.status === 'CONFIRMED' ? 'success' : interview.status === 'DECLINED' ? 'error' : 'warning'} />
                       {interview.status === 'PENDING' && (
                         <>
-                          <CTAButton variant="success" icon={<CheckCircleOutlined />} onClick={() => setConfirming(interview.interviewId)}>Confirm</CTAButton>
-                          <CTAButton variant="danger" icon={<CloseCircleOutlined />} onClick={() => setDeclining(interview)}>Decline</CTAButton>
+                          <CTAButton variant="success" icon={<CheckCircleOutlined />} onClick={() => setConfirming(interview.interviewId)}>{t('confirm', 'Confirm')}</CTAButton>
+                          <CTAButton variant="danger" icon={<CloseCircleOutlined />} onClick={() => setDeclining(interview)}>{t('decline', 'Decline')}</CTAButton>
                         </>
                       )}
                     </div>
@@ -218,7 +220,7 @@ export const ScheduleTab: React.FC = () => {
               total={interviews.length}
               onChange={setCurrentPage}
               showSizeChanger={false}
-              showTotal={(total, range) => `${range[0]}-${range[1]} of ${total}`}
+              showTotal={(total, range) => t('rangeSummary', '{{start}}-{{end}} of {{total}}', { start: range[0], end: range[1], total })}
             />
           </div>
         </>

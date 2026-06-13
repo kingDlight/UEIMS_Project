@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { message, Spin, Pagination } from 'antd';
 import { motion } from 'framer-motion';
 import { FileTextOutlined, CloseCircleOutlined, DownOutlined, UpOutlined } from '@ant-design/icons';
@@ -54,6 +55,7 @@ const EmptyState: React.FC<{ icon: React.ReactNode; title: string; description: 
 );
 
 export const ApplicationsTab: React.FC = () => {
+  const { t } = useTranslation(['applications']);
   const [applications, setApplications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>('all');
@@ -79,10 +81,10 @@ export const ApplicationsTab: React.FC = () => {
   const handleWithdraw = async (applicationId: string) => {
     try {
       await ApplicationService.withdraw(applicationId);
-      message.success('Application withdrawn successfully!');
+      message.success(t('applicationWithdrawn', 'Application withdrawn successfully!'));
       fetchApplications();
     } catch (err: any) {
-      message.error(err.response?.data?.message || 'Failed to withdraw application!');
+      message.error(err.response?.data?.message || t('failedWithdraw', 'Failed to withdraw application!'));
     }
   };
 
@@ -122,10 +124,10 @@ export const ApplicationsTab: React.FC = () => {
 
   const statusLabel = (status: string): string => {
     switch (status?.toUpperCase()) {
-      case 'SCREENING_PASSED': return 'Screening Passed';
-      case 'INTERVIEW_SCHEDULED': return 'Interview Scheduled';
-      case 'SCREENING_REJECTED': return 'Screening Rejected';
-      default: return status || 'Unknown';
+      case 'SCREENING_PASSED': return t('statusScreeningPassed', 'Screening Passed');
+      case 'INTERVIEW_SCHEDULED': return t('statusInterviewScheduled', 'Interview Scheduled');
+      case 'SCREENING_REJECTED': return t('statusScreeningRejected', 'Screening Rejected');
+      default: return status || t('statusUnknown', 'Unknown');
     }
   };
 
@@ -136,26 +138,26 @@ export const ApplicationsTab: React.FC = () => {
   return (
     <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 24px 40px', fontFamily: 'Inter, sans-serif' }}>
       <div style={{ marginBottom: 24 }}>
-        <h2 style={{ fontSize: 22, fontWeight: 800, color: cc.textPrimary, margin: '0 0 6px', letterSpacing: '-0.01em' }}>My Applications</h2>
-        <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}>Track all your job applications in one place</p>
+        <h2 style={{ fontSize: 22, fontWeight: 800, color: cc.textPrimary, margin: '0 0 6px', letterSpacing: '-0.01em' }}>{t('myApplicationsTitle', 'My Applications')}</h2>
+        <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}>{t('myApplicationsDesc', 'Track all your job applications in one place')}</p>
       </div>
 
       {/* Filter Tabs */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
         {[
-          { key: 'all', label: 'All' },
-          { key: 'pending', label: 'Pending' },
-          { key: 'screening', label: 'Screening' },
-          { key: 'interview', label: 'Interview' },
-          { key: 'accepted', label: 'Accepted' },
-          { key: 'rejected', label: 'Rejected' },
+          { key: 'all', label: t('all', 'All') },
+          { key: 'pending', label: t('pending', 'Pending') },
+          { key: 'screening', label: t('screening', 'Screening') },
+          { key: 'interview', label: t('interview', 'Interview') },
+          { key: 'accepted', label: t('accepted', 'Accepted') },
+          { key: 'rejected', label: t('rejected', 'Rejected') },
         ].map(f => (
           <CTAButton key={f.key} variant={filter === f.key ? 'primary' : 'ghost'} onClick={() => setFilter(f.key)}>{f.label}</CTAButton>
         ))}
       </div>
 
       {filteredApps.length === 0 ? (
-        <EmptyState icon={<FileTextOutlined style={{ fontSize: 32 }} />} title="No applications yet" description="Start applying to internships to see your applications here" />
+        <EmptyState icon={<FileTextOutlined style={{ fontSize: 32 }} />} title={t("noApplicationsYet", "No applications yet")} description={t("startApplying", "Start applying to internships to see your applications here")} />
       ) : (
         <>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -168,17 +170,17 @@ export const ApplicationsTab: React.FC = () => {
                         {app.enterpriseName?.charAt(0) || 'E'}
                       </div>
                       <div>
-                        <h4 style={{ fontSize: 14, fontWeight: 600, color: cc.textPrimary, margin: '0 0 4px' }}>{app.jobTitle || 'Internship Position'}</h4>
+                        <h4 style={{ fontSize: 14, fontWeight: 600, color: cc.textPrimary, margin: '0 0 4px' }}>{app.jobTitle || t('internshipPosition', 'Internship Position')}</h4>
                         <p style={{ fontSize: 12, color: cc.textMuted, margin: '0 0 8px' }}>{app.enterpriseName}</p>
                         <SmallBadge label={statusLabel(app.status)} variant={statusVariant(app.status)} />
                       </div>
                     </div>
                     <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                       {app.status === 'PENDING' && (
-                        <CTAButton variant="danger" icon={<CloseCircleOutlined />} onClick={() => handleWithdraw(app.applicationId)}>Withdraw</CTAButton>
+                        <CTAButton variant="danger" icon={<CloseCircleOutlined />} onClick={() => handleWithdraw(app.applicationId)}>{t('withdraw', 'Withdraw')}</CTAButton>
                       )}
                       <CTAButton variant="ghost" icon={expandedApp === app.applicationId ? <UpOutlined /> : <DownOutlined />} onClick={() => setExpandedApp(expandedApp === app.applicationId ? null : app.applicationId)}>
-                        {expandedApp === app.applicationId ? 'Collapse' : 'Expand'}
+                        {expandedApp === app.applicationId ? t('collapse', 'Collapse') : t('expand', 'Expand')}
                       </CTAButton>
                     </div>
                   </div>
@@ -186,22 +188,22 @@ export const ApplicationsTab: React.FC = () => {
                     <div style={{ marginTop: 16, paddingTop: 16, borderTop: `1px solid ${cc.border}` }}>
                       <div style={{ display: 'grid', gap: 12 }}>
                         <div>
-                          <p style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, margin: '0 0 4px' }}>Position</p>
+                          <p style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, margin: '0 0 4px' }}>{t('position', 'Position')}</p>
                           <p style={{ fontSize: 13, color: cc.textPrimary, margin: 0 }}>{app.jobTitle || 'N/A'}</p>
                         </div>
                         <div>
-                          <p style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, margin: '0 0 4px' }}>Enterprise</p>
+                          <p style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, margin: '0 0 4px' }}>{t('enterprise', 'Enterprise')}</p>
                           <p style={{ fontSize: 13, color: cc.textPrimary, margin: 0 }}>{app.enterpriseName || 'N/A'}</p>
                         </div>
                         {app.coverLetter && (
                           <div>
-                            <p style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, margin: '0 0 4px' }}>Cover Letter</p>
+                            <p style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, margin: '0 0 4px' }}>{t('coverLetter', 'Cover Letter')}</p>
                             <p style={{ fontSize: 13, color: cc.textPrimary, margin: 0, whiteSpace: 'pre-wrap' }}>{app.coverLetter}</p>
                           </div>
                         )}
                         {app.appliedAt && (
                           <div>
-                            <p style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, margin: '0 0 4px' }}>Applied At</p>
+                            <p style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, margin: '0 0 4px' }}>{t('appliedAt', 'Applied At')}</p>
                             <p style={{ fontSize: 13, color: cc.textPrimary, margin: 0 }}>{new Date(app.appliedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
                           </div>
                         )}
@@ -219,7 +221,7 @@ export const ApplicationsTab: React.FC = () => {
               total={filteredApps.length}
               onChange={setCurrentPage}
               showSizeChanger={false}
-              showTotal={(total, range) => `${range[0]}-${range[1]} of ${total}`}
+              showTotal={(total, range) => `${range[0]}-${range[1]} ${t('ofTotal', 'of {{total}}', { total })}`}
             />
           </div>
         </>

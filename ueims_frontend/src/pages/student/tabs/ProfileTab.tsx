@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { message, Spin } from 'antd';
 import {
   FileTextOutlined, EyeOutlined,
@@ -89,7 +90,9 @@ interface MyProfile {
 // ── Tab switcher ─────────────────────────────────────────────────────────────
 type ProfileView = 'profile' | 'cv';
 
-const TabSwitcher: React.FC<{ active: ProfileView; onChange: (v: ProfileView) => void }> = ({ active, onChange }) => (
+const TabSwitcher: React.FC<{ active: ProfileView; onChange: (v: ProfileView) => void }> = ({ active, onChange }) => {
+  const { t } = useTranslation(['profile', 'common']);
+  return (
   <div style={{ display: 'inline-flex', background: cc.bgLight, borderRadius: cc.radiusMd, padding: 3, gap: 2 }}>
     {(['profile', 'cv'] as ProfileView[]).map((v) => {
       const isActive = active === v;
@@ -106,23 +109,25 @@ const TabSwitcher: React.FC<{ active: ProfileView; onChange: (v: ProfileView) =>
             transition: 'all 0.2s ease',
           }}
         >
-          {v === 'profile' ? 'Profile Info' : 'My CVs'}
+          {v === 'profile' ? t('profileInfo', 'Profile Info') : t('myCvs', 'My CVs')}
         </button>
       );
     })}
   </div>
-);
+  );
+};
 
 // ── Status pill helper ────────────────────────────────────────────────────────
 const StatusPill: React.FC<{ status?: string }> = ({ status }) => {
+  const { t } = useTranslation(['profile']);
   const statusMap: Record<string, { color: string; bg: string; label: string }> = {
-    OJT: { color: cc.success, bg: cc.successMuted, label: 'On OJT' },
-    ACCEPTED: { color: '#3b82f6', bg: '#dbeafe', label: 'Accepted' },
-    MATCHED: { color: '#a855f7', bg: '#f3e8ff', label: 'Matched' },
-    ELIGIBLE: { color: cc.primary, bg: cc.primaryMuted, label: 'Eligible' },
-    CANCELLED: { color: cc.danger, bg: cc.dangerMuted, label: 'Cancelled' },
+    OJT: { color: cc.success, bg: cc.successMuted, label: t('onOjt', 'On OJT') },
+    ACCEPTED: { color: '#3b82f6', bg: '#dbeafe', label: t('accepted', 'Accepted') },
+    MATCHED: { color: '#a855f7', bg: '#f3e8ff', label: t('matched', 'Matched') },
+    ELIGIBLE: { color: cc.primary, bg: cc.primaryMuted, label: t('eligible', 'Eligible') },
+    CANCELLED: { color: cc.danger, bg: cc.dangerMuted, label: t('cancelled', 'Cancelled') },
   };
-  const s = statusMap[status || ''] || { color: cc.textMuted, bg: cc.bgLight, label: status || 'Unknown' };
+  const s = statusMap[status || ''] || { color: cc.textMuted, bg: cc.bgLight, label: status || t('unknown', 'Unknown') };
   return (
     <SmallPill color={s.color} bg={s.bg}>
       <span style={{ marginRight: 4 }}>&#10003;</span> {s.label}
@@ -131,7 +136,9 @@ const StatusPill: React.FC<{ status?: string }> = ({ status }) => {
 };
 
 // ── Profile Info View ─────────────────────────────────────────────────────────
-const ProfileInfoView: React.FC<{ profile: MyProfile }> = ({ profile }) => (
+const ProfileInfoView: React.FC<{ profile: MyProfile }> = ({ profile }) => {
+  const { t } = useTranslation(['profile']);
+  return (
   <>
     {/* Header */}
     <NeuSurface style={{ padding: 24, marginBottom: 16 }}>
@@ -157,13 +164,13 @@ const ProfileInfoView: React.FC<{ profile: MyProfile }> = ({ profile }) => (
     {(profile?.semesterName || profile?.currentSemester || (profile?.gpa != null)) && (
       <NeuSurface style={{ padding: 24, marginBottom: 16 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-          <h3 style={{ fontSize: 15, fontWeight: 700, color: cc.text, margin: 0 }}>Academic Information</h3>
+          <h3 style={{ fontSize: 15, fontWeight: 700, color: cc.text, margin: 0 }}>{t('academicInfo', 'Academic Information')}</h3>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
           {([
-            ...(profile?.semesterName ? [{ label: 'Semester', value: `${profile.semesterName}${profile.semesterCode ? ` (${profile.semesterCode})` : ''}`, icon: <CalendarOutlined /> }] : []),
-            ...(profile?.currentSemester ? [{ label: 'Current Semester', value: `Semester ${profile.currentSemester}`, icon: <BookOutlined /> }] : []),
-            ...(profile?.gpa != null ? [{ label: 'GPA', value: profile.gpa.toString(), icon: <TrophyOutlined /> }] : []),
+            ...(profile?.semesterName ? [{ label: t('semester', 'Semester'), value: `${profile.semesterName}${profile.semesterCode ? ` (${profile.semesterCode})` : ''}`, icon: <CalendarOutlined /> }] : []),
+            ...(profile?.currentSemester ? [{ label: t('currentSemester', 'Current Semester'), value: `Semester ${profile.currentSemester}`, icon: <BookOutlined /> }] : []),
+            ...(profile?.gpa != null ? [{ label: t('gpa', 'GPA'), value: profile.gpa.toString(), icon: <TrophyOutlined /> }] : []),
           ] as { label: string; value: string; icon: React.ReactNode }[]).map((item, i) => (
             <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
               <div style={{ width: 40, height: 40, borderRadius: cc.radiusMd, background: cc.primaryMuted, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.primary, flexShrink: 0 }}>
@@ -182,15 +189,15 @@ const ProfileInfoView: React.FC<{ profile: MyProfile }> = ({ profile }) => (
     {/* School Information (read-only) */}
     <NeuSurface style={{ padding: 24, marginBottom: 16 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-        <h3 style={{ fontSize: 15, fontWeight: 700, color: cc.text, margin: 0 }}>School Information</h3>
-        <span style={{ fontSize: 11, color: cc.textMuted }}>Managed by administrator</span>
+        <h3 style={{ fontSize: 15, fontWeight: 700, color: cc.text, margin: 0 }}>{t('schoolInfo', 'School Information')}</h3>
+        <span style={{ fontSize: 11, color: cc.textMuted }}>{t('managedByAdmin', 'Managed by administrator')}</span>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
         {([
-          { label: 'Student ID (MSSV)', value: profile?.studentCode || 'N/A', icon: <IdcardOutlined /> },
-          { label: 'Email', value: profile?.email || 'N/A', icon: <MailOutlined /> },
-          { label: 'Major / Department', value: profile?.major || 'N/A', icon: <BookOutlined /> },
-          { label: 'Full Name', value: profile?.fullName || 'N/A', icon: <UserOutlined /> },
+          { label: t('studentId', 'Student ID (MSSV)'), value: profile?.studentCode || 'N/A', icon: <IdcardOutlined /> },
+          { label: t('email', 'Email'), value: profile?.email || 'N/A', icon: <MailOutlined /> },
+          { label: t('major', 'Major / Department'), value: profile?.major || 'N/A', icon: <BookOutlined /> },
+          { label: t('fullName', 'Full Name'), value: profile?.fullName || 'N/A', icon: <UserOutlined /> },
         ] as { label: string; value: string; icon: React.ReactNode }[]).map((item, i) => (
           <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
             <div style={{ width: 40, height: 40, borderRadius: cc.radiusMd, background: cc.primaryMuted, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.primary, flexShrink: 0 }}>
@@ -209,7 +216,7 @@ const ProfileInfoView: React.FC<{ profile: MyProfile }> = ({ profile }) => (
     {profile?.skills && (
       <NeuSurface style={{ padding: 24 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-          <h3 style={{ fontSize: 15, fontWeight: 700, color: cc.text, margin: 0 }}>Skills</h3>
+          <h3 style={{ fontSize: 15, fontWeight: 700, color: cc.text, margin: 0 }}>{t('skills', 'Skills')}</h3>
         </div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
           {profile.skills.split(',').map((skill: string, i: number) => (
@@ -221,10 +228,12 @@ const ProfileInfoView: React.FC<{ profile: MyProfile }> = ({ profile }) => (
       </NeuSurface>
     )}
   </>
-);
+  );
+};
 
 // ── CV View ───────────────────────────────────────────────────────────────────
 const CvView: React.FC<{ cvUrl?: string; cvFileName?: string; onRefresh: () => void }> = ({ cvUrl, cvFileName, onRefresh }) => {
+  const { t } = useTranslation(['profile']);
   const [uploading, setUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [cvFile, setCvFile] = useState<File | null>(null);
@@ -288,8 +297,8 @@ const CvView: React.FC<{ cvUrl?: string; cvFileName?: string; onRefresh: () => v
             <FileTextOutlined style={{ fontSize: 20 }} />
           </div>
           <div>
-            <h3 style={{ fontSize: 15, fontWeight: 600, color: cc.text, margin: 0 }}>My CVs</h3>
-            <p style={{ fontSize: 12, color: cc.textMuted, margin: '2px 0 0' }}>PDF format only, max 5MB</p>
+            <h3 style={{ fontSize: 15, fontWeight: 600, color: cc.text, margin: 0 }}>{t('myCvs', 'My CVs')}</h3>
+            <p style={{ fontSize: 12, color: cc.textMuted, margin: '2px 0 0' }}>{t('onlyPdf', 'PDF format only, max 5MB')}</p>
           </div>
         </div>
         <div
@@ -319,8 +328,8 @@ const CvView: React.FC<{ cvUrl?: string; cvFileName?: string; onRefresh: () => v
               <line x1="9" y1="15" x2="15" y2="15"/>
             </svg>
           </div>
-          <p style={{ fontSize: 15, fontWeight: 700, color: cc.text, margin: '0 0 4px' }}>Drop your CV here</p>
-          <p style={{ fontSize: 12, color: cc.textMuted, margin: 0 }}>or click to browse &mdash; PDF only, max 5MB</p>
+          <p style={{ fontSize: 15, fontWeight: 700, color: cc.text, margin: '0 0 4px' }}>{t('dropCvHere', 'Drop your CV here')}</p>
+          <p style={{ fontSize: 12, color: cc.textMuted, margin: 0 }}>{t('clickToBrowse', 'or click to browse — PDF only, max 5MB')}</p>
         </div>
       </NeuSurface>
     );
@@ -334,12 +343,12 @@ const CvView: React.FC<{ cvUrl?: string; cvFileName?: string; onRefresh: () => v
             <FileTextOutlined style={{ fontSize: 20 }} />
           </div>
           <div>
-            <h3 style={{ fontSize: 15, fontWeight: 600, color: cc.text, margin: 0 }}>My CVs</h3>
-            <p style={{ fontSize: 12, color: cc.textMuted, margin: '2px 0 0' }}>Only one CV is allowed &mdash; uploading a new file replaces the current one</p>
+            <h3 style={{ fontSize: 15, fontWeight: 600, color: cc.text, margin: 0 }}>{t('myCvs', 'My CVs')}</h3>
+            <p style={{ fontSize: 12, color: cc.textMuted, margin: '2px 0 0' }}>{t('onlyOneCv', 'Only one CV is allowed — uploading a new file replaces the current one')}</p>
           </div>
         </div>
         {!showUpload && (
-          <CTAButton variant="primary" size="sm" icon={<PlusOutlined />} onClick={() => setShowUpload(true)}>Upload</CTAButton>
+          <CTAButton variant="primary" size="sm" icon={<PlusOutlined />} onClick={() => setShowUpload(true)}>{t('upload', 'Upload')}</CTAButton>
         )}
       </div>
 
@@ -351,11 +360,11 @@ const CvView: React.FC<{ cvUrl?: string; cvFileName?: string; onRefresh: () => v
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <p style={{ fontSize: 14, fontWeight: 700, color: cc.text, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{displayName}</p>
-            <p style={{ fontSize: 12, color: cc.textMuted, margin: '3px 0 0' }}>Uploaded CV</p>
+            <p style={{ fontSize: 12, color: cc.textMuted, margin: '3px 0 0' }}>{t('uploadedCv', 'Uploaded CV')}</p>
           </div>
           <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-            <CTAButton variant="ghost" size="sm" icon={<EyeOutlined />} onClick={() => window.open(resolveFileUrl(cvUrl), '_blank')}>View</CTAButton>
-            <CTAButton variant="danger" size="sm" icon={<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>} onClick={handleDelete} loading={uploading}>Delete</CTAButton>
+            <CTAButton variant="ghost" size="sm" icon={<EyeOutlined />} onClick={() => window.open(resolveFileUrl(cvUrl), '_blank')}>{t('view', 'View')}</CTAButton>
+            <CTAButton variant="danger" size="sm" icon={<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>} onClick={handleDelete} loading={uploading}>{t('delete', 'Delete')}</CTAButton>
           </div>
         </div>
       )}
@@ -364,7 +373,7 @@ const CvView: React.FC<{ cvUrl?: string; cvFileName?: string; onRefresh: () => v
       {showUpload && (
         <div style={{ background: cc.bgLight, border: `1px solid ${cc.border}`, borderRadius: cc.radiusLg, padding: 24 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-            <h4 style={{ fontSize: 14, fontWeight: 700, color: cc.text, margin: 0 }}>Upload New CV</h4>
+            <h4 style={{ fontSize: 14, fontWeight: 700, color: cc.text, margin: 0 }}>{t('uploadNewCv', 'Upload New CV')}</h4>
             <button onClick={() => { setShowUpload(false); setCvFile(null); }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 18, color: cc.textMuted, padding: 0 }}>&#x2715;</button>
           </div>
 
@@ -405,15 +414,15 @@ const CvView: React.FC<{ cvUrl?: string; cvFileName?: string; onRefresh: () => v
           </div>
 
           <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-            <CTAButton variant="ghost" onClick={() => { setShowUpload(false); setCvFile(null); }}>Cancel</CTAButton>
-            <CTAButton variant="primary" icon={<UploadOutlined />} onClick={handleUpload} loading={uploading} disabled={!cvFile}>Upload</CTAButton>
+            <CTAButton variant="ghost" onClick={() => { setShowUpload(false); setCvFile(null); }}>{t('cancel', 'Cancel')}</CTAButton>
+            <CTAButton variant="primary" icon={<UploadOutlined />} onClick={handleUpload} loading={uploading} disabled={!cvFile}>{t('upload', 'Upload')}</CTAButton>
           </div>
         </div>
       )}
 
       {cvUrl && !showUpload && (
         <p style={{ fontSize: 11, color: cc.textMuted, marginTop: 12, textAlign: 'center' }}>
-          To replace your CV, click the <strong>Upload</strong> button above.
+          To replace your CV, click the <strong>{t('upload', 'Upload')}</strong> button above.
         </p>
       )}
     </NeuSurface>
@@ -422,6 +431,7 @@ const CvView: React.FC<{ cvUrl?: string; cvFileName?: string; onRefresh: () => v
 
 // ── Main ProfileTab ───────────────────────────────────────────────────────────
 export const ProfileTab: React.FC = () => {
+  const { t } = useTranslation(['profile', 'common']);
   const [profile, setProfile] = useState<MyProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeView, setActiveView] = useState<ProfileView>('profile');

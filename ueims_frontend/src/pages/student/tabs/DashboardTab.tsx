@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import {
   ArrowRight,
   Upload,
-  SendHorizontal,
   FileText,
   Calendar,
   CheckCircle2,
@@ -246,247 +246,260 @@ const StatChip: React.FC<{ icon: React.ReactNode; label: string; value: number |
 // ============================================================
 // SECTION: SEMESTER CONTEXT BAR
 // ============================================================
-const SemesterContextBar: React.FC<{ stats: StudentDashboardStats }> = ({ stats }) => (
-  <div style={{
-    maxWidth: 1200,
-    margin: '0 auto',
-    padding: '0 24px',
-    marginBottom: 24,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  }}>
-    <motion.div
-      initial={{ opacity: 0, x: -12 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
-      style={{ display: 'flex', alignItems: 'center', gap: 10 }}
-    >
-      <span style={{ fontSize: 13, fontWeight: 600, color: cc.brand, letterSpacing: '0.04em' }}>
-        {stats.semesterName?.toUpperCase() || 'SEMESTER'}
-      </span>
-      <span style={{ color: cc.border, fontSize: 13 }}>·</span>
-      <span style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 4,
-        fontSize: 12,
-        fontWeight: 600,
-        color: cc.success,
-        backgroundColor: hexToRgba(cc.success, 0.06),
-        border: `1px solid ${hexToRgba(cc.success, 0.25)}`,
-        padding: '2px 8px',
-        borderRadius: cc.radiusFull,
-      }}>
-        <StatusDot color={cc.success} />
-        ACTIVE
-      </span>
-      <span style={{ color: cc.border, fontSize: 13 }}>·</span>
-      <span style={{ fontSize: 12, color: cc.textSecondary }}>
-        {stats.daysRemaining} days remaining
-      </span>
-    </motion.div>
+const SemesterContextBar: React.FC<{ stats: StudentDashboardStats }> = ({ stats }) => {
+  const { t } = useTranslation(['studentDashboard']);
+  return (
+    <div style={{
+      maxWidth: 1200,
+      margin: '0 auto',
+      padding: '0 24px',
+      marginBottom: 24,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    }}>
+      <motion.div
+        initial={{ opacity: 0, x: -12 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
+        style={{ display: 'flex', alignItems: 'center', gap: 10 }}
+      >
+        <span style={{ fontSize: 13, fontWeight: 600, color: cc.brand, letterSpacing: '0.04em' }}>
+          {stats.semesterName?.toUpperCase() || 'SEMESTER'}
+        </span>
+        <span style={{ color: cc.border, fontSize: 13 }}>·</span>
+        <span style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 4,
+          fontSize: 12,
+          fontWeight: 600,
+          color: cc.success,
+          backgroundColor: hexToRgba(cc.success, 0.06),
+          border: `1px solid ${hexToRgba(cc.success, 0.25)}`,
+          padding: '2px 8px',
+          borderRadius: cc.radiusFull,
+        }}>
+          <StatusDot color={cc.success} />
+          {t('active', 'ACTIVE')}
+        </span>
+        <span style={{ color: cc.border, fontSize: 13 }}>·</span>
+        <span style={{ fontSize: 12, color: cc.textSecondary }}>
+          {t('daysRemaining', '{{count}} days remaining', { count: stats.daysRemaining })}
+        </span>
+      </motion.div>
 
-    <motion.div
-      initial={{ opacity: 0, x: 12 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.4, delay: 0.1, ease: [0.32, 0.72, 0, 1] }}
-      style={{ display: 'flex', alignItems: 'center', gap: 10 }}
-    >
-      <span style={{ fontSize: 11, color: cc.textMuted }}>Status</span>
-      <span style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 4,
-        padding: '3px 10px',
-        borderRadius: cc.radiusFull,
-        backgroundColor: hexToRgba(cc.brand, 0.06),
-        border: `1px solid ${hexToRgba(cc.brand, 0.25)}`,
-        color: cc.brand,
-        fontSize: 11,
-        fontWeight: 600,
-      }}>
-        <StatusDot color={cc.brand} />
-        OJT IN PROGRESS
-      </span>
-    </motion.div>
-  </div>
-);
+      <motion.div
+        initial={{ opacity: 0, x: 12 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.4, delay: 0.1, ease: [0.32, 0.72, 0, 1] }}
+        style={{ display: 'flex', alignItems: 'center', gap: 10 }}
+      >
+        <span style={{ fontSize: 11, color: cc.textMuted }}>{t('statusLabel', 'Status')}</span>
+        <span style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 4,
+          padding: '3px 10px',
+          borderRadius: cc.radiusFull,
+          backgroundColor: hexToRgba(cc.brand, 0.06),
+          border: `1px solid ${hexToRgba(cc.brand, 0.25)}`,
+          color: cc.brand,
+          fontSize: 11,
+          fontWeight: 600,
+        }}>
+          <StatusDot color={cc.brand} />
+          {t('ojtInProgress', 'OJT IN PROGRESS')}
+        </span>
+      </motion.div>
+    </div>
+  );
+};
 
 // ============================================================
 // SECTION: KPI URGENCY CARDS
 // ============================================================
-const UrgencyCardsRow: React.FC<{ stats: StudentDashboardStats; onNavigate: (route: string) => void }> = ({ stats, onNavigate }) => (
-  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16, marginBottom: 16, alignItems: 'stretch' }}>
-    {/* Applications Card */}
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0, ease: [0.32, 0.72, 0, 1] }}
-    >
-      <CardWrapper hoverable style={{ padding: 20, flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ width: 36, height: 36, borderRadius: cc.radiusMd, background: cc.infoMuted, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.info }}>
-              <Briefcase size={18} />
+const UrgencyCardsRow: React.FC<{ stats: StudentDashboardStats; onNavigate: (route: string) => void }> = ({ stats, onNavigate }) => {
+  const { t } = useTranslation(['studentDashboard']);
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16, marginBottom: 16, alignItems: 'stretch' }}>
+      {/* Applications Card */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0, ease: [0.32, 0.72, 0, 1] }}
+      >
+        <CardWrapper hoverable style={{ padding: 20, flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ width: 36, height: 36, borderRadius: cc.radiusMd, background: cc.infoMuted, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.info }}>
+                <Briefcase size={18} />
+              </div>
+              <Label>{t('applications', 'Applications')}</Label>
             </div>
-            <Label>Applications</Label>
           </div>
-        </div>
-        <div style={{ marginBottom: 16 }}>
-          <div style={{ fontSize: 40, fontWeight: 700, color: cc.textPrimary, lineHeight: 1, letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums' }}>
-            {stats.applications}
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ fontSize: 40, fontWeight: 700, color: cc.textPrimary, lineHeight: 1, letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums' }}>
+              {stats.applications}
+            </div>
+            <TrendBadge direction="neutral" value={t('jobApplicationsTrend', 'Job applications')} />
           </div>
-          <TrendBadge direction="up" value="Job applications" />
-        </div>
-        <div style={{ height: 1, background: cc.borderSubtle, marginTop: 'auto', marginBottom: 14 }} />
-        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <CTAButton variant="ghost" size="sm" icon={false} onClick={() => onNavigate('jobs')}>Browse Jobs</CTAButton>
-        </div>
-      </CardWrapper>
-    </motion.div>
+          <div style={{ height: 1, background: cc.borderSubtle, marginTop: 'auto', marginBottom: 14 }} />
+          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <CTAButton variant="ghost" size="sm" icon={false} onClick={() => onNavigate('jobs')}>{t('browseJobs', 'Browse Jobs')}</CTAButton>
+          </div>
+        </CardWrapper>
+      </motion.div>
 
-    {/* Interviews Card */}
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 100, ease: [0.32, 0.72, 0, 1] }}
-    >
-      <CardWrapper hoverable style={{ padding: 20, flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ width: 36, height: 36, borderRadius: cc.radiusMd, background: cc.warningMuted, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.warning }}>
-              <Calendar size={18} />
+      {/* Interviews Card */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 100, ease: [0.32, 0.72, 0, 1] }}
+      >
+        <CardWrapper hoverable style={{ padding: 20, flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ width: 36, height: 36, borderRadius: cc.radiusMd, background: cc.warningMuted, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.warning }}>
+                <Calendar size={18} />
+              </div>
+              <Label>{t('interviews', 'Interviews')}</Label>
             </div>
-            <Label>Interviews</Label>
           </div>
-        </div>
-        <div style={{ marginBottom: 16 }}>
-          <div style={{ fontSize: 40, fontWeight: 700, color: cc.textPrimary, lineHeight: 1, letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums' }}>
-            {stats.interviews}
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ fontSize: 40, fontWeight: 700, color: cc.textPrimary, lineHeight: 1, letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums' }}>
+              {stats.interviews}
+            </div>
+            <TrendBadge
+              direction={stats.interviews > 0 ? 'up' : 'neutral'}
+              value={stats.interviews > 0 ? t('scheduledInterviewsTrend', 'Scheduled interviews') : t('noInterviewsTrend', 'No interviews yet')}
+            />
           </div>
-          <TrendBadge direction={stats.interviews > 0 ? 'up' : 'neutral'} value={stats.interviews > 0 ? 'Scheduled interviews' : 'No interviews yet'} />
-        </div>
-        <div style={{ height: 1, background: cc.borderSubtle, marginTop: 'auto', marginBottom: 14 }} />
-        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <CTAButton variant="ghost" size="sm" icon={false} onClick={() => onNavigate('schedule')}>View Schedule</CTAButton>
-        </div>
-      </CardWrapper>
-    </motion.div>
-  </div>
-);
+          <div style={{ height: 1, background: cc.borderSubtle, marginTop: 'auto', marginBottom: 14 }} />
+          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <CTAButton variant="ghost" size="sm" icon={false} onClick={() => onNavigate('schedule')}>{t('viewSchedule', 'View Schedule')}</CTAButton>
+          </div>
+        </CardWrapper>
+      </motion.div>
+    </div>
+  );
+};
 
 // ============================================================
 // SECTION: REPORT STATUS + TRAINING PROGRESS
 // ============================================================
-const ReportPipelineRow: React.FC<{ stats: StudentDashboardStats; onNavigate: (route: string) => void }> = ({ stats, onNavigate }) => (
-  <div style={{ display: 'grid', gridTemplateColumns: '7fr 5fr', gap: 16, marginBottom: 16, alignItems: 'stretch' }}>
-    {/* Weekly Reports Card */}
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.2, ease: [0.32, 0.72, 0, 1] }}
-    >
-      <CardWrapper style={{ padding: 20, flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 32, height: 32, borderRadius: cc.radiusMd, background: `${cc.info}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.info }}>
-              <FileText size={16} />
+const ReportPipelineRow: React.FC<{ stats: StudentDashboardStats; onNavigate: (route: string) => void }> = ({ stats, onNavigate }) => {
+  const { t } = useTranslation(['studentDashboard']);
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: '7fr 5fr', gap: 16, marginBottom: 16, alignItems: 'stretch' }}>
+      {/* Weekly Reports Card */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2, ease: [0.32, 0.72, 0, 1] }}
+      >
+        <CardWrapper style={{ padding: 20, flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{ width: 32, height: 32, borderRadius: cc.radiusMd, background: `${cc.info}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.info }}>
+                <FileText size={16} />
+              </div>
+              <div>
+                <div style={{ fontSize: 15, fontWeight: 600, color: cc.textPrimary }}>{t('weeklyReports', 'Weekly Reports')}</div>
+                <div style={{ fontSize: 12, color: cc.textMuted }}>{stats.semesterName || t('thisSemester', 'This semester')}</div>
+              </div>
+            </div>
+            <span style={{ padding: '2px 8px', borderRadius: cc.radiusFull, backgroundColor: hexToRgba(cc.warning, 0.06), border: `1px solid ${hexToRgba(cc.warning, 0.2)}`, color: cc.warning, fontSize: 10, fontWeight: 600 }}>
+              {t('reportDeadline', 'Deadline: Sun 11:59 PM')}
+            </span>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 16 }}>
+            <StatChip icon={<CheckCircle2 size={16} />} label={t('submitted', 'Submitted')} value={stats.reports} color={cc.success} />
+            <StatChip icon={<Clock size={16} />} label={t('pending', 'Pending')} value={1} color={cc.warning} />
+            <StatChip icon={<AlertTriangle size={16} />} label={t('late', 'Late')} value={0} color={cc.error} />
+            <StatChip icon={<BookOpen size={16} />} label={t('totalWeeks', 'Total Weeks')} value={stats.daysRemaining > 0 ? Math.max(1, 12 - stats.reports) : '-'} color={cc.info} />
+          </div>
+
+          <div style={{ height: 1, background: cc.borderSubtle, marginBottom: 14 }} />
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <TextLink color={cc.brand} onClick={() => onNavigate('reports')}>{t('viewAllReports', 'View all reports')}</TextLink>
+            <CTAButton variant="primary" size="sm" icon={false} onClick={() => onNavigate('reports')}>{t('submitReport', 'Submit Report')}</CTAButton>
+          </div>
+        </CardWrapper>
+      </motion.div>
+
+      {/* Training Progress Card */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.25, ease: [0.32, 0.72, 0, 1] }}
+      >
+        <CardWrapper style={{ padding: 20, flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+            <div style={{ width: 32, height: 32, borderRadius: cc.radiusMd, background: `${cc.brand}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.brand }}>
+              <BookOpen size={16} />
             </div>
             <div>
-              <div style={{ fontSize: 15, fontWeight: 600, color: cc.textPrimary }}>Weekly Reports</div>
-              <div style={{ fontSize: 12, color: cc.textMuted }}>{stats.semesterName || 'This semester'}</div>
+              <div style={{ fontSize: 15, fontWeight: 600, color: cc.textPrimary }}>{t('trainingProgress', 'Training Progress')}</div>
+              <div style={{ fontSize: 12, color: cc.textMuted }}>{stats.semesterName || t('ojtPhase', 'OJT Phase')}</div>
             </div>
           </div>
-          <span style={{ padding: '2px 8px', borderRadius: cc.radiusFull, backgroundColor: hexToRgba(cc.warning, 0.06), border: `1px solid ${hexToRgba(cc.warning, 0.2)}`, color: cc.warning, fontSize: 10, fontWeight: 600 }}>
-            Deadline: Sun 11:59 PM
-          </span>
-        </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 16 }}>
-          <StatChip icon={<CheckCircle2 size={16} />} label="Submitted" value={stats.reports} color={cc.success} />
-          <StatChip icon={<Clock size={16} />} label="Pending" value={1} color={cc.warning} />
-          <StatChip icon={<AlertTriangle size={16} />} label="Late" value={0} color={cc.error} />
-          <StatChip icon={<BookOpen size={16} />} label="Total Weeks" value={stats.daysRemaining > 0 ? Math.max(1, 12 - stats.reports) : '-'} color={cc.info} />
-        </div>
-
-        <div style={{ height: 1, background: cc.borderSubtle, marginBottom: 14 }} />
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <TextLink color={cc.brand} onClick={() => onNavigate('reports')}>View all reports</TextLink>
-          <CTAButton variant="primary" size="sm" icon={false} onClick={() => onNavigate('reports')}>Submit Report</CTAButton>
-        </div>
-      </CardWrapper>
-    </motion.div>
-
-    {/* Training Progress Card */}
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.25, ease: [0.32, 0.72, 0, 1] }}
-    >
-      <CardWrapper style={{ padding: 20, flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-          <div style={{ width: 32, height: 32, borderRadius: cc.radiusMd, background: `${cc.brand}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.brand }}>
-            <BookOpen size={16} />
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'stretch', gap: 0 }}>
+              {[
+                { label: t('week1_4', 'WEEK 1-4'), color: cc.success, flex: 4 },
+                { label: t('week5_8', 'WEEK 5-8'), color: cc.info, flex: 4 },
+                { label: t('week9_12', 'WEEK 9-12'), color: cc.warning, flex: stats.daysRemaining > 0 ? 4 : 0 },
+              ].map((stage, i) => (
+                <div key={stage.label} style={{
+                  flex: stage.flex,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  padding: '10px 4px',
+                  borderRadius: cc.radiusMd,
+                  background: stage.flex > 0 ? `${stage.color}10` : 'transparent',
+                  border: `1px solid ${stage.flex > 0 ? `${stage.color}25` : 'transparent'}`,
+                  gap: 4,
+                }}>
+                  <span style={{ fontSize: 9, fontWeight: 600, color: stage.color, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{stage.label}</span>
+                </div>
+              ))}
+            </div>
           </div>
-          <div>
-            <div style={{ fontSize: 15, fontWeight: 600, color: cc.textPrimary }}>Training Progress</div>
-            <div style={{ fontSize: 12, color: cc.textMuted }}>{stats.semesterName || 'OJT Phase'}</div>
+
+          <div style={{ height: 6, borderRadius: cc.radiusFull, background: cc.borderSubtle, overflow: 'hidden', marginBottom: 14 }}>
+            <div style={{
+              height: '100%',
+              width: `${Math.min(100, Math.max(5, (stats.reports / 12) * 100))}%`,
+              background: cc.brand,
+              borderRadius: cc.radiusFull,
+              transition: 'width 0.6s ease',
+            }} />
           </div>
-        </div>
 
-        <div style={{ marginBottom: 16 }}>
-          <div style={{ display: 'flex', alignItems: 'stretch', gap: 0 }}>
-            {[
-              { label: 'WEEK 1-4', color: cc.success, flex: 4 },
-              { label: 'WEEK 5-8', color: cc.info, flex: 4 },
-              { label: 'WEEK 9-12', color: cc.warning, flex: stats.daysRemaining > 0 ? 4 : 0 },
-            ].map((stage, i) => (
-              <div key={stage.label} style={{
-                flex: stage.flex,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                padding: '10px 4px',
-                borderRadius: cc.radiusMd,
-                background: stage.flex > 0 ? `${stage.color}10` : 'transparent',
-                border: `1px solid ${stage.flex > 0 ? `${stage.color}25` : 'transparent'}`,
-                gap: 4,
-              }}>
-                <span style={{ fontSize: 9, fontWeight: 600, color: stage.color, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{stage.label}</span>
-              </div>
-            ))}
+          <div style={{ height: 1, background: cc.borderSubtle, marginBottom: 14 }} />
+          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <TextLink color={cc.brand} onClick={() => onNavigate('training-plan')}>{t('viewTrainingPlan', 'View Training Plan')}</TextLink>
           </div>
-        </div>
-
-        <div style={{ height: 6, borderRadius: cc.radiusFull, background: cc.borderSubtle, overflow: 'hidden', marginBottom: 14 }}>
-          <div style={{
-            height: '100%',
-            width: `${Math.min(100, Math.max(5, (stats.reports / 12) * 100))}%`,
-            background: cc.brand,
-            borderRadius: cc.radiusFull,
-            transition: 'width 0.6s ease',
-          }} />
-        </div>
-
-        <div style={{ height: 1, background: cc.borderSubtle, marginBottom: 14 }} />
-        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <TextLink color={cc.brand} onClick={() => onNavigate('training-plan')}>View Training Plan</TextLink>
-        </div>
-      </CardWrapper>
-    </motion.div>
-  </div>
-);
+        </CardWrapper>
+      </motion.div>
+    </div>
+  );
+};
 
 // ============================================================
 // SECTION: QUICK ACTIONS
 // ============================================================
 const QuickActionsRow: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => {
+  const { t } = useTranslation(['studentDashboard']);
   const actions = [
-    { label: 'Browse Jobs', description: 'Find and apply for internships', icon: <Briefcase size={24} />, route: 'jobs' },
-    { label: 'Submit Report', description: 'Submit your weekly progress report', icon: <Upload size={24} />, route: 'reports' },
-    { label: 'Send Feedback', description: 'Rate your enterprise experience', icon: <Star size={24} />, route: 'feedback' },
-    { label: 'My Schedule', description: 'View upcoming interviews', icon: <Calendar size={24} />, route: 'schedule' },
+    { label: t('browseJobs', 'Browse Jobs'), description: t('browseJobsDesc', 'Find and apply for internships'), icon: <Briefcase size={24} />, route: 'jobs' },
+    { label: t('submitReport', 'Submit Report'), description: t('submitReportDesc', 'Submit your weekly progress report'), icon: <Upload size={24} />, route: 'reports' },
+    { label: t('sendFeedback', 'Send Feedback'), description: t('sendFeedbackDesc', 'Rate your enterprise experience'), icon: <Star size={24} />, route: 'feedback' },
+    { label: t('mySchedule', 'My Schedule'), description: t('myScheduleDesc', 'View upcoming interviews'), icon: <Calendar size={24} />, route: 'schedule' },
   ];
 
   return (
@@ -497,10 +510,10 @@ const QuickActionsRow: React.FC<{ onNavigate: (route: string) => void }> = ({ on
       style={{ marginBottom: 16 }}
     >
       <div style={{ fontSize: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: cc.textMuted, marginBottom: 10, paddingLeft: 2 }}>
-        Quick Actions
+        {t('quickActions', 'Quick Actions')}
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, alignItems: 'stretch' }}>
-        {actions.map((action, i) => (
+        {actions.map((action) => (
           <div key={action.label} style={{ display: 'flex', flexDirection: 'column' }}>
             <motion.div
               onClick={() => action.route && onNavigate(action.route)}
@@ -543,154 +556,164 @@ const QuickActionsRow: React.FC<{ onNavigate: (route: string) => void }> = ({ on
 // ============================================================
 // SECTION: RIGHT COLUMN — UPCOMING & ACTIVITY
 // ============================================================
-const UpcomingCard: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 16 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.5, delay: 0.35, ease: [0.32, 0.72, 0, 1] }}
-    style={{ display: 'flex', flexDirection: 'column', marginBottom: 16 }}
-  >
-    <CardWrapper style={{ padding: 20, flex: 1, display: 'flex', flexDirection: 'column' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-        <div style={{ width: 32, height: 32, borderRadius: cc.radiusMd, background: `${cc.info}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.info }}>
-          <Calendar size={16} />
-        </div>
-        <div>
-          <div style={{ fontSize: 15, fontWeight: 600, color: cc.textPrimary }}>Upcoming Events</div>
-          <div style={{ fontSize: 12, color: cc.textMuted }}>Your schedule</div>
-        </div>
-      </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, flex: 1 }}>
-        {[
-          { title: 'Weekly Report Deadline', meta: 'Sunday, 11:59 PM', tone: cc.warning, icon: <Clock size={14} /> },
-          { title: 'Mid-Review Meeting', meta: 'Next Week', tone: cc.info, icon: <Calendar size={14} /> },
-        ].map((item, i) => (
-          <div key={i} style={{
-            display: 'flex', alignItems: 'flex-start', gap: 10,
-            padding: '12px 14px', borderRadius: cc.radiusMd,
-            background: hexToRgba(item.tone, 0.06),
-            border: `1px solid ${hexToRgba(item.tone, 0.2)}`,
-          }}>
-            <div style={{ width: 10, height: 10, borderRadius: '50%', background: item.tone, boxShadow: `0 0 0 4px ${item.tone}20`, marginTop: 4, flexShrink: 0 }} />
-            <div style={{ minWidth: 0, flex: 1 }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: cc.textPrimary }}>{item.title}</div>
-              <div style={{ fontSize: 11, color: cc.textMuted, marginTop: 2, display: 'flex', alignItems: 'center', gap: 4 }}>{item.icon} {item.meta}</div>
-            </div>
+const UpcomingCard: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => {
+  const { t } = useTranslation(['studentDashboard']);
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.35, ease: [0.32, 0.72, 0, 1] }}
+      style={{ display: 'flex', flexDirection: 'column', marginBottom: 16 }}
+    >
+      <CardWrapper style={{ padding: 20, flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+          <div style={{ width: 32, height: 32, borderRadius: cc.radiusMd, background: `${cc.info}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.info }}>
+            <Calendar size={16} />
           </div>
-        ))}
-      </div>
-
-      <div style={{ height: 1, background: cc.borderSubtle, marginTop: 'auto', marginBottom: 14 }} />
-      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <CTAButton variant="ghost" size="sm" icon={false} onClick={() => onNavigate('schedule')}>View Calendar</CTAButton>
-      </div>
-    </CardWrapper>
-  </motion.div>
-);
-
-const RecentActivityCard: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 16 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.5, delay: 0.4, ease: [0.32, 0.72, 0, 1] }}
-    style={{ display: 'flex', flexDirection: 'column' }}
-  >
-    <CardWrapper style={{ padding: 20, flex: 1, display: 'flex', flexDirection: 'column' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-        <div style={{ width: 32, height: 32, borderRadius: cc.radiusMd, background: `${cc.success}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.success }}>
-          <CheckCircle2 size={16} />
+          <div>
+            <div style={{ fontSize: 15, fontWeight: 600, color: cc.textPrimary }}>{t('upcomingEvents', 'Upcoming Events')}</div>
+            <div style={{ fontSize: 12, color: cc.textMuted }}>{t('yourSchedule', 'Your schedule')}</div>
+          </div>
         </div>
-        <div>
-          <div style={{ fontSize: 15, fontWeight: 600, color: cc.textPrimary }}>Recent Activity</div>
-          <div style={{ fontSize: 12, color: cc.textMuted }}>Latest updates</div>
-        </div>
-      </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, flex: 1 }}>
-        {[
-          { title: 'Application submitted to TechCorp', meta: '2 hours ago', tone: cc.info },
-          { title: 'Weekly report W22 approved', meta: 'Yesterday', tone: cc.success },
-          { title: 'Interview scheduled for Jul 15', meta: '3 days ago', tone: cc.warning },
-        ].map((item, i) => (
-          <motion.div
-            key={i}
-            whileHover={{ x: 2 }}
-            transition={{ duration: 0.15 }}
-            style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '12px 14px', borderRadius: cc.radiusMd, background: cc.borderSubtle }}
-          >
-            <div style={{ width: 10, height: 10, borderRadius: '50%', background: item.tone, boxShadow: `0 0 0 4px ${item.tone}20`, marginTop: 4, flexShrink: 0 }} />
-            <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: cc.textPrimary }}>{item.title}</div>
-              <div style={{ fontSize: 11, color: cc.textMuted, marginTop: 2 }}>{item.meta}</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, flex: 1 }}>
+          {[
+            { title: t('weeklyReportDeadline', 'Weekly Report Deadline'), meta: t('sundayDeadline', 'Sunday, 11:59 PM'), tone: cc.warning, icon: <Clock size={14} /> },
+            { title: t('midReviewMeeting', 'Mid-Review Meeting'), meta: t('nextWeek', 'Next Week'), tone: cc.info, icon: <Calendar size={14} /> },
+          ].map((item, i) => (
+            <div key={i} style={{
+              display: 'flex', alignItems: 'flex-start', gap: 10,
+              padding: '12px 14px', borderRadius: cc.radiusMd,
+              background: hexToRgba(item.tone, 0.06),
+              border: `1px solid ${hexToRgba(item.tone, 0.2)}`,
+            }}>
+              <div style={{ width: 10, height: 10, borderRadius: '50%', background: item.tone, boxShadow: `0 0 0 4px ${item.tone}20`, marginTop: 4, flexShrink: 0 }} />
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: cc.textPrimary }}>{item.title}</div>
+                <div style={{ fontSize: 11, color: cc.textMuted, marginTop: 2, display: 'flex', alignItems: 'center', gap: 4 }}>{item.icon} {item.meta}</div>
+              </div>
             </div>
-          </motion.div>
-        ))}
-      </div>
+          ))}
+        </div>
 
-      <div style={{ height: 1, background: cc.borderSubtle, marginTop: 'auto', marginBottom: 14 }} />
-      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <TextLink color={cc.brand} onClick={() => onNavigate('dashboard')}>View all activity</TextLink>
-      </div>
-    </CardWrapper>
-  </motion.div>
-);
+        <div style={{ height: 1, background: cc.borderSubtle, marginTop: 'auto', marginBottom: 14 }} />
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <CTAButton variant="ghost" size="sm" icon={false} onClick={() => onNavigate('schedule')}>{t('viewCalendar', 'View Calendar')}</CTAButton>
+        </div>
+      </CardWrapper>
+    </motion.div>
+  );
+};
+
+const RecentActivityCard: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => {
+  const { t } = useTranslation(['studentDashboard']);
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.4, ease: [0.32, 0.72, 0, 1] }}
+      style={{ display: 'flex', flexDirection: 'column' }}
+    >
+      <CardWrapper style={{ padding: 20, flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+          <div style={{ width: 32, height: 32, borderRadius: cc.radiusMd, background: `${cc.success}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.success }}>
+            <CheckCircle2 size={16} />
+          </div>
+          <div>
+            <div style={{ fontSize: 15, fontWeight: 600, color: cc.textPrimary }}>{t('recentActivity', 'Recent Activity')}</div>
+            <div style={{ fontSize: 12, color: cc.textMuted }}>{t('latestUpdates', 'Latest updates')}</div>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, flex: 1 }}>
+          {[
+            { title: t('appSubmitted', 'Application submitted to TechCorp'), meta: '2 hours ago', tone: cc.info },
+            { title: t('reportApproved', 'Weekly report W22 approved'), meta: 'Yesterday', tone: cc.success },
+            { title: t('interviewScheduled', 'Interview scheduled for Jul 15'), meta: '3 days ago', tone: cc.warning },
+          ].map((item, i) => (
+            <motion.div
+              key={i}
+              whileHover={{ x: 2 }}
+              transition={{ duration: 0.15 }}
+              style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '12px 14px', borderRadius: cc.radiusMd, background: cc.borderSubtle }}
+            >
+              <div style={{ width: 10, height: 10, borderRadius: '50%', background: item.tone, boxShadow: `0 0 0 4px ${item.tone}20`, marginTop: 4, flexShrink: 0 }} />
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: cc.textPrimary }}>{item.title}</div>
+                <div style={{ fontSize: 11, color: cc.textMuted, marginTop: 2 }}>{item.meta}</div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        <div style={{ height: 1, background: cc.borderSubtle, marginTop: 'auto', marginBottom: 14 }} />
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <TextLink color={cc.brand} onClick={() => onNavigate('dashboard')}>{t('viewAllHistory', 'View All History')}</TextLink>
+        </div>
+      </CardWrapper>
+    </motion.div>
+  );
+};
 
 // ============================================================
 // SECTION: EVALUATION OVERVIEW
 // ============================================================
-const EvaluationRow: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 16 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.5, delay: 0.45, ease: [0.32, 0.72, 0, 1] }}
-    style={{ marginBottom: 16 }}
-  >
-    <CardWrapper style={{ padding: 20, display: 'flex', flexDirection: 'column' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ width: 32, height: 32, borderRadius: cc.radiusMd, background: `${cc.warning}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.warning }}>
-            <Star size={16} />
+const EvaluationRow: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => {
+  const { t } = useTranslation(['studentDashboard']);
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.45, ease: [0.32, 0.72, 0, 1] }}
+      style={{ marginBottom: 16 }}
+    >
+      <CardWrapper style={{ padding: 20, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ width: 32, height: 32, borderRadius: cc.radiusMd, background: `${cc.warning}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.warning }}>
+              <Star size={16} />
+            </div>
+            <div>
+              <div style={{ fontSize: 15, fontWeight: 600, color: cc.textPrimary }}>{t('myEvaluation', 'My Evaluation')}</div>
+              <div style={{ fontSize: 12, color: cc.textMuted }}>{t('trackGrade', 'Track your internship grade')}</div>
+            </div>
           </div>
-          <div>
-            <div style={{ fontSize: 15, fontWeight: 600, color: cc.textPrimary }}>My Evaluation</div>
-            <div style={{ fontSize: 12, color: cc.textMuted }}>Track your internship grade</div>
-          </div>
+          <CTAButton variant="ghost" size="sm" icon={false} onClick={() => onNavigate('evaluation')}>{t('viewDetails', 'View Details')}</CTAButton>
         </div>
-        <CTAButton variant="ghost" size="sm" icon={false} onClick={() => onNavigate('evaluation')}>View Details</CTAButton>
-      </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
-        {[
-          { label: 'Attitude (20%)', score: '—', color: cc.info },
-          { label: 'Professionalism (40%)', score: '—', color: cc.brand },
-          { label: 'Soft Skills (20%)', score: '—', color: cc.success },
-          { label: 'Progress (20%)', score: '—', color: cc.warning },
-        ].map((item) => (
-          <div key={item.label} style={{
-            padding: '12px 14px', borderRadius: cc.radiusMd,
-            background: hexToRgba(item.color, 0.05),
-            border: `1px solid ${hexToRgba(item.color, 0.15)}`,
-            textAlign: 'center',
-          }}>
-            <div style={{ fontSize: 18, fontWeight: 700, color: item.color, fontVariantNumeric: 'tabular-nums' }}>{item.score}</div>
-            <div style={{ fontSize: 10, color: item.color, opacity: 0.8, marginTop: 4, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{item.label}</div>
-          </div>
-        ))}
-      </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+          {[
+            { label: t('attitude', 'Attitude (20%)'), score: '—', color: cc.info },
+            { label: t('professionalism', 'Professionalism (40%)'), score: '—', color: cc.brand },
+            { label: t('softSkills', 'Soft Skills (20%)'), score: '—', color: cc.success },
+            { label: t('progress', 'Progress (20%)'), score: '—', color: cc.warning },
+          ].map((item) => (
+            <div key={item.label} style={{
+              padding: '12px 14px', borderRadius: cc.radiusMd,
+              background: hexToRgba(item.color, 0.05),
+              border: `1px solid ${hexToRgba(item.color, 0.15)}`,
+              textAlign: 'center',
+            }}>
+              <div style={{ fontSize: 18, fontWeight: 700, color: item.color, fontVariantNumeric: 'tabular-nums' }}>{item.score}</div>
+              <div style={{ fontSize: 10, color: item.color, opacity: 0.8, marginTop: 4, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{item.label}</div>
+            </div>
+          ))}
+        </div>
 
-      <div style={{ marginTop: 12, height: 6, borderRadius: cc.radiusFull, background: cc.borderSubtle, overflow: 'hidden' }}>
-        <div style={{ height: '100%', width: '0%', background: cc.textMuted, borderRadius: cc.radiusFull, transition: 'width 0.6s ease' }} />
-      </div>
-      <div style={{ fontSize: 11, color: cc.textMuted, marginTop: 6, textAlign: 'right' }}>Grade will be available after OJT completion</div>
-    </CardWrapper>
-  </motion.div>
-);
+        <div style={{ marginTop: 12, height: 6, borderRadius: cc.radiusFull, background: cc.borderSubtle, overflow: 'hidden' }}>
+          <div style={{ height: '100%', width: '0%', background: cc.textMuted, borderRadius: cc.radiusFull, transition: 'width 0.6s ease' }} />
+        </div>
+        <div style={{ fontSize: 11, color: cc.textMuted, marginTop: 6, textAlign: 'right' }}>{t('gradeInfo', 'Grade will be available after OJT completion')}</div>
+      </CardWrapper>
+    </motion.div>
+  );
+};
 
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
 export const StudentDashboardTab: React.FC = () => {
+  const { t } = useTranslation(['studentDashboard']);
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<StudentDashboardStats>({
@@ -700,6 +723,11 @@ export const StudentDashboardTab: React.FC = () => {
     daysRemaining: 0,
     semesterName: '—',
     semesterStatus: 'N/A',
+    userProfile: null,
+    loggedHours: 0,
+    applicationStatusRates: [],
+    upNextInterviews: [],
+    recentActivities: [],
   });
   const navigate = useNavigate();
 
@@ -713,8 +741,8 @@ export const StudentDashboardTab: React.FC = () => {
       try {
         const data = await StudentDashboardService.getStats();
         setStats(data);
-      } catch {
-        // fallback: keep zero values
+      } catch (e) {
+        console.error(e);
       } finally {
         setLoading(false);
       }
@@ -723,7 +751,7 @@ export const StudentDashboardTab: React.FC = () => {
   }, []);
 
   const handleNavigate = (route: string) => {
-    navigate(`/student-dashboard/${route}`);
+    navigate(`/student/${route}`);
   };
 
   if (loading) {

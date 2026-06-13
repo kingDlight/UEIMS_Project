@@ -1,0 +1,15 @@
+{
+  "pageTitle": "Kết Quả Đánh Giá Thực Tập",
+  "pageSubtitle": "Xem điểm Rubrics cuối cùng, phản hồi từ doanh nghiệp và điểm học phần chính thức",
+  "noEvaluation": "Chưa có kết quả đánh giá",
+  "noEvaluationDesc": "Kết quả đánh giá cuối cùng sẽ xuất hiện sau khi bạn hoàn thành thực tập",
+  "finalGrade": "Điểm Cuối Kỳ",
+  "totalScore": "Tổng Điểm",
+  "points": "điểm",
+  "rubricBreakdown": "Chi Tiết Rubric",
+  "enterpriseFeedback": "Nhận Xét Từ Doanh Nghiệp",
+  "attitude": "Thái Độ (20%)",
+  "professionalism": "Tính Chuyên Nghiệp (40%)",
+  "softSkills": "Kỹ Năng Mềm (20%)",
+  "progress": "Tiến Độ (20%)"
+}

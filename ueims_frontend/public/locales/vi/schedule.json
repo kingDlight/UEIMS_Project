@@ -1,0 +1,22 @@
+{
+  "pageTitle": "Lịch Phỏng Vấn",
+  "pageSubtitle": "Các cuộc phỏng vấn và lịch hẹn sắp tới",
+  "confirmAttendanceTitle": "Xác Nhận Tham Dự Phỏng Vấn",
+  "confirmAttendanceBody": "Bạn có chắc muốn chấp nhận lịch phỏng vấn này? Doanh nghiệp sẽ được thông báo về cam kết của bạn.",
+  "cannotUndo": "Hành động này không thể hoàn tác.",
+  "cancel": "Hủy",
+  "yesConfirm": "Xác Nhận",
+  "declineTitle": "Từ Chối Lời Mời Phỏng Vấn",
+  "declineWarning": "Bạn có chắc muốn từ chối phỏng vấn này? Hành động này sẽ rút bạn khỏi chu kỳ ứng tuyển.",
+  "reasonLabel": "Lý Do Từ Chối",
+  "declineReasonPlaceholder": "Vui lòng cung cấp lý do từ chối...",
+  "noKeepIt": "Không, Giữ Lại",
+  "confirmDecline": "Xác Nhận Từ Chối",
+  "noInterviews": "Chưa có lịch phỏng vấn",
+  "noInterviewsDesc": "Hiện tại bạn chưa có lời mời phỏng vấn nào.",
+  "joinMeeting": "Tham Gia Cuộc Họp",
+  "confirm": "Xác Nhận",
+  "decline": "Từ Chối",
+  "interview": "Phỏng Vấn",
+  "rangeSummary": "{{start}}-{{end}} trong {{total}}"
+}

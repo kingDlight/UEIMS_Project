@@ -12,6 +12,7 @@ import { AuthService } from '@/services/AuthService';
 import { api } from '@/services/api';
 import './ModernLayout.css';
 import { BackgroundEffects } from '@/pages/home/components/BackgroundEffects';
+import { useTranslation } from 'react-i18next';
 
 export interface NavItem {
   key: string;
@@ -155,6 +156,13 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
   const navigate = useNavigate();
   const { tab } = useParams<{ tab: string }>();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const { t, i18n } = useTranslation();
+
+  const toggleLanguage = () => {
+    const newLang = i18n.language === 'en' ? 'vi' : 'en';
+    i18n.changeLanguage(newLang);
+    localStorage.setItem('i18nextLng', newLang);
+  };
 
   useScrollAnimation();
 
@@ -362,7 +370,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
                     className={`modern-nav-item ${isActive ? 'active' : 'inactive'}`}
                   >
                     <span style={{ fontSize: 16, display: 'flex', alignItems: 'center' }}>{item.icon}</span>
-                    <span>{item.label}</span>
+                    <span>{t(`nav.${item.key}`, item.label)}</span>
                   </button>
                 );
               })}
@@ -374,7 +382,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
                   label: (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <span style={{ fontSize: 15 }}>{item.icon}</span>
-                      <span style={{ fontSize: 13, fontWeight: 600 }}>{item.label}</span>
+                      <span style={{ fontSize: 13, fontWeight: 600 }}>{t(`nav.${item.key}`, item.label)}</span>
                     </div>
                   ),
                   onClick: () => handleNavigate(item.key),
@@ -389,7 +397,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
                       style={{ cursor: 'pointer', userSelect: 'none' }}
                     >
                       <span style={{ fontSize: 16, display: 'flex', alignItems: 'center' }}><DownOutlined /></span>
-                      <span>More</span>
+                      <span>{t('layout.more', 'More')}</span>
                     </div>
                   </Dropdown>
                 );
@@ -402,6 +410,33 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
         <div className="modern-bottom-bar-wrapper">
           <div className="modern-bottom-bar">
             <div className="modern-bottom-bar-bg" />
+            
+            <div style={{ position: 'relative', zIndex: 1, flex: '0 0 auto', display: 'flex', alignItems: 'center', padding: '0 8px' }}>
+              <button
+                type="button"
+                onClick={toggleLanguage}
+                style={{
+                  background: 'rgba(230, 126, 34, 0.1)',
+                  border: '1px solid rgba(230, 126, 34, 0.2)',
+                  borderRadius: 12,
+                  padding: '6px 10px',
+                  color: '#ea580c',
+                  fontWeight: 700,
+                  fontSize: 12,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.2s ease',
+                  width: 44
+                }}
+                className="hover-lift"
+              >
+                {i18n.language === 'vi' ? 'VN' : 'EN'}
+              </button>
+            </div>
+            
+            <div className="modern-bar-divider" />
             
             <div ref={notificationMenuRef} style={{ position: 'relative', zIndex: 1, flex: '0 0 auto' }}>
               <button 
@@ -444,14 +479,14 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
               <div className="modern-floating-menu-arrow" style={{ left: 32 }} />
               <div style={{ padding: '14px 16px', borderBottom: '1px solid rgba(230, 126, 34,.10)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
-                  <div style={{ fontSize: 14, fontWeight: 800, color: '#1e293b' }}>Alerts</div>
-                  <div style={{ fontSize: 11.5, color: '#64748b' }}>Latest reminders and urgent items</div>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: '#1e293b' }}>{t('layout.alerts', 'Alerts')}</div>
+                  <div style={{ fontSize: 11.5, color: '#64748b' }}>{t('layout.alertsDesc', 'Latest reminders and urgent items')}</div>
                 </div>
                 {unreadCount > 0 && <SmallPill color="#E67E22" glow>{unreadCount} new</SmallPill>}
               </div>
               <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 10, maxHeight: 400, overflowY: 'auto' }}>
                 {notifications.length === 0 ? (
-                  <div style={{ padding: 16, textAlign: 'center', color: '#64748b' }}>No notifications yet</div>
+                  <div style={{ padding: 16, textAlign: 'center', color: '#64748b' }}>{t('layout.noNotifications', 'No notifications yet')}</div>
                 ) : (
                   notifications.map((item: any) => (
                     <div 
@@ -491,20 +526,24 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
                 </div>
               </div>
               <div style={{ padding: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {['View Profile', 'Change Password', 'Logout'].map((item) => (
+                {[
+                  { key: 'viewProfile', label: t('layout.viewProfile', 'View Profile') }, 
+                  { key: 'changePassword', label: t('layout.changePassword', 'Change Password') }, 
+                  { key: 'logout', label: t('layout.logout', 'Logout') }
+                ].map((item) => (
                   <button 
-                    key={item} 
+                    key={item.key} 
                     type="button"
                     onClick={() => {
                       setAccountOpen(false);
-                      if (item === 'Logout') handleLogout();
-                      if (item === 'Change Password') setChangePasswordVisible(true);
-                      if (item === 'View Profile') setProfileOpen(true);
+                      if (item.key === 'logout') handleLogout();
+                      if (item.key === 'changePassword') setChangePasswordVisible(true);
+                      if (item.key === 'viewProfile') setProfileOpen(true);
                     }} 
                     className="modern-menu-item"
-                    style={{ width: '100%', textAlign: 'left', background: 'none', border: 'none', color: item === 'Logout' ? '#ef4444' : '#1e293b' }}
+                    style={{ width: '100%', textAlign: 'left', background: 'none', border: 'none', color: item.key === 'logout' ? '#ef4444' : '#1e293b' }}
                   >
-                    {item}
+                    {item.label}
                   </button>
                 ))}
               </div>

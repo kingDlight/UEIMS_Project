@@ -1,0 +1,15 @@
+{
+  "pageTitle": "Enterprise Feedback",
+  "pageSubtitle": "Rate your internship experience",
+  "confidentialNote": "Your feedback is confidential and only visible to the Training Manager",
+  "rateExperienceTitle": "Rate Your Internship Experience",
+  "trainingQuality": "Training Quality",
+  "supervisorSupport": "Supervisor Support",
+  "workEnvironment": "Work Environment",
+  "overallRating": "Overall Rating",
+  "writtenComments": "Written Comments (Optional)",
+  "commentsPlaceholder": "Share your detailed experience...",
+  "clear": "Clear",
+  "submitFeedback": "Submit Feedback",
+  "rangeSummary": "{{start}}-{{end}} of {{total}}"
+}
