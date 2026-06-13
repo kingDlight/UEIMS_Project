@@ -11,6 +11,7 @@ import {
   XCircle,
 } from 'lucide-react';
 import dayjs from 'dayjs';
+import { SystemAnnouncementService } from '@/services/SystemAnnouncementService';
 
 
 // ============================================================
@@ -68,62 +69,6 @@ interface NoticeRecord {
   publishedDate?: string;
   createdDate: string;
 }
-
-// ============================================================
-// MOCK DATA — 5 realistic notices
-// ============================================================
-const MOCK_NOTICES: NoticeRecord[] = [
-  {
-    id: 'n-001',
-    title: 'OJT Registration Deadline Extended',
-    content: 'The OJT registration deadline has been extended to June 20th.',
-    audience: 'Students',
-    audienceLabel: 'Students',
-    status: 'Published',
-    publishedDate: '2026-05-28',
-    createdDate: '2026-05-27',
-  },
-  {
-    id: 'n-002',
-    title: 'Summer 2026 OJT Kickoff Briefing',
-    content: 'All students enrolled in Summer 2026 OJT must attend the kickoff session.',
-    audience: 'Semester',
-    audienceLabel: 'Summer 2026',
-    semesterCode: 'SU26',
-    status: 'Published',
-    publishedDate: '2026-05-20',
-    createdDate: '2026-05-19',
-  },
-  {
-    id: 'n-003',
-    title: 'Enterprise Partnership Program Update',
-    content: 'New enterprises have joined the partnership program for the upcoming semester.',
-    audience: 'Enterprise',
-    audienceLabel: 'Enterprise',
-    status: 'Published',
-    publishedDate: '2026-05-15',
-    createdDate: '2026-05-14',
-  },
-  {
-    id: 'n-004',
-    title: 'OJT Midterm Report Submission Guidelines',
-    content: 'Detailed guidelines for midterm report submissions have been published.',
-    audience: 'Semester',
-    audienceLabel: 'Summer 2026',
-    semesterCode: 'SU26',
-    status: 'Draft',
-    createdDate: '2026-06-01',
-  },
-  {
-    id: 'n-005',
-    title: 'Campus Closure — National Holiday',
-    content: 'All FPT University campuses will be closed on September 2nd for National Day.',
-    audience: 'All',
-    audienceLabel: 'All Users',
-    status: 'Draft',
-    createdDate: '2026-06-03',
-  },
-];
 
 // ============================================================
 // SUB-COMPONENTS
@@ -242,7 +187,7 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
 // MAIN COMPONENT
 // ============================================================
 export const NoticesTab: React.FC = () => {
-  const [notices] = useState<NoticeRecord[]>(MOCK_NOTICES);
+  const [notices, setNotices] = useState<NoticeRecord[]>([]);
   const [audienceFilter, setAudienceFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -251,7 +196,30 @@ export const NoticesTab: React.FC = () => {
   const [form] = Form.useForm();
 
   const [isMobile, setIsMobile] = useState(false);
+  
+  const fetchNotices = useCallback(async () => {
+    try {
+      const data: any[] = await SystemAnnouncementService.getAll();
+      const mapped: NoticeRecord[] = data.map(n => ({
+        id: n.announcementId,
+        title: n.title,
+        content: n.content,
+        audience: 'All', // Simplifying as we only have semesterId or global
+        audienceLabel: n.semester ? n.semester.name : 'All Users',
+        semesterCode: n.semester ? n.semester.semesterCode : undefined,
+        status: n.status === 'PUBLISHED' ? 'Published' : 'Draft',
+        publishedDate: n.publishedAt,
+        createdDate: n.createdAt,
+      }));
+      setNotices(mapped);
+    } catch (err) {
+      console.error(err);
+      message.error('Failed to fetch announcements');
+    }
+  }, []);
+
   useEffect(() => {
+    void fetchNotices();
     const check = () => setIsMobile(window.innerWidth < 768);
     check();
     window.addEventListener('resize', check);
@@ -264,13 +232,25 @@ export const NoticesTab: React.FC = () => {
     return matchAudience && matchStatus;
   });
 
-  const handlePublish = useCallback((record: NoticeRecord) => {
-    message.success({ content: `"${record.title}" published successfully.`, duration: 2.5 });
-  }, []);
+  const handlePublish = useCallback(async (record: NoticeRecord) => {
+    try {
+      await SystemAnnouncementService.publish(record.id);
+      message.success({ content: `"${record.title}" published successfully.`, duration: 2.5 });
+      void fetchNotices();
+    } catch (err) {
+      message.error('Failed to publish announcement');
+    }
+  }, [fetchNotices]);
 
-  const handleUnpublish = useCallback((record: NoticeRecord) => {
-    message.success({ content: `"${record.title}" unpublished.`, duration: 2.5 });
-  }, []);
+  const handleUnpublish = useCallback(async (record: NoticeRecord) => {
+    try {
+      await SystemAnnouncementService.archive(record.id);
+      message.success({ content: `"${record.title}" unpublished.`, duration: 2.5 });
+      void fetchNotices();
+    } catch (err) {
+      message.error('Failed to unpublish announcement');
+    }
+  }, [fetchNotices]);
 
   const handleView = useCallback((record: NoticeRecord) => {
     setSelectedNotice(record);
@@ -280,13 +260,19 @@ export const NoticesTab: React.FC = () => {
   const handleCreate = useCallback(async () => {
     try {
       const values = await form.validateFields();
-      message.success({ content: `Announcement "${values.title}" created as Draft.`, duration: 2.5 });
+      await SystemAnnouncementService.create({
+         title: values.title,
+         content: values.content,
+         semesterId: values.semesterId === 'all' ? undefined : values.semesterId
+      });
+      message.success({ content: `Announcement "${values.title}" created.`, duration: 2.5 });
       setIsModalOpen(false);
       form.resetFields();
-    } catch {
-      // validation failed
+      void fetchNotices();
+    } catch (err) {
+      console.error(err);
     }
-  }, [form]);
+  }, [form, fetchNotices]);
 
   const formatDate = (dateStr?: string) => {
     if (!dateStr) return '—';

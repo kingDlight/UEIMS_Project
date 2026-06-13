@@ -5,7 +5,7 @@ const WeeklyReportPage: React.FC = () => {
     const [data, setData] = useState<any[]>([]);
 
     useEffect(() => {
-        WeeklyReportService.getAll().then(res => setData(res.data)).catch(err => console.error(err));
+        WeeklyReportService.getAllReports().then((res: any) => setData(res.data)).catch((err: any) => console.error(err));
     }, []);
 
     return (

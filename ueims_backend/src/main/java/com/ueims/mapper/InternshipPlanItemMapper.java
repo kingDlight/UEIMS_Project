@@ -3,6 +3,7 @@ package com.ueims.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 
+import com.ueims.dto.request.InternshipPlanItemRequestDTO;
 import com.ueims.dto.response.InternshipPlanItemDTO;
 import com.ueims.model.entity.InternshipPlanItem;
 
@@ -17,5 +18,5 @@ public interface InternshipPlanItemMapper {
 
     @org.mapstruct.Mapping(target = "plan.planId", source = "planId")
     @org.mapstruct.Mapping(target = "orderIndex", source = "orderIndex", defaultValue = "0")
-    InternshipPlanItem toEntity(com.ueims.dto.request.InternshipPlanItemRequestDTO dto);
+    InternshipPlanItem toEntity(InternshipPlanItemRequestDTO dto);
 }

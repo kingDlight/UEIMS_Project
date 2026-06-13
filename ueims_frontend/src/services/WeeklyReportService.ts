@@ -1,11 +1,38 @@
-import axios from 'axios';
-
-const API_URL = 'http://localhost:8080/api/weekly-reports';
+import { api } from './api';
 
 export const WeeklyReportService = {
-    getAll: () => axios.get(API_URL),
-    getById: (id: string) => axios.get(`${API_URL}/${id}`),
-    create: (data: any) => axios.post(API_URL, data),
-    update: (id: string, data: any) => axios.put(`${API_URL}/${id}`, data),
-    delete: (id: string) => axios.delete(`${API_URL}/${id}`)
+  getAllReports: async () => {
+    const response = await api.get('/weekly-reports');
+    return response.data.result;
+  },
+  
+  getMyReports: async () => {
+    const response = await api.get('/weekly-reports/my-reports');
+    return response.data.result;
+  },
+
+  getReportById: async (id: string) => {
+    const response = await api.get(`/weekly-reports/${id}`);
+    return response.data.result;
+  },
+
+  createReport: async (reportData: any) => {
+    const response = await api.post('/weekly-reports', reportData);
+    return response.data.result;
+  },
+
+  updateReport: async (id: string, reportData: any) => {
+    const response = await api.put(`/weekly-reports/${id}`, reportData);
+    return response.data.result;
+  },
+
+  approveReport: async (id: string) => {
+    const response = await api.put(`/weekly-reports/${id}/approve`);
+    return response.data.result;
+  },
+
+  rejectReport: async (id: string, feedback: string) => {
+    const response = await api.put(`/weekly-reports/${id}/reject`, { feedback });
+    return response.data.result;
+  }
 };

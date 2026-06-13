@@ -121,7 +121,7 @@ export const StudentDashboardTab: React.FC = () => {
                   <div style={{ fontSize: 28, fontWeight: 900, color: cc.text, lineHeight: 1.05, fontVariantNumeric: 'tabular-nums' }}>68%</div>
                   <div style={{ fontSize: 12, color: cc.success, fontWeight: 700, marginTop: 4 }}>On track</div>
                 </div>
-                <div style={{ width: 62, height: 62, borderRadius: 18, background: `linear-gradient(135deg, ${cc.primary}26, ${cc.primaryLight}10)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: 62, height: 62, borderRadius: 18, background: `linear-gradient(135deg, ${cc.primary}26, ${cc.primaryMuted})`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <TrophyOutlined style={{ fontSize: 22, color: cc.primary }} />
                 </div>
               </div>
@@ -145,7 +145,7 @@ export const StudentDashboardTab: React.FC = () => {
             </div>
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
               <button onClick={() => navigate('/student-dashboard/reports')} style={{ padding: '11px 16px', borderRadius: 16, border: 'none', background: 'linear-gradient(135deg, #FF662C, #FF824D, #FF9B73)', color: '#fff', fontWeight: 800, boxShadow: '0 12px 28px rgba(233,101,0,.22)', cursor: 'pointer' }}>Submit Report</button>
-              <button onClick={() => navigate('/student-dashboard/jobs')} style={{ padding: '11px 16px', borderRadius: 16, border: 'none', background: '#fff', color: cc.primary, fontWeight: 800, boxShadow: '0 8px 18px rgba(15,23,42,.05)', cursor: 'pointer', border: `1.5px solid ${cc.primary}` }}>Browse Jobs</button>
+              <button onClick={() => navigate('/student-dashboard/jobs')} style={{ padding: '11px 16px', borderRadius: 16, background: '#fff', color: cc.primary, fontWeight: 800, boxShadow: '0 8px 18px rgba(15,23,42,.05)', cursor: 'pointer', border: `1.5px solid ${cc.primary}` }}>Browse Jobs</button>
             </div>
           </div>
         </div>

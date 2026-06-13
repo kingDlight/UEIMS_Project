@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { Table, Modal, Select, Input, Upload, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import type { UploadFile } from 'antd/es/upload';
@@ -138,135 +138,6 @@ function deriveStatus(sem: number): string {
 // Sem 6:   IN_OJT (active internship)
 // Sem 7-9: COMPLETED (finished OJT)
 // ============================================================
-const MOCK_STUDENTS: EligibleStudent[] = [
-  // --- Sem 2: Pre-Registration ---
-  {
-    eligibleId: 'ES-CS-001',
-    studentCode: 'CS240001',
-    fullName: 'Nguyễn Văn An',
-    email: 'an.nv@student.fpt.edu.vn',
-    major: 'Computer Science',
-    gpa: 3.85,
-    currentSemester: 2,
-    status: 'PRE_REGISTRATION',
-    isLocked: false,
-  },
-  // --- Sem 4: Pre-Registration ---
-  {
-    eligibleId: 'ES-SE-002',
-    studentCode: 'SE240003',
-    fullName: 'Trần Thị Bình',
-    email: 'binh.tt@student.fpt.edu.vn',
-    major: 'Software Engineering',
-    gpa: 2.45,
-    currentSemester: 4,
-    status: 'PRE_REGISTRATION',
-    isLocked: false,
-  },
-  {
-    eligibleId: 'ES-IA-003',
-    studentCode: 'IA240005',
-    fullName: 'Lê Văn Cường',
-    email: 'cuong.lv@student.fpt.edu.vn',
-    major: 'Information Assurance',
-    gpa: 3.21,
-    currentSemester: 4,
-    status: 'PRE_REGISTRATION',
-    isLocked: false,
-  },
-  // --- Sem 5: Eligible (only valid Eligible students) ---
-  {
-    eligibleId: 'ES-SE-004',
-    studentCode: 'SE230007',
-    fullName: 'Phạm Thị Dung',
-    email: 'dung.pt@student.fpt.edu.vn',
-    major: 'Software Engineering',
-    gpa: 3.67,
-    currentSemester: 5,
-    status: 'ELIGIBLE',
-    isLocked: false,
-  },
-  {
-    eligibleId: 'ES-AI-005',
-    studentCode: 'AI230009',
-    fullName: 'Hoàng Văn Em',
-    email: 'em.hv@student.fpt.edu.vn',
-    major: 'Artificial Intelligence',
-    gpa: 3.42,
-    currentSemester: 5,
-    status: 'ELIGIBLE',
-    isLocked: false,
-  },
-  {
-    eligibleId: 'ES-CS-006',
-    studentCode: 'CS230011',
-    fullName: 'Vũ Thị Hoa',
-    email: 'hoa.vt@student.fpt.edu.vn',
-    major: 'Computer Science',
-    gpa: 3.12,
-    currentSemester: 5,
-    status: 'ELIGIBLE',
-    isLocked: false,
-  },
-  // --- Sem 6: In OJT ---
-  {
-    eligibleId: 'ES-CS-007',
-    studentCode: 'CS220011',
-    fullName: 'Đỗ Thị Phương',
-    email: 'phuong.dt@student.fpt.edu.vn',
-    major: 'Computer Science',
-    gpa: 3.91,
-    currentSemester: 6,
-    status: 'IN_OJT',
-    isLocked: false,
-  },
-  {
-    eligibleId: 'ES-SE-008',
-    studentCode: 'SE220013',
-    fullName: 'Bùi Văn Giang',
-    email: 'giang.bv@student.fpt.edu.vn',
-    major: 'Software Engineering',
-    gpa: 2.88,
-    currentSemester: 6,
-    status: 'IN_OJT',
-    isLocked: false,
-  },
-  {
-    eligibleId: 'ES-IA-009',
-    studentCode: 'IA220015',
-    fullName: 'Ngô Thị Hương',
-    email: 'huong.nt@student.fpt.edu.vn',
-    major: 'Information Assurance',
-    gpa: 3.15,
-    currentSemester: 6,
-    status: 'IN_OJT',
-    isLocked: false,
-  },
-  // --- Sem 7-8: Completed ---
-  {
-    eligibleId: 'ES-AI-010',
-    studentCode: 'AI210017',
-    fullName: 'Vũ Văn Hùng',
-    email: 'hung.vv@student.fpt.edu.vn',
-    major: 'Artificial Intelligence',
-    gpa: 3.78,
-    currentSemester: 7,
-    status: 'COMPLETED',
-    isLocked: true,
-  },
-  {
-    eligibleId: 'ES-CS-011',
-    studentCode: 'CS210019',
-    fullName: 'Trịnh Thị Lan',
-    email: 'lan.tt2@student.fpt.edu.vn',
-    major: 'Computer Science',
-    gpa: 3.55,
-    currentSemester: 8,
-    status: 'COMPLETED',
-    isLocked: true,
-  },
-];
-
 const MAJORS = [
   'All Majors',
   'Computer Science',
@@ -553,8 +424,25 @@ export const StudentsTab: React.FC = () => {
   const pageSize = 10;
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Use mock data (no API call in demo)
-  const students = MOCK_STUDENTS;
+  // Fetch from real database via API
+  const [students, setStudents] = useState<EligibleStudent[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        setLoading(true);
+        const data = await EligibleStudentService.getAllEligibleStudents();
+        setStudents(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error('Failed to load students', err);
+        setStudents([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    void fetchStudents();
+  }, []);
 
   const eligibleCount = students.filter(
     (s) => deriveStatus(s.currentSemester) === 'ELIGIBLE'
@@ -983,6 +871,7 @@ export const StudentsTab: React.FC = () => {
           rowKey="eligibleId"
           columns={columns}
           dataSource={paginatedStudents}
+          loading={loading}
           scroll={{ x: 800 }}
           pagination={{
             current: page,
@@ -997,7 +886,7 @@ export const StudentsTab: React.FC = () => {
               <div style={{ textAlign: 'center', padding: '48px 24px', color: st.textMuted }}>
                 <Users size={32} style={{ marginBottom: 12, opacity: 0.4 }} />
                 <div style={{ fontSize: 14, fontWeight: 600 }}>No students found</div>
-                <div style={{ fontSize: 13 }}>Adjust your search or filters</div>
+                <div style={{ fontSize: 12, marginTop: 4 }}>Try adjusting your filters</div>
               </div>
             ),
           }}

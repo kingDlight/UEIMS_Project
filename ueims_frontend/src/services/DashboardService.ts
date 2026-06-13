@@ -1,13 +1,21 @@
 import { api } from './api';
 
 export const DashboardService = {
-  getAllStatistics: async () => {
-    const response = await api.get('/dashboard/statistics');
-    return response.data;
+  getCommandCenterSummary: async () => {
+    const response = await api.get('/dashboard/command-center-summary');
+    return response.data.result;
   },
 
-  getStatisticsBySemester: async (semesterId: string) => {
-    const response = await api.get(`/dashboard/statistics/${semesterId}`);
+  getEmploymentRateChart: async (semesterId: string) => {
+    const response = await api.get(`/dashboard/employment-rate/${semesterId}`);
+    return response.data;
+  },
+  getMajorDistributionChart: async (semesterId: string) => {
+    const response = await api.get(`/dashboard/major-distribution/${semesterId}`);
+    return response.data;
+  },
+  getGradeDistributionChart: async (semesterId: string) => {
+    const response = await api.get(`/dashboard/grade-distribution/${semesterId}`);
     return response.data;
   },
 };

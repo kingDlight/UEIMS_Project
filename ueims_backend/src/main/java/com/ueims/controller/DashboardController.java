@@ -9,18 +9,27 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ueims.dto.response.ApiResponse;
 import com.ueims.model.dto.dashboard.ChartDataDTO;
+import com.ueims.model.dto.dashboard.CommandCenterSummaryDTO;
 import com.ueims.service.DashboardService;
 
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/dashboard")
+@RequestMapping("/api/dashboard")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
 public class DashboardController {
 
     private final DashboardService dashboardService;
+
+    @GetMapping("/command-center-summary")
+    public ApiResponse<CommandCenterSummaryDTO> getCommandCenterSummary() {
+        return ApiResponse.<CommandCenterSummaryDTO>builder()
+                .result(dashboardService.getCommandCenterSummary())
+                .build();
+    }
 
     @GetMapping("/employment-rate/{semesterId}")
     public List<ChartDataDTO> getEmploymentRateChart(@PathVariable UUID semesterId) {

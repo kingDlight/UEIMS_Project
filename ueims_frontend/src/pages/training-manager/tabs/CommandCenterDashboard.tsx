@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { DashboardService } from '@/services/DashboardService';
 import {
   AlertTriangle,
   Clock,
@@ -516,12 +517,12 @@ const UrgencyCard: React.FC<{
   </motion.div>
 );
 
-const UrgencyCardsRow: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => (
+const UrgencyCardsRow: React.FC<{ onNavigate: (route: string) => void; incidents: any[]; pendingEnterprises: any[] }> = ({ onNavigate, incidents, pendingEnterprises }) => (
   <div className="cc-grid-2" style={{ marginBottom: 16, alignItems: 'stretch' }}>
     {/* Active Incidents */}
     <UrgencyCard
       title="Active Incidents"
-      value={2}
+      value={incidents.length}
       trend="↑ +1 today"
       trendDirection="up"
       trendColor={cc.error}
@@ -532,7 +533,7 @@ const UrgencyCardsRow: React.FC<{ onNavigate: (route: string) => void }> = ({ on
       delay={0}
       body={
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {mockIncidents.map((inc) => (
+          {incidents.map((inc: any) => (
             <div key={inc.id} className="cc-incident-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <StatusDot color={inc.severity === 'high' ? cc.error : cc.warning} pulse={inc.severity === 'high'} />
@@ -554,7 +555,7 @@ const UrgencyCardsRow: React.FC<{ onNavigate: (route: string) => void }> = ({ on
     {/* Pending Approvals */}
     <UrgencyCard
       title="Pending Approvals"
-      value={4}
+      value={pendingEnterprises.length}
       trend="↑ +2 today"
       trendDirection="up"
       trendColor={cc.warning}
@@ -565,7 +566,7 @@ const UrgencyCardsRow: React.FC<{ onNavigate: (route: string) => void }> = ({ on
       delay={100}
       body={
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          {mockPendingEnterprises.slice(0, 2).map((ent) => (
+          {pendingEnterprises.slice(0, 2).map((ent: any) => (
             <div key={ent.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <StatusDot color={cc.warning} />
@@ -575,7 +576,7 @@ const UrgencyCardsRow: React.FC<{ onNavigate: (route: string) => void }> = ({ on
             </div>
           ))}
           <div style={{ fontSize: 11, color: cc.textMuted, marginTop: 4 }}>
-            +{mockPendingEnterprises.length - 2} more enterprises waiting
+            +{Math.max(0, pendingEnterprises.length - 2)} more enterprises waiting
           </div>
         </div>
       }
@@ -623,8 +624,8 @@ const ReportStatusChip: React.FC<{
   </div>
 );
 
-const WeeklyReportsCard: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => {
-  const { week, submitted, pending, late, notStarted, students } = mockWeeklyReports;
+const WeeklyReportsCard: React.FC<{ onNavigate: (route: string) => void; weeklyReports: any }> = ({ onNavigate, weeklyReports }) => {
+  const { week, submitted, pending, late, notStarted, students } = weeklyReports || mockWeeklyReports;
 
   return (
     <motion.div
@@ -709,7 +710,7 @@ const WeeklyReportsCard: React.FC<{ onNavigate: (route: string) => void }> = ({ 
             <div style={{ fontSize: 11, fontWeight: 600, color: cc.error, marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
               Students needing attention
             </div>
-            {students.map((s, i) => (
+            {students.map((s: any, i: number) => (
               <div key={s.name} style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -742,8 +743,8 @@ const WeeklyReportsCard: React.FC<{ onNavigate: (route: string) => void }> = ({ 
   );
 };
 
-const PlacementPipelineCard: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => {
-  const { eligible, applied, interviewed, placed } = mockPipeline;
+const PlacementPipelineCard: React.FC<{ onNavigate: (route: string) => void; pipeline: any }> = ({ onNavigate, pipeline }) => {
+  const { eligible, applied, interviewed, placed } = pipeline || mockPipeline;
   const total = eligible || 1;
   const stages = [
     { label: 'ELIGIBLE', value: eligible, color: cc.info },
@@ -880,10 +881,10 @@ const PlacementPipelineCard: React.FC<{ onNavigate: (route: string) => void }> =
   );
 };
 
-const CompliancePipelineRow: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => (
+const CompliancePipelineRow: React.FC<{ onNavigate: (route: string) => void; summary: any }> = ({ onNavigate, summary }) => (
   <div className="cc-grid-pipeline" style={{ marginBottom: 16, alignItems: 'stretch' }}>
-    <WeeklyReportsCard onNavigate={onNavigate} />
-    <PlacementPipelineCard onNavigate={onNavigate} />
+    <WeeklyReportsCard onNavigate={onNavigate} weeklyReports={summary?.weeklyReports} />
+    <PlacementPipelineCard onNavigate={onNavigate} pipeline={summary?.pipeline} />
   </div>
 );
 
@@ -1291,10 +1292,20 @@ const RecentAlertsCard: React.FC<{ onNavigate: (route: string) => void }> = ({ o
 // ============================================================
 export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => void }> = ({ onNavigate }) => {
   const [mounted, setMounted] = useState(false);
+  const [summary, setSummary] = useState<any>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     setMounted(true);
+    const fetchSummary = async () => {
+      try {
+        const data = await DashboardService.getCommandCenterSummary();
+        setSummary(data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchSummary();
   }, []);
 
   const handleNavigate = (route: string) => {
@@ -1304,6 +1315,10 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
       navigate(`/tm-dashboard/${route}`);
     }
   };
+
+  if (!summary) {
+    return <div style={{ padding: 40, textAlign: 'center', color: cc.textMuted }}>Loading Dashboard...</div>;
+  }
 
   return (
     <div style={{
@@ -1326,10 +1341,10 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
               <SemesterContextBar />
 
               {/* ROW 1: Urgency Cards */}
-              <UrgencyCardsRow onNavigate={handleNavigate} />
+              <UrgencyCardsRow onNavigate={handleNavigate} incidents={summary.activeIncidents} pendingEnterprises={summary.pendingEnterprises} />
 
               {/* ROW 2: Weekly Reports + Pipeline */}
-              <CompliancePipelineRow onNavigate={handleNavigate} />
+              <CompliancePipelineRow onNavigate={handleNavigate} summary={summary} />
 
               {/* ROW 3: Quick Actions */}
               <QuickActionsRow onNavigate={handleNavigate} />
