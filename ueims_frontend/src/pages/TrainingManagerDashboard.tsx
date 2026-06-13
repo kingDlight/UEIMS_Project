@@ -29,6 +29,11 @@ export const TrainingManagerDashboard: React.FC = () => {
   }
 
   const payload = extractUserFromToken(token);
+  
+  if (payload?.mustChangePassword) {
+    return <Navigate to="/change-password" replace />;
+  }
+
   const roles = payload?.roles || [];
 
   // Redirect if no role

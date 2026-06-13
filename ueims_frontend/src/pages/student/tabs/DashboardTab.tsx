@@ -33,6 +33,7 @@ export const StudentDashboardTab: React.FC<{ animationDelay?: number }> = ({ ani
   const navigate = useNavigate();
   const [isLoaded, setIsLoaded] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [stats, setStats] = useState<StudentDashboardStats | null>(null);
   const [fullName, setFullName] = useState<string>('');
 
@@ -56,8 +57,13 @@ export const StudentDashboardTab: React.FC<{ animationDelay?: number }> = ({ ani
         if (profileRes.data && profileRes.data.result) {
           setFullName(profileRes.data.result.fullName || '');
         }
-      } catch (error) {
-        console.error('Failed to load student dashboard statistics', error);
+      } catch (err: any) {
+        console.error('Failed to load student dashboard statistics', err);
+        if (err?.response?.data?.code === 1006) {
+          setError('Vui lòng đổi mật khẩu mặc định trước khi truy cập Dashboard.');
+        } else {
+          setError('Không thể tải dữ liệu Dashboard. Vui lòng kiểm tra lại quyền truy cập hoặc đăng nhập lại.');
+        }
       } finally {
         setLoading(false);
       }
@@ -77,6 +83,18 @@ export const StudentDashboardTab: React.FC<{ animationDelay?: number }> = ({ ani
 
   if (loading) {
     return <FallbackLoader text="Preparing your dashboard..." />;
+  }
+
+  if (error) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '60vh', gap: 16 }}>
+        <WarningOutlined style={{ fontSize: 48, color: '#F59E0B' }} />
+        <h2 style={{ fontSize: 20, fontWeight: 700, color: cc.text }}>{error}</h2>
+        <button onClick={() => navigate('/change-password')} style={{ padding: '10px 24px', borderRadius: 12, background: cc.primary, color: '#fff', border: 'none', fontWeight: 600, cursor: 'pointer' }}>
+          Đi tới Đổi mật khẩu
+        </button>
+      </div>
+    );
   }
 
   if (!stats) return null;
