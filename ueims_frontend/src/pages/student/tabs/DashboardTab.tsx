@@ -48,8 +48,8 @@ export const StudentDashboardTab: React.FC<{ animationDelay?: number }> = ({ ani
         setLoading(true);
         // Fetch stats
         const response = await StudentDashboardService.getStats();
-        if (response.data && response.data.result) {
-          setStats(response.data.result);
+        if (response) {
+          setStats(response);
         }
         
         // Fetch profile to get full name
@@ -139,7 +139,7 @@ export const StudentDashboardTab: React.FC<{ animationDelay?: number }> = ({ ani
                 Welcome back, {fullName || 'Student'}
               </h1>
               <p style={{ fontSize: 14.5, color: cc.textMuted, marginTop: 10, maxWidth: 600, lineHeight: 1.7 }}>
-                Stay on top of your internship goals. You have submitted {stats.reportsThisWeek} reports this week and have {stats.upNextInterviews.length} upcoming interviews. Keep up the good work!
+                Stay on top of your internship goals. You have submitted {stats.reports} reports and have {stats.upNextInterviews.length} upcoming interviews. Keep up the good work!
               </p>
             </div>
             
@@ -160,7 +160,7 @@ export const StudentDashboardTab: React.FC<{ animationDelay?: number }> = ({ ani
                </div>
                <div>
                  <div style={{ fontSize: 12, color: cc.textLight, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.05em' }}>Applications</div>
-                 <div style={{ fontSize: 20, fontWeight: 800, color: cc.text }}><AnimatedNumber value={stats.activeApplications} /></div>
+                 <div style={{ fontSize: 20, fontWeight: 800, color: cc.text }}><AnimatedNumber value={stats.applications} /></div>
                </div>
              </div>
              <div style={{ padding: '12px 16px', borderRadius: 16, background: 'rgba(255, 255, 255, 0.9)', border: '1px solid rgba(226,232,240,.95)', boxShadow: '0 4px 18px rgba(15,23,42,.04)', display: 'flex', alignItems: 'center', gap: 14 }}>
@@ -181,29 +181,29 @@ export const StudentDashboardTab: React.FC<{ animationDelay?: number }> = ({ ani
         <AnimatedStatCard
           icon={<FileTextOutlined />}
           label="Total Applications"
-          value={stats.activeApplications}
-          trend={{ value: 12, label: 'from last semester', isPositive: true }}
+          value={stats.applications}
+          trend="+1 from last semester"
           color={cc.primary}
         />
         <AnimatedStatCard
           icon={<CalendarOutlined />}
           label="Upcoming Interviews"
           value={stats.upNextInterviews.length}
-          trend={{ value: 2, label: 'this week', isPositive: true }}
+          trend={stats.upNextInterviews.length > 0 ? "Next interview soon" : ""}
           color="#3B82F6"
         />
         <AnimatedStatCard
           icon={<CheckCircleOutlined />}
           label="Reports Submitted"
-          value={stats.reportsThisWeek}
-          trend={{ value: stats.reportsThisWeek >= 1 ? 100 : 0, label: 'weekly goal', isPositive: stats.reportsThisWeek >= 1 }}
+          value={stats.reports}
+          trend="Total reports logged"
           color="#10B981"
         />
         <AnimatedStatCard
           icon={<WarningOutlined />}
-          label="Pending Tasks"
+          label="Recent Activities"
           value={stats.recentActivities.length}
-          trend={{ value: 0, label: 'needs action', isPositive: false }}
+          trend="Latest updates"
           color="#F59E0B"
         />
       </div>
@@ -236,8 +236,7 @@ export const StudentDashboardTab: React.FC<{ animationDelay?: number }> = ({ ani
                   <div style={{ width: 8, height: 8, borderRadius: '50%', background: cc.primary, marginTop: 6 }} />
                   <div>
                     <div style={{ fontSize: 13, fontWeight: 600, color: cc.text }}>{activity.title}</div>
-                    <div style={{ fontSize: 12, color: cc.textMuted, marginTop: 2 }}>{activity.description}</div>
-                    <div style={{ fontSize: 11, color: cc.textLight, marginTop: 4 }}>{activity.timestamp}</div>
+                    <div style={{ fontSize: 11, color: cc.textLight, marginTop: 4 }}>{activity.date instanceof Date ? activity.date.toLocaleDateString() : 'N/A'}</div>
                   </div>
                 </div>
               ))
