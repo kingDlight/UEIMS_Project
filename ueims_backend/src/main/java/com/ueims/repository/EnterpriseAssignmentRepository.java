@@ -14,13 +14,17 @@ import com.ueims.model.entity.EnterpriseAssignment;
 @Repository
 public interface EnterpriseAssignmentRepository extends JpaRepository<EnterpriseAssignment, UUID> {
 
-    @Query("SELECT ea FROM EnterpriseAssignment ea WHERE ea.semester.semesterId = :semesterId AND NOT EXISTS "
-            + "(SELECT wr FROM WeeklyReport wr WHERE wr.assignment.assignmentId = ea.assignmentId "
-            + "AND wr.weekNumber = :weekNumber AND wr.status != 'NOT_SUBMITTED')")
-    List<EnterpriseAssignment> findAssignmentsWithLateReports(
-            @Param("semesterId") UUID semesterId, @Param("weekNumber") Integer weekNumber);
+    Optional<EnterpriseAssignment> findByStudent_UserId(UUID studentId);
 
+    // UC-44: Kiểm tra sinh viên đã có chỗ thực tập trong học kỳ chưa
+    boolean existsByStudent_UserIdAndSemester_SemesterId(UUID studentId, UUID semesterId);
+
+    // Security: Kiểm tra quyền xem profile của doanh nghiệp đối với sinh viên được phân công
     boolean existsByEnterprise_EnterpriseIdAndStudent_UserId(UUID enterpriseId, UUID studentId);
 
-    Optional<EnterpriseAssignment> findByStudent_UserId(UUID studentId);
+    // UC-29 & UC-31: Tìm các bản ghi chưa nộp báo cáo tuần
+    @Query("SELECT ea FROM EnterpriseAssignment ea WHERE ea.semester.semesterId = :semesterId "
+            + "AND NOT EXISTS (SELECT 1 FROM WeeklyReport wr WHERE wr.assignment = ea AND wr.weekNumber = :weekNumber)")
+    List<EnterpriseAssignment> findAssignmentsWithLateReports(
+            @Param("semesterId") UUID semesterId, @Param("weekNumber") Integer weekNumber);
 }

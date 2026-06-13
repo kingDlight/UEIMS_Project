@@ -10,14 +10,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
-import com.ueims.model.entity.Application;
-import com.ueims.model.entity.ApplicationStatus;
-import com.ueims.model.entity.Interview;
-import com.ueims.model.entity.User;
+import com.ueims.model.entity.*;
 import com.ueims.repository.ApplicationRepository;
+import com.ueims.repository.EligibleStudentRepository;
 import com.ueims.repository.InterviewRepository;
 import com.ueims.repository.UserRepository;
+import com.ueims.service.EnterpriseAssignmentService;
 import com.ueims.service.InterviewService;
+import com.ueims.service.MailService;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +30,9 @@ public class InterviewServiceImpl implements InterviewService {
     InterviewRepository repository;
     ApplicationRepository applicationRepository;
     UserRepository userRepository;
+    EnterpriseAssignmentService enterpriseAssignmentService;
+    EligibleStudentRepository eligibleStudentRepository;
+    MailService mailService;
 
     @Override
     public List<Interview> findAll() {
@@ -131,6 +134,99 @@ public class InterviewServiceImpl implements InterviewService {
         applicationRepository.save(application);
 
         return repository.save(interview);
+    }
+
+    @Override
+    @Transactional
+    public Interview recordResult(UUID id, String result, String feedback) {
+        Interview interview =
+                repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.INTERVIEW_NOT_FOUND));
+
+        // Đảm bảo không ghi đè kết quả đã có (Lock logic trong UC-44)
+        if ("COMPLETED".equals(interview.getStatus())) {
+            throw new AppException(
+                    ErrorCode.UNCATEGORIZED_EXCEPTION, "Kết quả phỏng vấn đã được ghi nhận và không thể thay đổi.");
+        }
+
+        // BR-37: Kết quả chỉ được ghi nhận sau khi buổi phỏng vấn kết thúc
+        if (interview.getScheduledTime().isAfter(LocalDateTime.now())) {
+            throw new AppException(
+                    ErrorCode.UNCATEGORIZED_EXCEPTION,
+                    "Kết quả chỉ có thể được ghi nhận sau khi thời gian phỏng vấn kết thúc (BR-37)");
+        }
+
+        // Kiểm tra quyền: Chỉ doanh nghiệp sở hữu bài đăng mới được ghi nhận kết quả
+        User currentUser = getCurrentUser();
+        Application application = interview.getApplication();
+        if (currentUser.getEnterprise() == null
+                || !application
+                        .getJobPost()
+                        .getEnterprise()
+                        .getEnterpriseId()
+                        .equals(currentUser.getEnterprise().getEnterpriseId())) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        // Exception 44.0.E1: Bắt buộc nhập feedback khi đánh giá FAIL
+        if ("FAIL".equalsIgnoreCase(result)
+                && (feedback == null || feedback.trim().isEmpty())) {
+            throw new AppException(
+                    ErrorCode.FIELD_REQUIRED, "Vui lòng nhập lý do/phản hồi khi đánh giá không đạt (E1).");
+        }
+
+        interview.setResult(result);
+        interview.setFeedback(feedback);
+        interview.setDecidedBy(currentUser);
+        interview.setStatus("COMPLETED");
+
+        if ("PASS".equalsIgnoreCase(result)) {
+            // UC-44: Nếu Pass, cập nhật trạng thái Application thành ACCEPTED
+
+            // Kiểm tra xem sinh viên đã có chỗ thực tập trong học kỳ này chưa
+            boolean alreadyAssigned = enterpriseAssignmentService.isStudentAssignedInSemester(
+                    application.getStudent().getUserId(),
+                    application.getJobPost().getSemester().getSemesterId());
+
+            if (alreadyAssigned) {
+                throw new AppException(
+                        ErrorCode.UNCATEGORIZED_EXCEPTION,
+                        "Sinh viên này đã được phân công thực tập tại một đơn vị khác.");
+            }
+
+            application.setStatus(ApplicationStatus.ACCEPTED);
+
+            // Tự động tạo phân công thực tập thông qua Service
+            enterpriseAssignmentService.createAssignmentFromApplication(application);
+
+            // UC-23 & BR-22: Cập nhật trạng thái để TM phê duyệt danh sách OJT chính thức
+            eligibleStudentRepository
+                    .findByUser_UserIdAndSemester_SemesterId(
+                            application.getStudent().getUserId(),
+                            application.getJobPost().getSemester().getSemesterId())
+                    .ifPresent(es -> {
+                        es.setStatus("MATCHED");
+                        eligibleStudentRepository.save(es);
+                    });
+
+        } else if ("FAIL".equalsIgnoreCase(result) || "REJECTED".equalsIgnoreCase(result)) {
+            application.setStatus(ApplicationStatus.REJECTED);
+            if (feedback != null) {
+                application.setRejectionReason(feedback);
+            }
+        }
+
+        applicationRepository.save(application);
+        Interview savedInterview = repository.save(interview);
+
+        // UC-44 Step 5: Gửi thông báo kết quả qua Email
+        mailService.sendInterviewResultMail(
+                application.getStudent().getEmail(),
+                application.getStudent().getFullName(),
+                application.getJobPost().getEnterprise().getCompanyName(),
+                result,
+                feedback);
+
+        return savedInterview;
     }
 
     @Override

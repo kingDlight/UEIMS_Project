@@ -122,6 +122,25 @@ public class MailService {
         log.info("Email thông báo trạng thái {} đã được gửi tới doanh nghiệp: {}", status, to);
     }
 
+    // ===== Interview Result Notification (UC-44) =====
+    @org.springframework.scheduling.annotation.Async("mailTaskExecutor")
+    public void sendInterviewResultMail(
+            String to, String fullName, String enterpriseName, String result, String feedback) {
+        String subject = "Thông báo kết quả phỏng vấn — " + enterpriseName;
+        String loginUrl = appBaseUrl + PATH_LOGIN;
+
+        Context ctx = new Context();
+        ctx.setVariable(VAR_FULL_NAME, fullName);
+        ctx.setVariable("enterpriseName", enterpriseName);
+        ctx.setVariable("result", result);
+        ctx.setVariable("feedback", feedback);
+        ctx.setVariable(VAR_LOGIN_URL, loginUrl);
+        ctx.setVariable(VAR_SUBJECT, subject);
+
+        String html = templateEngine.process("interview-result", ctx);
+        sendHtml(to, subject, html);
+    }
+
     private void sendHtml(String to, String subject, String htmlBody) {
         try {
             MimeMessage message = javaMailSender.createMimeMessage();

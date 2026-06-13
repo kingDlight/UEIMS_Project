@@ -69,4 +69,13 @@ public class InterviewController {
             @PathVariable UUID id, @RequestParam("reason") String reason) {
         return ResponseEntity.ok(mapper.toDto(service.declineAttendance(id, reason)));
     }
+
+    @PostMapping("/{id}/result")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ENTERPRISE')")
+    public ResponseEntity<com.ueims.dto.response.InterviewDTO> recordResult(
+            @PathVariable UUID id,
+            @RequestParam("result") String result,
+            @RequestParam(value = "feedback", required = false) String feedback) {
+        return ResponseEntity.ok(mapper.toDto(service.recordResult(id, result, feedback)));
+    }
 }

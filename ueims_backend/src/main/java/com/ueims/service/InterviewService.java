@@ -18,5 +18,7 @@ public interface InterviewService {
 
     Interview declineAttendance(UUID id, String reason);
 
+    Interview recordResult(UUID id, String result, String feedback);
+
     void deleteById(UUID id);
 }

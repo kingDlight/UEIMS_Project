@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.ueims.model.entity.EnterpriseAssignment;
 import com.ueims.repository.EnterpriseAssignmentRepository;
@@ -37,6 +38,24 @@ public class EnterpriseAssignmentServiceImpl implements EnterpriseAssignmentServ
     @Override
     public EnterpriseAssignment save(EnterpriseAssignment entity) {
         return repository.save(entity);
+    }
+
+    @Override
+    @Transactional
+    public EnterpriseAssignment createAssignmentFromApplication(com.ueims.model.entity.Application application) {
+        EnterpriseAssignment assignment = EnterpriseAssignment.builder()
+                .enterprise(application.getJobPost().getEnterprise())
+                .student(application.getStudent())
+                .semester(application.getJobPost().getSemester())
+                .status("ACTIVE")
+                .build();
+
+        return repository.save(assignment);
+    }
+
+    @Override
+    public boolean isStudentAssignedInSemester(UUID studentId, UUID semesterId) {
+        return repository.existsByStudent_UserIdAndSemester_SemesterId(studentId, semesterId);
     }
 
     @Override
