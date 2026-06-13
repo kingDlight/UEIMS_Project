@@ -65,7 +65,7 @@ export const StudentDashboard: React.FC = () => {
     <ModernLayout 
       navItems={studentNavItems} 
       defaultRoute="dashboard" 
-      basePath="/student-dashboard"
+      basePath="/student"
     >
       {pages[currentTab] || <StudentDashboardTab />}
     </ModernLayout>

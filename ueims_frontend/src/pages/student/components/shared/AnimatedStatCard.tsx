@@ -1,9 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { Typography } from 'antd';
 import { animate } from 'framer-motion';
-import { Sparkline } from '../charts/Sparkline';
 import { cc } from '../../constants';
 const { Text } = Typography;
+
+const Sparkline = React.lazy(() => import('../charts/Sparkline').then(m => ({ default: m.Sparkline })));
+
+const FallbackLoader = () => (
+  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 34 }}>
+    <div style={{ width: 16, height: 16, border: '2px solid rgba(230,126,34,0.1)', borderTopColor: '#E67E22', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+  </div>
+);
 
 export const AnimatedStatCard: React.FC<{
   label: string;
@@ -20,9 +27,9 @@ export const AnimatedStatCard: React.FC<{
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoaded(true), delay);
+    const timer = setTimeout(() => setIsLoaded(true), 10);
     return () => clearTimeout(timer);
-  }, [delay]);
+  }, []);
 
   useEffect(() => {
     const controls = animate(0, value, {
@@ -45,14 +52,15 @@ export const AnimatedStatCard: React.FC<{
       role="presentation"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      className="scroll-animate"
       style={{
-        background: '#fff',
+        background: '#ffffff',
         borderRadius: 22,
         padding: '18px 18px 16px',
         boxShadow: isHovered ? '0 14px 44px rgba(15,23,42,.10)' : '0 4px 20px rgba(15,23,42,.05)',
-        border: '1px solid rgba(226,232,240,.9)',
+        border: '1px solid rgba(255,255,255,0.4)',
         transform: transformValue,
-        transition: 'all .25s ease',
+        transition: `transform 0.25s ease, box-shadow 0.25s ease, opacity 0.5s ease ${delay}ms`,
         opacity: isLoaded ? 1 : 0,
         minHeight: 128,
         display: 'flex',
@@ -88,7 +96,9 @@ export const AnimatedStatCard: React.FC<{
       </div>
       {sparkline && (
         <div style={{ marginTop: 12 }}>
-          <Sparkline data={sparkline} color={color} width={180} height={34} />
+          <Suspense fallback={<FallbackLoader />}>
+            <Sparkline data={sparkline} color={color} width={180} height={34} />
+          </Suspense>
         </div>
       )}
     </div>

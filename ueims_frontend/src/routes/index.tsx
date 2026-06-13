@@ -44,7 +44,7 @@ export const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Navigate to="/app/dashboard" replace />,
+        element: <Navigate to="/training-manager/dashboard" replace />,
       },
       {
         path: 'dashboard',
@@ -63,11 +63,11 @@ export const router = createBrowserRouter([
     element: <EmailPreviewPage />,
   },
   {
-    path: '/tm-dashboard/:tab?',
+    path: '/training-manager/:tab?',
     element: <TrainingManagerDashboard />,
   },
   {
-    path: '/student-dashboard/:tab?',
+    path: '/student/:tab?',
     element: <StudentDashboard />,
   },
   {

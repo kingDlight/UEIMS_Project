@@ -25,14 +25,14 @@ export const LoginPage: React.FC = () => {
 
   const getRedirectPath = (roles: string[]): string => {
     if (!roles || roles.length === 0) return '/no-role';
-    if (roles.includes('STUDENT')) return '/student-dashboard';
-    if (roles.includes('ENTERPRISE')) return '/student-dashboard';
-    return '/app/dashboard';
+    if (roles.includes('STUDENT')) return '/student/dashboard';
+    if (roles.includes('ENTERPRISE')) return '/student/dashboard';
+    return '/training-manager/dashboard';
   };
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/app/dashboard');
+      navigate('/training-manager/dashboard');
     }
   }, [isAuthenticated, navigate]);
 

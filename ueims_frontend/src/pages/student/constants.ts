@@ -113,16 +113,16 @@ export type StudentPageKey =
   | 'evaluation';
 
 export const navItems: NavItem[] = [
-  { key: 'dashboard', label: 'Student Dashboard', icon: React.createElement(CalendarOutlined), roles: ['STUDENT'] },
-  { key: 'profile', label: 'Profile & CV', icon: React.createElement(UserOutlined), roles: ['STUDENT'] },
-  { key: 'jobs', label: 'Job Board', icon: React.createElement(TrophyOutlined), roles: ['STUDENT'] },
-  { key: 'applications', label: 'My Applications', icon: React.createElement(FileTextOutlined), roles: ['STUDENT'] },
-  { key: 'schedule', label: 'My Interviews', icon: React.createElement(CalendarOutlined), roles: ['STUDENT'] },
-  { key: 'training-plan', label: 'Internship Progress', icon: React.createElement(BookOutlined), roles: ['STUDENT'] },
-  { key: 'reports', label: 'Weekly Reports', icon: React.createElement(SnippetsOutlined), roles: ['STUDENT'] },
-  { key: 'feedback', label: 'Evaluate Enterprise', icon: React.createElement(CheckCircleOutlined), roles: ['STUDENT'] },
-  { key: 'final-report', label: 'Final Report Submission', icon: React.createElement(FileProtectOutlined), roles: ['STUDENT'] },
-  { key: 'evaluation', label: 'My Evaluation', icon: React.createElement(TrophyOutlined), roles: ['STUDENT'] },
+  { key: 'dashboard', label: 'Student Dashboard', icon: React.createElement(CalendarOutlined) },
+  { key: 'profile', label: 'Profile & CV', icon: React.createElement(UserOutlined) },
+  { key: 'jobs', label: 'Job Board', icon: React.createElement(TrophyOutlined) },
+  { key: 'applications', label: 'My Applications', icon: React.createElement(FileTextOutlined) },
+  { key: 'schedule', label: 'My Interviews', icon: React.createElement(CalendarOutlined) },
+  { key: 'training-plan', label: 'Internship Progress', icon: React.createElement(BookOutlined) },
+  { key: 'reports', label: 'Weekly Reports', icon: React.createElement(SnippetsOutlined) },
+  { key: 'feedback', label: 'Evaluate Enterprise', icon: React.createElement(CheckCircleOutlined) },
+  { key: 'final-report', label: 'Final Report Submission', icon: React.createElement(FileProtectOutlined) },
+  { key: 'evaluation', label: 'My Evaluation', icon: React.createElement(TrophyOutlined) },
 ];
 
 export const defaultPage: StudentPageKey = 'dashboard';

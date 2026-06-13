@@ -36,9 +36,8 @@ export const TrainingManagerDashboard: React.FC = () => {
     return <Navigate to="/no-role" replace />;
   }
 
-  // Redirect STUDENT to their own dashboard
   if (roles.includes('STUDENT') || roles.includes('ROLE_STUDENT') || roles.includes('ENTERPRISE') || roles.includes('ROLE_ENTERPRISE')) {
-    return <Navigate to={`/student-dashboard/${tab || 'dashboard'}`} replace />;
+    return <Navigate to={`/student/${tab || 'dashboard'}`} replace />;
   }
 
   const pages: Record<string, React.ReactNode> = {
@@ -60,13 +59,13 @@ export const TrainingManagerDashboard: React.FC = () => {
     // Redirect to the first available tab for this role
     const firstAllowed = navItems.find((item) => !item.roles || roles.some((r: string) => item.roles?.includes(r)));
     if (firstAllowed) {
-      return <Navigate to={`/tm-dashboard/${firstAllowed.key}`} replace />;
+      return <Navigate to={`/training-manager/${firstAllowed.key}`} replace />;
     }
     return <Navigate to="/login" replace />;
   }
 
   return (
-    <ModernLayout navItems={navItems} defaultRoute="dashboard" basePath="/tm-dashboard">
+    <ModernLayout navItems={navItems} defaultRoute="dashboard" basePath="/training-manager">
       {pages[currentTab]}
     </ModernLayout>
   );

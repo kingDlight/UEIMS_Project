@@ -88,9 +88,9 @@ export const NavBar = ({ isDark, toggleTheme, scrolled, scrollToSection }: { isD
               if (roles.length === 0) {
                 navigate('/no-role');
               } else if (roles.includes('STUDENT') || roles.includes('ROLE_STUDENT') || roles.includes('ENTERPRISE') || roles.includes('ROLE_ENTERPRISE')) {
-                navigate('/student-dashboard');
+                navigate('/student/dashboard');
               } else {
-                navigate('/app/dashboard');
+                navigate('/training-manager/dashboard');
               }
             }}
             className="flex items-center gap-2 cursor-pointer transition-transform hover:scale-105 active:scale-95"
@@ -147,9 +147,9 @@ export const NavBar = ({ isDark, toggleTheme, scrolled, scrollToSection }: { isD
                 if (roles.length === 0) {
                   navigate('/no-role');
                 } else if (roles.includes('STUDENT') || roles.includes('ROLE_STUDENT') || roles.includes('ENTERPRISE') || roles.includes('ROLE_ENTERPRISE')) {
-                  navigate('/student-dashboard');
+                  navigate('/student/dashboard');
                 } else {
-                  navigate('/app/dashboard');
+                  navigate('/training-manager/dashboard');
                 }
               } else {
                 navigate('/login');

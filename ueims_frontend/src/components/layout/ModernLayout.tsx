@@ -140,12 +140,13 @@ const renderProfileModal = (modal: React.ReactNode) => (
 );
 
 import { extractUserFromToken } from '@/utils/jwt';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 export const ModernLayout: React.FC<ModernLayoutProps> = ({ 
   navItems, 
   children,
   defaultRoute = 'dashboard',
-  basePath = '/app/tm-dashboard'
+  basePath = '/training-manager'
 }) => {
   const [accountOpen, setAccountOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
@@ -154,6 +155,8 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
   const navigate = useNavigate();
   const { tab } = useParams<{ tab: string }>();
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  useScrollAnimation();
 
   // Change Password state
   const [changePasswordVisible, setChangePasswordVisible] = useState(false);

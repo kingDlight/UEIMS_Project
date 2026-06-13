@@ -11,12 +11,13 @@ import {
 } from '@ant-design/icons';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import { useAnimatedNumber } from '@/hooks/useAnimatedNumber';
-import { StudentDashboardService, StudentDashboardStats } from '@/services/StudentDashboardService';
+import { StudentDashboardService } from '@/services/StudentDashboardService';
+import type { StudentDashboardStats } from '@/services/StudentDashboardService';
 import { StudentProfileService } from '@/services/StudentProfileService';
 import { AreaChart } from '@/pages/training-manager/components/charts/AreaChart';
 import { Sparkline } from '@/pages/training-manager/components/charts/Sparkline';
 import { AnimatedStatCard } from '../components/shared/AnimatedStatCard';
-import { FallbackLoader } from '../components/shared/FallbackLoader';
+import { FallbackLoader } from '@/components/FallbackLoader';
 import { NeuSurface } from '../components/shared/NeuSurface';
 import { cc } from '../constants';
 

@@ -48,7 +48,8 @@ public class StudentProfileController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('STUDENT') or hasRole('ENTERPRISE') or hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
+    @PreAuthorize(
+            "hasRole('STUDENT') or hasRole('ENTERPRISE') or hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
     public ResponseEntity<StudentProfileDTO> getById(@PathVariable UUID id) {
         com.ueims.model.entity.StudentProfile profile = service.findById(id);
         if (profile == null) {
@@ -59,8 +60,7 @@ public class StudentProfileController {
 
     @PostMapping
     @PreAuthorize("hasRole('SYSTEM_ADMIN')")
-    public ResponseEntity<StudentProfileDTO> create(
-            @Valid @RequestBody StudentProfileDTO entity) {
+    public ResponseEntity<StudentProfileDTO> create(@Valid @RequestBody StudentProfileDTO entity) {
         return ResponseEntity.ok(mapper.toDto(service.save(mapper.toEntity(entity))));
     }
 
