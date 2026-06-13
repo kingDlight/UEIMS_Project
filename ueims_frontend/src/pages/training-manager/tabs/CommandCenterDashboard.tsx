@@ -475,7 +475,7 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
   return (
     <div style={{
       fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-      backgroundColor: '#F9FAFB',
+      backgroundColor: '#F0F2F5',
       minHeight: '100vh',
     }}>
       {/* Top Header & Semester Selector */}
@@ -543,7 +543,7 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
               {/* TOP STAT CARDS ROW */}
               <div className="cc-kpi-grid" style={{ marginBottom: 24 }}>
                 {/* Stat 1: Employment/Placement Rate */}
-                <CardWrapper style={{ padding: 18, borderLeft: `4px solid ${cc.success}` }}>
+                <CardWrapper style={{ padding: 18, borderLeft: `4px solid ${cc.success}`, background: '#F0FDF4', border: '1px solid #BBF7D0' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div>
                       <Label>Placement Rate</Label>
@@ -562,7 +562,7 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
                 </CardWrapper>
 
                 {/* Stat 2: Interview Pass Rate */}
-                <CardWrapper style={{ padding: 18, borderLeft: `4px solid ${cc.info}` }}>
+                <CardWrapper style={{ padding: 18, borderLeft: `4px solid ${cc.info}`, background: '#EFF6FF', border: '1px solid #BFDBFE' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div>
                       <Label>Interview Pass Rate</Label>
@@ -581,7 +581,7 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
                 </CardWrapper>
 
                 {/* Stat 3: Pending Enterprise Approvals */}
-                <CardWrapper style={{ padding: 18, borderLeft: `4px solid ${cc.warning}` }}>
+                <CardWrapper style={{ padding: 18, borderLeft: `4px solid ${cc.warning}`, background: '#FFFBEB', border: '1px solid #FDE68A' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div>
                       <Label>Corporate Approvals</Label>
@@ -602,7 +602,7 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
                 </CardWrapper>
 
                 {/* Stat 4: Active Incidents */}
-                <CardWrapper style={{ padding: 18, borderLeft: `4px solid ${cc.error}` }}>
+                <CardWrapper style={{ padding: 18, borderLeft: `4px solid ${cc.error}`, background: '#FEF2F2', border: '1px solid #FCA5A5' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div>
                       <Label>Active Incidents</Label>
