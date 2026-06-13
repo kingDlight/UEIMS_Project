@@ -1,5 +1,6 @@
 package com.ueims.repository;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,4 +14,6 @@ public interface WeeklyReportRepository extends JpaRepository<WeeklyReport, UUID
             UUID semesterId, Integer weekNumber, String status);
 
     java.util.List<WeeklyReport> findByAssignment_Student_UserId(UUID studentId);
+
+    void deleteByAssignment_AssignmentIdIn(List<UUID> assignmentIds);
 }

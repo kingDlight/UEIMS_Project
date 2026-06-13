@@ -1,5 +1,6 @@
 package com.ueims.repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -13,4 +14,6 @@ public interface EnterpriseEvaluationRepository extends JpaRepository<Enterprise
     Optional<EnterpriseEvaluation> findByAssignment_AssignmentId(UUID assignmentId);
 
     Optional<EnterpriseEvaluation> findByAssignment_Student_UserId(UUID studentId);
+
+    void deleteByAssignment_AssignmentIdIn(List<UUID> assignmentIds);
 }

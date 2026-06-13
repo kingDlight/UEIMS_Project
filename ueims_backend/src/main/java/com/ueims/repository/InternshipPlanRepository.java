@@ -1,5 +1,6 @@
 package com.ueims.repository;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,4 +11,6 @@ import com.ueims.model.entity.InternshipPlan;
 @Repository
 public interface InternshipPlanRepository extends JpaRepository<InternshipPlan, UUID> {
     InternshipPlan findByAssignment_Student_UserId(UUID studentId);
+
+    List<InternshipPlan> findByAssignment_AssignmentIdIn(List<UUID> assignmentIds);
 }

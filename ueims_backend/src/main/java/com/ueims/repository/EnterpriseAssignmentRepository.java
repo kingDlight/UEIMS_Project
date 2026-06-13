@@ -26,5 +26,7 @@ public interface EnterpriseAssignmentRepository extends JpaRepository<Enterprise
 
     List<EnterpriseAssignment> findByEnterprise_EnterpriseId(UUID enterpriseId);
 
+    List<EnterpriseAssignment> findByAssignmentIdIn(List<UUID> assignmentIds);
+
     void deleteByEnterprise_EnterpriseId(UUID enterpriseId);
 }

@@ -11,4 +11,6 @@ import com.ueims.model.entity.InternshipPlanItem;
 @Repository
 public interface InternshipPlanItemRepository extends JpaRepository<InternshipPlanItem, UUID> {
     List<InternshipPlanItem> findByPlan_PlanId(UUID planId);
+
+    void deleteByPlan_PlanIdIn(List<UUID> planIds);
 }
