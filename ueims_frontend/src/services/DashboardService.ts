@@ -18,4 +18,12 @@ export const DashboardService = {
     const response = await api.get(`/dashboard/grade-distribution/${semesterId}`);
     return response.data;
   },
+  getInterviewPassRateChart: async (semesterId: string) => {
+    const response = await api.get(`/dashboard/interview-pass-rate/${semesterId}`);
+    return response.data;
+  },
+  getAverageRatingChart: async (semesterId: string) => {
+    const response = await api.get(`/dashboard/average-rating/${semesterId}`);
+    return response.data;
+  },
 };
