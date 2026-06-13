@@ -1,35 +1,710 @@
 import React, { useEffect, useState } from 'react';
-import { CalendarOutlined, TrophyOutlined, FileTextOutlined, SnippetsOutlined, ClockCircleOutlined } from '@ant-design/icons';
-import { Spin, Skeleton } from 'antd';
-import { motion, animate } from 'framer-motion';
-import { cc, hexToRgba } from '../constants';
-import { NeuSurface } from '../components/shared/NeuSurface';
-import { SmallPill } from '../components/shared/SmallPill';
-import { AnimatedStatCard } from '../components/shared/AnimatedStatCard';
-import { Sparkline } from '../components/charts/Sparkline';
-import { AreaChart } from '../components/charts/AreaChart';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  ArrowRight,
+  Upload,
+  SendHorizontal,
+  FileText,
+  Calendar,
+  CheckCircle2,
+  Clock,
+  AlertTriangle,
+  TrendingUp,
+  TrendingDown,
+  MinusCircle,
+  BookOpen,
+  Briefcase,
+  Star,
+} from 'lucide-react';
+import { Spin } from 'antd';
 import { StudentDashboardService, type StudentDashboardStats } from '@/services/StudentDashboardService';
 
-const AnimatedNumber: React.FC<{ value: number }> = ({ value }) => {
-  const [displayValue, setDisplayValue] = useState(0);
-  useEffect(() => {
-    const controls = animate(0, value, { duration: 1.2, onUpdate: v => setDisplayValue(Math.round(v)) });
-    return () => controls.stop();
-  }, [value]);
-  return <>{displayValue.toLocaleString()}</>;
+// ============================================================
+// DESIGN TOKENS — Student Command Center (matching TM style)
+// ============================================================
+const cc = {
+  brand: '#E67E22',
+  brandHover: '#D35400',
+  brandMuted: 'rgba(230, 126, 34, 0.08)',
+  brandSubtle: 'rgba(230, 126, 34, 0.04)',
+
+  success: '#10B981',
+  successMuted: 'rgba(16, 185, 129, 0.08)',
+  error: '#EF4444',
+  errorMuted: 'rgba(239, 68, 68, 0.08)',
+  warning: '#F59E0B',
+  warningMuted: 'rgba(245, 158, 11, 0.08)',
+  info: '#3B82F6',
+  infoMuted: 'rgba(59, 130, 246, 0.08)',
+
+  textPrimary: '#0F172A',
+  textSecondary: '#475569',
+  textMuted: '#64748B',
+
+  surface: '#FFFFFF',
+  bg: '#F8FAFC',
+  border: '#E2E8F0',
+  borderSubtle: '#F1F5F9',
+
+  radiusSm: 8,
+  radiusMd: 12,
+  radiusLg: 16,
+  radiusFull: 9999,
+
+  shadowSm: '0 4px 16px rgba(15,23,42,0.04)',
+  shadowMd: '0 8px 24px rgba(15,23,42,0.08)',
+  shadowLg: '0 12px 32px rgba(15,23,42,0.12)',
+  shadowBrand: '0 8px 22px rgba(230, 126, 34, 0.22)',
+  shadowSuccess: '0 8px 22px rgba(16, 185, 129, 0.22)',
+  shadowError: '0 8px 22px rgba(239, 68, 68, 0.22)',
+  shadowWarning: '0 8px 22px rgba(245, 158, 11, 0.22)',
 };
 
+function hexToRgba(hex: string, alpha: number): string {
+  const h = hex.replace('#', '');
+  const r = Number.parseInt(h.substring(0, 2), 16);
+  const g = Number.parseInt(h.substring(2, 4), 16);
+  const b = Number.parseInt(h.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+// ============================================================
+// HELPER COMPONENTS
+// ============================================================
+const CardWrapper: React.FC<{
+  children: React.ReactNode;
+  style?: React.CSSProperties;
+  hoverable?: boolean;
+  onClick?: () => void;
+}> = ({ children, style, hoverable = false, onClick }) => {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <motion.div
+      onClick={onClick}
+      onMouseEnter={() => hoverable && setHovered(true)}
+      onMouseLeave={() => hoverable && setHovered(false)}
+      animate={{
+        y: hovered && hoverable ? -2 : 0,
+        boxShadow: hovered && hoverable ? cc.shadowMd : cc.shadowSm,
+      }}
+      transition={{ duration: 0.15, ease: [0.32, 0.72, 0, 1] }}
+      style={{
+        background: cc.surface,
+        borderRadius: cc.radiusLg,
+        border: `1px solid ${cc.borderSubtle}`,
+        boxShadow: cc.shadowSm,
+        overflow: 'hidden',
+        cursor: onClick ? 'pointer' : 'default',
+        ...style,
+      }}
+    >
+      {children}
+    </motion.div>
+  );
+};
+
+const Label: React.FC<{ children: React.ReactNode; style?: React.CSSProperties }> = ({ children, style }) => (
+  <span style={{
+    fontSize: 11,
+    fontWeight: 600,
+    textTransform: 'uppercase',
+    letterSpacing: '0.06em',
+    color: cc.textMuted,
+    ...style,
+  }}>
+    {children}
+  </span>
+);
+
+const TrendBadge: React.FC<{ direction: 'up' | 'down' | 'neutral'; value: string; color?: string }> = ({ direction, value, color }) => {
+  let iconColor = color || cc.textMuted;
+  let Icon = MinusCircle;
+  if (!color) {
+    if (direction === 'up') iconColor = cc.success;
+    else if (direction === 'down') iconColor = cc.error;
+  }
+  if (direction === 'up') Icon = TrendingUp;
+  else if (direction === 'down') Icon = TrendingDown;
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 6 }}>
+      <Icon size={12} color={iconColor} />
+      <span style={{ fontSize: 12, fontWeight: 600, color: iconColor }}>{value}</span>
+    </div>
+  );
+};
+
+const StatusDot: React.FC<{ color: string; pulse?: boolean }> = ({ color, pulse = false }) => (
+  <span style={{
+    display: 'inline-block',
+    width: 8,
+    height: 8,
+    borderRadius: '50%',
+    background: color,
+    boxShadow: `0 0 0 3px ${color}20`,
+    animation: pulse ? 'pulse-dot 2s ease-in-out infinite' : 'none',
+  }} />
+);
+
+const CTAButton: React.FC<{
+  children: React.ReactNode;
+  onClick?: () => void;
+  variant?: 'primary' | 'amber' | 'red' | 'ghost' | 'success';
+  size?: 'sm' | 'md' | 'lg';
+  icon?: React.ReactNode;
+  disabled?: boolean;
+}> = ({ children, onClick, variant = 'primary', size = 'md', icon, disabled = false }) => {
+  const variants: Record<string, { bg: string; text: string; shadow: string }> = {
+    primary: { bg: cc.brand, text: '#fff', shadow: cc.shadowBrand },
+    amber: { bg: cc.warning, text: '#fff', shadow: cc.shadowWarning },
+    red: { bg: cc.error, text: '#fff', shadow: cc.shadowError },
+    success: { bg: cc.success, text: '#fff', shadow: cc.shadowSuccess },
+    ghost: { bg: 'transparent', text: cc.brand, shadow: 'none' },
+  };
+  const { bg, text: textColor, shadow } = variants[variant];
+  const sizes: Record<string, { padding: string; fontSize: number }> = {
+    sm: { padding: '6px 12px', fontSize: 12 },
+    md: { padding: '9px 16px', fontSize: 13 },
+    lg: { padding: '11px 20px', fontSize: 14 },
+  };
+  const { padding, fontSize } = sizes[size];
+  return (
+    <motion.button
+      onClick={onClick}
+      whileHover={disabled ? {} : { y: -1 }}
+      whileTap={disabled ? {} : { scale: 0.98 }}
+      disabled={disabled}
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 6,
+        padding,
+        fontSize,
+        fontWeight: 600,
+        color: disabled ? cc.textMuted : textColor,
+        background: disabled ? cc.borderSubtle : bg,
+        border: variant === 'ghost' ? `1px solid ${cc.border}` : 'none',
+        borderRadius: cc.radiusMd,
+        boxShadow: disabled ? 'none' : (variant === 'ghost' ? 'none' : shadow),
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        width: 'auto',
+        justifyContent: 'center',
+        fontFamily: 'Inter, -apple-system, sans-serif',
+      }}
+    >
+      {children}
+      {icon === false ? null : (icon || <ArrowRight size={size === 'sm' ? 12 : 14} />)}
+    </motion.button>
+  );
+};
+
+const TextLink: React.FC<{ children: React.ReactNode; onClick?: () => void; color?: string }> = ({ children, onClick, color }) => (
+  <motion.button
+    onClick={onClick}
+    whileHover={{ opacity: 0.8, x: 2 }}
+    transition={{ duration: 0.15 }}
+    style={{
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: 4,
+      fontSize: 13,
+      fontWeight: 500,
+      color: color || cc.brand,
+      background: 'none',
+      border: 'none',
+      cursor: 'pointer',
+      padding: 0,
+      fontFamily: 'Inter, -apple-system, sans-serif',
+      borderRadius: cc.radiusMd,
+    }}
+  >
+    {children}
+    <ArrowRight size={13} />
+  </motion.button>
+);
+
+const StatChip: React.FC<{ icon: React.ReactNode; label: string; value: number | string; color: string }> = ({ icon, label, value, color }) => (
+  <div style={{
+    display: 'flex',
+    alignItems: 'center',
+    gap: 10,
+    padding: '10px 14px',
+    borderRadius: cc.radiusMd,
+    backgroundColor: hexToRgba(color, 0.05),
+    border: `1px solid ${hexToRgba(color, 0.15)}`,
+    flex: 1,
+    minWidth: 0,
+  }}>
+    <div style={{ color, flexShrink: 0 }}>{icon}</div>
+    <div style={{ minWidth: 0 }}>
+      <div style={{ fontSize: 20, fontWeight: 700, color, lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{value}</div>
+      <div style={{ fontSize: 10, color, opacity: 0.8, marginTop: 2, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>{label}</div>
+    </div>
+  </div>
+);
+
+// ============================================================
+// SECTION: SEMESTER CONTEXT BAR
+// ============================================================
+const SemesterContextBar: React.FC<{ stats: StudentDashboardStats }> = ({ stats }) => (
+  <div style={{
+    maxWidth: 1200,
+    margin: '0 auto',
+    padding: '0 24px',
+    marginBottom: 24,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  }}>
+    <motion.div
+      initial={{ opacity: 0, x: -12 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
+      style={{ display: 'flex', alignItems: 'center', gap: 10 }}
+    >
+      <span style={{ fontSize: 13, fontWeight: 600, color: cc.brand, letterSpacing: '0.04em' }}>
+        {stats.semesterName?.toUpperCase() || 'SEMESTER'}
+      </span>
+      <span style={{ color: cc.border, fontSize: 13 }}>·</span>
+      <span style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 4,
+        fontSize: 12,
+        fontWeight: 600,
+        color: cc.success,
+        backgroundColor: hexToRgba(cc.success, 0.06),
+        border: `1px solid ${hexToRgba(cc.success, 0.25)}`,
+        padding: '2px 8px',
+        borderRadius: cc.radiusFull,
+      }}>
+        <StatusDot color={cc.success} />
+        ACTIVE
+      </span>
+      <span style={{ color: cc.border, fontSize: 13 }}>·</span>
+      <span style={{ fontSize: 12, color: cc.textSecondary }}>
+        {stats.daysRemaining} days remaining
+      </span>
+    </motion.div>
+
+    <motion.div
+      initial={{ opacity: 0, x: 12 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.4, delay: 0.1, ease: [0.32, 0.72, 0, 1] }}
+      style={{ display: 'flex', alignItems: 'center', gap: 10 }}
+    >
+      <span style={{ fontSize: 11, color: cc.textMuted }}>Status</span>
+      <span style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 4,
+        padding: '3px 10px',
+        borderRadius: cc.radiusFull,
+        backgroundColor: hexToRgba(cc.brand, 0.06),
+        border: `1px solid ${hexToRgba(cc.brand, 0.25)}`,
+        color: cc.brand,
+        fontSize: 11,
+        fontWeight: 600,
+      }}>
+        <StatusDot color={cc.brand} />
+        OJT IN PROGRESS
+      </span>
+    </motion.div>
+  </div>
+);
+
+// ============================================================
+// SECTION: KPI URGENCY CARDS
+// ============================================================
+const UrgencyCardsRow: React.FC<{ stats: StudentDashboardStats; onNavigate: (route: string) => void }> = ({ stats, onNavigate }) => (
+  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16, marginBottom: 16, alignItems: 'stretch' }}>
+    {/* Applications Card */}
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0, ease: [0.32, 0.72, 0, 1] }}
+    >
+      <CardWrapper hoverable style={{ padding: 20, flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ width: 36, height: 36, borderRadius: cc.radiusMd, background: cc.infoMuted, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.info }}>
+              <Briefcase size={18} />
+            </div>
+            <Label>Applications</Label>
+          </div>
+        </div>
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ fontSize: 40, fontWeight: 700, color: cc.textPrimary, lineHeight: 1, letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums' }}>
+            {stats.applications}
+          </div>
+          <TrendBadge direction="up" value="Job applications" />
+        </div>
+        <div style={{ height: 1, background: cc.borderSubtle, marginTop: 'auto', marginBottom: 14 }} />
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <CTAButton variant="ghost" size="sm" icon={false} onClick={() => onNavigate('jobs')}>Browse Jobs</CTAButton>
+        </div>
+      </CardWrapper>
+    </motion.div>
+
+    {/* Interviews Card */}
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 100, ease: [0.32, 0.72, 0, 1] }}
+    >
+      <CardWrapper hoverable style={{ padding: 20, flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ width: 36, height: 36, borderRadius: cc.radiusMd, background: cc.warningMuted, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.warning }}>
+              <Calendar size={18} />
+            </div>
+            <Label>Interviews</Label>
+          </div>
+        </div>
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ fontSize: 40, fontWeight: 700, color: cc.textPrimary, lineHeight: 1, letterSpacing: '-0.02em', fontVariantNumeric: 'tabular-nums' }}>
+            {stats.interviews}
+          </div>
+          <TrendBadge direction={stats.interviews > 0 ? 'up' : 'neutral'} value={stats.interviews > 0 ? 'Scheduled interviews' : 'No interviews yet'} />
+        </div>
+        <div style={{ height: 1, background: cc.borderSubtle, marginTop: 'auto', marginBottom: 14 }} />
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <CTAButton variant="ghost" size="sm" icon={false} onClick={() => onNavigate('schedule')}>View Schedule</CTAButton>
+        </div>
+      </CardWrapper>
+    </motion.div>
+  </div>
+);
+
+// ============================================================
+// SECTION: REPORT STATUS + TRAINING PROGRESS
+// ============================================================
+const ReportPipelineRow: React.FC<{ stats: StudentDashboardStats; onNavigate: (route: string) => void }> = ({ stats, onNavigate }) => (
+  <div style={{ display: 'grid', gridTemplateColumns: '7fr 5fr', gap: 16, marginBottom: 16, alignItems: 'stretch' }}>
+    {/* Weekly Reports Card */}
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.2, ease: [0.32, 0.72, 0, 1] }}
+    >
+      <CardWrapper style={{ padding: 20, flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ width: 32, height: 32, borderRadius: cc.radiusMd, background: `${cc.info}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.info }}>
+              <FileText size={16} />
+            </div>
+            <div>
+              <div style={{ fontSize: 15, fontWeight: 600, color: cc.textPrimary }}>Weekly Reports</div>
+              <div style={{ fontSize: 12, color: cc.textMuted }}>{stats.semesterName || 'This semester'}</div>
+            </div>
+          </div>
+          <span style={{ padding: '2px 8px', borderRadius: cc.radiusFull, backgroundColor: hexToRgba(cc.warning, 0.06), border: `1px solid ${hexToRgba(cc.warning, 0.2)}`, color: cc.warning, fontSize: 10, fontWeight: 600 }}>
+            Deadline: Sun 11:59 PM
+          </span>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 16 }}>
+          <StatChip icon={<CheckCircle2 size={16} />} label="Submitted" value={stats.reports} color={cc.success} />
+          <StatChip icon={<Clock size={16} />} label="Pending" value={1} color={cc.warning} />
+          <StatChip icon={<AlertTriangle size={16} />} label="Late" value={0} color={cc.error} />
+          <StatChip icon={<BookOpen size={16} />} label="Total Weeks" value={stats.daysRemaining > 0 ? Math.max(1, 12 - stats.reports) : '-'} color={cc.info} />
+        </div>
+
+        <div style={{ height: 1, background: cc.borderSubtle, marginBottom: 14 }} />
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <TextLink color={cc.brand} onClick={() => onNavigate('reports')}>View all reports</TextLink>
+          <CTAButton variant="primary" size="sm" icon={false} onClick={() => onNavigate('reports')}>Submit Report</CTAButton>
+        </div>
+      </CardWrapper>
+    </motion.div>
+
+    {/* Training Progress Card */}
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.25, ease: [0.32, 0.72, 0, 1] }}
+    >
+      <CardWrapper style={{ padding: 20, flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
+          <div style={{ width: 32, height: 32, borderRadius: cc.radiusMd, background: `${cc.brand}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.brand }}>
+            <BookOpen size={16} />
+          </div>
+          <div>
+            <div style={{ fontSize: 15, fontWeight: 600, color: cc.textPrimary }}>Training Progress</div>
+            <div style={{ fontSize: 12, color: cc.textMuted }}>{stats.semesterName || 'OJT Phase'}</div>
+          </div>
+        </div>
+
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'stretch', gap: 0 }}>
+            {[
+              { label: 'WEEK 1-4', color: cc.success, flex: 4 },
+              { label: 'WEEK 5-8', color: cc.info, flex: 4 },
+              { label: 'WEEK 9-12', color: cc.warning, flex: stats.daysRemaining > 0 ? 4 : 0 },
+            ].map((stage, i) => (
+              <div key={stage.label} style={{
+                flex: stage.flex,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                padding: '10px 4px',
+                borderRadius: cc.radiusMd,
+                background: stage.flex > 0 ? `${stage.color}10` : 'transparent',
+                border: `1px solid ${stage.flex > 0 ? `${stage.color}25` : 'transparent'}`,
+                gap: 4,
+              }}>
+                <span style={{ fontSize: 9, fontWeight: 600, color: stage.color, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{stage.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ height: 6, borderRadius: cc.radiusFull, background: cc.borderSubtle, overflow: 'hidden', marginBottom: 14 }}>
+          <div style={{
+            height: '100%',
+            width: `${Math.min(100, Math.max(5, (stats.reports / 12) * 100))}%`,
+            background: cc.brand,
+            borderRadius: cc.radiusFull,
+            transition: 'width 0.6s ease',
+          }} />
+        </div>
+
+        <div style={{ height: 1, background: cc.borderSubtle, marginBottom: 14 }} />
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <TextLink color={cc.brand} onClick={() => onNavigate('training-plan')}>View Training Plan</TextLink>
+        </div>
+      </CardWrapper>
+    </motion.div>
+  </div>
+);
+
+// ============================================================
+// SECTION: QUICK ACTIONS
+// ============================================================
+const QuickActionsRow: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => {
+  const actions = [
+    { label: 'Browse Jobs', description: 'Find and apply for internships', icon: <Briefcase size={24} />, route: 'jobs' },
+    { label: 'Submit Report', description: 'Submit your weekly progress report', icon: <Upload size={24} />, route: 'reports' },
+    { label: 'Send Feedback', description: 'Rate your enterprise experience', icon: <Star size={24} />, route: 'feedback' },
+    { label: 'My Schedule', description: 'View upcoming interviews', icon: <Calendar size={24} />, route: 'schedule' },
+  ];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.3, ease: [0.32, 0.72, 0, 1] }}
+      style={{ marginBottom: 16 }}
+    >
+      <div style={{ fontSize: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: cc.textMuted, marginBottom: 10, paddingLeft: 2 }}>
+        Quick Actions
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, alignItems: 'stretch' }}>
+        {actions.map((action, i) => (
+          <div key={action.label} style={{ display: 'flex', flexDirection: 'column' }}>
+            <motion.div
+              onClick={() => action.route && onNavigate(action.route)}
+              whileHover={{ y: -3, boxShadow: cc.shadowMd }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ duration: 0.15, ease: [0.32, 0.72, 0, 1] }}
+              style={{
+                background: cc.surface,
+                borderRadius: cc.radiusLg,
+                border: `1px solid ${cc.borderSubtle}`,
+                boxShadow: cc.shadowSm,
+                padding: '16px 16px 14px',
+                cursor: 'pointer',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 8,
+                flex: 1,
+                position: 'relative',
+                overflow: 'hidden',
+              }}
+            >
+              <div style={{ width: 40, height: 40, borderRadius: cc.radiusMd, background: `${cc.brand}12`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.brand, position: 'relative' }}>
+                {action.icon}
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 14, fontWeight: 600, color: cc.textPrimary, marginBottom: 2 }}>{action.label}</div>
+                <div style={{ fontSize: 11, color: cc.textMuted, lineHeight: 1.4 }}>{action.description}</div>
+              </div>
+              <div style={{ position: 'absolute', bottom: 12, right: 12, color: cc.brand, opacity: 0.6 }}>
+                <ArrowRight size={14} />
+              </div>
+            </motion.div>
+          </div>
+        ))}
+      </div>
+    </motion.div>
+  );
+};
+
+// ============================================================
+// SECTION: RIGHT COLUMN — UPCOMING & ACTIVITY
+// ============================================================
+const UpcomingCard: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 16 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5, delay: 0.35, ease: [0.32, 0.72, 0, 1] }}
+    style={{ display: 'flex', flexDirection: 'column', marginBottom: 16 }}
+  >
+    <CardWrapper style={{ padding: 20, flex: 1, display: 'flex', flexDirection: 'column' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+        <div style={{ width: 32, height: 32, borderRadius: cc.radiusMd, background: `${cc.info}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.info }}>
+          <Calendar size={16} />
+        </div>
+        <div>
+          <div style={{ fontSize: 15, fontWeight: 600, color: cc.textPrimary }}>Upcoming Events</div>
+          <div style={{ fontSize: 12, color: cc.textMuted }}>Your schedule</div>
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, flex: 1 }}>
+        {[
+          { title: 'Weekly Report Deadline', meta: 'Sunday, 11:59 PM', tone: cc.warning, icon: <Clock size={14} /> },
+          { title: 'Mid-Review Meeting', meta: 'Next Week', tone: cc.info, icon: <Calendar size={14} /> },
+        ].map((item, i) => (
+          <div key={i} style={{
+            display: 'flex', alignItems: 'flex-start', gap: 10,
+            padding: '12px 14px', borderRadius: cc.radiusMd,
+            background: hexToRgba(item.tone, 0.06),
+            border: `1px solid ${hexToRgba(item.tone, 0.2)}`,
+          }}>
+            <div style={{ width: 10, height: 10, borderRadius: '50%', background: item.tone, boxShadow: `0 0 0 4px ${item.tone}20`, marginTop: 4, flexShrink: 0 }} />
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: cc.textPrimary }}>{item.title}</div>
+              <div style={{ fontSize: 11, color: cc.textMuted, marginTop: 2, display: 'flex', alignItems: 'center', gap: 4 }}>{item.icon} {item.meta}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ height: 1, background: cc.borderSubtle, marginTop: 'auto', marginBottom: 14 }} />
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <CTAButton variant="ghost" size="sm" icon={false} onClick={() => onNavigate('schedule')}>View Calendar</CTAButton>
+      </div>
+    </CardWrapper>
+  </motion.div>
+);
+
+const RecentActivityCard: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 16 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5, delay: 0.4, ease: [0.32, 0.72, 0, 1] }}
+    style={{ display: 'flex', flexDirection: 'column' }}
+  >
+    <CardWrapper style={{ padding: 20, flex: 1, display: 'flex', flexDirection: 'column' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+        <div style={{ width: 32, height: 32, borderRadius: cc.radiusMd, background: `${cc.success}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.success }}>
+          <CheckCircle2 size={16} />
+        </div>
+        <div>
+          <div style={{ fontSize: 15, fontWeight: 600, color: cc.textPrimary }}>Recent Activity</div>
+          <div style={{ fontSize: 12, color: cc.textMuted }}>Latest updates</div>
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, flex: 1 }}>
+        {[
+          { title: 'Application submitted to TechCorp', meta: '2 hours ago', tone: cc.info },
+          { title: 'Weekly report W22 approved', meta: 'Yesterday', tone: cc.success },
+          { title: 'Interview scheduled for Jul 15', meta: '3 days ago', tone: cc.warning },
+        ].map((item, i) => (
+          <motion.div
+            key={i}
+            whileHover={{ x: 2 }}
+            transition={{ duration: 0.15 }}
+            style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '12px 14px', borderRadius: cc.radiusMd, background: cc.borderSubtle }}
+          >
+            <div style={{ width: 10, height: 10, borderRadius: '50%', background: item.tone, boxShadow: `0 0 0 4px ${item.tone}20`, marginTop: 4, flexShrink: 0 }} />
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: cc.textPrimary }}>{item.title}</div>
+              <div style={{ fontSize: 11, color: cc.textMuted, marginTop: 2 }}>{item.meta}</div>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      <div style={{ height: 1, background: cc.borderSubtle, marginTop: 'auto', marginBottom: 14 }} />
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <TextLink color={cc.brand} onClick={() => onNavigate('dashboard')}>View all activity</TextLink>
+      </div>
+    </CardWrapper>
+  </motion.div>
+);
+
+// ============================================================
+// SECTION: EVALUATION OVERVIEW
+// ============================================================
+const EvaluationRow: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 16 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5, delay: 0.45, ease: [0.32, 0.72, 0, 1] }}
+    style={{ marginBottom: 16 }}
+  >
+    <CardWrapper style={{ padding: 20, display: 'flex', flexDirection: 'column' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ width: 32, height: 32, borderRadius: cc.radiusMd, background: `${cc.warning}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.warning }}>
+            <Star size={16} />
+          </div>
+          <div>
+            <div style={{ fontSize: 15, fontWeight: 600, color: cc.textPrimary }}>My Evaluation</div>
+            <div style={{ fontSize: 12, color: cc.textMuted }}>Track your internship grade</div>
+          </div>
+        </div>
+        <CTAButton variant="ghost" size="sm" icon={false} onClick={() => onNavigate('evaluation')}>View Details</CTAButton>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+        {[
+          { label: 'Attitude (20%)', score: '—', color: cc.info },
+          { label: 'Professionalism (40%)', score: '—', color: cc.brand },
+          { label: 'Soft Skills (20%)', score: '—', color: cc.success },
+          { label: 'Progress (20%)', score: '—', color: cc.warning },
+        ].map((item) => (
+          <div key={item.label} style={{
+            padding: '12px 14px', borderRadius: cc.radiusMd,
+            background: hexToRgba(item.color, 0.05),
+            border: `1px solid ${hexToRgba(item.color, 0.15)}`,
+            textAlign: 'center',
+          }}>
+            <div style={{ fontSize: 18, fontWeight: 700, color: item.color, fontVariantNumeric: 'tabular-nums' }}>{item.score}</div>
+            <div style={{ fontSize: 10, color: item.color, opacity: 0.8, marginTop: 4, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{item.label}</div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{ marginTop: 12, height: 6, borderRadius: cc.radiusFull, background: cc.borderSubtle, overflow: 'hidden' }}>
+        <div style={{ height: '100%', width: '0%', background: cc.textMuted, borderRadius: cc.radiusFull, transition: 'width 0.6s ease' }} />
+      </div>
+      <div style={{ fontSize: 11, color: cc.textMuted, marginTop: 6, textAlign: 'right' }}>Grade will be available after OJT completion</div>
+    </CardWrapper>
+  </motion.div>
+);
+
+// ============================================================
+// MAIN COMPONENT
+// ============================================================
 export const StudentDashboardTab: React.FC = () => {
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<StudentDashboardStats>({
-    applications: 0, interviews: 0, reports: 0, daysRemaining: 0, semesterName: '—', semesterStatus: 'N/A',
+    applications: 0,
+    interviews: 0,
+    reports: 0,
+    daysRemaining: 0,
+    semesterName: '—',
+    semesterStatus: 'N/A',
   });
   const navigate = useNavigate();
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoaded(true), 100);
+    const timer = setTimeout(() => setMounted(true), 100);
     return () => clearTimeout(timer);
   }, []);
 
@@ -47,198 +722,72 @@ export const StudentDashboardTab: React.FC = () => {
     fetchStats();
   }, []);
 
-  const sparklineData = [12, 19, 15, 22, 18, 25, 20];
+  const handleNavigate = (route: string) => {
+    navigate(`/student-dashboard/${route}`);
+  };
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 22, fontFamily: 'Inter, sans-serif' }}>
-        <style>{`
-          .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; align-items: stretch; }
-          .bottom-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; align-items: stretch; }
-          @media (max-width: 1024px) {
-            .kpi-grid { grid-template-columns: repeat(2, 1fr); }
-            .bottom-grid { grid-template-columns: 1fr; }
-          }
-          @media (max-width: 640px) {
-            .kpi-grid { grid-template-columns: 1fr; }
-          }
-        `}</style>
-        
-        {/* Skeleton Hero Card */}
-        <div style={{ padding: '28px 30px', borderRadius: 28, background: '#fff', border: '1px solid rgba(226,232,240,.9)' }}>
-          <Skeleton active title={{ width: '60%' }} paragraph={{ rows: 2, width: ['40%', '30%'] }} />
-          <div style={{ display: 'flex', gap: 12, marginTop: 18 }}>
-            {[1, 2, 3, 4].map(i => (
-              <div key={i} style={{ width: 100, height: 68, borderRadius: 16, background: '#f5f7fa', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Skeleton.Button active shape="round" block style={{ height: 32, width: 60 }} />
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Skeleton KPI Grid */}
-        <div className="kpi-grid">
-          {[1, 2, 3, 4].map(i => (
-            <div key={i} style={{ padding: 20, borderRadius: 18, background: '#fff', border: '1px solid rgba(226,232,240,.9)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
-                <Skeleton.Avatar active shape="square" size="small" />
-                <Skeleton.Button active size="small" shape="round" style={{ width: 60 }} />
-              </div>
-              <Skeleton active paragraph={{ rows: 1 }} title={{ width: '40%' }} />
-            </div>
-          ))}
-        </div>
-
-        {/* Skeleton Bottom Grid */}
-        <div className="bottom-grid">
-          <div style={{ padding: 24, borderRadius: 18, background: '#fff', border: '1px solid rgba(226,232,240,.9)' }}>
-             <Skeleton active title={{ width: '30%' }} paragraph={{ rows: 4 }} />
-          </div>
-          <div style={{ padding: 24, borderRadius: 18, background: '#fff', border: '1px solid rgba(226,232,240,.9)' }}>
-             <Skeleton active title={{ width: '40%' }} paragraph={{ rows: 3 }} />
-          </div>
-        </div>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}>
+        <Spin size="large" />
       </div>
     );
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 22, fontFamily: 'Inter, sans-serif' }}>
+    <div style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px 40px' }}>
+        <AnimatePresence>
+          {mounted && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
+            >
+              <SemesterContextBar stats={stats} />
+
+              <div style={{ display: 'grid', gridTemplateColumns: '7fr 3fr', gap: 24 }}>
+                {/* Left Column */}
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <UrgencyCardsRow stats={stats} onNavigate={handleNavigate} />
+                  <ReportPipelineRow stats={stats} onNavigate={handleNavigate} />
+                  <QuickActionsRow onNavigate={handleNavigate} />
+                  <EvaluationRow onNavigate={handleNavigate} />
+                </div>
+
+                {/* Right Column */}
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <UpcomingCard onNavigate={handleNavigate} />
+                  <RecentActivityCard onNavigate={handleNavigate} />
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
       <style>{`
-        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; align-items: stretch; }
-        .bottom-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; align-items: stretch; }
-        @media (max-width: 1024px) {
-          .kpi-grid { grid-template-columns: repeat(2, 1fr); }
-          .bottom-grid { grid-template-columns: 1fr; }
+        @keyframes pulse-dot {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.5; transform: scale(1.15); }
         }
-        @media (max-width: 640px) {
-          .kpi-grid { grid-template-columns: 1fr; }
+        @media (max-width: 1024px) {
+          div[style*="grid-template-columns: 7fr 3fr"] {
+            grid-template-columns: 1fr !important;
+          }
+        }
+        @media (max-width: 768px) {
+          div[style*="grid-template-columns: repeat(2, 1fr)"] {
+            grid-template-columns: 1fr !important;
+          }
+          div[style*="grid-template-columns: repeat(4, 1fr)"] {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
+          div[style*="grid-template-columns: 7fr 5fr"] {
+            grid-template-columns: 1fr !important;
+          }
         }
       `}</style>
-
-      {/* HERO CARD */}
-      <div style={{
-        position: 'relative',
-        padding: '28px 30px',
-        borderRadius: 28,
-        background: 'linear-gradient(135deg, rgba(255,255,255,.98) 0%, rgba(255,244,236,.92) 48%, rgba(255,250,246,.96) 100%)',
-        border: '1px solid rgba(230, 126, 34,.12)',
-        boxShadow: '0 20px 50px rgba(15,23,42,.10), 0 8px 22px rgba(230, 126, 34,.10)',
-        overflow: 'hidden',
-      }}>
-        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'radial-gradient(circle at top right, rgba(230, 126, 34,.14), transparent 30%), radial-gradient(circle at 20% 20%, rgba(255,138,90,.10), transparent 25%)' }} />
-        <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 5, background: 'linear-gradient(180deg, #E67E22, #E67E22, #F39C12)' }} />
-        <div style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', gap: 20, alignItems: 'stretch', flexWrap: 'wrap' }}>
-          <div style={{ minWidth: 0, flex: '1 1 480px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-            <div>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '7px 12px', borderRadius: 999, background: 'rgba(233,101,0,.08)', color: cc.primaryDark, fontSize: 12, fontWeight: 700, marginBottom: 14 }}>
-                <CalendarOutlined /> {stats.semesterName || 'Semester'}
-              </div>
-              <h1 style={{ fontSize: 34, lineHeight: 1.06, fontWeight: 900, color: cc.text, margin: 0, letterSpacing: '-1.2px' }}>Your internship journey, at a glance.</h1>
-              <p style={{ fontSize: 14.5, color: cc.textMuted, marginTop: 10, maxWidth: 720, lineHeight: 1.7 }}>
-                {stats.applications} applications, {stats.interviews} interviews scheduled, {stats.reports} reports submitted this semester.
-              </p>
-            </div>
-            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 18 }}>
-              <motion.div whileHover={{ y: -2, transition: { duration: 0.2 }, boxShadow: '0 8px 24px rgba(15,23,42,.12)' }} style={{ padding: '10px 14px', borderRadius: 16, background: '#fff', border: '1px solid rgba(226,232,240,.95)', boxShadow: '0 4px 18px rgba(15,23,42,.06)', display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: 68 }}>
-                <div style={{ fontSize: 11, color: cc.textMuted, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em' }}>Applications</div>
-                <div style={{ fontSize: 26, fontWeight: 900, color: cc.text, lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}><AnimatedNumber value={stats.applications} /></div>
-              </motion.div>
-              <motion.div whileHover={{ y: -2, transition: { duration: 0.2 }, boxShadow: '0 8px 24px rgba(15,23,42,.12)' }} style={{ padding: '10px 14px', borderRadius: 16, background: '#fff', border: '1px solid rgba(226,232,240,.95)', boxShadow: '0 4px 18px rgba(15,23,42,.06)', display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: 68 }}>
-                <div style={{ fontSize: 11, color: cc.textMuted, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em' }}>Interviews</div>
-                <div style={{ fontSize: 26, fontWeight: 900, color: cc.text, lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}><AnimatedNumber value={stats.interviews} /></div>
-              </motion.div>
-              <motion.div whileHover={{ y: -2, transition: { duration: 0.2 }, boxShadow: '0 8px 24px rgba(15,23,42,.12)' }} style={{ padding: '10px 14px', borderRadius: 16, background: '#fff', border: '1px solid rgba(226,232,240,.95)', boxShadow: '0 4px 18px rgba(15,23,42,.06)', display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: 68 }}>
-                <div style={{ fontSize: 11, color: cc.textMuted, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em' }}>Reports</div>
-                <div style={{ fontSize: 26, fontWeight: 900, color: cc.text, lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}><AnimatedNumber value={stats.reports} /></div>
-              </motion.div>
-              <motion.div whileHover={{ y: -2, transition: { duration: 0.2 }, boxShadow: '0 8px 24px rgba(15,23,42,.12)' }} style={{ padding: '10px 14px', borderRadius: 16, background: '#fff', border: '1px solid rgba(226,232,240,.95)', boxShadow: '0 4px 18px rgba(15,23,42,.06)', display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: 68 }}>
-                <div style={{ fontSize: 11, color: cc.textMuted, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.08em' }}>Days Left</div>
-                <div style={{ fontSize: 26, fontWeight: 900, color: cc.text, lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}><AnimatedNumber value={stats.daysRemaining} /></div>
-              </motion.div>
-            </div>
-          </div>
-          <div style={{ flex: '0 1 320px', minWidth: 280, display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <motion.div whileHover={{ y: -2, transition: { duration: 0.2 }, boxShadow: '0 8px 24px rgba(15,23,42,.12)' }} style={{ padding: 16, borderRadius: 20, background: 'rgba(255,255,255,.72)', border: '1px solid rgba(226,232,240,.9)', boxShadow: '0 6px 18px rgba(15,23,42,.06)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
-                <div>
-                  <div style={{ fontSize: 12, color: cc.textMuted, fontWeight: 700 }}>Progress</div>
-                  <div style={{ fontSize: 28, fontWeight: 900, color: cc.text, lineHeight: 1.05, fontVariantNumeric: 'tabular-nums' }}>68%</div>
-                  <div style={{ fontSize: 12, color: cc.success, fontWeight: 700, marginTop: 4 }}>On track</div>
-                </div>
-                <div style={{ width: 62, height: 62, borderRadius: 18, background: `linear-gradient(135deg, ${cc.primary}26, ${cc.primaryDark}10)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <TrophyOutlined style={{ fontSize: 22, color: cc.primary }} />
-                </div>
-              </div>
-              <div style={{ marginTop: 12 }}><Sparkline data={sparklineData} color={cc.primary} width={260} height={42} /></div>
-            </motion.div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, alignItems: 'stretch' }}>
-              <motion.div whileHover={{ y: -2, transition: { duration: 0.2 }, boxShadow: '0 8px 24px rgba(15,23,42,.12)' }} style={{ padding: 14, borderRadius: 18, background: 'rgba(255,255,255,.72)', border: '1px solid rgba(226,232,240,.9)', boxShadow: '0 6px 18px rgba(15,23,42,.06)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: 80 }}>
-                <div>
-                  <div style={{ fontSize: 12, color: cc.textMuted, fontWeight: 700 }}>Status</div>
-                  <div style={{ fontSize: 20, fontWeight: 900, color: cc.success, lineHeight: 1.1, marginTop: 4, fontVariantNumeric: 'tabular-nums' }}>Active</div>
-                </div>
-                <div style={{ fontSize: 12, color: cc.success, marginTop: 4, fontWeight: 600 }}>Internship running</div>
-              </motion.div>
-              <motion.div whileHover={{ y: -2, transition: { duration: 0.2 }, boxShadow: '0 8px 24px rgba(15,23,42,.12)' }} style={{ padding: 14, borderRadius: 18, background: 'rgba(255,255,255,.72)', border: '1px solid rgba(226,232,240,.9)', boxShadow: '0 6px 18px rgba(15,23,42,.06)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: 80 }}>
-                <div>
-                  <div style={{ fontSize: 12, color: cc.textMuted, fontWeight: 700 }}>Reports Due</div>
-                  <div style={{ fontSize: 20, fontWeight: 900, color: cc.warning, lineHeight: 1.1, marginTop: 4, fontVariantNumeric: 'tabular-nums' }}>1</div>
-                </div>
-                <div style={{ fontSize: 12, color: cc.warning, marginTop: 4, fontWeight: 600 }}>This week</div>
-              </motion.div>
-            </div>
-            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-              <button onClick={() => navigate('/student-dashboard/reports')} style={{ padding: '11px 16px', borderRadius: 16, border: 'none', background: 'linear-gradient(135deg, #FF662C, #FF824D, #FF9B73)', color: '#fff', fontWeight: 800, boxShadow: '0 12px 28px rgba(233,101,0,.22)', cursor: 'pointer' }}>Submit Report</button>
-              <button onClick={() => navigate('/student-dashboard/jobs')} style={{ padding: '11px 16px', borderRadius: 16, border: `1.5px solid ${cc.primary}`, background: '#fff', color: cc.primary, fontWeight: 800, boxShadow: '0 8px 18px rgba(15,23,42,.05)', cursor: 'pointer' }}>Browse Jobs</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 4 KPI STAT CARDS */}
-      <div className="kpi-grid">
-        <AnimatedStatCard label="Applications" value={stats.applications} icon={<FileTextOutlined style={{ fontSize: 20 }} />} color={cc.info} trend="Total" insight="Job applications sent" sparkline={[1, 2, 1, 3, 2, 3, 3]} delay={100} />
-        <AnimatedStatCard label="Interviews" value={stats.interviews} icon={<CalendarOutlined style={{ fontSize: 20 }} />} color={cc.warning} trend="Scheduled" insight="Upcoming interviews" sparkline={[0, 0, 1, 1, 0, 1, 1]} delay={200} />
-        <AnimatedStatCard label="Reports Submitted" value={stats.reports} icon={<SnippetsOutlined style={{ fontSize: 20 }} />} color={cc.success} trend="This semester" insight="Weekly reports completed" sparkline={[0, 1, 2, 2, 3, 4, 4]} delay={300} />
-        <AnimatedStatCard label="Days Remaining" value={stats.daysRemaining} icon={<ClockCircleOutlined style={{ fontSize: 20 }} />} color={cc.primary} trend="Until end" insight="OJT duration" sparkline={[90, 85, 80, 75, 70, 65, 60]} delay={400} />
-      </div>
-
-      {/* BOTTOM ROW */}
-      <div className="bottom-grid">
-        <NeuSurface style={{ padding: 24, opacity: isLoaded ? 1 : 0, transform: isLoaded ? 'translateY(0)' : 'translateY(20px)', transition: 'all .4s ease-out .3s' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
-            <div>
-              <h2 style={{ fontSize: 18, fontWeight: 800, color: cc.text, margin: 0 }}>Report Progress</h2>
-              <span style={{ fontSize: 12, color: cc.textMuted }}>Weekly submission trend</span>
-            </div>
-            <SmallPill color={cc.success} glow>Live tracking</SmallPill>
-          </div>
-          <div style={{ height: 170 }}><AreaChart data={[0, 1, 2, 2, 3, 4, 4]} color={cc.primary} /></div>
-        </NeuSurface>
-
-        <NeuSurface style={{ padding: 24, opacity: isLoaded ? 1 : 0, transform: isLoaded ? 'translateY(0)' : 'translateY(20px)', transition: 'all .4s ease-out .4s', display: 'flex', flexDirection: 'column' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
-            <h2 style={{ fontSize: 18, fontWeight: 800, color: cc.text, margin: 0 }}>Recent Activity</h2>
-            <SmallPill color={cc.warning}>Live</SmallPill>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, flex: 1 }}>
-            {[
-              { title: 'Application submitted to TechCorp', meta: '2 hours ago', tone: cc.info },
-              { title: 'Weekly report W22 approved', meta: 'Yesterday', tone: cc.success },
-              { title: 'Interview scheduled for Jul 15', meta: '3 days ago', tone: cc.warning },
-            ].map((item, i) => (
-              <motion.div key={i} whileHover={{ x: 2, transition: { duration: 0.15 } }} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '12px 14px', borderRadius: 16, background: '#fff', border: '1px solid rgba(226,232,240,.9)', boxShadow: '0 4px 16px rgba(15,23,42,.04)', cursor: 'pointer' }}>
-                <div style={{ width: 10, height: 10, borderRadius: '50%', background: item.tone, boxShadow: `0 0 0 4px ${item.tone}20`, marginTop: 4 }} />
-                <div style={{ minWidth: 0 }}>
-                  <div style={{ fontSize: 13.5, fontWeight: 800, color: cc.text }}>{item.title}</div>
-                  <div style={{ fontSize: 11.5, color: cc.textMuted, marginTop: 3 }}>{item.meta}</div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </NeuSurface>
-      </div>
     </div>
   );
 };
