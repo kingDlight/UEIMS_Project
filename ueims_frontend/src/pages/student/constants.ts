@@ -113,16 +113,16 @@ export type StudentPageKey =
   | 'evaluation';
 
 export const navItems: NavItem[] = [
-  { key: 'dashboard', label: 'Student Dashboard', icon: React.createElement(CalendarOutlined), roles: ['STUDENT'] },
-  { key: 'profile', label: 'Profile & CV', icon: React.createElement(UserOutlined), roles: ['STUDENT'] },
+  { key: 'dashboard', label: 'Dashboard', icon: React.createElement(CalendarOutlined), roles: ['STUDENT'] },
+  { key: 'profile', label: 'Profile', icon: React.createElement(UserOutlined), roles: ['STUDENT'] },
   { key: 'jobs', label: 'Job Board', icon: React.createElement(TrophyOutlined), roles: ['STUDENT'] },
-  { key: 'applications', label: 'My Applications', icon: React.createElement(FileTextOutlined), roles: ['STUDENT'] },
-  { key: 'schedule', label: 'My Interviews', icon: React.createElement(CalendarOutlined), roles: ['STUDENT'] },
-  { key: 'training-plan', label: 'Internship Progress', icon: React.createElement(BookOutlined), roles: ['STUDENT'] },
-  { key: 'reports', label: 'Weekly Reports', icon: React.createElement(SnippetsOutlined), roles: ['STUDENT'] },
-  { key: 'feedback', label: 'Evaluate Enterprise', icon: React.createElement(CheckCircleOutlined), roles: ['STUDENT'] },
-  { key: 'final-report', label: 'Final Report Submission', icon: React.createElement(FileProtectOutlined), roles: ['STUDENT'] },
-  { key: 'evaluation', label: 'My Evaluation', icon: React.createElement(TrophyOutlined), roles: ['STUDENT'] },
+  { key: 'applications', label: 'Applications', icon: React.createElement(FileTextOutlined), roles: ['STUDENT'] },
+  { key: 'schedule', label: 'Interviews', icon: React.createElement(CalendarOutlined), roles: ['STUDENT'] },
+  { key: 'training-plan', label: 'Progress', icon: React.createElement(BookOutlined), roles: ['STUDENT'] },
+  { key: 'reports', label: 'Reports', icon: React.createElement(SnippetsOutlined), roles: ['STUDENT'] },
+  { key: 'feedback', label: 'Feedback', icon: React.createElement(CheckCircleOutlined), roles: ['STUDENT'] },
+  { key: 'final-report', label: 'Final Report', icon: React.createElement(FileProtectOutlined), roles: ['STUDENT'] },
+  { key: 'evaluation', label: 'Evaluation', icon: React.createElement(TrophyOutlined), roles: ['STUDENT'] },
 ];
 
 export const defaultPage: StudentPageKey = 'dashboard';
