@@ -43,6 +43,22 @@ public class InterviewServiceImpl implements InterviewService {
     }
 
     @Override
+    public List<Interview> findMyEnterpriseInterviews() {
+        User currentUser = getCurrentUser();
+        if (currentUser.getEnterprise() == null) {
+            return List.of();
+        }
+        UUID enterpriseId = currentUser.getEnterprise().getEnterpriseId();
+        return repository.findAll().stream()
+                .filter(i -> i.getApplication() != null
+                        && i.getApplication().getJobPost() != null
+                        && i.getApplication().getJobPost().getEnterprise() != null
+                        && enterpriseId.equals(
+                                i.getApplication().getJobPost().getEnterprise().getEnterpriseId()))
+                .toList();
+    }
+
+    @Override
     public Interview findById(UUID id) {
         return repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.INTERVIEW_NOT_FOUND));
     }
@@ -136,6 +152,90 @@ public class InterviewServiceImpl implements InterviewService {
     @Override
     public void deleteById(UUID id) {
         repository.deleteById(id);
+    }
+
+    @Override
+    @Transactional
+    public Interview update(UUID id, Interview entity) {
+        Interview existing = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.INTERVIEW_NOT_FOUND));
+        User currentUser = getCurrentUser();
+
+        // Ownership check
+        if (currentUser.getEnterprise() == null
+                || existing.getApplication() == null
+                || existing.getApplication().getJobPost() == null
+                || existing.getApplication().getJobPost().getEnterprise() == null
+                || !existing.getApplication()
+                        .getJobPost()
+                        .getEnterprise()
+                        .getEnterpriseId()
+                        .equals(currentUser.getEnterprise().getEnterpriseId())) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        // BR-35: future time required when rescheduling
+        if (entity.getScheduledTime() != null) {
+            if (entity.getScheduledTime().isBefore(LocalDateTime.now())) {
+                throw new AppException(ErrorCode.INTERVIEW_DATE_MUST_BE_IN_FUTURE);
+            }
+            existing.setScheduledTime(entity.getScheduledTime());
+        }
+        if (entity.getDurationMinutes() != null) existing.setDurationMinutes(entity.getDurationMinutes());
+        if (entity.getMeetingLink() != null) existing.setMeetingLink(entity.getMeetingLink());
+        if (entity.getLocation() != null) existing.setLocation(entity.getLocation());
+        if (entity.getStatus() != null) existing.setStatus(entity.getStatus().toUpperCase());
+        if (entity.getFeedback() != null) existing.setFeedback(entity.getFeedback());
+        existing.setUpdatedAt(LocalDateTime.now());
+
+        return repository.save(existing);
+    }
+
+    @Override
+    @Transactional
+    public Interview recordResult(UUID id, String result, String notes) {
+        Interview existing = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.INTERVIEW_NOT_FOUND));
+        User currentUser = getCurrentUser();
+
+        // Ownership check
+        if (currentUser.getEnterprise() == null
+                || existing.getApplication() == null
+                || existing.getApplication().getJobPost() == null
+                || existing.getApplication().getJobPost().getEnterprise() == null
+                || !existing.getApplication()
+                        .getJobPost()
+                        .getEnterprise()
+                        .getEnterpriseId()
+                        .equals(currentUser.getEnterprise().getEnterpriseId())) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        // BR-37: must be COMPLETED before recording
+        if (!"COMPLETED".equalsIgnoreCase(existing.getStatus())) {
+            throw new AppException(ErrorCode.INTERVIEW_NOT_COMPLETED);
+        }
+
+        // BR-44: rejection requires notes
+        if ("FAIL".equalsIgnoreCase(result) && (notes == null || notes.isBlank())) {
+            throw new AppException(ErrorCode.FIELD_REQUIRED);
+        }
+
+        String upper = result == null ? "PASS" : result.toUpperCase();
+        existing.setResult(upper);
+        existing.setFeedback(notes);
+        existing.setStatus("RESULT_RECORDED");
+        existing.setUpdatedAt(LocalDateTime.now());
+
+        // Update application status accordingly
+        Application app = existing.getApplication();
+        if ("PASS".equals(upper)) {
+            app.setStatus(ApplicationStatus.ACCEPTED);
+        } else if ("FAIL".equals(upper)) {
+            app.setStatus(ApplicationStatus.REJECTED);
+            app.setRejectionReason(notes);
+        }
+        applicationRepository.save(app);
+
+        return repository.save(existing);
     }
 
     private User getCurrentUser() {

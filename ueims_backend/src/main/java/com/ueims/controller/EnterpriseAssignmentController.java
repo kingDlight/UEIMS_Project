@@ -35,6 +35,14 @@ public class EnterpriseAssignmentController {
         return ResponseEntity.ok(mapper.toDto(service.findMyAssignment(userService.getCurrentUserId())));
     }
 
+    @GetMapping("/my-enterprise")
+    @PreAuthorize("hasRole('ENTERPRISE') or hasRole('TRAINING_MANAGER')")
+    public ResponseEntity<java.util.List<com.ueims.dto.response.EnterpriseAssignmentDTO>> getMyEnterpriseAssignments() {
+        return ResponseEntity.ok(service.findMyEnterpriseAssignments().stream()
+                .map(mapper::toDto)
+                .toList());
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<com.ueims.dto.response.EnterpriseAssignmentDTO> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(mapper.toDto(service.findById(id)));

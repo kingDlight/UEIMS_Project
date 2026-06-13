@@ -11,6 +11,8 @@ public interface EnterpriseService {
 
     Enterprise findById(UUID id);
 
+    Enterprise getMyEnterpriseProfile();
+
     Enterprise save(EnterpriseRequest request);
 
     Enterprise update(UUID id, EnterpriseRequest request);

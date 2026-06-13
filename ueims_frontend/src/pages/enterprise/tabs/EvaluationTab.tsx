@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Spin, message } from 'antd';
 import { motion } from 'framer-motion';
 import { StarOutlined, LockOutlined, CheckCircleOutlined } from '@ant-design/icons';
-import { EnterpriseAssignmentService } from '@/services/EnterpriseAssignmentService';
+import { ApplicationService } from '@/services/ApplicationService';
 import { EnterpriseEvaluationService } from '@/services/EnterpriseEvaluationService';
 import { c } from '../constants';
 
@@ -353,19 +353,19 @@ export const EvaluationTab: React.FC = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const res = await EnterpriseAssignmentService.getAll();
-        const data = res.data?.result ?? res.data ?? [];
-        if (Array.isArray(data) && data.length > 0) {
+        const res = await ApplicationService.getMyEnterprise();
+        const data: any[] = res.data?.result ?? res.data ?? [];
+        if (data.length > 0) {
           const mapped: AssignedStudent[] = data
-            .filter((item: any) => item.status === 'PLACED' || item.status === 'INTERVIEWING')
+            .filter((item) => item.status === 'ACCEPTED' || item.status === 'INTERVIEW_SCHEDULED')
             .map((item: any) => ({
-              assignmentId: item.assignmentId ?? item.id,
-              studentName: item.student?.fullName ?? item.studentName ?? 'Student',
-              studentCode: item.student?.studentCode ?? item.studentCode ?? '—',
-              major: item.student?.major ?? item.major ?? '—',
-              gpa: item.student?.gpa ?? item.gpa ?? 0,
-              jobTitle: item.jobPost?.title ?? item.jobTitle ?? 'Intern',
-              evaluationId: item.evaluationId,
+              assignmentId: item.applicationId ?? item.id,
+              studentName: item.studentName ?? 'Student',
+              studentCode: item.studentCode ?? '—',
+              major: item.major ?? '—',
+              gpa: item.gpa ?? 0,
+              jobTitle: item.jobPostTitle ?? 'Intern',
+              evaluationId: undefined,
             }));
           setStudents(mapped);
           if (mapped.length > 0) {
@@ -453,9 +453,23 @@ export const EvaluationTab: React.FC = () => {
         overallComments: comments,
       };
       if (existingEvaluation?.evaluationId) {
-        await EnterpriseEvaluationService.update(existingEvaluation.evaluationId, payload);
+        await EnterpriseEvaluationService.update(existingEvaluation.evaluationId, {
+          assignmentId: selectedStudent.assignmentId,
+          attitudeScore: scores.attitude,
+          professionalismScore: scores.professionalism,
+          softSkillsScore: scores.softSkills,
+          progressScore: scores.progress,
+          overallComments: comments,
+        });
       } else {
-        await EnterpriseEvaluationService.create(payload);
+        await EnterpriseEvaluationService.create({
+          assignmentId: selectedStudent.assignmentId,
+          attitudeScore: scores.attitude,
+          professionalismScore: scores.professionalism,
+          softSkillsScore: scores.softSkills,
+          progressScore: scores.progress,
+          overallComments: comments,
+        });
       }
       message.success('Evaluation submitted successfully!');
       setSubmitted(true);

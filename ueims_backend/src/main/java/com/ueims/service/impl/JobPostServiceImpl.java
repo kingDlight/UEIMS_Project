@@ -113,6 +113,19 @@ public class JobPostServiceImpl implements JobPostService {
         repository.save(existing);
     }
 
+    @Override
+    @Transactional
+    public JobPost toggleStatus(UUID id, String status) {
+        JobPost existing = findById(id);
+        validateOwnership(existing);
+        String upper = status == null ? "" : status.toUpperCase();
+        if (!upper.equals("OPEN") && !upper.equals("CLOSED")) {
+            throw new AppException(ErrorCode.INVALID_PARAMETER_FORMAT);
+        }
+        existing.setStatus(upper);
+        return repository.save(existing);
+    }
+
     /**
      * Kiểm tra xem người dùng hiện tại có phải là chủ sở hữu của bài đăng này không
      * (BR-29)
