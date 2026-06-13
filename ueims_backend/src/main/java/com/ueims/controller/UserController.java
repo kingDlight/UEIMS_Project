@@ -10,22 +10,31 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import com.ueims.dto.request.UserCreationRequest;
+import com.ueims.dto.request.UserUpdateRequest;
 import com.ueims.dto.response.UserResponse;
 import com.ueims.model.entity.User;
 import com.ueims.service.UserService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserController {
-    private final UserService service;
-    private final PasswordEncoder passwordEncoder;
+    UserService service;
+    PasswordEncoder passwordEncoder;
 
     @GetMapping("/myInfo")
     public ResponseEntity<UserResponse> getMyInfo() {
         return ResponseEntity.ok(service.getMyInfo());
+    }
+
+    @PutMapping("/myInfo")
+    public ResponseEntity<UserResponse> updateMyInfo(@RequestBody UserUpdateRequest request) {
+        return ResponseEntity.ok(service.updateMyInfo(request));
     }
 
     @GetMapping
@@ -47,6 +56,11 @@ public class UserController {
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         service.deleteById(id);
         return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<User> update(@PathVariable UUID id, @RequestBody UserUpdateRequest request) {
+        return ResponseEntity.ok(service.updateUser(id, request));
     }
 
     @PutMapping("/{id}/lock")

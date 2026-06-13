@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { message, Spin } from 'antd';
+import React, { useEffect, useState, useMemo } from 'react';
+import { message, Spin, Pagination } from 'antd';
 import { motion } from 'framer-motion';
 import { TrophyOutlined, CalendarOutlined, TeamOutlined, ClockCircleOutlined, RightOutlined, SendOutlined, CloseCircleOutlined, WarningOutlined, SearchOutlined, EnvironmentOutlined } from '@ant-design/icons';
 import { NeuSurface } from '../components/shared/NeuSurface';
 import { SmallBadge } from '../components/shared/SmallBadge';
-import { api } from '@/services/api';
+import { JobPostService } from '@/services/JobPostService';
+import { ApplicationService } from '@/services/ApplicationService';
+import { StudentProfileService } from '@/services/StudentProfileService';
 import { cc, hexToRgba } from '../constants';
 
 const CTAButton: React.FC<{
@@ -65,14 +67,28 @@ export const JobBoardTab: React.FC = () => {
   const [applying, setApplying] = useState(false);
   const [techFilter, setTechFilter] = useState<string[]>([]);
   const [confirmApply, setConfirmApply] = useState<any>(null);
+  const [hasCv, setHasCv] = useState<boolean | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 9;
 
-  useEffect(() => { fetchJobs(); }, []);
+  useEffect(() => { fetchJobs(); fetchProfile(); }, []);
+
+  const fetchProfile = async () => {
+    try {
+      const res = await StudentProfileService.getMyProfile();
+      const profile = res.data?.result ?? res.data;
+      setHasCv(!!(profile?.cvUrl));
+    } catch {
+      setHasCv(false);
+    }
+  };
 
   const fetchJobs = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/job-posts/active');
-      setJobs(res.data || []);
+      const res = await JobPostService.getActive();
+      const jobs = res.data?.result ?? res.data ?? [];
+      setJobs(Array.isArray(jobs) ? jobs : []);
     } catch (err) {
       console.error('Failed to fetch jobs', err);
     } finally {
@@ -91,30 +107,44 @@ export const JobBoardTab: React.FC = () => {
     
     try {
       setApplying(true);
-      await api.post('/applications', { jobPostId: confirmApply.jobPostId });
+      await ApplicationService.create({ jobPostId: confirmApply.jobPostId });
       message.success('Application submitted successfully!');
       setConfirmApply(null);
       setSelectedJob(null);
       fetchJobs();
     } catch (err: any) {
-      if (err.response?.data?.message?.includes('already') || err.response?.data?.message?.includes('duplicate')) {
+      const errorMsg = err.response?.data?.message || '';
+      if (errorMsg.includes('already') || errorMsg.includes('duplicate')) {
         message.error('You have already applied for this position.');
+      } else if (errorMsg.includes('CV') && errorMsg.includes('upload')) {
+        message.error('Please upload your CV in Profile before applying.');
+      } else if (errorMsg.includes('deadline') || errorMsg.includes('expired')) {
+        message.error('This job posting has reached its deadline.');
       } else {
-        message.error(err.response?.data?.message || 'Application failed!');
+        message.error(errorMsg || 'Application failed!');
       }
     } finally {
       setApplying(false);
     }
   };
 
-  const filteredJobs = jobs.filter(job => {
-    const matchesSearch = !searchTerm || 
-      job.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      job.enterpriseName?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesTech = techFilter.length === 0 || 
-      (job.requiredSkills && job.requiredSkills.some((skill: string) => techFilter.includes(skill.toLowerCase())));
-    return matchesSearch && matchesTech;
-  });
+  const filteredJobs = useMemo(() => {
+    return jobs.filter(job => {
+      const matchesSearch = !searchTerm || 
+        job.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        job.enterpriseName?.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesTech = techFilter.length === 0 || 
+        (job.requiredSkills && job.requiredSkills.some((skill: string) => techFilter.includes(skill.toLowerCase())));
+      return matchesSearch && matchesTech;
+    });
+  }, [jobs, searchTerm, techFilter]);
+
+  useEffect(() => { setCurrentPage(1); }, [searchTerm, techFilter]);
+
+  const paginatedJobs = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredJobs.slice(start, start + pageSize);
+  }, [filteredJobs, currentPage]);
 
   if (loading) {
     return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}><Spin size="large" /></div>;
@@ -190,32 +220,44 @@ export const JobBoardTab: React.FC = () => {
       {filteredJobs.length === 0 ? (
         <EmptyState icon={<TrophyOutlined style={{ fontSize: 32 }} />} title="No matching job postings found" description="Please try refining your keywords or filters" />
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 20 }}>
-          {filteredJobs.map((job, index) => (
-            <motion.div key={job.jobPostId || index} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: index * 0.05 }}>
-              <NeuSurface style={{ padding: 20, cursor: 'pointer', transition: 'all 0.2s' }} onClick={() => setSelectedJob(job)}>
-                <div style={{ display: 'flex', gap: 12, marginBottom: 14 }}>
-                  <div style={{ width: 48, height: 48, borderRadius: cc.radiusMd, background: hexToRgba(cc.primary, 0.08), display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.primary, fontSize: 20, fontWeight: 700, flexShrink: 0 }}>
-                    {job.enterpriseName?.charAt(0) || 'E'}
+        <>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 20 }}>
+            {paginatedJobs.map((job, index) => (
+              <motion.div key={job.jobPostId || index} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: index * 0.05 }}>
+                <NeuSurface style={{ padding: 20, cursor: 'pointer', transition: 'all 0.2s' }} onClick={() => setSelectedJob(job)}>
+                  <div style={{ display: 'flex', gap: 12, marginBottom: 14 }}>
+                    <div style={{ width: 48, height: 48, borderRadius: cc.radiusMd, background: hexToRgba(cc.primary, 0.08), display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.primary, fontSize: 20, fontWeight: 700, flexShrink: 0 }}>
+                      {job.enterpriseName?.charAt(0) || 'E'}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <h4 style={{ fontSize: 14, fontWeight: 600, color: cc.textPrimary, margin: '0 0 2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{job.title || 'Internship Position'}</h4>
+                      <p style={{ fontSize: 12, color: cc.textMuted, margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{job.enterpriseName || 'Company'}</p>
+                    </div>
                   </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <h4 style={{ fontSize: 14, fontWeight: 600, color: cc.textPrimary, margin: '0 0 2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{job.title || 'Internship Position'}</h4>
-                    <p style={{ fontSize: 12, color: cc.textMuted, margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{job.enterpriseName || 'Company'}</p>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
+                    {job.location && <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: cc.textMuted }}><EnvironmentOutlined style={{ fontSize: 12 }} />{job.location}</span>}
+                    {job.maxPositions && <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: cc.textMuted }}><TeamOutlined style={{ fontSize: 12 }} />{job.maxPositions} positions</span>}
                   </div>
-                </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
-                  {job.location && <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: cc.textMuted }}><EnvironmentOutlined style={{ fontSize: 12 }} />{job.location}</span>}
-                  {job.maxPositions && <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: cc.textMuted }}><TeamOutlined style={{ fontSize: 12 }} />{job.maxPositions} positions</span>}
-                </div>
-                <p style={{ fontSize: 13, color: cc.textMuted, margin: '0 0 14px', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{job.description || 'Job description...'}</p>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 14, borderTop: `1px solid ${cc.borderSubtle}` }}>
-                  <SmallBadge label={job.status === 'OPEN' ? 'Open' : 'Closed'} variant={job.status === 'OPEN' ? 'success' : 'neutral'} />
-                  <CTAButton variant="ghost" size="sm" icon={<RightOutlined />} onClick={(e) => { e?.stopPropagation(); setSelectedJob(job); }}>View details</CTAButton>
-                </div>
-              </NeuSurface>
-            </motion.div>
-          ))}
-        </div>
+                  <p style={{ fontSize: 13, color: cc.textMuted, margin: '0 0 14px', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{job.description || 'Job description...'}</p>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 14, borderTop: `1px solid ${cc.borderSubtle}` }}>
+                    <SmallBadge label={job.status === 'OPEN' ? 'Open' : 'Closed'} variant={job.status === 'OPEN' ? 'success' : 'neutral'} />
+                    <CTAButton variant="ghost" size="sm" icon={<RightOutlined />} onClick={(e) => { e?.stopPropagation(); setSelectedJob(job); }}>View details</CTAButton>
+                  </div>
+                </NeuSurface>
+              </motion.div>
+            ))}
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 32 }}>
+            <Pagination
+              current={currentPage}
+              pageSize={pageSize}
+              total={filteredJobs.length}
+              onChange={setCurrentPage}
+              showSizeChanger={false}
+              showTotal={(total, range) => `${range[0]}-${range[1]} of ${total} jobs`}
+            />
+          </div>
+        </>
       )}
 
       {/* Job Detail Drawer */}
@@ -239,14 +281,22 @@ export const JobBoardTab: React.FC = () => {
             {selectedJob.description && <div style={{ marginBottom: 18 }}><h3 style={{ fontSize: 13, fontWeight: 600, color: cc.textPrimary, margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Description</h3><p style={{ fontSize: 13, color: cc.textSecondary, lineHeight: 1.6, margin: 0 }}>{selectedJob.description}</p></div>}
             {selectedJob.requirements && <div style={{ marginBottom: 18 }}><h3 style={{ fontSize: 13, fontWeight: 600, color: cc.textPrimary, margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Requirements</h3><p style={{ fontSize: 13, color: cc.textSecondary, lineHeight: 1.6, margin: 0 }}>{selectedJob.requirements}</p></div>}
             {selectedJob.applicationDeadline && <div style={{ padding: 16, borderRadius: cc.radiusMd, background: cc.warningMuted, marginBottom: 20, display: 'flex', alignItems: 'center', gap: 12 }}><ClockCircleOutlined style={{ fontSize: 20, color: cc.warning }} /><div><p style={{ fontSize: 11, color: cc.warningText, margin: 0, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Application Deadline</p><p style={{ fontSize: 14, color: cc.warningText, margin: '2px 0 0', fontWeight: 600 }}>{new Date(selectedJob.applicationDeadline).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p></div></div>}
+            {!hasCv && (
+              <div style={{ padding: 12, borderRadius: cc.radiusMd, background: cc.dangerMuted, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <WarningOutlined style={{ color: cc.danger }} />
+                <span style={{ fontSize: 12, color: cc.dangerText }}>Please upload your CV in Profile before applying.</span>
+              </div>
+            )}
             <CTAButton variant="primary" size="lg" fullWidth icon={<SendOutlined />} onClick={() => {
               if (selectedJob.applicationDeadline && new Date(selectedJob.applicationDeadline) < new Date()) {
                 message.error('This job posting has reached its deadline.');
+              } else if (!hasCv) {
+                message.warning('Please upload your CV in Profile before applying.');
               } else {
                 setConfirmApply(selectedJob);
               }
-            }} disabled={selectedJob.status !== 'OPEN'} loading={applying}>
-              {selectedJob.status === 'OPEN' ? 'Apply Now' : 'Applications Closed'}
+            }} disabled={selectedJob.status !== 'OPEN' || !hasCv} loading={applying}>
+              {selectedJob.status === 'OPEN' ? (hasCv ? 'Apply Now' : 'CV Required') : 'Applications Closed'}
             </CTAButton>
           </motion.div>
         </div>

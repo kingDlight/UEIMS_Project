@@ -17,16 +17,19 @@ import com.ueims.repository.UserRepository;
 import com.ueims.service.EnterpriseService;
 import com.ueims.service.MailService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 public class EnterpriseServiceImpl implements EnterpriseService {
-    private final EnterpriseRepository repository;
-    private final UserRepository userRepository;
-    private final MailService mailService;
+    EnterpriseRepository repository;
+    UserRepository userRepository;
+    MailService mailService;
 
     @Override
     public List<Enterprise> findAll() {

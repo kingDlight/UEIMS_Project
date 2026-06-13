@@ -7,14 +7,17 @@ import org.springframework.web.bind.annotation.*;
 
 import com.ueims.service.PermissionService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @RestController
 @RequestMapping("/api/permissions")
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PermissionController {
-    private final PermissionService service;
-    private final com.ueims.mapper.PermissionMapper mapper;
+    PermissionService service;
+    com.ueims.mapper.PermissionMapper mapper;
 
     @GetMapping
     public ResponseEntity<java.util.List<com.ueims.dto.response.PermissionDTO>> getAll() {

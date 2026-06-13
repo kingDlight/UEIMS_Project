@@ -2,13 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { AuthService } from '@/services/AuthService';
+import { extractUserFromToken } from '@/utils/jwt';
 
 interface ProtectedRouteProps {
   allowedRoles?: string[];
 }
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles }) => {
-  const { isAuthenticated, currentRole, token } = useAuthStore();
+  const { isAuthenticated, token } = useAuthStore();
   const [isValidating, setIsValidating] = useState(true);
   const [isValid, setIsValid] = useState(false);
 
@@ -23,9 +24,28 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles }) 
       try {
         const result = await AuthService.introspect(token);
         if (!result.valid) {
-          useAuthStore.getState().logout();
+          const { refreshToken } = useAuthStore.getState();
+          if (refreshToken) {
+            try {
+              const refreshResult = await AuthService.refreshToken(refreshToken);
+              if (refreshResult && refreshResult.token) {
+                useAuthStore.getState().setTokens(refreshResult.token, refreshResult.refreshToken);
+                setIsValid(true);
+              } else {
+                useAuthStore.getState().logout();
+                setIsValid(false);
+              }
+            } catch {
+              useAuthStore.getState().logout();
+              setIsValid(false);
+            }
+          } else {
+            useAuthStore.getState().logout();
+            setIsValid(false);
+          }
+        } else {
+          setIsValid(true);
         }
-        setIsValid(result.valid);
       } catch {
         useAuthStore.getState().logout();
         setIsValid(false);
@@ -58,8 +78,14 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles }) 
     return <Navigate to="/login" replace />;
   }
 
-  if (allowedRoles && currentRole && !allowedRoles.includes(currentRole)) {
-    return <Navigate to="/unauthorized" replace />;
+  const payload = token ? extractUserFromToken(token) : null;
+  const roles = payload?.roles || [];
+  
+  if (allowedRoles) {
+    const hasAllowedRole = roles.some(role => allowedRoles.includes(role));
+    if (!hasAllowedRole) {
+      return <Navigate to="/unauthorized" replace />;
+    }
   }
 
   return <Outlet />;

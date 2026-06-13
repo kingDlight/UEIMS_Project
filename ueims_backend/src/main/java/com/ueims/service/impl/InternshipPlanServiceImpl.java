@@ -6,15 +6,20 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 import com.ueims.model.entity.InternshipPlan;
+import com.ueims.repository.InternshipPlanItemRepository;
 import com.ueims.repository.InternshipPlanRepository;
 import com.ueims.service.InternshipPlanService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class InternshipPlanServiceImpl implements InternshipPlanService {
     private final InternshipPlanRepository repository;
+    private final InternshipPlanItemRepository itemRepository;
 
     @Override
     public List<InternshipPlan> findAll() {
@@ -24,6 +29,15 @@ public class InternshipPlanServiceImpl implements InternshipPlanService {
     @Override
     public InternshipPlan findById(UUID id) {
         return repository.findById(id).orElse(null);
+    }
+
+    @Override
+    public InternshipPlan findMyPlan(UUID studentId) {
+        InternshipPlan plan = repository.findByAssignment_Student_UserId(studentId);
+        if (plan != null) {
+            plan.setItems(itemRepository.findByPlan_PlanId(plan.getPlanId()));
+        }
+        return plan;
     }
 
     @Override

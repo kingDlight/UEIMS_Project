@@ -7,6 +7,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
+import org.springframework.security.oauth2.jwt.BadJwtException;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
@@ -18,16 +19,24 @@ import com.ueims.model.entity.UserSession;
 import com.ueims.repository.InvalidatedTokenRepository;
 import com.ueims.repository.UserSessionRepository;
 
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
+
 @Component
-@lombok.RequiredArgsConstructor
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CustomJwtDecoder implements JwtDecoder {
+    @NonFinal
     @Value("${jwt.signerKey}")
-    private String signerKey;
+    String signerKey;
 
-    private final InvalidatedTokenRepository invalidatedTokenRepository;
-    private final UserSessionRepository userSessionRepository;
+    InvalidatedTokenRepository invalidatedTokenRepository;
+    UserSessionRepository userSessionRepository;
 
-    private NimbusJwtDecoder nimbusJwtDecoder = null;
+    @NonFinal
+    NimbusJwtDecoder nimbusJwtDecoder = null;
 
     @Override
     public Jwt decode(String token) throws JwtException {
@@ -36,30 +45,26 @@ public class CustomJwtDecoder implements JwtDecoder {
 
             String tokenType = signedJWT.getJWTClaimsSet().getStringClaim("token_type");
             if (!"ACCESS".equals(tokenType)) {
-                throw new JwtException("Invalid token type");
+                throw new BadJwtException("Invalid token type");
             }
 
             String jit = signedJWT.getJWTClaimsSet().getJWTID();
             if (jit != null && invalidatedTokenRepository.existsById(jit)) {
-                throw new JwtException("Token has been invalidated");
+                throw new BadJwtException("Token has been invalidated");
             }
 
             if (jit != null) {
                 var sessionOpt = userSessionRepository.findById(jit);
                 if (sessionOpt.isEmpty()) {
-                    throw new JwtException("Session not found or expired");
+                    throw new BadJwtException("Session not found or expired");
                 }
 
                 UserSession session = sessionOpt.get();
 
                 if (session.getLastActivity() != null
                         && session.getLastActivity().plusMinutes(15).isBefore(LocalDateTime.now())) {
-                    invalidatedTokenRepository.save(InvalidatedToken.builder()
-                            .tokenId(session.getTokenId())
-                            .expiresAt(session.getExpiresAt())
-                            .build());
-                    userSessionRepository.delete(session);
-                    throw new JwtException("Session expired due to inactivity");
+                    invalidateSessionToken(session);
+                    throw new BadJwtException("Session expired due to inactivity");
                 }
 
                 session.setLastActivity(LocalDateTime.now());
@@ -67,7 +72,7 @@ public class CustomJwtDecoder implements JwtDecoder {
             }
 
         } catch (ParseException e) {
-            throw new JwtException("Invalid token format", e);
+            throw new BadJwtException("Invalid token format", e);
         }
 
         if (Objects.isNull(nimbusJwtDecoder)) {
@@ -78,5 +83,17 @@ public class CustomJwtDecoder implements JwtDecoder {
         }
 
         return nimbusJwtDecoder.decode(token);
+    }
+
+    private void invalidateSessionToken(UserSession session) {
+        try {
+            invalidatedTokenRepository.save(InvalidatedToken.builder()
+                    .tokenId(session.getTokenId())
+                    .expiresAt(session.getExpiresAt())
+                    .build());
+            userSessionRepository.delete(session);
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            // Concurrent requests might try to invalidate the same token, ignore duplicate key error
+        }
     }
 }

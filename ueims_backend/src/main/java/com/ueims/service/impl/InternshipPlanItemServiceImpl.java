@@ -13,13 +13,16 @@ import com.ueims.repository.InternshipPlanItemRepository;
 import com.ueims.repository.InternshipPlanRepository;
 import com.ueims.service.InternshipPlanItemService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class InternshipPlanItemServiceImpl implements InternshipPlanItemService {
-    private final InternshipPlanItemRepository repository;
-    private final InternshipPlanRepository planRepository;
+    InternshipPlanItemRepository repository;
+    InternshipPlanRepository planRepository;
 
     @Override
     public List<InternshipPlanItem> findAll() {
@@ -44,11 +47,11 @@ public class InternshipPlanItemServiceImpl implements InternshipPlanItemService 
         Semester semester = plan.getAssignment().getSemester();
         LocalDate targetDate = entity.getTargetDate();
 
-        if (targetDate != null && semester != null) {
-            if (targetDate.isBefore(semester.getStartDate()) || targetDate.isAfter(semester.getEndDate())) {
-                throw new IllegalArgumentException("Target date must be within the semester boundaries ("
-                        + semester.getStartDate() + " to " + semester.getEndDate() + ")");
-            }
+        if (targetDate != null
+                && semester != null
+                && (targetDate.isBefore(semester.getStartDate()) || targetDate.isAfter(semester.getEndDate()))) {
+            throw new IllegalArgumentException("Target date must be within the semester boundaries ("
+                    + semester.getStartDate() + " to " + semester.getEndDate() + ")");
         }
 
         return repository.save(entity);

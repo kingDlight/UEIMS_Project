@@ -9,14 +9,17 @@ import org.springframework.web.bind.annotation.*;
 
 import com.ueims.service.InternshipPlanItemService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @RestController
 @RequestMapping("/api/internship-plan-items")
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class InternshipPlanItemController {
-    private final InternshipPlanItemService service;
-    private final com.ueims.mapper.InternshipPlanItemMapper mapper;
+    InternshipPlanItemService service;
+    com.ueims.mapper.InternshipPlanItemMapper mapper;
 
     @GetMapping
     public ResponseEntity<java.util.List<com.ueims.dto.response.InternshipPlanItemDTO>> getAll() {

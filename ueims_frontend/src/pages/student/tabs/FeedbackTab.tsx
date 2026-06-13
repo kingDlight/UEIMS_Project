@@ -1,12 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { message, Spin } from 'antd';
+import React, { useEffect, useState, useMemo } from 'react';
+import { message, Spin, Pagination } from 'antd';
 import { motion } from 'framer-motion';
 import { StarOutlined, CheckCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { NeuSurface } from '../components/shared/NeuSurface';
+import { StudentEnterpriseFeedbackService } from '@/services/StudentEnterpriseFeedbackService';
+import { EnterpriseAssignmentService } from '@/services/EnterpriseAssignmentService';
 import { api } from '@/services/api';
 
 const cc = {
-  primary: '#E96500',
+  primary: '#E67E22',
   primaryMuted: '#fff0e6',
   text: '#1e293b',
   textMuted: '#64748b',
@@ -34,7 +36,7 @@ const CTAButton: React.FC<{
   loading?: boolean;
 }> = ({ children, onClick, variant = 'primary', size = 'sm', icon, disabled = false, loading = false }) => {
   const styles: Record<string, { bg: string; text: string; border: string }> = {
-    primary: { bg: 'linear-gradient(135deg, #FF662C, #FF824D)', text: '#fff', border: 'none' },
+    primary: { bg: 'linear-gradient(135deg, #E67E22, #E67E22)', text: '#fff', border: 'none' },
     ghost: { bg: '#fff', text: cc.primary, border: cc.border },
     warning: { bg: '#fff', text: cc.warning, border: `${cc.warning}40` },
   };
@@ -61,13 +63,33 @@ export const FeedbackTab: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
   const [ratings, setRatings] = useState({ trainingQuality: 5, supervisorSupport: 5, workEnvironment: 5, overall: 5 });
   const [comment, setComment] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [currentAssignment, setCurrentAssignment] = useState<any>(null);
+  const pageSize = 5;
 
-  useEffect(() => { fetchFeedbacks(); }, []);
+  useEffect(() => { fetchFeedbacks(); fetchAssignment(); }, []);
+
+  const fetchAssignment = async () => {
+    try {
+      const res = await EnterpriseAssignmentService.getMyAssignment();
+      const data = res.data?.result ?? res.data;
+      if (data) {
+        setCurrentAssignment(data);
+      }
+    } catch (err) {
+      console.error('No active assignment found', err);
+    }
+  };
+
+  const paginatedFeedbacks = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return feedbacks.slice(start, start + pageSize);
+  }, [feedbacks, currentPage]);
 
   const fetchFeedbacks = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/feedbacks/my-feedbacks');
+      const res = await StudentEnterpriseFeedbackService.getMyFeedbacks();
       setFeedbacks(res.data || []);
     } catch (err) {
       console.error('Failed to fetch feedbacks', err);
@@ -77,6 +99,10 @@ export const FeedbackTab: React.FC = () => {
   };
 
   const handleSubmit = async () => {
+    if (!currentAssignment?.assignmentId) {
+      message.error('You must have an active internship assignment to submit feedback.');
+      return;
+    }
     const { trainingQuality, supervisorSupport, workEnvironment, overall } = ratings;
     if (!trainingQuality || !supervisorSupport || !workEnvironment || !overall) {
       message.error('Please complete all rating categories!');
@@ -89,7 +115,17 @@ export const FeedbackTab: React.FC = () => {
     }
     try {
       setSubmitting(true);
-      await api.post('/feedbacks', { ...ratings, comment });
+      await StudentEnterpriseFeedbackService.create({
+        enterpriseId: currentAssignment.enterprise?.enterpriseId || currentAssignment.enterpriseId,
+        semesterId: currentAssignment.semester?.semesterId || currentAssignment.semesterId,
+        trainingQualityScore: trainingQuality,
+        supervisorSupportScore: supervisorSupport,
+        workEnvironmentScore: workEnvironment,
+        overallScore: overall,
+        positiveFeedback: comment,
+        improvementFeedback: '',
+        additionalComments: '',
+      });
       message.success('Thank you! Your feedback has been submitted successfully.');
       setRatings({ trainingQuality: 5, supervisorSupport: 5, workEnvironment: 5, overall: 5 });
       setComment('');
@@ -160,24 +196,38 @@ export const FeedbackTab: React.FC = () => {
 
       {/* Feedback List */}
       {feedbacks.length > 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {feedbacks.map((fb, index) => (
-            <motion.div key={fb.feedbackId || index} initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3, delay: index * 0.05 }}>
-              <NeuSurface style={{ padding: 20 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                      <span style={{ fontSize: 18 }}>{'★'.repeat(fb.rating || 0)}</span>
-                      <span style={{ fontSize: 12, color: cc.info, background: cc.infoMuted, padding: '2px 8px', borderRadius: 4 }}>{fb.enterpriseName || 'Company'}</span>
+        <>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {paginatedFeedbacks.map((fb, index) => (
+              <motion.div key={fb.feedbackId || index} initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3, delay: index * 0.05 }}>
+                <NeuSurface style={{ padding: 20 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                        <span style={{ fontSize: 18 }}>{'★'.repeat(fb.overallScore || 0)}</span>
+                        <span style={{ fontSize: 12, color: cc.info, background: cc.infoMuted, padding: '2px 8px', borderRadius: 4 }}>{fb.enterprise?.enterpriseName || 'Company'}</span>
+                      </div>
+                      {fb.positiveFeedback && (
+                        <p style={{ fontSize: 14, color: cc.text, margin: '0 0 4px', lineHeight: 1.5 }}>{fb.positiveFeedback}</p>
+                      )}
+                      <p style={{ fontSize: 12, color: cc.textMuted, margin: '8px 0 0' }}>{fb.submittedAt ? new Date(fb.submittedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}</p>
                     </div>
-                    <p style={{ fontSize: 14, color: cc.text, margin: 0, lineHeight: 1.5 }}>{fb.comment}</p>
-                    <p style={{ fontSize: 12, color: cc.textMuted, margin: '8px 0 0' }}>{fb.createdAt ? new Date(fb.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}</p>
                   </div>
-                </div>
-              </NeuSurface>
-            </motion.div>
-          ))}
-        </div>
+                </NeuSurface>
+              </motion.div>
+            ))}
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 24 }}>
+            <Pagination
+              current={currentPage}
+              pageSize={pageSize}
+              total={feedbacks.length}
+              onChange={setCurrentPage}
+              showSizeChanger={false}
+              showTotal={(total, range) => `${range[0]}-${range[1]} of ${total}`}
+            />
+          </div>
+        </>
       )}
     </div>
   );

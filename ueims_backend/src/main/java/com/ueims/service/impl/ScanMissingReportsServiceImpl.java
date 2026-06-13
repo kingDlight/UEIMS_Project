@@ -12,9 +12,12 @@ import com.ueims.model.entity.EnterpriseAssignment;
 import com.ueims.model.entity.Semester;
 import com.ueims.repository.EnterpriseAssignmentRepository;
 import com.ueims.repository.SemesterRepository;
+import com.ueims.service.ScanMissingReportsService;
 import com.ueims.util.WeekCalculator;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -23,15 +26,17 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ScanMissingReportsService {
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+public class ScanMissingReportsServiceImpl implements ScanMissingReportsService {
 
-    private final SemesterRepository semesterRepository;
-    private final EnterpriseAssignmentRepository assignmentRepository;
+    SemesterRepository semesterRepository;
+    EnterpriseAssignmentRepository assignmentRepository;
 
     /**
      * Scan for missing reports in the current active semester.
      * @return List of missing report information
      */
+    @Override
     public List<MissingReportDto> scanMissingReports() {
         // Find the current/active semester
         LocalDate today = LocalDate.now();
@@ -89,6 +94,7 @@ public class ScanMissingReportsService {
     /**
      * Get missing reports for a specific semester and week.
      */
+    @Override
     public List<MissingReportDto> getMissingReportsForWeek(UUID semesterId, Integer weekNumber) {
         List<EnterpriseAssignment> missingAssignments =
                 assignmentRepository.findAssignmentsWithLateReports(semesterId, weekNumber);

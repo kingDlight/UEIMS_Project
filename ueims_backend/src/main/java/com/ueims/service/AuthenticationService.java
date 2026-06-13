@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -176,7 +177,7 @@ public class AuthenticationService {
     }
 
     @NonFinal
-    private NimbusJwtDecoder googleJwtDecoder;
+    private JwtDecoder googleJwtDecoder;
 
     public AuthenticationResponse authenticateWithGoogle(GoogleAuthenticationRequest request) {
         validateGoogleConfig();
@@ -419,6 +420,8 @@ public class AuthenticationService {
                         .toEpochMilli()))
                 .jwtID(UUID.randomUUID().toString())
                 .claim("must_change_password", Boolean.TRUE.equals(user.getMustChangePassword()))
+                .claim("full_name", user.getFullName())
+                .claim("avatar_url", user.getAvatarUrl())
                 .build();
 
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());

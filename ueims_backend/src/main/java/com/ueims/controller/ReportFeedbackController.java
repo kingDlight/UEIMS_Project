@@ -5,22 +5,36 @@ import java.util.UUID;
 import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.ueims.service.ReportFeedbackService;
+import com.ueims.service.UserService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @RestController
 @RequestMapping("/api/report-feedbacks")
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ReportFeedbackController {
     private final ReportFeedbackService service;
     private final com.ueims.mapper.ReportFeedbackMapper mapper;
+    private final UserService userService;
 
     @GetMapping
     public ResponseEntity<java.util.List<com.ueims.dto.response.ReportFeedbackDTO>> getAll() {
         return ResponseEntity.ok(service.findAll().stream().map(mapper::toDto).toList());
+    }
+
+    @GetMapping("/my-feedbacks")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<java.util.List<com.ueims.dto.response.ReportFeedbackDTO>> getMyFeedbacks() {
+        return ResponseEntity.ok(service.findMyFeedbacks(userService.getCurrentUserId()).stream()
+                .map(mapper::toDto)
+                .toList());
     }
 
     @GetMapping("/{id}")

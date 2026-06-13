@@ -10,6 +10,8 @@ public interface EnterpriseAssignmentService {
 
     EnterpriseAssignment findById(UUID id);
 
+    EnterpriseAssignment findMyAssignment(UUID studentId);
+
     EnterpriseAssignment save(EnterpriseAssignment entity);
 
     void deleteById(UUID id);

@@ -16,19 +16,27 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.lowagie.text.Document;
+import com.lowagie.text.DocumentException;
+import com.lowagie.text.Paragraph;
+import com.lowagie.text.pdf.PdfPTable;
+import com.lowagie.text.pdf.PdfWriter;
 import com.ueims.model.entity.AtRiskStudent;
 import com.ueims.model.entity.FinalGrade;
 import com.ueims.repository.AtRiskStudentRepository;
 import com.ueims.repository.FinalGradeRepository;
 import com.ueims.service.ExcelExportService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ExcelExportServiceImpl implements ExcelExportService {
-    private final AtRiskStudentRepository atRiskStudentRepository;
-    private final FinalGradeRepository finalGradeRepository;
+    AtRiskStudentRepository atRiskStudentRepository;
+    FinalGradeRepository finalGradeRepository;
 
     @Override
     public ResponseEntity<byte[]> exportAtRiskStudents(UUID semesterId) {
@@ -107,6 +115,43 @@ public class ExcelExportServiceImpl implements ExcelExportService {
                     .body(outputStream.toByteArray());
 
         } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @Override
+    public ResponseEntity<byte[]> exportFinalGradesPdf() {
+        List<FinalGrade> grades =
+                finalGradeRepository.findAll(PageRequest.of(0, 10000)).getContent();
+
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            Document document = new Document();
+            PdfWriter.getInstance(document, outputStream);
+
+            document.open();
+            document.add(new Paragraph("Final Grade Report"));
+            document.add(new Paragraph(" "));
+
+            PdfPTable table = new PdfPTable(3);
+            table.addCell("Student Name");
+            table.addCell("Grade Value");
+            table.addCell("Status");
+
+            for (FinalGrade grade : grades) {
+                table.addCell(grade.getStudent().getFullName());
+                table.addCell(String.valueOf(grade.getGradeValue().doubleValue()));
+                table.addCell(grade.getOverallStatus());
+            }
+
+            document.add(table);
+            document.close();
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=final_grades.pdf")
+                    .body(outputStream.toByteArray());
+
+        } catch (IOException | DocumentException e) {
             return ResponseEntity.internalServerError().build();
         }
     }

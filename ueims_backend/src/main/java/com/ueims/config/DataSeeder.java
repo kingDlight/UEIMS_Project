@@ -16,22 +16,27 @@ import com.ueims.repository.RoleRepository;
 import com.ueims.repository.UserRepository;
 import com.ueims.repository.UserRoleRepository;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 
 @Component
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 public class DataSeeder implements CommandLineRunner {
 
-    private final EnterpriseRepository enterpriseRepository;
-    private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
-    private final UserRoleRepository userRoleRepository;
-    private final PasswordEncoder passwordEncoder;
+    EnterpriseRepository enterpriseRepository;
+    UserRepository userRepository;
+    RoleRepository roleRepository;
+    UserRoleRepository userRoleRepository;
+    PasswordEncoder passwordEncoder;
 
     @Value("${app.seed.default-password:defaultPassword}")
-    private String defaultPassword;
+    @NonFinal
+    String defaultPassword;
 
     @Override
     public void run(String... args) throws Exception {

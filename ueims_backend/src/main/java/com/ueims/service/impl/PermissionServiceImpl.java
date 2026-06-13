@@ -8,12 +8,15 @@ import com.ueims.model.entity.Permission;
 import com.ueims.repository.PermissionRepository;
 import com.ueims.service.PermissionService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PermissionServiceImpl implements PermissionService {
-    private final PermissionRepository repository;
+    PermissionRepository repository;
 
     @Override
     public List<Permission> findAll() {

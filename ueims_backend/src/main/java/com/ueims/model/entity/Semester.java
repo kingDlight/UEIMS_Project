@@ -23,6 +23,7 @@ import lombok.*;
         callSuper = true,
         exclude = {"createdBy", "eligibleStudents", "jobPosts", "systemAnnouncements"})
 @ToString(exclude = {"createdBy", "eligibleStudents", "jobPosts", "systemAnnouncements"})
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Semester extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

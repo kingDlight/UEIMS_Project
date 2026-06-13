@@ -19,13 +19,16 @@ import com.ueims.repository.EnterpriseAssignmentRepository;
 import com.ueims.repository.FinalReportRepository;
 import com.ueims.service.FinalReportService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class FinalReportServiceImpl implements FinalReportService {
-    private final FinalReportRepository repository;
-    private final EnterpriseAssignmentRepository enterpriseAssignmentRepository;
+    FinalReportRepository repository;
+    EnterpriseAssignmentRepository enterpriseAssignmentRepository;
 
     @Override
     public List<FinalReport> findAll() {
@@ -35,6 +38,11 @@ public class FinalReportServiceImpl implements FinalReportService {
     @Override
     public FinalReport findById(UUID id) {
         return repository.findById(id).orElse(null);
+    }
+
+    @Override
+    public FinalReport findMyReport(UUID studentId) {
+        return repository.findByAssignment_Student_UserId(studentId).orElse(null);
     }
 
     @Override
@@ -82,7 +90,9 @@ public class FinalReportServiceImpl implements FinalReportService {
             report.setFileSizeBytes((int) file.getSize());
             return repository.save(report);
         } catch (IOException e) {
-            throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
+            System.err.println("File upload error: " + e.getMessage());
+            e.printStackTrace();
+            throw new AppException(ErrorCode.FIELD_REQUIRED);
         }
     }
 

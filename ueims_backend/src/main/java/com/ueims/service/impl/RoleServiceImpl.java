@@ -8,12 +8,15 @@ import com.ueims.model.entity.Role;
 import com.ueims.repository.RoleRepository;
 import com.ueims.service.RoleService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RoleServiceImpl implements RoleService {
-    private final RoleRepository repository;
+    RoleRepository repository;
 
     @Override
     public List<Role> findAll() {

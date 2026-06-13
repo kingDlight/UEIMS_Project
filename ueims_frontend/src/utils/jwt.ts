@@ -29,5 +29,13 @@ export function extractUserFromToken(token: string) {
     email: payload.sub,
     roles,
     mustChangePassword: payload.must_change_password,
+    fullName: payload.full_name,
+    avatarUrl: payload.avatar_url,
   };
+}
+
+export function isTokenExpired(token: string): boolean {
+  const payload = parseJwt(token);
+  if (!payload || !payload.exp) return true;
+  return Date.now() >= payload.exp * 1000;
 }

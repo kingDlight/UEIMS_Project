@@ -16,14 +16,17 @@ import com.ueims.repository.UserRepository;
 import com.ueims.service.MailService;
 import com.ueims.service.UserService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserServiceImpl implements UserService {
-    private final UserRepository repository;
-    private final MailService mailService;
-    private final PasswordEncoder passwordEncoder;
+    UserRepository repository;
+    MailService mailService;
+    PasswordEncoder passwordEncoder;
 
     @Override
     public List<User> findAll() {
@@ -81,6 +84,45 @@ public class UserServiceImpl implements UserService {
                 .fullName(user.getFullName())
                 .phone(user.getPhone())
                 .status(user.getStatus())
+                .avatarUrl(user.getAvatarUrl())
                 .build();
+    }
+
+    @Override
+    public UUID getCurrentUserId() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return repository
+                .findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED))
+                .getUserId();
+    }
+
+    @Override
+    public UserResponse updateMyInfo(com.ueims.dto.request.UserUpdateRequest request) {
+        var context = SecurityContextHolder.getContext();
+        String email = context.getAuthentication().getName();
+        User user = repository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        if (request.getFullName() != null) user.setFullName(request.getFullName());
+        if (request.getPhone() != null) user.setPhone(request.getPhone());
+        if (request.getStatus() != null) user.setStatus(request.getStatus());
+        if (request.getPassword() != null && !request.getPassword().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+        repository.save(user);
+
+        return getMyInfo();
+    }
+
+    @Override
+    public User updateUser(UUID id, com.ueims.dto.request.UserUpdateRequest request) {
+        User user = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        if (request.getFullName() != null) user.setFullName(request.getFullName());
+        if (request.getPhone() != null) user.setPhone(request.getPhone());
+        if (request.getStatus() != null) user.setStatus(request.getStatus());
+        if (request.getPassword() != null && !request.getPassword().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+        return repository.save(user);
     }
 }

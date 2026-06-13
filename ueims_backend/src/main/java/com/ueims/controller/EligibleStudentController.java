@@ -18,31 +18,38 @@ import com.ueims.dto.response.EligibleStudentResponse;
 import com.ueims.mapper.EligibleStudentMapper;
 import com.ueims.service.EligibleStudentService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @RestController
 @RequestMapping("/api/eligible-students")
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class EligibleStudentController {
-    private final EligibleStudentService service;
-    private final EligibleStudentMapper mapper;
+    EligibleStudentService service;
+    EligibleStudentMapper mapper;
 
     @GetMapping
+    @PreAuthorize("hasRole('TRAINING_MANAGER')")
     public ResponseEntity<List<EligibleStudentDTO>> getAll() {
         return ResponseEntity.ok(service.findAll().stream().map(mapper::toDto).toList());
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('TRAINING_MANAGER')")
     public ResponseEntity<EligibleStudentDTO> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(mapper.toDto(service.findById(id)));
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('TRAINING_MANAGER')")
     public ResponseEntity<EligibleStudentDTO> create(@Valid @RequestBody EligibleStudentRequest request) {
         return ResponseEntity.ok(mapper.toDto(service.save(mapper.toEntity(request))));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('TRAINING_MANAGER')")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         service.deleteById(id);
         return ResponseEntity.ok().build();

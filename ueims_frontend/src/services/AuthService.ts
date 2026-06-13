@@ -86,6 +86,15 @@ export const AuthService = {
     return response.data.result;
   },
 
+  refreshToken: async (refreshToken: string): Promise<{ token: string; refreshToken: string }> => {
+    const deviceId = getDeviceId();
+    const response = await api.post<{ code: number; message: string; result: { token: string; refreshToken: string } }>(
+      '/auth/refresh',
+      { token: refreshToken, deviceId }
+    );
+    return response.data.result;
+  },
+
   registerEnterprise: async (data: EnterpriseRegistrationRequest): Promise<void> => {
     await api.post('/auth/register-enterprise', data);
   },

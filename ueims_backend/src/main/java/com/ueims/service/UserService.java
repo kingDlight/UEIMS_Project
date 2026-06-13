@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.ueims.dto.request.UserCreationRequest;
+import com.ueims.dto.request.UserUpdateRequest;
 import com.ueims.dto.response.UserResponse;
 import com.ueims.model.entity.User;
 
@@ -21,4 +22,10 @@ public interface UserService {
     void updateUserStatus(UUID id, String status);
 
     UserResponse getMyInfo();
+
+    UUID getCurrentUserId();
+
+    UserResponse updateMyInfo(UserUpdateRequest request);
+
+    User updateUser(UUID id, UserUpdateRequest request);
 }

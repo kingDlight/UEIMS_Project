@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { BackgroundEffects } from './components/BackgroundEffects';
 import { NavBar } from './components/NavBar';
 import { HeroSection } from './components/HeroSection';
@@ -10,6 +10,11 @@ const PartnerSection = React.lazy(() => import('./components/PartnerSection').th
 const CTASection = React.lazy(() => import('./components/CTASection').then(m => ({ default: m.CTASection })));
 const Footer = React.lazy(() => import('./components/Footer').then(m => ({ default: m.Footer })));
 
+const FallbackLoader = ({ minHeight = "50vh" }: { minHeight?: string }) => (
+  <div style={{ minHeight }} className="flex items-center justify-center w-full">
+    <div className="w-8 h-8 border-4 border-[#f37021]/30 border-t-[#f37021] rounded-full animate-spin"></div>
+  </div>
+);
 const useScrollAnimation = () => {
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -37,16 +42,23 @@ const useScrollAnimation = () => {
       });
     };
 
+    let debounceTimer: ReturnType<typeof setTimeout>;
+    const debouncedObserveAll = () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(observeAll, 200);
+    };
+
     observeAll();
     const timeout = setTimeout(observeAll, 100);
 
     const mutationObserver = new MutationObserver(() => {
-      observeAll();
+      debouncedObserveAll();
     });
     mutationObserver.observe(document.body, { childList: true, subtree: true });
     
     return () => {
       clearTimeout(timeout);
+      clearTimeout(debounceTimer);
       observer.disconnect();
       mutationObserver.disconnect();
     };
@@ -83,14 +95,21 @@ export const HomePage: React.FC = () => {
   }, [isDark]);
 
   useEffect(() => {
+    let ticking = false;
     const handleScroll = () => {
-      setScrolled(window.scrollY > 40);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setScrolled(window.scrollY > 40);
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const scrollToSection = (href: string) => {
+  const scrollToSection = useCallback((href: string) => {
     const element = document.querySelector(href);
     if (element) {
       try {
@@ -105,18 +124,18 @@ export const HomePage: React.FC = () => {
         });
       }
     }
-  };
+  }, []);
 
   const themeTimeoutRef = React.useRef<any>(null);
 
-  const toggleTheme = () => {
+  const toggleTheme = useCallback(() => {
     document.documentElement.classList.add('theme-transitioning');
-    setIsDark(!isDark);
+    setIsDark((prev: boolean) => !prev);
     if (themeTimeoutRef.current) clearTimeout(themeTimeoutRef.current);
     themeTimeoutRef.current = setTimeout(() => {
       document.documentElement.classList.remove('theme-transitioning');
     }, 700);
-  };
+  }, []);
 
   return (
     <div className={`min-h-screen font-sans selection:bg-[#f37021]/30 selection:text-white overflow-x-hidden transition-colors duration-300 ease-in-out ${
@@ -146,12 +165,22 @@ export const HomePage: React.FC = () => {
         scrollToSection={scrollToSection} 
       />
 
-      <React.Suspense fallback={<div className="min-h-[50vh] flex items-center justify-center"><div className="w-8 h-8 border-4 border-[#f37021]/30 border-t-[#f37021] rounded-full animate-spin"></div></div>}>
+      <React.Suspense fallback={<FallbackLoader />}>
         <AboutSection isDark={isDark} />
+      </React.Suspense>
+      <React.Suspense fallback={<FallbackLoader />}>
         <FeaturesSection isDark={isDark} />
+      </React.Suspense>
+      <React.Suspense fallback={<FallbackLoader />}>
         <ProcessSection isDark={isDark} />
+      </React.Suspense>
+      <React.Suspense fallback={<FallbackLoader />}>
         <PartnerSection isDark={isDark} />
+      </React.Suspense>
+      <React.Suspense fallback={<FallbackLoader />}>
         <CTASection isDark={isDark} />
+      </React.Suspense>
+      <React.Suspense fallback={<FallbackLoader minHeight="20vh" />}>
         <Footer isDark={isDark} scrollToSection={scrollToSection} />
       </React.Suspense>
     </div>

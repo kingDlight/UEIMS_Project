@@ -14,13 +14,16 @@ import org.springframework.web.bind.annotation.*;
 import com.ueims.model.entity.AuditLog;
 import com.ueims.service.AuditLogService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @RestController
 @RequestMapping("/api/audit-logs")
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuditLogController {
-    private final AuditLogService service;
+    AuditLogService service;
 
     @GetMapping
     @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")

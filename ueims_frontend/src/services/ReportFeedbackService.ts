@@ -1,11 +1,9 @@
-import axios from 'axios';
-
-const API_URL = 'http://localhost:8080/api/report-feedbacks';
+import { api } from './api';
 
 export const ReportFeedbackService = {
-    getAll: () => axios.get(API_URL),
-    getById: (id: string) => axios.get(`${API_URL}/${id}`),
-    create: (data: any) => axios.post(API_URL, data),
-    update: (id: string, data: any) => axios.put(`${API_URL}/${id}`, data),
-    delete: (id: string) => axios.delete(`${API_URL}/${id}`)
+    getAll: () => api.get('/report-feedbacks'),
+    getMyFeedbacks: () => api.get('/report-feedbacks/my-feedbacks'),
+    getById: (id: string) => api.get(`/report-feedbacks/${id}`),
+    create: (data: unknown) => api.post('/report-feedbacks', data),
+    delete: (id: string) => api.delete(`/report-feedbacks/${id}`)
 };

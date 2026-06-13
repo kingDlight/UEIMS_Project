@@ -14,15 +14,18 @@ import com.ueims.model.dto.dashboard.ChartDataDTO;
 import com.ueims.model.dto.dashboard.CommandCenterSummaryDTO;
 import com.ueims.service.DashboardService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @RestController
 @RequestMapping("/api/dashboard")
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
 public class DashboardController {
 
-    private final DashboardService dashboardService;
+    DashboardService dashboardService;
 
     @GetMapping("/command-center-summary")
     public ApiResponse<CommandCenterSummaryDTO> getCommandCenterSummary() {

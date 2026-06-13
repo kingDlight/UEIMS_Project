@@ -9,12 +9,15 @@ import com.ueims.model.entity.EnterpriseAssignment;
 import com.ueims.repository.EnterpriseAssignmentRepository;
 import com.ueims.service.EnterpriseAssignmentService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class EnterpriseAssignmentServiceImpl implements EnterpriseAssignmentService {
-    private final EnterpriseAssignmentRepository repository;
+    EnterpriseAssignmentRepository repository;
 
     @Override
     public List<EnterpriseAssignment> findAll() {
@@ -24,6 +27,11 @@ public class EnterpriseAssignmentServiceImpl implements EnterpriseAssignmentServ
     @Override
     public EnterpriseAssignment findById(UUID id) {
         return repository.findById(id).orElse(null);
+    }
+
+    @Override
+    public EnterpriseAssignment findMyAssignment(UUID studentId) {
+        return repository.findByStudent_UserId(studentId).orElse(null);
     }
 
     @Override

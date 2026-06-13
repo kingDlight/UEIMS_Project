@@ -7,7 +7,9 @@ import org.springframework.stereotype.Component;
 
 import com.ueims.service.CronJobService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -17,9 +19,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class SchedulingConfig {
 
-    private final List<CronJobService> cronJobs;
+    List<CronJobService> cronJobs;
 
     /**
      * Scheduled task running every Sunday at 20:00 (8 PM) UTC+7.

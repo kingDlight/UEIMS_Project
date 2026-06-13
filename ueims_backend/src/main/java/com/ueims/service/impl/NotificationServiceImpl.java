@@ -9,12 +9,15 @@ import com.ueims.model.entity.Notification;
 import com.ueims.repository.NotificationRepository;
 import com.ueims.service.NotificationService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class NotificationServiceImpl implements NotificationService {
-    private final NotificationRepository repository;
+    NotificationRepository repository;
 
     @Override
     public List<Notification> findAll() {

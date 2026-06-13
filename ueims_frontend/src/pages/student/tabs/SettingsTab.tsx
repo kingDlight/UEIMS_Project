@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import { message } from 'antd';
-import { LockOutlined, BellOutlined, SaveOutlined } from '@ant-design/icons';
+import React, { useState, useEffect } from 'react';
+import { message, Spin } from 'antd';
+import { LockOutlined, BellOutlined, SaveOutlined, UserOutlined, PhoneOutlined } from '@ant-design/icons';
 import { NeuSurface } from '../components/shared/NeuSurface';
+import { AuthService } from '@/services/AuthService';
 import { api } from '@/services/api';
 
 const cc = {
-  primary: '#E96500',
+  primary: '#E67E22',
   primaryMuted: '#fff0e6',
   text: '#1e293b',
   textMuted: '#64748b',
@@ -30,7 +31,7 @@ const CTAButton: React.FC<{
   loading?: boolean;
 }> = ({ children, onClick, variant = 'primary', icon, disabled = false, loading = false }) => {
   const styles: Record<string, { bg: string; text: string; border: string }> = {
-    primary: { bg: 'linear-gradient(135deg, #FF662C, #FF824D)', text: '#fff', border: 'none' },
+    primary: { bg: 'linear-gradient(135deg, #E67E22, #E67E22)', text: '#fff', border: 'none' },
     ghost: { bg: '#fff', text: cc.primary, border: cc.border },
   };
   const { bg, text, border } = styles[variant];
@@ -42,7 +43,7 @@ const CTAButton: React.FC<{
       border: variant === 'primary' ? 'none' : `1px solid ${border}`, borderRadius: 12,
       cursor: disabled ? 'not-allowed' : 'pointer', fontFamily: "'Inter', sans-serif", opacity: disabled ? 0.6 : 1,
     }}>
-      {loading ? <span>...</span> : icon && <span style={{ display: 'flex' }}>{icon}</span>}
+      {loading ? <Spin size="small" /> : icon && <span style={{ display: 'flex' }}>{icon}</span>}
       {children}
     </button>
   );
@@ -50,7 +51,32 @@ const CTAButton: React.FC<{
 
 export const SettingsTab: React.FC = () => {
   const [loading, setLoading] = useState(false);
+  const [savingPhone, setSavingPhone] = useState(false);
   const [formData, setFormData] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+  const [phoneData, setPhoneData] = useState({ phone: '' });
+  const [userId, setUserId] = useState<string>('');
+
+  useEffect(() => { fetchUserInfo(); }, []);
+
+  const fetchUserInfo = async () => {
+    try {
+      const res = await api.get('/users/myInfo');
+      setPhoneData({ phone: res.data?.phone || '' });
+      setUserId(res.data?.userId || '');
+    } catch { /* ignore */ }
+  };
+
+  const handleSavePhone = async () => {
+    try {
+      setSavingPhone(true);
+      await api.put(`/users/${userId}`, { phone: phoneData.phone });
+      message.success('Phone number updated successfully!');
+    } catch (err: any) {
+      message.error(err.response?.data?.message || 'Failed to update phone number!');
+    } finally {
+      setSavingPhone(false);
+    }
+  };
 
   const handleChangePassword = async () => {
     if (formData.newPassword !== formData.confirmPassword) {
@@ -63,7 +89,7 @@ export const SettingsTab: React.FC = () => {
     }
     try {
       setLoading(true);
-      await api.put('/users/change-password', { currentPassword: formData.currentPassword, newPassword: formData.newPassword });
+      await AuthService.changePassword({ oldPassword: formData.currentPassword, newPassword: formData.newPassword, confirmPassword: formData.newPassword });
       message.success('Password changed successfully!');
       setFormData({ currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch (err: any) {
@@ -79,6 +105,35 @@ export const SettingsTab: React.FC = () => {
         <h2 style={{ fontSize: 22, fontWeight: 700, color: cc.text, margin: '0 0 6px' }}>Settings</h2>
         <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}>Manage your account and preferences</p>
       </div>
+
+      {/* Account Information */}
+      <NeuSurface style={{ padding: 24, marginBottom: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+          <div style={{ width: 44, height: 44, borderRadius: cc.radiusMd, background: cc.primaryMuted, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.primary }}>
+            <UserOutlined style={{ fontSize: 20 }} />
+          </div>
+          <div>
+            <h3 style={{ fontSize: 15, fontWeight: 600, color: cc.text, margin: 0 }}>Account Information</h3>
+            <p style={{ fontSize: 12, color: cc.textMuted, margin: '2px 0 0' }}>Manage your personal contact details</p>
+          </div>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div>
+            <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>
+              <PhoneOutlined style={{ marginRight: 6 }} />Phone Number</label>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <input
+                type="tel"
+                value={phoneData.phone}
+                onChange={(e) => setPhoneData({ phone: e.target.value })}
+                placeholder="Enter your phone number"
+                style={{ flex: 1, padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13 }}
+              />
+              <CTAButton variant="primary" icon={<SaveOutlined />} onClick={handleSavePhone} loading={savingPhone}>Save</CTAButton>
+            </div>
+          </div>
+        </div>
+      </NeuSurface>
 
       {/* Change Password */}
       <NeuSurface style={{ padding: 24, marginBottom: 20 }}>

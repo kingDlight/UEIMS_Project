@@ -7,18 +7,21 @@ import org.springframework.web.bind.annotation.*;
 
 import com.ueims.service.MailService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @RestController
 @RequestMapping("/api/test")
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class EmailTestController {
 
     private static final String KEY_FULL_NAME = "fullName";
     private static final String KEY_STATUS = "status";
     private static final String KEY_TEMPLATE = "template";
 
-    private final MailService mailService;
+    MailService mailService;
 
     /**
      * POST /api/test/email/password-reset

@@ -9,12 +9,15 @@ import com.ueims.model.entity.PasswordResetToken;
 import com.ueims.repository.PasswordResetTokenRepository;
 import com.ueims.service.PasswordResetTokenService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PasswordResetTokenServiceImpl implements PasswordResetTokenService {
-    private final PasswordResetTokenRepository repository;
+    PasswordResetTokenRepository repository;
 
     @Override
     public List<PasswordResetToken> findAll() {

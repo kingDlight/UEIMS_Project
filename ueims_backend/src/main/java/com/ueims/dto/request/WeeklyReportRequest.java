@@ -19,5 +19,6 @@ public class WeeklyReportRequest {
     private String lessonsLearned;
     private String planNextWeek;
     private String attachmentUrls;
+    private String feedback;
     private String status;
 }

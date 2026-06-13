@@ -20,19 +20,22 @@ import com.ueims.repository.UserRoleRepository;
 import com.ueims.service.EnterpriseRegistrationService;
 import com.ueims.service.MailService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class EnterpriseRegistrationServiceImpl implements EnterpriseRegistrationService {
     private static final String ENTERPRISE_ROLE = "ENTERPRISE";
 
-    private final EnterpriseRepository enterpriseRepository;
-    private final UserRepository userRepository;
-    private final UserRoleRepository userRoleRepository;
-    private final RoleRepository roleRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final MailService mailService;
+    EnterpriseRepository enterpriseRepository;
+    UserRepository userRepository;
+    UserRoleRepository userRoleRepository;
+    RoleRepository roleRepository;
+    PasswordEncoder passwordEncoder;
+    MailService mailService;
 
     @Override
     @Transactional
@@ -92,21 +95,21 @@ public class EnterpriseRegistrationServiceImpl implements EnterpriseRegistration
 
     private void validatePasswordComplexity(String password) {
         if (password.length() < 8) {
-            throw new AppException(ErrorCode.INVALID_PASSWORD);
+            throw new AppException(ErrorCode.INVALID_PASSWORD, "Password must be at least 8 characters");
         }
         if (!Pattern.compile("[A-Z]").matcher(password).find()) {
-            throw new AppException(ErrorCode.INVALID_PASSWORD);
+            throw new AppException(ErrorCode.INVALID_PASSWORD, "Password must contain at least 1 uppercase letter");
         }
         if (!Pattern.compile("[a-z]").matcher(password).find()) {
-            throw new AppException(ErrorCode.INVALID_PASSWORD);
+            throw new AppException(ErrorCode.INVALID_PASSWORD, "Password must contain at least 1 lowercase letter");
         }
         if (!Pattern.compile("\\d").matcher(password).find()) {
-            throw new AppException(ErrorCode.INVALID_PASSWORD);
+            throw new AppException(ErrorCode.INVALID_PASSWORD, "Password must contain at least 1 number");
         }
         if (!Pattern.compile("[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]")
                 .matcher(password)
                 .find()) {
-            throw new AppException(ErrorCode.INVALID_PASSWORD);
+            throw new AppException(ErrorCode.INVALID_PASSWORD, "Password must contain at least 1 special character (!@#$%^&*...)");
         }
     }
 }

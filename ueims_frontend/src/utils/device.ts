@@ -4,6 +4,9 @@ export const getDeviceId = (): string => {
 
 export const initDeviceId = (): void => {
   if (!localStorage.getItem('ueims-device-id')) {
-    localStorage.setItem('ueims-device-id', crypto.randomUUID ? crypto.randomUUID() : 'device-' + Math.random().toString(36).substring(2, 15) + Date.now().toString(36));
+    const array = new Uint32Array(1);
+    window.crypto.getRandomValues(array);
+    const randomStr = array[0].toString(36);
+    localStorage.setItem('ueims-device-id', crypto.randomUUID ? crypto.randomUUID() : 'device-' + randomStr + Date.now().toString(36));
   }
 };

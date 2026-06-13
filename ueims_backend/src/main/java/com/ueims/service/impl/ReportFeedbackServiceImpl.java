@@ -11,16 +11,24 @@ import com.ueims.model.entity.ReportFeedback;
 import com.ueims.repository.ReportFeedbackRepository;
 import com.ueims.service.ReportFeedbackService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ReportFeedbackServiceImpl implements ReportFeedbackService {
-    private final ReportFeedbackRepository repository;
+    ReportFeedbackRepository repository;
 
     @Override
     public List<ReportFeedback> findAll() {
         return repository.findAll();
+    }
+
+    @Override
+    public List<ReportFeedback> findMyFeedbacks(UUID studentId) {
+        return repository.findByReport_Assignment_Student_UserId(studentId);
     }
 
     @Override

@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react'
 import Cropper from 'react-easy-crop';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Modal, Dropdown, Drawer } from 'antd';
+import { Modal, Dropdown, Drawer, Form, Input, Button, message } from 'antd';
 import type { MenuProps } from 'antd';
 import { BellOutlined, DownOutlined, MenuOutlined } from '@ant-design/icons';
 import { X, Mail, Phone, ShieldCheck, Activity, Camera } from 'lucide-react';
@@ -138,6 +138,8 @@ const renderProfileModal = (modal: React.ReactNode) => (
   </div>
 );
 
+import { extractUserFromToken } from '@/utils/jwt';
+
 export const ModernLayout: React.FC<ModernLayoutProps> = ({ 
   navItems, 
   children,
@@ -152,20 +154,84 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
   const { tab } = useParams<{ tab: string }>();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
+  // Change Password state
+  const [changePasswordVisible, setChangePasswordVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const [form] = Form.useForm();
+
+  const handleChangePassword = async (values: {
+    oldPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+  }) => {
+    setLoading(true);
+    try {
+      await AuthService.changePassword({
+        oldPassword: values.oldPassword,
+        newPassword: values.newPassword,
+        confirmPassword: values.confirmPassword,
+      });
+      message.success('Đổi mật khẩu thành công!');
+      setChangePasswordVisible(false);
+    } catch (error: any) {
+      const code = error.response?.data?.code;
+      if (code === 2002) {
+        form.setFields([{ name: 'oldPassword', errors: ['Mật khẩu hiện tại không chính xác!'] }]);
+      } else if (code === 2003) {
+        form.setFields([{ name: 'confirmPassword', errors: ['Mật khẩu xác nhận không khớp!'] }]);
+      } else if (code === 1015) {
+        form.setFields([{ name: 'newPassword', errors: ['Mật khẩu mới phải có ít nhất 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt!'] }]);
+      } else {
+        message.error(error.response?.data?.message || 'Đổi mật khẩu thất bại!');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Determine current active tab
   const activeTab = tab || defaultRoute;
 
-  const { user, token, logout, currentRole } = useAuthStore();
-  const [realName, setRealName] = useState(user?.fullName || 'User');
+  const { user, token, logout } = useAuthStore();
+
+  const [phone, setPhone] = useState('');
+  const [updatingProfile, setUpdatingProfile] = useState(false);
+
+  useEffect(() => {
+    if ((user as any)?.phone) setPhone((user as any).phone);
+  }, [user]);
+
+  const handleUpdateProfile = async () => {
+    const currentPhone = (user as any)?.phone || '';
+    const newPhone = phone || '';
+    
+    if (currentPhone === newPhone) {
+      message.info('Không có thay đổi nào để cập nhật');
+      return;
+    }
+
+    try {
+      setUpdatingProfile(true);
+      await api.put('/users/myInfo', { ...(user as any), phone });
+      message.success('Cập nhật hồ sơ thành công!');
+    } catch (err: any) {
+      message.error(err.response?.data?.message || 'Cập nhật thất bại!');
+    } finally {
+      setUpdatingProfile(false);
+    }
+  };
 
   const filteredNavItems = useMemo(() => {
     return navItems.filter((item) => {
       if (!item.roles) return true;
-      return currentRole && item.roles.includes(currentRole);
+      
+      const payload = token ? extractUserFromToken(token) : null;
+      const userRoles: string[] = payload?.roles || [];
+      return item.roles.some(r => userRoles.includes(r) || userRoles.includes(`ROLE_${r}`));
     });
-  }, [navItems, currentRole]);
+  }, [navItems, token]);
 
-  const [myProfile, setMyProfile] = useState<any>(null);
   const [profileOpen, setProfileOpen] = useState(false);
   
   const [customAvatarUrl, setCustomAvatarUrl] = useState<string | null>(() => {
@@ -227,23 +293,6 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  useEffect(() => {
-    const fetchMyInfo = async () => {
-      try {
-        const res = await api.get('/users/myInfo');
-        setMyProfile(res.data);
-        if (res.data?.fullName) {
-          setRealName(res.data.fullName);
-        }
-      } catch (e) {
-        console.error('Failed to fetch myInfo', e);
-      }
-    };
-    if (token) {
-      fetchMyInfo();
-    }
-  }, [token]);
-
   const handleLogout = async () => {
     if (token) {
       try {
@@ -277,7 +326,14 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
               >
                 <MenuOutlined />
               </button>
-              <div className="modern-brand-logo">UEIMS</div>
+              <a 
+                href="/"
+                className="modern-brand-logo" 
+                onClick={(e) => { e.preventDefault(); navigate('/'); }}
+                style={{ textDecoration: 'none', color: 'inherit' }}
+              >
+                UEIMS
+              </a>
             </div>
             <div className="modern-nav-items desktop-only">
               {/* Visible pills: first 7 items */}
@@ -289,9 +345,8 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
                     type="button"
                     onClick={() => handleNavigate(item.key)}
                     className={`modern-nav-item ${isActive ? 'active' : 'inactive'}`}
-                    style={{ background: 'none', border: 'none', padding: 0, font: 'inherit', color: 'inherit' }}
                   >
-                    <span style={{ fontSize: 14 }}>{item.icon}</span>
+                    <span style={{ fontSize: 16, display: 'flex', alignItems: 'center' }}>{item.icon}</span>
                     <span>{item.label}</span>
                   </button>
                 );
@@ -318,7 +373,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
                       className={`modern-nav-item ${isMoreActive ? 'active' : 'inactive'}`}
                       style={{ cursor: 'pointer', userSelect: 'none' }}
                     >
-                      <span style={{ fontSize: 14 }}><DownOutlined /></span>
+                      <span style={{ fontSize: 16, display: 'flex', alignItems: 'center' }}><DownOutlined /></span>
                       <span>More</span>
                     </div>
                   </Dropdown>
@@ -338,7 +393,6 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
                 type="button"
                 onClick={() => { setNotificationOpen((prev) => !prev); setAccountOpen(false); }} 
                 className="modern-bell-icon-wrapper"
-                style={{ background: 'none', border: 'none', padding: 0 }}
               >
                 <BellOutlined style={{ fontSize: 18 }} />
                 {unreadCount > 0 && <div className="modern-bell-badge" />}
@@ -347,38 +401,38 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
             
             <div className="modern-bar-divider" />
             
-            <div ref={accountMenuRef} style={{ position: 'relative', zIndex: 1, flex: '1 1 auto' }}>
+            <div ref={accountMenuRef} style={{ position: 'relative', zIndex: 1, flex: '1 1 auto', minWidth: 0 }}>
               <button 
                 type="button"
                 onClick={() => { setAccountOpen((prev) => !prev); setNotificationOpen(false); }} 
                 className="modern-account-wrapper"
-                style={{ background: 'none', border: 'none', padding: 0, font: 'inherit', textAlign: 'left' }}
+                style={{ textAlign: 'left', width: '100%' }}
               >
                 <div className="modern-account-avatar" style={{ 
                   display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', color: '#fff',
-                  background: customAvatarUrl ? `url(${customAvatarUrl}) center/cover no-repeat` : undefined
+                  background: (customAvatarUrl || user?.avatarUrl) ? `url(${customAvatarUrl || user?.avatarUrl}) center/cover no-repeat` : undefined
                 }}>
-                  {!customAvatarUrl && (realName ? realName.substring(0, 2) : 'U')}
+                  {!(customAvatarUrl || user?.avatarUrl) && (user?.fullName ? user.fullName.substring(0, 2).toUpperCase() : 'U')}
                 </div>
                 <div className="modern-account-info">
-                  <div className="modern-account-name">{realName}</div>
+                  <div className="modern-account-name">{user?.fullName || 'User'}</div>
                   <div className="modern-account-email">{user?.email || 'admin@ueims.com'}</div>
                 </div>
               </button>
             </div>
-            <div style={{ position: 'absolute', left: 0, right: 0, bottom: -1, height: 1, background: 'linear-gradient(90deg, transparent, rgba(233,101,0,.18), transparent)', pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', left: 0, right: 0, bottom: -1, height: 1, background: 'linear-gradient(90deg, transparent, rgba(230, 126, 34,.18), transparent)', pointerEvents: 'none' }} />
           </div>
 
           {/* Notification Dropdown */}
           {notificationOpen && (
             <div onMouseDown={(e) => e.stopPropagation()} className="modern-floating-menu">
               <div className="modern-floating-menu-arrow" style={{ left: 32 }} />
-              <div style={{ padding: '14px 16px', borderBottom: '1px solid rgba(233,101,0,.10)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ padding: '14px 16px', borderBottom: '1px solid rgba(230, 126, 34,.10)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <div style={{ fontSize: 14, fontWeight: 800, color: '#1e293b' }}>Alerts</div>
                   <div style={{ fontSize: 11.5, color: '#64748b' }}>Latest reminders and urgent items</div>
                 </div>
-                {unreadCount > 0 && <SmallPill color="#E96500" glow>{unreadCount} new</SmallPill>}
+                {unreadCount > 0 && <SmallPill color="#E67E22" glow>{unreadCount} new</SmallPill>}
               </div>
               <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 10, maxHeight: 400, overflowY: 'auto' }}>
                 {notifications.length === 0 ? (
@@ -391,12 +445,12 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
                       style={{ 
                         display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 12px', borderRadius: 16, 
                         background: item.isRead ? 'rgba(255,255,255,.78)' : '#fff3ed', 
-                        border: '1px solid rgba(233,101,0,.08)', 
+                        border: '1px solid rgba(230, 126, 34,.08)', 
                         boxShadow: '0 8px 18px rgba(15,23,42,.04)',
                         cursor: item.isRead ? 'default' : 'pointer',
                         transition: 'all 0.2s'
                       }}>
-                      <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#E96500', boxShadow: `0 0 0 4px #E9650020`, marginTop: 4 }} />
+                      <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#E67E22', boxShadow: `0 0 0 4px #E67E2220`, marginTop: 4 }} />
                       <div style={{ minWidth: 0, flex: 1 }}>
                         <div style={{ fontSize: 13.5, fontWeight: 800, color: '#1e293b' }}>{item.title}</div>
                         <div style={{ fontSize: 11.5, color: '#64748b', marginTop: 2 }}>{item.message}</div>
@@ -413,9 +467,9 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
           {accountOpen && (
             <div onMouseDown={(e) => e.stopPropagation()} className="modern-floating-menu">
               <div className="modern-floating-menu-arrow" style={{ left: 110 }} />
-              <div style={{ padding: '14px 16px', borderBottom: '1px solid rgba(233,101,0,.10)' }}>
+              <div style={{ padding: '14px 16px', borderBottom: '1px solid rgba(230, 126, 34,.10)' }}>
                 <div style={{ fontSize: 14, fontWeight: 800, color: '#1e293b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {realName}
+                  {user?.fullName || 'User'}
                 </div>
                 <div style={{ fontSize: 11.5, color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {user?.email || 'admin@ueims.com'}
@@ -429,7 +483,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
                     onClick={() => {
                       setAccountOpen(false);
                       if (item === 'Logout') handleLogout();
-                      if (item === 'Change Password') navigate('/change-password');
+                      if (item === 'Change Password') setChangePasswordVisible(true);
                       if (item === 'View Profile') setProfileOpen(true);
                     }} 
                     className="modern-menu-item"
@@ -445,12 +499,21 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
 
         {/* Mobile Drawer */}
         <Drawer
-          title={<div className="modern-brand-logo">UEIMS</div>}
+          title={
+            <a 
+              href="/"
+              className="modern-brand-logo" 
+              onClick={(e) => { e.preventDefault(); setDrawerOpen(false); navigate('/'); }}
+              style={{ textDecoration: 'none', color: 'inherit' }}
+            >
+              UEIMS
+            </a>
+          }
           placement="left"
           onClose={() => setDrawerOpen(false)}
           open={drawerOpen}
           width={280}
-          styles={{ body: { padding: 0 }, header: { borderBottom: '1px solid rgba(233,101,0,.10)' } }}
+          styles={{ body: { padding: 0 }, header: { borderBottom: '1px solid rgba(230, 126, 34,.10)' } }}
         >
           <div style={{ display: 'flex', flexDirection: 'column', padding: '16px 0' }}>
             {filteredNavItems.map((item) => {
@@ -466,10 +529,10 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
                     alignItems: 'center',
                     gap: 12,
                     cursor: 'pointer',
-                    background: isActive ? 'rgba(233,101,0,.08)' : 'transparent',
-                    color: isActive ? '#E96500' : '#475569',
+                    background: isActive ? 'rgba(230, 126, 34,.08)' : 'transparent',
+                    color: isActive ? '#E67E22' : '#475569',
                     border: 'none',
-                    borderRight: isActive ? '3px solid #E96500' : '3px solid transparent',
+                    borderRight: isActive ? '3px solid #E67E22' : '3px solid transparent',
                     fontWeight: isActive ? 700 : 500,
                     width: '100%',
                     textAlign: 'left'
@@ -532,12 +595,12 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
             <div style={{ position: 'relative' }}>
               <div style={{ 
                 width: 80, height: 80, borderRadius: '50%', 
-                background: customAvatarUrl ? `url(${customAvatarUrl}) center/cover no-repeat` : 'linear-gradient(135deg, #f97316, #fb923c)', 
+                background: (customAvatarUrl || user?.avatarUrl) ? `url(${customAvatarUrl || user?.avatarUrl}) center/cover no-repeat` : 'linear-gradient(135deg, #f97316, #fb923c)', 
                 display: 'flex', alignItems: 'center', justifyContent: 'center', 
                 color: '#fff', fontSize: 28, fontWeight: 800, fontFamily: 'Inter, sans-serif',
                 border: '4px solid #fff', boxShadow: '0 8px 16px -4px rgba(249, 115, 22, 0.3)'
               }}>
-                {!customAvatarUrl && (myProfile?.fullName ? myProfile.fullName.substring(0, 2).toUpperCase() : 'U')}
+                {!(customAvatarUrl || user?.avatarUrl) && (user?.fullName ? user.fullName.substring(0, 2).toUpperCase() : 'U')}
               </div>
               
               <button
@@ -567,12 +630,12 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
             {/* Name & Role */}
             <div style={{ marginTop: 12, textAlign: 'center' }}>
               <div style={{ color: '#0f172a', fontSize: 20, fontWeight: 800, letterSpacing: '-0.02em', fontFamily: 'Inter, sans-serif' }}>
-                {myProfile?.fullName || 'Đang tải...'}
+                {user?.fullName || 'Đang tải...'}
               </div>
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 4, background: '#f1f5f9', padding: '4px 10px', borderRadius: 100 }}>
                 <ShieldCheck size={14} color="#64748b" />
                 <span style={{ color: '#475569', fontSize: 12, fontWeight: 600, fontFamily: 'Inter, sans-serif' }}>
-                  {myProfile?.roles?.map((r: any) => r.roleName.replace('ROLE_', '')).join(', ') || 'User'}
+                  {user?.roles?.map((r: any) => typeof r === 'string' ? r.replace('ROLE_', '') : r.roleName?.replace('ROLE_', '')).join(', ') || 'User'}
                 </span>
               </div>
             </div>
@@ -583,20 +646,27 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
         <div style={{ padding: '0 24px 24px', display: 'flex', flexDirection: 'column' }}>
           <div style={{ height: 1, background: '#f1f5f9', width: '100%', marginBottom: 8 }}></div>
           
-          {[
-            { icon: <Mail size={16} color="#64748b" />, label: 'Email Address', value: myProfile?.email },
-            { icon: <Phone size={16} color="#64748b" />, label: 'Phone Number', value: myProfile?.phone || 'Chưa cập nhật' },
-          ].map((item) => (
-            <div key={item.label} style={{ 
-              display: 'flex', flexDirection: 'column', gap: 4, padding: '12px 0', borderBottom: '1px solid #f8fafc'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                {item.icon}
-                <span style={{ fontSize: 11, color: '#64748b', fontWeight: 600, fontFamily: 'Inter, sans-serif', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{item.label}</span>
-              </div>
-              <span style={{ fontSize: 14, color: '#0f172a', fontWeight: 600, fontFamily: 'Inter, sans-serif', paddingLeft: 24 }}>{item.value}</span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: '12px 0', borderBottom: '1px solid #f8fafc' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Mail size={16} color="#64748b" />
+              <span style={{ fontSize: 11, color: '#64748b', fontWeight: 600, fontFamily: 'Inter, sans-serif', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Email Address</span>
             </div>
-          ))}
+            <span style={{ fontSize: 14, color: '#0f172a', fontWeight: 600, fontFamily: 'Inter, sans-serif', paddingLeft: 24 }}>{user?.email}</span>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: '12px 0', borderBottom: '1px solid #f8fafc' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Phone size={16} color="#64748b" />
+              <span style={{ fontSize: 11, color: '#64748b', fontWeight: 600, fontFamily: 'Inter, sans-serif', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Phone Number</span>
+            </div>
+            <Input 
+              value={phone} 
+              onChange={(e) => setPhone(e.target.value)} 
+              placeholder="Chưa cập nhật"
+              bordered={false}
+              style={{ fontSize: 14, color: '#0f172a', fontWeight: 600, fontFamily: 'Inter, sans-serif', padding: '0 0 0 12px', boxShadow: 'none' }}
+            />
+          </div>
 
           {/* Status row special casing */}
           <div style={{ 
@@ -608,14 +678,130 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
               </div>
               <span style={{ 
                 padding: '4px 12px', borderRadius: 100, 
-                background: myProfile?.status === 'ACTIVE' ? '#ecfdf5' : '#fef2f2', 
-                color: myProfile?.status === 'ACTIVE' ? '#10b981' : '#ef4444', 
-                fontWeight: 700, fontSize: 11, fontFamily: 'Inter, sans-serif', letterSpacing: '0.02em', border: `1px solid ${myProfile?.status === 'ACTIVE' ? '#a7f3d0' : '#fecaca'}`
+                background: '#ecfdf5', 
+                color: '#10b981', 
+                fontWeight: 700, fontSize: 11, fontFamily: 'Inter, sans-serif', letterSpacing: '0.02em', border: '1px solid #a7f3d0'
               }}>
-                {myProfile?.status || 'UNKNOWN'}
+                ACTIVE
               </span>
             </div>
+            
+            <div style={{ marginTop: 24 }}>
+              <Button 
+                type="primary" 
+                block 
+                onClick={handleUpdateProfile}
+                loading={updatingProfile}
+                style={{ 
+                  background: '#ea580c', 
+                  borderColor: '#ea580c', 
+                  fontWeight: 700, 
+                  height: 44, 
+                  borderRadius: 12, 
+                  fontFamily: 'Inter, sans-serif',
+                  boxShadow: '0 4px 12px rgba(234, 88, 12, 0.25)'
+                }}
+              >
+                Cập nhật thông tin
+              </Button>
+            </div>
         </div>
+      </Modal>
+
+      {/* Change Password Modal */}
+      <Modal
+        title={
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontFamily: 'Inter, sans-serif', fontWeight: 800, color: '#0f172a', fontSize: 18 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 40, height: 40, borderRadius: 12, background: '#fff7ed', border: '1px solid #ffedd5' }}>
+              <ShieldCheck size={22} color="#ea580c" />
+            </div>
+            Bảo mật tài khoản
+          </div>
+        }
+        open={changePasswordVisible}
+        onCancel={() => setChangePasswordVisible(false)}
+        footer={null}
+        destroyOnHidden
+        width={420}
+        closeIcon={<X size={20} color="#94a3b8" style={{ marginTop: 8, marginRight: 8 }} />}
+        styles={{ 
+          content: { borderRadius: 24, padding: '24px 32px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15)' },
+          header: { marginBottom: 24 },
+          body: { padding: 0 }
+        }}
+      >
+        <Form form={form} layout="vertical" onFinish={handleChangePassword} requiredMark={false}>
+          <Form.Item
+            name="oldPassword"
+            label={<span style={{ fontWeight: 700, color: '#334155', fontSize: 13, fontFamily: 'Inter, sans-serif' }}>Mật khẩu hiện tại</span>}
+            rules={[{ required: true, message: 'Vui lòng nhập mật khẩu hiện tại!' }]}
+          >
+            <Input.Password 
+              size="large" 
+              placeholder="Nhập mật khẩu đang sử dụng" 
+              className="modern-password-input"
+            />
+          </Form.Item>
+          
+          <div style={{ height: 1, background: '#f1f5f9', margin: '20px 0' }} />
+
+          <Form.Item
+            name="newPassword"
+            label={<span style={{ fontWeight: 700, color: '#334155', fontSize: 13, fontFamily: 'Inter, sans-serif' }}>Mật khẩu mới</span>}
+            rules={[
+              { required: true, message: 'Vui lòng nhập mật khẩu mới!' },
+              { min: 8, message: 'Mật khẩu phải có ít nhất 8 ký tự!' },
+            ]}
+          >
+            <Input.Password 
+              size="large" 
+              placeholder="Tạo mật khẩu mới" 
+              className="modern-password-input"
+            />
+          </Form.Item>
+          <Form.Item
+            name="confirmPassword"
+            label={<span style={{ fontWeight: 700, color: '#334155', fontSize: 13, fontFamily: 'Inter, sans-serif' }}>Xác nhận mật khẩu</span>}
+            dependencies={['newPassword']}
+            rules={[
+              { required: true, message: 'Vui lòng xác nhận mật khẩu!' },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value || getFieldValue('newPassword') === value) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(new Error('Mật khẩu xác nhận không khớp!'));
+                },
+              }),
+            ]}
+            style={{ marginBottom: 32 }}
+          >
+            <Input.Password 
+              size="large" 
+              placeholder="Nhập lại mật khẩu mới" 
+              className="modern-password-input"
+            />
+          </Form.Item>
+          
+          <div style={{ display: 'flex', gap: 12 }}>
+            <Button 
+              size="large"
+              onClick={() => setChangePasswordVisible(false)} 
+              style={{ flex: 1, borderRadius: 12, fontWeight: 700, color: '#475569', border: '1px solid #cbd5e1', background: '#fff', height: 44, fontFamily: 'Inter, sans-serif' }}
+            >
+              Hủy bỏ
+            </Button>
+            <Button 
+              size="large"
+              type="primary" 
+              htmlType="submit" 
+              loading={loading}
+              style={{ flex: 1, borderRadius: 12, fontWeight: 700, background: '#ea580c', borderColor: '#ea580c', boxShadow: '0 4px 12px rgba(234, 88, 12, 0.25)', height: 44, fontFamily: 'Inter, sans-serif' }}
+            >
+              Cập nhật
+            </Button>
+          </div>
+        </Form>
       </Modal>
 
       <CropAvatarModal 

@@ -5,7 +5,7 @@ import { NeuSurface } from '../components/shared/NeuSurface';
 import { api } from '@/services/api';
 
 const cc = {
-  primary: '#E96500',
+  primary: '#E67E22',
   primaryMuted: '#fff0e6',
   text: '#1e293b',
   textMuted: '#64748b',
@@ -37,8 +37,9 @@ export const EvaluationTab: React.FC = () => {
   const fetchEvaluation = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/evaluations/my-evaluation');
-      setEvaluation(res.data);
+      const res = await api.get('/enterprise-evaluations/my-evaluation');
+      const data = res.data?.result ?? res.data;
+      setEvaluation(data || null);
     } catch {
       setEvaluation(null);
     } finally {
@@ -50,13 +51,12 @@ export const EvaluationTab: React.FC = () => {
     return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}><Spin size="large" /></div>;
   }
 
-  const rubricScores = evaluation?.rubricScores || [
-    { name: 'Weekly Reports (20%)', score: 18, maxScore: 20 },
-    { name: 'Final Report (25%)', score: 22, maxScore: 25 },
-    { name: 'Enterprise Evaluation (30%)', score: 27, maxScore: 30 },
-    { name: 'Final Presentation (15%)', score: 14, maxScore: 15 },
-    { name: 'Documentation (10%)', score: 9, maxScore: 10 },
-  ];
+  const rubricScores = evaluation ? [
+    { name: 'Attitude (20%)', score: evaluation.attitudeScore, maxScore: 10 },
+    { name: 'Professionalism (40%)', score: evaluation.professionalismScore, maxScore: 10 },
+    { name: 'Soft Skills (20%)', score: evaluation.softSkillsScore, maxScore: 10 },
+    { name: 'Progress (20%)', score: evaluation.progressScore, maxScore: 10 },
+  ] : [];
 
   const totalScore = rubricScores.reduce((sum: number, r: any) => sum + r.score, 0);
   const maxScore = rubricScores.reduce((sum: number, r: any) => sum + r.maxScore, 0);
@@ -125,18 +125,10 @@ export const EvaluationTab: React.FC = () => {
           </NeuSurface>
 
           {/* Enterprise Feedback */}
-          {evaluation.enterpriseFeedback && (
+          {evaluation.overallComments && (
             <NeuSurface style={{ padding: 24, marginBottom: 20 }}>
               <h3 style={{ fontSize: 16, fontWeight: 700, color: cc.text, margin: '0 0 12px' }}>Enterprise Feedback</h3>
-              <p style={{ fontSize: 13, color: cc.textMuted, lineHeight: 1.6, margin: 0 }}>{evaluation.enterpriseFeedback}</p>
-            </NeuSurface>
-          )}
-
-          {/* TM Feedback */}
-          {evaluation.tmFeedback && (
-            <NeuSurface style={{ padding: 24 }}>
-              <h3 style={{ fontSize: 16, fontWeight: 700, color: cc.text, margin: '0 0 12px' }}>Training Manager Feedback</h3>
-              <p style={{ fontSize: 13, color: cc.textMuted, lineHeight: 1.6, margin: 0 }}>{evaluation.tmFeedback}</p>
+              <p style={{ fontSize: 13, color: cc.textMuted, lineHeight: 1.6, margin: 0 }}>{evaluation.overallComments}</p>
             </NeuSurface>
           )}
         </>

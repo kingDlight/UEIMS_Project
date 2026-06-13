@@ -44,6 +44,9 @@ class ApplicationServiceImplTest {
     private EligibleStudentRepository eligibleStudentRepository;
 
     @Mock
+    private StudentProfileRepository studentProfileRepository;
+
+    @Mock
     private ApplicationMapper mapper;
 
     @InjectMocks

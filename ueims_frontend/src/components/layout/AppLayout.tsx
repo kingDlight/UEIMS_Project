@@ -162,7 +162,7 @@ export const AppLayout: React.FC = () => {
         open={changePasswordVisible}
         onCancel={() => setChangePasswordVisible(false)}
         footer={null}
-        destroyOnClose
+        destroyOnHidden
       >
         <Form layout="vertical" onFinish={handleChangePassword}>
           <Form.Item

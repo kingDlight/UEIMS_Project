@@ -17,10 +17,10 @@ public class ApplicationRequest {
     @NotNull(message = "JOB_POST_ID_MANDATORY")
     private UUID jobPostId;
 
-    @NotNull(message = "STUDENT_ID_MANDATORY")
+    // studentId is auto-populated from security context (BR-47: Application Snapshot)
     private UUID studentId;
 
-    @NotNull(message = "CV_FILE_URL_MANDATORY")
+    // cvFileUrl is auto-populated from student's profile (BR-47)
     private String cvFileUrl;
 
     private Long cvFileSize;

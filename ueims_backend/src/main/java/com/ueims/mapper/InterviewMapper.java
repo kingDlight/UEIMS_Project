@@ -1,7 +1,6 @@
 package com.ueims.mapper;
 
-import org.mapstruct.Mapper;
-import org.mapstruct.ReportingPolicy;
+import org.mapstruct.*;
 
 import com.ueims.dto.response.InterviewDTO;
 import com.ueims.model.entity.Interview;
@@ -11,6 +10,10 @@ import com.ueims.model.entity.Interview;
         unmappedTargetPolicy = ReportingPolicy.IGNORE,
         builder = @org.mapstruct.Builder(disableBuilder = true))
 public interface InterviewMapper {
+    @Mapping(
+            target = "enterpriseName",
+            expression = "java(entity.getApplication().getJobPost().getEnterprise().getCompanyName())")
+    @Mapping(target = "jobTitle", expression = "java(entity.getApplication().getJobPost().getTitle())")
     InterviewDTO toDto(Interview entity);
 
     Interview toEntity(InterviewDTO dto);

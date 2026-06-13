@@ -19,17 +19,20 @@ import com.ueims.model.entity.User;
 import com.ueims.repository.AuditLogRepository;
 import com.ueims.repository.UserRepository;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 
 @Aspect
 @Component
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 public class AuditLogAspect {
 
-    private final AuditLogRepository auditLogRepository;
-    private final UserRepository userRepository;
+    AuditLogRepository auditLogRepository;
+    UserRepository userRepository;
 
     // BR-07: Automatically capture all mutating actions (POST, PUT, DELETE)
     @Pointcut("@annotation(org.springframework.web.bind.annotation.PostMapping) || "

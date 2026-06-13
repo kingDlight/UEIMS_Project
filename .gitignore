@@ -175,3 +175,10 @@ test-collection.json
 update-pass.js
 test-internship-plan.js
 test-plan-collection.json
+get_student.js
+replace_hash.js
+update_db.js
+generate_additional_dataset.js
+check_schema.js
+check_counts.js
+student_evaluation_data.sql

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { CalendarOutlined, TrophyOutlined, FileTextOutlined, SnippetsOutlined, ClockCircleOutlined } from '@ant-design/icons';
-import { Spin } from 'antd';
+import { Spin, Skeleton } from 'antd';
 import { motion, animate } from 'framer-motion';
 import { cc, hexToRgba } from '../constants';
 import { NeuSurface } from '../components/shared/NeuSurface';
@@ -9,6 +9,7 @@ import { AnimatedStatCard } from '../components/shared/AnimatedStatCard';
 import { Sparkline } from '../components/charts/Sparkline';
 import { AreaChart } from '../components/charts/AreaChart';
 import { useNavigate } from 'react-router-dom';
+import { StudentDashboardService, type StudentDashboardStats } from '@/services/StudentDashboardService';
 
 const AnimatedNumber: React.FC<{ value: number }> = ({ value }) => {
   const [displayValue, setDisplayValue] = useState(0);
@@ -22,7 +23,9 @@ const AnimatedNumber: React.FC<{ value: number }> = ({ value }) => {
 export const StudentDashboardTab: React.FC = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({ applications: 0, interviews: 0, reports: 0, daysRemaining: 0 });
+  const [stats, setStats] = useState<StudentDashboardStats>({
+    applications: 0, interviews: 0, reports: 0, daysRemaining: 0, semesterName: '—', semesterStatus: 'N/A',
+  });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -33,17 +36,10 @@ export const StudentDashboardTab: React.FC = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await fetch('http://localhost:8080/api/dashboard/student-stats', {
-          headers: { Authorization: `Bearer ${localStorage.getItem('ueims_token')}` }
-        });
-        if (res.ok) {
-          const data = await res.json();
-          setStats(data);
-        } else {
-          setStats({ applications: 3, interviews: 1, reports: 4, daysRemaining: 28 });
-        }
+        const data = await StudentDashboardService.getStats();
+        setStats(data);
       } catch {
-        setStats({ applications: 3, interviews: 1, reports: 4, daysRemaining: 28 });
+        // fallback: keep zero values
       } finally {
         setLoading(false);
       }
@@ -54,7 +50,56 @@ export const StudentDashboardTab: React.FC = () => {
   const sparklineData = [12, 19, 15, 22, 18, 25, 20];
 
   if (loading) {
-    return <div style={{ padding: 40, textAlign: 'center' }}><Spin size="large" /></div>;
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 22, fontFamily: 'Inter, sans-serif' }}>
+        <style>{`
+          .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; align-items: stretch; }
+          .bottom-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; align-items: stretch; }
+          @media (max-width: 1024px) {
+            .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+            .bottom-grid { grid-template-columns: 1fr; }
+          }
+          @media (max-width: 640px) {
+            .kpi-grid { grid-template-columns: 1fr; }
+          }
+        `}</style>
+        
+        {/* Skeleton Hero Card */}
+        <div style={{ padding: '28px 30px', borderRadius: 28, background: '#fff', border: '1px solid rgba(226,232,240,.9)' }}>
+          <Skeleton active title={{ width: '60%' }} paragraph={{ rows: 2, width: ['40%', '30%'] }} />
+          <div style={{ display: 'flex', gap: 12, marginTop: 18 }}>
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} style={{ width: 100, height: 68, borderRadius: 16, background: '#f5f7fa', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Skeleton.Button active shape="round" block style={{ height: 32, width: 60 }} />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Skeleton KPI Grid */}
+        <div className="kpi-grid">
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} style={{ padding: 20, borderRadius: 18, background: '#fff', border: '1px solid rgba(226,232,240,.9)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
+                <Skeleton.Avatar active shape="square" size="small" />
+                <Skeleton.Button active size="small" shape="round" style={{ width: 60 }} />
+              </div>
+              <Skeleton active paragraph={{ rows: 1 }} title={{ width: '40%' }} />
+            </div>
+          ))}
+        </div>
+
+        {/* Skeleton Bottom Grid */}
+        <div className="bottom-grid">
+          <div style={{ padding: 24, borderRadius: 18, background: '#fff', border: '1px solid rgba(226,232,240,.9)' }}>
+             <Skeleton active title={{ width: '30%' }} paragraph={{ rows: 4 }} />
+          </div>
+          <div style={{ padding: 24, borderRadius: 18, background: '#fff', border: '1px solid rgba(226,232,240,.9)' }}>
+             <Skeleton active title={{ width: '40%' }} paragraph={{ rows: 3 }} />
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -77,17 +122,17 @@ export const StudentDashboardTab: React.FC = () => {
         padding: '28px 30px',
         borderRadius: 28,
         background: 'linear-gradient(135deg, rgba(255,255,255,.98) 0%, rgba(255,244,236,.92) 48%, rgba(255,250,246,.96) 100%)',
-        border: '1px solid rgba(233,101,0,.12)',
-        boxShadow: '0 20px 50px rgba(15,23,42,.10), 0 8px 22px rgba(233,101,0,.10)',
+        border: '1px solid rgba(230, 126, 34,.12)',
+        boxShadow: '0 20px 50px rgba(15,23,42,.10), 0 8px 22px rgba(230, 126, 34,.10)',
         overflow: 'hidden',
       }}>
-        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'radial-gradient(circle at top right, rgba(233,101,0,.14), transparent 30%), radial-gradient(circle at 20% 20%, rgba(255,138,90,.10), transparent 25%)' }} />
-        <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 5, background: 'linear-gradient(180deg, #FF662C, #FF824D, #FF9B73)' }} />
+        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'radial-gradient(circle at top right, rgba(230, 126, 34,.14), transparent 30%), radial-gradient(circle at 20% 20%, rgba(255,138,90,.10), transparent 25%)' }} />
+        <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 5, background: 'linear-gradient(180deg, #E67E22, #E67E22, #F39C12)' }} />
         <div style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', gap: 20, alignItems: 'stretch', flexWrap: 'wrap' }}>
           <div style={{ minWidth: 0, flex: '1 1 480px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <div>
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '7px 12px', borderRadius: 999, background: 'rgba(233,101,0,.08)', color: cc.primaryDark, fontSize: 12, fontWeight: 700, marginBottom: 14 }}>
-                <CalendarOutlined /> Summer 2026
+                <CalendarOutlined /> {stats.semesterName || 'Semester'}
               </div>
               <h1 style={{ fontSize: 34, lineHeight: 1.06, fontWeight: 900, color: cc.text, margin: 0, letterSpacing: '-1.2px' }}>Your internship journey, at a glance.</h1>
               <p style={{ fontSize: 14.5, color: cc.textMuted, marginTop: 10, maxWidth: 720, lineHeight: 1.7 }}>
@@ -121,7 +166,7 @@ export const StudentDashboardTab: React.FC = () => {
                   <div style={{ fontSize: 28, fontWeight: 900, color: cc.text, lineHeight: 1.05, fontVariantNumeric: 'tabular-nums' }}>68%</div>
                   <div style={{ fontSize: 12, color: cc.success, fontWeight: 700, marginTop: 4 }}>On track</div>
                 </div>
-                <div style={{ width: 62, height: 62, borderRadius: 18, background: `linear-gradient(135deg, ${cc.primary}26, ${cc.primaryMuted})`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: 62, height: 62, borderRadius: 18, background: `linear-gradient(135deg, ${cc.primary}26, ${cc.primaryDark}10)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <TrophyOutlined style={{ fontSize: 22, color: cc.primary }} />
                 </div>
               </div>
@@ -145,7 +190,7 @@ export const StudentDashboardTab: React.FC = () => {
             </div>
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
               <button onClick={() => navigate('/student-dashboard/reports')} style={{ padding: '11px 16px', borderRadius: 16, border: 'none', background: 'linear-gradient(135deg, #FF662C, #FF824D, #FF9B73)', color: '#fff', fontWeight: 800, boxShadow: '0 12px 28px rgba(233,101,0,.22)', cursor: 'pointer' }}>Submit Report</button>
-              <button onClick={() => navigate('/student-dashboard/jobs')} style={{ padding: '11px 16px', borderRadius: 16, background: '#fff', color: cc.primary, fontWeight: 800, boxShadow: '0 8px 18px rgba(15,23,42,.05)', cursor: 'pointer', border: `1.5px solid ${cc.primary}` }}>Browse Jobs</button>
+              <button onClick={() => navigate('/student-dashboard/jobs')} style={{ padding: '11px 16px', borderRadius: 16, border: `1.5px solid ${cc.primary}`, background: '#fff', color: cc.primary, fontWeight: 800, boxShadow: '0 8px 18px rgba(15,23,42,.05)', cursor: 'pointer' }}>Browse Jobs</button>
             </div>
           </div>
         </div>

@@ -7,14 +7,17 @@ import org.springframework.web.bind.annotation.*;
 
 import com.ueims.service.InvalidatedTokenService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @RestController
 @RequestMapping("/api/invalidated-tokens")
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class InvalidatedTokenController {
-    private final InvalidatedTokenService service;
-    private final com.ueims.mapper.InvalidatedTokenMapper mapper;
+    InvalidatedTokenService service;
+    com.ueims.mapper.InvalidatedTokenMapper mapper;
 
     @GetMapping
     public ResponseEntity<java.util.List<com.ueims.dto.response.InvalidatedTokenDTO>> getAll() {

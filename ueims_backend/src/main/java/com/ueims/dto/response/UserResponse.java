@@ -20,4 +20,5 @@ public class UserResponse {
     String fullName;
     String phone;
     String status;
+    String avatarUrl;
 }

@@ -9,12 +9,15 @@ import com.ueims.model.entity.RolePermissionId;
 import com.ueims.repository.RolePermissionRepository;
 import com.ueims.service.RolePermissionService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RolePermissionServiceImpl implements RolePermissionService {
-    private final RolePermissionRepository repository;
+    RolePermissionRepository repository;
 
     @Override
     public List<RolePermission> findAll() {

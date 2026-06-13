@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { message, Spin } from 'antd';
+import React, { useEffect, useState, useMemo } from 'react';
+import { message, Spin, Pagination } from 'antd';
 import { motion } from 'framer-motion';
-import { FileTextOutlined, EyeOutlined, CloseCircleOutlined, BankOutlined } from '@ant-design/icons';
+import { FileTextOutlined, CloseCircleOutlined, DownOutlined, UpOutlined } from '@ant-design/icons';
 import { NeuSurface } from '../components/shared/NeuSurface';
 import { SmallBadge } from '../components/shared/SmallBadge';
-import { api } from '@/services/api';
+import { ApplicationService } from '@/services/ApplicationService';
 import { cc, hexToRgba } from '../constants';
 
 const CTAButton: React.FC<{
@@ -57,14 +57,18 @@ export const ApplicationsTab: React.FC = () => {
   const [applications, setApplications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>('all');
+  const [expandedApp, setExpandedApp] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 5;
 
   useEffect(() => { fetchApplications(); }, []);
 
   const fetchApplications = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/applications/my-applications');
-      setApplications(res.data || []);
+      const res = await ApplicationService.getMyApplications();
+      const apps = res.data?.result ?? res.data ?? [];
+      setApplications(Array.isArray(apps) ? apps : []);
     } catch (err) {
       console.error('Failed to fetch applications', err);
     } finally {
@@ -74,7 +78,7 @@ export const ApplicationsTab: React.FC = () => {
 
   const handleWithdraw = async (applicationId: string) => {
     try {
-      await api.put(`/applications/${applicationId}/withdraw`);
+      await ApplicationService.withdraw(applicationId);
       message.success('Application withdrawn successfully!');
       fetchApplications();
     } catch (err: any) {
@@ -82,15 +86,46 @@ export const ApplicationsTab: React.FC = () => {
     }
   };
 
-  const filteredApps = filter === 'all' ? applications : applications.filter(app => app.status === filter.toUpperCase());
+  const filteredApps = useMemo(() => {
+    if (filter === 'all') return applications;
+    return applications.filter(app => {
+      const status = app.status?.toUpperCase();
+      switch (filter) {
+        case 'pending': return status === 'PENDING';
+        case 'screening': return status === 'SCREENING_PASSED';
+        case 'interview': return status === 'INTERVIEW_SCHEDULED';
+        case 'rejected': return status === 'SCREENING_REJECTED' || status === 'REJECTED';
+        case 'accepted': return status === 'ACCEPTED';
+        default: return true;
+      }
+    });
+  }, [applications, filter]);
+
+  useEffect(() => { setCurrentPage(1); }, [filter]);
+
+  const paginatedApps = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredApps.slice(start, start + pageSize);
+  }, [filteredApps, currentPage]);
 
   const statusVariant = (status: string): 'success' | 'warning' | 'error' | 'info' | 'neutral' => {
     switch (status?.toUpperCase()) {
-      case 'PASSED': case 'APPROVED': return 'success';
-      case 'PENDING': case 'SUBMITTED': return 'warning';
-      case 'REJECTED': case 'FAILED': return 'error';
-      case 'SCHEDULED': return 'info';
+      case 'SCREENING_PASSED': return 'success';
+      case 'INTERVIEW_SCHEDULED': return 'info';
+      case 'ACCEPTED': return 'success';
+      case 'SCREENING_REJECTED':
+      case 'REJECTED': return 'error';
+      case 'PENDING': return 'warning';
       default: return 'neutral';
+    }
+  };
+
+  const statusLabel = (status: string): string => {
+    switch (status?.toUpperCase()) {
+      case 'SCREENING_PASSED': return 'Screening Passed';
+      case 'INTERVIEW_SCHEDULED': return 'Interview Scheduled';
+      case 'SCREENING_REJECTED': return 'Screening Rejected';
+      default: return status || 'Unknown';
     }
   };
 
@@ -107,40 +142,87 @@ export const ApplicationsTab: React.FC = () => {
 
       {/* Filter Tabs */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
-        {['all', 'pending', 'passed', 'rejected'].map(f => (
-          <CTAButton key={f} variant={filter === f ? 'primary' : 'ghost'} onClick={() => setFilter(f)}>{f.charAt(0).toUpperCase() + f.slice(1)}</CTAButton>
+        {[
+          { key: 'all', label: 'All' },
+          { key: 'pending', label: 'Pending' },
+          { key: 'screening', label: 'Screening' },
+          { key: 'interview', label: 'Interview' },
+          { key: 'accepted', label: 'Accepted' },
+          { key: 'rejected', label: 'Rejected' },
+        ].map(f => (
+          <CTAButton key={f.key} variant={filter === f.key ? 'primary' : 'ghost'} onClick={() => setFilter(f.key)}>{f.label}</CTAButton>
         ))}
       </div>
 
       {filteredApps.length === 0 ? (
         <EmptyState icon={<FileTextOutlined style={{ fontSize: 32 }} />} title="No applications yet" description="Start applying to internships to see your applications here" />
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {filteredApps.map((app, index) => (
-            <motion.div key={app.applicationId || index} initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3, delay: index * 0.05 }}>
-              <NeuSurface style={{ padding: 20 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
-                    <div style={{ width: 52, height: 52, borderRadius: cc.radiusMd, background: hexToRgba(cc.primary, 0.08), display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.primary, fontSize: 20, fontWeight: 700 }}>
-                      {app.enterpriseName?.charAt(0) || 'E'}
+        <>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {paginatedApps.map((app, index) => (
+              <motion.div key={app.applicationId || index} initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3, delay: index * 0.05 }}>
+                <NeuSurface style={{ padding: 20 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+                      <div style={{ width: 52, height: 52, borderRadius: cc.radiusMd, background: hexToRgba(cc.primary, 0.08), display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.primary, fontSize: 20, fontWeight: 700 }}>
+                        {app.enterpriseName?.charAt(0) || 'E'}
+                      </div>
+                      <div>
+                        <h4 style={{ fontSize: 14, fontWeight: 600, color: cc.textPrimary, margin: '0 0 4px' }}>{app.jobTitle || 'Internship Position'}</h4>
+                        <p style={{ fontSize: 12, color: cc.textMuted, margin: '0 0 8px' }}>{app.enterpriseName}</p>
+                        <SmallBadge label={statusLabel(app.status)} variant={statusVariant(app.status)} />
+                      </div>
                     </div>
-                    <div>
-                      <h4 style={{ fontSize: 14, fontWeight: 600, color: cc.textPrimary, margin: '0 0 4px' }}>{app.jobTitle || 'Internship Position'}</h4>
-                      <p style={{ fontSize: 12, color: cc.textMuted, margin: '0 0 8px' }}>{app.enterpriseName}</p>
-                      <SmallBadge label={app.status || 'PENDING'} variant={statusVariant(app.status)} />
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                      {app.status === 'PENDING' && (
+                        <CTAButton variant="danger" icon={<CloseCircleOutlined />} onClick={() => handleWithdraw(app.applicationId)}>Withdraw</CTAButton>
+                      )}
+                      <CTAButton variant="ghost" icon={expandedApp === app.applicationId ? <UpOutlined /> : <DownOutlined />} onClick={() => setExpandedApp(expandedApp === app.applicationId ? null : app.applicationId)}>
+                        {expandedApp === app.applicationId ? 'Collapse' : 'Expand'}
+                      </CTAButton>
                     </div>
                   </div>
-                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                    {app.status === 'PENDING' && (
-                      <CTAButton variant="danger" icon={<CloseCircleOutlined />} onClick={() => handleWithdraw(app.applicationId)}>Withdraw</CTAButton>
-                    )}
-                    <CTAButton variant="ghost" icon={<EyeOutlined />}>View</CTAButton>
-                  </div>
-                </div>
-              </NeuSurface>
-            </motion.div>
-          ))}
-        </div>
+                  {expandedApp === app.applicationId && (
+                    <div style={{ marginTop: 16, paddingTop: 16, borderTop: `1px solid ${cc.border}` }}>
+                      <div style={{ display: 'grid', gap: 12 }}>
+                        <div>
+                          <p style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, margin: '0 0 4px' }}>Position</p>
+                          <p style={{ fontSize: 13, color: cc.textPrimary, margin: 0 }}>{app.jobTitle || 'N/A'}</p>
+                        </div>
+                        <div>
+                          <p style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, margin: '0 0 4px' }}>Enterprise</p>
+                          <p style={{ fontSize: 13, color: cc.textPrimary, margin: 0 }}>{app.enterpriseName || 'N/A'}</p>
+                        </div>
+                        {app.coverLetter && (
+                          <div>
+                            <p style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, margin: '0 0 4px' }}>Cover Letter</p>
+                            <p style={{ fontSize: 13, color: cc.textPrimary, margin: 0, whiteSpace: 'pre-wrap' }}>{app.coverLetter}</p>
+                          </div>
+                        )}
+                        {app.appliedAt && (
+                          <div>
+                            <p style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, margin: '0 0 4px' }}>Applied At</p>
+                            <p style={{ fontSize: 13, color: cc.textPrimary, margin: 0 }}>{new Date(app.appliedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </NeuSurface>
+              </motion.div>
+            ))}
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 24 }}>
+            <Pagination
+              current={currentPage}
+              pageSize={pageSize}
+              total={filteredApps.length}
+              onChange={setCurrentPage}
+              showSizeChanger={false}
+              showTotal={(total, range) => `${range[0]}-${range[1]} of ${total}`}
+            />
+          </div>
+        </>
       )}
     </div>
   );

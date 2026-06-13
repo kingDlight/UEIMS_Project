@@ -8,4 +8,6 @@ public interface ExcelExportService {
     ResponseEntity<byte[]> exportAtRiskStudents(UUID semesterId);
 
     ResponseEntity<byte[]> exportFinalGrades();
+
+    ResponseEntity<byte[]> exportFinalGradesPdf();
 }

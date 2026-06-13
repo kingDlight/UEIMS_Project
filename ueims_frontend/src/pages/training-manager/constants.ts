@@ -17,7 +17,7 @@ export const c: ThemeColors = {
   bg: '#e8ecf2',
   bgLight: '#f5f7fa',
   gradient: 'linear-gradient(135deg, #fff5ed, #ffe8d6)',
-  primary: '#E96500',
+  primary: '#E67E22',
   primaryLight: '#FF8533',
   primaryDark: '#C45200',
   primaryMuted: '#fff0e6',
@@ -36,7 +36,7 @@ export const c: ThemeColors = {
   danger: '#ef4444',
   info: '#3b82f6',
   purple: '#8b5cf6',
-  shadow: '0 30px 60px rgba(233, 101, 0, 0.15)',
+  shadow: '0 30px 60px rgba(230, 126, 34, 0.15)',
   borderRadius: 16,
   border: '#e2e8f0',
 };

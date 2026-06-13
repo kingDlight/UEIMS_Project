@@ -10,15 +10,18 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ueims.repository.InvalidatedTokenRepository;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 public class InvalidatedTokenCleanupService {
 
-    private final InvalidatedTokenRepository invalidatedTokenRepository;
+    InvalidatedTokenRepository invalidatedTokenRepository;
 
     @Scheduled(cron = "0 0 0 * * ?")
     @EventListener(ApplicationReadyEvent.class)

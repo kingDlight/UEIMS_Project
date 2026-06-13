@@ -13,25 +13,35 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.ueims.dto.request.StudentProfileUpdateRequest;
+import com.ueims.dto.response.MyProfileResponse;
 import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
 import com.ueims.model.entity.StudentProfile;
 import com.ueims.model.entity.User;
 import com.ueims.repository.ApplicationRepository;
+import com.ueims.repository.EligibleStudentRepository;
 import com.ueims.repository.EnterpriseAssignmentRepository;
 import com.ueims.repository.StudentProfileRepository;
 import com.ueims.repository.UserRepository;
 import com.ueims.service.StudentProfileService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Slf4j
 public class StudentProfileServiceImpl implements StudentProfileService {
-    private final StudentProfileRepository repository;
-    private final UserRepository userRepository;
-    private final ApplicationRepository applicationRepository;
-    private final EnterpriseAssignmentRepository enterpriseAssignmentRepository;
+    private static final String USER_DIR_PROPERTY = "user.dir";
+
+    StudentProfileRepository repository;
+    UserRepository userRepository;
+    ApplicationRepository applicationRepository;
+    EnterpriseAssignmentRepository enterpriseAssignmentRepository;
+    EligibleStudentRepository eligibleStudentRepository;
 
     private User getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -41,6 +51,11 @@ public class StudentProfileServiceImpl implements StudentProfileService {
     @Override
     public List<StudentProfile> findAll() {
         return repository.findAll();
+    }
+
+    @Override
+    public StudentProfile findByUserId(UUID userId) {
+        return repository.findByUser_UserId(userId);
     }
 
     @Override
@@ -129,8 +144,8 @@ public class StudentProfileServiceImpl implements StudentProfileService {
             throw new AppException(ErrorCode.CV_NOT_UPLOADED);
         }
 
-        String filename = StringUtils.getFilename(file.getOriginalFilename());
-        if (filename == null || !filename.toLowerCase().endsWith(".pdf")) {
+        String originalFilename = StringUtils.getFilename(file.getOriginalFilename());
+        if (originalFilename == null || !originalFilename.toLowerCase().endsWith(".pdf")) {
             throw new AppException(ErrorCode.INVALID_CV_FORMAT);
         }
 
@@ -139,20 +154,98 @@ public class StudentProfileServiceImpl implements StudentProfileService {
         }
 
         try {
-            Path uploadDir = Paths.get(System.getProperty("user.dir"), "uploads", "cv");
+            // Delete existing CV file if present (prevent spam / orphan files)
+            String oldCvUrl = profile.getCvUrl();
+            if (oldCvUrl != null && !oldCvUrl.isBlank()) {
+                Path oldPath =
+                        Paths.get(System.getProperty(USER_DIR_PROPERTY), oldCvUrl.replace("/uploads/", "uploads/"));
+                Files.deleteIfExists(oldPath);
+            }
+
+            Path uploadDir = Paths.get(System.getProperty(USER_DIR_PROPERTY), "uploads", "cv");
             Files.createDirectories(uploadDir);
-            String stored = id.toString() + "_" + System.currentTimeMillis() + "_" + StringUtils.cleanPath(filename);
+            String stored =
+                    id.toString() + "_" + System.currentTimeMillis() + "_" + StringUtils.cleanPath(originalFilename);
             Path path = uploadDir.resolve(stored);
             file.transferTo(path.toFile());
             profile.setCvUrl("/uploads/cv/" + stored);
+            profile.setCvFileName(originalFilename);
             return repository.save(profile);
         } catch (IOException e) {
+            log.error("[CV Upload] IOException: {}", e.getMessage(), e);
             throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
         }
     }
 
     @Override
+    public StudentProfile deleteCv(UUID id) {
+        StudentProfile profile =
+                repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.STUDENT_PROFILE_NOT_FOUND));
+
+        User currentUser = getCurrentUser();
+        if (!profile.getUser().getUserId().equals(currentUser.getUserId())) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        String oldCvUrl = profile.getCvUrl();
+        if (oldCvUrl != null && !oldCvUrl.isBlank()) {
+            try {
+                Path oldPath =
+                        Paths.get(System.getProperty(USER_DIR_PROPERTY), oldCvUrl.replace("/uploads/", "uploads/"));
+                Files.deleteIfExists(oldPath);
+            } catch (IOException e) {
+                log.error("[CV Delete] Failed to delete file: {}", e.getMessage(), e);
+            }
+            profile.setCvUrl(null);
+            profile.setCvFileName(null);
+        }
+        return repository.save(profile);
+    }
+
+    @Override
     public void deleteById(UUID id) {
         repository.deleteById(id);
+    }
+
+    @Override
+    public MyProfileResponse getMyFullProfile(UUID userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        StudentProfile profile = repository.findByUser_UserId(userId);
+
+        MyProfileResponse.MyProfileResponseBuilder builder = MyProfileResponse.builder()
+                .userId(user.getUserId())
+                .email(user.getEmail())
+                .fullName(user.getFullName())
+                .phone(user.getPhone())
+                .avatarUrl(user.getAvatarUrl())
+                .status(user.getStatus());
+
+        if (profile != null) {
+            builder.profileId(profile.getProfileId())
+                    .studentCode(profile.getStudentCode())
+                    .major(profile.getMajor())
+                    .skills(profile.getSkills())
+                    .cvUrl(profile.getCvUrl())
+                    .cvFileName(profile.getCvFileName())
+                    .linkedinUrl(profile.getLinkedinUrl())
+                    .githubUrl(profile.getGithubUrl())
+                    .portfolioUrl(profile.getPortfolioUrl())
+                    .bio(profile.getBio());
+        }
+
+        // Get latest eligible student record for semester info
+        var latestEligible = eligibleStudentRepository.findTopByUser_UserIdOrderByImportedAtDesc(userId);
+        if (latestEligible.isPresent()) {
+            var eligible = latestEligible.get();
+            builder.currentSemester(eligible.getCurrentSemester())
+                    .gpa(eligible.getGpa())
+                    .ojtStatus(eligible.getStatus());
+            if (eligible.getSemester() != null) {
+                builder.semesterName(eligible.getSemester().getName())
+                        .semesterCode(eligible.getSemester().getSemesterCode());
+            }
+        }
+
+        return builder.build();
     }
 }

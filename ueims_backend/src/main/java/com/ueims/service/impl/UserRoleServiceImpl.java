@@ -12,12 +12,15 @@ import com.ueims.model.entity.UserRoleId;
 import com.ueims.repository.UserRoleRepository;
 import com.ueims.service.UserRoleService;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserRoleServiceImpl implements UserRoleService {
-    private final UserRoleRepository repository;
+    UserRoleRepository repository;
 
     @Override
     public List<UserRole> findAll() {

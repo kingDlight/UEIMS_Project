@@ -1,11 +1,21 @@
-import axios from 'axios';
+import { api } from './api';
 
-const API_URL = 'http://localhost:8080/api/student-enterprise-feedbacks';
+const API_URL = '/student-enterprise-feedbacks';
 
 export const StudentEnterpriseFeedbackService = {
-    getAll: () => axios.get(API_URL),
-    getById: (id: string) => axios.get(`${API_URL}/${id}`),
-    create: (data: any) => axios.post(API_URL, data),
-    update: (id: string, data: any) => axios.put(`${API_URL}/${id}`, data),
-    delete: (id: string) => axios.delete(`${API_URL}/${id}`)
+    getAll: () => api.get(API_URL),
+    getMyFeedbacks: () => api.get(`${API_URL}/my-feedbacks`),
+    getById: (id: string) => api.get(`${API_URL}/${id}`),
+    create: (data: any) => api.post(API_URL, {
+        enterpriseId: data.enterpriseId,
+        semesterId: data.semesterId,
+        trainingQualityScore: data.trainingQualityScore,
+        supervisorSupportScore: data.supervisorSupportScore,
+        workEnvironmentScore: data.workEnvironmentScore,
+        overallScore: data.overallScore,
+        positiveFeedback: data.positiveFeedback,
+        improvementFeedback: data.improvementFeedback,
+        additionalComments: data.additionalComments,
+    }),
+    delete: (id: string) => api.delete(`${API_URL}/${id}`)
 };

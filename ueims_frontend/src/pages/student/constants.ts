@@ -57,7 +57,7 @@ export const cc = {
   infoText: '#1E40AF',
   purple: '#8b5cf6',
   
-  shadow: '0 30px 60px rgba(233, 101, 0, 0.15)',
+  shadow: '0 30px 60px rgba(230, 126, 34, 0.15)',
   borderRadius: 16,
   border: '#E5E7EB',
   borderSubtle: '#F3F4F6',
@@ -108,23 +108,21 @@ export type StudentPageKey =
   | 'schedule'
   | 'training-plan'
   | 'reports'
-  | 'final-report'
-  | 'evaluation'
   | 'feedback'
-  | 'settings';
+  | 'final-report'
+  | 'evaluation';
 
 export const navItems: NavItem[] = [
-  { key: 'dashboard', label: 'Dashboard', icon: React.createElement(CalendarOutlined), roles: ['STUDENT'] },
-  { key: 'profile', label: 'Profile', icon: React.createElement(UserOutlined), roles: ['STUDENT'] },
+  { key: 'dashboard', label: 'Student Dashboard', icon: React.createElement(CalendarOutlined), roles: ['STUDENT'] },
+  { key: 'profile', label: 'Profile & CV', icon: React.createElement(UserOutlined), roles: ['STUDENT'] },
   { key: 'jobs', label: 'Job Board', icon: React.createElement(TrophyOutlined), roles: ['STUDENT'] },
-  { key: 'applications', label: 'Applications', icon: React.createElement(FileTextOutlined), roles: ['STUDENT'] },
-  { key: 'schedule', label: 'Interview', icon: React.createElement(CalendarOutlined), roles: ['STUDENT'] },
-  { key: 'training-plan', label: 'Training', icon: React.createElement(BookOutlined), roles: ['STUDENT'] },
-  { key: 'reports', label: 'Reports', icon: React.createElement(SnippetsOutlined), roles: ['STUDENT'] },
-  { key: 'final-report', label: 'Final Report', icon: React.createElement(FileProtectOutlined), roles: ['STUDENT'] },
-  { key: 'evaluation', label: 'Evaluation', icon: React.createElement(TrophyOutlined), roles: ['STUDENT'] },
-  { key: 'feedback', label: 'Feedback', icon: React.createElement(CheckCircleOutlined), roles: ['STUDENT'] },
-  { key: 'settings', label: 'Settings', icon: React.createElement(SettingOutlined), roles: ['STUDENT'] },
+  { key: 'applications', label: 'My Applications', icon: React.createElement(FileTextOutlined), roles: ['STUDENT'] },
+  { key: 'schedule', label: 'My Interviews', icon: React.createElement(CalendarOutlined), roles: ['STUDENT'] },
+  { key: 'training-plan', label: 'Internship Progress', icon: React.createElement(BookOutlined), roles: ['STUDENT'] },
+  { key: 'reports', label: 'Weekly Reports', icon: React.createElement(SnippetsOutlined), roles: ['STUDENT'] },
+  { key: 'feedback', label: 'Evaluate Enterprise', icon: React.createElement(CheckCircleOutlined), roles: ['STUDENT'] },
+  { key: 'final-report', label: 'Final Report Submission', icon: React.createElement(FileProtectOutlined), roles: ['STUDENT'] },
+  { key: 'evaluation', label: 'My Evaluation', icon: React.createElement(TrophyOutlined), roles: ['STUDENT'] },
 ];
 
 export const defaultPage: StudentPageKey = 'dashboard';

@@ -21,15 +21,18 @@ import com.ueims.repository.WeeklyReportRepository;
 import com.ueims.service.WeeklyReportService;
 import com.ueims.util.HtmlSanitizer;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class WeeklyReportServiceImpl implements WeeklyReportService {
-    private final WeeklyReportRepository repository;
-    private final UserRepository userRepository;
-    private final EligibleStudentRepository eligibleStudentRepository;
-    private final EnterpriseAssignmentRepository enterpriseAssignmentRepository;
+    WeeklyReportRepository repository;
+    UserRepository userRepository;
+    EligibleStudentRepository eligibleStudentRepository;
+    EnterpriseAssignmentRepository enterpriseAssignmentRepository;
 
     private User getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();

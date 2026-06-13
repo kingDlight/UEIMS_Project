@@ -1,6 +1,7 @@
 package com.ueims.repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,4 +21,6 @@ public interface EnterpriseAssignmentRepository extends JpaRepository<Enterprise
             @Param("semesterId") UUID semesterId, @Param("weekNumber") Integer weekNumber);
 
     boolean existsByEnterprise_EnterpriseIdAndStudent_UserId(UUID enterpriseId, UUID studentId);
+
+    Optional<EnterpriseAssignment> findByStudent_UserId(UUID studentId);
 }
