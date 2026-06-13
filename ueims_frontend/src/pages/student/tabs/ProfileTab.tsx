@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { message, Spin, Modal, Form, Input } from 'antd';
 import {
@@ -14,6 +14,8 @@ import { SmallPill } from '../components/shared/SmallPill';
 import { StudentProfileService } from '@/services/StudentProfileService';
 import { api } from '@/services/api';
 import { cc } from '../constants';
+import { useQueryClient } from '@tanstack/react-query';
+import { useCombinedProfileQuery } from '@/hooks/useStudentProfile';
 
 const BACKEND_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
@@ -677,35 +679,17 @@ const CvView: React.FC<{ cvUrl?: string; cvFileName?: string; onRefresh: () => v
 // ── Main ProfileTab ───────────────────────────────────────────────────────────
 export const ProfileTab: React.FC = () => {
   const { t } = useTranslation(['profile', 'common']);
-  const [profile, setProfile] = useState<MyProfile | null>(null);
-  const [loading, setLoading] = useState(true);
   const [activeView, setActiveView] = useState<ProfileView>('profile');
   const [editOpen, setEditOpen] = useState(false);
+  const queryClient = useQueryClient();
+  const { data: profile, isLoading } = useCombinedProfileQuery();
 
-  useEffect(() => { fetchProfile(); }, []);
-
-  const fetchProfile = async () => {
-    try {
-      setLoading(true);
-      const [userRes, profileRes] = await Promise.all([
-        api.get('/users/myInfo').catch((err) => { console.error('Failed to fetch user info:', err); return { data: null }; }),
-        StudentProfileService.getMyProfile().catch(() => ({ data: null })),
-      ]);
-
-      const userInfo = userRes?.data;
-      const profileData = profileRes?.data?.result ?? profileRes?.data;
-
-      if (!userInfo && !profileData) { console.warn('Unable to fetch profile data'); return; }
-
-      setProfile({ ...userInfo, ...profileData });
-    } catch (err) {
-      console.error('Failed to fetch profile', err);
-    } finally {
-      setLoading(false);
-    }
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: ['userInfo'] });
+    queryClient.invalidateQueries({ queryKey: ['studentProfile'] });
   };
 
-  if (loading) {
+  if (isLoading) {
     return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}><Spin size="large" /></div>;
   }
 
@@ -727,7 +711,7 @@ export const ProfileTab: React.FC = () => {
         <CvView
           cvUrl={profile.cvUrl}
           cvFileName={profile.cvFileName}
-          onRefresh={fetchProfile}
+          onRefresh={handleRefresh}
         />
       )}
 
@@ -738,7 +722,7 @@ export const ProfileTab: React.FC = () => {
         profile={profile}
         onSuccess={() => {
           setEditOpen(false);
-          fetchProfile();
+          handleRefresh();
         }}
       />
     </div>

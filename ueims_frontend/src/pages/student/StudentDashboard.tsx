@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import { Spin } from 'antd';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { ModernLayout } from '@/components/layout/ModernLayout';
 import { navItems } from './constants';
-import { StudentProfileService } from '@/services/StudentProfileService';
+import { useStudentProfileQuery } from '@/hooks/useStudentProfile';
 const StudentDashboardTab = React.lazy(() => import('./tabs/DashboardTab').then(m => ({ default: m.StudentDashboardTab })));
 const ProfileTab = React.lazy(() => import('./tabs/ProfileTab').then(m => ({ default: m.ProfileTab })));
 const JobBoardTab = React.lazy(() => import('./tabs/JobBoardTab').then(m => ({ default: m.JobBoardTab })));
@@ -36,27 +36,7 @@ export const StudentDashboard: React.FC = () => {
   const { tab } = useParams<{ tab: string }>();
   const currentTab = (tab || 'dashboard') as StudentPageKey;
   const { token } = useAuthStore();
-  const [profile, setProfile] = useState<any>(null);
-  const [profileLoading, setProfileLoading] = useState(true);
-  
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        setProfileLoading(true);
-        const res = await StudentProfileService.getMyProfile();
-        setProfile(res?.data?.result ?? res?.data);
-      } catch (err) {
-        console.error('Failed to fetch profile in StudentDashboard:', err);
-      } finally {
-        setProfileLoading(false);
-      }
-    };
-    if (token) {
-      fetchProfile();
-    } else {
-      setProfileLoading(false);
-    }
-  }, [token]);
+  const { data: profile, isLoading: profileLoading } = useStudentProfileQuery();
 
   if (!token) {
     return <Navigate to="/login" replace />;

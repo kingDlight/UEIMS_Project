@@ -7,7 +7,7 @@ import { NeuSurface } from '../components/shared/NeuSurface';
 import { SmallBadge } from '../components/shared/SmallBadge';
 import { JobPostService } from '@/services/JobPostService';
 import { ApplicationService } from '@/services/ApplicationService';
-import { StudentProfileService } from '@/services/StudentProfileService';
+import { useStudentProfileQuery } from '@/hooks/useStudentProfile';
 import { cc, hexToRgba } from '../constants';
 
 const CTAButton: React.FC<{
@@ -69,25 +69,14 @@ export const JobBoardTab: React.FC = () => {
   const [applying, setApplying] = useState(false);
   const [techFilter, setTechFilter] = useState<string[]>([]);
   const [confirmApply, setConfirmApply] = useState<any>(null);
-  const [hasCv, setHasCv] = useState<boolean | null>(null);
-  const [currentSemester, setCurrentSemester] = useState<number>(5);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 9;
 
-  useEffect(() => { fetchJobs(); fetchProfile(); }, []);
+  const { data: profile } = useStudentProfileQuery();
+  const hasCv = !!profile?.cvUrl;
+  const currentSemester = profile?.currentSemester ?? 5;
 
-  const fetchProfile = async () => {
-    try {
-      const res = await StudentProfileService.getMyProfile();
-      const profile = res.data?.result ?? res.data;
-      setHasCv(!!(profile?.cvUrl));
-      if (profile && typeof profile.currentSemester === 'number') {
-        setCurrentSemester(profile.currentSemester);
-      }
-    } catch {
-      setHasCv(false);
-    }
-  };
+  useEffect(() => { fetchJobs(); }, []);
 
   const fetchJobs = async () => {
     try {
