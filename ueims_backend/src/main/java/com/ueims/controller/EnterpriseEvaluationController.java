@@ -51,8 +51,7 @@ public class EnterpriseEvaluationController {
 
     @PostMapping
     @PreAuthorize("hasRole('ENTERPRISE')")
-    public ResponseEntity<EnterpriseEvaluationDTO> create(
-            @Valid @RequestBody EnterpriseEvaluationDTO entity) {
+    public ResponseEntity<EnterpriseEvaluationDTO> create(@Valid @RequestBody EnterpriseEvaluationDTO entity) {
         return ResponseEntity.ok(mapper.toDto(service.save(mapper.toEntity(entity))));
     }
 
