@@ -12,6 +12,8 @@ public interface ApplicationService {
 
     List<ApplicationResponse> findMyApplications();
 
+    List<ApplicationResponse> findByEnterpriseId(UUID enterpriseId);
+
     ApplicationResponse findById(UUID id);
 
     ApplicationResponse applyForJob(ApplicationRequest request);
@@ -21,4 +23,6 @@ public interface ApplicationService {
     ApplicationResponse withdrawApplication(UUID applicationId);
 
     ApplicationResponse screenApplication(UUID id, ApplicationScreenRequest request);
+
+    ApplicationResponse updateStatus(UUID id, com.ueims.dto.request.ApplicationStatusUpdateRequest request);
 }

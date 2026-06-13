@@ -14,5 +14,7 @@ public interface EnterpriseEvaluationService {
 
     EnterpriseEvaluation save(EnterpriseEvaluation entity);
 
+    EnterpriseEvaluation update(UUID id, EnterpriseEvaluation entity);
+
     void deleteById(UUID id);
 }

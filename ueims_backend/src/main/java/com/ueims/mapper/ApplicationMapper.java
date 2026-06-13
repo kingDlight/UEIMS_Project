@@ -13,5 +13,7 @@ public interface ApplicationMapper {
     @Mapping(source = "jobPost.enterprise.companyName", target = "enterpriseName")
     @Mapping(source = "student.userId", target = "studentId")
     @Mapping(source = "student.fullName", target = "studentName")
-    ApplicationResponse toApplicationResponse(Application application);
+    @Mapping(source = "student.email", target = "studentEmail")
+    @Mapping(source = "student.studentCode", target = "studentCode")
+    ApplicationResponse ptoApplicationResponse(Application application);
 }

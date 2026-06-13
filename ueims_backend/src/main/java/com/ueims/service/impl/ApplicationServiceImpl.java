@@ -58,6 +58,25 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<ApplicationResponse> findByEnterpriseId(UUID enterpriseId) {
+        User currentUser = getCurrentUser();
+        UUID enterpriseUUID = enterpriseId;
+        if (enterpriseUUID == null) {
+            enterpriseUUID = currentUser.getEnterprise() != null
+                    ? currentUser.getEnterprise().getEnterpriseId()
+                    : null;
+        }
+        if (enterpriseUUID == null) {
+            return List.of();
+        }
+        return repository.findByJobPost_Enterprise_EnterpriseIdAndDeletedAtIsNull(enterpriseUUID)
+                .stream()
+                .map(mapper::toApplicationResponse)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public ApplicationResponse findById(UUID id) {
         Application application =
                 repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.APPLICATION_NOT_FOUND));
@@ -229,6 +248,31 @@ public class ApplicationServiceImpl implements ApplicationService {
             application.setRejectionReason(null);
         }
 
+        application.setScreenedBy(currentUser);
+
+        return mapper.toApplicationResponse(repository.save(application));
+    }
+
+    @Override
+    @Transactional
+    public ApplicationResponse updateStatus(UUID id, com.ueims.dto.request.ApplicationStatusUpdateRequest request) {
+        Application application =
+                repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.APPLICATION_NOT_FOUND));
+
+        User currentUser = getCurrentUser();
+        if (currentUser.getEnterprise() == null
+                || !application.getJobPost().getEnterprise().getEnterpriseId()
+                        .equals(currentUser.getEnterprise().getEnterpriseId())) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        application.setStatus(request.getStatus());
+        if (request.getInterviewDate() != null && !request.getInterviewDate().isEmpty()) {
+            application.setInterviewDate(java.time.LocalDateTime.parse(request.getInterviewDate()));
+        }
+        if (request.getInterviewLink() != null) {
+            application.setInterviewLink(request.getInterviewLink());
+        }
         application.setScreenedBy(currentUser);
 
         return mapper.toApplicationResponse(repository.save(application));

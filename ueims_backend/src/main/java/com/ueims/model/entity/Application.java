@@ -51,6 +51,12 @@ public class Application extends BaseEntity {
     @Column(name = "rejection_reason", columnDefinition = "TEXT")
     private String rejectionReason;
 
+    @Column(name = "interview_date")
+    private LocalDateTime interviewDate;
+
+    @Column(name = "interview_link", length = 500)
+    private String interviewLink;
+
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 }
