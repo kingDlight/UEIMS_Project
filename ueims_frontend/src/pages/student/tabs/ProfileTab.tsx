@@ -334,15 +334,30 @@ const EditProfileModal: React.FC<{
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
+
+      // Normalize fields to check for changes
+      const phoneChanged = (values.phone || '') !== (profile.phone || '');
+      const skillsChanged = (values.skills || '') !== (profile.skills || '');
+      const linkedinChanged = (values.linkedinUrl || '') !== (profile.linkedinUrl || '');
+      const githubChanged = (values.githubUrl || '') !== (profile.githubUrl || '');
+      const portfolioChanged = (values.portfolioUrl || '') !== (profile.portfolioUrl || '');
+      const bioChanged = (values.bio || '') !== (profile.bio || '');
+
+      if (!phoneChanged && !skillsChanged && !linkedinChanged && !githubChanged && !portfolioChanged && !bioChanged) {
+        message.info(t('noChanges', 'No changes to save.'));
+        onCancel();
+        return;
+      }
+
       setSaving(true);
 
       // 1. Update phone via /users/myInfo if it changed
-      if (values.phone !== profile.phone) {
+      if (phoneChanged) {
         await api.put('/users/myInfo', { ...profile, phone: values.phone });
       }
 
       // 2. Update Student Profile if profileId is present
-      if (profile.profileId) {
+      if (profile.profileId && (skillsChanged || linkedinChanged || githubChanged || portfolioChanged || bioChanged)) {
         const updateData = {
           major: profile.major, // Keep current major as it is read-only
           skills: values.skills,
@@ -352,7 +367,7 @@ const EditProfileModal: React.FC<{
           bio: values.bio,
         };
         await StudentProfileService.update(profile.profileId, updateData);
-      } else {
+      } else if (!profile.profileId && (skillsChanged || linkedinChanged || githubChanged || portfolioChanged || bioChanged)) {
         message.warning(t('profileIdMissing', 'Student profile record not found. Please contact administrator.'));
       }
 
