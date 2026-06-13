@@ -89,7 +89,7 @@ export const SettingsTab: React.FC = () => {
     }
     try {
       setLoading(true);
-      await AuthService.changePassword({ oldPassword: formData.currentPassword, newPassword: formData.newPassword });
+      await AuthService.changePassword({ oldPassword: formData.currentPassword, newPassword: formData.newPassword, confirmPassword: formData.newPassword });
       message.success('Password changed successfully!');
       setFormData({ currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch (err: any) {

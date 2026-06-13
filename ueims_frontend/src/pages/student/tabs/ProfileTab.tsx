@@ -153,7 +153,7 @@ const StatusPill: React.FC<{ status?: string }> = ({ status }) => {
   };
   const s = statusMap[status || ''] || { color: cc.textMuted, bg: cc.bgLight, label: status || 'Unknown' };
   return (
-    <SmallPill color={s.color} style={{ background: s.bg }}>
+    <SmallPill color={s.color} bg={s.bg}>
       <span style={{ marginRight: 4 }}>&#10003;</span> {s.label}
     </SmallPill>
   );
