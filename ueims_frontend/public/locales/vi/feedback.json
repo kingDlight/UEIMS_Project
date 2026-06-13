@@ -1,0 +1,15 @@
+{
+  "pageTitle": "Đánh Giá Doanh Nghiệp",
+  "pageSubtitle": "Đánh giá trải nghiệm thực tập của bạn",
+  "confidentialNote": "Phản hồi của bạn được bảo mật và chỉ được Training Manager xem",
+  "rateExperienceTitle": "Đánh Giá Trải Nghiệm Thực Tập",
+  "trainingQuality": "Chất Lượng Đào Tạo",
+  "supervisorSupport": "Hỗ Trợ Từ Giám Sát Viên",
+  "workEnvironment": "Môi Trường Làm Việc",
+  "overallRating": "Đánh Giá Tổng Thể",
+  "writtenComments": "Nhận Xét Chi Tiết (Không bắt buộc)",
+  "commentsPlaceholder": "Chia sẻ trải nghiệm của bạn...",
+  "clear": "Xóa",
+  "submitFeedback": "Gửi Đánh Giá",
+  "rangeSummary": "{{start}}-{{end}} trong {{total}}"
+}

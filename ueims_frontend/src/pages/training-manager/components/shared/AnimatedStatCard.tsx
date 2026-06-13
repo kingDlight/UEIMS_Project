@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Typography } from 'antd';
-import { animate } from 'framer-motion';
-import { Sparkline } from '../charts/Sparkline';
+const Sparkline = React.lazy(() => import('../charts/Sparkline').then(m => ({ default: m.Sparkline })));
+import { FallbackLoader } from '../../../../components/FallbackLoader';
 import { c } from '../../constants';
+import { useAnimatedNumber } from '../../../../hooks/useAnimatedNumber';
 const { Text } = Typography;
 
 export const AnimatedStatCard: React.FC<{
@@ -15,7 +16,7 @@ export const AnimatedStatCard: React.FC<{
   sparkline?: number[];
   delay: number;
 }> = ({ label, value, icon, color, trend, insight, sparkline, delay }) => {
-  const [displayValue, setDisplayValue] = useState(0);
+  const displayValue = useAnimatedNumber(value, 1200, delay);
   const [isHovered, setIsHovered] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -23,17 +24,6 @@ export const AnimatedStatCard: React.FC<{
     const timer = setTimeout(() => setIsLoaded(true), delay);
     return () => clearTimeout(timer);
   }, [delay]);
-
-  useEffect(() => {
-    const controls = animate(0, value, {
-      duration: 1.2,
-      delay: delay / 1000,
-      onUpdate(val) {
-        setDisplayValue(Math.round(val));
-      }
-    });
-    return () => controls.stop();
-  }, [value, delay]);
 
   let transformValue = 'translateY(18px)';
   if (isLoaded) {
@@ -46,7 +36,9 @@ export const AnimatedStatCard: React.FC<{
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={{
-        background: '#fff',
+        background: 'rgba(255, 255, 255, 0.72)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
         borderRadius: 22,
         padding: '18px 18px 16px',
         boxShadow: isHovered ? '0 14px 44px rgba(15,23,42,.10)' : '0 4px 20px rgba(15,23,42,.05)',
@@ -88,7 +80,9 @@ export const AnimatedStatCard: React.FC<{
       </div>
       {sparkline && (
         <div style={{ marginTop: 12 }}>
-          <Sparkline data={sparkline} color={color} width={180} height={34} />
+          <React.Suspense fallback={<FallbackLoader size={24} />}>
+            <Sparkline data={sparkline} color={color} width={180} height={34} />
+          </React.Suspense>
         </div>
       )}
     </div>

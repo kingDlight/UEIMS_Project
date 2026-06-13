@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,20 +16,30 @@ import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
 import com.ueims.model.entity.EnterpriseAssignment;
 import com.ueims.model.entity.FinalReport;
+import com.ueims.model.entity.User;
 import com.ueims.repository.EnterpriseAssignmentRepository;
 import com.ueims.repository.FinalReportRepository;
+import com.ueims.repository.UserRepository;
 import com.ueims.service.FinalReportService;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class FinalReportServiceImpl implements FinalReportService {
     FinalReportRepository repository;
     EnterpriseAssignmentRepository enterpriseAssignmentRepository;
+    UserRepository userRepository;
+
+    private User getCurrentUser() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+    }
 
     @Override
     public List<FinalReport> findAll() {
@@ -37,7 +48,34 @@ public class FinalReportServiceImpl implements FinalReportService {
 
     @Override
     public FinalReport findById(UUID id) {
-        return repository.findById(id).orElse(null);
+        FinalReport report = repository.findById(id).orElse(null);
+        if (report == null) {
+            return null;
+        }
+        User currentUser = getCurrentUser();
+        boolean isStaff = currentUser.getRoles().stream()
+                .anyMatch(role -> role.getRole().getRoleName().equals("SYSTEM_ADMIN")
+                        || role.getRole().getRoleName().equals("TRAINING_MANAGER"));
+        if (isStaff) {
+            return report;
+        }
+
+        // If it's an Enterprise, check assignment
+        if (currentUser.getEnterprise() != null) {
+            if (!report.getAssignment()
+                    .getEnterprise()
+                    .getEnterpriseId()
+                    .equals(currentUser.getEnterprise().getEnterpriseId())) {
+                throw new AppException(ErrorCode.UNAUTHORIZED);
+            }
+            return report;
+        }
+
+        // If it's a Student, check ownership
+        if (!report.getAssignment().getStudent().getUserId().equals(currentUser.getUserId())) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+        return report;
     }
 
     @Override
@@ -69,6 +107,12 @@ public class FinalReportServiceImpl implements FinalReportService {
                 .findById(assignmentId)
                 .orElseThrow(() -> new AppException(ErrorCode.FIELD_REQUIRED));
 
+        // Enforce ownership
+        User currentUser = getCurrentUser();
+        if (!assignment.getStudent().getUserId().equals(currentUser.getUserId())) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
         // BR-51: Absolute Hard Deadline (Không cho nộp sau khi Học kỳ đã kết thúc)
         if (java.time.LocalDate.now().isAfter(assignment.getSemester().getEndDate())) {
             throw new AppException(ErrorCode.FINAL_REPORT_DEADLINE_EXPIRED);
@@ -90,14 +134,25 @@ public class FinalReportServiceImpl implements FinalReportService {
             report.setFileSizeBytes((int) file.getSize());
             return repository.save(report);
         } catch (IOException e) {
-            System.err.println("File upload error: " + e.getMessage());
-            e.printStackTrace();
+            log.error("File upload error: {}", e.getMessage(), e);
             throw new AppException(ErrorCode.FIELD_REQUIRED);
         }
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public void deleteById(UUID id) {
+        FinalReport report = repository.findById(id).orElse(null);
+        if (report == null) {
+            return;
+        }
+        User currentUser = getCurrentUser();
+        boolean isStaff = currentUser.getRoles().stream()
+                .anyMatch(role -> role.getRole().getRoleName().equals("SYSTEM_ADMIN")
+                        || role.getRole().getRoleName().equals("TRAINING_MANAGER"));
+        if (!isStaff && !report.getAssignment().getStudent().getUserId().equals(currentUser.getUserId())) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
         repository.deleteById(id);
     }
 }

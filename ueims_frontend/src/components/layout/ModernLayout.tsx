@@ -11,6 +11,8 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { AuthService } from '@/services/AuthService';
 import { api } from '@/services/api';
 import './ModernLayout.css';
+import { BackgroundEffects } from '@/pages/home/components/BackgroundEffects';
+import { useTranslation } from 'react-i18next';
 
 export interface NavItem {
   key: string;
@@ -46,17 +48,18 @@ const getCroppedImg = async (imageSrc: string, pixelCrop: any): Promise<string |
   return canvas.toDataURL('image/jpeg');
 };
 
-const CropAvatarModal = ({ 
-  open, 
-  tempImageUrl, 
-  onCancel, 
-  onSave 
-}: { 
-  open: boolean, 
-  tempImageUrl: string | null, 
-  onCancel: () => void, 
-  onSave: (url: string) => void 
+const CropAvatarModal = ({
+  open,
+  tempImageUrl,
+  onCancel,
+  onSave
+}: {
+  open: boolean,
+  tempImageUrl: string | null,
+  onCancel: () => void,
+  onSave: (url: string) => void
 }) => {
+  const { t } = useTranslation();
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
@@ -83,13 +86,13 @@ const CropAvatarModal = ({
 
   return (
     <Modal
-      title={<div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, color: '#0f172a' }}>Điều chỉnh ảnh</div>}
+      title={<div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, color: '#0f172a' }}>{t('layout.avatarCropTitle', 'Crop Photo')}</div>}
       open={open}
       onCancel={onCancel}
       onOk={handleSaveCrop}
       width={400}
-      okText="Lưu ảnh"
-      cancelText="Hủy"
+      okText={t('layout.savePhoto', 'Save Photo')}
+      cancelText={t('layout.cancel', 'Cancel')}
       okButtonProps={{ style: { background: '#ea580c', borderColor: '#ea580c', fontWeight: 600, fontFamily: 'Inter, sans-serif' } }}
       cancelButtonProps={{ style: { fontWeight: 600, fontFamily: 'Inter, sans-serif' } }}
       styles={{ body: { padding: '16px 0' } }}
@@ -110,15 +113,15 @@ const CropAvatarModal = ({
         )}
       </div>
       <div style={{ marginTop: 24, display: 'flex', alignItems: 'center', gap: 16, padding: '0 16px' }}>
-        <span style={{ fontSize: 13, color: '#64748b', fontWeight: 600, fontFamily: 'Inter, sans-serif' }}>Thu phóng</span>
-        <input 
-          type="range" 
-          min={1} 
-          max={3} 
-          step={0.1} 
-          value={zoom} 
-          onChange={(e) => setZoom(Number(e.target.value))} 
-          style={{ flex: 1, accentColor: '#ea580c' }} 
+        <span style={{ fontSize: 13, color: '#64748b', fontWeight: 600, fontFamily: 'Inter, sans-serif' }}>{t('layout.zoom', 'Zoom')}</span>
+        <input
+          type="range"
+          min={1}
+          max={3}
+          step={0.1}
+          value={zoom}
+          onChange={(e) => setZoom(Number(e.target.value))}
+          style={{ flex: 1, accentColor: '#ea580c' }}
         />
       </div>
     </Modal>
@@ -139,12 +142,13 @@ const renderProfileModal = (modal: React.ReactNode) => (
 );
 
 import { extractUserFromToken } from '@/utils/jwt';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
-export const ModernLayout: React.FC<ModernLayoutProps> = ({ 
-  navItems, 
+export const ModernLayout: React.FC<ModernLayoutProps> = ({
+  navItems,
   children,
   defaultRoute = 'dashboard',
-  basePath = '/app/tm-dashboard'
+  basePath = '/training-manager'
 }) => {
   const [accountOpen, setAccountOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
@@ -153,10 +157,28 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
   const navigate = useNavigate();
   const { tab } = useParams<{ tab: string }>();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const { t, i18n } = useTranslation();
+
+  const toggleLanguage = () => {
+    const currentLang = i18n.language?.split('-')[0] || 'en';
+    const newLang = currentLang === 'en' ? 'vi' : 'en';
+    i18n.changeLanguage(newLang);
+    localStorage.setItem('i18nextLng', newLang);
+  };
+
+  useScrollAnimation();
 
   // Change Password state
   const [changePasswordVisible, setChangePasswordVisible] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { user, token, logout } = useAuthStore();
+  const mustChangePassword = (user as any)?.mustChangePassword;
+
+  useEffect(() => {
+    if (mustChangePassword) {
+      setChangePasswordVisible(true);
+    }
+  }, [mustChangePassword]);
 
   const [form] = Form.useForm();
 
@@ -172,18 +194,23 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
         newPassword: values.newPassword,
         confirmPassword: values.confirmPassword,
       });
-      message.success('Đổi mật khẩu thành công!');
+      message.success(t('layout.passwordChangeSuccess', 'Password changed successfully! Please log in again.'));
       setChangePasswordVisible(false);
+      // Force user to log out and log back in to get a fresh token with mustChangePassword=false
+      if (mustChangePassword) {
+        logout();
+        navigate('/login');
+      }
     } catch (error: any) {
       const code = error.response?.data?.code;
       if (code === 2002) {
-        form.setFields([{ name: 'oldPassword', errors: ['Mật khẩu hiện tại không chính xác!'] }]);
+        form.setFields([{ name: 'oldPassword', errors: [t('layout.invalidCurrentPassword', 'Current password is incorrect!')] }]);
       } else if (code === 2003) {
-        form.setFields([{ name: 'confirmPassword', errors: ['Mật khẩu xác nhận không khớp!'] }]);
+        form.setFields([{ name: 'confirmPassword', errors: [t('layout.passwordMismatch', 'Password confirmation does not match!')] }]);
       } else if (code === 1015) {
-        form.setFields([{ name: 'newPassword', errors: ['Mật khẩu mới phải có ít nhất 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt!'] }]);
+        form.setFields([{ name: 'newPassword', errors: [t('layout.passwordPolicy', 'Password must be at least 8 characters and include uppercase, lowercase, number, and symbol!')] }]);
       } else {
-        message.error(error.response?.data?.message || 'Đổi mật khẩu thất bại!');
+        message.error(error.response?.data?.message || t('layout.passwordChangeFail', 'Failed to change password!'));
       }
     } finally {
       setLoading(false);
@@ -192,8 +219,6 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
 
   // Determine current active tab
   const activeTab = tab || defaultRoute;
-
-  const { user, token, logout } = useAuthStore();
 
   const [phone, setPhone] = useState('');
   const [updatingProfile, setUpdatingProfile] = useState(false);
@@ -205,18 +230,18 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
   const handleUpdateProfile = async () => {
     const currentPhone = (user as any)?.phone || '';
     const newPhone = phone || '';
-    
+
     if (currentPhone === newPhone) {
-      message.info('Không có thay đổi nào để cập nhật');
+      message.info(t('layout.profileUpdateNoChanges', 'No changes to save'));
       return;
     }
 
     try {
       setUpdatingProfile(true);
       await api.put('/users/myInfo', { ...(user as any), phone });
-      message.success('Cập nhật hồ sơ thành công!');
+      message.success(t('layout.profileUpdateSuccess', 'Profile updated successfully!'));
     } catch (err: any) {
-      message.error(err.response?.data?.message || 'Cập nhật thất bại!');
+      message.error(err.response?.data?.message || t('layout.profileUpdateFail', 'Failed to update profile!'));
     } finally {
       setUpdatingProfile(false);
     }
@@ -225,7 +250,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
   const filteredNavItems = useMemo(() => {
     return navItems.filter((item) => {
       if (!item.roles) return true;
-      
+
       const payload = token ? extractUserFromToken(token) : null;
       const userRoles: string[] = payload?.roles || [];
       return item.roles.some(r => userRoles.includes(r) || userRoles.includes(`ROLE_${r}`));
@@ -233,7 +258,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
   }, [navItems, token]);
 
   const [profileOpen, setProfileOpen] = useState(false);
-  
+
   const [customAvatarUrl, setCustomAvatarUrl] = useState<string | null>(() => {
     return localStorage.getItem('ueims_custom_avatar');
   });
@@ -313,22 +338,22 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
   return (
     <div className="modern-layout-wrapper">
       <div className="modern-layout-container">
-        
+
         {/* Header Navbar */}
         <div className="modern-header-navbar">
           <div className="modern-header-content">
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <button 
+              <button
                 type="button"
-                className="mobile-menu-btn" 
+                className="mobile-menu-btn"
                 onClick={() => setDrawerOpen(true)}
                 style={{ cursor: 'pointer', fontSize: 18, color: '#1e293b', background: 'none', border: 'none', padding: 0 }}
               >
                 <MenuOutlined />
               </button>
-              <a 
+              <a
                 href="/"
-                className="modern-brand-logo" 
+                className="modern-brand-logo"
                 onClick={(e) => { e.preventDefault(); navigate('/'); }}
                 style={{ textDecoration: 'none', color: 'inherit' }}
               >
@@ -347,7 +372,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
                     className={`modern-nav-item ${isActive ? 'active' : 'inactive'}`}
                   >
                     <span style={{ fontSize: 16, display: 'flex', alignItems: 'center' }}>{item.icon}</span>
-                    <span>{item.label}</span>
+                    <span>{t(`nav.${item.key}`, item.label)}</span>
                   </button>
                 );
               })}
@@ -359,7 +384,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
                   label: (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <span style={{ fontSize: 15 }}>{item.icon}</span>
-                      <span style={{ fontSize: 13, fontWeight: 600 }}>{item.label}</span>
+                      <span style={{ fontSize: 13, fontWeight: 600 }}>{t(`nav.${item.key}`, item.label)}</span>
                     </div>
                   ),
                   onClick: () => handleNavigate(item.key),
@@ -374,7 +399,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
                       style={{ cursor: 'pointer', userSelect: 'none' }}
                     >
                       <span style={{ fontSize: 16, display: 'flex', alignItems: 'center' }}><DownOutlined /></span>
-                      <span>More</span>
+                      <span>{t('layout.more', 'More')}</span>
                     </div>
                   </Dropdown>
                 );
@@ -387,35 +412,62 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
         <div className="modern-bottom-bar-wrapper">
           <div className="modern-bottom-bar">
             <div className="modern-bottom-bar-bg" />
-            
-            <div ref={notificationMenuRef} style={{ position: 'relative', zIndex: 1, flex: '0 0 auto' }}>
-              <button 
+
+            <div style={{ position: 'relative', zIndex: 1, flex: '0 0 auto', display: 'flex', alignItems: 'center', padding: '0 8px' }}>
+              <button
                 type="button"
-                onClick={() => { setNotificationOpen((prev) => !prev); setAccountOpen(false); }} 
+                onClick={toggleLanguage}
+                style={{
+                  background: 'rgba(230, 126, 34, 0.1)',
+                  border: '1px solid rgba(230, 126, 34, 0.2)',
+                  borderRadius: 12,
+                  padding: '6px 10px',
+                  color: '#ea580c',
+                  fontWeight: 700,
+                  fontSize: 12,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.2s ease',
+                  width: 44
+                }}
+                className="hover-lift"
+              >
+                {i18n.language?.split('-')[0] === 'vi' ? 'VN' : 'EN'}
+              </button>
+            </div>
+
+            <div className="modern-bar-divider" />
+
+            <div ref={notificationMenuRef} style={{ position: 'relative', zIndex: 1, flex: '0 0 auto' }}>
+              <button
+                type="button"
+                onClick={() => { setNotificationOpen((prev) => !prev); setAccountOpen(false); }}
                 className="modern-bell-icon-wrapper"
               >
                 <BellOutlined style={{ fontSize: 18 }} />
                 {unreadCount > 0 && <div className="modern-bell-badge" />}
               </button>
             </div>
-            
+
             <div className="modern-bar-divider" />
-            
+
             <div ref={accountMenuRef} style={{ position: 'relative', zIndex: 1, flex: '1 1 auto', minWidth: 0 }}>
-              <button 
+              <button
                 type="button"
-                onClick={() => { setAccountOpen((prev) => !prev); setNotificationOpen(false); }} 
+                onClick={() => { setAccountOpen((prev) => !prev); setNotificationOpen(false); }}
                 className="modern-account-wrapper"
                 style={{ textAlign: 'left', width: '100%' }}
               >
-                <div className="modern-account-avatar" style={{ 
+                <div className="modern-account-avatar" style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', color: '#fff',
                   background: (customAvatarUrl || user?.avatarUrl) ? `url(${customAvatarUrl || user?.avatarUrl}) center/cover no-repeat` : undefined
                 }}>
                   {!(customAvatarUrl || user?.avatarUrl) && (user?.fullName ? user.fullName.substring(0, 2).toUpperCase() : 'U')}
                 </div>
                 <div className="modern-account-info">
-                  <div className="modern-account-name">{user?.fullName || 'User'}</div>
+                  <div className="modern-account-name">{user?.fullName || t('layout.userFallback', 'User')}</div>
                   <div className="modern-account-email">{user?.email || 'admin@ueims.com'}</div>
                 </div>
               </button>
@@ -429,23 +481,23 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
               <div className="modern-floating-menu-arrow" style={{ left: 32 }} />
               <div style={{ padding: '14px 16px', borderBottom: '1px solid rgba(230, 126, 34,.10)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
-                  <div style={{ fontSize: 14, fontWeight: 800, color: '#1e293b' }}>Alerts</div>
-                  <div style={{ fontSize: 11.5, color: '#64748b' }}>Latest reminders and urgent items</div>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: '#1e293b' }}>{t('layout.alerts', 'Alerts')}</div>
+                  <div style={{ fontSize: 11.5, color: '#64748b' }}>{t('layout.alertsDesc', 'Latest reminders and urgent items')}</div>
                 </div>
-                {unreadCount > 0 && <SmallPill color="#E67E22" glow>{unreadCount} new</SmallPill>}
+                {unreadCount > 0 && <SmallPill color="#E67E22" glow>{t('layout.unreadCount', { count: unreadCount })}</SmallPill>}
               </div>
               <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 10, maxHeight: 400, overflowY: 'auto' }}>
                 {notifications.length === 0 ? (
-                  <div style={{ padding: 16, textAlign: 'center', color: '#64748b' }}>No notifications yet</div>
+                  <div style={{ padding: 16, textAlign: 'center', color: '#64748b' }}>{t('layout.noNotifications', 'No notifications yet')}</div>
                 ) : (
                   notifications.map((item: any) => (
-                    <div 
-                      key={item.notificationId} 
+                    <div
+                      key={item.notificationId}
                       onClick={() => { if (!item.isRead) markAsRead(item.notificationId); }}
-                      style={{ 
-                        display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 12px', borderRadius: 16, 
-                        background: item.isRead ? 'rgba(255,255,255,.78)' : '#fff3ed', 
-                        border: '1px solid rgba(230, 126, 34,.08)', 
+                      style={{
+                        display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 12px', borderRadius: 16,
+                        background: item.isRead ? 'rgba(255,255,255,.78)' : '#fff3ed',
+                        border: '1px solid rgba(230, 126, 34,.08)',
                         boxShadow: '0 8px 18px rgba(15,23,42,.04)',
                         cursor: item.isRead ? 'default' : 'pointer',
                         transition: 'all 0.2s'
@@ -469,27 +521,31 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
               <div className="modern-floating-menu-arrow" style={{ left: 110 }} />
               <div style={{ padding: '14px 16px', borderBottom: '1px solid rgba(230, 126, 34,.10)' }}>
                 <div style={{ fontSize: 14, fontWeight: 800, color: '#1e293b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {user?.fullName || 'User'}
+                  {user?.fullName || t('layout.userFallback', 'User')}
                 </div>
                 <div style={{ fontSize: 11.5, color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {user?.email || 'admin@ueims.com'}
                 </div>
               </div>
               <div style={{ padding: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                {['View Profile', 'Change Password', 'Logout'].map((item) => (
-                  <button 
-                    key={item} 
+                {[
+                  { key: 'viewProfile', label: t('layout.viewProfile', 'View Profile') },
+                  { key: 'changePassword', label: t('layout.changePassword', 'Change Password') },
+                  { key: 'logout', label: t('layout.logout', 'Logout') }
+                ].map((item) => (
+                  <button
+                    key={item.key}
                     type="button"
                     onClick={() => {
                       setAccountOpen(false);
-                      if (item === 'Logout') handleLogout();
-                      if (item === 'Change Password') setChangePasswordVisible(true);
-                      if (item === 'View Profile') setProfileOpen(true);
-                    }} 
+                      if (item.key === 'logout') handleLogout();
+                      if (item.key === 'changePassword') setChangePasswordVisible(true);
+                      if (item.key === 'viewProfile') setProfileOpen(true);
+                    }}
                     className="modern-menu-item"
-                    style={{ width: '100%', textAlign: 'left', background: 'none', border: 'none', color: item === 'Logout' ? '#ef4444' : '#1e293b' }}
+                    style={{ width: '100%', textAlign: 'left', background: 'none', border: 'none', color: item.key === 'logout' ? '#ef4444' : '#1e293b' }}
                   >
-                    {item}
+                    {item.label}
                   </button>
                 ))}
               </div>
@@ -500,9 +556,9 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
         {/* Mobile Drawer */}
         <Drawer
           title={
-            <a 
+            <a
               href="/"
-              className="modern-brand-logo" 
+              className="modern-brand-logo"
               onClick={(e) => { e.preventDefault(); setDrawerOpen(false); navigate('/'); }}
               style={{ textDecoration: 'none', color: 'inherit' }}
             >
@@ -539,7 +595,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
                   }}
                 >
                   <span style={{ fontSize: 18 }}>{item.icon}</span>
-                  <span style={{ fontSize: 15 }}>{item.label}</span>
+                  <span style={{ fontSize: 15 }}>{t(`nav.${item.key}`, item.label)}</span>
                 </button>
               );
             })}
@@ -547,6 +603,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
         </Drawer>
 
         {/* Page Content */}
+        <BackgroundEffects isDark={false} />
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}
@@ -554,6 +611,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -15 }}
             transition={{ duration: 0.25, ease: "easeOut" }}
+            style={{ position: 'relative', zIndex: 1 }}
           >
             {children}
           </motion.div>
@@ -561,10 +619,10 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
       </div>
 
       {/* Profile Modal - Redesigned (Premium Clean) */}
-      <Modal 
-        open={profileOpen} 
-        onCancel={() => setProfileOpen(false)} 
-        footer={null} 
+      <Modal
+        open={profileOpen}
+        onCancel={() => setProfileOpen(false)}
+        footer={null}
         closable={false}
         styles={{ body: { padding: 0, borderRadius: 24, overflow: 'hidden' } }}
         width={380}
@@ -574,12 +632,12 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
         <div style={{ position: 'relative' }}>
           {/* Cover Photo */}
           <div style={{ height: 100, background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)' }}></div>
-          
-          <button 
-            onClick={() => setProfileOpen(false)} 
-            style={{ 
-              position: 'absolute', top: 16, right: 16, width: 28, height: 28, borderRadius: 14, 
-              background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', 
+
+          <button
+            onClick={() => setProfileOpen(false)}
+            style={{
+              position: 'absolute', top: 16, right: 16, width: 28, height: 28, borderRadius: 14,
+              background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center',
               color: '#475569', cursor: 'pointer', transition: 'all 0.2s', border: 'none'
             }}
             onMouseOver={(e) => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.color = '#0f172a'; }}
@@ -589,20 +647,20 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
           >
             <X size={14} strokeWidth={3} />
           </button>
-          
+
           <div style={{ padding: '0 24px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: -40 }}>
             {/* Avatar */}
             <div style={{ position: 'relative' }}>
-              <div style={{ 
-                width: 80, height: 80, borderRadius: '50%', 
-                background: (customAvatarUrl || user?.avatarUrl) ? `url(${customAvatarUrl || user?.avatarUrl}) center/cover no-repeat` : 'linear-gradient(135deg, #f97316, #fb923c)', 
-                display: 'flex', alignItems: 'center', justifyContent: 'center', 
+              <div style={{
+                width: 80, height: 80, borderRadius: '50%',
+                background: (customAvatarUrl || user?.avatarUrl) ? `url(${customAvatarUrl || user?.avatarUrl}) center/cover no-repeat` : 'linear-gradient(135deg, #f97316, #fb923c)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
                 color: '#fff', fontSize: 28, fontWeight: 800, fontFamily: 'Inter, sans-serif',
                 border: '4px solid #fff', boxShadow: '0 8px 16px -4px rgba(249, 115, 22, 0.3)'
               }}>
                 {!(customAvatarUrl || user?.avatarUrl) && (user?.fullName ? user.fullName.substring(0, 2).toUpperCase() : 'U')}
               </div>
-              
+
               <button
                 onClick={() => fileInputRef.current?.click()}
                 style={{
@@ -618,24 +676,24 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
               >
                 <Camera size={12} strokeWidth={2.5} />
               </button>
-              <input 
-                type="file" 
-                ref={fileInputRef} 
-                onChange={handleAvatarChange} 
-                accept="image/*" 
-                style={{ display: 'none' }} 
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleAvatarChange}
+                accept="image/*"
+                style={{ display: 'none' }}
               />
             </div>
-            
+
             {/* Name & Role */}
             <div style={{ marginTop: 12, textAlign: 'center' }}>
               <div style={{ color: '#0f172a', fontSize: 20, fontWeight: 800, letterSpacing: '-0.02em', fontFamily: 'Inter, sans-serif' }}>
-                {user?.fullName || 'Đang tải...'}
+                {user?.fullName || t('layout.loading', 'Loading...')}
               </div>
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 4, background: '#f1f5f9', padding: '4px 10px', borderRadius: 100 }}>
                 <ShieldCheck size={14} color="#64748b" />
                 <span style={{ color: '#475569', fontSize: 12, fontWeight: 600, fontFamily: 'Inter, sans-serif' }}>
-                  {user?.roles?.map((r: any) => typeof r === 'string' ? r.replace('ROLE_', '') : r.roleName?.replace('ROLE_', '')).join(', ') || 'User'}
+                  {user?.roles?.map((r: any) => typeof r === 'string' ? r.replace('ROLE_', '') : r.roleName?.replace('ROLE_', '')).join(', ') || t('layout.userFallback', 'User')}
                 </span>
               </div>
             </div>
@@ -645,11 +703,11 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
         {/* Info List Section */}
         <div style={{ padding: '0 24px 24px', display: 'flex', flexDirection: 'column' }}>
           <div style={{ height: 1, background: '#f1f5f9', width: '100%', marginBottom: 8 }}></div>
-          
+
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: '12px 0', borderBottom: '1px solid #f8fafc' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <Mail size={16} color="#64748b" />
-              <span style={{ fontSize: 11, color: '#64748b', fontWeight: 600, fontFamily: 'Inter, sans-serif', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Email Address</span>
+              <span style={{ fontSize: 11, color: '#64748b', fontWeight: 600, fontFamily: 'Inter, sans-serif', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('layout.emailAddress', 'Email Address')}</span>
             </div>
             <span style={{ fontSize: 14, color: '#0f172a', fontWeight: 600, fontFamily: 'Inter, sans-serif', paddingLeft: 24 }}>{user?.email}</span>
           </div>
@@ -657,54 +715,54 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4, padding: '12px 0', borderBottom: '1px solid #f8fafc' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <Phone size={16} color="#64748b" />
-              <span style={{ fontSize: 11, color: '#64748b', fontWeight: 600, fontFamily: 'Inter, sans-serif', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Phone Number</span>
+              <span style={{ fontSize: 11, color: '#64748b', fontWeight: 600, fontFamily: 'Inter, sans-serif', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('layout.phoneNumber', 'Phone Number')}</span>
             </div>
-            <Input 
-              value={phone} 
-              onChange={(e) => setPhone(e.target.value)} 
-              placeholder="Chưa cập nhật"
+            <Input
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder={t('layout.notUpdated', 'Not updated')}
               bordered={false}
               style={{ fontSize: 14, color: '#0f172a', fontWeight: 600, fontFamily: 'Inter, sans-serif', padding: '0 0 0 12px', boxShadow: 'none' }}
             />
           </div>
 
           {/* Status row special casing */}
-          <div style={{ 
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 0 0'
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 0 0'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Activity size={16} color="#64748b" />
+              <span style={{ fontSize: 13, color: '#0f172a', fontWeight: 600, fontFamily: 'Inter, sans-serif' }}>{t('layout.accountStatus', 'Account Status')}</span>
+            </div>
+            <span style={{
+              padding: '4px 12px', borderRadius: 100,
+              background: '#ecfdf5',
+              color: '#10b981',
+              fontWeight: 700, fontSize: 11, fontFamily: 'Inter, sans-serif', letterSpacing: '0.02em', border: '1px solid #a7f3d0'
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <Activity size={16} color="#64748b" />
-                <span style={{ fontSize: 13, color: '#0f172a', fontWeight: 600, fontFamily: 'Inter, sans-serif' }}>Account Status</span>
-              </div>
-              <span style={{ 
-                padding: '4px 12px', borderRadius: 100, 
-                background: '#ecfdf5', 
-                color: '#10b981', 
-                fontWeight: 700, fontSize: 11, fontFamily: 'Inter, sans-serif', letterSpacing: '0.02em', border: '1px solid #a7f3d0'
-              }}>
-                ACTIVE
-              </span>
-            </div>
-            
-            <div style={{ marginTop: 24 }}>
-              <Button 
-                type="primary" 
-                block 
-                onClick={handleUpdateProfile}
-                loading={updatingProfile}
-                style={{ 
-                  background: '#ea580c', 
-                  borderColor: '#ea580c', 
-                  fontWeight: 700, 
-                  height: 44, 
-                  borderRadius: 12, 
-                  fontFamily: 'Inter, sans-serif',
-                  boxShadow: '0 4px 12px rgba(234, 88, 12, 0.25)'
-                }}
-              >
-                Cập nhật thông tin
-              </Button>
-            </div>
+              {t('layout.activeStatus', 'ACTIVE')}
+            </span>
+          </div>
+
+          <div style={{ marginTop: 24 }}>
+            <Button
+              type="primary"
+              block
+              onClick={handleUpdateProfile}
+              loading={updatingProfile}
+              style={{
+                background: '#ea580c',
+                borderColor: '#ea580c',
+                fontWeight: 700,
+                height: 44,
+                borderRadius: 12,
+                fontFamily: 'Inter, sans-serif',
+                boxShadow: '0 4px 12px rgba(234, 88, 12, 0.25)'
+              }}
+            >
+              {t('layout.updateInfo', 'Update Information')}
+            </Button>
+          </div>
         </div>
       </Modal>
 
@@ -715,16 +773,19 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 40, height: 40, borderRadius: 12, background: '#fff7ed', border: '1px solid #ffedd5' }}>
               <ShieldCheck size={22} color="#ea580c" />
             </div>
-            Bảo mật tài khoản
+            {t('layout.accountSecurity', 'Account Security')}
           </div>
         }
         open={changePasswordVisible}
-        onCancel={() => setChangePasswordVisible(false)}
+        onCancel={() => !mustChangePassword && setChangePasswordVisible(false)}
         footer={null}
         destroyOnHidden
+        closable={!mustChangePassword}
+        maskClosable={!mustChangePassword}
+        keyboard={!mustChangePassword}
         width={420}
-        closeIcon={<X size={20} color="#94a3b8" style={{ marginTop: 8, marginRight: 8 }} />}
-        styles={{ 
+        closeIcon={!mustChangePassword ? <X size={20} color="#94a3b8" style={{ marginTop: 8, marginRight: 8 }} /> : null}
+        styles={{
           content: { borderRadius: 24, padding: '24px 32px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15)' },
           header: { marginBottom: 24 },
           body: { padding: 0 }
@@ -733,81 +794,83 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
         <Form form={form} layout="vertical" onFinish={handleChangePassword} requiredMark={false}>
           <Form.Item
             name="oldPassword"
-            label={<span style={{ fontWeight: 700, color: '#334155', fontSize: 13, fontFamily: 'Inter, sans-serif' }}>Mật khẩu hiện tại</span>}
-            rules={[{ required: true, message: 'Vui lòng nhập mật khẩu hiện tại!' }]}
+            label={<span style={{ fontWeight: 700, color: '#334155', fontSize: 13, fontFamily: 'Inter, sans-serif' }}>{t('layout.currentPassword', 'Current Password')}</span>}
+            rules={[{ required: true, message: t('layout.passwordRequired', 'Please enter your password!') }]}
           >
-            <Input.Password 
-              size="large" 
-              placeholder="Nhập mật khẩu đang sử dụng" 
+            <Input.Password
+              size="large"
+              placeholder={t('layout.currentPasswordPlaceholder', 'Enter your current password')}
               className="modern-password-input"
             />
           </Form.Item>
-          
+
           <div style={{ height: 1, background: '#f1f5f9', margin: '20px 0' }} />
 
           <Form.Item
             name="newPassword"
-            label={<span style={{ fontWeight: 700, color: '#334155', fontSize: 13, fontFamily: 'Inter, sans-serif' }}>Mật khẩu mới</span>}
+            label={<span style={{ fontWeight: 700, color: '#334155', fontSize: 13, fontFamily: 'Inter, sans-serif' }}>{t('layout.newPassword', 'New Password')}</span>}
             rules={[
-              { required: true, message: 'Vui lòng nhập mật khẩu mới!' },
-              { min: 8, message: 'Mật khẩu phải có ít nhất 8 ký tự!' },
+              { required: true, message: t('layout.passwordRequired', 'Please enter your password!') },
+              { min: 8, message: t('layout.passwordMinLength', 'Password must be at least 8 characters!') },
             ]}
           >
-            <Input.Password 
-              size="large" 
-              placeholder="Tạo mật khẩu mới" 
+            <Input.Password
+              size="large"
+              placeholder={t('layout.newPasswordPlaceholder', 'Create a new password')}
               className="modern-password-input"
             />
           </Form.Item>
           <Form.Item
             name="confirmPassword"
-            label={<span style={{ fontWeight: 700, color: '#334155', fontSize: 13, fontFamily: 'Inter, sans-serif' }}>Xác nhận mật khẩu</span>}
+            label={<span style={{ fontWeight: 700, color: '#334155', fontSize: 13, fontFamily: 'Inter, sans-serif' }}>{t('layout.confirmPassword', 'Confirm Password')}</span>}
             dependencies={['newPassword']}
             rules={[
-              { required: true, message: 'Vui lòng xác nhận mật khẩu!' },
+              { required: true, message: t('layout.confirmPasswordRequired', 'Please confirm your password!') },
               ({ getFieldValue }) => ({
                 validator(_, value) {
                   if (!value || getFieldValue('newPassword') === value) {
                     return Promise.resolve();
                   }
-                  return Promise.reject(new Error('Mật khẩu xác nhận không khớp!'));
+                  return Promise.reject(new Error(t('layout.passwordMismatch', 'Password confirmation does not match!')));
                 },
               }),
             ]}
             style={{ marginBottom: 32 }}
           >
-            <Input.Password 
-              size="large" 
-              placeholder="Nhập lại mật khẩu mới" 
+            <Input.Password
+              size="large"
+              placeholder={t('layout.confirmPasswordPlaceholder', 'Confirm your new password')}
               className="modern-password-input"
             />
           </Form.Item>
-          
+
           <div style={{ display: 'flex', gap: 12 }}>
-            <Button 
+            {!mustChangePassword && (
+              <Button
+                size="large"
+                onClick={() => setChangePasswordVisible(false)}
+                style={{ flex: 1, borderRadius: 12, fontWeight: 700, color: '#475569', border: '1px solid #cbd5e1', background: '#fff', height: 44, fontFamily: 'Inter, sans-serif' }}
+              >
+                {t('layout.cancel', 'Cancel')}
+              </Button>
+            )}
+            <Button
               size="large"
-              onClick={() => setChangePasswordVisible(false)} 
-              style={{ flex: 1, borderRadius: 12, fontWeight: 700, color: '#475569', border: '1px solid #cbd5e1', background: '#fff', height: 44, fontFamily: 'Inter, sans-serif' }}
-            >
-              Hủy bỏ
-            </Button>
-            <Button 
-              size="large"
-              type="primary" 
-              htmlType="submit" 
+              type="primary"
+              htmlType="submit"
               loading={loading}
               style={{ flex: 1, borderRadius: 12, fontWeight: 700, background: '#ea580c', borderColor: '#ea580c', boxShadow: '0 4px 12px rgba(234, 88, 12, 0.25)', height: 44, fontFamily: 'Inter, sans-serif' }}
             >
-              Cập nhật
+              {t('layout.saveChanges', 'Save Changes')}
             </Button>
           </div>
         </Form>
       </Modal>
 
-      <CropAvatarModal 
-        open={cropModalOpen} 
-        tempImageUrl={tempImageUrl} 
-        onCancel={() => setCropModalOpen(false)} 
+      <CropAvatarModal
+        open={cropModalOpen}
+        tempImageUrl={tempImageUrl}
+        onCancel={() => setCropModalOpen(false)}
         onSave={(url) => {
           setCustomAvatarUrl(url);
           localStorage.setItem('ueims_custom_avatar', url);

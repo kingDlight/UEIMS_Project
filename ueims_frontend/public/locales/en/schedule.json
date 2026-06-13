@@ -1,0 +1,22 @@
+{
+  "pageTitle": "Interview Schedule",
+  "pageSubtitle": "Your upcoming interviews and appointments",
+  "confirmAttendanceTitle": "Confirm Interview Attendance",
+  "confirmAttendanceBody": "Are you sure you want to accept this interview schedule? The company will be notified of your commitment.",
+  "cannotUndo": "This action cannot be undone.",
+  "cancel": "Cancel",
+  "yesConfirm": "Yes, Confirm",
+  "declineTitle": "Decline Interview Invitation",
+  "declineWarning": "Are you sure you want to decline this interview? This action will formally withdraw you from this application cycle.",
+  "reasonLabel": "Reason for Refusal",
+  "declineReasonPlaceholder": "Please provide your reason for declining...",
+  "noKeepIt": "No, Keep It",
+  "confirmDecline": "Confirm Decline",
+  "noInterviews": "No scheduled interviews",
+  "noInterviewsDesc": "You have no upcoming interview invitations at this moment.",
+  "joinMeeting": "Join Meeting",
+  "confirm": "Confirm",
+  "decline": "Decline",
+  "interview": "Interview",
+  "rangeSummary": "{{start}}-{{end}} of {{total}}"
+}

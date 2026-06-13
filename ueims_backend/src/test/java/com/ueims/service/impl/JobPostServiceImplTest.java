@@ -87,7 +87,7 @@ class JobPostServiceImplTest {
 
     @Test
     void findAll_returnsList() {
-        when(repository.findAll()).thenReturn(List.of(jobPost));
+        when(repository.findAllByDeletedAtIsNull()).thenReturn(List.of(jobPost));
         List<JobPost> result = service.findAll();
         assertEquals(1, result.size());
     }

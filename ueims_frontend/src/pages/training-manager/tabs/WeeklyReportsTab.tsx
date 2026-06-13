@@ -1,6 +1,7 @@
 import React, { useState, useCallback, forwardRef } from 'react';
+import { useScrollAnimation } from '../../../hooks/useScrollAnimation';
 import { message, Checkbox } from 'antd';
-import { motion, AnimatePresence } from 'framer-motion';
+
 import {
   CheckSquare,
   Clock,
@@ -13,6 +14,7 @@ import {
   Hash,
 } from 'lucide-react';
 import { st } from './StatsTab';
+import { WeeklyReportService } from '@/services/WeeklyReportService';
 
 // ============================================================
 // COLOR UTILITY — hex-to-rgba for ghost style rendering
@@ -40,84 +42,6 @@ export interface WeeklyReport {
   hoursLogged: number;
   summary: string;
 }
-
-// ============================================================
-// MOCK DATA — 6 realistic reports (4 pending, 1 approved, 1 rejected)
-// ============================================================
-const MOCK_WEEKLY_REPORTS: WeeklyReport[] = [
-  {
-    id: 'wr-001',
-    studentName: 'Nguyen Van A',
-    studentCode: 'SE161234',
-    enterprise: 'FPT Software',
-    weekNumber: 1,
-    weekLabel: 'Week 1 — Jun 2–8, 2026',
-    status: 'PENDING',
-    submittedAt: '2026-06-08T17:30:00',
-    hoursLogged: 40,
-    summary: 'Completed onboarding modules, set up local development environment, and attended daily standup meetings. Shadowed senior developer on REST API integration tasks and submitted first PR.',
-  },
-  {
-    id: 'wr-002',
-    studentName: 'Tran Thi B',
-    studentCode: 'IA162345',
-    enterprise: 'VinBigData',
-    weekNumber: 1,
-    weekLabel: 'Week 1 — Jun 2–8, 2026',
-    status: 'PENDING',
-    submittedAt: '2026-06-08T18:15:00',
-    hoursLogged: 38,
-    summary: 'Worked on data pipeline scripts using Python and Apache Spark. Participated in sprint planning and completed first data quality check assignment with validation report.',
-  },
-  {
-    id: 'wr-003',
-    studentName: 'Le Van C',
-    studentCode: 'SE163456',
-    enterprise: 'NashTech VN',
-    weekNumber: 2,
-    weekLabel: 'Week 2 — Jun 9–15, 2026',
-    status: 'PENDING',
-    submittedAt: '2026-06-15T16:00:00',
-    hoursLogged: 42,
-    summary: 'Assisted with network security audit tasks. Documented firewall rule configurations and participated in a vulnerability assessment workshop with the security team.',
-  },
-  {
-    id: 'wr-004',
-    studentName: 'Pham Thi D',
-    studentCode: 'GD162111',
-    enterprise: 'VNG Corporation',
-    weekNumber: 2,
-    weekLabel: 'Week 2 — Jun 9–15, 2026',
-    status: 'PENDING',
-    submittedAt: '2026-06-15T14:30:00',
-    hoursLogged: 36,
-    summary: 'Designed marketing assets for the product launch campaign. Created 5 social media banners, 2 illustrated infographics, and contributed to UI mockups for the mobile app redesign.',
-  },
-  {
-    id: 'wr-005',
-    studentName: 'Hoang Van E',
-    studentCode: 'AI162789',
-    enterprise: 'Viettel AI',
-    weekNumber: 3,
-    weekLabel: 'Week 3 — Jun 16–22, 2026',
-    status: 'APPROVED',
-    submittedAt: '2026-06-22T19:00:00',
-    hoursLogged: 44,
-    summary: 'Completed ML model training pipeline using PyTorch. Documented training logs, evaluated model performance metrics, and prepared a summary slide deck for the weekly review meeting.',
-  },
-  {
-    id: 'wr-006',
-    studentName: 'Dao Thi F',
-    studentCode: 'CS162333',
-    enterprise: 'FPT Software',
-    weekNumber: 3,
-    weekLabel: 'Week 3 — Jun 16–22, 2026',
-    status: 'REJECTED',
-    submittedAt: '2026-06-22T17:45:00',
-    hoursLogged: 40,
-    summary: 'Worked on microservices refactoring using Node.js and Docker. Report was rejected — missing Docker compose configuration files and unclear description of the architecture changes.',
-  },
-];
 
 const ALL_WEEKS = [
   'Week 1 — Jun 2–8, 2026',
@@ -201,15 +125,15 @@ const ReportCard = forwardRef<HTMLDivElement, ReportCardProps>((
   const isPending = report.status === 'PENDING';
 
   return (
-    <motion.div
+    <div
       ref={ref}
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: index * 0.05, ease: [0.32, 0.72, 0, 1] }}
+     
+     
+     
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        background: st.surface,
+        background: st.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
         border: `1px solid ${hovered ? st.border : st.borderSubtle}`,
         borderRadius: st.radiusXl,
         boxShadow: hovered ? st.shadowMd : st.shadowSm,
@@ -217,7 +141,7 @@ const ReportCard = forwardRef<HTMLDivElement, ReportCardProps>((
         transition: 'all 0.25s cubic-bezier(0.32, 0.72, 0, 1)',
         overflow: 'hidden',
       }}
-    >
+     className="scroll-animate">
       <div className="report-card-inner">
         {/* Left: Checkbox */}
         <div className="rc-checkbox" style={{ background: checked ? st.successMuted : 'transparent' }}>
@@ -359,7 +283,7 @@ const ReportCard = forwardRef<HTMLDivElement, ReportCardProps>((
           </div>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 });
 
@@ -379,7 +303,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
 }) => {
   return (
     <div style={{
-      background: st.surface,
+      background: st.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
       border: `1px solid ${st.border}`,
       borderRadius: st.radiusXl,
       boxShadow: st.shadowSm,
@@ -537,7 +461,35 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
 // MAIN COMPONENT
 // ============================================================
 export const WeeklyReportsTab: React.FC = () => {
-  const [reports, setReports] = useState<WeeklyReport[]>(MOCK_WEEKLY_REPORTS);
+  useScrollAnimation();
+  const [reports, setReports] = useState<WeeklyReport[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  React.useEffect(() => {
+    const fetchReports = async () => {
+      try {
+        const data = await WeeklyReportService.getAllReports();
+        const mapped = data.map((r: any) => ({
+          id: r.reportId,
+          studentName: r.assignment?.student?.user?.fullName || 'Unknown Student',
+          studentCode: r.assignment?.student?.studentCode || 'N/A',
+          enterprise: r.assignment?.enterprise?.companyName || 'Unknown Enterprise',
+          weekNumber: r.weekNumber,
+          weekLabel: `Week ${r.weekNumber}`,
+          status: r.status,
+          submittedAt: r.submittedAt || new Date().toISOString(),
+          hoursLogged: 40,
+          summary: r.tasksCompleted || 'No summary provided',
+        }));
+        setReports(mapped);
+      } catch (err) {
+        console.error('Failed to fetch reports', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    void fetchReports();
+  }, []);
   const [selectedWeek, setSelectedWeek] = useState<string>('');
   const [checkedStatuses, setCheckedStatuses] = useState<Set<string>>(new Set(['PENDING']));
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -590,20 +542,30 @@ export const WeeklyReportsTab: React.FC = () => {
   const handleApprove = useCallback(async (id: string) => {
     if (processingId) return;
     setProcessingId(id);
-    await new Promise((r) => setTimeout(r, 400)); // Simulate API delay
-    setReports((prev) => prev.map((r) => r.id === id ? { ...r, status: 'APPROVED' as const } : r));
-    void message.success({ content: 'Report approved.', key: id, duration: 2 });
-    setProcessingId(null);
+    try {
+      await WeeklyReportService.approveReport(id);
+      setReports((prev) => prev.map((r) => r.id === id ? { ...r, status: 'APPROVED' as const } : r));
+      void message.success({ content: 'Report approved.', key: id, duration: 2 });
+    } catch (err) {
+      void message.error({ content: 'Failed to approve report.', key: id });
+    } finally {
+      setProcessingId(null);
+    }
   }, [processingId]);
 
   // Single reject
   const handleReject = useCallback(async (id: string) => {
     if (processingId) return;
     setProcessingId(id);
-    await new Promise((r) => setTimeout(r, 400)); // Simulate API delay
-    setReports((prev) => prev.map((r) => r.id === id ? { ...r, status: 'REJECTED' as const } : r));
-    void message.warning({ content: 'Report rejected.', key: id, duration: 2 });
-    setProcessingId(null);
+    try {
+      await WeeklyReportService.rejectReport(id, 'Rejected by Training Manager');
+      setReports((prev) => prev.map((r) => r.id === id ? { ...r, status: 'REJECTED' as const } : r));
+      void message.warning({ content: 'Report rejected.', key: id, duration: 2 });
+    } catch (err) {
+      void message.error({ content: 'Failed to reject report.', key: id });
+    } finally {
+      setProcessingId(null);
+    }
   }, [processingId]);
 
   // Batch approve
@@ -827,25 +789,25 @@ export const WeeklyReportsTab: React.FC = () => {
             className="wr-scroll"
             style={{ display: 'flex', flexDirection: 'column', gap: 10, maxHeight: 580, overflowY: 'auto', paddingRight: 2 }}
           >
-            <AnimatePresence mode="popLayout">
+            
               {filteredReports.length === 0 ? (
-                <motion.div
+                <div
                   key="empty"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
+                 
+                 
+                 
                   style={{
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
                     padding: '60px 24px',
-                    background: st.surface,
+                    background: st.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
                     border: `1px dashed ${st.border}`,
                     borderRadius: st.radiusXl,
                     gap: 8,
                   }}
-                >
+                 className="scroll-animate">
                   <FileText size={40} strokeWidth={1.5} style={{ color: st.border }} />
                   <div style={{ fontSize: 14, fontWeight: 700, color: st.textSecondary, fontFamily: 'Inter, sans-serif' }}>
                     No reports found
@@ -853,7 +815,7 @@ export const WeeklyReportsTab: React.FC = () => {
                   <div style={{ fontSize: 12.5, color: st.textMuted, fontFamily: 'Inter, sans-serif', textAlign: 'center' }}>
                     Try adjusting the week or status filters
                   </div>
-                </motion.div>
+                </div>
               ) : (
                 filteredReports.map((report, i) => (
                   <ReportCard
@@ -867,7 +829,7 @@ export const WeeklyReportsTab: React.FC = () => {
                   />
                 ))
               )}
-            </AnimatePresence>
+            
           </div>
         </div>
       </div>

@@ -109,7 +109,8 @@ public class EnterpriseRegistrationServiceImpl implements EnterpriseRegistration
         if (!Pattern.compile("[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]")
                 .matcher(password)
                 .find()) {
-            throw new AppException(ErrorCode.INVALID_PASSWORD, "Password must contain at least 1 special character (!@#$%^&*...)");
+            throw new AppException(
+                    ErrorCode.INVALID_PASSWORD, "Password must contain at least 1 special character (!@#$%^&*...)");
         }
     }
 }

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Spin } from 'antd';
 import { BookOutlined, BankOutlined } from '@ant-design/icons';
 import { NeuSurface } from '../components/shared/NeuSurface';
@@ -15,6 +16,7 @@ const EmptyState: React.FC<{ icon: React.ReactNode; title: string; description: 
 );
 
 export const TrainingPlanTab: React.FC = () => {
+  const { t } = useTranslation(['trainingPlan', 'common']);
   const [plan, setPlan] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -40,17 +42,17 @@ export const TrainingPlanTab: React.FC = () => {
   return (
     <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 24px 40px', fontFamily: 'Inter, sans-serif' }}>
       <div style={{ marginBottom: 24 }}>
-        <h2 style={{ fontSize: 22, fontWeight: 800, color: cc.textPrimary, margin: '0 0 6px', letterSpacing: '-0.01em' }}>Training Plan</h2>
-        <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}>Your internship training roadmap from Enterprise</p>
+        <h2 style={{ fontSize: 22, fontWeight: 800, color: cc.textPrimary, margin: '0 0 6px', letterSpacing: '-0.01em' }}>{t('pageTitle', 'Training Plan')}</h2>
+        <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}>{t('pageSubtitle', 'Your internship training roadmap from Enterprise')}</p>
       </div>
 
       {!plan ? (
-        <EmptyState icon={<BookOutlined style={{ fontSize: 32 }} />} title="No training plan yet" description="Your training plan will appear once assigned by your enterprise" />
+        <EmptyState icon={<BookOutlined style={{ fontSize: 32 }} />} title={t('noPlan', 'No training plan yet')} description={t('noPlanDesc', 'Your training plan will appear once assigned by your enterprise')} />
       ) : (
         <NeuSurface style={{ padding: 24 }}>
           <div style={{ marginBottom: 20 }}>
             <h3 style={{ fontSize: 18, fontWeight: 700, color: cc.textPrimary, margin: '0 0 8px' }}>{plan.title || 'OJT Training Plan'}</h3>
-            <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}><BankOutlined /> {plan.enterpriseName} • Started: {plan.startDate ? new Date(plan.startDate).toLocaleDateString() : 'N/A'}</p>
+            <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}><BankOutlined /> {plan.enterpriseName} • {t('startedLabel', 'Started')}: {plan.startDate ? new Date(plan.startDate).toLocaleDateString() : t('notAvailable', 'N/A')}</p>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {(plan.tasks || []).map((task: any, i: number) => (

@@ -39,17 +39,20 @@ public class StudentEnterpriseFeedbackController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('STUDENT')")
     public ResponseEntity<com.ueims.dto.response.StudentEnterpriseFeedbackDTO> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(mapper.toDto(service.findById(id)));
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<com.ueims.dto.response.StudentEnterpriseFeedbackDTO> create(
             @Valid @RequestBody com.ueims.dto.response.StudentEnterpriseFeedbackDTO entity) {
         return ResponseEntity.ok(mapper.toDto(service.save(mapper.toEntity(entity))));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         service.deleteById(id);
         return ResponseEntity.ok().build();

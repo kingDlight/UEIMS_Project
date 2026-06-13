@@ -1,0 +1,15 @@
+{
+  "pageTitle": "Internship Evaluation",
+  "pageSubtitle": "View final Rubrics scores, enterprise feedback, and official course grades",
+  "noEvaluation": "Evaluation not available",
+  "noEvaluationDesc": "Your final evaluation will appear after you complete your internship",
+  "finalGrade": "Final Grade",
+  "totalScore": "Total Score",
+  "points": "points",
+  "rubricBreakdown": "Rubric Breakdown",
+  "enterpriseFeedback": "Enterprise Feedback",
+  "attitude": "Attitude (20%)",
+  "professionalism": "Professionalism (40%)",
+  "softSkills": "Soft Skills (20%)",
+  "progress": "Progress (20%)"
+}

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { useScrollAnimation } from '../../../hooks/useScrollAnimation';
+
 import { Table, Select, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import {
@@ -100,44 +101,8 @@ const REPORT_TEMPLATES: ReportTemplate[] = [
 // ============================================================
 // MOCK DATA — Report History
 // ============================================================
-const REPORT_HISTORY: ReportHistoryItem[] = [
-  {
-    key: 'h1',
-    name: 'OJT Placement Summary — Summer 2026',
-    category: 'Placement',
-    categoryColor: st.success,
-    date: '04 Jun 2026, 14:32',
-    size: '2.4 MB',
-    sizeBytes: 2400000,
-  },
-  {
-    key: 'h2',
-    name: 'Final GPA & Evaluation — Spring 2026',
-    category: 'End-of-Term',
-    categoryColor: st.info,
-    date: '28 May 2026, 09:15',
-    size: '5.1 MB',
-    sizeBytes: 5100000,
-  },
-  {
-    key: 'h3',
-    name: 'Enterprise Feedback Report — AY 2025–2026',
-    category: 'Enterprise Feedback',
-    categoryColor: st.brand,
-    date: '15 May 2026, 16:48',
-    size: '3.8 MB',
-    sizeBytes: 3800000,
-  },
-  {
-    key: 'h4',
-    name: 'OJT Placement Summary — Spring 2026',
-    category: 'Placement',
-    categoryColor: st.success,
-    date: '01 Apr 2026, 11:20',
-    size: '2.2 MB',
-    sizeBytes: 2200000,
-  },
-];
+// REPORT_HISTORY removed to use dynamic state instead
+
 
 // ============================================================
 // REPORT TEMPLATE CARD
@@ -150,14 +115,14 @@ const TemplateCard: React.FC<{
   const [hovered, setHovered] = useState(false);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: index * 0.1, ease: [0.32, 0.72, 0, 1] }}
+    <div
+     
+     
+     
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        background: st.surface,
+        background: st.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
         border: `1px solid ${hovered ? st.brand + '60' : st.border}`,
         borderRadius: st.radiusXl,
         padding: '24px',
@@ -168,11 +133,11 @@ const TemplateCard: React.FC<{
         position: 'relative',
         overflow: 'hidden',
       }}
-    >
+     className="scroll-animate">
       {/* Brand glow on hover */}
-      <motion.div
-        animate={{ opacity: hovered ? 1 : 0 }}
-        transition={{ duration: 0.3 }}
+      <div
+       
+       
         style={{
           position: 'absolute',
           inset: 0,
@@ -269,7 +234,7 @@ const TemplateCard: React.FC<{
           Export {template.format}
         </button>
       </div>
-    </motion.div>
+    </div>
   );
 };
 
@@ -277,9 +242,12 @@ const TemplateCard: React.FC<{
 // MAIN COMPONENT
 // ============================================================
 export const ReportsTab: React.FC = () => {
+  useScrollAnimation();
+
   const [semester, setSemester] = useState<string>('SUMMER_2026');
   const [category, setCategory] = useState<string>('ALL');
   const [exportingId, setExportingId] = useState<string | null>(null);
+  const [reportHistory, setReportHistory] = useState<ReportHistoryItem[]>([]);
 
   // Suppress unused variable warning if your linter complains about exportingId
   console.debug('Exporting:', exportingId);
@@ -292,6 +260,17 @@ export const ReportsTab: React.FC = () => {
         content: `${template.title} (${template.format}) is being generated — check your downloads.`,
         duration: 3,
       });
+      
+      const newHistory: ReportHistoryItem = {
+        key: `h-${Date.now()}`,
+        name: `${template.title} — ${semester.replace('_', ' ')}`,
+        category: template.title.includes('Placement') ? 'Placement' : (template.title.includes('Feedback') ? 'Enterprise Feedback' : 'End-of-Term'),
+        categoryColor: template.formatColor,
+        date: new Date().toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute:'2-digit' }),
+        size: '1.2 MB',
+        sizeBytes: 1200000,
+      };
+      setReportHistory(prev => [newHistory, ...prev]);
     }, 1200);
   };
 
@@ -300,6 +279,7 @@ export const ReportsTab: React.FC = () => {
   };
 
   const handleDelete = (record: ReportHistoryItem) => {
+    setReportHistory(prev => prev.filter(r => r.key !== record.key));
     void message.info({ content: `"${record.name}" removed from history.`, duration: 2 });
   };
 
@@ -394,7 +374,7 @@ export const ReportsTab: React.FC = () => {
               height: 30,
               borderRadius: st.radiusMd,
               border: `1px solid ${st.border}`,
-              background: st.surface,
+              background: st.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
               color: st.textSecondary,
               display: 'inline-flex',
               alignItems: 'center',
@@ -423,7 +403,7 @@ export const ReportsTab: React.FC = () => {
               height: 30,
               borderRadius: st.radiusMd,
               border: `1px solid ${st.border}`,
-              background: st.surface,
+              background: st.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
               color: st.textSecondary,
               display: 'inline-flex',
               alignItems: 'center',
@@ -638,13 +618,13 @@ export const ReportsTab: React.FC = () => {
       </div>
 
       {/* ── Report History Table ─────────────────────────── */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, delay: 0.35, ease: [0.32, 0.72, 0, 1] }}
-      >
+      <div
+       
+       
+       
+       className="scroll-animate">
         <div style={{
-          background: st.surface,
+          background: st.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
           border: `1px solid ${st.border}`,
           borderRadius: st.radiusXl,
           boxShadow: st.shadowSm,
@@ -676,7 +656,7 @@ export const ReportsTab: React.FC = () => {
               fontFamily: 'Inter, sans-serif',
               fontVariantNumeric: 'tabular-nums',
             }}>
-              {REPORT_HISTORY.length} reports
+              {reportHistory.length} reports
             </span>
           </div>
 
@@ -684,15 +664,16 @@ export const ReportsTab: React.FC = () => {
             <Table
               className="reports-tab-table"
               columns={historyColumns}
-              dataSource={REPORT_HISTORY}
+              dataSource={reportHistory}
               rowKey="key"
               pagination={false}
               size="middle"
               scroll={{ x: 800 }}
+              locale={{ emptyText: 'No reports generated yet.' }}
             />
           </div>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 };

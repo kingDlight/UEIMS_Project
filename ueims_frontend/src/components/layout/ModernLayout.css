@@ -214,7 +214,7 @@ border-radius: 24px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 150px;
+  width: 100%;
 }
 
 .modern-account-email {
@@ -224,7 +224,7 @@ border-radius: 24px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 150px;
+  width: 100%;
 }
 
 /* Floating Menus (Dropdowns) */

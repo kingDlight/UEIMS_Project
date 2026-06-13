@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { message, Spin, Pagination } from 'antd';
 import { motion } from 'framer-motion';
 import { StarOutlined, CheckCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
@@ -40,6 +41,7 @@ const CTAButton: React.FC<{
 };
 
 export const FeedbackTab: React.FC = () => {
+  const { t } = useTranslation(['feedback', 'common']);
   const [feedbacks, setFeedbacks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -146,33 +148,33 @@ export const FeedbackTab: React.FC = () => {
   return (
     <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 24px 40px', fontFamily: 'Inter, sans-serif' }}>
       <div style={{ marginBottom: 24 }}>
-        <h2 style={{ fontSize: 22, fontWeight: 700, color: cc.text, margin: '0 0 6px' }}>Enterprise Feedback</h2>
-        <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}>Rate your internship experience</p>
+        <h2 style={{ fontSize: 22, fontWeight: 700, color: cc.text, margin: '0 0 6px' }}>{t('pageTitle', 'Enterprise Feedback')}</h2>
+        <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}>{t('pageSubtitle', 'Rate your internship experience')}</p>
       </div>
 
       {/* Submit Feedback Form */}
       <NeuSurface style={{ padding: 24, marginBottom: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20, padding: 12, borderRadius: cc.radiusMd, background: cc.infoMuted }}>
           <ExclamationCircleOutlined style={{ fontSize: 20, color: cc.info }} />
-          <p style={{ fontSize: 12, color: cc.infoText, margin: 0 }}>Your feedback is confidential and only visible to the Training Manager</p>
+          <p style={{ fontSize: 12, color: cc.infoText, margin: 0 }}>{t('confidentialNote', 'Your feedback is confidential and only visible to the Training Manager')}</p>
         </div>
-        <h3 style={{ fontSize: 16, fontWeight: 700, color: cc.text, margin: '0 0 16px' }}>Rate Your Internship Experience</h3>
+        <h3 style={{ fontSize: 16, fontWeight: 700, color: cc.text, margin: '0 0 16px' }}>{t('rateExperienceTitle', 'Rate Your Internship Experience')}</h3>
         
-        <RatingInput label="Training Quality" value={ratings.trainingQuality} onChange={(v) => setRatings({ ...ratings, trainingQuality: v })} required />
-        <RatingInput label="Supervisor Support" value={ratings.supervisorSupport} onChange={(v) => setRatings({ ...ratings, supervisorSupport: v })} required />
-        <RatingInput label="Work Environment" value={ratings.workEnvironment} onChange={(v) => setRatings({ ...ratings, workEnvironment: v })} required />
+        <RatingInput label={t('trainingQuality', 'Training Quality')} value={ratings.trainingQuality} onChange={(v) => setRatings({ ...ratings, trainingQuality: v })} required />
+        <RatingInput label={t('supervisorSupport', 'Supervisor Support')} value={ratings.supervisorSupport} onChange={(v) => setRatings({ ...ratings, supervisorSupport: v })} required />
+        <RatingInput label={t('workEnvironment', 'Work Environment')} value={ratings.workEnvironment} onChange={(v) => setRatings({ ...ratings, workEnvironment: v })} required />
         
         <div style={{ borderTop: `1px solid ${cc.borderSubtle}`, paddingTop: 16, marginTop: 8 }}>
-          <RatingInput label="Overall Rating" value={ratings.overall} onChange={(v) => setRatings({ ...ratings, overall: v })} required />
+          <RatingInput label={t('overallRating', 'Overall Rating')} value={ratings.overall} onChange={(v) => setRatings({ ...ratings, overall: v })} required />
         </div>
 
         <div style={{ marginBottom: 16 }}>
-          <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>Written Comments (Optional)</label>
-          <textarea value={comment} onChange={(e) => setComment(e.target.value)} rows={4} placeholder="Share your detailed experience..." style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13, fontFamily: "'Inter', sans-serif", resize: 'vertical' }} />
+          <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>{t('writtenComments', 'Written Comments (Optional)')}</label>
+          <textarea value={comment} onChange={(e) => setComment(e.target.value)} rows={4} placeholder={t('commentsPlaceholder', 'Share your detailed experience...')} style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13, fontFamily: "'Inter', sans-serif", resize: 'vertical' }} />
         </div>
         <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
-          <CTAButton variant="ghost" onClick={() => { setRatings({ trainingQuality: 5, supervisorSupport: 5, workEnvironment: 5, overall: 5 }); setComment(''); }}>Clear</CTAButton>
-          <CTAButton variant="primary" onClick={handleSubmit} loading={submitting}>Submit Feedback</CTAButton>
+          <CTAButton variant="ghost" onClick={() => { setRatings({ trainingQuality: 5, supervisorSupport: 5, workEnvironment: 5, overall: 5 }); setComment(''); }}>{t('clear', 'Clear')}</CTAButton>
+          <CTAButton variant="primary" onClick={handleSubmit} loading={submitting}>{t('submitFeedback', 'Submit Feedback')}</CTAButton>
         </div>
       </NeuSurface>
 
@@ -206,7 +208,7 @@ export const FeedbackTab: React.FC = () => {
               total={feedbacks.length}
               onChange={setCurrentPage}
               showSizeChanger={false}
-              showTotal={(total, range) => `${range[0]}-${range[1]} of ${total}`}
+              showTotal={(total, range) => t('rangeSummary', '{{start}}-{{end}} of {{total}}', { start: range[0], end: range[1], total })}
             />
           </div>
         </>

@@ -182,3 +182,7 @@ generate_additional_dataset.js
 check_schema.js
 check_counts.js
 student_evaluation_data.sql
+ueims_frontend/patch_microinteractions.cjs
+ueims_frontend/patch_glass.cjs
+ueims_frontend/patch_all_tabs.cjs
+ueims_frontend/patch_student_tabs.cjs

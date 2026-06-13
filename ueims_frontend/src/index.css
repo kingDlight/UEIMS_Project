@@ -673,9 +673,10 @@ a:hover {
 
 /* Transitions */
 .transition { transition: all var(--transition-normal); }
+.hover-lift { transition: transform 0.2s ease, box-shadow 0.2s ease !important; }
 .hover-lift:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 24px rgba(15,23,42,.12) !important;
 }
 
 /* Visibility */
@@ -705,6 +706,7 @@ a:hover {
 .scroll-animate {
   opacity: 0;
   transform: translateY(2rem);
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .scroll-animate[data-animated="true"] {
   opacity: 1 !important;

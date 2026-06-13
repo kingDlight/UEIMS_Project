@@ -52,7 +52,36 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
 
     @Override
     public WeeklyReport findById(UUID id) {
-        return repository.findById(id).orElse(null);
+        WeeklyReport report = repository.findById(id).orElse(null);
+        if (report == null) {
+            return null;
+        }
+
+        User currentUser = getCurrentUser();
+        boolean isStaff = currentUser.getRoles().stream()
+                .anyMatch(role -> role.getRole().getRoleName().equals("SYSTEM_ADMIN")
+                        || role.getRole().getRoleName().equals("TRAINING_MANAGER"));
+        if (isStaff) {
+            return report;
+        }
+
+        // If it's an Enterprise user, check if they are the supervisor assigned to this student
+        if (currentUser.getEnterprise() != null) {
+            if (!report.getAssignment()
+                    .getEnterprise()
+                    .getEnterpriseId()
+                    .equals(currentUser.getEnterprise().getEnterpriseId())) {
+                throw new AppException(ErrorCode.UNAUTHORIZED);
+            }
+            return report;
+        }
+
+        // If it's a Student, check if they are the owner
+        if (!report.getAssignment().getStudent().getUserId().equals(currentUser.getUserId())) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        return report;
     }
 
     @Override
@@ -117,7 +146,19 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public void deleteById(UUID id) {
+        WeeklyReport report = repository.findById(id).orElse(null);
+        if (report == null) {
+            return;
+        }
+        User currentUser = getCurrentUser();
+        boolean isStaff = currentUser.getRoles().stream()
+                .anyMatch(role -> role.getRole().getRoleName().equals("SYSTEM_ADMIN")
+                        || role.getRole().getRoleName().equals("TRAINING_MANAGER"));
+        if (!isStaff && !report.getAssignment().getStudent().getUserId().equals(currentUser.getUserId())) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
         repository.deleteById(id);
     }
 }

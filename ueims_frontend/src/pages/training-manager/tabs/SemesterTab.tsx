@@ -9,6 +9,7 @@ import {
   Star,
 } from 'lucide-react';
 import dayjs from 'dayjs';
+import { SemesterService } from '@/services/SemesterService';
 
 // ============================================================
 // COLOR UTILITY
@@ -47,7 +48,7 @@ const cc = {
   textPrimary: '#1A1A2E',
   textSecondary: '#6B7280',
   textMuted: '#9CA3AF',
-  surface: '#FFFFFF',
+  surface: 'rgba(255, 255, 255, 0.72)',
   neutralBg: '#F9FAFB',
   border: '#E5E7EB',
   borderSubtle: '#F3F4F6',
@@ -72,48 +73,6 @@ interface SemesterRecord {
   durationWeeks: number;
   status: SemesterStatus;
 }
-
-// ============================================================
-// MOCK DATA — realistic academic timeline
-// ============================================================
-const MOCK_SEMESTERS: SemesterRecord[] = [
-  {
-    id: 'sm-001',
-    name: 'Fall 2025',
-    semesterCode: 'FA25',
-    startDate: '2025-09-01',
-    endDate: '2025-12-15',
-    durationWeeks: 15,
-    status: 'Completed',
-  },
-  {
-    id: 'sm-002',
-    name: 'Spring 2026',
-    semesterCode: 'SP26',
-    startDate: '2026-01-12',
-    endDate: '2026-05-10',
-    durationWeeks: 16,
-    status: 'Completed',
-  },
-  {
-    id: 'sm-003',
-    name: 'Summer 2026',
-    semesterCode: 'SU26',
-    startDate: '2026-05-25',
-    endDate: '2026-08-30',
-    durationWeeks: 14,
-    status: 'Current',
-  },
-  {
-    id: 'sm-004',
-    name: 'Fall 2026',
-    semesterCode: 'FA26',
-    startDate: '2026-09-07',
-    endDate: '2026-12-20',
-    durationWeeks: 15,
-    status: 'Upcoming',
-  },
-];
 
 // ============================================================
 // SUB-COMPONENTS
@@ -204,7 +163,7 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
 // MAIN COMPONENT
 // ============================================================
 export const SemesterTab: React.FC = () => {
-  const [semesters] = useState<SemesterRecord[]>(MOCK_SEMESTERS);
+  const [semesters, setSemesters] = useState<SemesterRecord[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedSemester, setSelectedSemester] = useState<SemesterRecord | null>(null);
@@ -212,16 +171,54 @@ export const SemesterTab: React.FC = () => {
   const [editForm] = Form.useForm();
 
   const [isMobile, setIsMobile] = useState(false);
+  
+  const fetchSemesters = useCallback(async () => {
+    try {
+      const data = await SemesterService.getAllSemesters();
+      const mapped: SemesterRecord[] = data.map((s) => {
+        const start = dayjs(s.startDate);
+        const end = dayjs(s.endDate);
+        const durationWeeks = end.diff(start, 'week');
+        
+        let status: SemesterStatus = 'Completed';
+        if (s.status === 'ACTIVE') status = 'Current';
+        else if (s.status === 'DRAFT' || s.status === 'OPEN') status = 'Upcoming';
+        else if (s.status === 'LOCKED' || s.status === 'CLOSED') status = 'Completed';
+        
+        return {
+          id: s.semesterId,
+          name: s.name,
+          semesterCode: s.semesterCode,
+          startDate: s.startDate,
+          endDate: s.endDate,
+          durationWeeks: Math.max(1, durationWeeks),
+          status,
+        };
+      });
+      setSemesters(mapped);
+    } catch (err) {
+      console.error(err);
+      message.error('Failed to fetch semesters');
+    }
+  }, []);
+
   useEffect(() => {
+    void fetchSemesters();
     const check = () => setIsMobile(window.innerWidth < 768);
     check();
     window.addEventListener('resize', check);
     return () => window.removeEventListener('resize', check);
   }, []);
 
-  const handleSetCurrent = useCallback((record: SemesterRecord) => {
-    message.success({ content: `"${record.name}" is now set as Current semester.`, duration: 2.5 });
-  }, []);
+  const handleSetCurrent = useCallback(async (record: SemesterRecord) => {
+    try {
+      await SemesterService.activateSemester(record.id);
+      message.success({ content: `"${record.name}" is now set as Current semester.`, duration: 2.5 });
+      void fetchSemesters();
+    } catch (err) {
+      message.error('Failed to set current semester');
+    }
+  }, [fetchSemesters]);
 
   const handleEditTimeline = useCallback((record: SemesterRecord) => {
     setSelectedSemester(record);
@@ -577,7 +574,7 @@ export const SemesterTab: React.FC = () => {
       {/* TABLE CARD */}
       <div
         style={{
-          background: cc.surface,
+          background: cc.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
           borderRadius: cc.radiusXl,
           boxShadow: cc.shadowSm,
           border: `1px solid ${cc.border}`,

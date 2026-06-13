@@ -20,6 +20,13 @@ export const AppLayout: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { user, token, logout } = useAuthStore();
+  const mustChangePassword = (user as any)?.mustChangePassword;
+
+  React.useEffect(() => {
+    if (mustChangePassword) {
+      setChangePasswordVisible(true);
+    }
+  }, [mustChangePassword]);
 
   const handleLogout = async () => {
     try {
@@ -46,8 +53,12 @@ export const AppLayout: React.FC = () => {
         newPassword: values.newPassword,
         confirmPassword: values.confirmPassword,
       });
-      message.success('Đổi mật khẩu thành công!');
+      message.success('Đổi mật khẩu thành công! Vui lòng đăng nhập lại.');
       setChangePasswordVisible(false);
+      if (mustChangePassword) {
+        logout();
+        navigate('/login');
+      }
     } catch (error: any) {
       const code = error.response?.data?.code;
       if (code === 2002) {
@@ -160,9 +171,12 @@ export const AppLayout: React.FC = () => {
       <Modal
         title="Đổi mật khẩu"
         open={changePasswordVisible}
-        onCancel={() => setChangePasswordVisible(false)}
+        onCancel={() => !mustChangePassword && setChangePasswordVisible(false)}
         footer={null}
         destroyOnHidden
+        closable={!mustChangePassword}
+        maskClosable={!mustChangePassword}
+        keyboard={!mustChangePassword}
       >
         <Form layout="vertical" onFinish={handleChangePassword}>
           <Form.Item
@@ -190,9 +204,11 @@ export const AppLayout: React.FC = () => {
             <Input.Password placeholder="Nhập lại mật khẩu mới" />
           </Form.Item>
           <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
-            <Button onClick={() => setChangePasswordVisible(false)} style={{ marginRight: 8 }}>
-              Hủy
-            </Button>
+            {!mustChangePassword && (
+              <Button onClick={() => setChangePasswordVisible(false)} style={{ marginRight: 8 }}>
+                Hủy
+              </Button>
+            )}
             <Button type="primary" htmlType="submit" loading={loading}>
               Xác nhận
             </Button>

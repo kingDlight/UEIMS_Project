@@ -34,9 +34,7 @@ public class SecurityConfig {
         "/api/test/**"
     };
 
-    private static final String[] PUBLIC_GET_ENDPOINTS = {
-        "/uploads/**"
-    };
+    private static final String[] PUBLIC_GET_ENDPOINTS = {"/uploads/**"};
 
     @Bean
     public SecurityFilterChain filterChain(

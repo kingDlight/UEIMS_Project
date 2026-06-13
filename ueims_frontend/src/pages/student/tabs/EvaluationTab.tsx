@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Spin } from 'antd';
 import { TrophyOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 import { NeuSurface } from '../components/shared/NeuSurface';
 import { api } from '@/services/api';
 import { cc } from '../constants';
@@ -14,6 +15,7 @@ const EmptyState: React.FC<{ icon: React.ReactNode; title: string; description: 
 );
 
 export const EvaluationTab: React.FC = () => {
+  const { t } = useTranslation(['evaluation']);
   const [loading, setLoading] = useState(true);
   const [evaluation, setEvaluation] = useState<any>(null);
 
@@ -37,10 +39,10 @@ export const EvaluationTab: React.FC = () => {
   }
 
   const rubricScores = evaluation ? [
-    { name: 'Attitude (20%)', score: evaluation.attitudeScore, maxScore: 10 },
-    { name: 'Professionalism (40%)', score: evaluation.professionalismScore, maxScore: 10 },
-    { name: 'Soft Skills (20%)', score: evaluation.softSkillsScore, maxScore: 10 },
-    { name: 'Progress (20%)', score: evaluation.progressScore, maxScore: 10 },
+    { name: t('attitude', 'Attitude (20%)'), score: evaluation.attitudeScore, maxScore: 10 },
+    { name: t('professionalism', 'Professionalism (40%)'), score: evaluation.professionalismScore, maxScore: 10 },
+    { name: t('softSkills', 'Soft Skills (20%)'), score: evaluation.softSkillsScore, maxScore: 10 },
+    { name: t('progress', 'Progress (20%)'), score: evaluation.progressScore, maxScore: 10 },
   ] : [];
 
   const totalScore = rubricScores.reduce((sum: number, r: any) => sum + r.score, 0);
@@ -60,12 +62,12 @@ export const EvaluationTab: React.FC = () => {
   return (
     <div style={{ maxWidth: 800, margin: '0 auto', padding: '0 24px 40px', fontFamily: 'Inter, sans-serif' }}>
       <div style={{ marginBottom: 24 }}>
-        <h2 style={{ fontSize: 22, fontWeight: 700, color: cc.text, margin: '0 0 6px' }}>Internship Evaluation</h2>
-        <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}>View final Rubrics scores, enterprise feedback, and official course grades</p>
+        <h2 style={{ fontSize: 22, fontWeight: 700, color: cc.text, margin: '0 0 6px' }}>{t('pageTitle', 'Internship Evaluation')}</h2>
+        <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}>{t('pageSubtitle', 'View final Rubrics scores, enterprise feedback, and official course grades')}</p>
       </div>
 
       {!evaluation ? (
-        <EmptyState icon={<TrophyOutlined style={{ fontSize: 32 }} />} title="Evaluation not available" description="Your final evaluation will appear after you complete your internship" />
+        <EmptyState icon={<TrophyOutlined style={{ fontSize: 32 }} />} title={t('noEvaluation', 'Evaluation not available')} description={t('noEvaluationDesc', 'Your final evaluation will appear after you complete your internship')} />
       ) : (
         <>
           {/* Grade Overview */}
@@ -76,9 +78,9 @@ export const EvaluationTab: React.FC = () => {
                 <span style={{ fontSize: 12, fontWeight: 700, color: cc.textMuted, marginTop: 4 }}>{percentage}%</span>
               </div>
               <div style={{ flex: 1 }}>
-                <h3 style={{ fontSize: 18, fontWeight: 700, color: cc.text, margin: '0 0 8px' }}>Final Grade: {grade}</h3>
+                <h3 style={{ fontSize: 18, fontWeight: 700, color: cc.text, margin: '0 0 8px' }}>{t('finalGrade', 'Final Grade')}: {grade}</h3>
                 <p style={{ fontSize: 13, color: cc.textMuted, margin: 0, lineHeight: 1.6 }}>
-                  Total Score: {totalScore}/{maxScore} points
+                  {t('totalScore', 'Total Score')}: {totalScore}/{maxScore} {t('points', 'points')}
                 </p>
                 <div style={{ marginTop: 12, height: 8, borderRadius: 4, background: cc.borderSubtle, overflow: 'hidden' }}>
                   <div style={{ width: `${percentage}%`, height: '100%', background: color, borderRadius: 4, transition: 'width 0.5s ease' }} />
@@ -89,7 +91,7 @@ export const EvaluationTab: React.FC = () => {
 
           {/* Rubric Scores */}
           <NeuSurface style={{ padding: 24, marginBottom: 20 }}>
-            <h3 style={{ fontSize: 16, fontWeight: 700, color: cc.text, margin: '0 0 16px' }}>Rubric Breakdown</h3>
+            <h3 style={{ fontSize: 16, fontWeight: 700, color: cc.text, margin: '0 0 16px' }}>{t('rubricBreakdown', 'Rubric Breakdown')}</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               {rubricScores.map((rubric: any, i: number) => {
                 const pct = Math.round((rubric.score / rubric.maxScore) * 100);
@@ -112,7 +114,7 @@ export const EvaluationTab: React.FC = () => {
           {/* Enterprise Feedback */}
           {evaluation.overallComments && (
             <NeuSurface style={{ padding: 24, marginBottom: 20 }}>
-              <h3 style={{ fontSize: 16, fontWeight: 700, color: cc.text, margin: '0 0 12px' }}>Enterprise Feedback</h3>
+              <h3 style={{ fontSize: 16, fontWeight: 700, color: cc.text, margin: '0 0 12px' }}>{t('enterpriseFeedback', 'Enterprise Feedback')}</h3>
               <p style={{ fontSize: 13, color: cc.textMuted, lineHeight: 1.6, margin: 0 }}>{evaluation.overallComments}</p>
             </NeuSurface>
           )}

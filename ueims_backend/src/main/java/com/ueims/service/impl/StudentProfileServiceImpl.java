@@ -208,6 +208,7 @@ public class StudentProfileServiceImpl implements StudentProfileService {
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public MyProfileResponse getMyFullProfile(UUID userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         StudentProfile profile = repository.findByUser_UserId(userId);
