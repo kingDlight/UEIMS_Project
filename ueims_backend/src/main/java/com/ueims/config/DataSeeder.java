@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.ueims.model.entity.Role;
 import com.ueims.model.entity.User;
@@ -43,6 +44,7 @@ public class DataSeeder implements CommandLineRunner {
     String defaultPassword;
 
     @Override
+    @Transactional
     public void run(String... args) throws Exception {
         log.info("Cleaning up old mock enterprises from previous seed...");
         enterpriseRepository.findAll().forEach(e -> {
