@@ -21,11 +21,11 @@ export const cc = {
   gradient: 'linear-gradient(135deg, #fff5ed, #ffe8d6)',
   
   // Brand colors (TM-aligned)
-  primary: '#FF7A30',
-  primaryHover: '#E86A20',
+  primary: '#E67E22',
+  primaryHover: '#D35400',
   primaryDark: '#C45200',
-  primaryMuted: '#FFF3E8',
-  primarySubtle: '#FFF8F0',
+  primaryMuted: '#fff0e6',
+  primarySubtle: '#fff8f0',
   
   secondary: '#271c45',
   cardOrange: '#ffdfcf',
@@ -36,25 +36,25 @@ export const cc = {
   cardPurple: '#f3e5f5',
   
   // Text colors (TM-aligned)
-  text: '#1A1A2E',
-  textPrimary: '#1A1A2E',
-  textSecondary: '#6B7280',
-  textMuted: '#9CA3AF',
+  text: '#1e293b',
+  textPrimary: '#1e293b',
+  textSecondary: '#64748b',
+  textMuted: '#64748b',
   textLight: '#94a3b8',
   
   // Semantic colors (TM-aligned)
-  success: '#10B981',
-  successMuted: '#D1FAE5',
-  successText: '#065F46',
-  warning: '#F59E0B',
-  warningMuted: '#FEF3C7',
-  warningText: '#92400E',
-  danger: '#EF4444',
-  dangerMuted: '#FEE2E2',
-  dangerText: '#991B1B',
-  info: '#3B82F6',
-  infoMuted: '#DBEAFE',
-  infoText: '#1E40AF',
+  success: '#22c55e',
+  successMuted: '#dcfce7',
+  successText: '#166534',
+  warning: '#f59e0b',
+  warningMuted: '#fef3c7',
+  warningText: '#92400e',
+  danger: '#ef4444',
+  dangerMuted: '#fee2e2',
+  dangerText: '#991b1b',
+  info: '#3b82f6',
+  infoMuted: '#dbeafe',
+  infoText: '#1e40af',
   purple: '#8b5cf6',
   
   shadow: '0 30px 60px rgba(230, 126, 34, 0.15)',
@@ -113,16 +113,16 @@ export type StudentPageKey =
   | 'evaluation';
 
 export const navItems: NavItem[] = [
-  { key: 'dashboard', label: 'Student Dashboard', icon: React.createElement(CalendarOutlined), roles: ['STUDENT'] },
-  { key: 'profile', label: 'Profile & CV', icon: React.createElement(UserOutlined), roles: ['STUDENT'] },
+  { key: 'dashboard', label: 'Dashboard', icon: React.createElement(CalendarOutlined), roles: ['STUDENT'] },
+  { key: 'profile', label: 'Profile', icon: React.createElement(UserOutlined), roles: ['STUDENT'] },
   { key: 'jobs', label: 'Job Board', icon: React.createElement(TrophyOutlined), roles: ['STUDENT'] },
-  { key: 'applications', label: 'My Applications', icon: React.createElement(FileTextOutlined), roles: ['STUDENT'] },
-  { key: 'schedule', label: 'My Interviews', icon: React.createElement(CalendarOutlined), roles: ['STUDENT'] },
-  { key: 'training-plan', label: 'Internship Progress', icon: React.createElement(BookOutlined), roles: ['STUDENT'] },
-  { key: 'reports', label: 'Weekly Reports', icon: React.createElement(SnippetsOutlined), roles: ['STUDENT'] },
-  { key: 'feedback', label: 'Evaluate Enterprise', icon: React.createElement(CheckCircleOutlined), roles: ['STUDENT'] },
-  { key: 'final-report', label: 'Final Report Submission', icon: React.createElement(FileProtectOutlined), roles: ['STUDENT'] },
-  { key: 'evaluation', label: 'My Evaluation', icon: React.createElement(TrophyOutlined), roles: ['STUDENT'] },
+  { key: 'applications', label: 'Applications', icon: React.createElement(FileTextOutlined), roles: ['STUDENT'] },
+  { key: 'schedule', label: 'Interviews', icon: React.createElement(CalendarOutlined), roles: ['STUDENT'] },
+  { key: 'training-plan', label: 'Progress', icon: React.createElement(BookOutlined), roles: ['STUDENT'] },
+  { key: 'reports', label: 'Reports', icon: React.createElement(SnippetsOutlined), roles: ['STUDENT'] },
+  { key: 'feedback', label: 'Feedback', icon: React.createElement(CheckCircleOutlined), roles: ['STUDENT'] },
+  { key: 'final-report', label: 'Final Report', icon: React.createElement(FileProtectOutlined), roles: ['STUDENT'] },
+  { key: 'evaluation', label: 'Evaluation', icon: React.createElement(TrophyOutlined), roles: ['STUDENT'] },
 ];
 
 export const defaultPage: StudentPageKey = 'dashboard';
