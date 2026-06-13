@@ -42,11 +42,6 @@ export const StudentDashboard: React.FC = () => {
   }
 
   const payload = extractUserFromToken(token);
-  
-  if (payload?.mustChangePassword) {
-    return <Navigate to="/change-password" replace />;
-  }
-
   const roles = payload?.roles || [];
 
   if (roles.length === 0) {

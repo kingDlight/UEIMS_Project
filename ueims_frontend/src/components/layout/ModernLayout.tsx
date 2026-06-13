@@ -161,6 +161,14 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
   // Change Password state
   const [changePasswordVisible, setChangePasswordVisible] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { user, token, logout } = useAuthStore();
+  const mustChangePassword = (user as any)?.mustChangePassword;
+
+  useEffect(() => {
+    if (mustChangePassword) {
+      setChangePasswordVisible(true);
+    }
+  }, [mustChangePassword]);
 
   const [form] = Form.useForm();
 
@@ -176,8 +184,13 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
         newPassword: values.newPassword,
         confirmPassword: values.confirmPassword,
       });
-      message.success('Đổi mật khẩu thành công!');
+      message.success('Đổi mật khẩu thành công! Vui lòng đăng nhập lại.');
       setChangePasswordVisible(false);
+      // Force user to log out and log back in to get a fresh token with mustChangePassword=false
+      if (mustChangePassword) {
+        logout();
+        navigate('/login');
+      }
     } catch (error: any) {
       const code = error.response?.data?.code;
       if (code === 2002) {
@@ -196,8 +209,6 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
 
   // Determine current active tab
   const activeTab = tab || defaultRoute;
-
-  const { user, token, logout } = useAuthStore();
 
   const [phone, setPhone] = useState('');
   const [updatingProfile, setUpdatingProfile] = useState(false);
@@ -724,11 +735,14 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
           </div>
         }
         open={changePasswordVisible}
-        onCancel={() => setChangePasswordVisible(false)}
+        onCancel={() => !mustChangePassword && setChangePasswordVisible(false)}
         footer={null}
         destroyOnHidden
+        closable={!mustChangePassword}
+        maskClosable={!mustChangePassword}
+        keyboard={!mustChangePassword}
         width={420}
-        closeIcon={<X size={20} color="#94a3b8" style={{ marginTop: 8, marginRight: 8 }} />}
+        closeIcon={!mustChangePassword ? <X size={20} color="#94a3b8" style={{ marginTop: 8, marginRight: 8 }} /> : null}
         styles={{ 
           content: { borderRadius: 24, padding: '24px 32px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15)' },
           header: { marginBottom: 24 },
@@ -789,13 +803,15 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
           </Form.Item>
           
           <div style={{ display: 'flex', gap: 12 }}>
-            <Button 
-              size="large"
-              onClick={() => setChangePasswordVisible(false)} 
-              style={{ flex: 1, borderRadius: 12, fontWeight: 700, color: '#475569', border: '1px solid #cbd5e1', background: '#fff', height: 44, fontFamily: 'Inter, sans-serif' }}
-            >
-              Hủy bỏ
-            </Button>
+            {!mustChangePassword && (
+              <Button 
+                size="large"
+                onClick={() => setChangePasswordVisible(false)} 
+                style={{ flex: 1, borderRadius: 12, fontWeight: 700, color: '#475569', border: '1px solid #cbd5e1', background: '#fff', height: 44, fontFamily: 'Inter, sans-serif' }}
+              >
+                Hủy bỏ
+              </Button>
+            )}
             <Button 
               size="large"
               type="primary" 
