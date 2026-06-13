@@ -20,14 +20,19 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
 import com.ueims.model.entity.EnterpriseAssignment;
 import com.ueims.model.entity.FinalReport;
 import com.ueims.model.entity.Semester;
+import com.ueims.model.entity.User;
 import com.ueims.repository.EnterpriseAssignmentRepository;
 import com.ueims.repository.FinalReportRepository;
+import com.ueims.repository.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
 class FinalReportServiceImplTest {
@@ -38,29 +43,46 @@ class FinalReportServiceImplTest {
     @Mock
     private EnterpriseAssignmentRepository enterpriseAssignmentRepository;
 
+    @Mock
+    private UserRepository userRepository;
+
     @InjectMocks
     private FinalReportServiceImpl service;
 
     private FinalReport report;
     private EnterpriseAssignment assignment;
+    private User student;
     private UUID reportId;
     private UUID assignmentId;
 
     @BeforeEach
     void setUp() {
+        SecurityContextHolder.clearContext();
         reportId = UUID.randomUUID();
         assignmentId = UUID.randomUUID();
 
         Semester semester = new Semester();
         semester.setEndDate(LocalDate.now().plusDays(30)); // Deadline not expired
 
+        student = new User();
+        student.setUserId(UUID.randomUUID());
+        student.setEmail("student@test.com");
+        student.setRoles(List.of()); // Non-staff
+
         assignment = new EnterpriseAssignment();
         assignment.setAssignmentId(assignmentId);
         assignment.setSemester(semester);
+        assignment.setStudent(student);
 
         report = new FinalReport();
         report.setFinalReportId(reportId);
         report.setAssignment(assignment);
+    }
+
+    private void mockSecurityContext(User user) {
+        Authentication auth = new UsernamePasswordAuthenticationToken(user.getEmail(), null);
+        SecurityContextHolder.getContext().setAuthentication(auth);
+        when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
     }
 
     @Test

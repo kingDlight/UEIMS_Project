@@ -35,6 +35,7 @@ public class WeeklyReportController {
     WeeklyReportMapper mapper;
 
     @GetMapping
+    @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
     public ResponseEntity<List<WeeklyReportDTO>> getAll() {
         return ResponseEntity.ok(service.findAll().stream().map(mapper::toDto).toList());
     }
@@ -47,6 +48,8 @@ public class WeeklyReportController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize(
+            "hasRole('STUDENT') or hasRole('ENTERPRISE') or hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
     public ResponseEntity<WeeklyReportDTO> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(mapper.toDto(service.findById(id)));
     }
@@ -73,6 +76,7 @@ public class WeeklyReportController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('STUDENT') or hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         service.deleteById(id);
         return ResponseEntity.ok().build();

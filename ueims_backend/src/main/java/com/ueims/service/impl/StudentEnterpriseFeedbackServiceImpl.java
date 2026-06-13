@@ -39,7 +39,21 @@ public class StudentEnterpriseFeedbackServiceImpl implements StudentEnterpriseFe
 
     @Override
     public StudentEnterpriseFeedback findById(UUID id) {
-        return repository.findById(id).orElse(null);
+        StudentEnterpriseFeedback feedback = repository.findById(id).orElse(null);
+        if (feedback == null) {
+            return null;
+        }
+        User currentUser = getCurrentUser();
+        boolean isStaff = currentUser.getRoles().stream()
+                .anyMatch(role -> role.getRole().getRoleName().equals("SYSTEM_ADMIN")
+                        || role.getRole().getRoleName().equals("TRAINING_MANAGER"));
+        if (isStaff) {
+            return feedback;
+        }
+        if (!feedback.getStudent().getUserId().equals(currentUser.getUserId())) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+        return feedback;
     }
 
     @Override
@@ -88,6 +102,19 @@ public class StudentEnterpriseFeedbackServiceImpl implements StudentEnterpriseFe
 
     @Override
     public void deleteById(UUID id) {
+        StudentEnterpriseFeedback feedback = repository.findById(id).orElse(null);
+        if (feedback == null) {
+            return;
+        }
+
+        User currentUser = getCurrentUser();
+        boolean isStaff = currentUser.getRoles().stream()
+                .anyMatch(role -> role.getRole().getRoleName().equals("SYSTEM_ADMIN")
+                        || role.getRole().getRoleName().equals("TRAINING_MANAGER"));
+        if (!isStaff) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
         repository.deleteById(id);
     }
 }

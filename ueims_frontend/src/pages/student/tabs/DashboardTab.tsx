@@ -316,6 +316,71 @@ const SemesterContextBar: React.FC<{ stats: StudentDashboardStats }> = ({ stats 
   );
 };
 
+const WelcomeCard: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => {
+  const { t } = useTranslation(['studentDashboard']);
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
+      style={{ marginBottom: 16 }}
+    >
+      <CardWrapper style={{ padding: 24, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
+          <div style={{ width: 44, height: 44, borderRadius: cc.radiusFull, background: cc.brandMuted, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.brand }}>
+            <Briefcase size={22} />
+          </div>
+          <div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: cc.textPrimary }}>{t('welcomeUeims', 'Welcome to UEIMS')}</div>
+            <div style={{ fontSize: 13, color: cc.textSecondary, marginTop: 4 }}>{t('semesterIntro', 'Semester preparation and internship search starts here.')}</div>
+          </div>
+        </div>
+        <div style={{ fontSize: 14, color: cc.textMuted, lineHeight: 1.7, marginBottom: 20 }}>
+          {t('semester1to4Intro', 'You can browse the job board and prepare your profile while your study schedule is updated.')}
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <CTAButton variant="primary" size="md" icon={false} onClick={() => onNavigate('jobs')}>
+            {t('goToJobBoard', 'Go to Job Board')}
+          </CTAButton>
+        </div>
+      </CardWrapper>
+    </motion.div>
+  );
+};
+
+const NoPlacementAlert: React.FC<{ enterpriseName?: string; onNavigate: (route: string) => void }> = ({ enterpriseName, onNavigate }) => {
+  const { t } = useTranslation(['studentDashboard']);
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
+      style={{ marginBottom: 16 }}
+    >
+      <CardWrapper style={{ padding: 22, border: `1px solid ${cc.warningMuted}`, background: hexToRgba(cc.warning, 0.06) }}>
+        <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+          <AlertTriangle size={26} color={cc.warning} />
+          <div>
+            <div style={{ fontSize: 18, fontWeight: 700, color: cc.textPrimary, marginBottom: 8 }}>
+              {t('noActivePlacementHeading', 'No active placement found')}
+            </div>
+            <div style={{ fontSize: 14, color: cc.textSecondary, lineHeight: 1.7, marginBottom: 14 }}>
+              {enterpriseName
+                ? t('noActivePlacementMessageWithEnterprise', 'You are not currently assigned to an internship with {{enterprise}}. Please visit the Job Board to apply.', { enterprise: enterpriseName })
+                : t('noActivePlacementMessage', 'You are not currently assigned to any internship. Please visit the Job Board to apply.')}
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <CTAButton variant="primary" size="md" icon={false} onClick={() => onNavigate('jobs')}>
+                {t('visitJobBoard', 'Visit Job Board')}
+              </CTAButton>
+            </div>
+          </div>
+        </div>
+      </CardWrapper>
+    </motion.div>
+  );
+};
+
 // ============================================================
 // SECTION: KPI URGENCY CARDS
 // ============================================================
@@ -493,14 +558,11 @@ const ReportPipelineRow: React.FC<{ stats: StudentDashboardStats; onNavigate: (r
 // ============================================================
 // SECTION: QUICK ACTIONS
 // ============================================================
-const QuickActionsRow: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => {
+const QuickActionsRow: React.FC<{
+  onNavigate: (route: string) => void;
+  actions: Array<{ label: string; description: string; icon: React.ReactNode; route: string }>;
+}> = ({ onNavigate, actions }) => {
   const { t } = useTranslation(['studentDashboard']);
-  const actions = [
-    { label: t('browseJobs', 'Browse Jobs'), description: t('browseJobsDesc', 'Find and apply for internships'), icon: <Briefcase size={24} />, route: 'jobs' },
-    { label: t('submitReport', 'Submit Report'), description: t('submitReportDesc', 'Submit your weekly progress report'), icon: <Upload size={24} />, route: 'reports' },
-    { label: t('sendFeedback', 'Send Feedback'), description: t('sendFeedbackDesc', 'Rate your enterprise experience'), icon: <Star size={24} />, route: 'feedback' },
-    { label: t('mySchedule', 'My Schedule'), description: t('myScheduleDesc', 'View upcoming interviews'), icon: <Calendar size={24} />, route: 'schedule' },
-  ];
 
   return (
     <motion.div
@@ -723,6 +785,9 @@ export const StudentDashboardTab: React.FC = () => {
     daysRemaining: 0,
     semesterName: '—',
     semesterStatus: 'N/A',
+    currentSemester: 5,
+    hasActivePlacement: false,
+    enterpriseName: '',
     userProfile: null,
     loggedHours: 0,
     applicationStatusRates: [],
@@ -754,6 +819,95 @@ export const StudentDashboardTab: React.FC = () => {
     navigate(`/student/${route}`);
   };
 
+  const currentSemester = stats.currentSemester ?? (typeof stats.userProfile?.currentSemester === 'number' ? stats.userProfile.currentSemester : 5);
+  const isSemester1to4 = currentSemester >= 1 && currentSemester <= 4;
+  const isSemester5 = currentSemester === 5;
+  const isSemester6 = currentSemester === 6;
+  const isSemester7to9 = currentSemester >= 7 && currentSemester <= 9;
+  const isSemester6WithoutPlacement = isSemester6 && !stats.hasActivePlacement;
+  const showUpcoming = isSemester5 || (isSemester6 && stats.hasActivePlacement);
+  const showRecentActivity = isSemester5 || (isSemester6 && stats.hasActivePlacement);
+
+  const quickActions = (() => {
+    const actions = [] as Array<{ label: string; description: string; icon: React.ReactNode; route: string }>;
+
+    if (isSemester1to4) {
+      actions.push({
+        label: t('browseJobs', 'Browse Jobs'),
+        description: t('browseJobsDesc', 'Find and apply for internships'),
+        icon: <Briefcase size={24} />,
+        route: 'jobs',
+      });
+      return actions;
+    }
+
+    if (isSemester5) {
+      actions.push({
+        label: t('browseJobs', 'Browse Jobs'),
+        description: t('browseJobsDesc', 'Find and apply for internships'),
+        icon: <Briefcase size={24} />,
+        route: 'jobs',
+      });
+      actions.push({
+        label: t('mySchedule', 'My Schedule'),
+        description: t('myScheduleDesc', 'View upcoming interviews'),
+        icon: <Calendar size={24} />,
+        route: 'schedule',
+      });
+      return actions;
+    }
+
+    if (isSemester6) {
+      if (!stats.hasActivePlacement) {
+        actions.push({
+          label: t('browseJobs', 'Browse Jobs'),
+          description: t('browseJobsDesc', 'Find and apply for internships'),
+          icon: <Briefcase size={24} />,
+          route: 'jobs',
+        });
+      } else {
+        actions.push({
+          label: t('submitReport', 'Submit Report'),
+          description: t('submitReportDesc', 'Submit your weekly progress report'),
+          icon: <Upload size={24} />,
+          route: 'reports',
+        });
+        actions.push({
+          label: t('mySchedule', 'My Schedule'),
+          description: t('myScheduleDesc', 'View upcoming interviews'),
+          icon: <Calendar size={24} />,
+          route: 'schedule',
+        });
+        actions.push({
+          label: t('browseJobs', 'Browse Jobs'),
+          description: t('browseJobsDesc', 'Find and apply for internships'),
+          icon: <Briefcase size={24} />,
+          route: 'jobs',
+        });
+      }
+      return actions;
+    }
+
+    if (isSemester7to9) {
+      actions.push({
+        label: t('sendFeedback', 'Send Feedback'),
+        description: t('sendFeedbackDesc', 'Rate your enterprise experience'),
+        icon: <Star size={24} />,
+        route: 'feedback',
+      });
+      return actions;
+    }
+
+    return [
+      {
+        label: t('browseJobs', 'Browse Jobs'),
+        description: t('browseJobsDesc', 'Find and apply for internships'),
+        icon: <Briefcase size={24} />,
+        route: 'jobs',
+      },
+    ];
+  })();
+
   if (loading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}>
@@ -777,16 +931,18 @@ export const StudentDashboardTab: React.FC = () => {
               <div style={{ display: 'grid', gridTemplateColumns: '7fr 3fr', gap: 24 }}>
                 {/* Left Column */}
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <UrgencyCardsRow stats={stats} onNavigate={handleNavigate} />
-                  <ReportPipelineRow stats={stats} onNavigate={handleNavigate} />
-                  <QuickActionsRow onNavigate={handleNavigate} />
-                  <EvaluationRow onNavigate={handleNavigate} />
+                  {isSemester1to4 && <WelcomeCard onNavigate={handleNavigate} />}
+                  {isSemester5 && <UrgencyCardsRow stats={stats} onNavigate={handleNavigate} />}
+                  {isSemester6 && !isSemester6WithoutPlacement && <ReportPipelineRow stats={stats} onNavigate={handleNavigate} />}
+                  {isSemester7to9 && <EvaluationRow onNavigate={handleNavigate} />}
+                  <QuickActionsRow onNavigate={handleNavigate} actions={quickActions} />
+                  {showRecentActivity && <RecentActivityCard onNavigate={handleNavigate} />}
                 </div>
 
                 {/* Right Column */}
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  <UpcomingCard onNavigate={handleNavigate} />
-                  <RecentActivityCard onNavigate={handleNavigate} />
+                  {showUpcoming && <UpcomingCard onNavigate={handleNavigate} />}
+                  {isSemester6WithoutPlacement && <NoPlacementAlert enterpriseName={stats.enterpriseName} onNavigate={handleNavigate} />}
                 </div>
               </div>
             </motion.div>
