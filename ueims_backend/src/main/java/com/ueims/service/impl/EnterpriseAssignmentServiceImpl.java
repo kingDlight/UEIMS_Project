@@ -4,7 +4,12 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.ueims.dto.response.EnterpriseAssignmentDTO;
+import com.ueims.exception.AppException;
+import com.ueims.exception.ErrorCode;
+import com.ueims.mapper.EnterpriseAssignmentMapper;
 import com.ueims.model.entity.EnterpriseAssignment;
 import com.ueims.repository.EnterpriseAssignmentRepository;
 import com.ueims.service.EnterpriseAssignmentService;
@@ -18,6 +23,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class EnterpriseAssignmentServiceImpl implements EnterpriseAssignmentService {
     EnterpriseAssignmentRepository repository;
+    EnterpriseAssignmentMapper mapper;
 
     @Override
     public List<EnterpriseAssignment> findAll() {
@@ -30,6 +36,11 @@ public class EnterpriseAssignmentServiceImpl implements EnterpriseAssignmentServ
     }
 
     @Override
+    public List<EnterpriseAssignment> findByEnterpriseId(UUID enterpriseId) {
+        return repository.findByEnterprise_EnterpriseId(enterpriseId);
+    }
+
+    @Override
     public EnterpriseAssignment findMyAssignment(UUID studentId) {
         return repository.findByStudent_UserId(studentId).orElse(null);
     }
@@ -37,6 +48,16 @@ public class EnterpriseAssignmentServiceImpl implements EnterpriseAssignmentServ
     @Override
     public EnterpriseAssignment save(EnterpriseAssignment entity) {
         return repository.save(entity);
+    }
+
+    @Override
+    @Transactional
+    public EnterpriseAssignment update(UUID id, EnterpriseAssignmentDTO dto) {
+        EnterpriseAssignment existing = repository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.ASSIGNMENT_NOT_FOUND));
+
+        mapper.updateEntity(dto, existing);
+        return repository.save(existing);
     }
 
     @Override

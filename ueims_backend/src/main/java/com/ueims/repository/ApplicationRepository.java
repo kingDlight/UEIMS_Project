@@ -21,4 +21,8 @@ public interface ApplicationRepository extends JpaRepository<Application, UUID> 
     boolean existsByJobPost_Enterprise_EnterpriseIdAndStudent_UserId(UUID enterpriseId, UUID studentId);
 
     List<Application> findByJobPost_Enterprise_EnterpriseId(UUID enterpriseId);
+
+    List<Application> findByJobPost_Enterprise_EnterpriseIdAndDeletedAtIsNull(UUID enterpriseId);
+
+    long countByStudent_UserIdAndStatusNotAndDeletedAtIsNull(UUID studentId, ApplicationStatus status);
 }

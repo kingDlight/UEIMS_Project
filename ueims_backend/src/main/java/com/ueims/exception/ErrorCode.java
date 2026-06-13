@@ -103,7 +103,7 @@ public enum ErrorCode {
     STUDENT_ID_REQUIRED(1065, "Student ID is mandatory", HttpStatus.BAD_REQUEST),
     TM_ID_REQUIRED(1066, "Training Manager ID is mandatory", HttpStatus.BAD_REQUEST),
     SEMESTER_ID_REQUIRED(1067, "Semester ID is mandatory", HttpStatus.BAD_REQUEST),
-    FEEDBACK_TEXT_REQUIRED(1062, "Feedback text is required when rejecting a report", HttpStatus.BAD_REQUEST),
+    FEEDBACK_TEXT_REQUIRED(1071, "Feedback text is required when rejecting a report", HttpStatus.BAD_REQUEST),
 
     // Account related
     USER_BANNED(2001, "Tài khoản của bạn đã bị khóa do nhập sai mật khẩu quá 5 lần", HttpStatus.FORBIDDEN),
