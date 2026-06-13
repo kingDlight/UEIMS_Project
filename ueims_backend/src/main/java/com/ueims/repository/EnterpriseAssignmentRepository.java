@@ -14,6 +14,8 @@ import com.ueims.model.entity.EnterpriseAssignment;
 @Repository
 public interface EnterpriseAssignmentRepository extends JpaRepository<EnterpriseAssignment, UUID> {
 
+    List<EnterpriseAssignment> findByEnterprise_EnterpriseId(UUID enterpriseId);
+
     @Query("SELECT ea FROM EnterpriseAssignment ea WHERE ea.semester.semesterId = :semesterId AND NOT EXISTS "
             + "(SELECT wr FROM WeeklyReport wr WHERE wr.assignment.assignmentId = ea.assignmentId "
             + "AND wr.weekNumber = :weekNumber AND wr.status != 'NOT_SUBMITTED')")

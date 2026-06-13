@@ -13,4 +13,6 @@ public interface WeeklyReportRepository extends JpaRepository<WeeklyReport, UUID
             UUID semesterId, Integer weekNumber, String status);
 
     java.util.List<WeeklyReport> findByAssignment_Student_UserId(UUID studentId);
+
+    java.util.List<WeeklyReport> findByAssignment_AssignmentId(UUID assignmentId);
 }

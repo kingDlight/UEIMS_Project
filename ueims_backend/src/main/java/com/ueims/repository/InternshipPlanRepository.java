@@ -10,4 +10,5 @@ import com.ueims.model.entity.InternshipPlan;
 @Repository
 public interface InternshipPlanRepository extends JpaRepository<InternshipPlan, UUID> {
     InternshipPlan findByAssignment_Student_UserId(UUID studentId);
+    java.util.List<InternshipPlan> findByAssignment_AssignmentId(UUID assignmentId);
 }
