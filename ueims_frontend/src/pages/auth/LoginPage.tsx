@@ -19,7 +19,7 @@ import {
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const loginWithTokens = useAuthStore((state) => state.loginWithTokens);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const [loading, setLoading] = useState(false);
@@ -52,13 +52,13 @@ export const LoginPage: React.FC = () => {
 
       if (result.mustChangePassword) {
         loginWithTokens(result.token, result.refreshToken);
-        message.warning('Bạn cần đổi mật khẩu trước khi tiếp tục!');
+        message.warning(t('auth.mustChangePassword', 'You must change your password before continuing!'));
         navigate('/change-password');
         return;
       }
 
       loginWithTokens(result.token, result.refreshToken);
-      message.success('Đăng nhập thành công!');
+      message.success(t('auth.loginSuccess', 'Login successful!'));
       const payload = extractUserFromToken(result.token);
       const redirectPath = getRedirectPath(payload?.roles || []);
       navigate(redirectPath);
@@ -67,15 +67,15 @@ export const LoginPage: React.FC = () => {
       const errorMsg = error.response?.data?.message;
 
       if (code === 2001) {
-        message.error('Tài khoản bị khóa do nhập sai mật khẩu 5 lần. Vui lòng thử lại sau 30 phút.');
+        message.error(t('auth.accountLocked', 'Account locked due to 5 failed password attempts. Please try again after 30 minutes.'));
       } else if (code === 1006) {
-        form.setFields([{ name: 'password', errors: ['Xác thực thất bại. Vui lòng kiểm tra lại thông tin đăng nhập.'] }]);
+        form.setFields([{ name: 'password', errors: [t('auth.authFailed', 'Authentication failed. Please check your login information.')] }]);
       } else if (code === 1005) {
-        form.setFields([{ name: 'email', errors: ['Tài khoản không tồn tại trong hệ thống.'] }]);
+        form.setFields([{ name: 'email', errors: [t('auth.accountNotFound', 'Account does not exist in the system.')] }]);
       } else if (errorMsg) {
         message.error(errorMsg);
       } else {
-        message.error('Đăng nhập thất bại. Vui lòng thử lại!');
+        message.error(t('auth.loginFailed', 'Login failed. Please try again!'));
       }
     } finally {
       setLoading(false);
@@ -90,13 +90,13 @@ export const LoginPage: React.FC = () => {
 
       if (result.mustChangePassword) {
         loginWithTokens(result.token, result.refreshToken);
-        message.warning('Bạn cần đổi mật khẩu trước khi tiếp tục!');
+        message.warning(t('auth.mustChangePassword', 'You must change your password before continuing!'));
         navigate('/change-password');
         return;
       }
 
       loginWithTokens(result.token, result.refreshToken);
-      message.success('Đăng nhập với Google thành công!');
+      message.success(t('auth.googleLoginSuccess', 'Login with Google successful!'));
       const payload = extractUserFromToken(result.token);
       const redirectPath = getRedirectPath(payload?.roles || []);
       navigate(redirectPath);
@@ -105,7 +105,7 @@ export const LoginPage: React.FC = () => {
       if (errorMsg) {
         message.error(errorMsg);
       } else {
-        message.error('Đăng nhập với Google thất bại. Vui lòng thử lại!');
+        message.error(t('auth.googleLoginFail', 'Login with Google failed. Please try again!'));
       }
     } finally {
       setLoading(false);
@@ -185,7 +185,7 @@ export const LoginPage: React.FC = () => {
         </div>
 
         <div style={{ color: AUTH_PRIMARY, fontSize: 15, fontWeight: 600, marginBottom: 4 }}>
-          Welcome to
+          {t('auth.welcomeTo', 'Welcome to')}
         </div>
 
         <div style={{ fontSize: 52, fontWeight: 800, color: '#1A1A2E', marginBottom: 32, letterSpacing: '-2px' }}>
@@ -195,18 +195,18 @@ export const LoginPage: React.FC = () => {
         <Form form={form} onFinish={onFinish}>
           <div style={{ width: '100%', maxWidth: 320, marginBottom: 20 }}>
             <label htmlFor="email" style={{ display: 'block', color: AUTH_PRIMARY, fontSize: 14, fontWeight: 600, marginBottom: 6 }}>
-              Email
+              {t('auth.emailLabel', 'Email')}
             </label>
             <Form.Item
               name="email"
               rules={[
-                { required: true, message: 'Vui lòng nhập email!' },
-                { type: 'email', message: 'Email không hợp lệ!' },
+                { required: true, message: t('auth.emailRequired', 'Please enter your email!') },
+                { type: 'email', message: t('auth.emailInvalid', 'Invalid email address!') },
               ]}
               style={{ margin: 0 }}
             >
               <Input
-                placeholder="email@example.com"
+                placeholder={t('auth.emailPlaceholder', 'email@example.com')}
                 className="auth-input"
               />
             </Form.Item>
@@ -214,15 +214,15 @@ export const LoginPage: React.FC = () => {
 
           <div style={{ width: '100%', maxWidth: 320, marginBottom: 20 }}>
             <label htmlFor="password" style={{ display: 'block', color: AUTH_PRIMARY, fontSize: 14, fontWeight: 600, marginBottom: 6 }}>
-              Password
+              {t('auth.passwordLabel', 'Password')}
             </label>
             <Form.Item
               name="password"
-              rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
+              rules={[{ required: true, message: t('auth.passwordRequired', 'Please enter your password!') }]}
               style={{ margin: 0 }}
             >
               <Input.Password
-                placeholder="••••••••"
+                placeholder={t('auth.passwordPlaceholder', '••••••••')}
                 className="auth-input-password"
               />
             </Form.Item>
@@ -254,21 +254,21 @@ export const LoginPage: React.FC = () => {
                 e.currentTarget.style.boxShadow = `0 8px 18px ${AUTH_PRIMARY}40`;
               }}
             >
-              LOGIN
+              {t('auth.loginButton', 'LOGIN')}
             </Button>
           </Form.Item>
         </Form>
 
         <div style={{ width: '100%', maxWidth: 320 }}>
           <Divider plain style={{ borderColor: '#e0e0e0', color: AUTH_TEXT_GRAY, fontSize: 13, margin: '20px 0' }}>
-            HOẶC
+            {t('auth.or', 'OR')}
           </Divider>
 
           <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: 20 }}>
             <GoogleLogin
               onSuccess={handleGoogleSuccess}
               onError={() => {
-                message.error('Đăng nhập với Google thất bại!');
+                message.error(t('auth.googleLoginFail', 'Login with Google failed. Please try again!'));
               }}
               useOneTap
               shape="pill"
@@ -295,14 +295,14 @@ export const LoginPage: React.FC = () => {
               cursor: 'pointer',
             }}
           >
-            Quên mật khẩu?
+            {t('auth.forgotPassword', 'Forgot Password?')}
           </button>
         </div>
 
         {/* Divider + Register */}
         <div style={{ borderTop: '1px solid #e0e0e0', paddingTop: 16 }}>
           <div style={{ color: AUTH_TEXT_GRAY, fontSize: 13, marginBottom: 6 }}>
-            Bạn là nhà tuyển dụng?
+            {t('auth.employerPrompt', 'Are you an employer?')}
           </div>
           <button
             type="button"
@@ -320,7 +320,7 @@ export const LoginPage: React.FC = () => {
               cursor: 'pointer',
             }}
           >
-            Đăng ký tài khoản nhà tuyển dụng →
+            {t('auth.registerEmployer', 'Register an employer account →')}
           </button>
         </div>
       </div>
