@@ -3,22 +3,7 @@ import { Spin } from 'antd';
 import { TrophyOutlined } from '@ant-design/icons';
 import { NeuSurface } from '../components/shared/NeuSurface';
 import { api } from '@/services/api';
-
-const cc = {
-  primary: '#E67E22',
-  primaryMuted: '#fff0e6',
-  text: '#1e293b',
-  textMuted: '#64748b',
-  success: '#22c55e',
-  warning: '#f59e0b',
-  danger: '#ef4444',
-  info: '#3b82f6',
-  bgLight: '#f5f7fa',
-  borderSubtle: '#f1f5f9',
-  surface: '#ffffff',
-  radiusMd: 8,
-  radiusXl: 16,
-};
+import { cc } from '../constants';
 
 const EmptyState: React.FC<{ icon: React.ReactNode; title: string; description: string }> = ({ icon, title, description }) => (
   <NeuSurface style={{ padding: 56, textAlign: 'center' }}>

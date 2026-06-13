@@ -222,37 +222,6 @@ export const ReportsTab: React.FC = () => {
         </NeuSurface>
       )}
 
-      {/* Submit Form */}
-      {showForm && (
-        <NeuSurface style={{ padding: 24, marginBottom: 20 }}>
-          <h3 style={{ fontSize: 16, fontWeight: 700, color: cc.textPrimary, margin: '0 0 16px' }}>Submit Weekly Report</h3>
-          <div style={{ marginBottom: 16 }}>
-            <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>Week Number *</label>
-            <input type="number" value={formData.weekNumber} onChange={(e) => setFormData({ ...formData, weekNumber: e.target.value })} style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13, fontFamily: "'Inter', sans-serif" }} />
-          </div>
-          <div style={{ marginBottom: 16 }}>
-            <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>Tasks Completed *</label>
-            <textarea value={formData.tasksCompleted} onChange={(e) => setFormData({ ...formData, tasksCompleted: e.target.value })} rows={3} placeholder="What did you accomplish this week?" style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13, fontFamily: "'Inter', sans-serif", resize: 'vertical' }} />
-          </div>
-          <div style={{ marginBottom: 16 }}>
-            <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>Issues & Challenges</label>
-            <textarea value={formData.issuesChallenges} onChange={(e) => setFormData({ ...formData, issuesChallenges: e.target.value })} rows={2} placeholder="Any challenges you faced..." style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13, fontFamily: "'Inter', sans-serif", resize: 'vertical' }} />
-          </div>
-          <div style={{ marginBottom: 16 }}>
-            <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>Lessons Learned</label>
-            <textarea value={formData.lessonsLearned} onChange={(e) => setFormData({ ...formData, lessonsLearned: e.target.value })} rows={2} placeholder="What did you learn this week?" style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13, fontFamily: "'Inter', sans-serif", resize: 'vertical' }} />
-          </div>
-          <div style={{ marginBottom: 16 }}>
-            <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>Plan for Next Week</label>
-            <textarea value={formData.planNextWeek} onChange={(e) => setFormData({ ...formData, planNextWeek: e.target.value })} rows={2} placeholder="What are you planning for next week?" style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13, fontFamily: "'Inter', sans-serif", resize: 'vertical' }} />
-          </div>
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
-            <CTAButton variant="ghost" onClick={() => { setShowForm(false); setFormData({ weekNumber: '', tasksCompleted: '', issuesChallenges: '', lessonsLearned: '', planNextWeek: '' }); }}>Cancel</CTAButton>
-            <CTAButton variant="primary" icon={<SendOutlined />} onClick={handleSubmit} loading={submitting}>Submit</CTAButton>
-          </div>
-        </NeuSurface>
-      )}
-
       {/* Edit Form */}
       {editingReport && (
         <NeuSurface style={{ padding: 24, marginBottom: 20, border: `2px solid ${cc.warning}` }}>

@@ -6,25 +6,7 @@ import { NeuSurface } from '../components/shared/NeuSurface';
 import { StudentEnterpriseFeedbackService } from '@/services/StudentEnterpriseFeedbackService';
 import { EnterpriseAssignmentService } from '@/services/EnterpriseAssignmentService';
 import { api } from '@/services/api';
-
-const cc = {
-  primary: '#E67E22',
-  primaryMuted: '#fff0e6',
-  text: '#1e293b',
-  textMuted: '#64748b',
-  success: '#22c55e',
-  successMuted: '#dcfce7',
-  successText: '#166534',
-  warning: '#f59e0b',
-  warningMuted: '#fef3c7',
-  info: '#3b82f6',
-  infoMuted: '#dbeafe',
-  infoText: '#1e40af',
-  border: '#e2e8f0',
-  borderSubtle: '#f1f5f9',
-  surface: '#ffffff',
-  radiusMd: 8,
-};
+import { cc } from '../constants';
 
 const CTAButton: React.FC<{
   children: React.ReactNode;
