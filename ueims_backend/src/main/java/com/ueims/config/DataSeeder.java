@@ -11,7 +11,9 @@ import com.ueims.model.entity.Role;
 import com.ueims.model.entity.User;
 import com.ueims.model.entity.UserRole;
 import com.ueims.model.entity.UserRoleId;
+import com.ueims.repository.EnterpriseAssignmentRepository;
 import com.ueims.repository.EnterpriseRepository;
+import com.ueims.repository.JobPostRepository;
 import com.ueims.repository.RoleRepository;
 import com.ueims.repository.UserRepository;
 import com.ueims.repository.UserRoleRepository;
@@ -28,7 +30,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DataSeeder implements CommandLineRunner {
 
+    EnterpriseAssignmentRepository enterpriseAssignmentRepository;
     EnterpriseRepository enterpriseRepository;
+    JobPostRepository jobPostRepository;
     UserRepository userRepository;
     RoleRepository roleRepository;
     UserRoleRepository userRoleRepository;
@@ -44,6 +48,9 @@ public class DataSeeder implements CommandLineRunner {
         enterpriseRepository.findAll().forEach(e -> {
             if (Arrays.asList("FPT Software", "VNG Corporation", "NashTech Vietnam", "TMA Solutions")
                     .contains(e.getCompanyName())) {
+                // Delete related records first to avoid FK constraint
+                jobPostRepository.deleteByEnterprise_EnterpriseId(e.getEnterpriseId());
+                enterpriseAssignmentRepository.deleteByEnterprise_EnterpriseId(e.getEnterpriseId());
                 enterpriseRepository.delete(e);
             }
         });
