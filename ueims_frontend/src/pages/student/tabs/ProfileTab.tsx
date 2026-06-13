@@ -9,6 +9,7 @@ import {
 import { NeuSurface } from '../components/shared/NeuSurface';
 import { SmallPill } from '../components/shared/SmallPill';
 import { StudentProfileService } from '@/services/StudentProfileService';
+import { cc } from '../constants';
 
 const BACKEND_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
@@ -28,16 +29,6 @@ const CTAButton: React.FC<{
   disabled?: boolean;
   loading?: boolean;
 }> = ({ children, onClick, variant = 'primary', size = 'md', fullWidth = false, icon, disabled = false, loading = false }) => {
-  const cc = {
-    primary: '#E67E22',
-    primaryDark: '#C45200',
-    textMuted: '#64748b',
-    bgLight: '#f5f7fa',
-    border: '#e2e8f0',
-    success: '#22c55e',
-    danger: '#ef4444',
-    warning: '#f59e0b',
-  };
   const styles: Record<string, { bg: string; text: string; border: string; shadow: string }> = {
     primary: { bg: 'linear-gradient(135deg, #E67E22, #E67E22, #F39C12)', text: '#fff', border: 'none', shadow: '0 12px 28px rgba(230,126,34,.22)' },
     ghost: { bg: '#fff', text: cc.primary, border: cc.border, shadow: '0 8px 18px rgba(15,23,42,.05)' },
@@ -68,26 +59,6 @@ const CTAButton: React.FC<{
       {children}
     </button>
   );
-};
-
-const cc = {
-  primary: '#E67E22',
-  primaryDark: '#C45200',
-  primaryMuted: '#fff0e6',
-  text: '#1e293b',
-  textMuted: '#64748b',
-  success: '#22c55e',
-  successMuted: '#dcfce7',
-  successText: '#166534',
-  danger: '#ef4444',
-  dangerMuted: '#fff1f2',
-  bgLight: '#f5f7fa',
-  border: '#e2e8f0',
-  borderSubtle: '#f1f5f9',
-  surface: '#ffffff',
-  radiusMd: 8,
-  radiusLg: 12,
-  radiusFull: 9999,
 };
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -153,7 +124,7 @@ const StatusPill: React.FC<{ status?: string }> = ({ status }) => {
   };
   const s = statusMap[status || ''] || { color: cc.textMuted, bg: cc.bgLight, label: status || 'Unknown' };
   return (
-    <SmallPill color={s.color} style={{ background: s.bg }}>
+    <SmallPill color={s.color} bg={s.bg}>
       <span style={{ marginRight: 4 }}>&#10003;</span> {s.label}
     </SmallPill>
   );

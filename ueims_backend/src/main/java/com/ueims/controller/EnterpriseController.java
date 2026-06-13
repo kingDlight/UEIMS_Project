@@ -9,7 +9,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.ueims.dto.response.ApiResponse;
-import com.ueims.model.entity.Enterprise;
+import com.ueims.dto.response.EnterpriseDTO;
+import com.ueims.mapper.EnterpriseMapper;
 import com.ueims.service.EnterpriseService;
 
 import lombok.AccessLevel;
@@ -22,42 +23,48 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class EnterpriseController {
     EnterpriseService service;
+    EnterpriseMapper mapper;
 
     @GetMapping
     @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')") // UC-18
-    public ApiResponse<List<Enterprise>> getAll() {
-        return ApiResponse.<List<Enterprise>>builder().result(service.findAll()).build();
+    public ApiResponse<List<EnterpriseDTO>> getAll() {
+        return ApiResponse.<List<EnterpriseDTO>>builder()
+                .result(service.findAll().stream().map(mapper::toDto).toList())
+                .build();
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN') or hasRole('ENTERPRISE')") // UC-35
-    public ApiResponse<Enterprise> getById(@PathVariable UUID id) {
-        // Logic kiểm tra ownership được thực hiện trong service
-        return ApiResponse.<Enterprise>builder().result(service.findById(id)).build();
+    public ApiResponse<EnterpriseDTO> getById(@PathVariable UUID id) {
+        return ApiResponse.<EnterpriseDTO>builder()
+                .result(mapper.toDto(service.findById(id)))
+                .build();
     }
 
     @PostMapping
     @PreAuthorize("hasRole('SYSTEM_ADMIN')")
-    public ApiResponse<Enterprise> create(@Valid @RequestBody com.ueims.dto.request.EnterpriseRequest request) {
-        return ApiResponse.<Enterprise>builder().result(service.save(request)).build();
+    public ApiResponse<EnterpriseDTO> create(@Valid @RequestBody com.ueims.dto.request.EnterpriseRequest request) {
+        return ApiResponse.<EnterpriseDTO>builder()
+                .result(mapper.toDto(service.save(request)))
+                .build();
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ENTERPRISE')") // UC-36: Chỉ Enterprise được sửa profile của chính họ
-    public ApiResponse<Enterprise> update(
+    public ApiResponse<EnterpriseDTO> update(
             @PathVariable UUID id, @Valid @RequestBody com.ueims.dto.request.EnterpriseRequest request) {
-        return ApiResponse.<Enterprise>builder()
-                .result(service.update(id, request))
+        return ApiResponse.<EnterpriseDTO>builder()
+                .result(mapper.toDto(service.update(id, request)))
                 .message("Enterprise profile updated successfully")
                 .build();
     }
 
     @PutMapping("/{id}/status")
     @PreAuthorize("hasRole('TRAINING_MANAGER')") // UC-19: Chỉ TM có quyền duyệt/từ chối
-    public ApiResponse<Enterprise> approveRejectEnterprise(
+    public ApiResponse<EnterpriseDTO> approveRejectEnterprise(
             @PathVariable UUID id, @RequestParam String status, @RequestParam(required = false) String reason) {
-        return ApiResponse.<Enterprise>builder()
-                .result(service.approveReject(id, status, reason))
+        return ApiResponse.<EnterpriseDTO>builder()
+                .result(mapper.toDto(service.approveReject(id, status, reason)))
                 .message("Enterprise status updated to " + status)
                 .build();
     }

@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Table, Select, Modal, message, Spin } from 'antd';
+import { EnterpriseAssignmentService } from '@/services/EnterpriseAssignmentService';
 import type { ColumnsType } from 'antd/es/table';
 import {
   Sparkles,
@@ -67,82 +68,6 @@ interface PlacementRecord {
   enterpriseInitials: string | null;
   enterpriseColor: string | null;
 }
-
-// ============================================================
-// MOCK DATA
-// ============================================================
-const MOCK_PLACEMENTS: PlacementRecord[] = [
-  {
-    key: 'p-001', id: 'p-001',
-    studentName: 'Nguyen Van A', studentCode: 'SE161234', avatar: 'NVA',
-    major: 'SE', gpa: 3.8, targetRole: 'Frontend Developer',
-    source: 'SYSTEM_MATCHED', status: 'PLACED',
-    enterprise: 'FPT Software', enterpriseInitials: 'FP', enterpriseColor: '#E67E22',
-  },
-  {
-    key: 'p-002', id: 'p-002',
-    studentName: 'Tran Thi B', studentCode: 'IA162345', avatar: 'TTB',
-    major: 'IA', gpa: 3.4, targetRole: 'Security Analyst',
-    source: 'SYSTEM_MATCHED', status: 'INTERVIEWING',
-    enterprise: 'VinBigData', enterpriseInitials: 'VB', enterpriseColor: '#3B82F6',
-  },
-  {
-    key: 'p-003', id: 'p-003',
-    studentName: 'Le Van C', studentCode: 'SE163456', avatar: 'LVC',
-    major: 'SE', gpa: 3.1, targetRole: 'Backend Developer',
-    source: 'SYSTEM_MATCHED', status: 'UNPLACED',
-    enterprise: null, enterpriseInitials: null, enterpriseColor: null,
-  },
-  {
-    key: 'p-004', id: 'p-004',
-    studentName: 'Bui Van G', studentCode: 'IA163222', avatar: 'BVG',
-    major: 'IA', gpa: 3.2, targetRole: 'DevOps Engineer',
-    source: 'SYSTEM_MATCHED', status: 'PLACED',
-    enterprise: 'NashTech VN', enterpriseInitials: 'NT', enterpriseColor: '#10B981',
-  },
-  {
-    key: 'p-005', id: 'p-005',
-    studentName: 'Pham Thi D', studentCode: 'GD162111', avatar: 'PTD',
-    major: 'GD', gpa: 3.6, targetRole: 'UI/UX Designer',
-    source: 'SYSTEM_MATCHED', status: 'INTERVIEWING',
-    enterprise: 'VNG Corporation', enterpriseInitials: 'VN', enterpriseColor: '#8B5CF6',
-  },
-  {
-    key: 'p-006', id: 'p-006',
-    studentName: 'Hoang Van E', studentCode: 'AI162789', avatar: 'HVE',
-    major: 'AI', gpa: 3.9, targetRole: 'ML Engineer',
-    source: 'SELF_SOURCED', status: 'PENDING_APPROVAL',
-    enterprise: 'Viettel AI', enterpriseInitials: 'VA', enterpriseColor: '#EF4444',
-  },
-  {
-    key: 'p-007', id: 'p-007',
-    studentName: 'Dao Thi F', studentCode: 'SE164001', avatar: 'DTF',
-    major: 'SE', gpa: 2.8, targetRole: 'QA Engineer',
-    source: 'SELF_SOURCED', status: 'PENDING_APPROVAL',
-    enterprise: 'TMA Solutions', enterpriseInitials: 'TM', enterpriseColor: '#F59E0B',
-  },
-  {
-    key: 'p-008', id: 'p-008',
-    studentName: 'Nguyen Thi I', studentCode: 'GD164444', avatar: 'NTI',
-    major: 'GD', gpa: 3.3, targetRole: 'Visual Designer',
-    source: 'SELF_SOURCED', status: 'PENDING_APPROVAL',
-    enterprise: 'Haravan Tech', enterpriseInitials: 'HV', enterpriseColor: '#EC4899',
-  },
-  {
-    key: 'p-009', id: 'p-009',
-    studentName: 'Vo Thi H', studentCode: 'GD163333', avatar: 'VTH',
-    major: 'GD', gpa: 3.5, targetRole: 'Motion Designer',
-    source: 'SELF_SOURCED', status: 'PLACED',
-    enterprise: 'VNG Corporation', enterpriseInitials: 'VN', enterpriseColor: '#8B5CF6',
-  },
-  {
-    key: 'p-010', id: 'p-010',
-    studentName: 'Phan Van J', studentCode: 'SE165555', avatar: 'PVJ',
-    major: 'SE', gpa: 3, targetRole: 'Fullstack Dev',
-    source: 'SELF_SOURCED', status: 'UNPLACED',
-    enterprise: null, enterpriseInitials: null, enterpriseColor: null,
-  },
-];
 
 // ============================================================
 // COLOR UTILITIES
@@ -277,7 +202,39 @@ export const OJTTab: React.FC = () => {
     return () => window.removeEventListener('resize', check);
   }, []);
 
-  const [placementData, setPlacementData] = useState<PlacementRecord[]>(MOCK_PLACEMENTS);
+  const [placementData, setPlacementData] = useState<PlacementRecord[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchPlacements = async () => {
+      try {
+        setLoading(true);
+        const { data } = await EnterpriseAssignmentService.getAll();
+        const mapped: PlacementRecord[] = data.result?.map((item: any) => ({
+          key: item.assignmentId,
+          id: item.assignmentId,
+          studentName: item.student?.fullName || 'Unknown Student',
+          studentCode: item.student?.studentCode || 'Unknown',
+          avatar: item.student?.fullName?.substring(0, 2).toUpperCase() || 'ST',
+          major: item.student?.studentProfile?.major || 'N/A',
+          gpa: item.student?.studentProfile?.gpa || 0,
+          targetRole: 'Intern',
+          source: 'SYSTEM_MATCHED',
+          status: item.status === 'ACTIVE' ? 'PLACED' : 'UNPLACED',
+          enterprise: item.enterprise?.companyName || null,
+          enterpriseInitials: item.enterprise?.companyName?.substring(0, 2).toUpperCase() || null,
+          enterpriseColor: null,
+        })) || [];
+        setPlacementData(mapped);
+      } catch (err) {
+        console.error('Failed to load OJT placements', err);
+        setPlacementData([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    void fetchPlacements();
+  }, []);
   const pendingCount = placementData.filter((p) => p.status === 'PENDING_APPROVAL').length;
 
   const ENTERPRISES = [
@@ -297,9 +254,7 @@ export const OJTTab: React.FC = () => {
         const p = next[i];
         if (p.status === 'UNPLACED' && unplacedCount < 3) {
           unplacedCount++;
-          const array = new Uint32Array(1);
-          window.crypto.getRandomValues(array);
-          const ent = ENTERPRISES[array[0] % ENTERPRISES.length];
+          const ent = ENTERPRISES[Math.floor(Math.random() * ENTERPRISES.length)];
           next[i] = {
             ...p,
             status: 'INTERVIEWING',
@@ -800,6 +755,7 @@ export const OJTTab: React.FC = () => {
           columns={columns}
           dataSource={filteredData}
           rowKey="key"
+          loading={loading}
           pagination={{
             pageSize: 8,
             showSizeChanger: false,

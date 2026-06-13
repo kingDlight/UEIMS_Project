@@ -1,4 +1,3 @@
-export { DashboardTab } from './DashboardTab';
 export { CommandCenterDashboard } from './CommandCenterDashboard';
 export { EnterpriseTab } from './EnterpriseTab';
 export { StudentsTab } from './StudentsTab';

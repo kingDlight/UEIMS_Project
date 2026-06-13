@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { BackgroundEffects } from '../../home/components/BackgroundEffects';
-import { useScrollAnimation } from '../../../hooks/useScrollAnimation';
 import { useNavigate } from 'react-router-dom';
-
+import { motion, AnimatePresence } from 'framer-motion';
+import { DashboardService } from '@/services/DashboardService';
 import {
   AlertTriangle,
   Clock,
@@ -18,66 +17,62 @@ import {
   MinusCircle,
   Activity,
 } from 'lucide-react';
-import {
-  PieChart, Pie, Cell,
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, Legend
-} from 'recharts';
 
 // ============================================================
 // DESIGN TOKENS — UEIMS Command Center
 // ============================================================
 export const cc = {
   // Brand
-  brand: '#E67E22',
-  brandHover: '#D35400',
-  brandActive: '#E67E22',
-  brandMuted: 'rgba(230, 126, 34, 0.08)',
-  brandSubtle: 'rgba(230, 126, 34, 0.04)',
-  brandStrong: '#D35400',
+  brand: '#FF7A30',
+  brandHover: '#E86A20',
+  brandActive: '#CC5A18',
+  brandMuted: '#FFF3E8',
+  brandSubtle: '#FFF8F0',
+  brandStrong: '#9B4A10',
 
   // Semantic
   success: '#10B981',
-  successMuted: 'rgba(16, 185, 129, 0.08)',
-  successText: '#059669',
+  successMuted: '#D1FAE5',
+  successText: '#065F46',
   error: '#EF4444',
-  errorMuted: 'rgba(239, 68, 68, 0.08)',
-  errorText: '#DC2626',
+  errorMuted: '#FEE2E2',
+  errorText: '#991B1B',
   warning: '#F59E0B',
-  warningMuted: 'rgba(245, 158, 11, 0.08)',
-  warningText: '#D97706',
+  warningMuted: '#FEF3C7',
+  warningText: '#92400E',
   info: '#3B82F6',
-  infoMuted: 'rgba(59, 130, 246, 0.08)',
-  infoText: '#2563EB',
+  infoMuted: '#DBEAFE',
+  infoText: '#1E40AF',
 
   // Text
-  textPrimary: '#0F172A',
-  textSecondary: '#475569',
-  textMuted: '#64748B',
-  textDisabled: '#94A3B8',
+  textPrimary: '#1A1A2E',
+  textSecondary: '#6B7280',
+  textMuted: '#9CA3AF',
+  textDisabled: '#D1D5DB',
 
   // Surface
-  surface: 'rgba(255, 255, 255, 0.72)',
-  bg: '#F8FAFC',
-  neutralBg: '#F1F5F9',
-  border: '#E2E8F0',
-  borderSubtle: '#F1F5F9',
+  surface: '#FFFFFF',
+  bg: 'transparent',
+  neutralBg: '#F9FAFB',
+  border: '#E5E7EB',
+  borderSubtle: '#F3F4F6',
 
   // Radius
-  radiusSm: 8,
-  radiusMd: 12,
-  radiusLg: 16,
-  radiusXl: 24,
+  radiusSm: 6,
+  radiusMd: 8,
+  radiusLg: 12,
+  radiusXl: 16,
   radiusFull: 9999,
 
   // Shadows
-  shadowSm: '0 4px 16px rgba(15,23,42,0.04)',
-  shadowMd: '0 8px 24px rgba(15,23,42,0.08)',
-  shadowLg: '0 12px 32px rgba(15,23,42,0.12)',
-  shadowXl: '0 20px 50px rgba(15,23,42,0.15)',
-  shadowBrand: '0 8px 22px rgba(230, 126, 34, 0.22)',
-  shadowSuccess: '0 8px 22px rgba(16, 185, 129, 0.22)',
-  shadowError: '0 8px 22px rgba(239, 68, 68, 0.22)',
-  shadowWarning: '0 8px 22px rgba(245, 158, 11, 0.22)',
+  shadowSm: '0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)',
+  shadowMd: '0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.04)',
+  shadowLg: '0 10px 15px rgba(0,0,0,0.08), 0 4px 6px rgba(0,0,0,0.04)',
+  shadowXl: '0 20px 25px rgba(0,0,0,0.10), 0 8px 10px rgba(0,0,0,0.04)',
+  shadowBrand: '0 4px 12px rgba(255,122,48,0.25)',
+  shadowSuccess: '0 4px 12px rgba(16,185,129,0.25)',
+  shadowError: '0 4px 12px rgba(239,68,68,0.25)',
+  shadowWarning: '0 4px 12px rgba(245,158,11,0.25)',
   shadowInner: 'inset 0 2px 4px rgba(0,0,0,0.04)',
 };
 
@@ -136,26 +131,6 @@ const mockQuickActions = [
   { label: 'View Reports', icon: <FileBarChart size={24} />, description: 'View compliance, grades, and rubrics', route: 'reports' },
 ];
 
-const mockPassRateData = [
-  { name: 'Passed', value: 85, color: cc.success },
-  { name: 'Failed', value: 15, color: cc.error },
-];
-
-const mockMajorData = [
-  { name: 'Software Eng', value: 350, color: cc.brand },
-  { name: 'Info Assurance', value: 120, color: cc.info },
-  { name: 'Graphic Design', value: 80, color: cc.success },
-  { name: 'Biz Admin', value: 200, color: cc.warning },
-];
-
-const mockGradeData = [
-  { name: 'Excellent', count: 140 },
-  { name: 'Good', count: 210 },
-  { name: 'Average', count: 85 },
-  { name: 'Pass', count: 30 },
-  { name: 'Fail', count: 12 },
-];
-
 // ============================================================
 // COLOR UTILITY — hex-to-rgba for ghost style rendering
 // ============================================================
@@ -180,13 +155,16 @@ const CardWrapper: React.FC<{
 }> = ({ children, className = '', style, onClick, hoverable = false }) => {
   const [hovered, setHovered] = useState(false);
   return (
-    <div
+    <motion.div
       className={className}
       onClick={onClick}
       onMouseEnter={() => hoverable && setHovered(true)}
       onMouseLeave={() => hoverable && setHovered(false)}
-     
-     
+      animate={{
+        y: hovered && hoverable ? -2 : 0,
+        boxShadow: hovered && hoverable ? cc.shadowMd : cc.shadowSm,
+      }}
+      transition={{ duration: 0.15, ease: [0.32, 0.72, 0, 1] }}
       style={{
         background: cc.surface,
         borderRadius: cc.radiusLg,
@@ -198,7 +176,7 @@ const CardWrapper: React.FC<{
       }}
     >
       {children}
-    </div>
+    </motion.div>
   );
 };
 
@@ -301,11 +279,11 @@ const CTAButton: React.FC<{
   };
   const { padding, fontSize } = sizes[size];
   return (
-    <button
+    <motion.button
       onClick={onClick}
-     
-     
-     
+      whileHover={{ y: -1, boxShadow: shadow }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ duration: 0.15, ease: [0.32, 0.72, 0, 1] }}
       style={{
         display: 'inline-flex',
         alignItems: 'center',
@@ -323,18 +301,18 @@ const CTAButton: React.FC<{
         justifyContent: 'center',
         fontFamily: 'Inter, -apple-system, sans-serif',
       }}
-     className="hover-lift">
+    >
       {children}
       {icon === false ? null : (icon || <ArrowRight size={size === 'sm' ? 12 : 14} />)}
-    </button>
+    </motion.button>
   );
 };
 
 const TextLink: React.FC<{ children: React.ReactNode; onClick?: () => void; color?: string }> = ({ children, onClick, color }) => (
-  <button
+  <motion.button
     onClick={onClick}
-   
-   
+    whileHover={{ opacity: 0.8, x: 2 }}
+    transition={{ duration: 0.15 }}
     style={{
       display: 'inline-flex',
       alignItems: 'center',
@@ -349,10 +327,10 @@ const TextLink: React.FC<{ children: React.ReactNode; onClick?: () => void; colo
       fontFamily: 'Inter, -apple-system, sans-serif',
       borderRadius: cc.radiusMd,
     }}
-   className="hover-lift">
+  >
     {children}
     <ArrowRight size={13} />
-  </button>
+  </motion.button>
 );
 
 // ============================================================
@@ -360,7 +338,7 @@ const TextLink: React.FC<{ children: React.ReactNode; onClick?: () => void; colo
 // ============================================================
 const SemesterContextBar: React.FC = () => (
   <div className="cc-semester-bar" style={{
-    maxWidth: 1600,
+    maxWidth: 1200,
     margin: '0 auto',
     padding: '0 24px',
     marginBottom: 24,
@@ -368,12 +346,12 @@ const SemesterContextBar: React.FC = () => (
     alignItems: 'center',
     justifyContent: 'space-between',
   }}>
-    <div
-     
-     
-     
+    <motion.div
+      initial={{ opacity: 0, x: -12 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
       style={{ display: 'flex', alignItems: 'center', gap: 10 }}
-     className="scroll-animate">
+    >
       <span style={{
         fontSize: 13,
         fontWeight: 600,
@@ -402,14 +380,14 @@ const SemesterContextBar: React.FC = () => (
       <span style={{ fontSize: 12, color: cc.textSecondary }}>
         OJT Day 38 of 56
       </span>
-    </div>
+    </motion.div>
 
-    <div
-     
-     
-     
+    <motion.div
+      initial={{ opacity: 0, x: 12 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.4, delay: 0.1, ease: [0.32, 0.72, 0, 1] }}
       style={{ display: 'flex', alignItems: 'center', gap: 10 }}
-     className="scroll-animate">
+    >
       <span style={{
         fontSize: 11,
         color: cc.textMuted,
@@ -437,7 +415,7 @@ const SemesterContextBar: React.FC = () => (
         }} />
         {' 18 days remaining'}
       </span>
-    </div>
+    </motion.div>
   </div>
 );
 
@@ -450,6 +428,7 @@ const UrgencyCard: React.FC<{
   trend: string;
   trendDirection: 'up' | 'down' | 'neutral';
   trendColor?: string;
+  borderColor: string;
   icon: React.ReactNode;
   iconColor: string;
   iconBg: string;
@@ -457,16 +436,27 @@ const UrgencyCard: React.FC<{
   cta?: React.ReactNode;
   ctaVariant?: 'red' | 'amber' | 'ghost';
   delay?: number;
-}> = ({ title, value, trend, trendDirection, trendColor, icon, iconColor, iconBg, body, cta, ctaVariant = 'ghost', delay = 0 }) => (
-  <div
-   
-   
-   
-    style={{ position: 'relative', display: 'flex', flexDirection: 'column', height: '100%', transitionDelay: `${delay}ms` }}
-   className="scroll-animate">
+}> = ({ title, value, trend, trendDirection, trendColor, borderColor, icon, iconColor, iconBg, body, cta, ctaVariant = 'ghost', delay = 0 }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 16 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5, delay: delay / 1000, ease: [0.32, 0.72, 0, 1] }}
+    style={{ position: 'relative', display: 'flex', flexDirection: 'column' }}
+  >
+    {/* Urgency top border */}
+    <div style={{
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      height: 3,
+      background: borderColor,
+      borderRadius: `${cc.radiusLg}px ${cc.radiusLg}px 0 0`,
+      zIndex: 1,
+    }} />
     <CardWrapper
       hoverable
-      style={{ padding: 20, flex: 1, display: 'flex', flexDirection: 'column' }}
+      style={{ padding: 20, paddingTop: 23, flex: 1, display: 'flex', flexDirection: 'column' }}
     >
       {/* Header row */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
@@ -524,25 +514,26 @@ const UrgencyCard: React.FC<{
         </div>
       )}
     </CardWrapper>
-  </div>
+  </motion.div>
 );
 
-const UrgencyCardsRow: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => (
+const UrgencyCardsRow: React.FC<{ onNavigate: (route: string) => void; incidents: any[]; pendingEnterprises: any[] }> = ({ onNavigate, incidents, pendingEnterprises }) => (
   <div className="cc-grid-2" style={{ marginBottom: 16, alignItems: 'stretch' }}>
     {/* Active Incidents */}
     <UrgencyCard
       title="Active Incidents"
-      value={2}
+      value={incidents.length}
       trend="↑ +1 today"
       trendDirection="up"
       trendColor={cc.error}
+      borderColor={cc.error}
       icon={<AlertTriangle size={18} />}
       iconColor={cc.error}
       iconBg={cc.errorMuted}
       delay={0}
       body={
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {mockIncidents.map((inc) => (
+          {incidents.map((inc: any) => (
             <div key={inc.id} className="cc-incident-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <StatusDot color={inc.severity === 'high' ? cc.error : cc.warning} pulse={inc.severity === 'high'} />
@@ -564,17 +555,18 @@ const UrgencyCardsRow: React.FC<{ onNavigate: (route: string) => void }> = ({ on
     {/* Pending Approvals */}
     <UrgencyCard
       title="Pending Approvals"
-      value={4}
+      value={pendingEnterprises.length}
       trend="↑ +2 today"
       trendDirection="up"
       trendColor={cc.warning}
+      borderColor={cc.warning}
       icon={<Clock size={18} />}
       iconColor={cc.warning}
       iconBg={cc.warningMuted}
       delay={100}
       body={
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          {mockPendingEnterprises.slice(0, 2).map((ent) => (
+          {pendingEnterprises.slice(0, 2).map((ent: any) => (
             <div key={ent.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <StatusDot color={cc.warning} />
@@ -584,7 +576,7 @@ const UrgencyCardsRow: React.FC<{ onNavigate: (route: string) => void }> = ({ on
             </div>
           ))}
           <div style={{ fontSize: 11, color: cc.textMuted, marginTop: 4 }}>
-            +{mockPendingEnterprises.length - 2} more enterprises waiting
+            +{Math.max(0, pendingEnterprises.length - 2)} more enterprises waiting
           </div>
         </div>
       }
@@ -632,16 +624,16 @@ const ReportStatusChip: React.FC<{
   </div>
 );
 
-const WeeklyReportsCard: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => {
-  const { week, submitted, pending, late, notStarted, students } = mockWeeklyReports;
+const WeeklyReportsCard: React.FC<{ onNavigate: (route: string) => void; weeklyReports: any }> = ({ onNavigate, weeklyReports }) => {
+  const { week, submitted, pending, late, notStarted, students } = weeklyReports || mockWeeklyReports;
 
   return (
-    <div
-     
-     
-     
-      style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
-     className="scroll-animate">
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.2, ease: [0.32, 0.72, 0, 1] }}
+      style={{ display: 'flex', flexDirection: 'column' }}
+    >
       <CardWrapper style={{ padding: 20, flex: 1, display: 'flex', flexDirection: 'column' }}>
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
@@ -718,7 +710,7 @@ const WeeklyReportsCard: React.FC<{ onNavigate: (route: string) => void }> = ({ 
             <div style={{ fontSize: 11, fontWeight: 600, color: cc.error, marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
               Students needing attention
             </div>
-            {students.map((s, i) => (
+            {students.map((s: any, i: number) => (
               <div key={s.name} style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -747,12 +739,12 @@ const WeeklyReportsCard: React.FC<{ onNavigate: (route: string) => void }> = ({ 
           <CTAButton variant="primary" size="sm" icon={null} onClick={() => onNavigate('incidents')}>Send Warnings ({late})</CTAButton>
         </div>
       </CardWrapper>
-    </div>
+    </motion.div>
   );
 };
 
-const PlacementPipelineCard: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => {
-  const { eligible, applied, interviewed, placed } = mockPipeline;
+const PlacementPipelineCard: React.FC<{ onNavigate: (route: string) => void; pipeline: any }> = ({ onNavigate, pipeline }) => {
+  const { eligible, applied, interviewed, placed } = pipeline || mockPipeline;
   const total = eligible || 1;
   const stages = [
     { label: 'ELIGIBLE', value: eligible, color: cc.info },
@@ -762,12 +754,12 @@ const PlacementPipelineCard: React.FC<{ onNavigate: (route: string) => void }> =
   ];
 
   return (
-    <div
-     
-     
-     
-      style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
-     className="scroll-animate">
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: 0.25, ease: [0.32, 0.72, 0, 1] }}
+      style={{ display: 'flex', flexDirection: 'column' }}
+    >
       <CardWrapper style={{ padding: 20, flex: 1, display: 'flex', flexDirection: 'column' }}>
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
@@ -885,14 +877,14 @@ const PlacementPipelineCard: React.FC<{ onNavigate: (route: string) => void }> =
           <TextLink color={cc.brand} onClick={() => onNavigate('enterprises')}>View Enterprises</TextLink>
         </div>
       </CardWrapper>
-    </div>
+    </motion.div>
   );
 };
 
-const CompliancePipelineRow: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => (
+const CompliancePipelineRow: React.FC<{ onNavigate: (route: string) => void; summary: any }> = ({ onNavigate, summary }) => (
   <div className="cc-grid-pipeline" style={{ marginBottom: 16, alignItems: 'stretch' }}>
-    <WeeklyReportsCard onNavigate={onNavigate} />
-    <PlacementPipelineCard onNavigate={onNavigate} />
+    <WeeklyReportsCard onNavigate={onNavigate} weeklyReports={summary?.weeklyReports} />
+    <PlacementPipelineCard onNavigate={onNavigate} pipeline={summary?.pipeline} />
   </div>
 );
 
@@ -900,12 +892,12 @@ const CompliancePipelineRow: React.FC<{ onNavigate: (route: string) => void }> =
 // SECTION E: QUICK ACTIONS
 // ============================================================
 const QuickActionsRow: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => (
-  <div
-   
-   
-   
+  <motion.div
+    initial={{ opacity: 0, y: 16 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5, delay: 0.3, ease: [0.32, 0.72, 0, 1] }}
     style={{ marginBottom: 16 }}
-   className="scroll-animate">
+  >
     <div style={{
       fontSize: 12,
       fontWeight: 600,
@@ -920,11 +912,11 @@ const QuickActionsRow: React.FC<{ onNavigate: (route: string) => void }> = ({ on
     <div className="cc-grid-4" style={{ alignItems: 'stretch' }}>
       {mockQuickActions.map((action, i) => (
         <div key={action.label} style={{ display: 'flex', flexDirection: 'column' }}>
-        <div
+        <motion.div
           onClick={() => action.route && onNavigate(action.route)}
-         
-         
-         
+          whileHover={{ y: -3, boxShadow: cc.shadowMd }}
+          whileTap={{ scale: 0.98 }}
+          transition={{ duration: 0.15, ease: [0.32, 0.72, 0, 1] }}
           style={{
             background: cc.surface,
             borderRadius: cc.radiusLg,
@@ -939,7 +931,7 @@ const QuickActionsRow: React.FC<{ onNavigate: (route: string) => void }> = ({ on
             position: 'relative',
             overflow: 'hidden',
           }}
-         className="hover-lift">
+        >
           {/* Subtle brand tint on hover */}
           <div style={{
             position: 'absolute',
@@ -990,23 +982,23 @@ const QuickActionsRow: React.FC<{ onNavigate: (route: string) => void }> = ({ on
           }}>
             <ArrowRight size={14} />
           </div>
-        </div>
+        </motion.div>
         </div>
       ))}
     </div>
-  </div>
+  </motion.div>
 );
 
 // ============================================================
 // SECTION F: TIMELINE
 // ============================================================
 const TimelineCard: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => (
-  <div
-   
-   
-   
+  <motion.div
+    initial={{ opacity: 0, y: 16 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5, delay: 0.35, ease: [0.32, 0.72, 0, 1] }}
     style={{ display: 'flex', flexDirection: 'column' }}
-   className="scroll-animate">
+  >
     <CardWrapper style={{ padding: 20, flex: 1, display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
@@ -1102,9 +1094,9 @@ const TimelineCard: React.FC<{ onNavigate: (route: string) => void }> = ({ onNav
                     <NodeIcon size={12} color={nodeColor} />
                   </div>
                   {isCurrent && (
-                    <div
-                     
-                     
+                    <motion.div
+                      animate={{ scale: [1, 1.4, 1], opacity: [0.6, 0, 0.6] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
                       style={{
                         position: 'absolute',
                         inset: -4,
@@ -1148,7 +1140,7 @@ const TimelineCard: React.FC<{ onNavigate: (route: string) => void }> = ({ onNav
         <TextLink color={cc.brand} onClick={() => onNavigate('calendar')}>Edit timeline</TextLink>
       </div>
     </CardWrapper>
-  </div>
+  </motion.div>
 );
 
 const AlertItem: React.FC<{
@@ -1165,10 +1157,10 @@ const AlertItem: React.FC<{
   const { dot, label, labelColor } = config[severity];
 
   return (
-    <div
-     
-     
-     
+    <motion.div
+      initial={{ opacity: 0, x: 8 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.4, delay: delay / 1000, ease: [0.32, 0.72, 0, 1] }}
       style={{
         display: 'flex',
         alignItems: 'flex-start',
@@ -1179,11 +1171,10 @@ const AlertItem: React.FC<{
         border: `1px solid ${hexToRgba(dot, 0.2)}`,
         cursor: 'pointer',
         transition: 'background-color 0.12s',
-        transitionDelay: `${delay}ms`,
       }}
       onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = hexToRgba(dot, 0.1))}
       onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.backgroundColor = hexToRgba(dot, 0.06))}
-     className="scroll-animate">
+    >
       <div style={{ paddingTop: 2, flexShrink: 0 }}>
         <StatusDot color={dot} pulse={severity === 'high'} />
       </div>
@@ -1216,17 +1207,17 @@ const AlertItem: React.FC<{
       <div style={{ flexShrink: 0, paddingTop: 2 }}>
         <ArrowRight size={14} color={cc.textMuted} />
       </div>
-    </div>
+    </motion.div>
   );
 };
 
 const RecentAlertsCard: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => (
-  <div
-   
-   
-   
+  <motion.div
+    initial={{ opacity: 0, y: 16 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.5, delay: 0.4, ease: [0.32, 0.72, 0, 1] }}
     style={{ display: 'flex', flexDirection: 'column' }}
-   className="scroll-animate">
+  >
     <CardWrapper style={{ padding: 20, flex: 1, display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
@@ -1293,106 +1284,41 @@ const RecentAlertsCard: React.FC<{ onNavigate: (route: string) => void }> = ({ o
         </button>
       </div>
     </CardWrapper>
-  </div>
-);
-
-// ============================================================
-// SECTION G: ANALYTICS (UC-26)
-// ============================================================
-const AnalyticsRow: React.FC = () => (
-  <div
-   
-   
-   
-    style={{ marginBottom: 16 }}
-   className="scroll-animate">
-    <div style={{
-      fontSize: 12,
-      fontWeight: 600,
-      textTransform: 'uppercase',
-      letterSpacing: '0.06em',
-      color: cc.textMuted,
-      marginBottom: 10,
-      paddingLeft: 2,
-    }}>
-      General Statistical Dashboard
-    </div>
-    <div className="cc-grid-3" style={{ alignItems: 'stretch' }}>
-      {/* Pass Rate */}
-      <CardWrapper style={{ padding: 20, display: 'flex', flexDirection: 'column' }}>
-        <div style={{ fontSize: 14, fontWeight: 600, color: cc.textPrimary, marginBottom: 16 }}>Interview Pass Rate</div>
-        <div style={{ height: 200, width: '100%' }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie data={mockPassRateData} innerRadius={55} outerRadius={75} paddingAngle={3} dataKey="value" stroke="none">
-                {mockPassRateData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <RechartsTooltip contentStyle={{ borderRadius: 8, border: 'none', boxShadow: cc.shadowSm }} />
-              <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: 11 }} />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-      </CardWrapper>
-
-      {/* Major Distribution */}
-      <CardWrapper style={{ padding: 20, display: 'flex', flexDirection: 'column' }}>
-        <div style={{ fontSize: 14, fontWeight: 600, color: cc.textPrimary, marginBottom: 16 }}>Major Distribution</div>
-        <div style={{ height: 200, width: '100%' }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie data={mockMajorData} outerRadius={75} dataKey="value" stroke="none" label={false}>
-                {mockMajorData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <RechartsTooltip contentStyle={{ borderRadius: 8, border: 'none', boxShadow: cc.shadowSm }} />
-              <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: 11 }} />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-      </CardWrapper>
-
-      {/* Grade Distribution */}
-      <CardWrapper style={{ padding: 20, display: 'flex', flexDirection: 'column' }}>
-        <div style={{ fontSize: 14, fontWeight: 600, color: cc.textPrimary, marginBottom: 16 }}>OJT Grade Distribution</div>
-        <div style={{ height: 200, width: '100%' }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={mockGradeData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={cc.borderSubtle} />
-              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: cc.textMuted }} />
-              <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: cc.textMuted }} />
-              <RechartsTooltip cursor={{ fill: cc.neutralBg }} contentStyle={{ borderRadius: 8, border: 'none', boxShadow: cc.shadowSm }} />
-              <Bar dataKey="count" fill={cc.brand} radius={[4, 4, 0, 0]} barSize={24} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </CardWrapper>
-    </div>
-  </div>
+  </motion.div>
 );
 
 // ============================================================
 // MAIN COMMAND CENTER COMPONENT
 // ============================================================
 export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => void }> = ({ onNavigate }) => {
-  useScrollAnimation();
-
   const [mounted, setMounted] = useState(false);
+  const [summary, setSummary] = useState<any>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     setMounted(true);
+    const fetchSummary = async () => {
+      try {
+        const data = await DashboardService.getCommandCenterSummary();
+        setSummary(data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchSummary();
   }, []);
 
   const handleNavigate = (route: string) => {
     if (onNavigate) {
       onNavigate(route);
     } else {
-      navigate(`/training-manager/${route}`);
+      navigate(`/tm-dashboard/${route}`);
     }
   };
+
+  if (!summary) {
+    return <div style={{ padding: 40, textAlign: 'center', color: cc.textMuted }}>Loading Dashboard...</div>;
+  }
 
   return (
     <div style={{
@@ -1400,34 +1326,37 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
     }}>
       {/* Main Content */}
       <div style={{
-        maxWidth: 1600,
+        maxWidth: 1200,
         margin: '0 auto',
         padding: '0 24px 40px',
       }}>
-        {mounted && (
-          <div className="scroll-animate">
-            {/* Semester Context Bar */}
-            <SemesterContextBar />
+        <AnimatePresence>
+          {mounted && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
+            >
+              {/* Semester Context Bar */}
+              <SemesterContextBar />
 
-            {/* TOP: Quick Actions */}
-            <QuickActionsRow onNavigate={handleNavigate} />
+              {/* ROW 1: Urgency Cards */}
+              <UrgencyCardsRow onNavigate={handleNavigate} incidents={summary.activeIncidents} pendingEnterprises={summary.pendingEnterprises} />
 
-            <div className="cc-dashboard-grid" style={{ marginTop: 24 }}>
-              {/* Left Column (Main Data) */}
-              <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                <UrgencyCardsRow onNavigate={handleNavigate} />
-                <CompliancePipelineRow onNavigate={handleNavigate} />
-                <AnalyticsRow />
-              </div>
+              {/* ROW 2: Weekly Reports + Pipeline */}
+              <CompliancePipelineRow onNavigate={handleNavigate} summary={summary} />
 
-              {/* Right Column (Alerts & Timeline) */}
-              <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                <RecentAlertsCard onNavigate={handleNavigate} />
+              {/* ROW 3: Quick Actions */}
+              <QuickActionsRow onNavigate={handleNavigate} />
+
+              {/* ROW 4: Timeline + Alerts */}
+              <div className="cc-grid-2" style={{ alignItems: 'stretch' }}>
                 <TimelineCard onNavigate={handleNavigate} />
+                <RecentAlertsCard onNavigate={handleNavigate} />
               </div>
-            </div>
-          </div>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Keyframe for pulsing dot */}
@@ -1435,11 +1364,6 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
         @keyframes pulse-dot {
           0%, 100% { opacity: 1; transform: scale(1); }
           50% { opacity: 0.5; transform: scale(1.15); }
-        }
-        .cc-dashboard-grid {
-          display: grid;
-          grid-template-columns: 7fr 3fr;
-          gap: 24px;
         }
         .cc-grid-2 {
           display: grid;
@@ -1451,20 +1375,12 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
           grid-template-columns: 7fr 5fr;
           gap: 16px;
         }
-        .cc-grid-3 {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 16px;
-        }
         .cc-grid-4 {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
           gap: 12px;
         }
         @media (max-width: 1024px) {
-          .cc-dashboard-grid {
-            grid-template-columns: 1fr;
-          }
           .cc-grid-pipeline {
             grid-template-columns: 1fr;
           }
@@ -1473,7 +1389,7 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
           }
         }
         @media (max-width: 768px) {
-          .cc-grid-2, .cc-grid-3 {
+          .cc-grid-2 {
             grid-template-columns: 1fr;
           }
           .cc-grid-4 {

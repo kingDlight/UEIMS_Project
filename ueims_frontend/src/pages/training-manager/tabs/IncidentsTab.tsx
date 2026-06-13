@@ -117,79 +117,6 @@ function deriveSeverity(incident: Incident): Severity {
 }
 
 // ============================================================
-// MOCK DATA — pre-seeded for demo
-// ============================================================
-const MOCK_INCIDENTS: Incident[] = [
-  {
-    incidentId: 'INC001',
-    category: 'Harassment',
-    description:
-      'A student reported verbal harassment from a co-worker at the enterprise. Immediate supervisor was notified but no action was taken within 48 hours.',
-    status: 'OPEN',
-    createdAt: new Date(Date.now() - 1 * 86400000).toISOString(),
-    assignment: {
-      student: { fullName: 'Nguyễn Thị Lan', studentCode: 'CS22001', email: 'lan.nt@student.fpt.edu.vn' },
-      enterprise: { companyName: 'FPT Software', address: 'FPT Tower, Hanoi' },
-    },
-    reportedBy: { fullName: 'TM.Pham Thanh', role: 'Training Manager' },
-  },
-  {
-    incidentId: 'INC002',
-    category: 'Attendance Issue',
-    description:
-      'Student has been absent for 3 consecutive days without any notification to the university or enterprise supervisor. Attendance records confirm 6 absences in the current month.',
-    status: 'OPEN',
-    createdAt: new Date(Date.now() - 3 * 86400000).toISOString(),
-    assignment: {
-      student: { fullName: 'Trần Văn Minh', studentCode: 'SE22003', email: 'minh.tv@student.fpt.edu.vn' },
-      enterprise: { companyName: 'Viettel Solutions', address: 'Ho Chi Minh City' },
-    },
-    reportedBy: { fullName: 'Enterprise HR', role: 'Enterprise Supervisor' },
-  },
-  {
-    incidentId: 'INC003',
-    category: 'Performance Warning',
-    description:
-      'Student submitted deliverables 2 weeks late with quality below enterprise standards. Enterprise supervisor has requested a formal review meeting.',
-    status: 'RESOLVED',
-    createdAt: new Date(Date.now() - 10 * 86400000).toISOString(),
-    assignment: {
-      student: { fullName: 'Lê Hoàng Nam', studentCode: 'AI21005', email: 'nam.lh@student.fpt.edu.vn' },
-      enterprise: { companyName: 'VinBigData', address: 'Hanoi' },
-    },
-    reportedBy: { fullName: 'Enterprise Tech Lead', role: 'Enterprise Supervisor' },
-    resolutionNote: 'Student has been placed on a performance improvement plan (PIP) with weekly check-ins. Enterprise supervisor agreed to extend internship by 2 weeks to compensate for the delay.',
-  },
-  {
-    incidentId: 'INC004',
-    category: 'Safety Incident',
-    description:
-      'Minor slip-and-fall accident in the enterprise cafeteria. Student sustained no injuries but reported the incident as a safety concern for future prevention.',
-    status: 'OPEN',
-    createdAt: new Date(Date.now() - 5 * 86400000).toISOString(),
-    assignment: {
-      student: { fullName: 'Phạm Thị Hương', studentCode: 'CS21007', email: 'huong.pt@student.fpt.edu.vn' },
-      enterprise: { companyName: 'Bosch Vietnam', address: 'Bien Hoa, Dong Nai' },
-    },
-    reportedBy: { fullName: 'Safety Officer', role: 'Enterprise Safety Officer' },
-  },
-  {
-    incidentId: 'INC005',
-    category: 'Dress Code Violation',
-    description:
-      'Student attended client-facing meeting without proper business attire, resulting in negative feedback from the client.',
-    status: 'RESOLVED',
-    createdAt: new Date(Date.now() - 15 * 86400000).toISOString(),
-    assignment: {
-      student: { fullName: 'Bùi Đức Anh', studentCode: 'SE21009', email: 'anh.bd@student.fpt.edu.vn' },
-      enterprise: { companyName: 'Grab Vietnam', address: 'Ho Chi Minh City' },
-    },
-    reportedBy: { fullName: 'Project Manager', role: 'Enterprise Supervisor' },
-    resolutionNote: 'Student acknowledged the violation and has since complied with the enterprise dress code policy. No further incidents reported.',
-  },
-];
-
-// ============================================================
 // INCIDENT CARD
 // ============================================================
 const IncidentCard: React.FC<{
@@ -644,9 +571,25 @@ const MetricCard: React.FC<{
 // ============================================================
 export const IncidentsTab: React.FC = () => {
   useScrollAnimation();
-
-  const [incidents, setIncidents] = useState<Incident[]>(MOCK_INCIDENTS);
+  const [incidents, setIncidents] = useState<Incident[]>([]);
   const [selected, setSelected] = useState<Incident | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchIncidents = async () => {
+      try {
+        setLoading(true);
+        const data = await IncidentService.getAll();
+        setIncidents(data.result || []);
+      } catch (err) {
+        console.error('Failed to load incidents', err);
+        setIncidents([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    void fetchIncidents();
+  }, []);
 
   const open = incidents.filter((i) => i.status === 'OPEN');
   const resolved = incidents.filter((i) => i.status === 'RESOLVED' || i.status === 'CLOSED');

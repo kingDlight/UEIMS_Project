@@ -10,6 +10,7 @@ import { ProtectedRoute } from '@/components/guards/ProtectedRoute';
 import { EmailPreviewPage } from '@/pages/dev/EmailPreviewPage';
 import { TrainingManagerDashboard } from '@/pages/TrainingManagerDashboard';
 import { StudentDashboard } from '@/pages/student/StudentDashboard';
+import { EnterpriseDashboard } from '@/pages/enterprise/EnterpriseDashboard';
 import { NoRolePage } from '@/pages/auth/NoRolePage';
 
 export const router = createBrowserRouter([
@@ -69,6 +70,10 @@ export const router = createBrowserRouter([
   {
     path: '/student/:tab?',
     element: <StudentDashboard />,
+  },
+  {
+    path: '/enterprise-dashboard/:tab?',
+    element: <EnterpriseDashboard />,
   },
   {
     path: '*',
