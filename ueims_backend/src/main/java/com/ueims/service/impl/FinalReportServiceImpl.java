@@ -25,7 +25,9 @@ import com.ueims.service.FinalReportService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -132,8 +134,7 @@ public class FinalReportServiceImpl implements FinalReportService {
             report.setFileSizeBytes((int) file.getSize());
             return repository.save(report);
         } catch (IOException e) {
-            System.err.println("File upload error: " + e.getMessage());
-            e.printStackTrace();
+            log.error("File upload error: {}", e.getMessage(), e);
             throw new AppException(ErrorCode.FIELD_REQUIRED);
         }
     }

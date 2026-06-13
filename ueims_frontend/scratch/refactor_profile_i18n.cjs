@@ -18,7 +18,7 @@ content = content.replace(
   "const TabSwitcher: React.FC<{ active: ProfileView; onChange: (v: ProfileView) => void }> = ({ active, onChange }) => {\n  const { t } = useTranslation(['profile', 'common']);\n  return ("
 );
 content = content.replace(
-  /(\s*\{\s*v === 'profile'\s*\?\s*(?:t\('profileInfo',\s*)?'Profile Info'(?:\)\s*)?\s*:\s*(?:t\('myCvs',\s*)?'My CVs'(?:\)\s*)?\s*\}\s*<\/button>\s*\);\s*\}\)\}\s*<\/div>\s*)\);/,
+  /(\s*\{\s*v === 'profile'\s*\?\s*(?:'Profile Info'|t\('profileInfo',\s*'Profile Info'\))\s*:\s*(?:'My CVs'|t\('myCvs',\s*'My CVs'\))\s*\}\s*<\/button>\s*\);\s*\}\)\}\s*<\/div>\s*)\);/,
   "$1  );\n};"
 );
 
@@ -32,7 +32,7 @@ content = content.replace(
   "const ProfileInfoView: React.FC<{ profile: MyProfile }> = ({ profile }) => {\n  const { t } = useTranslation(['profile']);\n  return ("
 );
 content = content.replace(
-  /(\s*<\/NeuSurface>\s*)\}\s*<\/>\s*\);/,
+  /([ \t]*<\/NeuSurface>\r?\n[ \t]*)\}\s*<\/>\s*\);/,
   "$1  }\n  </>\n  );\n};"
 );
 
