@@ -921,9 +921,6 @@ export const StudentDashboardTab: React.FC = () => {
   return (
     <div style={{
       fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-      backgroundColor: '#F0F2F5',
-      minHeight: '100vh',
-      paddingTop: 24,
     }}>
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px 40px' }}>
         <AnimatePresence>

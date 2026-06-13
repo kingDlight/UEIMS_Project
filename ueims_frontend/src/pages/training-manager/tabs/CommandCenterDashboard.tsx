@@ -476,64 +476,9 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
   return (
     <div style={{
       fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-      backgroundColor: '#F0F2F5',
-      minHeight: '100vh',
     }}>
-      {/* Top Header & Semester Selector */}
-      <div style={{
-        backgroundColor: '#FFFFFF',
-        borderBottom: `1px solid ${cc.borderSubtle}`,
-        padding: '16px 24px',
-        marginBottom: 24,
-      }}>
-        <div style={{
-          maxWidth: 1200,
-          margin: '0 auto',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: 16,
-        }}>
-          <div>
-            <h1 style={{ fontSize: 22, fontWeight: 800, color: cc.textPrimary, margin: 0, letterSpacing: '-0.02em' }}>
-              Command Center
-            </h1>
-            <p style={{ fontSize: 13, color: cc.textSecondary, margin: '4px 0 0' }}>
-              Monitor OJT semesters, placements, grading and corporate compliance
-            </p>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <Select
-              value={selectedSemesterId}
-              onChange={(val) => setSelectedSemesterId(val)}
-              style={{ width: 180, fontWeight: 600 }}
-              options={semesters.map(s => ({ value: s.semesterId, label: s.name }))}
-            />
-            {selectedSemester && (
-              <span style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 6,
-                fontSize: 12,
-                fontWeight: 700,
-                color: selectedSemester.status === 'ACTIVE' ? cc.success : selectedSemester.status === 'LOCKED' ? cc.error : cc.warning,
-                backgroundColor: selectedSemester.status === 'ACTIVE' ? hexToRgba(cc.success, 0.08) : selectedSemester.status === 'LOCKED' ? hexToRgba(cc.error, 0.08) : hexToRgba(cc.warning, 0.08),
-                padding: '4px 10px',
-                borderRadius: cc.radiusFull,
-                border: `1px solid ${selectedSemester.status === 'ACTIVE' ? hexToRgba(cc.success, 0.2) : selectedSemester.status === 'LOCKED' ? hexToRgba(cc.error, 0.2) : hexToRgba(cc.warning, 0.2)}`,
-              }}>
-                <StatusDot color={selectedSemester.status === 'ACTIVE' ? cc.success : selectedSemester.status === 'LOCKED' ? cc.error : cc.warning} pulse={selectedSemester.status === 'ACTIVE'} />
-                {selectedSemester.status}
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
-
       {/* Main Workspace Area */}
-      <div style={{ maxWidth: 1240, margin: '0 auto', padding: '0 20px 40px' }}>
+      <div style={{ maxWidth: 1240, margin: '0 auto', padding: '24px 20px 40px' }}>
         <AnimatePresence>
           {mounted && (
             <motion.div
@@ -541,6 +486,55 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
             >
+              {/* Top Header & Semester Selector (Floating Card style) */}
+              <div style={{
+                backgroundColor: '#FFFFFF',
+                borderRadius: cc.radiusLg,
+                border: `1px solid ${cc.border}`,
+                boxShadow: cc.shadowSm,
+                padding: '16px 24px',
+                marginBottom: 24,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: 16,
+              }}>
+                <div>
+                  <h1 style={{ fontSize: 22, fontWeight: 800, color: cc.textPrimary, margin: 0, letterSpacing: '-0.02em' }}>
+                    Command Center
+                  </h1>
+                  <p style={{ fontSize: 13, color: cc.textSecondary, margin: '4px 0 0' }}>
+                    Monitor OJT semesters, placements, grading and corporate compliance
+                  </p>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <Select
+                    value={selectedSemesterId}
+                    onChange={(val) => setSelectedSemesterId(val)}
+                    style={{ width: 180, fontWeight: 600 }}
+                    options={semesters.map(s => ({ value: s.semesterId, label: s.name }))}
+                  />
+                  {selectedSemester && (
+                    <span style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      fontSize: 12,
+                      fontWeight: 700,
+                      color: selectedSemester.status === 'ACTIVE' ? cc.success : selectedSemester.status === 'LOCKED' ? cc.error : cc.warning,
+                      backgroundColor: selectedSemester.status === 'ACTIVE' ? hexToRgba(cc.success, 0.08) : selectedSemester.status === 'LOCKED' ? hexToRgba(cc.error, 0.08) : hexToRgba(cc.warning, 0.08),
+                      padding: '4px 10px',
+                      borderRadius: cc.radiusFull,
+                      border: `1px solid ${selectedSemester.status === 'ACTIVE' ? hexToRgba(cc.success, 0.2) : selectedSemester.status === 'LOCKED' ? hexToRgba(cc.error, 0.2) : hexToRgba(cc.warning, 0.2)}`,
+                    }}>
+                      <StatusDot color={selectedSemester.status === 'ACTIVE' ? cc.success : selectedSemester.status === 'LOCKED' ? cc.error : cc.warning} pulse={selectedSemester.status === 'ACTIVE'} />
+                      {selectedSemester.status}
+                    </span>
+                  )}
+                </div>
+              </div>
               {/* TOP STAT CARDS ROW */}
               <div className="cc-kpi-grid" style={{ marginBottom: 24 }}>
                 {/* Stat 1: Employment/Placement Rate */}
