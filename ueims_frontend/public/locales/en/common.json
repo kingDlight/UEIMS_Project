@@ -61,7 +61,13 @@
     "authFailed": "Authentication failed. Please check your login information.",
     "accountNotFound": "Account does not exist in the system.",
     "googleLoginSuccess": "Login with Google successful!",
-    "googleLoginFail": "Login with Google failed. Please try again!"
+    "googleLoginFail": "Login with Google failed. Please try again!",
+    "backToHome": "Back to homepage"
+  },
+  "home": {
+    "login": "Login",
+    "enterSystem": "Enter System",
+    "dashboard": "Go to Dashboard"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -74,5 +80,35 @@
     "feedback": "Evaluate Enterprise",
     "final-report": "Final Report Submission",
     "evaluation": "My Evaluation"
+  },
+  "common": {
+    "english": "English",
+    "vietnamese": "Tiếng Việt",
+    "lightMode": "Light Mode",
+    "darkMode": "Dark Mode",
+    "switchLanguage": "Switch Language"
+  },
+  "settings": {
+    "title": "Settings",
+    "desc": "Manage your account and preferences",
+    "accountInfo": "Account Information",
+    "accountInfoDesc": "Manage your personal contact details",
+    "phoneLabel": "Phone Number",
+    "phonePlaceholder": "Enter your phone number",
+    "saveBtn": "Save",
+    "changePassword": "Change Password",
+    "changePasswordDesc": "Update your account password",
+    "currentPasswordLabel": "Current Password",
+    "newPasswordLabel": "New Password",
+    "confirmPasswordLabel": "Confirm New Password",
+    "saveChangesBtn": "Save Changes",
+    "notificationsTitle": "Notifications",
+    "notificationsDesc": "Manage your notification preferences",
+    "emailNotifications": "Email notifications",
+    "interviewReminders": "Interview reminders",
+    "deadlineAlerts": "Report deadline alerts",
+    "statusUpdates": "Application status updates",
+    "phoneUpdated": "Phone number updated successfully!",
+    "phoneUpdateFailed": "Failed to update phone number!"
   }
 }

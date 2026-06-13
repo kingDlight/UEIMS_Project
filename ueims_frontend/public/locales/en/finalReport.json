@@ -14,5 +14,13 @@
   "submitReport": "Submit Report",
   "submittedReport": "Submitted Report",
   "submittedDate": "Submitted",
-  "view": "View"
+  "view": "View",
+  "invalidFileError": "Invalid file. Please upload your final report strictly in PDF format under 20MB.",
+  "fileTooLargeError": "File too large. Final report must not exceed 20MB.",
+  "pleaseUploadPdf": "Please upload your final report PDF!",
+  "noAssignmentError": "You do not have an active internship assignment yet.",
+  "submitSuccess": "Final report submitted successfully!",
+  "submitFailed": "Submit failed!",
+  "onlyPdfAllowed": "Only PDF allowed!",
+  "max20Mb": "Max 20MB!"
 }
