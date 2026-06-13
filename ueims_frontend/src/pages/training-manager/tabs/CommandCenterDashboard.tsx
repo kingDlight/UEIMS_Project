@@ -134,7 +134,7 @@ const CardWrapper: React.FC<{
       style={{
         background: cc.surface,
         borderRadius: cc.radiusLg,
-        border: `1px solid ${cc.borderSubtle}`,
+        border: `1px solid ${cc.border}`,
         boxShadow: cc.shadowSm,
         overflow: 'hidden',
         cursor: onClick ? 'pointer' : 'default',
@@ -164,11 +164,11 @@ const Label: React.FC<{ children: React.ReactNode; className?: string; style?: R
 
 const SeverityBadge: React.FC<{ label: string; severity: 'critical' | 'high' | 'medium' | 'low' | 'info' }> = ({ label, severity }) => {
   const config: Record<string, { bg: string; color: string; borderColor: string }> = {
-    critical: { bg: hexToRgba(cc.error, 0.06), color: cc.error, borderColor: hexToRgba(cc.error, 0.25) },
-    high: { bg: hexToRgba(cc.warning, 0.06), color: cc.warning, borderColor: hexToRgba(cc.warning, 0.25) },
-    medium: { bg: hexToRgba(cc.info, 0.06), color: cc.info, borderColor: hexToRgba(cc.info, 0.25) },
-    low: { bg: hexToRgba(cc.textMuted, 0.06), color: cc.textMuted, borderColor: hexToRgba(cc.textMuted, 0.25) },
-    info: { bg: hexToRgba(cc.info, 0.06), color: cc.info, borderColor: hexToRgba(cc.info, 0.25) },
+    critical: { bg: hexToRgba(cc.error, 0.15), color: cc.error, borderColor: hexToRgba(cc.error, 0.45) },
+    high: { bg: hexToRgba(cc.warning, 0.15), color: cc.warning, borderColor: hexToRgba(cc.warning, 0.45) },
+    medium: { bg: hexToRgba(cc.info, 0.15), color: cc.info, borderColor: hexToRgba(cc.info, 0.45) },
+    low: { bg: hexToRgba(cc.textMuted, 0.15), color: cc.textMuted, borderColor: hexToRgba(cc.textMuted, 0.45) },
+    info: { bg: hexToRgba(cc.info, 0.15), color: cc.info, borderColor: hexToRgba(cc.info, 0.45) },
   };
   const { bg, color, borderColor } = config[severity] ?? config.info;
   return (
@@ -554,7 +554,7 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
                         {ojtCount} of {totalStudents || 0} students placed
                       </div>
                     </div>
-                    <div style={{ width: 36, height: 36, borderRadius: cc.radiusMd, backgroundColor: hexToRgba(cc.success, 0.08), color: cc.success, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ width: 36, height: 36, borderRadius: cc.radiusMd, backgroundColor: hexToRgba(cc.success, 0.16), color: cc.success, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <Briefcase size={20} />
                     </div>
                   </div>
@@ -573,7 +573,7 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
                         {passedCount} passed of {totalIv || 0} interviews
                       </div>
                     </div>
-                    <div style={{ width: 36, height: 36, borderRadius: cc.radiusMd, backgroundColor: hexToRgba(cc.info, 0.08), color: cc.info, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ width: 36, height: 36, borderRadius: cc.radiusMd, backgroundColor: hexToRgba(cc.info, 0.16), color: cc.info, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <Activity size={20} />
                     </div>
                   </div>
@@ -592,7 +592,7 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
                         Companies awaiting registration
                       </div>
                     </div>
-                    <div style={{ width: 36, height: 36, borderRadius: cc.radiusMd, backgroundColor: hexToRgba(cc.warning, 0.08), color: cc.warning, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ width: 36, height: 36, borderRadius: cc.radiusMd, backgroundColor: hexToRgba(cc.warning, 0.16), color: cc.warning, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <Building2 size={20} />
                     </div>
                   </div>
@@ -613,7 +613,7 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
                         Open student discipline cases
                       </div>
                     </div>
-                    <div style={{ width: 36, height: 36, borderRadius: cc.radiusMd, backgroundColor: hexToRgba(cc.error, 0.08), color: cc.error, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ width: 36, height: 36, borderRadius: cc.radiusMd, backgroundColor: hexToRgba(cc.error, 0.16), color: cc.error, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <AlertTriangle size={20} />
                     </div>
                   </div>
@@ -658,8 +658,8 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
                       gap: 4,
                       padding: '2px 8px',
                       borderRadius: cc.radiusFull,
-                      backgroundColor: hexToRgba(cc.error, 0.06),
-                      border: `1px solid ${hexToRgba(cc.error, 0.15)}`,
+                      backgroundColor: hexToRgba(cc.error, 0.15),
+                      border: `1px solid ${hexToRgba(cc.error, 0.35)}`,
                       color: cc.error,
                       fontSize: 11,
                       fontWeight: 700,
@@ -670,6 +670,47 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
                 ) : (
                   <span style={{ fontSize: 12, color: cc.textMuted, fontWeight: 600 }}>Irrevocably locked</span>
                 )}
+              </div>
+
+              {/* QUICK ACTIONS ROW (CLEAN TOP UTILITIES) */}
+              <div style={{ marginBottom: 24 }}>
+                <div style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: cc.textMuted, marginBottom: 12 }}>
+                  Quick Utilities
+                </div>
+                <div className="cc-grid-4">
+                  {[
+                    { label: 'Import Students', icon: <Upload size={18} />, desc: 'Bulk load eligible list via Excel', route: 'students' },
+                    { label: 'Review Enterprises', icon: <Building2 size={18} />, desc: 'Approve new host companies', route: 'enterprises' },
+                    { label: 'Send Reminders', icon: <SendHorizontal size={18} />, desc: 'Alert overdue reports', route: 'incidents' },
+                    { label: 'View Reports', icon: <FileBarChart size={18} />, desc: 'Analyze overall grading', route: 'reports' }
+                  ].map(action => (
+                    <motion.div
+                      key={action.label}
+                      onClick={() => handleNavigate(action.route)}
+                      whileHover={{ y: -2, boxShadow: cc.shadowMd }}
+                      whileTap={{ scale: 0.98 }}
+                      style={{
+                        background: '#FFFFFF',
+                        border: `1px solid ${cc.border}`,
+                        borderRadius: cc.radiusLg,
+                        boxShadow: cc.shadowSm,
+                        padding: '14px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 12
+                      }}
+                    >
+                      <div style={{ width: 36, height: 36, borderRadius: cc.radiusMd, backgroundColor: hexToRgba(cc.brand, 0.16), color: cc.brand, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        {action.icon}
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: cc.textPrimary }}>{action.label}</div>
+                        <div style={{ fontSize: 11, color: cc.textMuted, marginTop: 1 }}>{action.desc}</div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
               </div>
 
               {/* SPLIT SCREEN WORKSPACE */}
@@ -736,8 +777,8 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
                                         flex: 1,
                                         padding: '16px 12px',
                                         borderRadius: cc.radiusLg,
-                                        background: hexToRgba(stage.color, 0.05),
-                                        border: `1px solid ${hexToRgba(stage.color, 0.15)}`,
+                                        background: hexToRgba(stage.color, 0.15),
+                                        border: `1px solid ${hexToRgba(stage.color, 0.45)}`,
                                         display: 'flex',
                                         flexDirection: 'column',
                                         alignItems: 'center',
@@ -745,10 +786,10 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
                                       }}>
                                         <span style={{ fontSize: 24, fontWeight: 800, color: stage.color }}>{stage.value}</span>
                                         <span style={{ fontSize: 10, fontWeight: 700, color: stage.color, marginTop: 4, letterSpacing: '0.05em' }}>{stage.label}</span>
-                                        <span style={{ fontSize: 10, color: cc.textSecondary, marginTop: 2, textAlign: 'center' }}>{stage.desc}</span>
+                                        <span style={{ fontSize: 10, color: cc.textPrimary, fontWeight: 500, marginTop: 2, textAlign: 'center' }}>{stage.desc}</span>
                                       </div>
                                       {i < stages.length - 1 && (
-                                        <div style={{ display: 'flex', alignItems: 'center', color: cc.textMuted }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', color: cc.textSecondary }}>
                                           <ChevronRight size={20} />
                                         </div>
                                       )}
@@ -906,35 +947,35 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
                   <CardWrapper style={{ padding: 20 }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <div style={{ width: 32, height: 32, borderRadius: cc.radiusMd, background: `${cc.info}12`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.info }}>
+                        <div style={{ width: 32, height: 32, borderRadius: cc.radiusMd, background: `${cc.info}24`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.info }}>
                           <FileBarChart size={16} />
                         </div>
                         <div>
                           <div style={{ fontSize: 15, fontWeight: 700, color: cc.textPrimary }}>Weekly Reports Compliance</div>
-                          <div style={{ fontSize: 12, color: cc.textMuted }}>Week {summary.weeklyReports.week} Report Statuses</div>
+                          <div style={{ fontSize: 12, color: cc.textSecondary }}>Week {summary.weeklyReports.week} Report Statuses</div>
                         </div>
                       </div>
-                      <span style={{ fontSize: 11, fontWeight: 700, color: cc.success, backgroundColor: hexToRgba(cc.success, 0.08), border: `1px solid ${hexToRgba(cc.success, 0.2)}`, padding: '2px 8px', borderRadius: cc.radiusFull }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: cc.success, backgroundColor: hexToRgba(cc.success, 0.18), border: `1px solid ${hexToRgba(cc.success, 0.45)}`, padding: '2px 8px', borderRadius: cc.radiusFull }}>
                         Deadline: Sun 11:59 PM
                       </span>
                     </div>
 
                     {/* 2x2 grid */}
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10, marginBottom: 18 }}>
-                      <div style={{ padding: '10px 12px', borderRadius: cc.radiusMd, backgroundColor: hexToRgba(cc.success, 0.05), border: `1px solid ${hexToRgba(cc.success, 0.12)}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: 12, color: cc.successText, fontWeight: 600 }}>Submitted / Approved</span>
+                      <div style={{ padding: '10px 12px', borderRadius: cc.radiusMd, backgroundColor: hexToRgba(cc.success, 0.15), border: `1px solid ${hexToRgba(cc.success, 0.35)}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: 12, color: cc.successText, fontWeight: 700 }}>Submitted / Approved</span>
                         <span style={{ fontSize: 18, fontWeight: 800, color: cc.success }}>{summary.weeklyReports.submitted}</span>
                       </div>
-                      <div style={{ padding: '10px 12px', borderRadius: cc.radiusMd, backgroundColor: hexToRgba(cc.info, 0.05), border: `1px solid ${hexToRgba(cc.info, 0.12)}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: 12, color: cc.infoText, fontWeight: 600 }}>Pending Review</span>
+                      <div style={{ padding: '10px 12px', borderRadius: cc.radiusMd, backgroundColor: hexToRgba(cc.info, 0.15), border: `1px solid ${hexToRgba(cc.info, 0.35)}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: 12, color: cc.infoText, fontWeight: 700 }}>Pending Review</span>
                         <span style={{ fontSize: 18, fontWeight: 800, color: cc.info }}>{summary.weeklyReports.pending}</span>
                       </div>
-                      <div style={{ padding: '10px 12px', borderRadius: cc.radiusMd, backgroundColor: hexToRgba(cc.error, 0.05), border: `1px solid ${hexToRgba(cc.error, 0.12)}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: 12, color: cc.errorText, fontWeight: 600 }}>Late Submissions</span>
+                      <div style={{ padding: '10px 12px', borderRadius: cc.radiusMd, backgroundColor: hexToRgba(cc.error, 0.15), border: `1px solid ${hexToRgba(cc.error, 0.35)}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: 12, color: cc.errorText, fontWeight: 700 }}>Late Submissions</span>
                         <span style={{ fontSize: 18, fontWeight: 800, color: cc.error }}>{summary.weeklyReports.late}</span>
                       </div>
-                      <div style={{ padding: '10px 12px', borderRadius: cc.radiusMd, backgroundColor: hexToRgba(cc.textMuted, 0.05), border: `1px solid ${hexToRgba(cc.textMuted, 0.12)}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: 12, color: cc.textSecondary, fontWeight: 600 }}>Not Started</span>
+                      <div style={{ padding: '10px 12px', borderRadius: cc.radiusMd, backgroundColor: hexToRgba(cc.textMuted, 0.15), border: `1px solid ${hexToRgba(cc.textMuted, 0.35)}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: 12, color: cc.textPrimary, fontWeight: 700 }}>Not Started</span>
                         <span style={{ fontSize: 18, fontWeight: 800, color: cc.textSecondary }}>{summary.weeklyReports.notStarted}</span>
                       </div>
                     </div>
@@ -944,25 +985,25 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
                       <div style={{
                         padding: '12px',
                         borderRadius: cc.radiusMd,
-                        backgroundColor: hexToRgba(cc.error, 0.04),
-                        border: `1px solid ${hexToRgba(cc.error, 0.15)}`,
+                        backgroundColor: hexToRgba(cc.error, 0.12),
+                        border: `1px solid ${hexToRgba(cc.error, 0.35)}`,
                         marginBottom: 16
                       }}>
-                        <div style={{ fontSize: 11, fontWeight: 700, color: cc.error, marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                        <div style={{ fontSize: 11, fontWeight: 700, color: cc.errorText, marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
                           Students Overdue (Missed Reports)
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                           {summary.weeklyReports.students.slice(0, 4).map((s: any, idx: number) => (
                             <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <span style={{ fontSize: 13, color: cc.textPrimary, fontWeight: 500 }}>{s.name}</span>
-                              <span style={{ fontSize: 11, color: cc.error, fontWeight: 600 }}>{s.daysOverdue} days overdue</span>
+                              <span style={{ fontSize: 13, color: cc.textPrimary, fontWeight: 600 }}>{s.name}</span>
+                              <span style={{ fontSize: 11, color: cc.errorText, fontWeight: 700 }}>{s.daysOverdue} days overdue</span>
                             </div>
                           ))}
                         </div>
                       </div>
                     )}
 
-                    <div style={{ borderTop: `1px solid ${cc.borderSubtle}`, paddingTop: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ borderTop: `1px solid ${cc.border}`, paddingTop: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <TextLink color={cc.brand} onClick={() => handleNavigate('reports')}>Browse reports list</TextLink>
                       <CTAButton variant="primary" size="sm" icon={<SendHorizontal size={12} />} onClick={() => handleNavigate('incidents')}>
                         Send warnings ({summary.weeklyReports.late})
@@ -983,17 +1024,17 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
                     {/* Approvals section */}
                     <div style={{ marginBottom: 20 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                        <span style={{ fontSize: 11, fontWeight: 700, color: cc.textMuted, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Corporate Registrations ({summary.pendingEnterprises.length})</span>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: cc.textSecondary, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Corporate Registrations ({summary.pendingEnterprises.length})</span>
                         <TextLink color={cc.warning} onClick={() => handleNavigate('enterprises')}>Review all</TextLink>
                       </div>
 
                       {summary.pendingEnterprises.length > 0 ? (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                           {summary.pendingEnterprises.slice(0, 2).map((ent: any) => (
-                            <div key={ent.id} style={{ padding: '8px 10px', borderRadius: cc.radiusMd, backgroundColor: '#FAFBFD', border: `1px solid ${cc.borderSubtle}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div key={ent.id} style={{ padding: '8px 10px', borderRadius: cc.radiusMd, backgroundColor: '#EBF3FC', border: `1px solid ${cc.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                               <div>
-                                <div style={{ fontSize: 12.5, fontWeight: 600, color: cc.textPrimary }}>{ent.name}</div>
-                                <div style={{ fontSize: 10, color: cc.textMuted }}>{ent.sector}</div>
+                                <div style={{ fontSize: 12.5, fontWeight: 700, color: cc.textPrimary }}>{ent.name}</div>
+                                <div style={{ fontSize: 10, color: cc.textSecondary, fontWeight: 500 }}>{ent.sector}</div>
                               </div>
                               <span style={{ fontSize: 11, color: cc.warningText, backgroundColor: cc.warningMuted, padding: '2px 6px', borderRadius: cc.radiusMd, fontWeight: 700 }}>
                                 {ent.daysWaiting}d ago
@@ -1009,17 +1050,17 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
                     {/* Incidents section */}
                     <div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                        <span style={{ fontSize: 11, fontWeight: 700, color: cc.textMuted, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Active incidents ({summary.activeIncidents.length})</span>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: cc.textSecondary, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Active incidents ({summary.activeIncidents.length})</span>
                         <TextLink color={cc.error} onClick={() => handleNavigate('incidents')}>Resolve</TextLink>
                       </div>
 
                       {summary.activeIncidents.length > 0 ? (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                           {summary.activeIncidents.slice(0, 2).map((inc: any) => (
-                            <div key={inc.id} style={{ padding: '8px 10px', borderRadius: cc.radiusMd, backgroundColor: '#FFFDFD', border: `1px solid ${cc.borderSubtle}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div key={inc.id} style={{ padding: '8px 10px', borderRadius: cc.radiusMd, backgroundColor: '#FDECEE', border: `1px solid ${cc.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                               <div>
-                                <div style={{ fontSize: 12.5, fontWeight: 600, color: cc.textPrimary }}>{inc.name}</div>
-                                <div style={{ fontSize: 10, color: cc.textMuted }}>{inc.enterprise} · {inc.type}</div>
+                                <div style={{ fontSize: 12.5, fontWeight: 700, color: cc.textPrimary }}>{inc.name}</div>
+                                <div style={{ fontSize: 10, color: cc.textSecondary, fontWeight: 500 }}>{inc.enterprise} · {inc.type}</div>
                               </div>
                               <SeverityBadge label={inc.severity} severity={inc.severity} />
                             </div>
@@ -1034,12 +1075,12 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
                   {/* SEMESTER TIMELINE CARD */}
                   <CardWrapper style={{ padding: 20 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-                      <div style={{ width: 32, height: 32, borderRadius: cc.radiusMd, background: `${cc.info}12`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.info }}>
+                      <div style={{ width: 32, height: 32, borderRadius: cc.radiusMd, background: `${cc.info}24`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.info }}>
                         <Calendar size={16} />
                       </div>
                       <div>
                         <div style={{ fontSize: 15, fontWeight: 700, color: cc.textPrimary }}>Semester Milestones</div>
-                        <div style={{ fontSize: 12, color: cc.textMuted }}>Important calendar dates</div>
+                        <div style={{ fontSize: 12, color: cc.textSecondary }}>Important calendar dates</div>
                       </div>
                     </div>
 
@@ -1052,7 +1093,7 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
                         bottom: 8,
                         left: 17,
                         width: 2,
-                        backgroundColor: cc.borderSubtle,
+                        backgroundColor: cc.border,
                         zIndex: 0
                       }} />
 
@@ -1088,7 +1129,7 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
                               <div style={{ fontSize: 13, fontWeight: isCurrent || isCompleted ? 700 : 500, color: textColor }}>
                                 {milestone.label}
                               </div>
-                              <div style={{ fontSize: 11, color: cc.textMuted }}>{milestone.date}</div>
+                              <div style={{ fontSize: 11, color: cc.textSecondary, fontWeight: 500 }}>{milestone.date}</div>
                             </div>
                             {isCurrent && (
                               <span style={{ fontSize: 10, fontWeight: 700, color: cc.warning, backgroundColor: cc.warningMuted, padding: '2px 6px', borderRadius: cc.radiusFull }}>
@@ -1105,19 +1146,19 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
                   <CardWrapper style={{ padding: 20 }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
                       <span style={{ fontSize: 14, fontWeight: 700, color: cc.textPrimary }}>System Flags</span>
-                      <span style={{ fontSize: 10, color: cc.textMuted, backgroundColor: cc.borderSubtle, padding: '2px 8px', borderRadius: cc.radiusFull, fontWeight: 700 }}>LIVE</span>
+                      <span style={{ fontSize: 10, color: cc.textSecondary, backgroundColor: cc.border, padding: '2px 8px', borderRadius: cc.radiusFull, fontWeight: 700 }}>LIVE</span>
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                      <div style={{ display: 'flex', gap: 8, padding: '8px 10px', borderRadius: cc.radiusMd, backgroundColor: hexToRgba(cc.error, 0.05), border: `1px solid ${hexToRgba(cc.error, 0.1)}` }}>
+                      <div style={{ display: 'flex', gap: 8, padding: '8px 10px', borderRadius: cc.radiusMd, backgroundColor: hexToRgba(cc.error, 0.12), border: `1px solid ${hexToRgba(cc.error, 0.35)}` }}>
                         <AlertTriangle size={16} color={cc.error} style={{ flexShrink: 0, marginTop: 1 }} />
-                        <div style={{ fontSize: 11.5, color: cc.errorText }}>
+                        <div style={{ fontSize: 11.5, color: cc.errorText, fontWeight: 600 }}>
                           <strong>Critical Incident Escalated:</strong> Student attendance warning filed by FPT Software.
                         </div>
                       </div>
-                      <div style={{ display: 'flex', gap: 8, padding: '8px 10px', borderRadius: cc.radiusMd, backgroundColor: hexToRgba(cc.warning, 0.05), border: `1px solid ${hexToRgba(cc.warning, 0.1)}` }}>
+                      <div style={{ display: 'flex', gap: 8, padding: '8px 10px', borderRadius: cc.radiusMd, backgroundColor: hexToRgba(cc.warning, 0.12), border: `1px solid ${hexToRgba(cc.warning, 0.35)}` }}>
                         <Clock size={16} color={cc.warning} style={{ flexShrink: 0, marginTop: 1 }} />
-                        <div style={{ fontSize: 11.5, color: cc.warningText }}>
+                        <div style={{ fontSize: 11.5, color: cc.warningText, fontWeight: 600 }}>
                           <strong>System lock warning:</strong> Locked phase starts in {lockDaysRemaining} days.
                         </div>
                       </div>
@@ -1126,46 +1167,7 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
                 </div>
               </div>
 
-              {/* QUICK ACTIONS ROW (CLEAN BOTTOM UTILITIES) */}
-              <div style={{ marginTop: 32 }}>
-                <div style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: cc.textMuted, marginBottom: 12 }}>
-                  Quick Utilities
-                </div>
-                <div className="cc-grid-4">
-                  {[
-                    { label: 'Import Students', icon: <Upload size={18} />, desc: 'Bulk load eligible list via Excel', route: 'students' },
-                    { label: 'Review Enterprises', icon: <Building2 size={18} />, desc: 'Approve new host companies', route: 'enterprises' },
-                    { label: 'Send Reminders', icon: <SendHorizontal size={18} />, desc: 'Alert overdue reports', route: 'incidents' },
-                    { label: 'View Reports', icon: <FileBarChart size={18} />, desc: 'Analyze overall grading', route: 'reports' }
-                  ].map(action => (
-                    <motion.div
-                      key={action.label}
-                      onClick={() => handleNavigate(action.route)}
-                      whileHover={{ y: -2, boxShadow: cc.shadowMd }}
-                      whileTap={{ scale: 0.98 }}
-                      style={{
-                        background: '#FFFFFF',
-                        border: `1px solid ${cc.borderSubtle}`,
-                        borderRadius: cc.radiusLg,
-                        boxShadow: cc.shadowSm,
-                        padding: '14px',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 12
-                      }}
-                    >
-                      <div style={{ width: 36, height: 36, borderRadius: cc.radiusMd, backgroundColor: hexToRgba(cc.brand, 0.08), color: cc.brand, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        {action.icon}
-                      </div>
-                      <div>
-                        <div style={{ fontSize: 13, fontWeight: 700, color: cc.textPrimary }}>{action.label}</div>
-                        <div style={{ fontSize: 11, color: cc.textMuted, marginTop: 1 }}>{action.desc}</div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
+
             </motion.div>
           )}
         </AnimatePresence>
