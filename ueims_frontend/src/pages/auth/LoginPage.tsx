@@ -87,7 +87,7 @@ export const LoginPage: React.FC = () => {
     setLoading(true);
     try {
       const result = await AuthService.loginWithGoogle(credentialResponse.credential);
-      
+
       if (result.mustChangePassword) {
         loginWithTokens(result.token, result.refreshToken);
         message.warning('Bạn cần đổi mật khẩu trước khi tiếp tục!');
@@ -174,7 +174,7 @@ export const LoginPage: React.FC = () => {
             onMouseLeave={(e) => { e.currentTarget.style.color = AUTH_TEXT_GRAY; }}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M19 12H5M12 19l-7-7 7-7"/>
+              <path d="M19 12H5M12 19l-7-7 7-7" />
             </svg>
             Quay về trang chủ
           </button>
@@ -273,7 +273,6 @@ export const LoginPage: React.FC = () => {
               useOneTap
               shape="pill"
               theme="outline"
-              locale={i18n.language || 'vi'}
             />
           </div>
         </div>
