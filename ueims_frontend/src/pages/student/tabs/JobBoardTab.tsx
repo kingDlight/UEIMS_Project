@@ -70,6 +70,7 @@ export const JobBoardTab: React.FC = () => {
   const [techFilter, setTechFilter] = useState<string[]>([]);
   const [confirmApply, setConfirmApply] = useState<any>(null);
   const [hasCv, setHasCv] = useState<boolean | null>(null);
+  const [currentSemester, setCurrentSemester] = useState<number>(5);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 9;
 
@@ -80,6 +81,9 @@ export const JobBoardTab: React.FC = () => {
       const res = await StudentProfileService.getMyProfile();
       const profile = res.data?.result ?? res.data;
       setHasCv(!!(profile?.cvUrl));
+      if (profile && typeof profile.currentSemester === 'number') {
+        setCurrentSemester(profile.currentSemester);
+      }
     } catch {
       setHasCv(false);
     }
@@ -283,22 +287,30 @@ export const JobBoardTab: React.FC = () => {
             {selectedJob.description && <div style={{ marginBottom: 18 }}><h3 style={{ fontSize: 13, fontWeight: 600, color: cc.textPrimary, margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('description', 'Description')}</h3><p style={{ fontSize: 13, color: cc.textSecondary, lineHeight: 1.6, margin: 0 }}>{selectedJob.description}</p></div>}
             {selectedJob.requirements && <div style={{ marginBottom: 18 }}><h3 style={{ fontSize: 13, fontWeight: 600, color: cc.textPrimary, margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('requirements', 'Requirements')}</h3><p style={{ fontSize: 13, color: cc.textSecondary, lineHeight: 1.6, margin: 0 }}>{selectedJob.requirements}</p></div>}
             {selectedJob.applicationDeadline && <div style={{ padding: 16, borderRadius: cc.radiusMd, background: cc.warningMuted, marginBottom: 20, display: 'flex', alignItems: 'center', gap: 12 }}><ClockCircleOutlined style={{ fontSize: 20, color: cc.warning }} /><div><p style={{ fontSize: 11, color: cc.warningText, margin: 0, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('applicationDeadline', 'Application Deadline')}</p><p style={{ fontSize: 14, color: cc.warningText, margin: '2px 0 0', fontWeight: 600 }}>{new Date(selectedJob.applicationDeadline).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p></div></div>}
-            {!hasCv && (
+            {currentSemester < 5 && (
+              <div style={{ padding: 12, borderRadius: cc.radiusMd, background: cc.warningMuted, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <WarningOutlined style={{ color: cc.warning }} />
+                <span style={{ fontSize: 12, color: cc.warningText }}>{t('browseOnlySemester', 'Browse only mode — Applications open in Semester 5 (Current: Semester {{sem}})', { sem: currentSemester })}</span>
+              </div>
+            )}
+            {!hasCv && currentSemester >= 5 && (
               <div style={{ padding: 12, borderRadius: cc.radiusMd, background: cc.dangerMuted, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
                 <WarningOutlined style={{ color: cc.danger }} />
                 <span style={{ fontSize: 12, color: cc.dangerText }}>{t('pleaseUploadCv', 'Please upload your CV in Profile before applying.')}</span>
               </div>
             )}
             <CTAButton variant="primary" size="lg" fullWidth icon={<SendOutlined />} onClick={() => {
-              if (selectedJob.applicationDeadline && new Date(selectedJob.applicationDeadline) < new Date()) {
+              if (currentSemester < 5) {
+                message.warning('Browse only mode enabled for your semester.');
+              } else if (selectedJob.applicationDeadline && new Date(selectedJob.applicationDeadline) < new Date()) {
                 message.error('This job posting has reached its deadline.');
               } else if (!hasCv) {
                 message.warning('Please upload your CV in Profile before applying.');
               } else {
                 setConfirmApply(selectedJob);
               }
-            }} disabled={selectedJob.status !== 'OPEN' || !hasCv} loading={applying}>
-              {selectedJob.status === 'OPEN' ? (hasCv ? t('applyNow', 'Apply Now') : t('cvRequired', 'CV Required')) : t('applicationsClosed', 'Applications Closed')}
+            }} disabled={selectedJob.status !== 'OPEN' || !hasCv || currentSemester < 5} loading={applying}>
+              {selectedJob.status === 'OPEN' ? (currentSemester < 5 ? t('browseOnly', 'Browse Only') : (hasCv ? t('applyNow', 'Apply Now') : t('cvRequired', 'CV Required'))) : t('applicationsClosed', 'Applications Closed')}
             </CTAButton>
           </motion.div>
         </div>

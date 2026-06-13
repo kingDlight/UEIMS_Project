@@ -31,5 +31,7 @@
   "applicationDeadline": "Application Deadline",
   "applyNow": "Apply Now",
   "cvRequired": "CV Required",
-  "applicationsClosed": "Applications Closed"
+  "applicationsClosed": "Applications Closed",
+  "browseOnlySemester": "Browse only mode — Applications open in Semester 5 (Current: Semester {{sem}})",
+  "browseOnly": "Browse Only"
 }

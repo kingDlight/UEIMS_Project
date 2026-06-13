@@ -10,6 +10,7 @@ import {
 import { NeuSurface } from '../components/shared/NeuSurface';
 import { SmallPill } from '../components/shared/SmallPill';
 import { StudentProfileService } from '@/services/StudentProfileService';
+import { api } from '@/services/api';
 import { cc } from '../constants';
 
 const BACKEND_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8080';
@@ -240,8 +241,8 @@ const CvView: React.FC<{ cvUrl?: string; cvFileName?: string; onRefresh: () => v
   const [showUpload, setShowUpload] = useState(false);
 
   const validateFile = (file: File): string | null => {
-    if (file.type !== 'application/pdf') return 'Only PDF files are accepted!';
-    if (file.size > 5 * 1024 * 1024) return 'CV file must not exceed 5MB!';
+    if (file.type !== 'application/pdf') return t('onlyPdfAccept', 'Only PDF files are accepted!');
+    if (file.size > 5 * 1024 * 1024) return t('maxSizeAccept', 'CV file must not exceed 5MB!');
     return null;
   };
 
@@ -263,12 +264,12 @@ const CvView: React.FC<{ cvUrl?: string; cvFileName?: string; onRefresh: () => v
       const fd = new FormData();
       fd.append('file', cvFile);
       await StudentProfileService.uploadCV(fd);
-      message.success('CV uploaded successfully!');
+      message.success(t('cvUploadedSuccess', 'CV uploaded successfully!'));
       setCvFile(null);
       setShowUpload(false);
       onRefresh();
     } catch (err: any) {
-      message.error(err.response?.data?.message || 'Upload failed!');
+      message.error(err.response?.data?.message || t('cvUploadFailed', 'Upload failed!'));
     } finally {
       setUploading(false);
     }
@@ -278,16 +279,16 @@ const CvView: React.FC<{ cvUrl?: string; cvFileName?: string; onRefresh: () => v
     try {
       setUploading(true);
       await StudentProfileService.deleteCV();
-      message.success('CV deleted successfully!');
+      message.success(t('cvDeletedSuccess', 'CV deleted successfully!'));
       onRefresh();
     } catch (err: any) {
-      message.error(err.response?.data?.message || 'Delete failed!');
+      message.error(err.response?.data?.message || t('cvDeleteFailed', 'Delete failed!'));
     } finally {
       setUploading(false);
     }
   };
 
-  const displayName = cvFileName || (cvUrl ? cvUrl.split('_').slice(2).join('_').replace('/uploads/cv/', '') : 'CV Document');
+  const displayName = cvFileName || (cvUrl ? cvUrl.split('_').slice(2).join('_').replace('/uploads/cv/', '') : t('cvDocument', 'CV Document'));
 
   if (!cvUrl && !showUpload) {
     return (
@@ -407,8 +408,8 @@ const CvView: React.FC<{ cvUrl?: string; cvFileName?: string; onRefresh: () => v
             ) : (
               <>
                 <UploadOutlined style={{ fontSize: 32, color: cc.textMuted, marginBottom: 8, display: 'block' }} />
-                <p style={{ fontSize: 13, fontWeight: 600, color: cc.text, margin: '0 0 2px' }}>Drop file here or click to browse</p>
-                <p style={{ fontSize: 11, color: cc.textMuted, margin: 0 }}>PDF only, max 5MB</p>
+                <p style={{ fontSize: 13, fontWeight: 600, color: cc.text, margin: '0 0 2px' }}>{t('dropOrClick', 'Drop file here or click to browse')}</p>
+                <p style={{ fontSize: 11, color: cc.textMuted, margin: 0 }}>{t('onlyPdf', 'PDF only, max 5MB')}</p>
               </>
             )}
           </div>
@@ -441,10 +442,17 @@ export const ProfileTab: React.FC = () => {
   const fetchProfile = async () => {
     try {
       setLoading(true);
-      const res = await StudentProfileService.getMyProfile();
-      const data = res?.data?.result;
-      if (!data) { console.warn('Unable to fetch profile data'); return; }
-      setProfile(data);
+      const [userRes, profileRes] = await Promise.all([
+        api.get('/users/myInfo').catch((err) => { console.error('Failed to fetch user info:', err); return { data: null }; }),
+        StudentProfileService.getMyProfile().catch(() => ({ data: null })),
+      ]);
+
+      const userInfo = userRes?.data;
+      const profileData = profileRes?.data?.result ?? profileRes?.data;
+
+      if (!userInfo && !profileData) { console.warn('Unable to fetch profile data'); return; }
+
+      setProfile({ ...userInfo, ...profileData });
     } catch (err) {
       console.error('Failed to fetch profile', err);
     } finally {

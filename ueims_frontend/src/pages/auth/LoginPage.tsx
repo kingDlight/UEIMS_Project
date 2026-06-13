@@ -2,6 +2,7 @@ import { LogoIcon } from '@/components/LogoIcon';
 import React, { useState, useEffect } from 'react';
 import { Form, Input, Button, message, Divider } from 'antd';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { AuthService } from '@/services/AuthService';
 import { getDeviceId } from '@/utils/device';
@@ -18,23 +19,27 @@ import {
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const { i18n } = useTranslation();
   const loginWithTokens = useAuthStore((state) => state.loginWithTokens);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
 
+  const user = useAuthStore((state) => state.user);
+
   const getRedirectPath = (roles: string[]): string => {
     if (!roles || roles.length === 0) return '/no-role';
     if (roles.includes('STUDENT')) return '/student/dashboard';
-    if (roles.includes('ENTERPRISE')) return '/student/dashboard';
+    if (roles.includes('ENTERPRISE')) return '/enterprise-dashboard';
     return '/training-manager/dashboard';
   };
 
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/training-manager/dashboard');
+    if (isAuthenticated && user) {
+      const redirectPath = getRedirectPath(user.roles || []);
+      navigate(redirectPath);
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, user, navigate]);
 
   const onFinish = async (values: { email: string; password: string }) => {
     setLoading(true);
@@ -268,6 +273,7 @@ export const LoginPage: React.FC = () => {
               useOneTap
               shape="pill"
               theme="outline"
+              locale={i18n.language || 'vi'}
             />
           </div>
         </div>

@@ -31,5 +31,7 @@
   "applicationDeadline": "Hạn nộp hồ sơ",
   "applyNow": "Ứng tuyển ngay",
   "cvRequired": "Yêu cầu CV",
-  "applicationsClosed": "Đã đóng ứng tuyển"
+  "applicationsClosed": "Đã đóng ứng tuyển",
+  "browseOnlySemester": "Chế độ xem chỉ đọc — Cơ hội ứng tuyển sẽ mở vào Kỳ học thứ 5 (Hiện tại: Kỳ học thứ {{sem}})",
+  "browseOnly": "Chỉ xem"
 }

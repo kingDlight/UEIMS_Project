@@ -45,5 +45,13 @@
   "uploadNewCv": "Upload New CV",
   "preparing": "Preparing your profile...",
   "selectFile": "Select File",
-  "supportedFormats": "Supported formats: .pdf (Max 5MB)"
+  "supportedFormats": "Supported formats: .pdf (Max 5MB)",
+  "onlyPdfAccept": "Only PDF files are accepted!",
+  "maxSizeAccept": "CV file must not exceed 5MB!",
+  "cvUploadedSuccess": "CV uploaded successfully!",
+  "cvUploadFailed": "Upload failed!",
+  "cvDeletedSuccess": "CV deleted successfully!",
+  "cvDeleteFailed": "Delete failed!",
+  "dropOrClick": "Drop file here or click to browse",
+  "cvDocument": "CV Document"
 }

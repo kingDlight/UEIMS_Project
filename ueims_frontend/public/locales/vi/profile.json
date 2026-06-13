@@ -45,5 +45,13 @@
   "uploadNewCv": "Tải CV mới",
   "preparing": "Đang chuẩn bị hồ sơ...",
   "selectFile": "Chọn tệp",
-  "supportedFormats": "Định dạng hỗ trợ: .pdf (Tối đa 5MB)"
+  "supportedFormats": "Định dạng hỗ trợ: .pdf (Tối đa 5MB)",
+  "onlyPdfAccept": "Chỉ chấp nhận tệp PDF!",
+  "maxSizeAccept": "Tệp CV không được vượt quá 5MB!",
+  "cvUploadedSuccess": "Đã tải lên CV thành công!",
+  "cvUploadFailed": "Tải lên thất bại!",
+  "cvDeletedSuccess": "Đã xóa CV thành công!",
+  "cvDeleteFailed": "Xóa thất bại!",
+  "dropOrClick": "Thả tệp vào đây hoặc nhấn để chọn",
+  "cvDocument": "Tài liệu CV"
 }
