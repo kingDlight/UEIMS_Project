@@ -1,5 +1,6 @@
 package com.ueims.repository;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,5 +10,7 @@ import com.ueims.model.entity.*;
 
 @Repository
 public interface IncidentRepository extends JpaRepository<Incident, UUID> {
-    java.util.List<Incident> findByAssignment_AssignmentId(UUID assignmentId);
+    List<Incident> findByAssignment_AssignmentIdIn(List<UUID> assignmentIds);
+
+    List<Incident> findByAssignment_AssignmentId(UUID assignmentId);
 }

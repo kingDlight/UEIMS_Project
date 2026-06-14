@@ -58,16 +58,18 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ApplicationResponse> findMyEnterpriseApplications() {
+    public List<ApplicationResponse> findByEnterpriseId(UUID enterpriseId) {
         User currentUser = getCurrentUser();
-        if (currentUser.getEnterprise() == null) {
+        UUID enterpriseUUID = enterpriseId;
+        if (enterpriseUUID == null) {
+            enterpriseUUID = currentUser.getEnterprise() != null
+                    ? currentUser.getEnterprise().getEnterpriseId()
+                    : null;
+        }
+        if (enterpriseUUID == null) {
             return List.of();
         }
-        UUID enterpriseId = currentUser.getEnterprise().getEnterpriseId();
-        return repository.findAll().stream()
-                .filter(app -> app.getJobPost() != null
-                        && app.getJobPost().getEnterprise() != null
-                        && enterpriseId.equals(app.getJobPost().getEnterprise().getEnterpriseId()))
+        return repository.findByJobPost_Enterprise_EnterpriseIdAndDeletedAtIsNull(enterpriseUUID).stream()
                 .map(mapper::toApplicationResponse)
                 .toList();
     }
@@ -252,11 +254,10 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     @Transactional
-    public ApplicationResponse updateStatus(UUID id, ApplicationScreenRequest request) {
+    public ApplicationResponse updateStatus(UUID id, com.ueims.dto.request.ApplicationStatusUpdateRequest request) {
         Application application =
                 repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.APPLICATION_NOT_FOUND));
 
-        // Ownership check: chỉ Enterprise sở hữu job post mới được cập nhật
         User currentUser = getCurrentUser();
         if (currentUser.getEnterprise() == null
                 || application.getJobPost() == null
@@ -275,8 +276,11 @@ public class ApplicationServiceImpl implements ApplicationService {
         }
 
         application.setStatus(request.getStatus());
-        if (request.getRejectionReason() != null) {
-            application.setRejectionReason(request.getRejectionReason());
+        if (request.getInterviewDate() != null && !request.getInterviewDate().isEmpty()) {
+            application.setInterviewDate(java.time.LocalDateTime.parse(request.getInterviewDate()));
+        }
+        if (request.getInterviewLink() != null) {
+            application.setInterviewLink(request.getInterviewLink());
         }
         application.setScreenedBy(currentUser);
 

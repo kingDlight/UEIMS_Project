@@ -1,5 +1,6 @@
 package com.ueims.controller;
 
+import java.util.List;
 import java.util.UUID;
 
 import jakarta.validation.Valid;
@@ -27,7 +28,7 @@ public class FinalReportController {
 
     @GetMapping
     @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
-    public ResponseEntity<java.util.List<com.ueims.dto.response.FinalReportDTO>> getAll() {
+    public ResponseEntity<List<com.ueims.dto.response.FinalReportDTO>> getAll() {
         return ResponseEntity.ok(service.findAll().stream().map(mapper::toDto).toList());
     }
 

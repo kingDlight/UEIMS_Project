@@ -1,5 +1,6 @@
 package com.ueims.repository;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,4 +13,6 @@ public interface FinalReportRepository extends JpaRepository<FinalReport, UUID> 
     java.util.Optional<FinalReport> findByAssignment_AssignmentId(UUID assignmentId);
 
     java.util.Optional<FinalReport> findByAssignment_Student_UserId(UUID studentId);
+
+    void deleteByAssignment_AssignmentIdIn(List<UUID> assignmentIds);
 }

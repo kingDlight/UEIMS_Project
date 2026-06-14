@@ -1,5 +1,6 @@
 package com.ueims.controller;
 
+import java.util.List;
 import java.util.UUID;
 
 import jakarta.validation.Valid;
@@ -30,20 +31,20 @@ public class InterviewController {
     com.ueims.mapper.InterviewMapper mapper;
 
     @GetMapping
-    public ResponseEntity<java.util.List<com.ueims.dto.response.InterviewDTO>> getAll() {
+    public ResponseEntity<List<com.ueims.dto.response.InterviewDTO>> getAll() {
         return ResponseEntity.ok(service.findAll().stream().map(mapper::toDto).toList());
     }
 
     @GetMapping("/my-schedules")
     @org.springframework.security.access.prepost.PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<java.util.List<com.ueims.dto.response.InterviewDTO>> getMyInterviews() {
+    public ResponseEntity<List<com.ueims.dto.response.InterviewDTO>> getMyInterviews() {
         return ResponseEntity.ok(
                 service.findMyInterviews().stream().map(mapper::toDto).toList());
     }
 
     @GetMapping("/my-enterprise")
     @org.springframework.security.access.prepost.PreAuthorize("hasRole('ENTERPRISE') or hasRole('TRAINING_MANAGER')")
-    public ResponseEntity<java.util.List<com.ueims.dto.response.InterviewDTO>> getMyEnterpriseInterviews() {
+    public ResponseEntity<List<com.ueims.dto.response.InterviewDTO>> getMyEnterpriseInterviews() {
         return ResponseEntity.ok(
                 service.findMyEnterpriseInterviews().stream().map(mapper::toDto).toList());
     }

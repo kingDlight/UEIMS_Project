@@ -5,9 +5,12 @@ import java.util.UUID;
 
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.ueims.dto.response.EnterpriseAssignmentDTO;
 import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
+import com.ueims.mapper.EnterpriseAssignmentMapper;
 import com.ueims.model.entity.EnterpriseAssignment;
 import com.ueims.model.entity.User;
 import com.ueims.repository.EnterpriseAssignmentRepository;
@@ -24,6 +27,7 @@ import lombok.experimental.FieldDefaults;
 public class EnterpriseAssignmentServiceImpl implements EnterpriseAssignmentService {
     EnterpriseAssignmentRepository repository;
     UserRepository userRepository;
+    EnterpriseAssignmentMapper mapper;
 
     @Override
     public List<EnterpriseAssignment> findAll() {
@@ -33,6 +37,11 @@ public class EnterpriseAssignmentServiceImpl implements EnterpriseAssignmentServ
     @Override
     public EnterpriseAssignment findById(UUID id) {
         return repository.findById(id).orElse(null);
+    }
+
+    @Override
+    public List<EnterpriseAssignment> findByEnterpriseId(UUID enterpriseId) {
+        return repository.findByEnterprise_EnterpriseId(enterpriseId);
     }
 
     @Override
@@ -56,6 +65,16 @@ public class EnterpriseAssignmentServiceImpl implements EnterpriseAssignmentServ
     @Override
     public EnterpriseAssignment save(EnterpriseAssignment entity) {
         return repository.save(entity);
+    }
+
+    @Override
+    @Transactional
+    public EnterpriseAssignment update(UUID id, EnterpriseAssignmentDTO dto) {
+        EnterpriseAssignment existing =
+                repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ASSIGNMENT_NOT_FOUND));
+
+        mapper.updateEntity(dto, existing);
+        return repository.save(existing);
     }
 
     @Override

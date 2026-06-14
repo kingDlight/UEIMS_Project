@@ -19,11 +19,15 @@ public class ApplicationResponse {
     private String enterpriseName;
     private UUID studentId;
     private String studentName;
+    private String studentEmail;
+    private String studentCode;
     private String cvFileUrl;
     private String cvSnapshotUrl;
     private String coverLetter;
     private String status;
     private String rejectionReason;
+    private LocalDateTime interviewDate;
+    private String interviewLink;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

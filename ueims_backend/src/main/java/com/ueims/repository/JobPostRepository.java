@@ -13,4 +13,8 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID> {
     List<JobPost> findByStatusAndDeletedAtIsNull(String status);
 
     List<JobPost> findAllByDeletedAtIsNull();
+
+    List<JobPost> findByEnterprise_EnterpriseId(UUID enterpriseId);
+
+    void deleteByEnterprise_EnterpriseId(UUID enterpriseId);
 }

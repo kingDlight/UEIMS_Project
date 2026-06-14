@@ -3,6 +3,7 @@ package com.ueims.service;
 import java.util.List;
 import java.util.UUID;
 
+import com.ueims.dto.response.EnterpriseAssignmentDTO;
 import com.ueims.model.entity.EnterpriseAssignment;
 
 public interface EnterpriseAssignmentService {
@@ -10,11 +11,15 @@ public interface EnterpriseAssignmentService {
 
     EnterpriseAssignment findById(UUID id);
 
+    List<EnterpriseAssignment> findByEnterpriseId(UUID enterpriseId);
+
     EnterpriseAssignment findMyAssignment(UUID studentId);
 
     List<EnterpriseAssignment> findMyEnterpriseAssignments();
 
     EnterpriseAssignment save(EnterpriseAssignment entity);
+
+    EnterpriseAssignment update(UUID id, EnterpriseAssignmentDTO dto);
 
     void deleteById(UUID id);
 }

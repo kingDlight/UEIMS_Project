@@ -1,5 +1,6 @@
 package com.ueims.controller;
 
+import java.util.List;
 import java.util.UUID;
 
 import jakarta.validation.Valid;
@@ -22,12 +23,12 @@ public class NotificationController {
     com.ueims.mapper.NotificationMapper mapper;
 
     @GetMapping
-    public ResponseEntity<java.util.List<com.ueims.dto.response.NotificationDTO>> getAll() {
+    public ResponseEntity<List<com.ueims.dto.response.NotificationDTO>> getAll() {
         return ResponseEntity.ok(service.findAll().stream().map(mapper::toDto).toList());
     }
 
     @GetMapping("/my")
-    public ResponseEntity<java.util.List<com.ueims.dto.response.NotificationDTO>> getMyNotifications() {
+    public ResponseEntity<List<com.ueims.dto.response.NotificationDTO>> getMyNotifications() {
         String email = org.springframework.security.core.context.SecurityContextHolder.getContext()
                 .getAuthentication()
                 .getName();

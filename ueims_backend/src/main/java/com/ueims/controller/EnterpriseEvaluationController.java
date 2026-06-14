@@ -55,6 +55,13 @@ public class EnterpriseEvaluationController {
         return ResponseEntity.ok(mapper.toDto(service.save(mapper.toEntity(entity))));
     }
 
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ENTERPRISE')")
+    public ResponseEntity<EnterpriseEvaluationDTO> update(
+            @PathVariable UUID id, @Valid @RequestBody EnterpriseEvaluationDTO dto) {
+        return ResponseEntity.ok(mapper.toDto(service.update(id, dto)));
+    }
+
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('SYSTEM_ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {

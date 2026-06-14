@@ -348,16 +348,16 @@ export const EvaluationTab: React.FC = () => {
   const [submitted, setSubmitted] = useState(false);
   const [existingEvaluation, setExistingEvaluation] = useState<ExistingEvaluation | null>(null);
 
-  // Fetch assigned students
+  // Fetch placed students from applications
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
         const res = await ApplicationService.getMyEnterprise();
-        const data: any[] = res.data?.result ?? res.data ?? [];
-        if (data.length > 0) {
+        const data = res.data?.result ?? res.data ?? [];
+        if (Array.isArray(data) && data.length > 0) {
           const mapped: AssignedStudent[] = data
-            .filter((item) => item.status === 'ACCEPTED' || item.status === 'INTERVIEW_SCHEDULED')
+            .filter((item: any) => item.status === 'ACCEPTED' || item.status === 'INTERVIEW_SCHEDULED')
             .map((item: any) => ({
               assignmentId: item.applicationId ?? item.id,
               studentName: item.studentName ?? 'Student',

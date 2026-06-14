@@ -1,5 +1,6 @@
 package com.ueims.repository;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,5 +12,5 @@ import com.ueims.model.entity.*;
 public interface SemesterRepository extends JpaRepository<Semester, UUID> {
     boolean existsBySemesterCode(String semesterCode);
 
-    java.util.List<Semester> findByStatus(String status);
+    List<Semester> findByStatus(String status);
 }

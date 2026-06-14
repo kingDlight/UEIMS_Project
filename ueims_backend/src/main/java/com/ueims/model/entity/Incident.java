@@ -1,6 +1,7 @@
 package com.ueims.model.entity;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import jakarta.persistence.*;
 
@@ -35,7 +36,7 @@ public class Incident extends BaseEntity {
 
     @Column(name = "evidence_urls", columnDefinition = "JSONB")
     @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
-    private java.util.List<String> evidenceUrls;
+    private List<String> evidenceUrls;
 
     @Column(name = "status", nullable = false, length = 20)
     @Builder.Default

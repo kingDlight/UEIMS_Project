@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository;
 import com.ueims.model.entity.*;
 
 @Repository
-public interface SemesterEnterpriseRepository extends JpaRepository<SemesterEnterprise, SemesterEnterpriseId> {}
+public interface SemesterEnterpriseRepository extends JpaRepository<SemesterEnterprise, SemesterEnterpriseId> {
+    void deleteById_EnterpriseId(java.util.UUID enterpriseId);
+}

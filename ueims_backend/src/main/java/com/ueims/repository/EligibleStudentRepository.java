@@ -1,5 +1,6 @@
 package com.ueims.repository;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,16 +15,16 @@ public interface EligibleStudentRepository extends JpaRepository<EligibleStudent
 
     java.util.Optional<EligibleStudent> findByUser_UserIdAndSemester_SemesterId(UUID userId, UUID semesterId);
 
-    java.util.List<EligibleStudent> findBySemester_SemesterIdAndStatus(UUID semesterId, String status);
+    List<EligibleStudent> findBySemester_SemesterIdAndStatus(UUID semesterId, String status);
 
-    java.util.List<EligibleStudent> findBySemester_SemesterId(UUID semesterId);
+    List<EligibleStudent> findBySemester_SemesterId(UUID semesterId);
 
-    java.util.List<EligibleStudent> findAllByUser_UserId(UUID userId);
+    List<EligibleStudent> findAllByUser_UserId(UUID userId);
 
     java.util.Optional<EligibleStudent> findTopByUser_UserIdOrderByImportedAtDesc(UUID userId);
 
     @org.springframework.data.jpa.repository.Query(
             "SELECT new com.ueims.model.dto.dashboard.ChartDataDTO(e.major, COUNT(e)) FROM EligibleStudent e WHERE e.semester.semesterId = :semesterId GROUP BY e.major")
-    java.util.List<com.ueims.model.dto.dashboard.ChartDataDTO> countStudentsByMajor(
+    List<com.ueims.model.dto.dashboard.ChartDataDTO> countStudentsByMajor(
             @org.springframework.data.repository.query.Param("semesterId") UUID semesterId);
 }

@@ -85,14 +85,14 @@ function getAvatarColor(name: string) {
 // MAP API RESPONSE TO APPLICANT CARD (UC-39: from real backend)
 // ============================================================
 function mapToApplicantCard(item: any): ApplicantCard {
-  const name: string = item.studentName || 'Student';
+  const name: string = item.studentName ?? item.student?.fullName ?? 'Student';
   const avatarColor = getAvatarColor(name);
   return {
     id: item.applicationId ?? item.id,
     applicationId: item.applicationId ?? item.id,
     studentName: name,
-    studentCode: item.studentCode || '—',
-    studentEmail: item.studentEmail || '',
+    studentCode: item.studentCode ?? item.student?.studentCode ?? '—',
+    studentEmail: item.studentEmail ?? item.student?.email ?? '',
     jobTitle: item.jobPostTitle ?? item.job?.title ?? 'Intern',
     jobPostId: item.jobPostId ?? '',
     avatarColor,
@@ -187,9 +187,19 @@ const SortableCard: React.FC<{
         onClick={() => onViewDetails(applicant)}
         whileHover={{ y: -2 }}
         style={{
-          background: c.surface, borderRadius: c.radiusLg,
-          border: `1px solid ${c.border}`, boxShadow: c.shadowSm,
-          padding: '14px 16px', cursor: 'grab', marginBottom: 10,
+          background: c.surface, borderRadius: c.radiusLg, border: `1px solid ${c.border}`,
+          boxShadow: c.shadowSm, padding: '14px 16px',
+          cursor: 'grab', transition: 'box-shadow 0.2s, transform 0.2s', marginBottom: 10,
+        }}
+        onMouseEnter={(e) => {
+          const el = e.currentTarget as HTMLElement;
+          el.style.boxShadow = c.shadowMd;
+          el.style.transform = 'translateY(-1px)';
+        }}
+        onMouseLeave={(e) => {
+          const el = e.currentTarget as HTMLElement;
+          el.style.boxShadow = c.shadowSm;
+          el.style.transform = 'translateY(0)';
         }}
       >
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 10 }}>

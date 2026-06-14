@@ -12,7 +12,7 @@ public interface ApplicationService {
 
     List<ApplicationResponse> findMyApplications();
 
-    List<ApplicationResponse> findMyEnterpriseApplications();
+    List<ApplicationResponse> findByEnterpriseId(UUID enterpriseId);
 
     ApplicationResponse findById(UUID id);
 
@@ -24,5 +24,5 @@ public interface ApplicationService {
 
     ApplicationResponse screenApplication(UUID id, ApplicationScreenRequest request);
 
-    ApplicationResponse updateStatus(UUID id, ApplicationScreenRequest request);
+    ApplicationResponse updateStatus(UUID id, com.ueims.dto.request.ApplicationStatusUpdateRequest request);
 }

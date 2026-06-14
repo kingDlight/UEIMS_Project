@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ueims.dto.request.ApplicationRequest;
 import com.ueims.dto.request.ApplicationScreenRequest;
+import com.ueims.dto.request.ApplicationStatusUpdateRequest;
 import com.ueims.dto.response.ApiResponse;
 import com.ueims.dto.response.ApplicationResponse;
 import com.ueims.service.ApplicationService;
@@ -62,32 +63,13 @@ public class ApplicationController {
     }
 
     /**
-     * Get all applications for the currently logged in Enterprise (UC-39)
-     *
-     * @return ApiResponse containing list of application responses
+     * Get all applications for the enterprise of the currently logged-in user (UC-41 Kanban)
      */
     @GetMapping("/my-enterprise")
     @PreAuthorize("hasRole('ENTERPRISE') or hasRole('TRAINING_MANAGER')")
     public ApiResponse<List<ApplicationResponse>> getMyEnterpriseApplications() {
         return ApiResponse.<List<ApplicationResponse>>builder()
-                .result(service.findMyEnterpriseApplications())
-                .build();
-    }
-
-    /**
-     * Update application status (UC-38, UC-39, UC-41)
-     * Used by the enterprise kanban to move candidates between stages.
-     *
-     * @param id Application UUID
-     * @param request Status payload
-     * @return ApiResponse containing the updated application details
-     */
-    @PutMapping("/{id}/status")
-    @PreAuthorize("hasRole('ENTERPRISE')")
-    public ApiResponse<ApplicationResponse> updateApplicationStatus(
-            @PathVariable UUID id, @RequestBody @Valid ApplicationScreenRequest request) {
-        return ApiResponse.<ApplicationResponse>builder()
-                .result(service.updateStatus(id, request))
+                .result(service.findByEnterpriseId(null))
                 .build();
     }
 
@@ -133,6 +115,19 @@ public class ApplicationController {
             @PathVariable UUID id, @RequestBody @Valid ApplicationScreenRequest request) {
         return ApiResponse.<ApplicationResponse>builder()
                 .result(service.screenApplication(id, request))
+                .build();
+    }
+
+    /**
+     * Update application status (UC-41 Kanban)
+     * Enterprise moves student through PENDING → INTERVIEW_SCHEDULED → ACCEPTED / REJECTED
+     */
+    @PutMapping("/{id}/status")
+    @PreAuthorize("hasRole('ENTERPRISE')")
+    public ApiResponse<ApplicationResponse> updateStatus(
+            @PathVariable UUID id, @RequestBody @Valid ApplicationStatusUpdateRequest request) {
+        return ApiResponse.<ApplicationResponse>builder()
+                .result(service.updateStatus(id, request))
                 .build();
     }
 

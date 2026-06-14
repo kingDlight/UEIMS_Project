@@ -1,5 +1,6 @@
 package com.ueims.controller;
 
+import java.util.List;
 import java.util.UUID;
 
 import jakarta.validation.Valid;
@@ -22,7 +23,7 @@ public class InternshipPlanItemController {
     com.ueims.mapper.InternshipPlanItemMapper mapper;
 
     @GetMapping
-    public ResponseEntity<java.util.List<com.ueims.dto.response.InternshipPlanItemDTO>> getAll() {
+    public ResponseEntity<List<com.ueims.dto.response.InternshipPlanItemDTO>> getAll() {
         return ResponseEntity.ok(service.findAll().stream().map(mapper::toDto).toList());
     }
 

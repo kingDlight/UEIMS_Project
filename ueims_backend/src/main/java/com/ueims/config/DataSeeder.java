@@ -1,24 +1,32 @@
 package com.ueims.config;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.ueims.model.entity.EnterpriseAssignment;
 import com.ueims.model.entity.Role;
 import com.ueims.model.entity.User;
 import com.ueims.model.entity.UserRole;
 import com.ueims.model.entity.UserRoleId;
+import com.ueims.repository.ApplicationRepository;
 import com.ueims.repository.EnterpriseAssignmentRepository;
 import com.ueims.repository.EnterpriseEvaluationRepository;
 import com.ueims.repository.EnterpriseRepository;
 import com.ueims.repository.FinalReportRepository;
 import com.ueims.repository.IncidentRepository;
+import com.ueims.repository.InternshipPlanItemRepository;
 import com.ueims.repository.InternshipPlanRepository;
+import com.ueims.repository.JobPostRepository;
 import com.ueims.repository.RoleRepository;
+import com.ueims.repository.SemesterEnterpriseRepository;
 import com.ueims.repository.StudentEnterpriseFeedbackRepository;
 import com.ueims.repository.UserRepository;
 import com.ueims.repository.UserRoleRepository;
@@ -36,86 +44,93 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DataSeeder implements CommandLineRunner {
 
-    EnterpriseRepository enterpriseRepository;
+    ApplicationRepository applicationRepository;
     EnterpriseAssignmentRepository enterpriseAssignmentRepository;
+    EnterpriseEvaluationRepository enterpriseEvaluationRepository;
+    EnterpriseRepository enterpriseRepository;
+    FinalReportRepository finalReportRepository;
+    IncidentRepository incidentRepository;
+    InternshipPlanItemRepository internshipPlanItemRepository;
+    InternshipPlanRepository internshipPlanRepository;
+    JobPostRepository jobPostRepository;
+    SemesterEnterpriseRepository semesterEnterpriseRepository;
+    StudentEnterpriseFeedbackRepository studentEnterpriseFeedbackRepository;
     UserRepository userRepository;
     RoleRepository roleRepository;
     UserRoleRepository userRoleRepository;
-    PasswordEncoder passwordEncoder;
     WeeklyReportRepository weeklyReportRepository;
-    FinalReportRepository finalReportRepository;
-    EnterpriseEvaluationRepository enterpriseEvaluationRepository;
-    IncidentRepository incidentRepository;
-    InternshipPlanRepository internshipPlanRepository;
-    StudentEnterpriseFeedbackRepository studentEnterpriseFeedbackRepository;
+    PasswordEncoder passwordEncoder;
 
     @Value("${app.seed.default-password:defaultPassword}")
     @NonFinal
     String defaultPassword;
 
     @Override
+    @Transactional
     public void run(String... args) throws Exception {
         log.info("Cleaning up old mock enterprises from previous seed...");
         enterpriseRepository.findAll().forEach(e -> {
             if (Arrays.asList("FPT Software", "VNG Corporation", "NashTech Vietnam", "TMA Solutions")
                     .contains(e.getCompanyName())) {
+                log.info("Deleting enterprise: {} ({})", e.getCompanyName(), e.getEnterpriseId());
                 UUID enterpriseId = e.getEnterpriseId();
-                log.info("Processing enterprise: {} (ID: {})", e.getCompanyName(), enterpriseId);
 
-                // Get all assignments for this enterprise
-                var assignments = enterpriseAssignmentRepository.findByEnterprise_EnterpriseId(enterpriseId);
-                log.info("Found {} enterprise_assignments for enterprise ID: {}", assignments.size(), enterpriseId);
+                // --- Delete in correct FK dependency order ---
 
-                // Delete all related entities for each assignment (in correct FK order)
-                for (var assignment : assignments) {
-                    UUID assignmentId = assignment.getAssignmentId();
+                // 1. Get all assignment IDs for this enterprise (needed for child-of-assignment deletes)
+                List<EnterpriseAssignment> assignments =
+                        enterpriseAssignmentRepository.findByEnterprise_EnterpriseId(enterpriseId);
+                List<UUID> assignmentIds = assignments.stream()
+                        .map(EnterpriseAssignment::getAssignmentId)
+                        .collect(Collectors.toList());
 
-                    // Delete weekly_reports
-                    var weeklyReports = weeklyReportRepository.findByAssignment_AssignmentId(assignmentId);
-                    log.info("Found {} weekly_reports for assignment ID: {}", weeklyReports.size(), assignmentId);
-                    weeklyReportRepository.deleteAll(weeklyReports);
+                // 2. Delete children of EnterpriseAssignment (Assignment -> X chain)
+                if (!assignmentIds.isEmpty()) {
+                    // 2a. InternshipPlanItems -> InternshipPlans (via planId)
+                    List<UUID> planIds =
+                            internshipPlanRepository.findByAssignment_AssignmentIdIn(assignmentIds).stream()
+                                    .map(p -> p.getPlanId())
+                                    .collect(Collectors.toList());
+                    if (!planIds.isEmpty()) {
+                        internshipPlanItemRepository.deleteByPlan_PlanIdIn(planIds);
+                    }
+                    internshipPlanRepository
+                            .findByAssignment_AssignmentIdIn(assignmentIds)
+                            .forEach(p -> internshipPlanRepository.delete(p));
 
-                    // Delete final_reports
-                    finalReportRepository
-                            .findByAssignment_AssignmentId(assignmentId)
-                            .ifPresent(fr -> {
-                                finalReportRepository.delete(fr);
-                                log.info("Deleted final_report for assignment ID: {}", assignmentId);
-                            });
+                    // 2b. WeeklyReports
+                    weeklyReportRepository.deleteByAssignment_AssignmentIdIn(assignmentIds);
 
-                    // Delete enterprise_evaluations
-                    enterpriseEvaluationRepository
-                            .findByAssignment_AssignmentId(assignmentId)
-                            .ifPresent(ee -> {
-                                enterpriseEvaluationRepository.delete(ee);
-                                log.info("Deleted enterprise_evaluation for assignment ID: {}", assignmentId);
-                            });
+                    // 2c. FinalReports
+                    finalReportRepository.deleteByAssignment_AssignmentIdIn(assignmentIds);
 
-                    // Delete incidents
-                    var incidents = incidentRepository.findByAssignment_AssignmentId(assignmentId);
-                    incidentRepository.deleteAll(incidents);
-                    log.info("Deleted {} incidents for assignment ID: {}", incidents.size(), assignmentId);
+                    // 2d. EnterpriseEvaluations
+                    enterpriseEvaluationRepository.deleteByAssignment_AssignmentIdIn(assignmentIds);
 
-                    // Delete internship_plans
-                    var plans = internshipPlanRepository.findByAssignment_AssignmentId(assignmentId);
-                    internshipPlanRepository.deleteAll(plans);
-                    log.info("Deleted {} internship_plans for assignment ID: {}", plans.size(), assignmentId);
+                    // 2e. Incidents
+                    incidentRepository
+                            .findByAssignment_AssignmentIdIn(assignmentIds)
+                            .forEach(i -> incidentRepository.delete(i));
                 }
 
-                // Delete all assignments
-                enterpriseAssignmentRepository.deleteAll(assignments);
-                log.info("Deleted all enterprise_assignments for enterprise ID: {}", enterpriseId);
+                // 3. Delete Applications (via job_post -> enterprise)
+                applicationRepository.deleteByJobPost_Enterprise_EnterpriseId(enterpriseId);
 
-                // Delete student_enterprise_feedbacks for this enterprise
-                var feedbacks = studentEnterpriseFeedbackRepository.findByEnterprise_EnterpriseId(enterpriseId);
-                studentEnterpriseFeedbackRepository.deleteAll(feedbacks);
-                log.info(
-                        "Deleted {} student_enterprise_feedbacks for enterprise ID: {}",
-                        feedbacks.size(),
-                        enterpriseId);
+                // 4. Delete JobPosts
+                jobPostRepository.deleteByEnterprise_EnterpriseId(enterpriseId);
 
+                // 5. Delete StudentEnterpriseFeedbacks
+                studentEnterpriseFeedbackRepository.deleteByEnterprise_EnterpriseId(enterpriseId);
+
+                // 6. Delete SemesterEnterprises
+                semesterEnterpriseRepository.deleteById_EnterpriseId(enterpriseId);
+
+                // 7. Delete Users linked to this enterprise
+                userRepository.findByEnterprise_EnterpriseId(enterpriseId).forEach(u -> userRepository.delete(u));
+
+                // 8. Delete the Enterprise
                 enterpriseRepository.delete(e);
-                log.info("Deleted enterprise: {} (ID: {})", e.getCompanyName(), enterpriseId);
+                log.info("Deleted enterprise: {}", e.getCompanyName());
             }
         });
         seedUsers();
