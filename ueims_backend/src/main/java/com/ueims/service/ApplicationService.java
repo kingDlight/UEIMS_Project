@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import com.ueims.dto.request.ApplicationRequest;
 import com.ueims.dto.request.ApplicationScreenRequest;
+import com.ueims.dto.request.ApplicationStatusUpdateRequest;
 import com.ueims.dto.response.ApplicationResponse;
 
 public interface ApplicationService {
@@ -24,5 +25,5 @@ public interface ApplicationService {
 
     ApplicationResponse screenApplication(UUID id, ApplicationScreenRequest request);
 
-    ApplicationResponse updateStatus(UUID id, com.ueims.dto.request.ApplicationStatusUpdateRequest request);
+    ApplicationResponse updateStatus(UUID id, ApplicationStatusUpdateRequest request);
 }
