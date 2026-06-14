@@ -1,22 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import { Spin } from 'antd';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { ModernLayout } from '@/components/layout/ModernLayout';
 import { navItems } from './constants';
-import { StudentProfileService } from '@/services/StudentProfileService';
-import {
-  StudentDashboardTab,
-  ProfileTab,
-  JobBoardTab,
-  ApplicationsTab,
-  ScheduleTab,
-  TrainingPlanTab,
-  ReportsTab,
-  FinalReportTab,
-  EvaluationTab,
-  FeedbackTab,
-} from './tabs';
+import { useStudentProfileQuery } from '@/hooks/useStudentProfile';
+const StudentDashboardTab = React.lazy(() => import('./tabs/DashboardTab').then(m => ({ default: m.StudentDashboardTab })));
+const ProfileTab = React.lazy(() => import('./tabs/ProfileTab').then(m => ({ default: m.ProfileTab })));
+const JobBoardTab = React.lazy(() => import('./tabs/JobBoardTab').then(m => ({ default: m.JobBoardTab })));
+const ApplicationsTab = React.lazy(() => import('./tabs/ApplicationsTab').then(m => ({ default: m.ApplicationsTab })));
+const ScheduleTab = React.lazy(() => import('./tabs/ScheduleTab').then(m => ({ default: m.ScheduleTab })));
+const TrainingPlanTab = React.lazy(() => import('./tabs/TrainingPlanTab').then(m => ({ default: m.TrainingPlanTab })));
+const ReportsTab = React.lazy(() => import('./tabs/ReportsTab').then(m => ({ default: m.ReportsTab })));
+const FinalReportTab = React.lazy(() => import('./tabs/FinalReportTab').then(m => ({ default: m.FinalReportTab })));
+const EvaluationTab = React.lazy(() => import('./tabs/EvaluationTab').then(m => ({ default: m.EvaluationTab })));
+const FeedbackTab = React.lazy(() => import('./tabs/FeedbackTab').then(m => ({ default: m.FeedbackTab })));
 
 export type StudentPageKey = 
   | 'dashboard'
@@ -38,27 +36,7 @@ export const StudentDashboard: React.FC = () => {
   const { tab } = useParams<{ tab: string }>();
   const currentTab = (tab || 'dashboard') as StudentPageKey;
   const { token } = useAuthStore();
-  const [profile, setProfile] = useState<any>(null);
-  const [profileLoading, setProfileLoading] = useState(true);
-  
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        setProfileLoading(true);
-        const res = await StudentProfileService.getMyProfile();
-        setProfile(res?.data?.result ?? res?.data);
-      } catch (err) {
-        console.error('Failed to fetch profile in StudentDashboard:', err);
-      } finally {
-        setProfileLoading(false);
-      }
-    };
-    if (token) {
-      fetchProfile();
-    } else {
-      setProfileLoading(false);
-    }
-  }, [token]);
+  const { data: profile, isLoading: profileLoading } = useStudentProfileQuery();
 
   if (!token) {
     return <Navigate to="/login" replace />;
@@ -127,7 +105,13 @@ export const StudentDashboard: React.FC = () => {
       defaultRoute="dashboard" 
       basePath="/student"
     >
-      {pages[currentTab] || <StudentDashboardTab />}
+      <React.Suspense fallback={
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh', width: '100%' }}>
+          <Spin size="large" />
+        </div>
+      }>
+        {pages[currentTab] || <StudentDashboardTab />}
+      </React.Suspense>
     </ModernLayout>
   );
 };

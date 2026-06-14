@@ -10,15 +10,19 @@ public interface InterviewService {
 
     List<Interview> findMyInterviews();
 
+    List<Interview> findMyEnterpriseInterviews();
+
     Interview findById(UUID id);
 
     Interview save(Interview entity);
+
+    Interview update(UUID id, Interview entity);
 
     Interview confirmAttendance(UUID id);
 
     Interview declineAttendance(UUID id, String reason);
 
-    Interview recordResult(UUID id, String result, String feedback);
+    Interview recordResult(UUID id, String result, String notes);
 
     void deleteById(UUID id);
 }

@@ -10,11 +10,17 @@ public interface WeeklyReportService {
 
     List<WeeklyReport> findMyReports();
 
+    List<WeeklyReport> findByEnterprise();
+
     WeeklyReport findById(UUID id);
 
     WeeklyReport save(WeeklyReport entity);
 
     WeeklyReport updateReport(UUID id, com.ueims.dto.request.WeeklyReportRequest request);
+
+    WeeklyReport approveReport(UUID id, String feedback);
+
+    WeeklyReport rejectReport(UUID id, String feedback);
 
     void deleteById(UUID id);
 }

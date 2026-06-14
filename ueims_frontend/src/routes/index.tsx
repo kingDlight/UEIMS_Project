@@ -1,4 +1,6 @@
+import React, { Suspense } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { Spin } from 'antd';
 
 import { LoginPage } from '@/pages/auth/LoginPage';
 import { ForgotPasswordPage } from '@/pages/auth/ForgotPasswordPage';
@@ -8,10 +10,17 @@ import { RegisterEnterprisePage } from '@/pages/auth/RegisterEnterprisePage';
 import { HomePage } from '@/pages/home/HomePage';
 import { ProtectedRoute } from '@/components/guards/ProtectedRoute';
 import { EmailPreviewPage } from '@/pages/dev/EmailPreviewPage';
-import { TrainingManagerDashboard } from '@/pages/TrainingManagerDashboard';
-import { StudentDashboard } from '@/pages/student/StudentDashboard';
-import { EnterpriseDashboard } from '@/pages/enterprise/EnterpriseDashboard';
 import { NoRolePage } from '@/pages/auth/NoRolePage';
+
+const TrainingManagerDashboard = React.lazy(() => import('@/pages/TrainingManagerDashboard').then(m => ({ default: m.TrainingManagerDashboard })));
+const StudentDashboard = React.lazy(() => import('@/pages/student/StudentDashboard').then(m => ({ default: m.StudentDashboard })));
+const EnterpriseDashboard = React.lazy(() => import('@/pages/enterprise/EnterpriseDashboard').then(m => ({ default: m.EnterpriseDashboard })));
+
+const PageLoader = () => (
+  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', width: '100%' }}>
+    <Spin size="large" />
+  </div>
+);
 
 export const router = createBrowserRouter([
   {
@@ -49,7 +58,11 @@ export const router = createBrowserRouter([
       },
       {
         path: 'dashboard',
-        element: <TrainingManagerDashboard />,
+        element: (
+          <Suspense fallback={<PageLoader />}>
+            <TrainingManagerDashboard />
+          </Suspense>
+        ),
       },
       // Nếu sau này có màn hình nào khác của Admin/Student cần dùng AppLayout cũ thì khai báo vào đây:
       // {
@@ -65,15 +78,27 @@ export const router = createBrowserRouter([
   },
   {
     path: '/training-manager/:tab?',
-    element: <TrainingManagerDashboard />,
+    element: (
+      <Suspense fallback={<PageLoader />}>
+        <TrainingManagerDashboard />
+      </Suspense>
+    ),
   },
   {
     path: '/student/:tab?',
-    element: <StudentDashboard />,
+    element: (
+      <Suspense fallback={<PageLoader />}>
+        <StudentDashboard />
+      </Suspense>
+    ),
   },
   {
     path: '/enterprise-dashboard/:tab?',
-    element: <EnterpriseDashboard />,
+    element: (
+      <Suspense fallback={<PageLoader />}>
+        <EnterpriseDashboard />
+      </Suspense>
+    ),
   },
   {
     path: '*',

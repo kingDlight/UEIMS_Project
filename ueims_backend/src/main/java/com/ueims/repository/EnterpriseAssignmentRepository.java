@@ -18,6 +18,13 @@ public interface EnterpriseAssignmentRepository extends JpaRepository<Enterprise
 
     // UC-44: Kiểm tra sinh viên đã có chỗ thực tập trong học kỳ chưa
     boolean existsByStudent_UserIdAndSemester_SemesterId(UUID studentId, UUID semesterId);
+    List<EnterpriseAssignment> findByEnterprise_EnterpriseId(UUID enterpriseId);
+
+    @Query("SELECT ea FROM EnterpriseAssignment ea WHERE ea.semester.semesterId = :semesterId AND NOT EXISTS "
+            + "(SELECT wr FROM WeeklyReport wr WHERE wr.assignment.assignmentId = ea.assignmentId "
+            + "AND wr.weekNumber = :weekNumber AND wr.status != 'NOT_SUBMITTED')")
+    List<EnterpriseAssignment> findAssignmentsWithLateReports(
+            @Param("semesterId") UUID semesterId, @Param("weekNumber") Integer weekNumber);
 
     // Security: Kiểm tra quyền xem profile của doanh nghiệp đối với sinh viên được phân công
     boolean existsByEnterprise_EnterpriseIdAndStudent_UserId(UUID enterpriseId, UUID studentId);

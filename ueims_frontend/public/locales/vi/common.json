@@ -61,7 +61,13 @@
     "authFailed": "Xác thực thất bại. Vui lòng kiểm tra lại thông tin đăng nhập.",
     "accountNotFound": "Tài khoản không tồn tại trong hệ thống.",
     "googleLoginSuccess": "Đăng nhập với Google thành công!",
-    "googleLoginFail": "Đăng nhập với Google thất bại. Vui lòng thử lại!"
+    "googleLoginFail": "Đăng nhập với Google thất bại. Vui lòng thử lại!",
+    "backToHome": "Quay về trang chủ"
+  },
+  "home": {
+    "login": "Đăng nhập",
+    "enterSystem": "Vào hệ thống",
+    "dashboard": "Vào bảng điều khiển"
   },
   "nav": {
     "dashboard": "Bảng Điều Khiển",
@@ -74,5 +80,35 @@
     "feedback": "Đánh Giá Doanh Nghiệp",
     "final-report": "Nộp Báo Cáo Cuối Kỳ",
     "evaluation": "Kết Quả Đánh Giá"
+  },
+  "common": {
+    "english": "English",
+    "vietnamese": "Tiếng Việt",
+    "lightMode": "Chế độ sáng",
+    "darkMode": "Chế độ tối",
+    "switchLanguage": "Chuyển ngôn ngữ"
+  },
+  "settings": {
+    "title": "Cài đặt",
+    "desc": "Quản lý tài khoản và thiết lập của bạn",
+    "accountInfo": "Thông tin tài khoản",
+    "accountInfoDesc": "Quản lý thông tin liên hệ cá nhân",
+    "phoneLabel": "Số điện thoại",
+    "phonePlaceholder": "Nhập số điện thoại của bạn",
+    "saveBtn": "Lưu",
+    "changePassword": "Đổi mật khẩu",
+    "changePasswordDesc": "Cập nhật mật khẩu tài khoản của bạn",
+    "currentPasswordLabel": "Mật khẩu hiện tại",
+    "newPasswordLabel": "Mật khẩu mới",
+    "confirmPasswordLabel": "Xác nhận mật khẩu mới",
+    "saveChangesBtn": "Lưu thay đổi",
+    "notificationsTitle": "Thông báo",
+    "notificationsDesc": "Quản lý tùy chọn nhận thông báo của bạn",
+    "emailNotifications": "Thông báo qua Email",
+    "interviewReminders": "Nhắc nhở lịch phỏng vấn",
+    "deadlineAlerts": "Cảnh báo hạn chót nộp báo cáo",
+    "statusUpdates": "Cập nhật trạng thái ứng tuyển",
+    "phoneUpdated": "Cập nhật số điện thoại thành công!",
+    "phoneUpdateFailed": "Cập nhật số điện thoại thất bại!"
   }
 }

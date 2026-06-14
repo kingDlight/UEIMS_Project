@@ -32,6 +32,9 @@ public class Interview extends BaseEntity {
     @Column(name = "meeting_link", length = 500)
     private String meetingLink;
 
+    @Column(name = "duration_minutes")
+    private Integer durationMinutes;
+
     @Column(name = "status", nullable = false, length = 20)
     @Builder.Default
     private String status = "SCHEDULED";

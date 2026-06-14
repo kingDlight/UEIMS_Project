@@ -90,9 +90,10 @@ const CardWrapper: React.FC<{
       }}
       transition={{ duration: 0.15, ease: [0.32, 0.72, 0, 1] }}
       style={{
-        background: cc.surface,
+        backgroundColor: '#FFFFFF',
+        opacity: 1,
         borderRadius: cc.radiusLg,
-        border: `1px solid ${cc.borderSubtle}`,
+        border: `1px solid ${cc.border}`,
         boxShadow: cc.shadowSm,
         overflow: 'hidden',
         cursor: onClick ? 'pointer' : 'default',
@@ -325,7 +326,7 @@ const WelcomeCard: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavi
       transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
       style={{ marginBottom: 16 }}
     >
-      <CardWrapper style={{ padding: 24, display: 'flex', flexDirection: 'column' }}>
+      <CardWrapper style={{ padding: 24, display: 'flex', flexDirection: 'column', backgroundColor: '#FFF8F2', opacity: 1, border: '1px solid #FFE0C2', borderLeft: `4px solid ${cc.brand}` }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
           <div style={{ width: 44, height: 44, borderRadius: cc.radiusFull, background: cc.brandMuted, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.brand }}>
             <Briefcase size={22} />
@@ -394,7 +395,7 @@ const UrgencyCardsRow: React.FC<{ stats: StudentDashboardStats; onNavigate: (rou
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0, ease: [0.32, 0.72, 0, 1] }}
       >
-        <CardWrapper hoverable style={{ padding: 20, flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <CardWrapper hoverable style={{ padding: 20, flex: 1, display: 'flex', flexDirection: 'column', backgroundColor: '#EFF6FF', opacity: 1, border: '1px solid #BFDBFE', borderLeft: `4px solid ${cc.info}` }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <div style={{ width: 36, height: 36, borderRadius: cc.radiusMd, background: cc.infoMuted, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.info }}>
@@ -422,7 +423,7 @@ const UrgencyCardsRow: React.FC<{ stats: StudentDashboardStats; onNavigate: (rou
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1, ease: [0.32, 0.72, 0, 1] }}
       >
-        <CardWrapper hoverable style={{ padding: 20, flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <CardWrapper hoverable style={{ padding: 20, flex: 1, display: 'flex', flexDirection: 'column', backgroundColor: '#FFFBEB', opacity: 1, border: '1px solid #FDE68A', borderLeft: `4px solid ${cc.warning}` }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <div style={{ width: 36, height: 36, borderRadius: cc.radiusMd, background: cc.warningMuted, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.warning }}>
@@ -463,7 +464,7 @@ const ReportPipelineRow: React.FC<{ stats: StudentDashboardStats; onNavigate: (r
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.2, ease: [0.32, 0.72, 0, 1] }}
       >
-        <CardWrapper style={{ padding: 20, flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <CardWrapper style={{ padding: 20, flex: 1, display: 'flex', flexDirection: 'column', backgroundColor: '#EFF6FF', opacity: 1, border: '1px solid #BFDBFE', borderLeft: `4px solid ${cc.info}` }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <div style={{ width: 32, height: 32, borderRadius: cc.radiusMd, background: `${cc.info}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.info }}>
@@ -500,7 +501,7 @@ const ReportPipelineRow: React.FC<{ stats: StudentDashboardStats; onNavigate: (r
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.25, ease: [0.32, 0.72, 0, 1] }}
       >
-        <CardWrapper style={{ padding: 20, flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <CardWrapper style={{ padding: 20, flex: 1, display: 'flex', flexDirection: 'column', backgroundColor: '#FFF8F2', opacity: 1, border: '1px solid #FFE0C2', borderLeft: `4px solid ${cc.brand}` }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
             <div style={{ width: 32, height: 32, borderRadius: cc.radiusMd, background: `${cc.brand}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.brand }}>
               <BookOpen size={16} />
@@ -583,9 +584,10 @@ const QuickActionsRow: React.FC<{
               whileTap={{ scale: 0.98 }}
               transition={{ duration: 0.15, ease: [0.32, 0.72, 0, 1] }}
               style={{
-                background: cc.surface,
+                backgroundColor: '#FFFFFF',
+                opacity: 1,
                 borderRadius: cc.radiusLg,
-                border: `1px solid ${cc.borderSubtle}`,
+                border: `1px solid ${cc.border}`,
                 boxShadow: cc.shadowSm,
                 padding: '16px 16px 14px',
                 cursor: 'pointer',
@@ -729,7 +731,7 @@ const EvaluationRow: React.FC<{ onNavigate: (route: string) => void }> = ({ onNa
       transition={{ duration: 0.5, delay: 0.45, ease: [0.32, 0.72, 0, 1] }}
       style={{ marginBottom: 16 }}
     >
-      <CardWrapper style={{ padding: 20, display: 'flex', flexDirection: 'column' }}>
+      <CardWrapper style={{ padding: 20, display: 'flex', flexDirection: 'column', backgroundColor: '#FFFBEB', opacity: 1, border: '1px solid #FDE68A', borderLeft: `4px solid ${cc.warning}` }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ width: 32, height: 32, borderRadius: cc.radiusMd, background: `${cc.warning}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.warning }}>
@@ -917,7 +919,9 @@ export const StudentDashboardTab: React.FC = () => {
   }
 
   return (
-    <div style={{ fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' }}>
+    <div style={{
+      fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    }}>
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px 40px' }}>
         <AnimatePresence>
           {mounted && (
@@ -928,18 +932,27 @@ export const StudentDashboardTab: React.FC = () => {
             >
               <SemesterContextBar stats={stats} />
 
+              {/* PRIMARY SEMESTER CARDS (Full Width) */}
+              <div style={{ marginBottom: 24 }}>
+                {isSemester1to4 && <WelcomeCard onNavigate={handleNavigate} />}
+                {isSemester5 && <UrgencyCardsRow stats={stats} onNavigate={handleNavigate} />}
+                {isSemester6 && !isSemester6WithoutPlacement && <ReportPipelineRow stats={stats} onNavigate={handleNavigate} />}
+                {isSemester7to9 && <EvaluationRow onNavigate={handleNavigate} />}
+              </div>
+
+              {/* QUICK ACTIONS ROW (Full Width) */}
+              <div style={{ marginBottom: 24 }}>
+                <QuickActionsRow onNavigate={handleNavigate} actions={quickActions} />
+              </div>
+
+              {/* SPLIT SCREEN WORKSPACE GRID */}
               <div style={{ display: 'grid', gridTemplateColumns: '7fr 3fr', gap: 24 }}>
-                {/* Left Column */}
+                {/* Left Column (Main content) */}
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  {isSemester1to4 && <WelcomeCard onNavigate={handleNavigate} />}
-                  {isSemester5 && <UrgencyCardsRow stats={stats} onNavigate={handleNavigate} />}
-                  {isSemester6 && !isSemester6WithoutPlacement && <ReportPipelineRow stats={stats} onNavigate={handleNavigate} />}
-                  {isSemester7to9 && <EvaluationRow onNavigate={handleNavigate} />}
-                  <QuickActionsRow onNavigate={handleNavigate} actions={quickActions} />
                   {showRecentActivity && <RecentActivityCard onNavigate={handleNavigate} />}
                 </div>
 
-                {/* Right Column */}
+                {/* Right Column (Sidebar content) */}
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                   {showUpcoming && <UpcomingCard onNavigate={handleNavigate} />}
                   {isSemester6WithoutPlacement && <NoPlacementAlert enterpriseName={stats.enterpriseName} onNavigate={handleNavigate} />}

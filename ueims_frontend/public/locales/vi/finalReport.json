@@ -14,5 +14,13 @@
   "submitReport": "Nộp Báo Cáo",
   "submittedReport": "Báo Cáo Đã Nộp",
   "submittedDate": "Đã nộp",
-  "view": "Xem"
+  "view": "Xem",
+  "invalidFileError": "File không hợp lệ. Vui lòng nộp báo cáo cuối kỳ ở định dạng PDF và dung lượng dưới 20MB.",
+  "fileTooLargeError": "Dung lượng file quá lớn. Báo cáo cuối kỳ không được vượt quá 20MB.",
+  "pleaseUploadPdf": "Vui lòng tải lên file báo cáo PDF của bạn!",
+  "noAssignmentError": "Bạn chưa có thông tin thực tập hiện tại.",
+  "submitSuccess": "Nộp báo cáo cuối kỳ thành công!",
+  "submitFailed": "Nộp báo cáo thất bại!",
+  "onlyPdfAllowed": "Chỉ chấp nhận file PDF!",
+  "max20Mb": "Tối đa 20MB!"
 }

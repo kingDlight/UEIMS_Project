@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { message, Spin } from 'antd';
 import { FileOutlined, UploadOutlined, EyeOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 import { NeuSurface } from '../components/shared/NeuSurface';
 import { SmallBadge } from '../components/shared/SmallBadge';
 import { FinalReportService } from '@/services/FinalReportService';
@@ -39,6 +40,7 @@ const CTAButton: React.FC<{
 };
 
 export const FinalReportTab: React.FC = () => {
+  const { t } = useTranslation(['finalReport', 'common']);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [finalReport, setFinalReport] = useState<any>(null);
@@ -66,11 +68,11 @@ export const FinalReportTab: React.FC = () => {
     const f = e.dataTransfer.files?.[0];
     if (f) {
       if (f.type !== 'application/pdf') {
-        message.error('Invalid file. Please upload your final report strictly in PDF format under 20MB.');
+        message.error(t('invalidFileError', 'Invalid file. Please upload your final report strictly in PDF format under 20MB.'));
         return;
       }
       if (f.size > 20 * 1024 * 1024) {
-        message.error('File too large. Final report must not exceed 20MB.');
+        message.error(t('fileTooLargeError', 'File too large. Final report must not exceed 20MB.'));
         return;
       }
       setFile(f);
@@ -79,7 +81,7 @@ export const FinalReportTab: React.FC = () => {
 
   const handleSubmit = async () => {
     if (!file) {
-      message.error('Please upload your final report PDF!');
+      message.error(t('pleaseUploadPdf', 'Please upload your final report PDF!'));
       return;
     }
     try {
@@ -88,15 +90,15 @@ export const FinalReportTab: React.FC = () => {
       const assignmentRes = await EnterpriseAssignmentService.getMyAssignment();
       const assignment = assignmentRes.data?.result ?? assignmentRes.data;
       if (!assignment?.assignmentId) {
-        message.error('You do not have an active internship assignment yet.');
+        message.error(t('noAssignmentError', 'You do not have an active internship assignment yet.'));
         return;
       }
       await FinalReportService.upload(assignment.assignmentId, file);
-      message.success('Final report submitted successfully!');
+      message.success(t('submitSuccess', 'Final report submitted successfully!'));
       setFile(null);
       fetchFinalReport();
     } catch (err: any) {
-      message.error(err.response?.data?.message || 'Submit failed!');
+      message.error(err.response?.data?.message || t('submitFailed', 'Submit failed!'));
     } finally {
       setSubmitting(false);
     }
@@ -109,18 +111,18 @@ export const FinalReportTab: React.FC = () => {
   return (
     <div style={{ maxWidth: 800, margin: '0 auto', padding: '0 24px 40px', fontFamily: 'Inter, sans-serif' }}>
       <div style={{ marginBottom: 24 }}>
-        <h2 style={{ fontSize: 22, fontWeight: 800, color: cc.textPrimary, margin: '0 0 6px', letterSpacing: '-0.01em' }}>Final Internship Report</h2>
-        <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}>Compile and submit your official final internship report (PDF) for academic grading</p>
+        <h2 style={{ fontSize: 22, fontWeight: 800, color: cc.textPrimary, margin: '0 0 6px', letterSpacing: '-0.01em' }}>{t('pageTitle', 'Final Internship Report')}</h2>
+        <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}>{t('pageSubtitle', 'Compile and submit your official final internship report (PDF) for academic grading')}</p>
       </div>
 
       {/* Instructions */}
       <NeuSurface style={{ padding: 24, marginBottom: 20 }}>
-        <h3 style={{ fontSize: 15, fontWeight: 700, color: cc.textPrimary, margin: '0 0 12px' }}>Report Requirements</h3>
+        <h3 style={{ fontSize: 15, fontWeight: 700, color: cc.textPrimary, margin: '0 0 12px' }}>{t('requirementsTitle', 'Report Requirements')}</h3>
         <ul style={{ fontSize: 13, color: cc.textMuted, margin: 0, paddingLeft: 20, lineHeight: 1.8 }}>
-          <li>File format: <strong>PDF only</strong></li>
-          <li>Maximum file size: <strong>20MB</strong></li>
-          <li>Include: Cover page, table of contents, weekly summaries, learning outcomes</li>
-          <li>Must be approved by your enterprise supervisor before submission</li>
+          <li>{t('req1', 'File format: PDF only')}</li>
+          <li>{t('req2', 'Maximum file size: 20MB')}</li>
+          <li>{t('req3', 'Include: Cover page, table of contents, weekly summaries, learning outcomes')}</li>
+          <li>{t('req4', 'Must be approved by your enterprise supervisor before submission')}</li>
         </ul>
       </NeuSurface>
 
@@ -131,8 +133,8 @@ export const FinalReportTab: React.FC = () => {
             <FileOutlined style={{ fontSize: 20 }} />
           </div>
           <div>
-            <h3 style={{ fontSize: 15, fontWeight: 600, color: cc.textPrimary, margin: 0 }}>Upload Final Report</h3>
-            <p style={{ fontSize: 12, color: cc.textMuted, margin: '2px 0 0' }}>Submit your completed internship report in PDF format</p>
+            <h3 style={{ fontSize: 15, fontWeight: 600, color: cc.textPrimary, margin: 0 }}>{t('uploadTitle', 'Upload Final Report')}</h3>
+            <p style={{ fontSize: 12, color: cc.textMuted, margin: '2px 0 0' }}>{t('uploadSubtitle', 'Submit your completed internship report in PDF format')}</p>
           </div>
         </div>
 
@@ -149,7 +151,7 @@ export const FinalReportTab: React.FC = () => {
             transition: 'all 0.2s ease', cursor: 'pointer',
           }}
         >
-          <input id="final-report-input" type="file" accept=".pdf" onChange={(e) => { const f = e.target.files?.[0]; if (f) { if (f.type !== 'application/pdf') message.error('Only PDF allowed!'); else if (f.size > 20 * 1024 * 1024) message.error('Max 20MB!'); else setFile(f); }}} style={{ display: 'none' }} />
+          <input id="final-report-input" type="file" accept=".pdf" onChange={(e) => { const f = e.target.files?.[0]; if (f) { if (f.type !== 'application/pdf') message.error(t('onlyPdfAllowed', 'Only PDF allowed!')); else if (f.size > 20 * 1024 * 1024) message.error(t('max20Mb', 'Max 20MB!')); else setFile(f); }}} style={{ display: 'none' }} />
           {file ? (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
               <FileOutlined style={{ fontSize: 32, color: cc.success }} />
@@ -161,15 +163,15 @@ export const FinalReportTab: React.FC = () => {
           ) : (
             <>
               <UploadOutlined style={{ fontSize: 40, color: cc.textMuted, marginBottom: 12 }} />
-              <p style={{ fontSize: 14, fontWeight: 600, color: cc.textPrimary, margin: '0 0 4px' }}>Drag & drop your final report here</p>
-              <p style={{ fontSize: 12, color: cc.textMuted, margin: 0 }}>or click to browse files</p>
+              <p style={{ fontSize: 14, fontWeight: 600, color: cc.textPrimary, margin: '0 0 4px' }}>{t('dragDrop', 'Drag & drop your final report here')}</p>
+              <p style={{ fontSize: 12, color: cc.textMuted, margin: 0 }}>{t('orBrowse', 'or click to browse files')}</p>
             </>
           )}
         </div>
         {file && (
           <div style={{ marginTop: 16, display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
-            <CTAButton variant="ghost" onClick={() => setFile(null)}>Cancel</CTAButton>
-            <CTAButton variant="primary" icon={<UploadOutlined />} onClick={handleSubmit} loading={submitting}>Submit Report</CTAButton>
+            <CTAButton variant="ghost" onClick={() => setFile(null)}>{t('cancel', 'Cancel')}</CTAButton>
+            <CTAButton variant="primary" icon={<UploadOutlined />} onClick={handleSubmit} loading={submitting}>{t('submitReport', 'Submit Report')}</CTAButton>
           </div>
         )}
       </NeuSurface>
@@ -178,16 +180,16 @@ export const FinalReportTab: React.FC = () => {
       {finalReport && (
         <NeuSurface style={{ padding: 24 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-            <h3 style={{ fontSize: 15, fontWeight: 700, color: cc.textPrimary, margin: 0 }}>Submitted Report</h3>
+            <h3 style={{ fontSize: 15, fontWeight: 700, color: cc.textPrimary, margin: 0 }}>{t('submittedReport', 'Submitted Report')}</h3>
             <SmallBadge label={finalReport.status || 'SUBMITTED'} variant={finalReport.status === 'APPROVED' ? 'success' : finalReport.status === 'REJECTED' ? 'error' : 'warning'} />
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: 16, borderRadius: cc.radiusMd, background: cc.neutralBg }}>
             <FileOutlined style={{ fontSize: 32, color: cc.primary }} />
             <div style={{ flex: 1 }}>
               <p style={{ fontSize: 14, fontWeight: 600, color: cc.textPrimary, margin: 0 }}>{finalReport.fileName || 'Final_Report.pdf'}</p>
-              <p style={{ fontSize: 12, color: cc.textMuted, margin: '4px 0 0' }}>Submitted: {finalReport.submittedAt ? new Date(finalReport.submittedAt).toLocaleDateString() : 'N/A'}</p>
+              <p style={{ fontSize: 12, color: cc.textMuted, margin: '4px 0 0' }}>{t('submittedDate', 'Submitted')}: {finalReport.submittedAt ? new Date(finalReport.submittedAt).toLocaleDateString() : 'N/A'}</p>
             </div>
-            <CTAButton variant="ghost" size="sm" icon={<EyeOutlined />} onClick={() => window.open(finalReport.fileUrl, '_blank')}>View</CTAButton>
+            <CTAButton variant="ghost" size="sm" icon={<EyeOutlined />} onClick={() => window.open(finalReport.fileUrl, '_blank')}>{t('view', 'View')}</CTAButton>
           </div>
         </NeuSurface>
       )}

@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -65,6 +66,7 @@ class WeeklyReportServiceImplTest {
         currentUser = new User();
         currentUser.setUserId(UUID.randomUUID());
         currentUser.setEmail("student@test.com");
+        currentUser.setRoles(Collections.emptySet());
 
         semester = new Semester();
         semester.setSemesterId(UUID.randomUUID());
@@ -119,6 +121,7 @@ class WeeklyReportServiceImplTest {
 
     @Test
     void findByIdExistsReturnsReport() {
+        mockSecurityContext(currentUser);
         when(repository.findById(reportId)).thenReturn(Optional.of(report));
         WeeklyReport result = service.findById(reportId);
         assertNotNull(result);
@@ -291,6 +294,8 @@ class WeeklyReportServiceImplTest {
 
     @Test
     void deleteByIdSuccess() {
+        mockSecurityContext(currentUser);
+        when(repository.findById(reportId)).thenReturn(Optional.of(report));
         service.deleteById(reportId);
         verify(repository).deleteById(reportId);
     }

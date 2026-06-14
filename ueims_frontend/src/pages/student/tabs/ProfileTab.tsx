@@ -1,17 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { message, Spin } from 'antd';
+import { message, Spin, Modal, Form, Input } from 'antd';
 import {
   FileTextOutlined, EyeOutlined,
   PlusOutlined, UploadOutlined, IdcardOutlined,
   MailOutlined, BookOutlined, UserOutlined,
-  CalendarOutlined, TrophyOutlined,
+  CalendarOutlined, TrophyOutlined, EditOutlined,
+  LinkedinOutlined, GithubOutlined, GlobalOutlined,
+  PhoneOutlined,
 } from '@ant-design/icons';
 import { NeuSurface } from '../components/shared/NeuSurface';
 import { SmallPill } from '../components/shared/SmallPill';
 import { StudentProfileService } from '@/services/StudentProfileService';
 import { api } from '@/services/api';
 import { cc } from '../constants';
+import { useQueryClient } from '@tanstack/react-query';
+import { useCombinedProfileQuery } from '@/hooks/useStudentProfile';
 
 const BACKEND_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
@@ -137,7 +141,7 @@ const StatusPill: React.FC<{ status?: string }> = ({ status }) => {
 };
 
 // ── Profile Info View ─────────────────────────────────────────────────────────
-const ProfileInfoView: React.FC<{ profile: MyProfile }> = ({ profile }) => {
+const ProfileInfoView: React.FC<{ profile: MyProfile; onEdit: () => void }> = ({ profile, onEdit }) => {
   const { t } = useTranslation(['profile']);
   return (
   <>
@@ -157,6 +161,16 @@ const ProfileInfoView: React.FC<{ profile: MyProfile }> = ({ profile }) => {
           <h2 style={{ fontSize: 20, fontWeight: 700, color: cc.text, margin: '0 0 4px' }}>{profile?.fullName || 'Student'}</h2>
           <p style={{ fontSize: 13, color: cc.textMuted, margin: '0 0 10px' }}>{profile?.email || 'email@student.fpt.edu.vn'}</p>
           <StatusPill status={profile?.ojtStatus} />
+        </div>
+        <div>
+          <CTAButton
+            variant="ghost"
+            size="sm"
+            icon={<EditOutlined />}
+            onClick={onEdit}
+          >
+            {t('editProfile', 'Edit Profile')}
+          </CTAButton>
         </div>
       </div>
     </NeuSurface>
@@ -213,12 +227,71 @@ const ProfileInfoView: React.FC<{ profile: MyProfile }> = ({ profile }) => {
       </div>
     </NeuSurface>
 
+    {/* Contact & Social Profiles */}
+    <NeuSurface style={{ padding: 24, marginBottom: 16 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+        <h3 style={{ fontSize: 15, fontWeight: 700, color: cc.text, margin: 0 }}>{t('contactSocial', 'Contact & Social Profiles')}</h3>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+        {([
+          { label: t('phone', 'Phone Number'), value: profile?.phone || 'Not set', icon: <PhoneOutlined /> },
+          {
+            label: t('linkedin', 'LinkedIn'),
+            value: profile?.linkedinUrl ? (
+              <a href={profile.linkedinUrl} target="_blank" rel="noopener noreferrer" style={{ color: cc.primary, fontWeight: 600 }}>
+                LinkedIn Profile
+              </a>
+            ) : 'Not set',
+            icon: <LinkedinOutlined />
+          },
+          {
+            label: t('github', 'GitHub'),
+            value: profile?.githubUrl ? (
+              <a href={profile.githubUrl} target="_blank" rel="noopener noreferrer" style={{ color: cc.primary, fontWeight: 600 }}>
+                GitHub Profile
+              </a>
+            ) : 'Not set',
+            icon: <GithubOutlined />
+          },
+          {
+            label: t('portfolio', 'Portfolio'),
+            value: profile?.portfolioUrl ? (
+              <a href={profile.portfolioUrl} target="_blank" rel="noopener noreferrer" style={{ color: cc.primary, fontWeight: 600 }}>
+                Portfolio Website
+              </a>
+            ) : 'Not set',
+            icon: <GlobalOutlined />
+          },
+        ] as { label: string; value: React.ReactNode; icon: React.ReactNode }[]).map((item, i) => (
+          <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+            <div style={{ width: 40, height: 40, borderRadius: cc.radiusMd, background: cc.primaryMuted, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.primary, flexShrink: 0 }}>
+              {item.icon}
+            </div>
+            <div>
+              <div style={{ fontSize: 11, color: cc.textMuted, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.07em' }}>{item.label}</div>
+              <div style={{ fontSize: 14, color: cc.text, fontWeight: 600, marginTop: 2 }}>{item.value}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </NeuSurface>
+
+    {/* Biography */}
+    <NeuSurface style={{ padding: 24, marginBottom: 16 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+        <h3 style={{ fontSize: 15, fontWeight: 700, color: cc.text, margin: 0 }}>{t('bio', 'Biography')}</h3>
+      </div>
+      <p style={{ fontSize: 14, color: profile?.bio ? cc.text : cc.textMuted, lineHeight: '1.6', margin: 0, fontStyle: profile?.bio ? 'normal' : 'italic' }}>
+        {profile?.bio || t('noBio', 'No biography provided yet.')}
+      </p>
+    </NeuSurface>
+
     {/* Skills */}
-    {profile?.skills && (
-      <NeuSurface style={{ padding: 24 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-          <h3 style={{ fontSize: 15, fontWeight: 700, color: cc.text, margin: 0 }}>{t('skills', 'Skills')}</h3>
-        </div>
+    <NeuSurface style={{ padding: 24 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+        <h3 style={{ fontSize: 15, fontWeight: 700, color: cc.text, margin: 0 }}>{t('skills', 'Skills')}</h3>
+      </div>
+      {profile?.skills ? (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
           {profile.skills.split(',').map((skill: string, i: number) => (
             <span key={i} style={{ padding: '6px 14px', borderRadius: cc.radiusFull, background: cc.primaryMuted, color: cc.primary, fontSize: 12, fontWeight: 600 }}>
@@ -226,9 +299,182 @@ const ProfileInfoView: React.FC<{ profile: MyProfile }> = ({ profile }) => {
             </span>
           ))}
         </div>
-      </NeuSurface>
-    )}
+      ) : (
+        <p style={{ fontSize: 13, color: cc.textMuted, margin: 0, fontStyle: 'italic' }}>
+          {t('noSkills', 'No skills listed yet.')}
+        </p>
+      )}
+    </NeuSurface>
   </>
+  );
+};
+
+// ── Edit Profile Modal ────────────────────────────────────────────────────────
+const EditProfileModal: React.FC<{
+  open: boolean;
+  onCancel: () => void;
+  profile: MyProfile;
+  onSuccess: () => void;
+}> = ({ open, onCancel, profile, onSuccess }) => {
+  const { t } = useTranslation(['profile', 'common']);
+  const [form] = Form.useForm();
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      form.setFieldsValue({
+        phone: profile.phone || '',
+        skills: profile.skills || '',
+        linkedinUrl: profile.linkedinUrl || '',
+        githubUrl: profile.githubUrl || '',
+        portfolioUrl: profile.portfolioUrl || '',
+        bio: profile.bio || '',
+      });
+    }
+  }, [open, profile, form]);
+
+  const handleSubmit = async () => {
+    try {
+      const values = await form.validateFields();
+
+      // Normalize fields to check for changes
+      const phoneChanged = (values.phone || '') !== (profile.phone || '');
+      const skillsChanged = (values.skills || '') !== (profile.skills || '');
+      const linkedinChanged = (values.linkedinUrl || '') !== (profile.linkedinUrl || '');
+      const githubChanged = (values.githubUrl || '') !== (profile.githubUrl || '');
+      const portfolioChanged = (values.portfolioUrl || '') !== (profile.portfolioUrl || '');
+      const bioChanged = (values.bio || '') !== (profile.bio || '');
+
+      if (!phoneChanged && !skillsChanged && !linkedinChanged && !githubChanged && !portfolioChanged && !bioChanged) {
+        message.info(t('noChanges', 'No changes to save.'));
+        onCancel();
+        return;
+      }
+
+      setSaving(true);
+
+      // 1. Update phone via /users/myInfo if it changed
+      if (phoneChanged) {
+        await api.put('/users/myInfo', { ...profile, phone: values.phone });
+      }
+
+      // 2. Update Student Profile if profileId is present
+      if (profile.profileId && (skillsChanged || linkedinChanged || githubChanged || portfolioChanged || bioChanged)) {
+        const updateData = {
+          major: profile.major, // Keep current major as it is read-only
+          skills: values.skills,
+          linkedinUrl: values.linkedinUrl,
+          githubUrl: values.githubUrl,
+          portfolioUrl: values.portfolioUrl,
+          bio: values.bio,
+        };
+        await StudentProfileService.update(profile.profileId, updateData);
+      } else if (!profile.profileId && (skillsChanged || linkedinChanged || githubChanged || portfolioChanged || bioChanged)) {
+        message.warning(t('profileIdMissing', 'Student profile record not found. Please contact administrator.'));
+      }
+
+      message.success(t('profileUpdatedSuccess', 'Profile updated successfully!'));
+      onSuccess();
+    } catch (err: any) {
+      if (err.name === 'FieldsValidationError') return;
+      console.error('Failed to update profile:', err);
+      message.error(err.response?.data?.message || t('profileUpdateFailed', 'Failed to update profile.'));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <Modal
+      open={open}
+      title={<span style={{ fontSize: 16, fontWeight: 700, color: cc.text }}>{t('editProfile', 'Edit Profile')}</span>}
+      okText={t('saveChanges', 'Save Changes')}
+      cancelText={t('cancel', 'Cancel')}
+      onCancel={onCancel}
+      confirmLoading={saving}
+      onOk={handleSubmit}
+      okButtonProps={{
+        style: {
+          background: 'linear-gradient(135deg, #E67E22, #E67E22, #F39C12)',
+          border: 'none',
+          borderRadius: 12,
+          fontWeight: 700,
+          boxShadow: '0 4px 12px rgba(230,126,34,.22)',
+        }
+      }}
+      cancelButtonProps={{
+        style: {
+          borderRadius: 12,
+          fontWeight: 600,
+        }
+      }}
+    >
+      <Form
+        form={form}
+        layout="vertical"
+        style={{ marginTop: 16 }}
+      >
+        <Form.Item
+          name="phone"
+          label={<span style={{ fontWeight: 600, color: cc.text }}>{t('phone', 'Phone Number')}</span>}
+          rules={[
+            { pattern: /^[0-9+()#.\s-]{8,20}$/, message: t('invalidPhone', 'Please enter a valid phone number') }
+          ]}
+        >
+          <Input placeholder="e.g. +84 987 654 321" style={{ borderRadius: 8 }} prefix={<PhoneOutlined style={{ color: cc.textMuted }} />} />
+        </Form.Item>
+
+        <Form.Item
+          name="skills"
+          label={<span style={{ fontWeight: 600, color: cc.text }}>{t('skillsComma', 'Technical Skills (comma-separated)')}</span>}
+        >
+          <Input placeholder="e.g. Java, React, SQL, CSS" style={{ borderRadius: 8 }} />
+        </Form.Item>
+
+        <Form.Item
+          name="linkedinUrl"
+          label={<span style={{ fontWeight: 600, color: cc.text }}>{t('linkedinUrl', 'LinkedIn URL')}</span>}
+          rules={[
+            { type: 'url', message: t('invalidUrl', 'Please enter a valid URL') }
+          ]}
+        >
+          <Input placeholder="e.g. https://linkedin.com/in/username" style={{ borderRadius: 8 }} prefix={<LinkedinOutlined style={{ color: cc.textMuted }} />} />
+        </Form.Item>
+
+        <Form.Item
+          name="githubUrl"
+          label={<span style={{ fontWeight: 600, color: cc.text }}>{t('githubUrl', 'GitHub URL')}</span>}
+          rules={[
+            { type: 'url', message: t('invalidUrl', 'Please enter a valid URL') }
+          ]}
+        >
+          <Input placeholder="e.g. https://github.com/username" style={{ borderRadius: 8 }} prefix={<GithubOutlined style={{ color: cc.textMuted }} />} />
+        </Form.Item>
+
+        <Form.Item
+          name="portfolioUrl"
+          label={<span style={{ fontWeight: 600, color: cc.text }}>{t('portfolioUrl', 'Portfolio URL')}</span>}
+          rules={[
+            { type: 'url', message: t('invalidUrl', 'Please enter a valid URL') }
+          ]}
+        >
+          <Input placeholder="e.g. https://myportfolio.com" style={{ borderRadius: 8 }} prefix={<GlobalOutlined style={{ color: cc.textMuted }} />} />
+        </Form.Item>
+
+        <Form.Item
+          name="bio"
+          label={<span style={{ fontWeight: 600, color: cc.text }}>{t('bio', 'Short Biography')}</span>}
+        >
+          <Input.TextArea
+            rows={4}
+            placeholder={t('bioPlaceholder', 'Tell us about your technical background and experience...')}
+            maxLength={1000}
+            showCount
+            style={{ borderRadius: 8 }}
+          />
+        </Form.Item>
+      </Form>
+    </Modal>
   );
 };
 
@@ -433,34 +679,17 @@ const CvView: React.FC<{ cvUrl?: string; cvFileName?: string; onRefresh: () => v
 // ── Main ProfileTab ───────────────────────────────────────────────────────────
 export const ProfileTab: React.FC = () => {
   const { t } = useTranslation(['profile', 'common']);
-  const [profile, setProfile] = useState<MyProfile | null>(null);
-  const [loading, setLoading] = useState(true);
   const [activeView, setActiveView] = useState<ProfileView>('profile');
+  const [editOpen, setEditOpen] = useState(false);
+  const queryClient = useQueryClient();
+  const { data: profile, isLoading } = useCombinedProfileQuery();
 
-  useEffect(() => { fetchProfile(); }, []);
-
-  const fetchProfile = async () => {
-    try {
-      setLoading(true);
-      const [userRes, profileRes] = await Promise.all([
-        api.get('/users/myInfo').catch((err) => { console.error('Failed to fetch user info:', err); return { data: null }; }),
-        StudentProfileService.getMyProfile().catch(() => ({ data: null })),
-      ]);
-
-      const userInfo = userRes?.data;
-      const profileData = profileRes?.data?.result ?? profileRes?.data;
-
-      if (!userInfo && !profileData) { console.warn('Unable to fetch profile data'); return; }
-
-      setProfile({ ...userInfo, ...profileData });
-    } catch (err) {
-      console.error('Failed to fetch profile', err);
-    } finally {
-      setLoading(false);
-    }
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: ['userInfo'] });
+    queryClient.invalidateQueries({ queryKey: ['studentProfile'] });
   };
 
-  if (loading) {
+  if (isLoading) {
     return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}><Spin size="large" /></div>;
   }
 
@@ -477,14 +706,25 @@ export const ProfileTab: React.FC = () => {
 
       {/* Views */}
       {activeView === 'profile' ? (
-        <ProfileInfoView profile={profile} />
+        <ProfileInfoView profile={profile} onEdit={() => setEditOpen(true)} />
       ) : (
         <CvView
           cvUrl={profile.cvUrl}
           cvFileName={profile.cvFileName}
-          onRefresh={fetchProfile}
+          onRefresh={handleRefresh}
         />
       )}
+
+      {/* Edit Profile Modal */}
+      <EditProfileModal
+        open={editOpen}
+        onCancel={() => setEditOpen(false)}
+        profile={profile}
+        onSuccess={() => {
+          setEditOpen(false);
+          handleRefresh();
+        }}
+      />
     </div>
   );
 };

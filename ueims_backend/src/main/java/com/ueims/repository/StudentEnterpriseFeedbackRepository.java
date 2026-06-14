@@ -13,4 +13,6 @@ public interface StudentEnterpriseFeedbackRepository extends JpaRepository<Stude
             UUID studentId, UUID enterpriseId, UUID semesterId);
 
     java.util.List<StudentEnterpriseFeedback> findByStudent_UserId(UUID studentId);
+
+    java.util.List<StudentEnterpriseFeedback> findByEnterprise_EnterpriseId(UUID enterpriseId);
 }

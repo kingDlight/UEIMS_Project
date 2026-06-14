@@ -41,6 +41,15 @@ public class EnterpriseController {
                 .build();
     }
 
+    @GetMapping("/my-profile")
+    @PreAuthorize("hasRole('ENTERPRISE')") // UC-35: Enterprise viewing own profile
+    public ApiResponse<EnterpriseDTO> getMyProfile() {
+        return ApiResponse.<EnterpriseDTO>builder()
+                .result(mapper.toDto(service.getMyEnterpriseProfile()))
+                .message("Enterprise profile retrieved successfully")
+                .build();
+    }
+
     @PostMapping
     @PreAuthorize("hasRole('SYSTEM_ADMIN')")
     public ApiResponse<EnterpriseDTO> create(@Valid @RequestBody com.ueims.dto.request.EnterpriseRequest request) {

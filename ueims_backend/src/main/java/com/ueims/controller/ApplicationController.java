@@ -62,6 +62,36 @@ public class ApplicationController {
     }
 
     /**
+     * Get all applications for the currently logged in Enterprise (UC-39)
+     *
+     * @return ApiResponse containing list of application responses
+     */
+    @GetMapping("/my-enterprise")
+    @PreAuthorize("hasRole('ENTERPRISE') or hasRole('TRAINING_MANAGER')")
+    public ApiResponse<List<ApplicationResponse>> getMyEnterpriseApplications() {
+        return ApiResponse.<List<ApplicationResponse>>builder()
+                .result(service.findMyEnterpriseApplications())
+                .build();
+    }
+
+    /**
+     * Update application status (UC-38, UC-39, UC-41)
+     * Used by the enterprise kanban to move candidates between stages.
+     *
+     * @param id Application UUID
+     * @param request Status payload
+     * @return ApiResponse containing the updated application details
+     */
+    @PutMapping("/{id}/status")
+    @PreAuthorize("hasRole('ENTERPRISE')")
+    public ApiResponse<ApplicationResponse> updateApplicationStatus(
+            @PathVariable UUID id, @RequestBody @Valid ApplicationScreenRequest request) {
+        return ApiResponse.<ApplicationResponse>builder()
+                .result(service.updateStatus(id, request))
+                .build();
+    }
+
+    /**
      * Get details of a specific job application
      *
      * @param id Application UUID

@@ -58,6 +58,22 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<ApplicationResponse> findMyEnterpriseApplications() {
+        User currentUser = getCurrentUser();
+        if (currentUser.getEnterprise() == null) {
+            return List.of();
+        }
+        UUID enterpriseId = currentUser.getEnterprise().getEnterpriseId();
+        return repository.findAll().stream()
+                .filter(app -> app.getJobPost() != null
+                        && app.getJobPost().getEnterprise() != null
+                        && enterpriseId.equals(app.getJobPost().getEnterprise().getEnterpriseId()))
+                .map(mapper::toApplicationResponse)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public ApplicationResponse findById(UUID id) {
         Application application =
                 repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.APPLICATION_NOT_FOUND));
@@ -229,6 +245,39 @@ public class ApplicationServiceImpl implements ApplicationService {
             application.setRejectionReason(null);
         }
 
+        application.setScreenedBy(currentUser);
+
+        return mapper.toApplicationResponse(repository.save(application));
+    }
+
+    @Override
+    @Transactional
+    public ApplicationResponse updateStatus(UUID id, ApplicationScreenRequest request) {
+        Application application =
+                repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.APPLICATION_NOT_FOUND));
+
+        // Ownership check: chỉ Enterprise sở hữu job post mới được cập nhật
+        User currentUser = getCurrentUser();
+        if (currentUser.getEnterprise() == null
+                || application.getJobPost() == null
+                || application.getJobPost().getEnterprise() == null
+                || !application
+                        .getJobPost()
+                        .getEnterprise()
+                        .getEnterpriseId()
+                        .equals(currentUser.getEnterprise().getEnterpriseId())) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        // BR-30: Block updates when job post is CLOSED
+        if ("CLOSED".equalsIgnoreCase(application.getJobPost().getStatus())) {
+            throw new AppException(ErrorCode.JOB_POST_CLOSED);
+        }
+
+        application.setStatus(request.getStatus());
+        if (request.getRejectionReason() != null) {
+            application.setRejectionReason(request.getRejectionReason());
+        }
         application.setScreenedBy(currentUser);
 
         return mapper.toApplicationResponse(repository.save(application));

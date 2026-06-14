@@ -51,6 +51,20 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
     }
 
     @Override
+    public List<WeeklyReport> findByEnterprise() {
+        User currentUser = getCurrentUser();
+        if (currentUser.getEnterprise() == null) return List.of();
+        return repository.findAll().stream()
+                .filter(r -> r.getAssignment() != null
+                        && r.getAssignment().getEnterprise() != null
+                        && currentUser
+                                .getEnterprise()
+                                .getEnterpriseId()
+                                .equals(r.getAssignment().getEnterprise().getEnterpriseId()))
+                .toList();
+    }
+
+    @Override
     public WeeklyReport findById(UUID id) {
         WeeklyReport report = repository.findById(id).orElse(null);
         if (report == null) {
@@ -160,5 +174,53 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
         repository.deleteById(id);
+    }
+
+    @Override
+    @org.springframework.transaction.annotation.Transactional
+    public WeeklyReport approveReport(UUID id, String feedback) {
+        WeeklyReport existing = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.FIELD_REQUIRED));
+        User currentUser = getCurrentUser();
+
+        // BR-29: ownership — enterprise must own the assignment
+        if (currentUser.getEnterprise() == null
+                || existing.getAssignment() == null
+                || existing.getAssignment().getEnterprise() == null
+                || !currentUser
+                        .getEnterprise()
+                        .getEnterpriseId()
+                        .equals(existing.getAssignment().getEnterprise().getEnterpriseId())) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        existing.setStatus("APPROVED");
+        if (feedback != null) existing.setFeedback(feedback);
+        return repository.save(existing);
+    }
+
+    @Override
+    @org.springframework.transaction.annotation.Transactional
+    public WeeklyReport rejectReport(UUID id, String feedback) {
+        WeeklyReport existing = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.FIELD_REQUIRED));
+        User currentUser = getCurrentUser();
+
+        if (currentUser.getEnterprise() == null
+                || existing.getAssignment() == null
+                || existing.getAssignment().getEnterprise() == null
+                || !currentUser
+                        .getEnterprise()
+                        .getEnterpriseId()
+                        .equals(existing.getAssignment().getEnterprise().getEnterpriseId())) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        // BR-40: feedback is mandatory on rejection
+        if (feedback == null || feedback.isBlank()) {
+            throw new AppException(ErrorCode.FIELD_REQUIRED);
+        }
+
+        existing.setStatus("REJECTED");
+        existing.setFeedback(feedback);
+        return repository.save(existing);
     }
 }

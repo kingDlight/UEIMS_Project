@@ -13,6 +13,8 @@ public interface EnterpriseAssignmentService {
 
     EnterpriseAssignment findMyAssignment(UUID studentId);
 
+    List<EnterpriseAssignment> findMyEnterpriseAssignments();
+
     EnterpriseAssignment save(EnterpriseAssignment entity);
 
     EnterpriseAssignment createAssignmentFromApplication(Application application);

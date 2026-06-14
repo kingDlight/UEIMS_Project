@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { message, Spin, Pagination, Collapse } from 'antd';
 import { motion } from 'framer-motion';
 import { SnippetsOutlined, PlusOutlined, SendOutlined, EditOutlined, EyeOutlined, WarningOutlined, DownOutlined, UpOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 import { NeuSurface } from '../components/shared/NeuSurface';
 import { SmallBadge } from '../components/shared/SmallBadge';
 import { WeeklyReportService } from '@/services/WeeklyReportService';
@@ -56,6 +57,7 @@ const EmptyState: React.FC<{ icon: React.ReactNode; title: string; description: 
 );
 
 export const ReportsTab: React.FC = () => {
+  const { t } = useTranslation(['reports', 'common']);
   const [reports, setReports] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -96,11 +98,11 @@ export const ReportsTab: React.FC = () => {
 
   const handleSubmit = async () => {
     if (!formData.weekNumber || (!formData.tasksCompleted && !formData.lessonsLearned)) {
-      message.error('Please fill in all required fields!');
+      message.error(t('fillRequiredFields', 'Please fill in all required fields!'));
       return;
     }
     if (!currentAssignment?.assignmentId) {
-      message.error('No active internship assignment found. Please complete your internship assignment first.');
+      message.error(t('noActiveAssignment', 'No active internship assignment found. Please complete your internship assignment first.'));
       return;
     }
     try {
@@ -113,12 +115,12 @@ export const ReportsTab: React.FC = () => {
         lessonsLearned: formData.lessonsLearned,
         planNextWeek: formData.planNextWeek,
       });
-      message.success('Report submitted successfully!');
+      message.success(t('submitSuccess', 'Report submitted successfully!'));
       setShowForm(false);
       setFormData({ weekNumber: '', tasksCompleted: '', issuesChallenges: '', lessonsLearned: '', planNextWeek: '' });
       fetchReports();
     } catch (err: any) {
-      message.error(err.response?.data?.message || 'Submit failed!');
+      message.error(err.response?.data?.message || t('submitFailed', 'Submit failed!'));
     } finally {
       setSubmitting(false);
     }
@@ -126,7 +128,7 @@ export const ReportsTab: React.FC = () => {
 
   const handleUpdate = async () => {
     if (!formData.lessonsLearned) {
-      message.error('Report content cannot be empty!');
+      message.error(t('reportEmptyError', 'Report content cannot be empty!'));
       return;
     }
     try {
@@ -137,12 +139,12 @@ export const ReportsTab: React.FC = () => {
         lessonsLearned: formData.lessonsLearned,
         planNextWeek: formData.planNextWeek,
       });
-      message.success('Report updated successfully!');
+      message.success(t('updateSuccess', 'Report updated successfully!'));
       setEditingReport(null);
       setFormData({ weekNumber: '', tasksCompleted: '', issuesChallenges: '', lessonsLearned: '', planNextWeek: '' });
       fetchReports();
     } catch (err: any) {
-      message.error(err.response?.data?.message || 'Update failed!');
+      message.error(err.response?.data?.message || t('updateFailed', 'Update failed!'));
     } finally {
       setSubmitting(false);
     }
@@ -160,12 +162,12 @@ export const ReportsTab: React.FC = () => {
 
   const getStatusLabel = (status: string) => {
     switch (status?.toUpperCase()) {
-      case 'APPROVED': return 'Approved';
-      case 'REJECTED': return 'Rejected';
-      case 'PENDING_REVIEW': return 'Pending Review';
-      case 'NOT_SUBMITTED': return 'Not Submitted';
-      case 'REVIEWED': return 'Reviewed';
-      default: return status || 'Draft';
+      case 'APPROVED': return t('statusApproved', 'Approved');
+      case 'REJECTED': return t('statusRejected', 'Rejected');
+      case 'PENDING_REVIEW': return t('statusPendingReview', 'Pending Review');
+      case 'NOT_SUBMITTED': return t('statusNotSubmitted', 'Not Submitted');
+      case 'REVIEWED': return t('statusReviewed', 'Reviewed');
+      default: return status || t('statusDraft', 'Draft');
     }
   };
 
@@ -183,41 +185,41 @@ export const ReportsTab: React.FC = () => {
   return (
     <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 24px 40px', fontFamily: 'Inter, sans-serif' }}>
       <div style={{ marginBottom: 24 }}>
-        <h2 style={{ fontSize: 22, fontWeight: 800, color: cc.textPrimary, margin: '0 0 6px', letterSpacing: '-0.01em' }}>Weekly Reports</h2>
-        <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}>Track your internship progress on a weekly basis</p>
+        <h2 style={{ fontSize: 22, fontWeight: 800, color: cc.textPrimary, margin: '0 0 6px', letterSpacing: '-0.01em' }}>{t('pageTitle', 'Weekly Reports')}</h2>
+        <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}>{t('pageSubtitle', 'Track your internship progress on a weekly basis')}</p>
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 20 }}>
-        <CTAButton variant="primary" icon={<PlusOutlined />} onClick={() => setShowForm(true)}>Submit Report</CTAButton>
+        <CTAButton variant="primary" icon={<PlusOutlined />} onClick={() => setShowForm(true)}>{t('submitReportBtn', 'Submit Report')}</CTAButton>
       </div>
 
       {/* Submit Form */}
       {showForm && (
         <NeuSurface style={{ padding: 24, marginBottom: 20 }}>
-          <h3 style={{ fontSize: 16, fontWeight: 700, color: cc.textPrimary, margin: '0 0 16px' }}>Submit Weekly Report</h3>
+          <h3 style={{ fontSize: 16, fontWeight: 700, color: cc.textPrimary, margin: '0 0 16px' }}>{t('submitFormTitle', 'Submit Weekly Report')}</h3>
           <div style={{ marginBottom: 16 }}>
-            <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>Week Number *</label>
+            <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>{t('weekNumberLabel', 'Week Number *')}</label>
             <input type="number" value={formData.weekNumber} onChange={(e) => setFormData({ ...formData, weekNumber: e.target.value })} style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13, fontFamily: "'Inter', sans-serif" }} />
           </div>
           <div style={{ marginBottom: 16 }}>
-            <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>Tasks Completed *</label>
-            <textarea value={formData.tasksCompleted} onChange={(e) => setFormData({ ...formData, tasksCompleted: e.target.value })} rows={3} placeholder="What did you accomplish this week?" style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13, fontFamily: "'Inter', sans-serif", resize: 'vertical' }} />
+            <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>{t('tasksCompletedLabel', 'Tasks Completed *')}</label>
+            <textarea value={formData.tasksCompleted} onChange={(e) => setFormData({ ...formData, tasksCompleted: e.target.value })} rows={3} placeholder={t('tasksCompletedPlaceholder', 'What did you accomplish this week?')} style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13, fontFamily: "'Inter', sans-serif", resize: 'vertical' }} />
           </div>
           <div style={{ marginBottom: 16 }}>
-            <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>Issues & Challenges</label>
-            <textarea value={formData.issuesChallenges} onChange={(e) => setFormData({ ...formData, issuesChallenges: e.target.value })} rows={2} placeholder="Any challenges you faced..." style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13, fontFamily: "'Inter', sans-serif", resize: 'vertical' }} />
+            <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>{t('issuesChallengesLabel', 'Issues & Challenges')}</label>
+            <textarea value={formData.issuesChallenges} onChange={(e) => setFormData({ ...formData, issuesChallenges: e.target.value })} rows={2} placeholder={t('issuesChallengesPlaceholder', 'Any challenges you faced...')} style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13, fontFamily: "'Inter', sans-serif", resize: 'vertical' }} />
           </div>
           <div style={{ marginBottom: 16 }}>
-            <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>Lessons Learned</label>
-            <textarea value={formData.lessonsLearned} onChange={(e) => setFormData({ ...formData, lessonsLearned: e.target.value })} rows={2} placeholder="What did you learn this week?" style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13, fontFamily: "'Inter', sans-serif", resize: 'vertical' }} />
+            <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>{t('lessonsLearnedLabel', 'Lessons Learned')}</label>
+            <textarea value={formData.lessonsLearned} onChange={(e) => setFormData({ ...formData, lessonsLearned: e.target.value })} rows={2} placeholder={t('lessonsLearnedPlaceholder', 'What did you learn this week?')} style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13, fontFamily: "'Inter', sans-serif", resize: 'vertical' }} />
           </div>
           <div style={{ marginBottom: 16 }}>
-            <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>Plan for Next Week</label>
-            <textarea value={formData.planNextWeek} onChange={(e) => setFormData({ ...formData, planNextWeek: e.target.value })} rows={2} placeholder="What are you planning for next week?" style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13, fontFamily: "'Inter', sans-serif", resize: 'vertical' }} />
+            <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>{t('planNextWeekLabel', 'Plan for Next Week')}</label>
+            <textarea value={formData.planNextWeek} onChange={(e) => setFormData({ ...formData, planNextWeek: e.target.value })} rows={2} placeholder={t('planNextWeekPlaceholder', 'What are you planning for next week?')} style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13, fontFamily: "'Inter', sans-serif", resize: 'vertical' }} />
           </div>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
-            <CTAButton variant="ghost" onClick={() => { setShowForm(false); setFormData({ weekNumber: '', tasksCompleted: '', issuesChallenges: '', lessonsLearned: '', planNextWeek: '' }); }}>Cancel</CTAButton>
-            <CTAButton variant="primary" icon={<SendOutlined />} onClick={handleSubmit} loading={submitting}>Submit</CTAButton>
+            <CTAButton variant="ghost" onClick={() => { setShowForm(false); setFormData({ weekNumber: '', tasksCompleted: '', issuesChallenges: '', lessonsLearned: '', planNextWeek: '' }); }}>{t('cancel', 'Cancel')}</CTAButton>
+            <CTAButton variant="primary" icon={<SendOutlined />} onClick={handleSubmit} loading={submitting}>{t('submit', 'Submit')}</CTAButton>
           </div>
         </NeuSurface>
       )}
@@ -228,41 +230,41 @@ export const ReportsTab: React.FC = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, padding: 12, borderRadius: cc.radiusMd, background: cc.warningMuted }}>
             <WarningOutlined style={{ fontSize: 20, color: cc.warning }} />
             <div>
-              <h3 style={{ fontSize: 14, fontWeight: 700, color: cc.warningText, margin: 0 }}>Edit Rejected Report</h3>
-              <p style={{ fontSize: 12, color: cc.warningText, margin: '4px 0 0' }}>Week {editingReport.weekNumber} - Resubmit based on enterprise feedback</p>
+              <h3 style={{ fontSize: 14, fontWeight: 700, color: cc.warningText, margin: 0 }}>{t('editFormTitle', 'Edit Rejected Report')}</h3>
+              <p style={{ fontSize: 12, color: cc.warningText, margin: '4px 0 0' }}>{t('resubmitDesc', 'Week {{week}} - Resubmit based on enterprise feedback', { week: editingReport.weekNumber })}</p>
             </div>
           </div>
           {editingReport.feedback && (
             <div style={{ marginBottom: 16, padding: 12, borderRadius: cc.radiusMd, background: cc.dangerMuted }}>
-              <p style={{ fontSize: 12, fontWeight: 600, color: cc.dangerText, margin: '0 0 6px' }}>Enterprise Feedback:</p>
+              <p style={{ fontSize: 12, fontWeight: 600, color: cc.dangerText, margin: '0 0 6px' }}>{t('enterpriseFeedbackLabel', 'Enterprise Feedback:')}</p>
               <p style={{ fontSize: 13, color: cc.dangerText, margin: 0 }}>{editingReport.feedback}</p>
             </div>
           )}
           <div style={{ marginBottom: 16 }}>
-            <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>Tasks Completed *</label>
+            <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>{t('tasksCompletedLabel', 'Tasks Completed *')}</label>
             <textarea value={formData.tasksCompleted} onChange={(e) => setFormData({ ...formData, tasksCompleted: e.target.value })} rows={3} style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13, fontFamily: "'Inter', sans-serif", resize: 'vertical' }} />
           </div>
           <div style={{ marginBottom: 16 }}>
-            <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>Issues & Challenges</label>
+            <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>{t('issuesChallengesLabel', 'Issues & Challenges')}</label>
             <textarea value={formData.issuesChallenges} onChange={(e) => setFormData({ ...formData, issuesChallenges: e.target.value })} rows={2} style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13, fontFamily: "'Inter', sans-serif", resize: 'vertical' }} />
           </div>
           <div style={{ marginBottom: 16 }}>
-            <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>Lessons Learned</label>
+            <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>{t('lessonsLearnedLabel', 'Lessons Learned')}</label>
             <textarea value={formData.lessonsLearned} onChange={(e) => setFormData({ ...formData, lessonsLearned: e.target.value })} rows={2} style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13, fontFamily: "'Inter', sans-serif", resize: 'vertical' }} />
           </div>
           <div style={{ marginBottom: 16 }}>
-            <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>Plan for Next Week</label>
+            <label style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, display: 'block', marginBottom: 6 }}>{t('planNextWeekLabel', 'Plan for Next Week')}</label>
             <textarea value={formData.planNextWeek} onChange={(e) => setFormData({ ...formData, planNextWeek: e.target.value })} rows={2} style={{ width: '100%', padding: '10px 12px', borderRadius: cc.radiusMd, border: `1px solid ${cc.border}`, fontSize: 13, fontFamily: "'Inter', sans-serif", resize: 'vertical' }} />
           </div>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
-            <CTAButton variant="ghost" onClick={() => { setEditingReport(null); setFormData({ weekNumber: '', tasksCompleted: '', issuesChallenges: '', lessonsLearned: '', planNextWeek: '' }); }}>Cancel</CTAButton>
-            <CTAButton variant="warning" icon={<SendOutlined />} onClick={handleUpdate} loading={submitting}>Resubmit Report</CTAButton>
+            <CTAButton variant="ghost" onClick={() => { setEditingReport(null); setFormData({ weekNumber: '', tasksCompleted: '', issuesChallenges: '', lessonsLearned: '', planNextWeek: '' }); }}>{t('cancel', 'Cancel')}</CTAButton>
+            <CTAButton variant="warning" icon={<SendOutlined />} onClick={handleUpdate} loading={submitting}>{t('resubmitReportBtn', 'Resubmit Report')}</CTAButton>
           </div>
         </NeuSurface>
       )}
 
       {reports.length === 0 ? (
-        <EmptyState icon={<SnippetsOutlined style={{ fontSize: 32 }} />} title="No reports yet" description="Your weekly reports will appear once you start your internship" />
+        <EmptyState icon={<SnippetsOutlined style={{ fontSize: 32 }} />} title={t('noReports', 'No reports yet')} description={t('noReportsDesc', 'Your weekly reports will appear once you start your internship')} />
       ) : (
         <>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -275,8 +277,8 @@ export const ReportsTab: React.FC = () => {
                         W{report.weekNumber}
                       </div>
                       <div>
-                        <h4 style={{ fontSize: 14, fontWeight: 600, color: cc.textPrimary, margin: '0 0 4px' }}>Week {report.weekNumber} Report</h4>
-                        <p style={{ fontSize: 12, color: cc.textMuted, margin: '0 0 8px' }}>Submitted: {report.submittedAt ? new Date(report.submittedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}</p>
+                        <h4 style={{ fontSize: 14, fontWeight: 600, color: cc.textPrimary, margin: '0 0 4px' }}>{t('reportTitle', 'Week {{week}} Report', { week: report.weekNumber })}</h4>
+                        <p style={{ fontSize: 12, color: cc.textMuted, margin: '0 0 8px' }}>{t('submittedDate', 'Submitted')}: {report.submittedAt ? new Date(report.submittedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}</p>
                         <SmallBadge label={getStatusLabel(report.status)} variant={getStatusVariant(report.status)} />
                       </div>
                     </div>
@@ -288,9 +290,9 @@ export const ReportsTab: React.FC = () => {
                       )}
                       <div style={{ display: 'flex', gap: 8 }}>
                         {report.status === 'REJECTED' && (
-                          <CTAButton variant="warning" size="sm" icon={<EditOutlined />} onClick={() => { setEditingReport(report); setFormData({ weekNumber: String(report.weekNumber), tasksCompleted: report.tasksCompleted || '', issuesChallenges: report.issuesChallenges || '', lessonsLearned: report.lessonsLearned || '', planNextWeek: report.planNextWeek || '' }); }}>Edit & Resubmit</CTAButton>
+                          <CTAButton variant="warning" size="sm" icon={<EditOutlined />} onClick={() => { setEditingReport(report); setFormData({ weekNumber: String(report.weekNumber), tasksCompleted: report.tasksCompleted || '', issuesChallenges: report.issuesChallenges || '', lessonsLearned: report.lessonsLearned || '', planNextWeek: report.planNextWeek || '' }); }}>{t('editAndResubmitBtn', 'Edit & Resubmit')}</CTAButton>
                         )}
-                        <CTAButton variant="ghost" size="sm" icon={expandedReport === report.reportId ? <UpOutlined /> : <DownOutlined />} onClick={() => setExpandedReport(expandedReport === report.reportId ? null : report.reportId)}>{expandedReport === report.reportId ? 'Collapse' : 'Expand'}</CTAButton>
+                        <CTAButton variant="ghost" size="sm" icon={expandedReport === report.reportId ? <UpOutlined /> : <DownOutlined />} onClick={() => setExpandedReport(expandedReport === report.reportId ? null : report.reportId)}>{expandedReport === report.reportId ? t('collapse', 'Collapse') : t('expand', 'Expand')}</CTAButton>
                       </div>
                     </div>
                   </div>
@@ -298,24 +300,24 @@ export const ReportsTab: React.FC = () => {
                     <div style={{ marginTop: 16, paddingTop: 16, borderTop: `1px solid ${cc.border}` }}>
                       <div style={{ display: 'grid', gap: 12 }}>
                         <div>
-                          <p style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, margin: '0 0 4px' }}>Tasks Completed</p>
+                          <p style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, margin: '0 0 4px' }}>{t('tasksCompletedTitle', 'Tasks Completed')}</p>
                           <p style={{ fontSize: 13, color: cc.textPrimary, margin: 0, whiteSpace: 'pre-wrap' }}>{report.tasksCompleted || 'N/A'}</p>
                         </div>
                         <div>
-                          <p style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, margin: '0 0 4px' }}>Issues & Challenges</p>
+                          <p style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, margin: '0 0 4px' }}>{t('issuesChallengesTitle', 'Issues & Challenges')}</p>
                           <p style={{ fontSize: 13, color: cc.textPrimary, margin: 0, whiteSpace: 'pre-wrap' }}>{report.issuesChallenges || 'N/A'}</p>
                         </div>
                         <div>
-                          <p style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, margin: '0 0 4px' }}>Lessons Learned</p>
+                          <p style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, margin: '0 0 4px' }}>{t('lessonsLearnedTitle', 'Lessons Learned')}</p>
                           <p style={{ fontSize: 13, color: cc.textPrimary, margin: 0, whiteSpace: 'pre-wrap' }}>{report.lessonsLearned || 'N/A'}</p>
                         </div>
                         <div>
-                          <p style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, margin: '0 0 4px' }}>Plan for Next Week</p>
+                          <p style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, margin: '0 0 4px' }}>{t('planNextWeekTitle', 'Plan for Next Week')}</p>
                           <p style={{ fontSize: 13, color: cc.textPrimary, margin: 0, whiteSpace: 'pre-wrap' }}>{report.planNextWeek || 'N/A'}</p>
                         </div>
                         {report.feedback && (
                           <div style={{ padding: 12, borderRadius: cc.radiusMd, background: cc.dangerMuted }}>
-                            <p style={{ fontSize: 12, fontWeight: 600, color: cc.dangerText, margin: '0 0 4px' }}>Enterprise Feedback:</p>
+                            <p style={{ fontSize: 12, fontWeight: 600, color: cc.dangerText, margin: '0 0 4px' }}>{t('enterpriseFeedbackLabel', 'Enterprise Feedback:')}</p>
                             <p style={{ fontSize: 13, color: cc.dangerText, margin: 0, whiteSpace: 'pre-wrap' }}>{report.feedback}</p>
                           </div>
                         )}
@@ -333,7 +335,7 @@ export const ReportsTab: React.FC = () => {
               total={reports.length}
               onChange={setCurrentPage}
               showSizeChanger={false}
-              showTotal={(total, range) => `${range[0]}-${range[1]} of ${total}`}
+              showTotal={(total, range) => `${range[0]}-${range[1]} ${t('ofTotal', 'of {{total}}', { total })}`}
             />
           </div>
         </>

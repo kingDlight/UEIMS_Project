@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -40,6 +41,13 @@ public class InterviewController {
                 service.findMyInterviews().stream().map(mapper::toDto).toList());
     }
 
+    @GetMapping("/my-enterprise")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ENTERPRISE') or hasRole('TRAINING_MANAGER')")
+    public ResponseEntity<java.util.List<com.ueims.dto.response.InterviewDTO>> getMyEnterpriseInterviews() {
+        return ResponseEntity.ok(
+                service.findMyEnterpriseInterviews().stream().map(mapper::toDto).toList());
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<com.ueims.dto.response.InterviewDTO> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(mapper.toDto(service.findById(id)));
@@ -49,6 +57,20 @@ public class InterviewController {
     public ResponseEntity<com.ueims.dto.response.InterviewDTO> create(
             @Valid @RequestBody com.ueims.dto.response.InterviewDTO entity) {
         return ResponseEntity.ok(mapper.toDto(service.save(mapper.toEntity(entity))));
+    }
+
+    @PutMapping("/{id}")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ENTERPRISE') or hasRole('TRAINING_MANAGER')")
+    public ResponseEntity<com.ueims.dto.response.InterviewDTO> update(
+            @PathVariable UUID id, @Valid @RequestBody com.ueims.dto.response.InterviewDTO entity) {
+        return ResponseEntity.ok(mapper.toDto(service.update(id, entity)));
+    }
+
+    @PostMapping("/{id}/record-result")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ENTERPRISE')")
+    public ResponseEntity<com.ueims.dto.response.InterviewDTO> recordResult(
+            @PathVariable UUID id, @RequestParam String result, @RequestParam(required = false) String notes) {
+        return ResponseEntity.ok(mapper.toDto(service.recordResult(id, result, notes)));
     }
 
     @DeleteMapping("/{id}")

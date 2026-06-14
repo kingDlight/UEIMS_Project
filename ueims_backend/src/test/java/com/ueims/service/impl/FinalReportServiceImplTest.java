@@ -11,6 +11,7 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -67,7 +68,7 @@ class FinalReportServiceImplTest {
         student = new User();
         student.setUserId(UUID.randomUUID());
         student.setEmail("student@test.com");
-        student.setRoles(List.of()); // Non-staff
+        student.setRoles(Set.of()); // Non-staff
 
         assignment = new EnterpriseAssignment();
         assignment.setAssignmentId(assignmentId);
@@ -94,6 +95,7 @@ class FinalReportServiceImplTest {
 
     @Test
     void findById_exists_returnsFinalReport() {
+        mockSecurityContext(student);
         when(repository.findById(reportId)).thenReturn(Optional.of(report));
         FinalReport result = service.findById(reportId);
         assertNotNull(result);
@@ -116,6 +118,8 @@ class FinalReportServiceImplTest {
 
     @Test
     void deleteById_success() {
+        mockSecurityContext(student);
+        when(repository.findById(reportId)).thenReturn(Optional.of(report));
         service.deleteById(reportId);
         verify(repository).deleteById(reportId);
     }
@@ -153,6 +157,7 @@ class FinalReportServiceImplTest {
 
     @Test
     void uploadFinalReport_deadlineExpired_throwsException() {
+        mockSecurityContext(student);
         assignment.getSemester().setEndDate(LocalDate.now().minusDays(1)); // Expired
         MockMultipartFile file = new MockMultipartFile("file", "test.pdf", "application/pdf", "content".getBytes());
 
@@ -164,6 +169,7 @@ class FinalReportServiceImplTest {
 
     @Test
     void uploadFinalReport_success() throws IOException {
+        mockSecurityContext(student);
         MockMultipartFile file = new MockMultipartFile("file", "test.pdf", "application/pdf", "content".getBytes());
 
         when(enterpriseAssignmentRepository.findById(assignmentId)).thenReturn(Optional.of(assignment));

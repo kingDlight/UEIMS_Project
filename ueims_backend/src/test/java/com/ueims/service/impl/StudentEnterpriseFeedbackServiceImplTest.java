@@ -8,10 +8,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,9 +27,11 @@ import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
 import com.ueims.model.entity.EligibleStudent;
 import com.ueims.model.entity.Enterprise;
+import com.ueims.model.entity.Role;
 import com.ueims.model.entity.Semester;
 import com.ueims.model.entity.StudentEnterpriseFeedback;
 import com.ueims.model.entity.User;
+import com.ueims.model.entity.UserRole;
 import com.ueims.repository.EligibleStudentRepository;
 import com.ueims.repository.StudentEnterpriseFeedbackRepository;
 import com.ueims.repository.UserRepository;
@@ -79,9 +83,30 @@ class StudentEnterpriseFeedbackServiceImplTest {
                 .build();
     }
 
+    @AfterEach
+    void cleanup() {
+        SecurityContextHolder.clearContext();
+    }
+
     private void mockSecurityContext() {
-        SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(TEST_EMAIL, null));
-        when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(student));
+        mockSecurityContext(student, null);
+    }
+
+    private void mockSecurityContext(User user, String roleName) {
+        if (roleName != null) {
+            Role r = new Role();
+            r.setRoleName(roleName);
+            UserRole ur = new UserRole();
+            ur.setRole(r);
+            user.setRoles(Collections.singleton(ur));
+        } else {
+            user.setRoles(Collections.emptySet());
+        }
+        SecurityContextHolder.getContext()
+                .setAuthentication(new UsernamePasswordAuthenticationToken(user.getEmail(), null));
+        org.mockito.Mockito.lenient()
+                .when(userRepository.findByEmail(user.getEmail()))
+                .thenReturn(Optional.of(user));
     }
 
     @Test
@@ -96,6 +121,7 @@ class StudentEnterpriseFeedbackServiceImplTest {
 
     @Test
     void findByIdSuccess() {
+        mockSecurityContext(student, "STUDENT");
         when(repository.findById(feedbackId)).thenReturn(Optional.of(feedback));
 
         StudentEnterpriseFeedback result = service.findById(feedbackId);
@@ -212,6 +238,9 @@ class StudentEnterpriseFeedbackServiceImplTest {
 
     @Test
     void deleteByIdSuccess() {
+        User tm = User.builder().userId(UUID.randomUUID()).email("tm@test.com").build();
+        mockSecurityContext(tm, "TRAINING_MANAGER");
+        when(repository.findById(feedbackId)).thenReturn(Optional.of(feedback));
         service.deleteById(feedbackId);
 
         verify(repository).deleteById(feedbackId);
