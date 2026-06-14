@@ -7,6 +7,7 @@ import {
   BellOutlined,
   HomeOutlined,
   FileTextOutlined,
+  UserOutlined,
 } from '@ant-design/icons';
 import type { NavItem } from '@/components/layout/ModernLayout';
 
@@ -62,8 +63,10 @@ export const c = {
 export const navItems: NavItem[] = [
   { key: 'dashboard', label: 'Dashboard', icon: React.createElement(HomeOutlined), roles: ['ENTERPRISE'] },
   { key: 'applicants', label: 'Applicants', icon: React.createElement(TeamOutlined), roles: ['ENTERPRISE'] },
+  { key: 'job-posts', label: 'Job Posts', icon: React.createElement(ProjectOutlined), roles: ['ENTERPRISE'] },
   { key: 'evaluation', label: 'Evaluation', icon: React.createElement(StarOutlined), roles: ['ENTERPRISE'] },
   { key: 'reports', label: 'Reports', icon: React.createElement(FileTextOutlined), roles: ['ENTERPRISE'] },
   { key: 'analytics', label: 'Analytics', icon: React.createElement(BarChartOutlined), roles: ['ENTERPRISE'] },
+  { key: 'profile', label: 'Profile', icon: React.createElement(UserOutlined), roles: ['ENTERPRISE'] },
   { key: 'notifications', label: 'Notices', icon: React.createElement(BellOutlined), roles: ['ENTERPRISE', 'STUDENT', 'TRAINING_MANAGER'] },
 ];

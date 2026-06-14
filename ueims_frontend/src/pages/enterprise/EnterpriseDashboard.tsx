@@ -9,11 +9,15 @@ import { extractUserFromToken } from '@/utils/jwt';
 const EnterpriseDashboardTab = React.lazy(() => import('./tabs/EnterpriseDashboardTab').then(m => ({ default: m.EnterpriseDashboardTab })));
 const ApplicantKanbanTab = React.lazy(() => import('./tabs/ApplicantKanbanTab').then(m => ({ default: m.ApplicantKanbanTab })));
 const EvaluationTab = React.lazy(() => import('./tabs/EvaluationTab').then(m => ({ default: m.EvaluationTab })));
+const EnterpriseProfileTab = React.lazy(() => import('./tabs/EnterpriseProfileTab').then(m => ({ default: m.EnterpriseProfileTab })));
+const JobPostManagementTab = React.lazy(() => import('./tabs/JobPostManagementTab').then(m => ({ default: m.JobPostManagementTab })));
 
 export type EnterprisePageKey =
   | 'dashboard'
   | 'applicants'
+  | 'job-posts'
   | 'evaluation'
+  | 'profile'
   | 'reports'
   | 'analytics'
   | 'notifications';
@@ -39,7 +43,9 @@ export const EnterpriseDashboard: React.FC = () => {
   const pages: Record<string, React.ReactNode> = {
     dashboard: <EnterpriseDashboardTab />,
     applicants: <ApplicantKanbanTab />,
+    'job-posts': <JobPostManagementTab />,
     evaluation: <EvaluationTab />,
+    profile: <EnterpriseProfileTab />,
     reports: (
       <div style={{ padding: '40px 24px', fontFamily: 'Inter, sans-serif', color: '#64748b', textAlign: 'center' }}>
         Reports — Coming Soon
