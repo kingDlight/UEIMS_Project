@@ -885,6 +885,8 @@ CREATE TABLE weekly_reports (
                     CHECK (status IN ('NOT_SUBMITTED', 'SUBMITTED', 'APPROVED', 'REJECTED')),
     submitted_at    TIMESTAMP,
     late_override_by UUID REFERENCES users(user_id),                  -- BR-56: TM override for late/early submissions
+    plagiarism_score DECIMAL(5,4),                                    -- BR-58: RBL Jaccard Similarity Score (0.0000 - 1.0000)
+    is_anomaly      BOOLEAN NOT NULL DEFAULT FALSE,                   -- BR-58: Red flag if score >= 0.85
     created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
