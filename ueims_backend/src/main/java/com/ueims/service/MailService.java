@@ -146,7 +146,8 @@ public class MailService {
     public void sendIncidentReported(com.ueims.model.entity.Incident incident) {
         try {
             // Notify reporter + all training managers
-            String reporterEmail = incident.getReportedBy() != null ? incident.getReportedBy().getEmail() : null;
+            String reporterEmail =
+                    incident.getReportedBy() != null ? incident.getReportedBy().getEmail() : null;
             if (reporterEmail == null) return;
             Context ctx = new Context();
             ctx.setVariable("fullName", incident.getReportedBy().getFullName());
@@ -163,7 +164,8 @@ public class MailService {
     private void sendInterviewEmail(
             com.ueims.model.entity.Interview interview, String template, String subject, String extra) {
         try {
-            String to = interview.getApplication() != null && interview.getApplication().getStudent() != null
+            String to = interview.getApplication() != null
+                            && interview.getApplication().getStudent() != null
                     ? interview.getApplication().getStudent().getEmail()
                     : null;
             if (to == null) {
@@ -177,15 +179,20 @@ public class MailService {
             ctx.setVariable("scheduledTime", interview.getScheduledTime());
             ctx.setVariable("location", interview.getLocation());
             ctx.setVariable("meetingLink", interview.getMeetingLink());
-            ctx.setVariable("jobTitle", interview.getApplication().getJobPost() != null
-                    ? interview.getApplication().getJobPost().getTitle()
-                    : "");
+            ctx.setVariable(
+                    "jobTitle",
+                    interview.getApplication().getJobPost() != null
+                            ? interview.getApplication().getJobPost().getTitle()
+                            : "");
             ctx.setVariable("result", interview.getResult());
             ctx.setVariable("reason", extra);
             String html = templateEngine.process(template, ctx);
             sendHtml(to, subject, html);
         } catch (Exception e) {
-            log.warn("[InterviewEmail] Template '{}' may not exist; falling back to plain text. err={}", template, e.getMessage());
+            log.warn(
+                    "[InterviewEmail] Template '{}' may not exist; falling back to plain text. err={}",
+                    template,
+                    e.getMessage());
         }
     }
 

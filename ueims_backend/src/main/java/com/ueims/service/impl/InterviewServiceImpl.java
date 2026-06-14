@@ -121,8 +121,10 @@ public class InterviewServiceImpl implements InterviewService {
             notificationService.notifyInterviewScheduled(saved);
         } catch (Exception ex) {
             // 43.0.E2: email dispatch failure — log warning, keep DB state
-            log.warn("[UC-43 43.0.E2] Notification dispatch failed for interview {}: {}",
-                    saved.getInterviewId(), ex.getMessage());
+            log.warn(
+                    "[UC-43 43.0.E2] Notification dispatch failed for interview {}: {}",
+                    saved.getInterviewId(),
+                    ex.getMessage());
         }
         return saved;
     }
@@ -332,8 +334,8 @@ public class InterviewServiceImpl implements InterviewService {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
         // BR-35: also check overlap
-        boolean overlap = repository.existsByEnterpriseAndTime(
-                currentUser.getEnterprise().getEnterpriseId(), newTime);
+        boolean overlap =
+                repository.existsByEnterpriseAndTime(currentUser.getEnterprise().getEnterpriseId(), newTime);
         if (overlap) {
             throw new AppException(ErrorCode.INTERVIEW_OVERLAP);
         }
@@ -360,7 +362,8 @@ public class InterviewServiceImpl implements InterviewService {
         User currentUser = getCurrentUser();
         if (currentUser.getEnterprise() == null
                 || application.getJobPost() == null
-                || !application.getJobPost()
+                || !application
+                        .getJobPost()
                         .getEnterprise()
                         .getEnterpriseId()
                         .equals(currentUser.getEnterprise().getEnterpriseId())) {
@@ -375,9 +378,10 @@ public class InterviewServiceImpl implements InterviewService {
                 int hour = cursor.getHour();
                 if ((hour >= 9 && hour < 12) || (hour >= 14 && hour < 17)) {
                     final LocalDateTime candidate = cursor;
-                    boolean conflict = existing.stream().anyMatch(i ->
-                            i.getScheduledTime() != null
-                                    && Math.abs(java.time.Duration.between(i.getScheduledTime(), candidate).toMinutes())
+                    boolean conflict = existing.stream()
+                            .anyMatch(i -> i.getScheduledTime() != null
+                                    && Math.abs(java.time.Duration.between(i.getScheduledTime(), candidate)
+                                                    .toMinutes())
                                             < 60);
                     if (!conflict) {
                         slots.add(candidate);

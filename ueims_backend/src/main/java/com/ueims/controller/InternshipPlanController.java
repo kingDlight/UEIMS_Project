@@ -41,17 +41,14 @@ public class InternshipPlanController {
      */
     @GetMapping("/by-assignment/{assignmentId}")
     @PreAuthorize("hasRole('ENTERPRISE') or hasRole('TRAINING_MANAGER')")
-    public ResponseEntity<com.ueims.dto.response.InternshipPlanDTO> getByAssignment(
-            @PathVariable UUID assignmentId) {
-        com.ueims.model.entity.InternshipPlan plan =
-                service.findByAssignmentId(assignmentId);
+    public ResponseEntity<com.ueims.dto.response.InternshipPlanDTO> getByAssignment(@PathVariable UUID assignmentId) {
+        com.ueims.model.entity.InternshipPlan plan = service.findByAssignmentId(assignmentId);
         if (plan == null) {
-            return ResponseEntity.ok(mapper.toDto(
-                    com.ueims.model.entity.InternshipPlan.builder()
-                            .assignment(com.ueims.model.entity.EnterpriseAssignment.builder()
-                                    .assignmentId(assignmentId)
-                                    .build())
-                            .build()));
+            return ResponseEntity.ok(mapper.toDto(com.ueims.model.entity.InternshipPlan.builder()
+                    .assignment(com.ueims.model.entity.EnterpriseAssignment.builder()
+                            .assignmentId(assignmentId)
+                            .build())
+                    .build()));
         }
         return ResponseEntity.ok(mapper.toDto(plan));
     }

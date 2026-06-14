@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { Form, Input, Button, message, Divider } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Globe } from 'lucide-react';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { AuthService } from '@/services/AuthService';
 import { getDeviceId } from '@/utils/device';
@@ -20,11 +19,10 @@ import {
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const loginWithTokens = useAuthStore((state) => state.loginWithTokens);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const [loading, setLoading] = useState(false);
-  const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [form] = Form.useForm();
 
   const user = useAuthStore((state) => state.user);
@@ -152,7 +150,7 @@ export const LoginPage: React.FC = () => {
           zIndex: 2,
         }}
       >
-        {/* Language Selector & Back to home */}
+        {/* Back to home */}
         <div style={{ marginBottom: 40, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <button
             type="button"
@@ -181,104 +179,6 @@ export const LoginPage: React.FC = () => {
             {t('auth.backToHome')}
           </button>
 
-          <div style={{ position: 'relative' }}>
-            <button
-              onClick={() => setLangMenuOpen(!langMenuOpen)}
-              style={{
-                background: 'none',
-                border: 'none',
-                padding: '6px',
-                color: AUTH_PRIMARY,
-                textDecoration: 'none',
-                fontSize: 13,
-                fontWeight: 500,
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 4,
-                transition: 'color 0.2s',
-                cursor: 'pointer',
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = AUTH_PRIMARY_DARK; }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = AUTH_PRIMARY; }}
-              title={t('common.switchLanguage')}
-            >
-              <Globe size={16} />
-            </button>
-
-            {langMenuOpen && (
-              <div style={{
-                position: 'absolute',
-                right: 0,
-                top: '100%',
-                marginTop: '8px',
-                backgroundColor: '#fff',
-                border: `1px solid ${AUTH_PRIMARY}20`,
-                borderRadius: '6px',
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                zIndex: 50,
-                minWidth: '120px',
-              }}>
-                <button
-                  onClick={() => {
-                    i18n.changeLanguage('en');
-                    setLangMenuOpen(false);
-                    localStorage.setItem('i18nextLng', 'en');
-                  }}
-                  style={{
-                    width: '100%',
-                    textAlign: 'left',
-                    padding: '10px 14px',
-                    border: 'none',
-                    background: i18n.language === 'en' ? `${AUTH_PRIMARY}10` : 'transparent',
-                    color: i18n.language === 'en' ? AUTH_PRIMARY : AUTH_TEXT_GRAY,
-                    fontSize: 13,
-                    fontWeight: 500,
-                    cursor: 'pointer',
-                    borderTopLeftRadius: '6px',
-                    borderTopRightRadius: '6px',
-                    transition: 'all 0.2s',
-                  }}
-                  onMouseEnter={(e) => {
-                    if (i18n.language !== 'en') e.currentTarget.style.backgroundColor = `${AUTH_PRIMARY}05`;
-                  }}
-                  onMouseLeave={(e) => {
-                    if (i18n.language !== 'en') e.currentTarget.style.backgroundColor = 'transparent';
-                  }}
-                >
-                  {t('common.english')}
-                </button>
-                <button
-                  onClick={() => {
-                    i18n.changeLanguage('vi');
-                    setLangMenuOpen(false);
-                    localStorage.setItem('i18nextLng', 'vi');
-                  }}
-                  style={{
-                    width: '100%',
-                    textAlign: 'left',
-                    padding: '10px 14px',
-                    border: 'none',
-                    background: i18n.language === 'vi' ? `${AUTH_PRIMARY}10` : 'transparent',
-                    color: i18n.language === 'vi' ? AUTH_PRIMARY : AUTH_TEXT_GRAY,
-                    fontSize: 13,
-                    fontWeight: 500,
-                    cursor: 'pointer',
-                    borderBottomLeftRadius: '6px',
-                    borderBottomRightRadius: '6px',
-                    transition: 'all 0.2s',
-                  }}
-                  onMouseEnter={(e) => {
-                    if (i18n.language !== 'vi') e.currentTarget.style.backgroundColor = `${AUTH_PRIMARY}05`;
-                  }}
-                  onMouseLeave={(e) => {
-                    if (i18n.language !== 'vi') e.currentTarget.style.backgroundColor = 'transparent';
-                  }}
-                >
-                  {t('common.vietnamese')}
-                </button>
-              </div>
-            )}
-          </div>
         </div>
 
         <div style={{ marginBottom: 12 }}>

@@ -1,6 +1,5 @@
 package com.ueims.service.impl;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -80,8 +79,8 @@ public class InternshipPlanItemServiceImpl implements InternshipPlanItemService 
                         || entity.getTargetDate().isAfter(semester.getEndDate()))) {
             throw new AppException(
                     ErrorCode.SEMESTER_INVALID_DATE,
-                    "Target date must be within the semester boundaries ("
-                            + semester.getStartDate() + " to " + semester.getEndDate() + ")");
+                    "Target date must be within the semester boundaries (" + semester.getStartDate() + " to "
+                            + semester.getEndDate() + ")");
         }
 
         return repository.save(entity);

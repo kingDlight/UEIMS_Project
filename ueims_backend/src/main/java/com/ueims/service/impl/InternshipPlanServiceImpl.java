@@ -70,7 +70,8 @@ public class InternshipPlanServiceImpl implements InternshipPlanService {
         if (currentUser == null
                 || currentUser.getEnterprise() == null
                 || assignment.getEnterprise() == null
-                || !assignment.getEnterprise()
+                || !assignment
+                        .getEnterprise()
                         .getEnterpriseId()
                         .equals(currentUser.getEnterprise().getEnterpriseId())) {
             throw new AppException(ErrorCode.UNAUTHORIZED);

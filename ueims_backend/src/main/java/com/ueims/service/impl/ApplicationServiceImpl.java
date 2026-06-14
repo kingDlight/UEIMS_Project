@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.core.io.Resource;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -296,9 +295,8 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     @Transactional
     public org.springframework.core.io.Resource downloadCv(UUID applicationId) {
-        Application application = repository
-                .findById(applicationId)
-                .orElseThrow(() -> new AppException(ErrorCode.APPLICATION_NOT_FOUND));
+        Application application =
+                repository.findById(applicationId).orElseThrow(() -> new AppException(ErrorCode.APPLICATION_NOT_FOUND));
 
         // BR-32: Enterprises can only download CVs of students who applied to their active posts.
         User currentUser = getCurrentUser();
@@ -320,9 +318,8 @@ public class ApplicationServiceImpl implements ApplicationService {
         }
 
         // Convert /uploads/cv/xxx.pdf -> user.dir/uploads/cv/xxx.pdf
-        java.nio.file.Path filePath = java.nio.file.Paths.get(
-                System.getProperty("user.dir"),
-                cvUrl.replace("/uploads/", "uploads/"));
+        java.nio.file.Path filePath =
+                java.nio.file.Paths.get(System.getProperty("user.dir"), cvUrl.replace("/uploads/", "uploads/"));
 
         if (!java.nio.file.Files.exists(filePath)) {
             // 40.0.E1: file missing or removed by applicant

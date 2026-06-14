@@ -6,13 +6,13 @@ import { Modal, Dropdown, Drawer, Form, Input, Button, message } from 'antd';
 import type { MenuProps } from 'antd';
 import { BellOutlined, DownOutlined, MenuOutlined } from '@ant-design/icons';
 import { X, Mail, Phone, ShieldCheck, Activity, Camera } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { SmallPill } from '@/pages/training-manager/components/shared/SmallPill';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { AuthService } from '@/services/AuthService';
 import { api } from '@/services/api';
 import './ModernLayout.css';
 import { BackgroundEffects } from '@/pages/home/components/BackgroundEffects';
-import { useTranslation } from 'react-i18next';
 
 export interface NavItem {
   key: string;
@@ -157,14 +157,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
   const navigate = useNavigate();
   const { tab } = useParams<{ tab: string }>();
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const { t, i18n } = useTranslation();
-
-  const toggleLanguage = () => {
-    const currentLang = i18n.language?.split('-')[0] || 'en';
-    const newLang = currentLang === 'en' ? 'vi' : 'en';
-    i18n.changeLanguage(newLang);
-    localStorage.setItem('i18nextLng', newLang);
-  };
+  const { t } = useTranslation();
 
   useScrollAnimation();
 
@@ -413,30 +406,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
           <div className="modern-bottom-bar">
             <div className="modern-bottom-bar-bg" />
 
-            <div style={{ position: 'relative', zIndex: 1, flex: '0 0 auto', display: 'flex', alignItems: 'center', padding: '0 8px' }}>
-              <button
-                type="button"
-                onClick={toggleLanguage}
-                style={{
-                  background: 'rgba(230, 126, 34, 0.1)',
-                  border: '1px solid rgba(230, 126, 34, 0.2)',
-                  borderRadius: 12,
-                  padding: '6px 10px',
-                  color: '#ea580c',
-                  fontWeight: 700,
-                  fontSize: 12,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'all 0.2s ease',
-                  width: 44
-                }}
-                className="hover-lift"
-              >
-                {i18n.language?.split('-')[0] === 'vi' ? 'VN' : 'EN'}
-              </button>
-            </div>
+            <div style={{ position: 'relative', zIndex: 1, flex: '0 0 auto', display: 'flex', alignItems: 'center', padding: '0 8px' }} />
 
             <div className="modern-bar-divider" />
 

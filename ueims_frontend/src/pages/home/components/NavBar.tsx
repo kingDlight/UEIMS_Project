@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Menu, X, Sun, Moon, Globe } from 'lucide-react';
+import { ArrowRight, Menu, X, Sun, Moon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { navLinks } from '../constants';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -9,9 +9,8 @@ import { LogoIcon } from '../../../components/LogoIcon';
 
 export const NavBar = ({ isDark, toggleTheme, scrolled, scrollToSection }: { isDark: boolean, toggleTheme: () => void, scrolled: boolean, scrollToSection: (h: string) => void }) => {
   const navigate = useNavigate();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [langMenuOpen, setLangMenuOpen] = useState(false);
   const { isAuthenticated, user, token } = useAuthStore();
 
   const isReallyAuthenticated = isAuthenticated && token && !isTokenExpired(token);
@@ -62,49 +61,6 @@ export const NavBar = ({ isDark, toggleTheme, scrolled, scrollToSection }: { isD
         >
           {isDark ? <Sun className="h-4 w-4 relative" /> : <Moon className="h-4 w-4 relative" />}
         </button>
-
-        <div className="relative">
-          <button
-            onClick={() => setLangMenuOpen(!langMenuOpen)}
-            className={`w-9 h-9 flex items-center justify-center rounded-full border transition-all duration-300 ease-in-out bg-transparent shrink-0 ${isDark ? 'border-zinc-500 text-zinc-300 hover:text-white hover:border-[#f37021]/50 hover:bg-zinc-800/40' : 'border-slate-400 text-slate-700 hover:text-slate-950 hover:border-slate-500 hover:bg-slate-100'
-              }`}
-            title={t('common.switchLanguage')}
-          >
-            <Globe className="h-4 w-4 relative" />
-          </button>
-
-          {langMenuOpen && (
-            <div className={`absolute right-0 mt-2 rounded-lg shadow-lg z-50 ${isDark ? 'bg-zinc-800 border border-zinc-700' : 'bg-white border border-slate-200'
-              }`}>
-              <button
-                onClick={() => {
-                  i18n.changeLanguage('en');
-                  setLangMenuOpen(false);
-                  localStorage.setItem('i18nextLng', 'en');
-                }}
-                className={`block w-full text-left px-4 py-2 text-sm font-medium rounded-t-lg transition-colors duration-200 ${i18n.language === 'en'
-                    ? isDark ? 'bg-zinc-700 text-white' : 'bg-slate-100 text-slate-900'
-                    : isDark ? 'text-zinc-300 hover:bg-zinc-700/50 hover:text-white' : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900'
-                  }`}
-              >
-                {t('common.english')}
-              </button>
-              <button
-                onClick={() => {
-                  i18n.changeLanguage('vi');
-                  setLangMenuOpen(false);
-                  localStorage.setItem('i18nextLng', 'vi');
-                }}
-                className={`block w-full text-left px-4 py-2 text-sm font-medium rounded-b-lg transition-colors duration-200 ${i18n.language === 'vi'
-                    ? isDark ? 'bg-zinc-700 text-white' : 'bg-slate-100 text-slate-900'
-                    : isDark ? 'text-zinc-300 hover:bg-zinc-700/50 hover:text-white' : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900'
-                  }`}
-              >
-                {t('common.vietnamese')}
-              </button>
-            </div>
-          )}
-        </div>
 
         {!isReallyAuthenticated ? (
           <>

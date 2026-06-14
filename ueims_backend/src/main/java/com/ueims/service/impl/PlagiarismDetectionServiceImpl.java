@@ -24,13 +24,11 @@ public class PlagiarismDetectionServiceImpl implements PlagiarismDetectionServic
     WeeklyReportRepository repository;
 
     private static final Set<String> STOP_WORDS = new HashSet<>(Arrays.asList(
-            "the", "a", "an", "is", "are", "was", "were", "be", "been", "being",
-            "and", "or", "but", "so", "of", "to", "in", "on", "at", "by", "for",
-            "with", "from", "as", "this", "that", "it", "i", "we", "you", "they",
-            "he", "she", "them", "his", "her", "their", "my", "our", "your", "do",
-            "does", "did", "have", "has", "had", "will", "would", "should", "could",
-            "can", "may", "might", "must", "shall", "và", "của", "là", "trong", "đã"
-    ));
+            "the", "a", "an", "is", "are", "was", "were", "be", "been", "being", "and", "or", "but", "so", "of", "to",
+            "in", "on", "at", "by", "for", "with", "from", "as", "this", "that", "it", "i", "we", "you", "they", "he",
+            "she", "them", "his", "her", "their", "my", "our", "your", "do", "does", "did", "have", "has", "had",
+            "will", "would", "should", "could", "can", "may", "might", "must", "shall", "và", "của", "là", "trong",
+            "đã"));
 
     private static Set<String> tokenize(String text) {
         if (text == null || text.isBlank()) return Set.of();
@@ -60,7 +58,8 @@ public class PlagiarismDetectionServiceImpl implements PlagiarismDetectionServic
     @Override
     public double computeMaxSimilarity(WeeklyReport report) {
         if (report == null) return 0.0;
-        String text = String.join(" ",
+        String text = String.join(
+                " ",
                 nullSafe(report.getTasksCompleted()),
                 nullSafe(report.getIssuesChallenges()),
                 nullSafe(report.getLessonsLearned()),
@@ -77,11 +76,11 @@ public class PlagiarismDetectionServiceImpl implements PlagiarismDetectionServic
             return 0.0;
         }
         for (WeeklyReport other : all) {
-            if (other.getReportId() == null
-                    || other.getReportId().equals(report.getReportId())) {
+            if (other.getReportId() == null || other.getReportId().equals(report.getReportId())) {
                 continue;
             }
-            String otherText = String.join(" ",
+            String otherText = String.join(
+                    " ",
                     nullSafe(other.getTasksCompleted()),
                     nullSafe(other.getIssuesChallenges()),
                     nullSafe(other.getLessonsLearned()),

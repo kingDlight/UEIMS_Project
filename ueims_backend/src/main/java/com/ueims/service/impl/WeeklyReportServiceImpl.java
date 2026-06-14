@@ -2,9 +2,7 @@ package com.ueims.service.impl;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,6 +23,7 @@ import com.ueims.service.PlagiarismDetectionService;
 import com.ueims.service.WeeklyReportService;
 import com.ueims.util.HtmlSanitizer;
 
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -198,7 +197,7 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
     }
 
     @Override
-    @org.springframework.transaction.annotation.Transactional
+    @Transactional
     public WeeklyReport approveReport(UUID id, String feedback) {
         WeeklyReport existing = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.FIELD_REQUIRED));
         User currentUser = getCurrentUser();

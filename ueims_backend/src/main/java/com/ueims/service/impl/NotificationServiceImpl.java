@@ -59,8 +59,7 @@ public class NotificationServiceImpl implements NotificationService {
         return repository.save(notification);
     }
 
-    private void notifyStudent(
-            Interview interview, String type, String title, String message) {
+    private void notifyStudent(Interview interview, String type, String title, String message) {
         if (interview == null
                 || interview.getApplication() == null
                 || interview.getApplication().getStudent() == null) {
@@ -110,9 +109,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void notifyInterviewResult(Interview interview) {
         String result = interview.getResult();
-        String title = "PASS".equalsIgnoreCase(result)
-                ? "Chúc mừng — Bạn đã vượt qua phỏng vấn"
-                : "Kết quả phỏng vấn";
+        String title = "PASS".equalsIgnoreCase(result) ? "Chúc mừng — Bạn đã vượt qua phỏng vấn" : "Kết quả phỏng vấn";
         String message = "PASS".equalsIgnoreCase(result)
                 ? "Bạn đã được doanh nghiệp lựa chọn. Vui lòng theo dõi các bước tiếp theo."
                 : "Cảm ơn bạn đã tham gia. Hãy tiếp tục tìm kiếm cơ hội khác.";
@@ -161,8 +158,11 @@ public class NotificationServiceImpl implements NotificationService {
         try {
             userRepository.findAll().stream()
                     .filter(u -> u.getRoles() != null
-                            && u.getRoles().stream().anyMatch(ur -> ur.getRole() != null
-                                    && "TRAINING_MANAGER".equalsIgnoreCase(ur.getRole().getRoleName())))
+                            && u.getRoles().stream()
+                                    .anyMatch(ur -> ur.getRole() != null
+                                            && "TRAINING_MANAGER"
+                                                    .equalsIgnoreCase(
+                                                            ur.getRole().getRoleName())))
                     .forEach(tm -> {
                         try {
                             repository.save(Notification.builder()

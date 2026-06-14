@@ -6,7 +6,6 @@ import java.util.UUID;
 import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ueims.dto.response.InterviewDTO;
 import com.ueims.service.InterviewService;
 import com.ueims.service.MailService;
 import com.ueims.service.NotificationService;
@@ -114,17 +112,15 @@ public class InterviewController {
             @PathVariable UUID id,
             @RequestParam("newTime") String newTime,
             @RequestParam(value = "reason", required = false) String reason) {
-        return ResponseEntity.ok(
-                mapper.toDto(service.reschedule(id, java.time.LocalDateTime.parse(newTime), reason)));
+        return ResponseEntity.ok(mapper.toDto(service.reschedule(id, java.time.LocalDateTime.parse(newTime), reason)));
     }
 
     // UC-43.1: Propose 3 open slots for a given application
     @GetMapping("/propose-slots")
     @org.springframework.security.access.prepost.PreAuthorize("hasRole('ENTERPRISE') or hasRole('TRAINING_MANAGER')")
     public ResponseEntity<List<String>> proposeSlots(@RequestParam("applicationId") java.util.UUID applicationId) {
-        return ResponseEntity.ok(
-                service.proposeSlots(applicationId).stream()
-                        .map(java.time.LocalDateTime::toString)
-                        .toList());
+        return ResponseEntity.ok(service.proposeSlots(applicationId).stream()
+                .map(java.time.LocalDateTime::toString)
+                .toList());
     }
 }

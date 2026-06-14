@@ -45,6 +45,7 @@ public class EnterpriseAssignmentController {
     public ResponseEntity<EnterpriseAssignmentDTO> getMyAssignment() {
         return ResponseEntity.ok(mapper.toDto(service.findMyAssignment(userService.getCurrentUserId())));
     }
+
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('ENTERPRISE') or hasRole('SYSTEM_ADMIN')")
     public ResponseEntity<EnterpriseAssignmentDTO> getById(@PathVariable UUID id) {

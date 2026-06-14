@@ -1,9 +1,5 @@
 package com.ueims.service;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import com.ueims.model.entity.WeeklyReport;
 
 public interface PlagiarismDetectionService {
