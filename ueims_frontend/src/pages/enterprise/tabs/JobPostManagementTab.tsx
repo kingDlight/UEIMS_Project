@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Spin, message, Modal, Form, Input, InputNumber, DatePicker, Button, Select, Empty } from 'antd';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Spin, message, Modal, Form, Input, InputNumber, DatePicker, Button, Select, Empty, Pagination } from 'antd';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   PlusOutlined,
@@ -108,6 +108,12 @@ export const JobPostManagementTab: React.FC = () => {
   const [form] = Form.useForm<FormValues>();
   const [saving, setSaving] = useState(false);
   const [toggling, setToggling] = useState(false);
+
+  // Pagination + filter (mirrors JobBoardTab pattern)
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 9;
 
   // ========== FETCH LIST (UC-37.0 Step 2) ==========
   const fetchPosts = async () => {
@@ -233,6 +239,24 @@ export const JobPostManagementTab: React.FC = () => {
     return { text: `${diff}d left`, color: c.textMuted };
   };
 
+  // ========== FILTER + PAGINATE (client-side, mirrors JobBoardTab) ==========
+  const filteredPosts = useMemo(() => {
+    return posts.filter(post => {
+      const matchesSearch = !searchTerm ||
+        post.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        post.description?.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesStatus = statusFilter === 'ALL' || post.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    });
+  }, [posts, searchTerm, statusFilter]);
+
+  useEffect(() => { setCurrentPage(1); }, [searchTerm, statusFilter]);
+
+  const paginatedPosts = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredPosts.slice(start, start + pageSize);
+  }, [filteredPosts, currentPage]);
+
   if (loading) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}>
@@ -274,6 +298,38 @@ export const JobPostManagementTab: React.FC = () => {
           </div>
         </motion.div>
 
+        {/* SEARCH + STATUS FILTER */}
+        {posts.length > 0 && (
+          <div style={{
+            display: 'flex', gap: 12, marginBottom: 20, alignItems: 'center',
+            background: c.surface, padding: 12, borderRadius: c.radiusMd,
+            border: `1px solid ${c.border}`,
+          }}>
+            <Input
+              placeholder="Search by title or description..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              allowClear
+              style={{ flex: 1, borderRadius: c.radiusMd }}
+            />
+            <Select
+              value={statusFilter}
+              onChange={setStatusFilter}
+              style={{ width: 160 }}
+              options={[
+                { value: 'ALL', label: 'All statuses' },
+                { value: 'OPEN', label: 'Open' },
+                { value: 'CLOSED', label: 'Closed' },
+                { value: 'PENDING', label: 'Pending' },
+                { value: 'DRAFT', label: 'Draft' },
+              ]}
+            />
+            <span style={{ fontSize: 12, color: c.textMuted, whiteSpace: 'nowrap' }}>
+              {filteredPosts.length} of {posts.length}
+            </span>
+          </div>
+        )}
+
         {/* LIST */}
         {posts.length === 0 ? (
           <motion.div
@@ -290,10 +346,26 @@ export const JobPostManagementTab: React.FC = () => {
               }
             />
           </motion.div>
+        ) : filteredPosts.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+            style={{ background: c.surface, borderRadius: c.radiusLg, border: `1px solid ${c.border}`, padding: 60 }}
+          >
+            <Empty
+              image={<FileTextOutlined style={{ fontSize: 48, color: c.textMuted }} />}
+              description={
+                <div>
+                  <div style={{ fontSize: 15, fontWeight: 600, color: c.text, marginBottom: 4 }}>No matching posts</div>
+                  <div style={{ fontSize: 13, color: c.textMuted }}>Try changing your search or status filter</div>
+                </div>
+              }
+            />
+          </motion.div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: 16 }}>
-            <AnimatePresence>
-              {posts.map((post, i) => {
+          <>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: 16 }}>
+              <AnimatePresence>
+                {paginatedPosts.map((post, i) => {
                 const deadline = daysUntil(post.applicationDeadline);
                 return (
                   <motion.div
@@ -379,7 +451,18 @@ export const JobPostManagementTab: React.FC = () => {
               })}
             </AnimatePresence>
           </div>
-        )}
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 24 }}>
+            <Pagination
+              current={currentPage}
+              pageSize={pageSize}
+              total={filteredPosts.length}
+              onChange={setCurrentPage}
+              showSizeChanger={false}
+              showTotal={(total, range) => `${range[0]}-${range[1]} of ${total} posts`}
+            />
+          </div>
+        </>
+      )}
       </div>
 
       {/* CREATE / EDIT MODAL */}
