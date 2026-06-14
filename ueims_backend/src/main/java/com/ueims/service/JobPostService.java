@@ -17,5 +17,7 @@ public interface JobPostService {
 
     JobPost update(UUID id, JobPostRequest request);
 
+    JobPost toggleStatus(UUID id, String status);
+
     void deleteById(UUID id);
 }

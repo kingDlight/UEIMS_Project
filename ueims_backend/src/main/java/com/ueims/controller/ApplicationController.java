@@ -66,7 +66,7 @@ public class ApplicationController {
      * Get all applications for the enterprise of the currently logged-in user (UC-41 Kanban)
      */
     @GetMapping("/my-enterprise")
-    @PreAuthorize("hasRole('ENTERPRISE')")
+    @PreAuthorize("hasRole('ENTERPRISE') or hasRole('TRAINING_MANAGER')")
     public ApiResponse<List<ApplicationResponse>> getMyEnterpriseApplications() {
         return ApiResponse.<List<ApplicationResponse>>builder()
                 .result(service.findByEnterpriseId(null))
@@ -125,8 +125,7 @@ public class ApplicationController {
     @PutMapping("/{id}/status")
     @PreAuthorize("hasRole('ENTERPRISE')")
     public ApiResponse<ApplicationResponse> updateStatus(
-            @PathVariable UUID id,
-            @RequestBody @Valid ApplicationStatusUpdateRequest request) {
+            @PathVariable UUID id, @RequestBody @Valid ApplicationStatusUpdateRequest request) {
         return ApiResponse.<ApplicationResponse>builder()
                 .result(service.updateStatus(id, request))
                 .build();

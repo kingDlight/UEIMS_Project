@@ -1,5 +1,6 @@
 package com.ueims.controller;
 
+import java.util.List;
 import java.util.UUID;
 
 import jakarta.validation.Valid;
@@ -25,13 +26,13 @@ public class ReportFeedbackController {
     private final UserService userService;
 
     @GetMapping
-    public ResponseEntity<java.util.List<com.ueims.dto.response.ReportFeedbackDTO>> getAll() {
+    public ResponseEntity<List<com.ueims.dto.response.ReportFeedbackDTO>> getAll() {
         return ResponseEntity.ok(service.findAll().stream().map(mapper::toDto).toList());
     }
 
     @GetMapping("/my-feedbacks")
     @PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<java.util.List<com.ueims.dto.response.ReportFeedbackDTO>> getMyFeedbacks() {
+    public ResponseEntity<List<com.ueims.dto.response.ReportFeedbackDTO>> getMyFeedbacks() {
         return ResponseEntity.ok(service.findMyFeedbacks(userService.getCurrentUserId()).stream()
                 .map(mapper::toDto)
                 .toList());

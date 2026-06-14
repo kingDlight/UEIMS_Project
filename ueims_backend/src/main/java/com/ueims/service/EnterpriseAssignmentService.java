@@ -15,6 +15,8 @@ public interface EnterpriseAssignmentService {
 
     EnterpriseAssignment findMyAssignment(UUID studentId);
 
+    List<EnterpriseAssignment> findMyEnterpriseAssignments();
+
     EnterpriseAssignment save(EnterpriseAssignment entity);
 
     EnterpriseAssignment update(UUID id, EnterpriseAssignmentDTO dto);

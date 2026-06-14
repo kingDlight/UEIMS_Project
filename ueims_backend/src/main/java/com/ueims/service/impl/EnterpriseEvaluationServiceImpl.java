@@ -186,8 +186,8 @@ public class EnterpriseEvaluationServiceImpl implements EnterpriseEvaluationServ
     @Override
     @Transactional
     public EnterpriseEvaluation update(UUID id, EnterpriseEvaluation dto) {
-        EnterpriseEvaluation existing = repository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.EVALUATION_NOT_FOUND));
+        EnterpriseEvaluation existing =
+                repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.EVALUATION_NOT_FOUND));
 
         if (Boolean.TRUE.equals(existing.getIsLocked())) {
             throw new AppException(ErrorCode.EVALUATION_LOCKED);
@@ -195,7 +195,9 @@ public class EnterpriseEvaluationServiceImpl implements EnterpriseEvaluationServ
 
         User currentUser = getCurrentUser();
         if (currentUser.getEnterprise() == null
-                || !existing.getAssignment().getEnterprise().getEnterpriseId()
+                || !existing.getAssignment()
+                        .getEnterprise()
+                        .getEnterpriseId()
                         .equals(currentUser.getEnterprise().getEnterpriseId())) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
@@ -206,7 +208,8 @@ public class EnterpriseEvaluationServiceImpl implements EnterpriseEvaluationServ
         existing.setProgressScore(dto.getProgressScore());
         existing.setOverallComments(dto.getOverallComments());
 
-        BigDecimal totalScore = dto.getAttitudeScore().multiply(WEIGHT_ATTITUDE)
+        BigDecimal totalScore = dto.getAttitudeScore()
+                .multiply(WEIGHT_ATTITUDE)
                 .add(dto.getProfessionalismScore().multiply(WEIGHT_PROFESSIONALISM))
                 .add(dto.getSoftSkillsScore().multiply(WEIGHT_SOFT_SKILLS))
                 .add(dto.getProgressScore().multiply(WEIGHT_PROGRESS))

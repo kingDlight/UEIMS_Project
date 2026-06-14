@@ -49,6 +49,17 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     }
 
     @Override
+    public Enterprise getMyEnterpriseProfile() {
+        User currentUser = getCurrentUser();
+        if (currentUser.getEnterprise() == null) {
+            throw new AppException(ErrorCode.ENTERPRISE_NOT_FOUND);
+        }
+        return repository
+                .findById(currentUser.getEnterprise().getEnterpriseId())
+                .orElseThrow(() -> new AppException(ErrorCode.ENTERPRISE_NOT_FOUND));
+    }
+
+    @Override
     public Enterprise save(EnterpriseRequest request) {
         Enterprise entity = Enterprise.builder()
                 .companyName(request.getCompanyName())

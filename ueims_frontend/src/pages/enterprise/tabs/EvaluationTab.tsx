@@ -453,9 +453,23 @@ export const EvaluationTab: React.FC = () => {
         overallComments: comments,
       };
       if (existingEvaluation?.evaluationId) {
-        await EnterpriseEvaluationService.update(existingEvaluation.evaluationId, payload);
+        await EnterpriseEvaluationService.update(existingEvaluation.evaluationId, {
+          assignmentId: selectedStudent.assignmentId,
+          attitudeScore: scores.attitude,
+          professionalismScore: scores.professionalism,
+          softSkillsScore: scores.softSkills,
+          progressScore: scores.progress,
+          overallComments: comments,
+        });
       } else {
-        await EnterpriseEvaluationService.create(payload);
+        await EnterpriseEvaluationService.create({
+          assignmentId: selectedStudent.assignmentId,
+          attitudeScore: scores.attitude,
+          professionalismScore: scores.professionalism,
+          softSkillsScore: scores.softSkills,
+          progressScore: scores.progress,
+          overallComments: comments,
+        });
       }
       message.success('Evaluation submitted successfully!');
       setSubmitted(true);

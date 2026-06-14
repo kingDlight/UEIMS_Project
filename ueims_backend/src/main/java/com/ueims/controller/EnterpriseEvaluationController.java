@@ -58,8 +58,7 @@ public class EnterpriseEvaluationController {
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ENTERPRISE')")
     public ResponseEntity<EnterpriseEvaluationDTO> update(
-            @PathVariable UUID id,
-            @Valid @RequestBody EnterpriseEvaluationDTO dto) {
+            @PathVariable UUID id, @Valid @RequestBody EnterpriseEvaluationDTO dto) {
         return ResponseEntity.ok(mapper.toDto(service.update(id, dto)));
     }
 

@@ -1,5 +1,6 @@
 package com.ueims.dto.request;
 
+import java.util.List;
 import java.util.UUID;
 
 import jakarta.validation.constraints.NotBlank;
@@ -18,5 +19,5 @@ public class IncidentReportRequest {
     @NotBlank(message = "Description cannot be blank")
     private String description;
 
-    private java.util.List<String> evidenceUrls;
+    private List<String> evidenceUrls;
 }

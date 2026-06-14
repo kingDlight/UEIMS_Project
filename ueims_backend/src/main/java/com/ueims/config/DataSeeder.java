@@ -87,15 +87,15 @@ public class DataSeeder implements CommandLineRunner {
                 // 2. Delete children of EnterpriseAssignment (Assignment -> X chain)
                 if (!assignmentIds.isEmpty()) {
                     // 2a. InternshipPlanItems -> InternshipPlans (via planId)
-                    List<UUID> planIds = internshipPlanRepository
-                            .findByAssignment_AssignmentIdIn(assignmentIds)
-                            .stream()
-                            .map(p -> p.getPlanId())
-                            .collect(Collectors.toList());
+                    List<UUID> planIds =
+                            internshipPlanRepository.findByAssignment_AssignmentIdIn(assignmentIds).stream()
+                                    .map(p -> p.getPlanId())
+                                    .collect(Collectors.toList());
                     if (!planIds.isEmpty()) {
                         internshipPlanItemRepository.deleteByPlan_PlanIdIn(planIds);
                     }
-                    internshipPlanRepository.findByAssignment_AssignmentIdIn(assignmentIds)
+                    internshipPlanRepository
+                            .findByAssignment_AssignmentIdIn(assignmentIds)
                             .forEach(p -> internshipPlanRepository.delete(p));
 
                     // 2b. WeeklyReports
@@ -108,7 +108,8 @@ public class DataSeeder implements CommandLineRunner {
                     enterpriseEvaluationRepository.deleteByAssignment_AssignmentIdIn(assignmentIds);
 
                     // 2e. Incidents
-                    incidentRepository.findByAssignment_AssignmentIdIn(assignmentIds)
+                    incidentRepository
+                            .findByAssignment_AssignmentIdIn(assignmentIds)
                             .forEach(i -> incidentRepository.delete(i));
                 }
 
@@ -125,8 +126,7 @@ public class DataSeeder implements CommandLineRunner {
                 semesterEnterpriseRepository.deleteById_EnterpriseId(enterpriseId);
 
                 // 7. Delete Users linked to this enterprise
-                userRepository.findByEnterprise_EnterpriseId(enterpriseId)
-                        .forEach(u -> userRepository.delete(u));
+                userRepository.findByEnterprise_EnterpriseId(enterpriseId).forEach(u -> userRepository.delete(u));
 
                 // 8. Delete the Enterprise
                 enterpriseRepository.delete(e);

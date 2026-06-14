@@ -69,8 +69,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         if (enterpriseUUID == null) {
             return List.of();
         }
-        return repository.findByJobPost_Enterprise_EnterpriseIdAndDeletedAtIsNull(enterpriseUUID)
-                .stream()
+        return repository.findByJobPost_Enterprise_EnterpriseIdAndDeletedAtIsNull(enterpriseUUID).stream()
                 .map(mapper::toApplicationResponse)
                 .toList();
     }
@@ -261,9 +260,19 @@ public class ApplicationServiceImpl implements ApplicationService {
 
         User currentUser = getCurrentUser();
         if (currentUser.getEnterprise() == null
-                || !application.getJobPost().getEnterprise().getEnterpriseId()
+                || application.getJobPost() == null
+                || application.getJobPost().getEnterprise() == null
+                || !application
+                        .getJobPost()
+                        .getEnterprise()
+                        .getEnterpriseId()
                         .equals(currentUser.getEnterprise().getEnterpriseId())) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        // BR-30: Block updates when job post is CLOSED
+        if ("CLOSED".equalsIgnoreCase(application.getJobPost().getStatus())) {
+            throw new AppException(ErrorCode.JOB_POST_CLOSED);
         }
 
         application.setStatus(request.getStatus());

@@ -1,5 +1,6 @@
 package com.ueims.controller;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -32,7 +33,7 @@ public class StudentProfileController {
 
     @GetMapping
     @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
-    public ResponseEntity<java.util.List<com.ueims.dto.response.StudentProfileDTO>> getAll() {
+    public ResponseEntity<List<com.ueims.dto.response.StudentProfileDTO>> getAll() {
         return ResponseEntity.ok(service.findAll().stream().map(mapper::toDto).toList());
     }
 

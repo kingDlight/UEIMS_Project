@@ -24,10 +24,23 @@ import {
   CheckCircleOutlined,
   CloseCircleOutlined,
   WarningOutlined,
+  CalendarOutlined,
+  LinkOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { ApplicationService } from '@/services/ApplicationService';
 import { c } from '../constants';
+
+// ============================================================
+// DESIGN TOKENS
+// ============================================================
+function hexToRgba(hex: string, alpha: number): string {
+  const h = hex.replace('#', '');
+  const r = Number.parseInt(h.substring(0, 2), 16);
+  const g = Number.parseInt(h.substring(2, 4), 16);
+  const b = Number.parseInt(h.substring(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
 
 // ============================================================
 // TYPES
@@ -54,14 +67,6 @@ interface ApplicantCard {
 // ============================================================
 // HELPERS
 // ============================================================
-function hexToRgba(hex: string, alpha: number): string {
-  const h = hex.replace('#', '');
-  const r = Number.parseInt(h.substring(0, 2), 16);
-  const g = Number.parseInt(h.substring(2, 4), 16);
-  const b = Number.parseInt(h.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-}
-
 const AVATAR_COLORS = [
   { bg: '#fff3e6', text: '#E67E22' },
   { bg: '#dcfce7', text: '#22c55e' },
@@ -106,7 +111,7 @@ const StatusBadge: React.FC<{ status: ApplicationStatus }> = ({ status }) => {
   return (
     <span style={{
       display: 'inline-flex', alignItems: 'center', gap: 4,
-      padding: '4px 10px', borderRadius: 999,
+      padding: '4px 10px', borderRadius: c.radiusFull,
       background: config.bg, border: `1px solid ${hexToRgba(config.color, 0.25)}`,
       color: config.color, fontSize: 11, fontWeight: 700,
       textTransform: 'uppercase', letterSpacing: '0.05em',
@@ -138,27 +143,28 @@ const SortableCard: React.FC<{
 
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <div
+      <motion.div
         onClick={() => onViewDetails(applicant)}
+        whileHover={{ y: -2 }}
         style={{
-          background: '#fff', borderRadius: 16, border: `1px solid ${c.borderSubtle}`,
-          boxShadow: '0 4px 16px rgba(15,23,42,0.04)', padding: '14px 16px',
+          background: c.surface, borderRadius: c.radiusLg, border: `1px solid ${c.border}`,
+          boxShadow: c.shadowSm, padding: '14px 16px',
           cursor: 'grab', transition: 'box-shadow 0.2s, transform 0.2s', marginBottom: 10,
         }}
         onMouseEnter={(e) => {
           const el = e.currentTarget as HTMLElement;
-          el.style.boxShadow = '0 8px 24px rgba(15,23,42,0.08)';
+          el.style.boxShadow = c.shadowMd;
           el.style.transform = 'translateY(-1px)';
         }}
         onMouseLeave={(e) => {
           const el = e.currentTarget as HTMLElement;
-          el.style.boxShadow = '0 4px 16px rgba(15,23,42,0.04)';
+          el.style.boxShadow = c.shadowSm;
           el.style.transform = 'translateY(0)';
         }}
       >
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 10 }}>
           <div style={{
-            width: 42, height: 42, borderRadius: 12,
+            width: 42, height: 42, borderRadius: c.radiusMd,
             background: avatarColor.bg, display: 'flex', alignItems: 'center', justifyContent: 'center',
             color: avatarColor.text, fontSize: 14, fontWeight: 800, flexShrink: 0,
           }}>
@@ -193,7 +199,7 @@ const SortableCard: React.FC<{
         <div style={{ marginTop: 8, fontSize: 10, color: c.textMuted, textAlign: 'right' }}>
           {daysSinceApply === 0 ? 'Today' : `${daysSinceApply}d ago`}
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };
@@ -205,12 +211,14 @@ const DragCard: React.FC<{ applicant: ApplicantCard }> = ({ applicant }) => {
   const avatarColor = getAvatarColor(applicant.studentName);
   return (
     <div style={{
-      background: '#fff', borderRadius: 16, border: `2px solid ${c.brand}`,
-      boxShadow: '0 20px 50px rgba(230,126,34,0.2)', padding: '14px 16px', cursor: 'grabbing', width: 260,
+      background: c.surface, borderRadius: c.radiusLg,
+      border: `2px solid ${c.brand}`,
+      boxShadow: '0 20px 50px rgba(230,126,34,0.2)',
+      padding: '14px 16px', cursor: 'grabbing', width: 260,
     }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
         <div style={{
-          width: 42, height: 42, borderRadius: 12, background: avatarColor.bg,
+          width: 42, height: 42, borderRadius: c.radiusMd, background: avatarColor.bg,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           color: avatarColor.text, fontSize: 14, fontWeight: 800,
         }}>
@@ -226,7 +234,7 @@ const DragCard: React.FC<{ applicant: ApplicantCard }> = ({ applicant }) => {
 };
 
 // ============================================================
-// INTERVIEW SCHEDULE MODAL
+// INTERVIEW MODAL
 // ============================================================
 const InterviewModal: React.FC<{
   applicant: ApplicantCard | null;
@@ -261,11 +269,11 @@ const InterviewModal: React.FC<{
         Schedule Interview — {applicant?.studentName}
       </div>}
       open={open} onCancel={onClose} footer={null} width={440}
-      styles={{ content: { borderRadius: 24, padding: '24px 28px' }, header: { borderBottom: 'none', marginBottom: 16, padding: 0 }, body: { padding: 0 } }}
+      styles={{ content: { borderRadius: c.radiusLg, padding: '24px 28px' }, header: { borderBottom: 'none', marginBottom: 16, padding: 0 }, body: { padding: 0 } }}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         {error && (
-          <div style={{ padding: '10px 14px', borderRadius: 12, background: c.errorMuted, border: `1px solid ${c.error}30`, color: c.error, fontSize: 13, fontWeight: 600 }}>{error}</div>
+          <div style={{ padding: '10px 14px', borderRadius: c.radiusMd, background: c.errorMuted, border: `1px solid ${hexToRgba(c.error, 0.3)}`, color: c.error, fontSize: 13, fontWeight: 600 }}>{error}</div>
         )}
         <div>
           <label style={{ fontSize: 12, fontWeight: 700, color: c.textMuted, display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
@@ -274,16 +282,16 @@ const InterviewModal: React.FC<{
           <DatePicker showTime format="YYYY-MM-DD HH:mm" value={scheduledDate}
             onChange={(val) => { setScheduledDate(val); setError(''); }}
             disabledDate={(current) => current && current < dayjs().startOf('day')}
-            style={{ width: '100%', borderRadius: 12, borderColor: c.border }} placeholder="Select date and time" />
+            style={{ width: '100%', borderRadius: c.radiusMd, borderColor: c.border }} placeholder="Select date and time" />
         </div>
         <div>
           <label style={{ fontSize: 12, fontWeight: 700, color: c.textMuted, display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Meeting Link</label>
-          <Input value={meetingLink} onChange={(e) => setMeetingLink(e.target.value)} placeholder="https://meet.google.com/..." style={{ borderRadius: 12 }} />
+          <Input value={meetingLink} onChange={(e) => setMeetingLink(e.target.value)} placeholder="https://meet.google.com/..." style={{ borderRadius: c.radiusMd }} prefix={<LinkOutlined />} />
         </div>
         <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', paddingTop: 4 }}>
-          <button onClick={onClose} style={{ padding: '10px 20px', borderRadius: 12, border: `1px solid ${c.border}`, background: '#fff', color: c.text, fontWeight: 600, cursor: 'pointer', fontSize: 13 }}>Cancel</button>
+          <button onClick={onClose} style={{ padding: '10px 20px', borderRadius: c.radiusMd, border: `1px solid ${c.border}`, background: c.surface, color: c.text, fontWeight: 600, cursor: 'pointer', fontSize: 13 }}>Cancel</button>
           <button onClick={handleConfirm} disabled={submitting}
-            style={{ padding: '10px 20px', borderRadius: 12, border: 'none', background: c.brand, color: '#fff', fontWeight: 700, cursor: submitting ? 'not-allowed' : 'pointer', fontSize: 13, opacity: submitting ? 0.7 : 1, boxShadow: '0 8px 22px rgba(230,126,34,0.22)' }}>
+            style={{ padding: '10px 20px', borderRadius: c.radiusMd, border: 'none', background: c.brand, color: '#fff', fontWeight: 700, cursor: submitting ? 'not-allowed' : 'pointer', fontSize: 13, opacity: submitting ? 0.7 : 1, boxShadow: c.shadowBrand }}>
             {submitting ? 'Scheduling...' : 'Schedule Interview'}
           </button>
         </div>
@@ -302,11 +310,11 @@ const DetailModal: React.FC<{ applicant: ApplicantCard | null; open: boolean; on
     <Modal
       title={<div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, color: c.text, fontSize: 16 }}>Applicant Details</div>}
       open={open} onCancel={onClose} footer={null} width={480}
-      styles={{ content: { borderRadius: 24, padding: '24px 28px' }, header: { borderBottom: 'none', marginBottom: 16, padding: 0 }, body: { padding: 0 } }}
+      styles={{ content: { borderRadius: c.radiusLg, padding: '24px 28px' }, header: { borderBottom: 'none', marginBottom: 16, padding: 0 }, body: { padding: 0 } }}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <div style={{ width: 64, height: 64, borderRadius: 18, background: avatarColor.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', color: avatarColor.text, fontSize: 22, fontWeight: 800, boxShadow: `0 8px 18px ${avatarColor.text}20` }}>
+          <div style={{ width: 64, height: 64, borderRadius: c.radiusLg, background: avatarColor.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', color: avatarColor.text, fontSize: 22, fontWeight: 800 }}>
             {applicant.avatarInitials}
           </div>
           <div>
@@ -317,18 +325,18 @@ const DetailModal: React.FC<{ applicant: ApplicantCard | null; open: boolean; on
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
           {[{ label: 'Student ID', value: applicant.studentCode }, { label: 'Major', value: applicant.major }, { label: 'GPA', value: applicant.gpa.toString() }, { label: 'Applied', value: dayjs(applicant.appliedAt).format('MMM D, YYYY') }].map(item => (
-            <div key={item.label} style={{ padding: '12px 14px', borderRadius: 12, background: c.bgLight, border: `1px solid ${c.borderSubtle}` }}>
+            <div key={item.label} style={{ padding: '12px 14px', borderRadius: c.radiusMd, background: c.bgLight, border: `1px solid ${c.border}` }}>
               <div style={{ fontSize: 10, fontWeight: 700, color: c.textMuted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>{item.label}</div>
               <div style={{ fontSize: 13, fontWeight: 600, color: c.text }}>{item.value}</div>
             </div>
           ))}
         </div>
-        <div style={{ padding: '12px 14px', borderRadius: 12, background: c.bgLight, border: `1px solid ${c.borderSubtle}` }}>
+        <div style={{ padding: '12px 14px', borderRadius: c.radiusMd, background: c.bgLight, border: `1px solid ${c.border}` }}>
           <div style={{ fontSize: 10, fontWeight: 700, color: c.textMuted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Email</div>
           <div style={{ fontSize: 13, fontWeight: 600, color: c.text }}>{applicant.studentEmail}</div>
         </div>
         {applicant.interviewDate && (
-          <div style={{ padding: '12px 14px', borderRadius: 12, background: hexToRgba(c.info, 0.06), border: `1px solid ${hexToRgba(c.info, 0.2)}` }}>
+          <div style={{ padding: '12px 14px', borderRadius: c.radiusMd, background: hexToRgba(c.info, 0.06), border: `1px solid ${hexToRgba(c.info, 0.2)}` }}>
             <div style={{ fontSize: 10, fontWeight: 700, color: c.info, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Interview Scheduled</div>
             <div style={{ fontSize: 14, fontWeight: 600, color: c.text }}>{dayjs(applicant.interviewDate).format('dddd, MMMM D, YYYY [at] HH:mm')}</div>
             {applicant.interviewLink && <a href={applicant.interviewLink} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: c.info, marginTop: 4, display: 'block' }}>Join Meeting →</a>}
@@ -348,15 +356,15 @@ const KanbanColumn: React.FC<{
   onViewDetails: (a: ApplicantCard) => void;
 }> = ({ column, applicants, onViewDetails }) => (
   <div style={{ flex: '0 0 280px', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-    <div style={{ padding: '12px 14px', borderRadius: 14, background: column.bg, border: `1px solid ${hexToRgba(column.color, 0.2)}`, marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+    <div style={{ padding: '12px 14px', borderRadius: c.radiusMd, background: column.bg, border: `1px solid ${hexToRgba(column.color, 0.2)}`, marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <span style={{ width: 8, height: 8, borderRadius: '50%', background: column.color, display: 'inline-block' }} />
         <span style={{ fontSize: 13, fontWeight: 700, color: column.color }}>{column.label}</span>
       </div>
-      <span style={{ padding: '2px 8px', borderRadius: 999, background: hexToRgba(column.color, 0.15), color: column.color, fontSize: 12, fontWeight: 700 }}>{applicants.length}</span>
+      <span style={{ padding: '2px 8px', borderRadius: c.radiusFull, background: hexToRgba(column.color, 0.15), color: column.color, fontSize: 12, fontWeight: 700 }}>{applicants.length}</span>
     </div>
     <SortableContext items={applicants.map(a => a.id)} strategy={verticalListSortingStrategy}>
-      <div style={{ flex: 1, padding: '6px 4px', minHeight: 200, borderRadius: 14, background: '#fff', border: `1px dashed ${c.border}`, overflowY: 'auto', maxHeight: 'calc(100vh - 280px)' }}>
+      <div style={{ flex: 1, padding: '6px 4px', minHeight: 200, borderRadius: c.radiusMd, background: c.surface, border: `1px dashed ${c.border}`, overflowY: 'auto', maxHeight: 'calc(100vh - 280px)' }}>
         {applicants.length === 0 ? (
           <div style={{ padding: '32px 16px', textAlign: 'center', color: c.textMuted, fontSize: 12 }}>Drop here</div>
         ) : (
@@ -460,7 +468,7 @@ export const ApplicantKanbanTab: React.FC = () => {
   const updateStatus = async (applicant: ApplicantCard, newStatus: ApplicationStatus) => {
     try {
       await ApplicationService.updateStatus(applicant.applicationId, { status: newStatus });
-    } catch { /* optimistic */ }
+    } catch { /* optimistic update */ }
     setApplicants(prev => prev.map(a => a.id === applicant.id ? { ...a, status: newStatus } : a));
     message.success(`Moved ${applicant.studentName} to ${COLUMNS.find(c => c.id === newStatus)?.label}`);
   };
@@ -494,7 +502,7 @@ export const ApplicantKanbanTab: React.FC = () => {
           <h2 style={{ fontSize: 20, fontWeight: 800, color: c.text, margin: '0 0 4px', letterSpacing: '-0.01em' }}>Applicant Kanban</h2>
           <p style={{ fontSize: 13, color: c.textMuted, margin: 0 }}>Drag & drop to update status</p>
         </div>
-        <span style={{ padding: '6px 14px', borderRadius: 999, background: c.bgLight, border: `1px solid ${c.border}`, fontSize: 12, fontWeight: 700, color: c.textMuted }}>{applicants.length} Total</span>
+        <span style={{ padding: '6px 14px', borderRadius: c.radiusFull, background: c.bgLight, border: `1px solid ${c.border}`, fontSize: 12, fontWeight: 700, color: c.textMuted }}>{applicants.length} Total</span>
       </div>
 
       <div style={{ display: 'flex', gap: 16, padding: '0 24px', overflowX: 'auto', alignItems: 'flex-start' }}>
@@ -506,8 +514,17 @@ export const ApplicantKanbanTab: React.FC = () => {
         </DndContext>
       </div>
 
-      <InterviewModal applicant={interviewModal.applicant} open={interviewModal.open} onClose={() => setInterviewModal({ open: false, applicant: null })} onConfirm={handleScheduleInterview} />
-      <DetailModal applicant={detailModal.applicant} open={detailModal.open} onClose={() => setDetailModal({ open: false, applicant: null })} />
+      <InterviewModal
+        applicant={interviewModal.applicant}
+        open={interviewModal.open}
+        onClose={() => setInterviewModal({ open: false, applicant: null })}
+        onConfirm={handleScheduleInterview}
+      />
+      <DetailModal
+        applicant={detailModal.applicant}
+        open={detailModal.open}
+        onClose={() => setDetailModal({ open: false, applicant: null })}
+      />
     </div>
   );
 };

@@ -13,4 +13,6 @@ public interface InternshipPlanRepository extends JpaRepository<InternshipPlan, 
     InternshipPlan findByAssignment_Student_UserId(UUID studentId);
 
     List<InternshipPlan> findByAssignment_AssignmentIdIn(List<UUID> assignmentIds);
+
+    List<InternshipPlan> findByAssignment_AssignmentId(UUID assignmentId);
 }

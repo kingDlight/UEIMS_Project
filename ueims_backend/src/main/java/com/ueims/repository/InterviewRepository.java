@@ -1,6 +1,7 @@
 package com.ueims.repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -19,5 +20,5 @@ public interface InterviewRepository extends JpaRepository<Interview, UUID> {
     boolean existsByEnterpriseAndTime(
             @Param("enterpriseId") UUID enterpriseId, @Param("scheduledTime") LocalDateTime scheduledTime);
 
-    java.util.List<Interview> findByApplication_Student_UserId(UUID studentId);
+    List<Interview> findByApplication_Student_UserId(UUID studentId);
 }

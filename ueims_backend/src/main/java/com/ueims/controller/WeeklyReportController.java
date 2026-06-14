@@ -47,6 +47,13 @@ public class WeeklyReportController {
                 service.findMyReports().stream().map(mapper::toDto).toList());
     }
 
+    @GetMapping("/by-enterprise")
+    @PreAuthorize("hasRole('ENTERPRISE') or hasRole('TRAINING_MANAGER')")
+    public ResponseEntity<List<WeeklyReportDTO>> getByEnterprise() {
+        return ResponseEntity.ok(
+                service.findByEnterprise().stream().map(mapper::toDto).toList());
+    }
+
     @GetMapping("/{id}")
     @PreAuthorize(
             "hasRole('STUDENT') or hasRole('ENTERPRISE') or hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
@@ -73,6 +80,25 @@ public class WeeklyReportController {
     public ResponseEntity<WeeklyReportDTO> update(
             @PathVariable UUID id, @Valid @RequestBody WeeklyReportRequest request) {
         return ResponseEntity.ok(mapper.toDto(service.updateReport(id, request)));
+    }
+
+    @PutMapping("/{id}/approve")
+    @PreAuthorize("hasRole('ENTERPRISE') or hasRole('TRAINING_MANAGER')")
+    public ResponseEntity<WeeklyReportDTO> approve(
+            @PathVariable UUID id, @RequestBody(required = false) WeeklyReportRequest feedback) {
+        String fb = feedback == null ? null : feedback.getFeedback();
+        return ResponseEntity.ok(mapper.toDto(service.approveReport(id, fb)));
+    }
+
+    @PutMapping("/{id}/reject")
+    @PreAuthorize("hasRole('ENTERPRISE') or hasRole('TRAINING_MANAGER')")
+    public ResponseEntity<WeeklyReportDTO> reject(@PathVariable UUID id, @RequestBody WeeklyReportRequest request) {
+        if (request == null
+                || request.getFeedback() == null
+                || request.getFeedback().isBlank()) {
+            throw new com.ueims.exception.AppException(com.ueims.exception.ErrorCode.FIELD_REQUIRED);
+        }
+        return ResponseEntity.ok(mapper.toDto(service.rejectReport(id, request.getFeedback())));
     }
 
     @DeleteMapping("/{id}")

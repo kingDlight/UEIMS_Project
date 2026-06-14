@@ -1,5 +1,7 @@
 package com.ueims.controller;
 
+import java.util.List;
+
 import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
@@ -20,7 +22,7 @@ public class PermissionController {
     com.ueims.mapper.PermissionMapper mapper;
 
     @GetMapping
-    public ResponseEntity<java.util.List<com.ueims.dto.response.PermissionDTO>> getAll() {
+    public ResponseEntity<List<com.ueims.dto.response.PermissionDTO>> getAll() {
         return ResponseEntity.ok(service.findAll().stream().map(mapper::toDto).toList());
     }
 

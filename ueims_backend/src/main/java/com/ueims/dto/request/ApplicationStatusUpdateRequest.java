@@ -1,8 +1,9 @@
 package com.ueims.dto.request;
 
+import jakarta.validation.constraints.NotNull;
+
 import com.ueims.model.entity.ApplicationStatus;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

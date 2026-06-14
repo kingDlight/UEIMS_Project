@@ -9,7 +9,10 @@ import com.ueims.repository.StudentProfileRepository;
 
 import lombok.RequiredArgsConstructor;
 
-@Mapper(componentModel = "spring", uses = {StudentProfileRepository.class}, unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(
+        componentModel = "spring",
+        uses = {StudentProfileRepository.class},
+        unmappedTargetPolicy = ReportingPolicy.IGNORE)
 @RequiredArgsConstructor
 public abstract class ApplicationMapper {
     private StudentProfileRepository studentProfileRepository;
@@ -27,7 +30,8 @@ public abstract class ApplicationMapper {
     @AfterMapping
     protected void afterMapping(Application source, @MappingTarget ApplicationResponse target) {
         if (source.getStudent() != null) {
-            StudentProfile profile = studentProfileRepository.findByUser_UserId(source.getStudent().getUserId());
+            StudentProfile profile = studentProfileRepository.findByUser_UserId(
+                    source.getStudent().getUserId());
             if (profile != null) {
                 target.setStudentCode(profile.getStudentCode());
             }

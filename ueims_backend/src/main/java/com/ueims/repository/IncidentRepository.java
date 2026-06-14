@@ -11,4 +11,6 @@ import com.ueims.model.entity.*;
 @Repository
 public interface IncidentRepository extends JpaRepository<Incident, UUID> {
     List<Incident> findByAssignment_AssignmentIdIn(List<UUID> assignmentIds);
+
+    List<Incident> findByAssignment_AssignmentId(UUID assignmentId);
 }

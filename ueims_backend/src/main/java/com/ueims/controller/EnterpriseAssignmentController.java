@@ -1,5 +1,6 @@
 package com.ueims.controller;
 
+import java.util.List;
 import java.util.UUID;
 
 import jakarta.validation.Valid;
@@ -27,22 +28,22 @@ public class EnterpriseAssignmentController {
 
     @GetMapping
     @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
-    public ResponseEntity<java.util.List<EnterpriseAssignmentDTO>> getAll() {
+    public ResponseEntity<List<EnterpriseAssignmentDTO>> getAll() {
         return ResponseEntity.ok(service.findAll().stream().map(mapper::toDto).toList());
-    }
-
-    @GetMapping("/my-enterprise")
-    @PreAuthorize("hasRole('ENTERPRISE')")
-    public ResponseEntity<java.util.List<EnterpriseAssignmentDTO>> getMyEnterpriseAssignments() {
-        return ResponseEntity.ok(
-            service.findByEnterpriseId(userService.getCurrentUserId())
-                .stream().map(mapper::toDto).toList());
     }
 
     @GetMapping("/my-assignment")
     @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<EnterpriseAssignmentDTO> getMyAssignment() {
         return ResponseEntity.ok(mapper.toDto(service.findMyAssignment(userService.getCurrentUserId())));
+    }
+
+    @GetMapping("/my-enterprise")
+    @PreAuthorize("hasRole('ENTERPRISE') or hasRole('TRAINING_MANAGER')")
+    public ResponseEntity<List<com.ueims.dto.response.EnterpriseAssignmentDTO>> getMyEnterpriseAssignments() {
+        return ResponseEntity.ok(service.findMyEnterpriseAssignments().stream()
+                .map(mapper::toDto)
+                .toList());
     }
 
     @GetMapping("/{id}")
@@ -53,16 +54,14 @@ public class EnterpriseAssignmentController {
 
     @PostMapping
     @PreAuthorize("hasRole('STUDENT') or hasRole('TRAINING_MANAGER')")
-    public ResponseEntity<EnterpriseAssignmentDTO> create(
-            @Valid @RequestBody EnterpriseAssignmentDTO dto) {
+    public ResponseEntity<EnterpriseAssignmentDTO> create(@Valid @RequestBody EnterpriseAssignmentDTO dto) {
         return ResponseEntity.ok(mapper.toDto(service.save(mapper.toEntity(dto))));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ENTERPRISE') or hasRole('TRAINING_MANAGER')")
     public ResponseEntity<EnterpriseAssignmentDTO> update(
-            @PathVariable UUID id,
-            @RequestBody EnterpriseAssignmentDTO dto) {
+            @PathVariable UUID id, @RequestBody EnterpriseAssignmentDTO dto) {
         return ResponseEntity.ok(mapper.toDto(service.update(id, dto)));
     }
 

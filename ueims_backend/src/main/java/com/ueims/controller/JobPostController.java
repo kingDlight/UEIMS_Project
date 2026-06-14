@@ -65,4 +65,18 @@ public class JobPostController {
                 .message("Job posting deleted successfully")
                 .build();
     }
+
+    /**
+     * Toggle job post visibility (UC-38: Close / Reopen)
+     * BR-30: Closed posts immediately block new student applications
+     * BR-29: Only owning enterprise may toggle their own posts
+     */
+    @PatchMapping("/{id}/status")
+    @PreAuthorize("hasRole('ENTERPRISE')")
+    public ApiResponse<JobPost> toggleStatus(@PathVariable UUID id, @RequestParam String status) {
+        return ApiResponse.<JobPost>builder()
+                .result(service.toggleStatus(id, status))
+                .message("Job posting status updated to " + status)
+                .build();
+    }
 }
