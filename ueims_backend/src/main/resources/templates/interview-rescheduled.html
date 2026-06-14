@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"/><title th:text="${subject}">Reschedule</title></head>
+<body style="font-family: Inter, Arial, sans-serif; padding: 24px; color: #0F172A;">
+<p>Xin chào <strong th:text="${fullName}">Student</strong>,</p>
+<p>Buổi phỏng vấn của bạn đã được <strong>dời lịch</strong>.</p>
+<ul>
+    <li>Thời gian mới: <span th:text="${#temporals.format(scheduledTime,'dd/MM/yyyy HH:mm')}">—</span></li>
+    <li th:if="${location}">Địa điểm: <span th:text="${location}">—</span></li>
+    <li th:if="${meetingLink}">Link: <a th:href="${meetingLink}" th:text="${meetingLink}">link</a></li>
+</ul>
+<p>Vui lòng đăng nhập UEIMS để xác nhận lại.</p>
+</body>
+</html>

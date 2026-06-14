@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import com.ueims.dto.request.IncidentReportRequest;
 import com.ueims.dto.request.IncidentRequest;
 import com.ueims.dto.request.IncidentResolveRequest;
+import com.ueims.exception.AppException;
+import com.ueims.exception.ErrorCode;
 import com.ueims.model.entity.EnterpriseAssignment;
 import com.ueims.model.entity.Incident;
 import com.ueims.model.entity.User;
@@ -17,11 +19,15 @@ import com.ueims.repository.EnterpriseAssignmentRepository;
 import com.ueims.repository.IncidentRepository;
 import com.ueims.repository.UserRepository;
 import com.ueims.service.IncidentService;
+import com.ueims.service.MailService;
+import com.ueims.service.NotificationService;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -29,6 +35,8 @@ public class IncidentServiceImpl implements IncidentService {
     IncidentRepository repository;
     EnterpriseAssignmentRepository assignmentRepository;
     UserRepository userRepository;
+    MailService mailService;
+    NotificationService notificationService;
 
     private static final String ASSIGNMENT_NOT_FOUND = "Assignment not found";
 
@@ -127,13 +135,21 @@ public class IncidentServiceImpl implements IncidentService {
 
     @Override
     public Incident reportIncident(IncidentReportRequest request) {
+        // BR-41: Category and Description are mandatory
+        if (request.getCategory() == null || request.getCategory().isBlank()) {
+            throw new AppException(ErrorCode.FIELD_REQUIRED, "Category is required");
+        }
+        if (request.getDescription() == null || request.getDescription().isBlank()) {
+            throw new AppException(ErrorCode.FIELD_REQUIRED, "Description is required");
+        }
+
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User currentUser =
-                userRepository.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("User not found"));
+                userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         EnterpriseAssignment assignment = assignmentRepository
                 .findById(request.getAssignmentId())
-                .orElseThrow(() -> new IllegalArgumentException(ASSIGNMENT_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.ASSIGNMENT_NOT_FOUND, ASSIGNMENT_NOT_FOUND));
 
         boolean isStudent = assignment.getStudent().getUserId().equals(currentUser.getUserId());
         boolean isEnterprise = assignment.getEnterprise() != null
@@ -144,7 +160,7 @@ public class IncidentServiceImpl implements IncidentService {
                         .equals(currentUser.getEnterprise().getEnterpriseId());
 
         if (!isStudent && !isEnterprise) {
-            throw new IllegalArgumentException("You do not have permission to report an incident for this assignment");
+            throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
         Incident incident = Incident.builder()
@@ -156,7 +172,15 @@ public class IncidentServiceImpl implements IncidentService {
                 .status("OPEN")
                 .build();
 
-        return repository.save(incident);
+        Incident saved = repository.save(incident);
+        // UC-49 POST-1: notify Training Manager + send urgent email
+        try {
+            notificationService.notifyTrainingManagerOfIncident(saved);
+            mailService.sendIncidentReported(saved);
+        } catch (Exception ex) {
+            log.warn("[UC-49] Incident notification failed: {}", ex.getMessage());
+        }
+        return saved;
     }
 
     @Override

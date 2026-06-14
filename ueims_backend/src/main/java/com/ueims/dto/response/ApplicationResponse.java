@@ -23,6 +23,7 @@ public class ApplicationResponse {
     private String studentCode;
     private String cvFileUrl;
     private String cvSnapshotUrl;
+    private Integer cvDownloadCount;
     private String coverLetter;
     private String status;
     private String rejectionReason;

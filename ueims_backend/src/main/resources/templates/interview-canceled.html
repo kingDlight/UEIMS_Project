@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"/><title th:text="${subject}">Cancel</title></head>
+<body style="font-family: Inter, Arial, sans-serif; padding: 24px; color: #0F172A;">
+<p>Xin chào <strong th:text="${fullName}">Student</strong>,</p>
+<p>Buổi phỏng vấn của bạn đã bị <strong>hủy</strong>.</p>
+<p th:if="${reason}">Lý do: <em th:text="${reason}">—</em></p>
+<p>Vui lòng liên hệ doanh nghiệp nếu cần hỗ trợ thêm.</p>
+</body>
+</html>

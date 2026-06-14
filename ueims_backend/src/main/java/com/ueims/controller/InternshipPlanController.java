@@ -36,6 +36,26 @@ public class InternshipPlanController {
         return ResponseEntity.ok(mapper.toDto(service.findMyPlan(userService.getCurrentUserId())));
     }
 
+    /**
+     * UC-46: Enterprise fetches the plan associated with a given assignment.
+     */
+    @GetMapping("/by-assignment/{assignmentId}")
+    @PreAuthorize("hasRole('ENTERPRISE') or hasRole('TRAINING_MANAGER')")
+    public ResponseEntity<com.ueims.dto.response.InternshipPlanDTO> getByAssignment(
+            @PathVariable UUID assignmentId) {
+        com.ueims.model.entity.InternshipPlan plan =
+                service.findByAssignmentId(assignmentId);
+        if (plan == null) {
+            return ResponseEntity.ok(mapper.toDto(
+                    com.ueims.model.entity.InternshipPlan.builder()
+                            .assignment(com.ueims.model.entity.EnterpriseAssignment.builder()
+                                    .assignmentId(assignmentId)
+                                    .build())
+                            .build()));
+        }
+        return ResponseEntity.ok(mapper.toDto(plan));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<com.ueims.dto.response.InternshipPlanDTO> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(mapper.toDto(service.findById(id)));

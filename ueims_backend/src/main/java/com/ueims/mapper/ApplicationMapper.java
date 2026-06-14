@@ -25,6 +25,7 @@ public abstract class ApplicationMapper {
     @Mapping(source = "student.email", target = "studentEmail")
     @Mapping(source = "interviewDate", target = "interviewDate")
     @Mapping(source = "interviewLink", target = "interviewLink")
+    @Mapping(source = "cvDownloadCount", target = "cvDownloadCount")
     public abstract ApplicationResponse toApplicationResponse(Application application);
 
     @AfterMapping

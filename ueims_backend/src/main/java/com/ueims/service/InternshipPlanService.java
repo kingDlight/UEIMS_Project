@@ -12,6 +12,8 @@ public interface InternshipPlanService {
 
     InternshipPlan findMyPlan(UUID studentId);
 
+    InternshipPlan findByAssignmentId(UUID assignmentId);
+
     InternshipPlan save(InternshipPlan entity);
 
     void deleteById(UUID id);

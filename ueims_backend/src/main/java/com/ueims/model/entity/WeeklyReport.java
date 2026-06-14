@@ -53,4 +53,11 @@ public class WeeklyReport extends BaseEntity {
 
     @Column(name = "submitted_at")
     private LocalDateTime submittedAt;
+
+    @Column(name = "plagiarism_score")
+    private Double plagiarismScore;
+
+    @Column(name = "is_anomaly")
+    @Builder.Default
+    private Boolean isAnomaly = false;
 }

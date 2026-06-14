@@ -27,4 +27,9 @@ public interface ApplicationRepository extends JpaRepository<Application, UUID> 
     long countByStudent_UserIdAndStatusNotAndDeletedAtIsNull(UUID studentId, ApplicationStatus status);
 
     void deleteByJobPost_Enterprise_EnterpriseId(UUID enterpriseId);
+
+    @org.springframework.data.jpa.repository.Modifying
+    @org.springframework.data.jpa.repository.Query(
+            "UPDATE Application a SET a.cvDownloadCount = a.cvDownloadCount + 1 WHERE a.applicationId = :id")
+    void incrementDownloadCount(@org.springframework.data.repository.query.Param("id") UUID id);
 }

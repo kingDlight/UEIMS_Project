@@ -17,6 +17,10 @@ export const WeeklyReportService = {
     const response = await api.get(`/weekly-reports/${id}`);
     return response.data.result;
   },
+  getByEnterprise: async () => {
+    const response = await api.get('/weekly-reports/by-enterprise');
+    return response.data.result;
+  },
   create: (data: any) => api.post(API_URL, data),
   createReport: async (reportData: any) => {
     const response = await api.post('/weekly-reports', reportData);
@@ -28,13 +32,13 @@ export const WeeklyReportService = {
     return response.data.result;
   },
   delete: (id: string) => api.delete(`${API_URL}/${id}`),
-  approveReport: async (id: string) => {
-    const response = await api.put(`/weekly-reports/${id}/approve`);
+  approveReport: async (id: string, feedback?: string) => {
+    const response = await api.put(`/weekly-reports/${id}/approve`, feedback ? { feedback } : undefined);
     return response.data.result;
   },
   rejectReport: async (id: string, feedback: string) => {
     const response = await api.put(`/weekly-reports/${id}/reject`, { feedback });
     return response.data.result;
   }
-};;
+};
 

@@ -1,6 +1,9 @@
 package com.ueims.service.impl;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,11 +21,15 @@ import com.ueims.repository.ApplicationRepository;
 import com.ueims.repository.InterviewRepository;
 import com.ueims.repository.UserRepository;
 import com.ueims.service.InterviewService;
+import com.ueims.service.MailService;
+import com.ueims.service.NotificationService;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -30,6 +37,8 @@ public class InterviewServiceImpl implements InterviewService {
     InterviewRepository repository;
     ApplicationRepository applicationRepository;
     UserRepository userRepository;
+    MailService mailService;
+    NotificationService notificationService;
 
     @Override
     public List<Interview> findAll() {
@@ -104,7 +113,18 @@ public class InterviewServiceImpl implements InterviewService {
         application.setStatus(ApplicationStatus.INTERVIEW_SCHEDULED);
         applicationRepository.save(application);
 
-        return repository.save(entity);
+        Interview saved = repository.save(entity);
+
+        // 43.0: send email + in-app notification to the student (43.0.E2 logged on failure)
+        try {
+            mailService.sendInterviewScheduled(saved);
+            notificationService.notifyInterviewScheduled(saved);
+        } catch (Exception ex) {
+            // 43.0.E2: email dispatch failure — log warning, keep DB state
+            log.warn("[UC-43 43.0.E2] Notification dispatch failed for interview {}: {}",
+                    saved.getInterviewId(), ex.getMessage());
+        }
+        return saved;
     }
 
     @Override
@@ -187,7 +207,15 @@ public class InterviewServiceImpl implements InterviewService {
         if (entity.getFeedback() != null) existing.setFeedback(entity.getFeedback());
         existing.setUpdatedAt(LocalDateTime.now());
 
-        return repository.save(existing);
+        Interview saved = repository.save(existing);
+        // 43.2: send reschedule email to student
+        try {
+            mailService.sendInterviewRescheduled(saved);
+            notificationService.notifyInterviewRescheduled(saved);
+        } catch (Exception ex) {
+            log.warn("[UC-43 43.2] Reschedule notification failed: {}", ex.getMessage());
+        }
+        return saved;
     }
 
     @Override
@@ -235,7 +263,131 @@ public class InterviewServiceImpl implements InterviewService {
         }
         applicationRepository.save(app);
 
-        return repository.save(existing);
+        Interview saved = repository.save(existing);
+        // UC-44: send result email to the student
+        try {
+            mailService.sendInterviewResult(saved, upper, notes);
+            notificationService.notifyInterviewResult(saved);
+        } catch (Exception ex) {
+            log.warn("[UC-44] Result notification failed: {}", ex.getMessage());
+        }
+        return saved;
+    }
+
+    @Override
+    @Transactional
+    public Interview cancel(UUID id, String reason) {
+        if (reason == null || reason.isBlank()) {
+            throw new AppException(ErrorCode.FIELD_REQUIRED);
+        }
+        Interview existing = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.INTERVIEW_NOT_FOUND));
+        User currentUser = getCurrentUser();
+        if (currentUser.getEnterprise() == null
+                || existing.getApplication() == null
+                || existing.getApplication().getJobPost() == null
+                || existing.getApplication().getJobPost().getEnterprise() == null
+                || !existing.getApplication()
+                        .getJobPost()
+                        .getEnterprise()
+                        .getEnterpriseId()
+                        .equals(currentUser.getEnterprise().getEnterpriseId())) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+        existing.setStatus("CANCELED");
+        existing.setCancelReason(reason);
+        existing.setCanceledAt(LocalDateTime.now());
+        existing.setUpdatedAt(LocalDateTime.now());
+        Interview saved = repository.save(existing);
+
+        // 43.3: send cancellation email + notification
+        try {
+            mailService.sendInterviewCanceled(saved, reason);
+            notificationService.notifyInterviewCanceled(saved);
+        } catch (Exception ex) {
+            log.warn("[UC-43 43.3] Cancellation notification failed: {}", ex.getMessage());
+        }
+        return saved;
+    }
+
+    @Override
+    @Transactional
+    public Interview reschedule(UUID id, LocalDateTime newTime, String reason) {
+        if (newTime == null) {
+            throw new AppException(ErrorCode.MISSING_PARAMETER, "newTime is required");
+        }
+        if (newTime.isBefore(LocalDateTime.now())) {
+            throw new AppException(ErrorCode.INTERVIEW_DATE_MUST_BE_IN_FUTURE);
+        }
+        Interview existing = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.INTERVIEW_NOT_FOUND));
+        User currentUser = getCurrentUser();
+        if (currentUser.getEnterprise() == null
+                || existing.getApplication() == null
+                || existing.getApplication().getJobPost() == null
+                || existing.getApplication().getJobPost().getEnterprise() == null
+                || !existing.getApplication()
+                        .getJobPost()
+                        .getEnterprise()
+                        .getEnterpriseId()
+                        .equals(currentUser.getEnterprise().getEnterpriseId())) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+        // BR-35: also check overlap
+        boolean overlap = repository.existsByEnterpriseAndTime(
+                currentUser.getEnterprise().getEnterpriseId(), newTime);
+        if (overlap) {
+            throw new AppException(ErrorCode.INTERVIEW_OVERLAP);
+        }
+        existing.setScheduledTime(newTime);
+        existing.setStatus("RESCHEDULED");
+        existing.setRescheduleReason(reason);
+        existing.setUpdatedAt(LocalDateTime.now());
+        Interview saved = repository.save(existing);
+        try {
+            mailService.sendInterviewRescheduled(saved);
+            notificationService.notifyInterviewRescheduled(saved);
+        } catch (Exception ex) {
+            log.warn("[UC-43 43.2] Reschedule notification failed: {}", ex.getMessage());
+        }
+        return saved;
+    }
+
+    @Override
+    public List<LocalDateTime> proposeSlots(UUID applicationId) {
+        // 43.1: suggest 3 open slots in the next 7 business days (9-12, 14-17) that don't overlap.
+        Application application = applicationRepository
+                .findById(applicationId)
+                .orElseThrow(() -> new AppException(ErrorCode.APPLICATION_NOT_FOUND));
+        User currentUser = getCurrentUser();
+        if (currentUser.getEnterprise() == null
+                || application.getJobPost() == null
+                || !application.getJobPost()
+                        .getEnterprise()
+                        .getEnterpriseId()
+                        .equals(currentUser.getEnterprise().getEnterpriseId())) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+        List<LocalDateTime> slots = new ArrayList<>();
+        LocalDateTime cursor = LocalDateTime.now().plusDays(1).with(LocalTime.of(9, 0));
+        List<Interview> existing = findMyEnterpriseInterviews();
+        while (slots.size() < 3 && cursor.isBefore(LocalDateTime.now().plusDays(14))) {
+            int dow = cursor.getDayOfWeek().getValue();
+            if (dow >= 1 && dow <= 5) {
+                int hour = cursor.getHour();
+                if ((hour >= 9 && hour < 12) || (hour >= 14 && hour < 17)) {
+                    final LocalDateTime candidate = cursor;
+                    boolean conflict = existing.stream().anyMatch(i ->
+                            i.getScheduledTime() != null
+                                    && Math.abs(java.time.Duration.between(i.getScheduledTime(), candidate).toMinutes())
+                                            < 60);
+                    if (!conflict) {
+                        slots.add(candidate);
+                    }
+                }
+            }
+            cursor = cursor.plusMinutes(60);
+        }
+        slots.sort(Comparator.naturalOrder());
+        return slots;
     }
 
     private User getCurrentUser() {

@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"/><title th:text="${subject}">Result</title></head>
+<body style="font-family: Inter, Arial, sans-serif; padding: 24px; color: #0F172A;">
+<p>Xin chào <strong th:text="${fullName}">Student</strong>,</p>
+<p>Cảm ơn bạn đã tham gia buổi phỏng vấn. Rất tiếc, kết quả lần này <strong>chưa phù hợp</strong>.</p>
+<p th:if="${reason}">Nhận xét: <em th:text="${reason}">—</em></p>
+<p>Chúc bạn may mắn trong các cơ hội sắp tới.</p>
+</body>
+</html>

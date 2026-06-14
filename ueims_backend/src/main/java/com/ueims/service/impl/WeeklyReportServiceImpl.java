@@ -2,7 +2,9 @@ package com.ueims.service.impl;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,13 +20,17 @@ import com.ueims.repository.EligibleStudentRepository;
 import com.ueims.repository.EnterpriseAssignmentRepository;
 import com.ueims.repository.UserRepository;
 import com.ueims.repository.WeeklyReportRepository;
+import com.ueims.service.NotificationService;
+import com.ueims.service.PlagiarismDetectionService;
 import com.ueims.service.WeeklyReportService;
 import com.ueims.util.HtmlSanitizer;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -33,6 +39,8 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
     UserRepository userRepository;
     EligibleStudentRepository eligibleStudentRepository;
     EnterpriseAssignmentRepository enterpriseAssignmentRepository;
+    NotificationService notificationService;
+    PlagiarismDetectionService plagiarismService;
 
     private User getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -126,7 +134,20 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
         }
 
         entity.setAssignment(assignment);
-        return repository.save(entity);
+        WeeklyReport saved = repository.save(entity);
+        // BR-58: run plagiarism check asynchronously after submission
+        try {
+            double maxScore = plagiarismService.computeMaxSimilarity(saved);
+            saved.setPlagiarismScore(maxScore);
+            saved.setIsAnomaly(maxScore >= 0.85);
+            if (saved.getIsAnomaly()) {
+                log.info("[BR-58] Weekly report {} flagged as ANOMALY (score={})", saved.getReportId(), maxScore);
+            }
+            repository.save(saved);
+        } catch (Exception ex) {
+            log.warn("[BR-58] Plagiarism check failed: {}", ex.getMessage());
+        }
+        return saved;
     }
 
     @Override
@@ -195,7 +216,13 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
 
         existing.setStatus("APPROVED");
         if (feedback != null) existing.setFeedback(feedback);
-        return repository.save(existing);
+        WeeklyReport saved = repository.save(existing);
+        try {
+            notificationService.notifyWeeklyReportApproved(saved);
+        } catch (Exception ex) {
+            log.warn("[UC-48] Approved notification failed: {}", ex.getMessage());
+        }
+        return saved;
     }
 
     @Override
@@ -221,6 +248,15 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
 
         existing.setStatus("REJECTED");
         existing.setFeedback(feedback);
-        return repository.save(existing);
+        WeeklyReport saved = repository.save(existing);
+        try {
+            // Rejected → student may edit again, so we also set status to PENDING_REVIEW to allow edits
+            saved.setStatus("PENDING_REVIEW");
+            repository.save(saved);
+            notificationService.notifyWeeklyReportRejected(saved, feedback);
+        } catch (Exception ex) {
+            log.warn("[UC-48] Reject notification failed: {}", ex.getMessage());
+        }
+        return saved;
     }
 }

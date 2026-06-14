@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Spin, message, Modal, Button } from 'antd';
+import { Spin, message, Modal, Button, Input } from 'antd';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   DndContext,
@@ -26,7 +26,8 @@ import {
   WarningOutlined,
   FileTextOutlined,
   ReloadOutlined,
-  FilePdfOutlined,
+  DownloadOutlined,
+  LockOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { ApplicationService } from '@/services/ApplicationService';
@@ -269,10 +270,89 @@ const DragCard: React.FC<{ applicant: ApplicantCard }> = ({ applicant }) => {
 // ============================================================
 // DETAIL MODAL
 // ============================================================
-const DetailModal: React.FC<{ applicant: ApplicantCard | null; open: boolean; onClose: () => void }> = ({ applicant, open, onClose }) => {
+interface DetailModalProps {
+  applicant: ApplicantCard | null;
+  open: boolean;
+  onClose: () => void;
+  onScreenComplete?: (applicant: ApplicantCard, newStatus: 'SCREENING_PASSED' | 'SCREENING_REJECTED', reason?: string) => void;
+}
+
+const DetailModal: React.FC<DetailModalProps> = ({ applicant, open, onClose, onScreenComplete }) => {
+  const [downloading, setDownloading] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingDecision, setPendingDecision] = useState<'SCREENING_PASSED' | 'SCREENING_REJECTED' | null>(null);
+  const [rejectionReason, setRejectionReason] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
   if (!applicant) return null;
   const avatarColor = applicant.avatarColor;
   const initials = (applicant.studentName || 'ST').substring(0, 2).toUpperCase();
+  const isPending = applicant.status === 'PENDING';
+  const alreadyScreened = applicant.status === 'SCREENING_PASSED' || applicant.status === 'SCREENING_REJECTED';
+
+  const openConfirm = (decision: 'SCREENING_PASSED' | 'SCREENING_REJECTED') => {
+    setPendingDecision(decision);
+    setRejectionReason('');
+    setConfirmOpen(true);
+  };
+
+  const closeConfirm = () => {
+    if (submitting) return;
+    setConfirmOpen(false);
+    setPendingDecision(null);
+    setRejectionReason('');
+  };
+
+  const submitScreen = async () => {
+    if (!pendingDecision) return;
+    if (pendingDecision === 'SCREENING_REJECTED' && !rejectionReason.trim()) {
+      message.warning('Justification notes when failing a candidate.');
+      return;
+    }
+    setSubmitting(true);
+    try {
+      await ApplicationService.screen(applicant.applicationId, {
+        status: pendingDecision,
+        rejectionReason: pendingDecision === 'SCREENING_REJECTED' ? rejectionReason.trim() : undefined,
+      });
+      message.success('Application status updated successfully.');
+      setConfirmOpen(false);
+      onScreenComplete?.(applicant, pendingDecision, pendingDecision === 'SCREENING_REJECTED' ? rejectionReason.trim() : undefined);
+    } catch (err: any) {
+      const backendMsg = err?.response?.data?.message;
+      // 41.0.E1: state lock conflict (concurrent update)
+      if (err?.response?.status === 400 || err?.response?.status === 409) {
+        message.warning(backendMsg ?? 'This application status has already been modified. Please refresh the page.');
+      } else {
+        message.error(backendMsg ?? 'Failed to update screening status.');
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDownloadCv = async () => {
+    if (!applicant?.applicationId) return;
+    setDownloading(true);
+    const hide = message.loading('Preparing CV…', 0);
+    try {
+      const filename = await ApplicationService.downloadCV(applicant.applicationId, applicant.studentName);
+      hide();
+      message.success(`File download started automatically (${filename})`);
+    } catch (err: any) {
+      hide();
+      const code = err?.response?.data?.code;
+      const backendMsg = err?.response?.data?.message;
+      // 40.0.E1: file missing / removed
+      if (err?.response?.status === 404 || code === 1073) {
+        message.error('The requested CV file is currently unavailable or has been removed by the applicant.');
+      } else {
+        message.error(backendMsg ?? 'Failed to download CV. Please try again.');
+      }
+    } finally {
+      setDownloading(false);
+    }
+  };
   return (
     <Modal
       title={<div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, color: c.text, fontSize: 16 }}>Applicant Details</div>}
@@ -314,10 +394,35 @@ const DetailModal: React.FC<{ applicant: ApplicantCard | null; open: boolean; on
           </div>
         )}
         {applicant.cvFileUrl && (
-          <a href={applicant.cvFileUrl} target="_blank" rel="noopener noreferrer"
-            style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '10px 16px', borderRadius: c.radiusMd, background: c.brand, color: '#fff', fontWeight: 700, fontSize: 13, textDecoration: 'none', boxShadow: c.shadowBrand }}>
-            <FilePdfOutlined /> View CV (PDF)
-          </a>
+          <Button
+            type="primary"
+            icon={<DownloadOutlined />}
+            loading={downloading}
+            onClick={handleDownloadCv}
+            style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '10px 16px', borderRadius: c.radiusMd, background: c.brand, borderColor: c.brand, color: '#fff', fontWeight: 700, fontSize: 13, boxShadow: c.shadowBrand }}
+          >
+            Download CV (PDF)
+          </Button>
+        )}
+        {isPending && (
+          <div style={{ display: 'flex', gap: 10, paddingTop: 4, borderTop: `1px solid ${c.borderSubtle}` }}>
+            <Button
+              type="primary"
+              icon={<CheckCircleOutlined />}
+              onClick={() => openConfirm('SCREENING_PASSED')}
+              style={{ flex: 1, background: c.success, borderColor: c.success, fontWeight: 700 }}
+            >
+              Pass Screening
+            </Button>
+            <Button
+              danger
+              icon={<CloseCircleOutlined />}
+              onClick={() => openConfirm('SCREENING_REJECTED')}
+              style={{ flex: 1, fontWeight: 700 }}
+            >
+              Reject
+            </Button>
+          </div>
         )}
         {applicant.rejectionReason && (
           <div style={{ padding: '12px 14px', borderRadius: c.radiusMd, background: c.errorMuted, border: `1px solid ${hexToRgba(c.error, 0.3)}` }}>
@@ -325,7 +430,64 @@ const DetailModal: React.FC<{ applicant: ApplicantCard | null; open: boolean; on
             <div style={{ fontSize: 13, color: c.text, lineHeight: 1.5 }}>{applicant.rejectionReason}</div>
           </div>
         )}
+        {alreadyScreened && (
+          <div style={{ fontSize: 12, color: c.textMuted, textAlign: 'center', padding: '8px 12px', background: c.bgLight, borderRadius: c.radiusMd, border: `1px dashed ${c.border}` }}>
+            <LockOutlined style={{ marginRight: 6 }} />
+            Evaluation locked — application has been screened.
+          </div>
+        )}
       </div>
+      <Modal
+        title={
+          <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, color: c.text, fontSize: 15 }}>
+            {pendingDecision === 'SCREENING_PASSED' ? 'Confirm Pass Screening' : 'Confirm Rejection'}
+          </div>
+        }
+        open={confirmOpen}
+        onCancel={closeConfirm}
+        footer={null}
+        width={420}
+        destroyOnClose
+      >
+        <div style={{ fontSize: 13, color: c.text, marginBottom: 12, lineHeight: 1.5 }}>
+          Are you sure you want to{' '}
+          <strong style={{ color: pendingDecision === 'SCREENING_PASSED' ? c.success : c.error }}>
+            {pendingDecision === 'SCREENING_PASSED' ? 'Pass' : 'Reject'}
+          </strong>{' '}
+          <strong>{applicant.studentName}</strong>?
+        </div>
+        {pendingDecision === 'SCREENING_REJECTED' && (
+          <div style={{ marginBottom: 12 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: c.textMuted, marginBottom: 6 }}>
+              Rejection Reason <span style={{ color: c.error }}>*</span>
+            </div>
+            <Input.TextArea
+              value={rejectionReason}
+              onChange={(e) => setRejectionReason(e.target.value)}
+              rows={3}
+              placeholder="Briefly explain the reason for rejection (required)"
+              maxLength={500}
+              showCount
+            />
+          </div>
+        )}
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+          <Button onClick={closeConfirm} disabled={submitting}>Cancel</Button>
+          <Button
+            type="primary"
+            danger={pendingDecision === 'SCREENING_REJECTED'}
+            onClick={submitScreen}
+            loading={submitting}
+            style={
+              pendingDecision === 'SCREENING_PASSED'
+                ? { background: c.success, borderColor: c.success }
+                : undefined
+            }
+          >
+            Confirm
+          </Button>
+        </div>
+      </Modal>
     </Modal>
   );
 };
@@ -495,6 +657,13 @@ export const ApplicantKanbanTab: React.FC = () => {
         applicant={detailModal.applicant}
         open={detailModal.open}
         onClose={() => setDetailModal({ open: false, applicant: null })}
+        onScreenComplete={(a, newStatus, reason) => {
+          setApplicants(prev => prev.map(item =>
+            item.id === a.id
+              ? { ...item, status: newStatus, rejectionReason: reason ?? item.rejectionReason }
+              : item
+          ));
+        }}
       />
     </div>
   );

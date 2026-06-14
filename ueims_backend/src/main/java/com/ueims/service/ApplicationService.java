@@ -26,4 +26,13 @@ public interface ApplicationService {
     ApplicationResponse screenApplication(UUID id, ApplicationScreenRequest request);
 
     ApplicationResponse updateStatus(UUID id, ApplicationStatusUpdateRequest request);
+
+    /**
+     * UC-40: Download applicant's CV file. Enforces BR-32 (only enterprise that owns the
+     * job post can download). Throws FILE_NOT_FOUND if the underlying file is missing.
+     * Increments the download counter on the application (POST-2 of UC-40).
+     *
+     * @return a Spring Resource pointing to the CV file on disk
+     */
+    org.springframework.core.io.Resource downloadCv(UUID applicationId);
 }

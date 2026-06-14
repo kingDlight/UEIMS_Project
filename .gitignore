@@ -186,3 +186,10 @@ ueims_frontend/patch_microinteractions.cjs
 ueims_frontend/patch_glass.cjs
 ueims_frontend/patch_all_tabs.cjs
 ueims_frontend/patch_student_tabs.cjs
+
+# Playwright — keep spec files + config, ignore build/runtime artifacts
+ueims_frontend/playwright-report/
+ueims_frontend/test-results/
+ueims_frontend/blob-report/
+ueims_frontend/playwright/.cache/
+playwright/.cache/

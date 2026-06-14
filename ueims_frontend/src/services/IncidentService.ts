@@ -23,5 +23,9 @@ export const IncidentService = {
     resolve: async (id: string, data: { resolutionNote: string }) => {
         const response = await api.put(`/incidents/${id}/resolve`, data);
         return response.data;
+    },
+    report: async (data: { assignmentId: string; category: string; description: string; evidenceUrls?: string }) => {
+        const response = await api.post('/incidents/report', data);
+        return response.data;
     }
 };

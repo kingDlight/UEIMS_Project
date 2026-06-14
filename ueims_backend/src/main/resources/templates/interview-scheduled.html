@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title th:text="${subject}">Interview notification</title>
+</head>
+<body style="font-family: Inter, Arial, sans-serif; color: #0F172A; background: #F8FAFC; padding: 24px;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 560px; margin: 0 auto; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 8px 24px rgba(15,23,42,0.08);">
+        <tr>
+            <td style="background: #E67E22; padding: 18px 24px; color: #fff; font-size: 18px; font-weight: 700;">
+                UEIMS — Lịch phỏng vấn
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 24px;">
+                <p style="margin: 0 0 12px;">Xin chào <strong th:text="${fullName}">Student</strong>,</p>
+                <p>Bạn có một buổi phỏng vấn mới được lên lịch.</p>
+                <table cellpadding="0" cellspacing="0" style="width: 100%; margin: 16px 0; font-size: 14px;">
+                    <tr><td style="padding: 6px 0; color: #64748B; width: 140px;">Vị trí</td><td style="padding: 6px 0;" th:text="${jobTitle}">Job title</td></tr>
+                    <tr><td style="padding: 6px 0; color: #64748B;">Thời gian</td><td style="padding: 6px 0;" th:text="${#temporals.format(scheduledTime,'dd/MM/yyyy HH:mm')}">—</td></tr>
+                    <tr th:if="${location}"><td style="padding: 6px 0; color: #64748B;">Địa điểm</td><td style="padding: 6px 0;" th:text="${location}">—</td></tr>
+                    <tr th:if="${meetingLink}"><td style="padding: 6px 0; color: #64748B;">Link họp</td><td style="padding: 6px 0;"><a th:href="${meetingLink}" th:text="${meetingLink}">link</a></td></tr>
+                </table>
+                <p>Vui lòng đăng nhập UEIMS để xác nhận tham dự.</p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

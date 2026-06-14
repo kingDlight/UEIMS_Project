@@ -37,4 +37,16 @@ public class EnterpriseAssignment extends BaseEntity {
     @Column(name = "status", nullable = false, length = 20)
     @Builder.Default
     private String status = "ACTIVE";
+
+    @Column(name = "supervisor_name", length = 200)
+    private String supervisorName;
+
+    @Column(name = "supervisor_email", length = 200)
+    private String supervisorEmail;
+
+    @Column(name = "start_date")
+    private java.time.LocalDate startDate;
+
+    @Column(name = "end_date")
+    private java.time.LocalDate endDate;
 }

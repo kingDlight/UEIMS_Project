@@ -5,6 +5,10 @@ import java.util.UUID;
 
 import jakarta.validation.Valid;
 
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -156,5 +160,21 @@ public class ApplicationController {
         return ApiResponse.<ApplicationResponse>builder()
                 .result(service.withdrawApplication(id))
                 .build();
+    }
+
+    /**
+     * UC-40: Download the applicant's CV as a PDF attachment. Enforces BR-32 (CV ownership scope).
+     * POST-2: increments the download counter on the application record.
+     * 40.0.E1: returns 404 with a friendly error if the file is missing.
+     */
+    @GetMapping("/{id}/cv")
+    @PreAuthorize("hasRole('ENTERPRISE')")
+    public ResponseEntity<Resource> downloadCv(@PathVariable UUID id) {
+        Resource file = service.downloadCv(id);
+        String filename = "CV_" + id + ".pdf";
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_PDF)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .body(file);
     }
 }

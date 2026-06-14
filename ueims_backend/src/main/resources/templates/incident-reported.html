@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"/><title th:text="${subject}">Incident</title></head>
+<body style="font-family: Inter, Arial, sans-serif; padding: 24px; color: #0F172A;">
+<p>Xin chào <strong th:text="${fullName}">User</strong>,</p>
+<p>Chúng tôi đã ghi nhận sự cố bạn vừa báo cáo. Training Manager sẽ xem xét và phản hồi trong thời gian sớm nhất.</p>
+<ul>
+    <li><strong>Loại sự cố:</strong> <span th:text="${category}">—</span></li>
+    <li><strong>Mô tả:</strong> <span th:text="${description}">—</span></li>
+</ul>
+<p>Trân trọng,<br/>Đội ngũ UEIMS</p>
+</body>
+</html>

@@ -125,6 +125,10 @@ public enum ErrorCode {
     TOKEN_INVALIDATED(1068, "Token has been invalidated", HttpStatus.UNAUTHORIZED),
     SESSION_EXPIRED(1069, "Session expired due to inactivity", HttpStatus.UNAUTHORIZED),
     INVALID_TOKEN_FORMAT(1070, "Invalid token format", HttpStatus.UNAUTHORIZED),
+
+    // File related
+    FILE_NOT_FOUND(1073, "The requested file is currently unavailable or has been removed", HttpStatus.NOT_FOUND),
+    FILE_DOWNLOAD_ERROR(1074, "Failed to stream the requested file", HttpStatus.INTERNAL_SERVER_ERROR),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

@@ -24,5 +24,12 @@ public interface InterviewService {
 
     Interview recordResult(UUID id, String result, String notes);
 
+    Interview cancel(UUID id, String reason);
+
+    Interview reschedule(UUID id, java.time.LocalDateTime newTime, String reason);
+
+    /** Propose 3 open time slots for the next 7 business days that don't overlap existing interviews. */
+    List<java.time.LocalDateTime> proposeSlots(UUID applicationId);
+
     void deleteById(UUID id);
 }

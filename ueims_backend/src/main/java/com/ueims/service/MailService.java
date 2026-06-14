@@ -122,6 +122,73 @@ public class MailService {
         log.info("Email thông báo trạng thái {} đã được gửi tới doanh nghiệp: {}", status, to);
     }
 
+    // ===== Interview notifications (UC-43 / UC-44) =====
+    public void sendInterviewScheduled(com.ueims.model.entity.Interview interview) {
+        sendInterviewEmail(interview, "interview-scheduled", "Lịch phỏng vấn mới — UEIMS", null);
+    }
+
+    public void sendInterviewRescheduled(com.ueims.model.entity.Interview interview) {
+        sendInterviewEmail(interview, "interview-rescheduled", "Lịch phỏng vấn đã được dời — UEIMS", null);
+    }
+
+    public void sendInterviewCanceled(com.ueims.model.entity.Interview interview, String reason) {
+        sendInterviewEmail(interview, "interview-canceled", "Lịch phỏng vấn đã bị hủy — UEIMS", reason);
+    }
+
+    public void sendInterviewResult(com.ueims.model.entity.Interview interview, String result, String notes) {
+        sendInterviewEmail(
+                interview,
+                "PASS".equalsIgnoreCase(result) ? "interview-result-pass" : "interview-result-fail",
+                "Kết quả phỏng vấn — UEIMS",
+                notes);
+    }
+
+    public void sendIncidentReported(com.ueims.model.entity.Incident incident) {
+        try {
+            // Notify reporter + all training managers
+            String reporterEmail = incident.getReportedBy() != null ? incident.getReportedBy().getEmail() : null;
+            if (reporterEmail == null) return;
+            Context ctx = new Context();
+            ctx.setVariable("fullName", incident.getReportedBy().getFullName());
+            ctx.setVariable("subject", "Sự cố đã được ghi nhận — UEIMS");
+            ctx.setVariable("category", incident.getCategory());
+            ctx.setVariable("description", incident.getDescription());
+            String html = templateEngine.process("incident-reported", ctx);
+            sendHtml(reporterEmail, "Sự cố đã được ghi nhận — UEIMS", html);
+        } catch (Exception e) {
+            log.warn("[IncidentEmail] Failed: {}", e.getMessage());
+        }
+    }
+
+    private void sendInterviewEmail(
+            com.ueims.model.entity.Interview interview, String template, String subject, String extra) {
+        try {
+            String to = interview.getApplication() != null && interview.getApplication().getStudent() != null
+                    ? interview.getApplication().getStudent().getEmail()
+                    : null;
+            if (to == null) {
+                log.warn("[InterviewEmail] No recipient email for interview {}", interview.getInterviewId());
+                return;
+            }
+            String studentName = interview.getApplication().getStudent().getFullName();
+            Context ctx = new Context();
+            ctx.setVariable(VAR_FULL_NAME, studentName);
+            ctx.setVariable(VAR_SUBJECT, subject);
+            ctx.setVariable("scheduledTime", interview.getScheduledTime());
+            ctx.setVariable("location", interview.getLocation());
+            ctx.setVariable("meetingLink", interview.getMeetingLink());
+            ctx.setVariable("jobTitle", interview.getApplication().getJobPost() != null
+                    ? interview.getApplication().getJobPost().getTitle()
+                    : "");
+            ctx.setVariable("result", interview.getResult());
+            ctx.setVariable("reason", extra);
+            String html = templateEngine.process(template, ctx);
+            sendHtml(to, subject, html);
+        } catch (Exception e) {
+            log.warn("[InterviewEmail] Template '{}' may not exist; falling back to plain text. err={}", template, e.getMessage());
+        }
+    }
+
     private void sendHtml(String to, String subject, String htmlBody) {
         try {
             MimeMessage message = javaMailSender.createMimeMessage();

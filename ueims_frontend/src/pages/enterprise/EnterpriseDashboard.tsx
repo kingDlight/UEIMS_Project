@@ -11,14 +11,25 @@ const ApplicantKanbanTab = React.lazy(() => import('./tabs/ApplicantKanbanTab').
 const EvaluationTab = React.lazy(() => import('./tabs/EvaluationTab').then(m => ({ default: m.EvaluationTab })));
 const EnterpriseProfileTab = React.lazy(() => import('./tabs/EnterpriseProfileTab').then(m => ({ default: m.EnterpriseProfileTab })));
 const JobPostManagementTab = React.lazy(() => import('./tabs/JobPostManagementTab').then(m => ({ default: m.JobPostManagementTab })));
+const AssignedStudentsTab = React.lazy(() => import('./tabs/AssignedStudentsTab').then(m => ({ default: m.AssignedStudentsTab })));
+const InterviewScheduleTab = React.lazy(() => import('./tabs/InterviewScheduleTab').then(m => ({ default: m.InterviewScheduleTab })));
+const InterviewResultTab = React.lazy(() => import('./tabs/InterviewResultTab').then(m => ({ default: m.InterviewResultTab })));
+const InternshipPlanTab = React.lazy(() => import('./tabs/InternshipPlanTab').then(m => ({ default: m.InternshipPlanTab })));
+const WeeklyReportReviewTab = React.lazy(() => import('./tabs/WeeklyReportReviewTab').then(m => ({ default: m.WeeklyReportReviewTab })));
+const IncidentReportTab = React.lazy(() => import('./tabs/IncidentReportTab').then(m => ({ default: m.IncidentReportTab })));
 
 export type EnterprisePageKey =
   | 'dashboard'
   | 'applicants'
   | 'job-posts'
+  | 'students'
+  | 'interviews'
+  | 'results'
+  | 'plans'
+  | 'reports'
+  | 'incidents'
   | 'evaluation'
   | 'profile'
-  | 'reports'
   | 'analytics'
   | 'notifications';
 
@@ -44,13 +55,14 @@ export const EnterpriseDashboard: React.FC = () => {
     dashboard: <EnterpriseDashboardTab />,
     applicants: <ApplicantKanbanTab />,
     'job-posts': <JobPostManagementTab />,
+    students: <AssignedStudentsTab />,
+    interviews: <InterviewScheduleTab />,
+    results: <InterviewResultTab />,
+    plans: <InternshipPlanTab />,
+    reports: <WeeklyReportReviewTab />,
+    incidents: <IncidentReportTab />,
     evaluation: <EvaluationTab />,
     profile: <EnterpriseProfileTab />,
-    reports: (
-      <div style={{ padding: '40px 24px', fontFamily: 'Inter, sans-serif', color: '#64748b', textAlign: 'center' }}>
-        Reports — Coming Soon
-      </div>
-    ),
     analytics: (
       <div style={{ padding: '40px 24px', fontFamily: 'Inter, sans-serif', color: '#64748b', textAlign: 'center' }}>
         Analytics — Coming Soon
