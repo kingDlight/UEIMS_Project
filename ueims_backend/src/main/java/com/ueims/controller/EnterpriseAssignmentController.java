@@ -32,6 +32,14 @@ public class EnterpriseAssignmentController {
         return ResponseEntity.ok(service.findAll().stream().map(mapper::toDto).toList());
     }
 
+    @GetMapping("/my-enterprise")
+    @PreAuthorize("hasRole('ENTERPRISE')")
+    public ResponseEntity<List<EnterpriseAssignmentDTO>> getMyEnterpriseAssignments() {
+        return ResponseEntity.ok(service.findByEnterpriseId(userService.getCurrentUserId()).stream()
+                .map(mapper::toDto)
+                .toList());
+    }
+
     @GetMapping("/my-assignment")
     @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<EnterpriseAssignmentDTO> getMyAssignment() {
@@ -40,7 +48,7 @@ public class EnterpriseAssignmentController {
 
     @GetMapping("/my-enterprise")
     @PreAuthorize("hasRole('ENTERPRISE') or hasRole('TRAINING_MANAGER')")
-    public ResponseEntity<List<com.ueims.dto.response.EnterpriseAssignmentDTO>> getMyEnterpriseAssignments() {
+    public ResponseEntity<List<EnterpriseAssignmentDTO>> getMyEnterpriseAssignmentsEntity() {
         return ResponseEntity.ok(service.findMyEnterpriseAssignments().stream()
                 .map(mapper::toDto)
                 .toList());
