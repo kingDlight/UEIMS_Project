@@ -69,4 +69,10 @@ public class JobPost extends BaseEntity {
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
+
+    @Transient
+    private Double compatibilityScore;
+
+    @Transient
+    private Boolean isHighlyRecommended;
 }
