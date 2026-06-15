@@ -91,8 +91,10 @@ public class SecurityConfig {
             String method = request.getMethod();
 
             // Skip token extraction for public endpoints
-            boolean isPublicPost = "POST".equalsIgnoreCase(method) && publicPaths.stream().anyMatch(p -> matcher.match(p, path));
-            boolean isPublicGet = "GET".equalsIgnoreCase(method) && publicGetPaths.stream().anyMatch(p -> matcher.match(p, path));
+            boolean isPublicPost =
+                    "POST".equalsIgnoreCase(method) && publicPaths.stream().anyMatch(p -> matcher.match(p, path));
+            boolean isPublicGet =
+                    "GET".equalsIgnoreCase(method) && publicGetPaths.stream().anyMatch(p -> matcher.match(p, path));
             boolean isPublicLogin = "GET".equalsIgnoreCase(method) && "/google-login-test.html".equals(path);
 
             if (isPublicPost || isPublicGet || isPublicLogin) {

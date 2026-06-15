@@ -1,5 +1,8 @@
 package com.ueims.controller;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -11,8 +14,6 @@ import com.ueims.repository.EnterpriseRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import java.util.Map;
-import java.util.HashMap;
 
 @RestController
 @RequestMapping("/api/public")
@@ -34,8 +35,6 @@ public class PublicController {
         stats.put("completion", 98.5);
         stats.put("satisfaction", 96.2);
 
-        return ApiResponse.<Map<String, Object>>builder()
-                .result(stats)
-                .build();
+        return ApiResponse.<Map<String, Object>>builder().result(stats).build();
     }
 }

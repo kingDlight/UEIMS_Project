@@ -30,11 +30,16 @@ export function extractUserFromToken(token: string) {
 
 
   return {
+    userId: payload.userId,
     email: payload.sub,
     roles,
     mustChangePassword: payload.must_change_password,
     fullName: payload.full_name,
     avatarUrl: payload.avatar_url,
+    phone: payload.phone,
+    status: payload.status,
+    authProvider: payload.auth_provider,
+    enterpriseId: payload.enterprise_id,
   };
 }
 

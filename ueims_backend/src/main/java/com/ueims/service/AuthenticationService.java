@@ -422,6 +422,14 @@ public class AuthenticationService {
                 .claim("must_change_password", Boolean.TRUE.equals(user.getMustChangePassword()))
                 .claim("full_name", user.getFullName())
                 .claim("avatar_url", user.getAvatarUrl())
+                .claim("phone", user.getPhone())
+                .claim("status", user.getStatus())
+                .claim("auth_provider", user.getAuthProvider())
+                .claim(
+                        "enterprise_id",
+                        user.getEnterprise() != null
+                                ? user.getEnterprise().getEnterpriseId().toString()
+                                : null)
                 .build();
 
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
