@@ -1,5 +1,8 @@
 package com.ueims.configuration;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -11,8 +14,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
+import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
+import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
@@ -56,6 +62,7 @@ public class SecurityConfig {
         httpSecurity.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtConfigurer -> jwtConfigurer
                         .decoder(customJwtDecoder)
                         .jwtAuthenticationConverter(jwtAuthenticationConverter()))
+                .bearerTokenResolver(publicSkippingBearerTokenResolver())
                 .authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
         httpSecurity.csrf(AbstractHttpConfigurer::disable);
         httpSecurity.cors(cors -> {});
@@ -63,6 +70,30 @@ public class SecurityConfig {
         httpSecurity.addFilterAfter(requirePasswordChangeFilter, BearerTokenAuthenticationFilter.class);
 
         return httpSecurity.build();
+    }
+
+    /**
+     * A BearerTokenResolver that returns null (no token) for public endpoints,
+     * preventing the BearerTokenAuthenticationFilter from attempting JWT validation
+     * on paths that are already permitted (e.g., /api/auth/token). This avoids
+     * a 401 caused by a stale/invalidated token sent in the Authorization header
+     * to a public endpoint.
+     */
+    @Bean
+    public BearerTokenResolver publicSkippingBearerTokenResolver() {
+        DefaultBearerTokenResolver delegate = new DefaultBearerTokenResolver();
+        AntPathMatcher matcher = new AntPathMatcher();
+        List<String> publicPaths = Arrays.asList(PUBLIC_ENDPOINTS);
+
+        return (request) -> {
+            String path = request.getRequestURI();
+            // Skip token extraction for public endpoints
+            boolean isPublic = publicPaths.stream().anyMatch(p -> matcher.match(p, path));
+            if (isPublic) {
+                return null; // No token → no JWT validation → request flows to permitAll
+            }
+            return delegate.resolve(request);
+        };
     }
 
     @Bean
