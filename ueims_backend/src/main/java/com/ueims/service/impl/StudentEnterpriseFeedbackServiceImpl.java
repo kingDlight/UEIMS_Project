@@ -46,6 +46,7 @@ public class StudentEnterpriseFeedbackServiceImpl implements StudentEnterpriseFe
         User currentUser = getCurrentUser();
         boolean isStaff = currentUser.getRoles().stream()
                 .anyMatch(role -> role.getRole().getRoleName().equals("SYSTEM_ADMIN")
+                        || role.getRole().getRoleName().equals("ADMIN")
                         || role.getRole().getRoleName().equals("TRAINING_MANAGER"));
         if (isStaff) {
             return feedback;
@@ -110,6 +111,7 @@ public class StudentEnterpriseFeedbackServiceImpl implements StudentEnterpriseFe
         User currentUser = getCurrentUser();
         boolean isStaff = currentUser.getRoles().stream()
                 .anyMatch(role -> role.getRole().getRoleName().equals("SYSTEM_ADMIN")
+                        || role.getRole().getRoleName().equals("ADMIN")
                         || role.getRole().getRoleName().equals("TRAINING_MANAGER"));
         if (!isStaff) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
