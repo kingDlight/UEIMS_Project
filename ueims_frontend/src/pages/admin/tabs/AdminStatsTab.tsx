@@ -8,7 +8,7 @@ import {
   TrendingUp,
   ClockCircleOutlined,
   FileTextOutlined,
-  AlertTriangleOutlined,
+  WarningOutlined,
   ArrowRightOutlined,
 } from '@ant-design/icons';
 import { AdminService } from '@/services/AdminService';
@@ -88,7 +88,7 @@ export const AdminStatsTab: React.FC = () => {
             <StatCard label="Total Students" value={stats?.totalStudents ?? 0} icon={<TeamOutlined />} color={c.info} />
             <StatCard label="Enterprises" value={stats?.totalEnterprises ?? 0} icon={<BankOutlined />} color={c.success} description={`${stats?.pendingEnterprises?.length ?? 0} pending`} />
             <StatCard label="Pending Approvals" value={stats?.pendingEnterprises?.length ?? 0} icon={<ClockCircleOutlined />} color={c.warning} />
-            <StatCard label="Active Incidents" value={stats?.activeIncidents?.length ?? 0} icon={<AlertTriangleOutlined />} color={c.error} />
+            <StatCard label="Active Incidents" value={stats?.activeIncidents?.length ?? 0} icon={<WarningOutlined />} color={c.error} />
           </div>
 
           {/* Pipeline Funnel */}
