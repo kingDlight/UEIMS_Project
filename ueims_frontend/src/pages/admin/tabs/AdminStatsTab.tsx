@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { Spin } from 'antd';
 import {
   TrophyOutlined,
-  UsersOutlined,
   BankOutlined,
   TeamOutlined,
   TrendingUp,
@@ -86,7 +85,7 @@ export const AdminStatsTab: React.FC = () => {
 
           {/* KPI Grid */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
-            <StatCard label="Total Students" value={stats?.totalStudents ?? 0} icon={<UsersOutlined />} color={c.info} />
+            <StatCard label="Total Students" value={stats?.totalStudents ?? 0} icon={<TeamOutlined />} color={c.info} />
             <StatCard label="Enterprises" value={stats?.totalEnterprises ?? 0} icon={<BankOutlined />} color={c.success} description={`${stats?.pendingEnterprises?.length ?? 0} pending`} />
             <StatCard label="Pending Approvals" value={stats?.pendingEnterprises?.length ?? 0} icon={<ClockCircleOutlined />} color={c.warning} />
             <StatCard label="Active Incidents" value={stats?.activeIncidents?.length ?? 0} icon={<AlertTriangleOutlined />} color={c.error} />
