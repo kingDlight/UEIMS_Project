@@ -197,3 +197,4 @@ export_sql.js
 update-seed.js
 SQL/_count_lines.ps1
 SQL/_count_lines2.ps1
+SQL/ueims_erd.dbml
