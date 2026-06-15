@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Spin, App } from 'antd';
 import {
-  UsersOutlined,
+  TeamOutlined,
   BankOutlined,
   AuditOutlined,
   SafetyCertificateOutlined,
@@ -159,7 +159,7 @@ export const AdminDashboardTab: React.FC = () => {
                   <div style={{ fontSize: 12, color: c.textSecondary, marginTop: 4 }}>All roles combined</div>
                 </div>
                 <div style={{ width: 36, height: 36, borderRadius: c.radiusMd, backgroundColor: hexToRgba(c.info, 0.16), color: c.info, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <UsersOutlined size={20} />
+                  <TeamOutlined />
                 </div>
               </div>
             </Card>
