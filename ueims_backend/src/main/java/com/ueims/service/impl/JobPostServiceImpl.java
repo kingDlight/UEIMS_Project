@@ -13,11 +13,14 @@ import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
 import com.ueims.model.entity.JobPost;
 import com.ueims.model.entity.Semester;
+import com.ueims.model.entity.StudentProfile;
 import com.ueims.model.entity.User;
 import com.ueims.repository.JobPostRepository;
 import com.ueims.repository.SemesterRepository;
+import com.ueims.repository.StudentProfileRepository;
 import com.ueims.repository.UserRepository;
 import com.ueims.service.JobPostService;
+import com.ueims.service.JobRecommenderService;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +33,8 @@ public class JobPostServiceImpl implements JobPostService {
     JobPostRepository repository;
     UserRepository userRepository;
     SemesterRepository semesterRepository;
+    JobRecommenderService recommenderService;
+    StudentProfileRepository studentProfileRepository;
 
     @Override
     public List<JobPost> findAll() {
@@ -38,7 +43,35 @@ public class JobPostServiceImpl implements JobPostService {
 
     @Override
     public List<JobPost> findActive() {
-        return repository.findByStatusAndDeletedAtIsNull("OPEN");
+        List<JobPost> activeJobs = repository.findByStatusAndDeletedAtIsNull("OPEN");
+
+        try {
+            User currentUser = getCurrentUser();
+            boolean isStudent = currentUser.getRoles().stream()
+                    .anyMatch(r -> "STUDENT".equals(r.getRole().getRoleName()));
+
+            if (isStudent) {
+                StudentProfile profile = studentProfileRepository.findByUser_UserId(currentUser.getUserId());
+
+                if (profile != null && profile.getSkills() != null) {
+                    for (JobPost job : activeJobs) {
+                        double score =
+                                recommenderService.calculateCompatibility(profile.getSkills(), job.getRequiredSkills());
+                        job.setCompatibilityScore(score);
+                        job.setIsHighlyRecommended(score >= 0.6); // BR-57
+                    }
+
+                    // Sort descending by compatibility score
+                    activeJobs.sort((a, b) -> Double.compare(
+                            b.getCompatibilityScore() != null ? b.getCompatibilityScore() : 0.0,
+                            a.getCompatibilityScore() != null ? a.getCompatibilityScore() : 0.0));
+                }
+            }
+        } catch (Exception e) {
+            // Ignore if not logged in or any other error, just return the raw list
+        }
+
+        return activeJobs;
     }
 
     @Override

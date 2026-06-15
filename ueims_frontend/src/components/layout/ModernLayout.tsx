@@ -406,10 +406,6 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
           <div className="modern-bottom-bar">
             <div className="modern-bottom-bar-bg" />
 
-            <div style={{ position: 'relative', zIndex: 1, flex: '0 0 auto', display: 'flex', alignItems: 'center', padding: '0 8px' }} />
-
-            <div className="modern-bar-divider" />
-
             <div ref={notificationMenuRef} style={{ position: 'relative', zIndex: 1, flex: '0 0 auto' }}>
               <button
                 type="button"

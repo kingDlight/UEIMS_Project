@@ -13,4 +13,8 @@ public interface UserRoleService {
     UserRole save(UserRole entity);
 
     void deleteById(UserRoleId id);
+
+    void assignRole(com.ueims.dto.request.UserRoleRequest request);
+
+    void revokeRole(java.util.UUID userId, String roleName);
 }
