@@ -63,10 +63,10 @@ export const c = {
 };
 
 export const navItems: NavItem[] = [
-  { key: 'dashboard', label: 'Dashboard', icon: React.createElement(HomeOutlined), roles: ['SYSTEM_ADMIN', 'TRAINING_MANAGER', 'ENTERPRISE', 'STUDENT'] },
-  { key: 'users', label: 'Users', icon: React.createElement(UserOutlined), roles: ['SYSTEM_ADMIN'] },
-  { key: 'audit', label: 'Audit Logs', icon: React.createElement(AuditOutlined), roles: ['SYSTEM_ADMIN', 'TRAINING_MANAGER'] },
-  { key: 'system', label: 'System', icon: React.createElement(SettingOutlined), roles: ['SYSTEM_ADMIN'] },
-  { key: 'analytics', label: 'Stats', icon: React.createElement(BarChartOutlined), roles: ['SYSTEM_ADMIN', 'TRAINING_MANAGER'] },
-  { key: 'notifications', label: 'Notices', icon: React.createElement(BellOutlined), roles: ['SYSTEM_ADMIN', 'TRAINING_MANAGER', 'ENTERPRISE', 'STUDENT'] },
+  { key: 'dashboard', label: 'Dashboard', icon: React.createElement(HomeOutlined), roles: ['ADMIN', 'SYSTEM_ADMIN', 'TRAINING_MANAGER', 'ENTERPRISE', 'STUDENT'] },
+  { key: 'users', label: 'Users', icon: React.createElement(UserOutlined), roles: ['ADMIN', 'SYSTEM_ADMIN'] },
+  { key: 'audit', label: 'Audit Logs', icon: React.createElement(AuditOutlined), roles: ['ADMIN', 'SYSTEM_ADMIN', 'TRAINING_MANAGER'] },
+  { key: 'system', label: 'System', icon: React.createElement(SettingOutlined), roles: ['ADMIN', 'SYSTEM_ADMIN'] },
+  { key: 'analytics', label: 'Stats', icon: React.createElement(BarChartOutlined), roles: ['ADMIN', 'SYSTEM_ADMIN', 'TRAINING_MANAGER'] },
+  { key: 'notifications', label: 'Notices', icon: React.createElement(BellOutlined), roles: ['ADMIN', 'SYSTEM_ADMIN', 'TRAINING_MANAGER', 'ENTERPRISE', 'STUDENT'] },
 ];

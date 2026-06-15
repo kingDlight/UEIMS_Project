@@ -39,10 +39,10 @@ export const AdminDashboard: React.FC = () => {
 
   // Only SYSTEM_ADMIN can access this portal
   // #region agent debug
-  const _log = (msg: string, data: any) => fetch('http://127.0.0.1:7689/ingest/85060117-28a9-450a-b776-759dca15ff5a',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'4c8288'},body:JSON.stringify({sessionId:'4c8288',location:'AdminDashboard.tsx:41',message:msg,data,timestamp:Date.now()})}).catch(()=>{});
-  _log('AdminDashboard roles check', { roles, hasSystemAdmin: roles.includes('SYSTEM_ADMIN') });
+  const _log = (msg: string, data: any) => fetch('http://127.0.0.1:7689/ingest/85060117-28a9-450a-b776-759dca15ff5a',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'4c8288'},body:JSON.stringify({sessionId:'4c8288',location:'AdminDashboard.tsx:42',message:msg,data,timestamp:Date.now()})}).catch(()=>{});
+  _log('AdminDashboard roles check', { roles, hasAdmin: roles.includes('ADMIN') });
   // #endregion
-  if (!roles.includes('SYSTEM_ADMIN')) {
+  if (!roles.includes('ADMIN') && !roles.includes('SYSTEM_ADMIN')) {
     // Redirect to appropriate dashboard based on role
     if (roles.includes('TRAINING_MANAGER')) {
       return <Navigate to="/training-manager/dashboard" replace />;

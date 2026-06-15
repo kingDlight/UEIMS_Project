@@ -58,7 +58,6 @@ export const LoginPage: React.FC = () => {
         deviceId: getDeviceId(),
       });
 
-      _log('Login API response', { mustChangePassword: result.mustChangePassword, hasToken: !!result.token, tokenPreview: result.token?.slice(0, 30) });
       if (result.mustChangePassword) {
         loginWithTokens(result.token, result.refreshToken);
         message.warning(t('auth.mustChangePassword', 'You must change your password before continuing!'));
