@@ -11,6 +11,14 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ['@ant-design/icons'],
+    include: [
+      'react',
+      'react-dom',
+      'react-router-dom',
+      'antd',
+      '@ant-design/icons',
+      'dayjs',
+      'framer-motion',
+    ],
   },
 })
