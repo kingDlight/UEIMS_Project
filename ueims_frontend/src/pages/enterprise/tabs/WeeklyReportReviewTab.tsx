@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Spin, message, Button, Input, Modal, Select, Empty, Tag } from 'antd';
+import { Spin, App, Button, Input, Modal, Select, Empty, Tag } from 'antd';
 import {
   CheckCircleOutlined,
   CloseCircleOutlined,
@@ -55,6 +55,7 @@ const STATUS_META: Record<string, { label: string; color: string; bg: string }> 
 };
 
 export const WeeklyReportReviewTab: React.FC = () => {
+  const { message } = App.useApp();
   const [reports, setReports] = useState<WeeklyReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

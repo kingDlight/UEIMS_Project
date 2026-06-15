@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { message, Spin, Pagination, Collapse } from 'antd';
+import { App, Spin, Pagination, Collapse } from 'antd';
 import { motion } from 'framer-motion';
 import { SnippetsOutlined, PlusOutlined, SendOutlined, EditOutlined, EyeOutlined, WarningOutlined, DownOutlined, UpOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
@@ -57,6 +57,7 @@ const EmptyState: React.FC<{ icon: React.ReactNode; title: string; description: 
 );
 
 export const ReportsTab: React.FC = () => {
+  const { message } = App.useApp();
   const { t } = useTranslation(['reports', 'common']);
   const [reports, setReports] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);

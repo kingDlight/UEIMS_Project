@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Spin, message, Modal, Form, Input, InputNumber, DatePicker, Button, Select, Empty, Pagination } from 'antd';
+import { Spin, App, Modal, Form, Input, InputNumber, DatePicker, Button, Select, Empty, Pagination } from 'antd';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   PlusOutlined,
@@ -65,6 +65,7 @@ const STATUS_COLORS: Record<string, { color: string; bg: string; label: string }
 };
 
 const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
+  const { message } = App.useApp();
   const cfg = STATUS_COLORS[status] || STATUS_COLORS.DRAFT;
   return (
     <span style={{
@@ -96,6 +97,7 @@ interface FormValues {
 // MAIN COMPONENT (UC-37 + UC-38)
 // ============================================================
 export const JobPostManagementTab: React.FC = () => {
+  const { message } = App.useApp();
   const [posts, setPosts] = useState<JobPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [semesters, setSemesters] = useState<Semester[]>([]);

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Spin, message } from 'antd';
+import { Spin, App } from 'antd';
 import {
   UsersOutlined,
   BankOutlined,
@@ -59,6 +59,7 @@ const Label: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 );
 
 export const AdminDashboardTab: React.FC = () => {
+  const { message } = App.useApp();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<any>(null);
   const [recentLogs, setRecentLogs] = useState<any[]>([]);

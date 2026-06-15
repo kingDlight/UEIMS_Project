@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useScrollAnimation } from '../../../hooks/useScrollAnimation';
 
-import { Select, Input, message } from 'antd';
+import { Select, Input, App } from 'antd';
 import {
   AlertOctagon,
   Search,
@@ -570,6 +570,7 @@ const MetricCard: React.FC<{
 // MAIN COMPONENT
 // ============================================================
 export const IncidentsTab: React.FC = () => {
+  const { message } = App.useApp();
   useScrollAnimation();
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [selected, setSelected] = useState<Incident | null>(null);

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { message, Spin, Pagination } from 'antd';
+import { App, Spin, Pagination } from 'antd';
 import { motion } from 'framer-motion';
 import { StarOutlined, CheckCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { NeuSurface } from '../components/shared/NeuSurface';
@@ -41,6 +41,7 @@ const CTAButton: React.FC<{
 };
 
 export const FeedbackTab: React.FC = () => {
+  const { message } = App.useApp();
   const { t } = useTranslation(['feedback', 'common']);
   const [feedbacks, setFeedbacks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
