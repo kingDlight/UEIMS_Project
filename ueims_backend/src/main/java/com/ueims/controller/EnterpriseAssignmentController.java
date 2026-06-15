@@ -34,10 +34,15 @@ public class EnterpriseAssignmentController {
 
     @GetMapping("/my-enterprise")
     @PreAuthorize("hasRole('ENTERPRISE') or hasRole('TRAINING_MANAGER')")
-    public ResponseEntity<List<EnterpriseAssignmentDTO>> getMyEnterpriseAssignments() {
-        return ResponseEntity.ok(service.findMyEnterpriseAssignments().stream()
+    public ResponseEntity<List<EnterpriseAssignmentDTO>> getMyEnterpriseAssignments(@RequestParam(required = false) String keyword) {
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            return ResponseEntity.ok(service.searchMyEnterpriseAssignments(keyword.trim()).stream()
                 .map(mapper::toDto)
                 .toList());
+        }
+        return ResponseEntity.ok(service.findMyEnterpriseAssignments().stream()
+            .map(mapper::toDto)
+            .toList());
     }
 
     @GetMapping("/my-assignment")
