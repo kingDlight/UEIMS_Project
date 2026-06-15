@@ -13,5 +13,8 @@
     "newman": "^6.2.2",
     "pg": "^8.21.0",
     "recharts": "^3.8.1"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
   }
 }
