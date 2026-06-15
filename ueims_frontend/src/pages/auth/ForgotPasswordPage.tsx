@@ -2,7 +2,7 @@ import bgAuth from '@/assets/bg-auth.png';
 import authShield3d from '@/assets/auth_shield_3d.png';
 import { LogoIcon } from '@/components/LogoIcon';
 import React, { useState } from 'react';
-import { Form, Input, Button, message } from 'antd';
+import { Form, Input, Button, App } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { Mail, Send, Info } from 'lucide-react';
 import { AuthService } from '@/services/AuthService';
@@ -19,6 +19,7 @@ import {
 } from '@/theme/authTheme';
 
 export const ForgotPasswordPage: React.FC = () => {
+  const { message } = App.useApp();
   const { t } = useTranslation('common');
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);

@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Table, Modal, Form, DatePicker, Input, Button, Popconfirm, message, Select } from 'antd';
+import { Table, Modal, Form, DatePicker, Input, Button, Popconfirm, App, Select } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import {
   Plus,
@@ -102,6 +102,7 @@ interface StatusBadgeProps {
 }
 
 const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
+  const { message } = App.useApp();
   const config: Record<SemesterStatus, { bg: string; border: string; color: string; dot: string; label: string }> = {
     Current: {
       bg: cc.successMuted,
@@ -163,6 +164,7 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
 // MAIN COMPONENT
 // ============================================================
 export const SemesterTab: React.FC = () => {
+  const { message } = App.useApp();
   const [semesters, setSemesters] = useState<SemesterRecord[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);

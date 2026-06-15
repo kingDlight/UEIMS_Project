@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Spin, message } from 'antd';
+import { Spin, App } from 'antd';
 import {
   SettingOutlined,
   DatabaseOutlined,
@@ -67,6 +67,7 @@ const ServiceRow: React.FC<{
 };
 
 export const AdminSystemTab: React.FC = () => {
+  const { message } = App.useApp();
   const [loading, setLoading] = useState(false);
 
   const handlePing = async () => {

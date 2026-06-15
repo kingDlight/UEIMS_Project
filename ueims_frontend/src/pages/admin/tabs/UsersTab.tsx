@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Spin, message, Modal, Select, Tag, Tooltip, Badge } from 'antd';
+import { Spin, App, Modal, Select, Tag, Tooltip, Badge } from 'antd';
 import {
   UserOutlined,
   SearchOutlined,
@@ -31,6 +31,7 @@ const ROLE_COLORS: Record<string, { color: string; bg: string }> = {
 const ALL_ROLES = ['SYSTEM_ADMIN', 'TRAINING_MANAGER', 'ENTERPRISE', 'STUDENT'];
 
 const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
+  const { message } = App.useApp();
   const isActive = status === 'ACTIVE';
   return (
     <span style={{
@@ -48,6 +49,7 @@ const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
 };
 
 export const UsersTab: React.FC = () => {
+  const { message } = App.useApp();
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');

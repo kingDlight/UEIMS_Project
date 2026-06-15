@@ -1,6 +1,6 @@
 import React, { useState, useCallback, forwardRef } from 'react';
 import { useScrollAnimation } from '../../../hooks/useScrollAnimation';
-import { message, Checkbox } from 'antd';
+import { App, Checkbox } from 'antd';
 
 import {
   CheckSquare,
@@ -84,6 +84,7 @@ const STATUS_CONFIG = {
 // STATUS BADGE
 // ============================================================
 const StatusBadge: React.FC<{ status: WeeklyReport['status'] }> = ({ status }) => {
+  const { message } = App.useApp();
   const cfg = STATUS_CONFIG[status];
   return (
     <span style={{
@@ -461,6 +462,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
 // MAIN COMPONENT
 // ============================================================
 export const WeeklyReportsTab: React.FC = () => {
+  const { message } = App.useApp();
   useScrollAnimation();
   const [reports, setReports] = useState<WeeklyReport[]>([]);
   const [loading, setLoading] = useState(true);

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Spin, message, DatePicker, Button } from 'antd';
+import { Spin, App, DatePicker, Button } from 'antd';
 import {
   AuditOutlined,
   SearchOutlined,
@@ -57,6 +57,7 @@ const Card: React.FC<{ children: React.ReactNode; style?: React.CSSProperties }>
 );
 
 export const AuditLogTab: React.FC = () => {
+  const { message } = App.useApp();
   const [logs, setLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');

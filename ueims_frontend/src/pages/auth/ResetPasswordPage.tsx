@@ -2,7 +2,7 @@ import bgAuth from '@/assets/bg-auth.png';
 import authShield3d from '@/assets/auth_shield_3d.png';
 import { LogoIcon } from '@/components/LogoIcon';
 import React, { useState, useEffect } from 'react';
-import { Form, Input, Button, message } from 'antd';
+import { Form, Input, Button, App } from 'antd';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Lock, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { AuthService } from '@/services/AuthService';
@@ -25,6 +25,7 @@ import {
 const renderPasswordIcon = (visible: boolean) => visible ? <Eye size={18} color="#94A3B8" /> : <EyeOff size={18} color="#94A3B8" />;
 
 export const ResetPasswordPage: React.FC = () => {
+  const { message } = App.useApp();
   const { t } = useTranslation('common');
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();

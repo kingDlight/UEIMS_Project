@@ -1,5 +1,5 @@
 import React, { useState, useRef, useMemo, useEffect } from 'react';
-import { Table, Modal, Select, Input, Upload, message } from 'antd';
+import { Table, Modal, Select, Input, Upload, App } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import type { UploadFile } from 'antd/es/upload';
 import {
@@ -82,6 +82,7 @@ function getAvatarColor(name: string) {
 }
 
 const Avatar: React.FC<{ initials: string }> = ({ initials }) => {
+  const { message } = App.useApp();
   const palette = getAvatarColor(initials);
   return (
     <div style={{
@@ -162,6 +163,7 @@ const ACAD_SEM_OPTIONS = [
 // STATUS BADGE — ghost outline (text color + whisper border, no solid fill)
 // ============================================================
 const StatusBadge: React.FC<{ sem: number }> = ({ sem }) => {
+  const { message } = App.useApp();
   const { t } = useTranslation('common');
   const key = deriveStatus(sem);
   const cfg = OJT_STATUS[key];
@@ -409,6 +411,7 @@ const StudentDetailModal: React.FC<{
 // MAIN COMPONENT
 // ============================================================
 export const StudentsTab: React.FC = () => {
+  const { message } = App.useApp();
   const { t } = useTranslation('common');
   const [search, setSearch] = useState('');
   const [major, setMajor] = useState<string>(MAJORS[0].value);

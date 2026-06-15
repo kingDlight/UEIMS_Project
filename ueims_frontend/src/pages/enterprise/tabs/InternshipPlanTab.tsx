@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Spin, message, Button, Input, DatePicker, Form, Select, Empty, Popconfirm } from 'antd';
+import { Spin, App, Button, Input, DatePicker, Form, Select, Empty, Popconfirm } from 'antd';
 import {
   PlusOutlined,
   DeleteOutlined,
@@ -53,6 +53,7 @@ function hexToRgba(hex: string, alpha: number): string {
 }
 
 export const InternshipPlanTab: React.FC = () => {
+  const { message } = App.useApp();
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null);
   const [plan, setPlan] = useState<PlanState>({ items: [] });

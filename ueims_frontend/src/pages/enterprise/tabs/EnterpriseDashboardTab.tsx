@@ -16,7 +16,7 @@ import {
   AlertTriangle,
   Star,
 } from 'lucide-react';
-import { Spin, message } from 'antd';
+import { Spin, App } from 'antd';
 import { ApplicationService } from '@/services/ApplicationService';
 import { c } from '../constants';
 
@@ -76,6 +76,7 @@ const Label: React.FC<{ children: React.ReactNode; style?: React.CSSProperties }
 );
 
 const TrendBadge: React.FC<{ direction: 'up' | 'down' | 'neutral'; value: string; color?: string }> = ({ direction, value, color }) => {
+  const { message } = App.useApp();
   let iconColor = color || c.textMuted;
   let Icon = MinusCircle;
   if (!color) {
@@ -186,6 +187,7 @@ interface DashboardStats {
 // SECTION: ENTERPRISE CONTEXT BAR
 // ============================================================
 const EnterpriseContextBar: React.FC<{ companyName: string }> = ({ companyName }) => {
+  const { message } = App.useApp();
   const { t } = useTranslation();
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px', marginBottom: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -222,6 +224,7 @@ const EnterpriseContextBar: React.FC<{ companyName: string }> = ({ companyName }
 // SECTION: KPI CARDS ROW
 // ============================================================
 const KPICardsRow: React.FC<{ stats: DashboardStats; onNavigate: (route: string) => void }> = ({ stats, onNavigate }) => {
+  const { message } = App.useApp();
   const { t } = useTranslation();
   return (
     <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 20 }}>
@@ -260,6 +263,7 @@ const KPICardsRow: React.FC<{ stats: DashboardStats; onNavigate: (route: string)
 // SECTION: PIPELINE SUMMARY
 // ============================================================
 const PipelineSummary: React.FC<{ stats: DashboardStats }> = ({ stats }) => {
+  const { message } = App.useApp();
   const { t } = useTranslation();
   const total = stats.totalApplicants || 1;
   const pipeline = [
@@ -313,6 +317,7 @@ const PipelineSummary: React.FC<{ stats: DashboardStats }> = ({ stats }) => {
 // SECTION: RECENT ACTIVITY
 // ============================================================
 const RecentActivity: React.FC<{ applications: ApplicationItem[] }> = ({ applications }) => {
+  const { message } = App.useApp();
   const { t } = useTranslation();
   const recent = applications.slice(0, 5);
 
@@ -384,6 +389,7 @@ const RecentActivity: React.FC<{ applications: ApplicationItem[] }> = ({ applica
 // SECTION: QUICK ACTIONS
 // ============================================================
 const QuickActions: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => {
+  const { message } = App.useApp();
   const { t } = useTranslation();
   return (
     <motion.div
@@ -434,6 +440,7 @@ const QuickActions: React.FC<{ onNavigate: (route: string) => void }> = ({ onNav
 // MAIN DASHBOARD TAB
 // ============================================================
 export const EnterpriseDashboardTab: React.FC = () => {
+  const { message } = App.useApp();
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
