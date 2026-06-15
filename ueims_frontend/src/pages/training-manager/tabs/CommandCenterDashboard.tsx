@@ -390,7 +390,7 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
     if (onNavigate) {
       onNavigate(route);
     } else {
-      navigate(`/tm-dashboard/${route}`);
+      navigate(`/training-manager/${route}`);
     }
   };
 

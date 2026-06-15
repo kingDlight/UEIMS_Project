@@ -132,7 +132,7 @@ interface ModernLayoutProps {
   navItems: NavItem[];
   children: React.ReactNode;
   defaultRoute?: string;
-  basePath?: string; // e.g. "/app/tm-dashboard"
+  basePath?: string; 
 }
 
 const renderProfileModal = (modal: React.ReactNode) => (
