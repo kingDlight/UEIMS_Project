@@ -188,6 +188,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
         confirmPassword: values.confirmPassword,
       });
       message.success(t('layout.passwordChangeSuccess', 'Password changed successfully! Please log in again.'));
+      form.resetFields();
       setChangePasswordVisible(false);
       // Force user to log out and log back in to get a fresh token with mustChangePassword=false
       if (mustChangePassword) {
