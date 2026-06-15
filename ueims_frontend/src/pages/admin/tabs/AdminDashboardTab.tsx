@@ -10,7 +10,7 @@ import {
   CheckCircleOutlined,
   ClockCircleOutlined,
   KeyOutlined,
-  Activity,
+  ThunderboltOutlined,
 } from '@ant-design/icons';
 import { AdminService } from '@/services/AdminService';
 import { c } from '../constants';
@@ -253,7 +253,7 @@ export const AdminDashboardTab: React.FC = () => {
                   { label: 'Database', status: 'Connected', icon: <CheckCircleOutlined size={16} />, color: c.success },
                   { label: 'Email Service', status: 'Operational', icon: <CheckCircleOutlined size={16} />, color: c.success },
                   { label: 'File Storage', status: 'Available', icon: <CheckCircleOutlined size={16} />, color: c.success },
-                  { label: 'API Gateway', status: 'Active', icon: <Activity size={16} />, color: c.info },
+                  { label: 'API Gateway', status: 'Active', icon: <ThunderboltOutlined />, color: c.info },
                   { label: 'Scheduled Jobs', status: 'Running', icon: <ClockCircleOutlined size={16} />, color: c.warning },
                 ].map(item => (
                   <div key={item.label} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', borderRadius: c.radiusMd, background: c.neutralBg, border: `1px solid ${c.border}` }}>
