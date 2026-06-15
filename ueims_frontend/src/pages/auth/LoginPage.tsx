@@ -1,6 +1,6 @@
 import { LogoIcon } from '@/components/LogoIcon';
 import React, { useState, useEffect } from 'react';
-import { Form, Input, Button, message, Divider } from 'antd';
+import { Form, Input, Button, App, Divider } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -24,6 +24,7 @@ export const LoginPage: React.FC = () => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
+  const { message } = App.useApp();
 
   const user = useAuthStore((state) => state.user);
 
