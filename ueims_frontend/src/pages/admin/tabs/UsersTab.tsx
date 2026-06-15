@@ -218,7 +218,7 @@ export const UsersTab: React.FC = () => {
                       <td colSpan={7} style={{ padding: 40, textAlign: 'center', color: c.textMuted, fontSize: 13 }}>No users match your filters</td>
                     </tr>
                   ) : paginatedUsers.map((user, idx) => (
-                    <tr key={user.userId ?? idx} style={{ borderBottom: idx < paginatedUsers.length - 1 ? `1px solid ${c.borderSubtle}` : 'none` }`}>
+                    <tr key={user.userId ?? idx} style={{ borderBottom: idx < paginatedUsers.length - 1 ? `1px solid ${c.borderSubtle}` : 'none' }}>
                       <td style={{ padding: '14px 16px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                           <div style={{ width: 36, height: 36, borderRadius: '50%', background: hexToRgba(c.brand, 0.1), color: c.brand, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>
