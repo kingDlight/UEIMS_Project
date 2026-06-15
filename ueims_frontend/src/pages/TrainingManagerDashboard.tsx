@@ -31,19 +31,14 @@ export const TrainingManagerDashboard: React.FC = () => {
   const payload = extractUserFromToken(token);
   const roles = payload?.roles || [];
 
-  // #region agent debug
-  const _log = (msg: string, data: any) => fetch('http://127.0.0.1:7689/ingest/85060117-28a9-450a-b776-759dca15ff5a',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'4c8288'},body:JSON.stringify({sessionId:'4c8288',location:'TrainingManagerDashboard.tsx:31',message:msg,data,timestamp:Date.now()})}).catch(()=>{});
-  _log('TM Dashboard roles', { roles, firstNavRole: navItems[0]?.roles });
-  // #endregion
+
 
   // Redirect if no role
   if (roles.length === 0) {
-    _log('No roles, redirecting to /no-role', { roles });
     return <Navigate to="/no-role" replace />;
   }
 
   if (roles.includes('STUDENT') || roles.includes('ROLE_STUDENT') || roles.includes('ENTERPRISE') || roles.includes('ROLE_ENTERPRISE')) {
-    _log('Redirecting from TM to student/ent dashboard', { roles });
     return <Navigate to={`/student/${tab || 'dashboard'}`} replace />;
   }
 
