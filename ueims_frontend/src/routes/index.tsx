@@ -11,6 +11,7 @@ import { HomePage } from '@/pages/home/HomePage';
 import { ProtectedRoute } from '@/components/guards/ProtectedRoute';
 import { EmailPreviewPage } from '@/pages/dev/EmailPreviewPage';
 import { NoRolePage } from '@/pages/auth/NoRolePage';
+import { NotFoundPage } from '@/pages/errors/NotFoundPage';
 
 const TrainingManagerDashboard = React.lazy(() => import('@/pages/TrainingManagerDashboard').then(m => ({ default: m.TrainingManagerDashboard })));
 const StudentDashboard = React.lazy(() => import('@/pages/student/StudentDashboard').then(m => ({ default: m.StudentDashboard })));
@@ -111,7 +112,7 @@ export const router = createBrowserRouter([
   },
   {
     path: '*',
-    element: <div>404 Not Found</div>,
+    element: <NotFoundPage />,
   },
 ], {
   future: {
