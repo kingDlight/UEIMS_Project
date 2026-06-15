@@ -27,7 +27,7 @@ public class EnterpriseAssignmentController {
     private final UserService userService;
 
     @GetMapping
-    @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
+    @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')")
     public ResponseEntity<List<EnterpriseAssignmentDTO>> getAll() {
         return ResponseEntity.ok(service.findAll().stream().map(mapper::toDto).toList());
     }
@@ -47,7 +47,7 @@ public class EnterpriseAssignmentController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('ENTERPRISE') or hasRole('SYSTEM_ADMIN')")
+    @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('ENTERPRISE') or hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')")
     public ResponseEntity<EnterpriseAssignmentDTO> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(mapper.toDto(service.findById(id)));
     }
@@ -66,7 +66,7 @@ public class EnterpriseAssignmentController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    @PreAuthorize("hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         service.deleteById(id);
         return ResponseEntity.ok().build();
