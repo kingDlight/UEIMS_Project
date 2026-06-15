@@ -1,13 +1,43 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
-import { stats } from '../constants';
+import { stats as defaultStats } from '../constants';
 import { FloatingShapes } from './FloatingShapes';
 import { useTranslation } from 'react-i18next';
+import { PublicService } from '../../../services/PublicService';
 
 export const HeroSection = ({ isDark, handleMouseMove, spotlightRef, scrollToSection }: any) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  
+  const [dynamicStats, setDynamicStats] = useState(defaultStats);
+
+  useEffect(() => {
+    let isMounted = true;
+    
+    const fetchStats = async () => {
+      try {
+        const data = await PublicService.getHomeStats();
+        if (isMounted) {
+          setDynamicStats([
+            { value: `${data.interns}+`, label: 'home.stats.interns' },
+            { value: `${data.enterprises}+`, label: 'home.stats.enterprises' },
+            { value: `${data.completion}%`, label: 'home.stats.completion' },
+            { value: `${data.satisfaction}%`, label: 'home.stats.satisfaction' },
+          ]);
+        }
+      } catch (error) {
+        console.error('Failed to load stats', error);
+      }
+    };
+    
+    fetchStats();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   return (
     <section 
       role="presentation"
@@ -77,7 +107,7 @@ export const HeroSection = ({ isDark, handleMouseMove, spotlightRef, scrollToSec
         <div className={`animate-fade-in-up [animation-delay:400ms] grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 pt-10 backdrop-blur-md rounded-2xl p-6 border transition-all duration-300 ease-in-out ${
           isDark ? 'border-zinc-800/30 bg-[#0e1322]/30 text-zinc-100' : 'border-slate-200 bg-white/85 shadow-lg shadow-slate-100/40 text-slate-800'
         }`}>
-          {stats.map((stat) => (
+          {dynamicStats.map((stat) => (
             <div key={stat.label} className="text-center">
               <div className={`text-2xl sm:text-3xl md:text-4xl font-extrabold mb-1 tracking-tight transition-colors duration-300 ease-in-out ${isDark ? 'text-white' : 'text-slate-900'}`}>
                 {stat.value}
@@ -92,3 +122,4 @@ export const HeroSection = ({ isDark, handleMouseMove, spotlightRef, scrollToSec
     </section>
   );
 };
+
