@@ -62,7 +62,7 @@ export const InternshipPlanTab: React.FC = () => {
   const fetchAssignments = async () => {
     setLoading(true);
     try {
-      const res = await EnterpriseAssignmentService.getMyEnterprise();
+      const res = await EnterpriseAssignmentService.getMyAssignment();
       const data: Assignment[] = res.data?.result ?? res.data ?? [];
       setAssignments(Array.isArray(data) ? data : []);
     } catch (err: any) {
@@ -252,7 +252,7 @@ export const InternshipPlanTab: React.FC = () => {
   }
 
   return (
-    <div style={{ padding: '0 0 40px', fontFamily: 'Inter, sans-serif', display: 'grid', gridTemplateColumns: '280px 1fr', gap: 16, padding: '0 24px 40px' }}>
+    <div style={{ fontFamily: 'Inter, sans-serif', display: 'grid', gridTemplateColumns: '280px 1fr', gap: 16, padding: '0 24px 40px' }}>
       <aside style={{ background: c.surface, border: `1px solid ${c.border}`, borderRadius: c.radiusLg, padding: 12, height: 'fit-content' }}>
         <div style={{ fontSize: 12, fontWeight: 700, color: c.textMuted, textTransform: 'uppercase', letterSpacing: '0.05em', padding: '4px 8px 8px' }}>My Students</div>
         {assignments.length === 0 ? (

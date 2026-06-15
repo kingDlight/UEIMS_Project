@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { stats } from '../constants';
 import { FloatingShapes } from './FloatingShapes';
+import { useTranslation } from 'react-i18next';
 
 export const HeroSection = ({ isDark, handleMouseMove, spotlightRef, scrollToSection }: any) => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   return (
     <section 
       role="presentation"
@@ -33,23 +35,23 @@ export const HeroSection = ({ isDark, handleMouseMove, spotlightRef, scrollToSec
           isDark ? 'bg-[#f37021]/10 border-[#f37021]/30' : 'bg-[#f37021]/5 border-[#f37021]/20'
         }`}>
           <span className="flex h-2 w-2 rounded-full bg-[#f37021] animate-pulse"></span>
-          <span className="text-xs font-semibold tracking-wider text-[#f37021] uppercase">OJT - FPT University</span>
+          <span className="text-xs font-semibold tracking-wider text-[#f37021] uppercase">{t('home.hero.ojtFpt')}</span>
         </div>
 
         <h1 className={`animate-fade-in-up [animation-delay:100ms] text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tight leading-none mb-6 transition-colors duration-300 ease-in-out ${
           isDark ? 'text-white' : 'text-slate-900'
         }`}>
-          Chuyển Đổi Số Toàn Diện
+          {t('home.hero.title1')}
           <br />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#f37021] via-amber-500 to-orange-400">
-            Quy Trình Thực Tập OJT
+            {t('home.hero.title2')}
           </span>
         </h1>
 
         <p className={`animate-fade-in-up [animation-delay:200ms] text-base sm:text-lg md:text-xl max-w-3xl mx-auto mb-10 leading-relaxed font-normal transition-colors duration-300 ease-in-out ${
           isDark ? 'text-zinc-300' : 'text-slate-600'
         }`}>
-          Đơn giản hóa việc kết nối Doanh nghiệp, quản lý hồ sơ sinh viên, sắp xếp phỏng vấn và đánh giá điểm năng lực bằng hệ thống số hóa thông minh, minh bạch.
+          {t('home.hero.description')}
         </p>
 
         <div className="animate-fade-in-up [animation-delay:300ms] flex gap-4 justify-center flex-wrap mb-20">
@@ -58,7 +60,7 @@ export const HeroSection = ({ isDark, handleMouseMove, spotlightRef, scrollToSec
             className="group relative overflow-hidden text-sm font-bold text-white px-7 py-3.5 rounded-full bg-gradient-to-r from-[#f37021] to-[#e26215] shadow-lg shadow-[#f37021]/30 hover:shadow-xl hover:shadow-[#f37021]/40 hover:-translate-y-1 active:translate-y-0 transition-all duration-300 flex items-center gap-2"
           >
             <div className="absolute top-0 -left-[100%] w-1/2 h-full block transform skew-x-12 bg-gradient-to-r from-transparent via-white/30 to-transparent group-hover:left-[200%] transition-all duration-700 ease-in-out"></div>
-            <span className="relative z-10 flex items-center gap-2">Bắt đầu ngay
+            <span className="relative z-10 flex items-center gap-2">{t('home.hero.startNow')}
               <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
             </span>
           </button>
@@ -68,7 +70,7 @@ export const HeroSection = ({ isDark, handleMouseMove, spotlightRef, scrollToSec
               isDark ? 'text-zinc-100 border-zinc-500 hover:text-white hover:bg-zinc-800/40 hover:border-zinc-400' : 'text-slate-800 border-slate-400 hover:text-[#f37021] hover:bg-slate-100 hover:border-[#f37021]'
             }`}
           >
-            Tìm hiểu tính năng
+            {t('home.hero.learnFeatures')}
           </button>
         </div>
 
@@ -81,7 +83,7 @@ export const HeroSection = ({ isDark, handleMouseMove, spotlightRef, scrollToSec
                 {stat.value}
               </div>
               <div className={`text-xs font-semibold uppercase tracking-wider transition-colors duration-300 ease-in-out ${isDark ? 'text-zinc-300' : 'text-slate-600'}`}>
-                {stat.label}
+                {t(stat.label)}
               </div>
             </div>
           ))}

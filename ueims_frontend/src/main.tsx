@@ -5,7 +5,9 @@ import './index.css'
 import AppComponent from './App.tsx'
 import './i18n/config';
 import { initDeviceId } from './utils/device'
-localStorage.removeItem('i18nextLng');
+if (!localStorage.getItem('i18nextLng')) {
+  localStorage.setItem('i18nextLng', 'en');
+}
 
 initDeviceId();
 

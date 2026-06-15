@@ -16,6 +16,7 @@ import {
 import { EligibleStudentService } from '@/services/EligibleStudentService';
 import { SemesterService } from '@/services/SemesterService';
 import type { EligibleStudent } from '../types';
+import { useTranslation } from 'react-i18next';
 
 // ============================================================
 // DESIGN TOKENS
@@ -107,20 +108,20 @@ const Avatar: React.FC<{ initials: string }> = ({ initials }) => {
 //     by default; they are only shown when "All" filter is applied.
 // ============================================================
 const OJT_STATUS: Record<string, {
-  label: string; color: string; bg: string; borderColor: string;
-  semRange: string; description: string;
+  color: string; bg: string; borderColor: string;
+  semRange: string; key: string; descKey: string;
 }> = {
   PRE_REGISTRATION: {
-    label: 'Pre-Registration', color: st.textMuted,  bg: hexToRgba(st.textMuted,  0.06), borderColor: hexToRgba(st.textMuted,  0.25), semRange: 'Sem. 1-4', description: 'Cannot register OJT — semester below eligibility threshold',
+    color: st.textMuted,  bg: hexToRgba(st.textMuted,  0.06), borderColor: hexToRgba(st.textMuted,  0.25), semRange: 'Sem. 1-4', key: 'preRegistration', descKey: 'preRegistrationDesc',
   },
   ELIGIBLE: {
-    label: 'Eligible',        color: st.info,     bg: hexToRgba(st.info,     0.06), borderColor: hexToRgba(st.info,     0.25), semRange: 'Sem. 5',     description: 'Meets all OJT criteria — ready to register for internship',
+    color: st.info,     bg: hexToRgba(st.info,     0.06), borderColor: hexToRgba(st.info,     0.25), semRange: 'Sem. 5',     key: 'eligible', descKey: 'eligibleDesc',
   },
   IN_OJT: {
-    label: 'In OJT',           color: st.success,  bg: hexToRgba(st.success,  0.06), borderColor: hexToRgba(st.success,  0.25), semRange: 'Sem. 6',     description: 'Currently in OJT — active internship',
+    color: st.success,  bg: hexToRgba(st.success,  0.06), borderColor: hexToRgba(st.success,  0.25), semRange: 'Sem. 6',     key: 'inOjt', descKey: 'inOjtDesc',
   },
   COMPLETED: {
-    label: 'Completed',       color: st.warning,  bg: hexToRgba(st.warning,  0.06), borderColor: hexToRgba(st.warning,  0.25), semRange: 'Sem. 7-9',   description: 'OJT finished — eligible to view results',
+    color: st.warning,  bg: hexToRgba(st.warning,  0.06), borderColor: hexToRgba(st.warning,  0.25), semRange: 'Sem. 7-9',   key: 'completed', descKey: 'completedDesc',
   },
 };
 
@@ -139,18 +140,18 @@ function deriveStatus(sem: number): string {
 // Sem 7-9: COMPLETED (finished OJT)
 // ============================================================
 const MAJORS = [
-  'All Majors',
-  'Computer Science',
-  'Software Engineering',
-  'Information Assurance',
-  'Artificial Intelligence',
+  { value: 'All Majors', key: 'allMajors' },
+  { value: 'Computer Science', key: 'computerScience' },
+  { value: 'Software Engineering', key: 'softwareEngineering' },
+  { value: 'Information Assurance', key: 'informationAssurance' },
+  { value: 'Artificial Intelligence', key: 'artificialIntelligence' },
 ];
 const ACAD_SEM_OPTIONS = [
-  { value: 'ALL', label: 'All Academic Sem' },
-  { value: '1-4', label: 'Sem. 1-4' },
-  { value: '5', label: 'Sem. 5 - Eligible' },
-  { value: '6', label: 'Sem. 6 - In OJT' },
-  { value: '7+', label: 'Sem. 7-9 - Completed' },
+  { value: 'ALL', key: 'allAcademicSem' },
+  { value: '1-4', key: 'sem1_4' },
+  { value: '5', key: 'sem5Eligible' },
+  { value: '6', key: 'sem6InOjt' },
+  { value: '7+', key: 'sem7_9Completed' },
 ];
 
 // ============================================================
@@ -161,6 +162,7 @@ const ACAD_SEM_OPTIONS = [
 // STATUS BADGE — ghost outline (text color + whisper border, no solid fill)
 // ============================================================
 const StatusBadge: React.FC<{ sem: number }> = ({ sem }) => {
+  const { t } = useTranslation('common');
   const key = deriveStatus(sem);
   const cfg = OJT_STATUS[key];
   return (
@@ -179,7 +181,7 @@ const StatusBadge: React.FC<{ sem: number }> = ({ sem }) => {
         fontFamily: 'Inter, sans-serif',
       }}
     >
-      {cfg.label}
+      {t(`studentsTab.ojtStatuses.${cfg.key}`)}
     </span>
   );
 };
@@ -254,6 +256,7 @@ const StudentDetailModal: React.FC<{
   onClose: () => void;
   onEdit: (s: EligibleStudent) => void;
 }> = ({ open, student, onClose, onEdit }) => {
+  const { t } = useTranslation('common');
   if (!student) return null;
   const key = deriveStatus(student.currentSemester);
   const cfg = OJT_STATUS[key];
@@ -327,7 +330,7 @@ const StudentDetailModal: React.FC<{
                 backgroundColor: hexToRgba(cfg.color, 0.06), border: `1px solid ${hexToRgba(cfg.color, 0.2)}`,
                 color: cfg.color, fontSize: 11, fontWeight: 700, fontFamily: 'Inter, sans-serif', letterSpacing: '0.03em', textTransform: 'uppercase'
               }}>
-                {cfg.label}
+                {t(`studentsTab.ojtStatuses.${cfg.key}`)}
               </span>
             </div>
           </div>
@@ -339,10 +342,10 @@ const StudentDetailModal: React.FC<{
         {/* Simple Grid for Info (No borders) */}
         <div className="ent-info-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px 24px', marginBottom: 28 }}>
           {[
-            { label: 'Email Address', value: student.email },
-            { label: 'Major', value: student.major },
-            { label: 'Current Semester', value: `Semester ${student.currentSemester}` },
-            { label: 'Cumulative GPA', value: student.gpa.toFixed(2), warn: student.gpa < 2.5 },
+            { label: t('studentsTab.emailAddress'), value: student.email },
+            { label: t('studentsTab.major'), value: student.major },
+            { label: t('studentsTab.currentSemester'), value: `${t('studentsTab.semesterShort')} ${student.currentSemester}` },
+            { label: t('studentsTab.cumulativeGpa'), value: student.gpa.toFixed(2), warn: student.gpa < 2.5 },
           ].map(({ label, value, warn }) => (
             <div key={label}>
               <div style={{ fontSize: 11, fontWeight: 700, color: st.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6, fontFamily: 'Inter, sans-serif' }}>
@@ -363,8 +366,8 @@ const StudentDetailModal: React.FC<{
         }}>
           <AlertCircle size={16} color={cfg.color} style={{ marginTop: 2, flexShrink: 0 }} />
           <div style={{ fontSize: 12.5, fontWeight: 500, color: st.textSecondary, fontFamily: 'Inter, sans-serif', lineHeight: 1.5 }}>
-            <span style={{ color: cfg.color, fontWeight: 700, marginRight: 4 }}>Note:</span>
-            {cfg.description}
+            <span style={{ color: cfg.color, fontWeight: 700, marginRight: 4 }}>{t('studentsTab.note')}</span>
+            {t(`studentsTab.ojtStatuses.${cfg.descKey}`)}
           </div>
         </div>
       </div>
@@ -381,7 +384,7 @@ const StudentDetailModal: React.FC<{
           onMouseEnter={(e) => { e.currentTarget.style.background = st.neutralBg; e.currentTarget.style.color = st.textPrimary; }}
           onMouseLeave={(e) => { e.currentTarget.style.background = st.surface; e.currentTarget.style.color = st.textSecondary; }}
         >
-          Cancel
+          {t('studentsTab.cancel')}
         </button>
         <button
           onClick={() => { onClose(); onEdit(student); }}
@@ -395,7 +398,7 @@ const StudentDetailModal: React.FC<{
           onMouseLeave={(e) => { e.currentTarget.style.background = st.brand; e.currentTarget.style.transform = 'translateY(0)'; }}
         >
           <Edit3 size={14} />
-          Edit Student
+          {t('studentsTab.editStudent')}
         </button>
       </div>
     </Modal>
@@ -405,14 +408,10 @@ const StudentDetailModal: React.FC<{
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
-const renderShowTotal = (total: number, range: [number, number]) => (
-  <span style={{ fontSize: 12, color: st.textMuted }}>
-    Showing {range[0]}-{range[1]} of {total} students
-  </span>
-);
 export const StudentsTab: React.FC = () => {
+  const { t } = useTranslation('common');
   const [search, setSearch] = useState('');
-  const [major, setMajor] = useState<string>(MAJORS[0]);
+  const [major, setMajor] = useState<string>(MAJORS[0].value);
   const [acadSem, setAcadSem] = useState<string>('ALL');
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
@@ -494,10 +493,10 @@ export const StudentsTab: React.FC = () => {
         fileInputRef.current.files[0],
         activeSemester?.semesterId ?? ''
       );
-      message.success({ content: 'Import thành công!', key: 'import' });
+      message.success({ content: t('studentsTab.importSuccess'), key: 'import' });
       setImportModalOpen(false);
     } catch {
-      message.error({ content: 'Lỗi khi import Excel.', key: 'import' });
+      message.error({ content: t('studentsTab.importError'), key: 'import' });
     } finally {
       setImporting(false);
     }
@@ -517,15 +516,15 @@ export const StudentsTab: React.FC = () => {
       }.xlsx`;
       a.click();
       globalThis.URL.revokeObjectURL(url);
-      message.success({ content: 'Xuất file thành công!', key: 'export' });
+      message.success({ content: t('studentsTab.exportSuccess'), key: 'export' });
     } catch {
-      message.error({ content: 'Lỗi khi xuất file.', key: 'export' });
+      message.error({ content: t('studentsTab.exportError'), key: 'export' });
     }
   };
 
   const columns: ColumnsType<EligibleStudent> = [
     {
-      title: <span style={thStyle}>Student ID</span>,
+      title: <span style={thStyle}>{t('studentsTab.studentId')}</span>,
       dataIndex: 'studentCode',
       key: 'studentCode',
       width: 110,
@@ -543,7 +542,7 @@ export const StudentsTab: React.FC = () => {
       ),
     },
     {
-      title: <span style={thStyle}>Full Name</span>,
+      title: <span style={thStyle}>{t('studentsTab.fullName')}</span>,
       dataIndex: 'fullName',
       key: 'fullName',
       width: 190,
@@ -554,7 +553,7 @@ export const StudentsTab: React.FC = () => {
       ),
     },
     {
-      title: <span style={thStyle}>Major</span>,
+      title: <span style={thStyle}>{t('studentsTab.major')}</span>,
       dataIndex: 'major',
       key: 'major',
       width: 170,
@@ -565,7 +564,7 @@ export const StudentsTab: React.FC = () => {
       ),
     },
     {
-      title: <span style={thStyle}>Sem.</span>,
+      title: <span style={thStyle}>{t('studentsTab.semesterShort')}</span>,
       key: 'sem',
       width: 72,
       render: (_: unknown, r: EligibleStudent) => (
@@ -577,12 +576,12 @@ export const StudentsTab: React.FC = () => {
             color: st.textPrimary,
           }}
         >
-          Sem. {r.currentSemester}
+          {t('studentsTab.semesterShort')} {r.currentSemester}
         </span>
       ),
     },
     {
-      title: <span style={thStyle}>GPA</span>,
+      title: <span style={thStyle}>{t('studentsTab.gpa')}</span>,
       dataIndex: 'gpa',
       key: 'gpa',
       width: 70,
@@ -600,7 +599,7 @@ export const StudentsTab: React.FC = () => {
       ),
     },
     {
-      title: <span style={thStyle}>OJT Status</span>,
+      title: <span style={thStyle}>{t('studentsTab.ojtStatus')}</span>,
       key: 'status',
       width: 200,
       render: (_: unknown, r: EligibleStudent) => <StatusBadge sem={r.currentSemester} />,
@@ -614,7 +613,7 @@ export const StudentsTab: React.FC = () => {
         <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
           <button
             onClick={() => openDetail(r)}
-            title="View Details"
+            title={t('studentsTab.viewDetails')}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -632,7 +631,7 @@ export const StudentsTab: React.FC = () => {
           </button>
           <button
             onClick={() => handleEdit(r)}
-            title="Edit"
+            title={t('studentsTab.edit')}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -701,10 +700,10 @@ export const StudentsTab: React.FC = () => {
             letterSpacing: '-0.01em',
           }}
         >
-          Student Management
+          {t('studentsTab.studentManagement')}
         </h2>
         <p style={{ fontSize: 13, color: st.textMuted, margin: '4px 0 0' }}>
-          Manage and track all students across academic semesters
+          {t('studentsTab.studentManagementDesc')}
         </p>
       </div>
 
@@ -718,14 +717,14 @@ export const StudentsTab: React.FC = () => {
         }}
       >
         <MetricCard
-          label="Total Students"
+          label={t('studentsTab.totalStudents')}
           value={students.length}
           icon={<Users size={18} color={st.brand} />}
           color={st.brand}
           bgMuted={st.brandMuted}
         />
         <MetricCard
-          label="Eligible Students"
+          label={t('studentsTab.eligibleStudents')}
           value={eligibleTotal}
           icon={<UserCheck size={18} color={st.info} />}
           color={st.info}
@@ -750,7 +749,7 @@ export const StudentsTab: React.FC = () => {
       >
         <Input
           prefix={<Search size={14} style={{ color: st.textMuted }} />}
-          placeholder="Search by Name or Student ID..."
+          placeholder={t('studentsTab.searchPlaceholder')}
           value={search}
           onChange={(e) => {
             setSearch(e.target.value);
@@ -772,7 +771,7 @@ export const StudentsTab: React.FC = () => {
             setMajor(v);
             setPage(1);
           }}
-          options={MAJORS.map((m) => ({ value: m, label: m }))}
+          options={MAJORS.map((m) => ({ value: m.value, label: t(`studentsTab.majors.${m.key}`) }))}
           style={{ flex: '0 1 190px' }}
           popupMatchSelectWidth={false}
         />
@@ -782,7 +781,7 @@ export const StudentsTab: React.FC = () => {
             setAcadSem(v);
             setPage(1);
           }}
-          options={ACAD_SEM_OPTIONS}
+          options={ACAD_SEM_OPTIONS.map((o) => ({ value: o.value, label: t(`studentsTab.semesters.${o.key}`) }))}
           style={{ flex: '0 1 170px' }}
           popupMatchSelectWidth={false}
         />
@@ -878,7 +877,11 @@ export const StudentsTab: React.FC = () => {
             pageSize,
             total: filteredStudents.length,
             showSizeChanger: false,
-            showTotal: renderShowTotal,
+            showTotal: (total, range) => (
+              <span style={{ fontSize: 12, color: st.textMuted }}>
+                {t('studentsTab.showingStudents', { start: range[0], end: range[1], total })}
+              </span>
+            ),
             onChange: (p) => setPage(p),
           }}
           locale={{
