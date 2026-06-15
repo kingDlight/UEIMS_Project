@@ -194,3 +194,4 @@ ueims_frontend/blob-report/
 ueims_frontend/playwright/.cache/
 playwright/.cache/
 export_sql.js
+update-seed.js
