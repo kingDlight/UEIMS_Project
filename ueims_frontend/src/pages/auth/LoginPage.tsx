@@ -29,14 +29,21 @@ export const LoginPage: React.FC = () => {
 
   const getRedirectPath = (roles: string[]): string => {
     if (!roles || roles.length === 0) return '/no-role';
+    if (roles.includes('ADMIN')) return '/admin/dashboard';
     if (roles.includes('STUDENT')) return '/student/dashboard';
     if (roles.includes('ENTERPRISE')) return '/enterprise-dashboard';
     return '/training-manager/dashboard';
   };
 
+  // #region agent debug
+  const _log = (msg: string, data: any) => fetch('http://127.0.0.1:7689/ingest/85060117-28a9-450a-b776-759dca15ff5a',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'4c8288'},body:JSON.stringify({sessionId:'4c8288',location:'LoginPage.tsx:30',message:msg,data,timestamp:Date.now()})}).catch(()=>{});
+  // #endregion
+
   useEffect(() => {
     if (isAuthenticated && user) {
+      _log('LoginPage useEffect redirect', { isAuthenticated, userRoles: user.roles });
       const redirectPath = getRedirectPath(user.roles || []);
+      _log('Redirecting to', { path: redirectPath });
       navigate(redirectPath);
     }
   }, [isAuthenticated, user, navigate]);
@@ -266,15 +273,8 @@ export const LoginPage: React.FC = () => {
           </Divider>
 
           <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: 20 }}>
-            <GoogleLogin
-              onSuccess={handleGoogleSuccess}
-              onError={() => {
-                message.error(t('auth.googleLoginFail', 'Login with Google failed. Please try again!'));
-              }}
-              useOneTap
-              shape="pill"
-              theme="outline"
-            />
+            {/* Google Sign-In disabled — uncomment and configure client_id in .env when ready */}
+            {/* <GoogleLogin onSuccess={handleGoogleSuccess} onError={() => message.error('Google login failed')} useOneTap shape="pill" theme="outline" /> */}
           </div>
         </div>
 
