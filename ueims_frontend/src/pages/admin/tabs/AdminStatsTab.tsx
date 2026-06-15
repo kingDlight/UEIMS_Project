@@ -5,7 +5,6 @@ import {
   TrophyOutlined,
   BankOutlined,
   TeamOutlined,
-  TrendingUp,
   ClockCircleOutlined,
   FileTextOutlined,
   WarningOutlined,
