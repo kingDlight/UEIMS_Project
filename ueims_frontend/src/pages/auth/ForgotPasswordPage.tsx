@@ -6,6 +6,7 @@ import { Form, Input, Button, message } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { Mail, Send, Info } from 'lucide-react';
 import { AuthService } from '@/services/AuthService';
+import { useTranslation } from 'react-i18next';
 import {
   AUTH_PRIMARY,
   AUTH_PRIMARY_LIGHT,
@@ -18,6 +19,7 @@ import {
 } from '@/theme/authTheme';
 
 export const ForgotPasswordPage: React.FC = () => {
+  const { t } = useTranslation('common');
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
@@ -25,13 +27,13 @@ export const ForgotPasswordPage: React.FC = () => {
     setLoading(true);
     try {
       await AuthService.forgotPassword({ email: values.email });
-      message.success('Vui lòng kiểm tra email để đặt lại mật khẩu!');
+      message.success(t('auth.forgotPasswordPage.checkEmailSuccess'));
     } catch (error: any) {
       const code = error.response?.data?.code;
       if (code === 1005) {
-        message.error('Email không tồn tại trong hệ thống.');
+        message.error(t('auth.accountNotFound'));
       } else {
-        message.error('Gửi yêu cầu thất bại. Vui lòng thử lại!');
+        message.error(t('auth.forgotPasswordPage.requestFailed'));
       }
     } finally {
       setLoading(false);
@@ -70,7 +72,7 @@ export const ForgotPasswordPage: React.FC = () => {
             UEIMS
           </h1>
           <p style={{ fontSize: 8, color: AUTH_TEXT_DARK, textTransform: 'uppercase', fontWeight: 600, margin: '2px 0 0 0', letterSpacing: 0.5 }}>
-            Hệ thống quản lý thực tập sinh<br />và doanh nghiệp
+            {t('auth.systemSubtitleLine1')}<br />{t('auth.systemSubtitleLine2')}
           </p>
         </div>
       </div>
@@ -137,9 +139,9 @@ export const ForgotPasswordPage: React.FC = () => {
           </div>
 
           <div style={{ zIndex: 2, textAlign: 'center' }}>
-            <h2 style={{ fontSize: 24, fontWeight: 700, margin: '0 0 12px 0', color: AUTH_WHITE }}>Bảo mật tài khoản của bạn</h2>
+            <h2 style={{ fontSize: 24, fontWeight: 700, margin: '0 0 12px 0', color: AUTH_WHITE }}>{t('auth.forgotPasswordPage.title')}</h2>
             <p style={{ fontSize: 14, lineHeight: 1.6, color: 'rgba(255,255,255,0.9)', margin: '0 0 32px 0', padding: '0 10px' }}>
-              Chúng tôi sẽ gửi liên kết khôi phục mật khẩu đến email đã đăng ký trong hệ thống.
+              {t('auth.forgotPasswordPage.description')}
             </p>
           </div>
         </div>
@@ -162,22 +164,22 @@ export const ForgotPasswordPage: React.FC = () => {
           </div>
 
           <h1 style={{ fontSize: 26, fontWeight: 800, color: AUTH_TEXT_DARK, margin: '0 0 12px 0' }}>
-            Quên mật khẩu?
+            {t('auth.forgotPasswordPage.forgotTitle')}
           </h1>
           <p style={{ color: AUTH_TEXT_GRAY, fontSize: 13, lineHeight: 1.6, margin: '0 0 30px 0' }}>
-            Nhập email đã đăng ký. Chúng tôi sẽ gửi link khôi phục<br />mật khẩu đến hộp thư của bạn.
+            {t('auth.forgotPasswordPage.forgotDescLine1')}<br />{t('auth.forgotPasswordPage.forgotDescLine2')}
           </p>
 
           <Form onFinish={onFinish} layout="vertical" style={{ width: '100%' }}>
             <div style={{ marginBottom: 24 }}>
               <label htmlFor="email" style={{ display: 'block', fontSize: 12, fontWeight: 700, color: AUTH_TEXT_DARK, marginBottom: 8 }}>
-                Địa chỉ Email
+                {t('auth.emailLabel')}
               </label>
               <Form.Item
                 name="email"
                 rules={[
-                  { required: true, message: 'Vui lòng nhập email!' },
-                  { type: 'email', message: 'Email không hợp lệ!' },
+                  { required: true, message: t('auth.forgotPasswordPage.emailRequired') },
+                  { type: 'email', message: t('auth.emailInvalid') },
                 ]}
                 style={{ margin: 0 }}
               >
@@ -217,7 +219,7 @@ export const ForgotPasswordPage: React.FC = () => {
                 }}
               >
                 <Send size={16} />
-                Gửi Link Khôi Phục
+                {t('auth.forgotPasswordPage.sendLinkBtn')}
               </Button>
             </Form.Item>
           </Form>
@@ -225,21 +227,20 @@ export const ForgotPasswordPage: React.FC = () => {
           <div style={{ marginTop: 24, backgroundColor: AUTH_PRIMARY_LIGHT, border: '1px solid rgba(230, 126, 34, 0.1)', borderRadius: 8, padding: '14px', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
             <Info size={18} fill={AUTH_PRIMARY} color={AUTH_WHITE} style={{ flexShrink: 0 }} />
             <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              <strong style={{ color: AUTH_PRIMARY, fontSize: 12 }}>Lưu ý</strong>
-              <p style={{ color: AUTH_TEXT_GRAY, fontSize: 11, lineHeight: 1.5, margin: 0 }}>
-                Link khôi phục sẽ hết hạn sau <strong style={{ color: AUTH_TEXT_DARK }}>2 giờ</strong>. Nếu không nhận được email, hãy kiểm tra thư mục Spam hoặc liên hệ Training Manager.
+              <strong style={{ color: AUTH_PRIMARY, fontSize: 12 }}>{t('auth.forgotPasswordPage.noteTitle')}</strong>
+              <p style={{ color: AUTH_TEXT_GRAY, fontSize: 11, lineHeight: 1.5, margin: 0 }} dangerouslySetInnerHTML={{ __html: t('auth.forgotPasswordPage.noteDesc') }}>
               </p>
             </div>
           </div>
 
           <div style={{ marginTop: 20, display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'center' }}>
-            <span style={{ color: AUTH_TEXT_GRAY, fontSize: 13 }}>Nhớ mật khẩu?</span>
+            <span style={{ color: AUTH_TEXT_GRAY, fontSize: 13 }}>{t('auth.forgotPasswordPage.rememberPassword')}</span>
             <button
               type="button"
               onClick={() => navigate('/login')}
               style={{ background: 'none', border: 'none', padding: 0, color: AUTH_PRIMARY, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}
             >
-              Quay lại đăng nhập
+              {t('auth.backToHome')}
             </button>
           </div>
         </div>

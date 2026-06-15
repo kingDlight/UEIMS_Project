@@ -1,18 +1,21 @@
 import React from 'react';
 import { features } from '../constants';
+import { useTranslation } from 'react-i18next';
 
-export const FeaturesSection = ({ isDark }: { isDark: boolean }) => (
+export const FeaturesSection = ({ isDark }: { isDark: boolean }) => {
+  const { t } = useTranslation();
+  return (
   <section id="features" className={`py-20 md:py-28 px-6 md:px-12 relative z-10 border-b scroll-mt-20 transition-colors duration-300 ease-in-out ${isDark ? 'border-zinc-900 bg-[#0e1322]/20' : 'border-slate-200 bg-white'}`}>
     <div
       className="max-w-6xl mx-auto"
     >
       <div className="scroll-animate transition-all duration-700 ease-out text-center mb-16 md:mb-20">
-        <span className="text-xs font-bold tracking-widest text-[#f37021] uppercase">Tính Năng Cốt Lõi</span>
+        <span className="text-xs font-bold tracking-widest text-[#f37021] uppercase">{t('home.featuresSection.subtitle')}</span>
         <h2 className={`text-3xl sm:text-4xl md:text-5xl font-extrabold mt-3 mb-4 tracking-tight transition-colors duration-300 ease-in-out ${isDark ? 'text-white' : 'text-slate-900'}`}>
-          Quản lý thực tập chuyên nghiệp
+          {t('home.featuresSection.title')}
         </h2>
         <p className={`text-sm sm:text-base max-w-xl mx-auto transition-colors duration-300 ease-in-out ${isDark ? 'text-zinc-300' : 'text-slate-600'}`}>
-          Thiết kế giải pháp phù hợp cho tất cả các đối tượng tham gia vào kỳ học doanh nghiệp OJT.
+          {t('home.featuresSection.description')}
         </p>
       </div>
 
@@ -27,10 +30,10 @@ export const FeaturesSection = ({ isDark }: { isDark: boolean }) => (
                 <Icon className="h-5.5 w-5.5" />
               </div>
               <h3 className={`text-lg font-bold mb-3 transition-colors duration-300 ease-in-out ${isDark ? 'text-zinc-100 group-hover:text-white' : 'text-slate-800 group-hover:text-slate-900'}`}>
-                {feat.title}
+                {t(feat.title)}
               </h3>
               <p className={`text-xs sm:text-sm leading-relaxed font-normal transition-colors duration-300 ease-in-out ${isDark ? 'text-zinc-300' : 'text-slate-600'}`}>
-                {feat.desc}
+                {t(feat.desc)}
               </p>
             </div>
           );
@@ -38,4 +41,5 @@ export const FeaturesSection = ({ isDark }: { isDark: boolean }) => (
       </div>
     </div>
   </section>
-);
+  );
+};

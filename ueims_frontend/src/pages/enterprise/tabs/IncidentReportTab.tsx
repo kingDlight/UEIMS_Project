@@ -36,6 +36,7 @@ interface Incident {
   resolutionNote?: string;
   studentName?: string;
   studentCode?: string;
+  studentId?: string;
 }
 
 const CATEGORIES = [
@@ -81,7 +82,7 @@ export const IncidentReportTab: React.FC = () => {
     setLoading(true);
     try {
       const [a, i] = await Promise.allSettled([
-        EnterpriseAssignmentService.getMyEnterprise(),
+        EnterpriseAssignmentService.getMyAssignment(),
         // The Incident service may not have a list-by-enterprise endpoint; we'll fetch all and filter
         IncidentService.getAll().catch(() => ({ data: { result: [] } })),
       ]);

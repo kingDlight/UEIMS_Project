@@ -4,6 +4,7 @@ import { LogoIcon } from '@/components/LogoIcon';
 import React, { useState } from 'react';
 import { Form, Input, Button, message } from 'antd';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Building2, Briefcase, Users, BarChart2, GraduationCap, Smile, UserPlus, FileText, User, Mail, MapPin, Lock, ShieldCheck, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { AuthService } from '@/services/AuthService';
 import {
@@ -24,12 +25,13 @@ const renderPasswordIcon = (visible: boolean) => visible ? <Eye size={12} color=
 
 export const RegisterEnterprisePage: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation('common');
   const [loading, setLoading] = useState(false);
   const [password, setPassword] = useState('');
 
   const onFinish = async (values: any) => {
     if (values.password !== values.confirmPassword) {
-      message.error('Mật khẩu xác nhận không khớp!');
+      message.error(t('auth.registerEnterprise.passwordMismatch'));
       return;
     }
     setLoading(true);
@@ -43,19 +45,19 @@ export const RegisterEnterprisePage: React.FC = () => {
         password: values.password,
         confirmPassword: values.confirmPassword,
       });
-      message.success('Đăng ký thành công! Vui lòng đợi Training Manager phê duyệt.');
+      message.success(t('auth.registerEnterprise.registerSuccess'));
       setTimeout(() => navigate('/login'), 2000);
     } catch (error: any) {
       const msg = error.response?.data?.message;
       const code = error.response?.data?.code;
       if (code === 1035) {
-        message.error('Mã số thuế đã được sử dụng bởi doanh nghiệp khác.');
+        message.error(t('auth.registerEnterprise.taxCodeUsed'));
       } else if (code === 1002) {
-        message.error('Email đã được sử dụng trong hệ thống.');
+        message.error(t('auth.registerEnterprise.emailUsed'));
       } else if (msg) {
         message.error(msg);
       } else {
-        message.error('Đăng ký thất bại. Vui lòng thử lại!');
+        message.error(t('auth.registerEnterprise.registerFail'));
       }
     } finally {
       setLoading(false);
@@ -107,15 +109,15 @@ export const RegisterEnterprisePage: React.FC = () => {
             <LogoIcon style={{ height: 30, width: 'auto' }} />
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               <h1 style={{ fontSize: 12, fontWeight: 800, color: AUTH_PRIMARY, margin: 0, lineHeight: 1.1, letterSpacing: 0.5 }}>UEIMS</h1>
-              <p style={{ fontSize: 5, color: AUTH_TEXT_DARK, textTransform: 'uppercase', fontWeight: 700, margin: '1px 0 0 0' }}>Hệ thống quản lý thực tập sinh<br />và doanh nghiệp</p>
+              <p style={{ fontSize: 5, color: AUTH_TEXT_DARK, textTransform: 'uppercase', fontWeight: 700, margin: '1px 0 0 0' }}>{t('auth.registerEnterprise.systemName')}</p>
             </div>
           </div>
 
           <h2 style={{ fontSize: 16, fontWeight: 800, color: AUTH_TEXT_DARK, lineHeight: 1.3, margin: '0 0 6px 0' }}>
-            Kết nối doanh nghiệp<br />với <span style={{ color: AUTH_PRIMARY }}>sinh viên tài năng</span>
+            {t('auth.registerEnterprise.connect')}<br /><span style={{ color: AUTH_PRIMARY }}>{t('auth.registerEnterprise.talents')}</span>
           </h2>
           <p style={{ fontSize: 10, color: AUTH_TEXT_GRAY, lineHeight: 1.4, margin: '0 0 10px 0', maxWidth: '90%' }}>
-            Đăng ký tài khoản nhà tuyển dụng để tiếp cận nguồn nhân lực chất lượng và quản lý tuyển dụng hiệu quả trên UEIMS.
+            {t('auth.registerEnterprise.desc')}
           </p>
 
           <div style={{ display: 'flex', flex: 1, position: 'relative', alignItems: 'flex-start' }}>
@@ -125,8 +127,8 @@ export const RegisterEnterprisePage: React.FC = () => {
                   <Briefcase size={11} fill={AUTH_PRIMARY} color={AUTH_PRIMARY} />
                 </div>
                 <div>
-                  <h4 style={{ fontSize: 10, fontWeight: 700, color: AUTH_TEXT_DARK, margin: '0 0 1px 0' }}>Đăng tuyển dễ dàng</h4>
-                  <p style={{ fontSize: 8, color: AUTH_TEXT_GRAY, lineHeight: 1.3, margin: 0 }}>Tạo và quản lý tin tuyển dụng chỉ trong vài phút.</p>
+                  <h4 style={{ fontSize: 10, fontWeight: 700, color: AUTH_TEXT_DARK, margin: '0 0 1px 0' }}>{t('auth.registerEnterprise.easyPost')}</h4>
+                  <p style={{ fontSize: 8, color: AUTH_TEXT_GRAY, lineHeight: 1.3, margin: 0 }}>{t('auth.registerEnterprise.easyPostDesc')}</p>
                 </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
@@ -134,8 +136,8 @@ export const RegisterEnterprisePage: React.FC = () => {
                   <Users size={11} fill={AUTH_PRIMARY} color={AUTH_PRIMARY} />
                 </div>
                 <div>
-                  <h4 style={{ fontSize: 10, fontWeight: 700, color: AUTH_TEXT_DARK, margin: '0 0 1px 0' }}>Quản lý ứng viên</h4>
-                  <p style={{ fontSize: 8, color: AUTH_TEXT_GRAY, lineHeight: 1.3, margin: 0 }}>Theo dõi, đánh giá và lựa chọn ứng viên phù hợp.</p>
+                  <h4 style={{ fontSize: 10, fontWeight: 700, color: AUTH_TEXT_DARK, margin: '0 0 1px 0' }}>{t('auth.registerEnterprise.manageCandidates')}</h4>
+                  <p style={{ fontSize: 8, color: AUTH_TEXT_GRAY, lineHeight: 1.3, margin: 0 }}>{t('auth.registerEnterprise.manageCandidatesDesc')}</p>
                 </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
@@ -143,8 +145,8 @@ export const RegisterEnterprisePage: React.FC = () => {
                   <BarChart2 size={11} fill={AUTH_PRIMARY} color={AUTH_PRIMARY} />
                 </div>
                 <div>
-                  <h4 style={{ fontSize: 10, fontWeight: 700, color: AUTH_TEXT_DARK, margin: '0 0 1px 0' }}>Báo cáo & thống kê</h4>
-                  <p style={{ fontSize: 8, color: AUTH_TEXT_GRAY, lineHeight: 1.3, margin: 0 }}>Thống kê chi tiết giúp tối ưu quy trình tuyển dụng.</p>
+                  <h4 style={{ fontSize: 10, fontWeight: 700, color: AUTH_TEXT_DARK, margin: '0 0 1px 0' }}>{t('auth.registerEnterprise.reports')}</h4>
+                  <p style={{ fontSize: 8, color: AUTH_TEXT_GRAY, lineHeight: 1.3, margin: 0 }}>{t('auth.registerEnterprise.reportsDesc')}</p>
                 </div>
               </div>
             </div>
@@ -156,21 +158,21 @@ export const RegisterEnterprisePage: React.FC = () => {
               <Building2 size={14} color={AUTH_WHITE} opacity={0.9} />
               <div>
                 <h3 style={{ fontSize: 12, fontWeight: 800, margin: '0 0 1px 0' }}>500+</h3>
-                <p style={{ fontSize: 7, color: 'rgba(255,255,255,0.8)', lineHeight: 1.2, margin: 0 }}>Doanh nghiệp<br />đối tác</p>
+                <p style={{ fontSize: 7, color: 'rgba(255,255,255,0.8)', lineHeight: 1.2, margin: 0 }}>{t('auth.registerEnterprise.partnerEnterprises')}</p>
               </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <GraduationCap size={14} color={AUTH_WHITE} opacity={0.9} />
               <div>
                 <h3 style={{ fontSize: 12, fontWeight: 800, margin: '0 0 1px 0' }}>3000+</h3>
-                <p style={{ fontSize: 7, color: 'rgba(255,255,255,0.8)', lineHeight: 1.2, margin: 0 }}>Sinh viên<br />đang hoạt động</p>
+                <p style={{ fontSize: 7, color: 'rgba(255,255,255,0.8)', lineHeight: 1.2, margin: 0 }}>{t('auth.registerEnterprise.activeStudents')}</p>
               </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <Smile size={14} color={AUTH_WHITE} opacity={0.9} />
               <div>
                 <h3 style={{ fontSize: 12, fontWeight: 800, margin: '0 0 1px 0' }}>95%</h3>
-                <p style={{ fontSize: 7, color: 'rgba(255,255,255,0.8)', lineHeight: 1.2, margin: 0 }}>Tỷ lệ hài lòng<br />của doanh nghiệp</p>
+                <p style={{ fontSize: 7, color: 'rgba(255,255,255,0.8)', lineHeight: 1.2, margin: 0 }}>{t('auth.registerEnterprise.satisfactionRate')}</p>
               </div>
             </div>
           </div>
@@ -185,8 +187,8 @@ export const RegisterEnterprisePage: React.FC = () => {
                 <UserPlus size={14} />
               </div>
               <div>
-                <h1 style={{ fontSize: 14, fontWeight: 800, color: AUTH_TEXT_DARK, margin: '0 0 2px 0' }}>Đăng ký tài khoản nhà tuyển dụng</h1>
-                <p style={{ fontSize: 9, color: AUTH_TEXT_GRAY, lineHeight: 1.3, margin: 0 }}>Điền đầy đủ thông tin. Tài khoản sẽ được Training Manager phê duyệt trước khi kích hoạt.</p>
+                <h1 style={{ fontSize: 14, fontWeight: 800, color: AUTH_TEXT_DARK, margin: '0 0 2px 0' }}>{t('auth.registerEnterprise.registerAccount')}</h1>
+                <p style={{ fontSize: 9, color: AUTH_TEXT_GRAY, lineHeight: 1.3, margin: 0 }}>{t('auth.registerEnterprise.fillInfo')}</p>
               </div>
             </div>
           </div>
@@ -196,13 +198,13 @@ export const RegisterEnterprisePage: React.FC = () => {
 
               <Form.Item
                 name="enterpriseName"
-                label={<span style={{ fontSize: 10, fontWeight: 700, color: AUTH_TEXT_DARK }}>Tên doanh nghiệp <span style={{ color: AUTH_DANGER }}>*</span></span>}
-                rules={[{ required: true, message: 'Vui lòng nhập tên doanh nghiệp!' }]}
+                label={<span style={{ fontSize: 10, fontWeight: 700, color: AUTH_TEXT_DARK }}>{t('auth.registerEnterprise.enterpriseName')} <span style={{ color: AUTH_DANGER }}>*</span></span>}
+                rules={[{ required: true, message: t('auth.registerEnterprise.enterpriseNameReq') }]}
                 className="regis-span2"
                 style={{ gridColumn: 'span 2', marginBottom: 6 }}
               >
                 <Input
-                  placeholder="Nhập tên doanh nghiệp"
+                  placeholder={t('auth.registerEnterprise.enterpriseNamePlaceholder')}
                   prefix={<Building2 size={12} color="#94A3B8" style={{ marginRight: 5 }} />}
                   style={{ borderRadius: 5, border: `1px solid ${AUTH_BORDER}`, padding: '5px 8px', fontSize: 11 }}
                 />
@@ -210,12 +212,12 @@ export const RegisterEnterprisePage: React.FC = () => {
 
               <Form.Item
                 name="taxCode"
-                label={<span style={{ fontSize: 10, fontWeight: 700, color: AUTH_TEXT_DARK }}>Mã số thuế <span style={{ color: AUTH_DANGER }}>*</span></span>}
-                rules={[{ required: true, message: 'Vui lòng nhập mã số thuế!' }]}
+                label={<span style={{ fontSize: 10, fontWeight: 700, color: AUTH_TEXT_DARK }}>{t('auth.registerEnterprise.taxCode')} <span style={{ color: AUTH_DANGER }}>*</span></span>}
+                rules={[{ required: true, message: t('auth.registerEnterprise.taxCodeReq') }]}
                 style={{ marginBottom: 6 }}
               >
                 <Input
-                  placeholder="Nhập mã số thuế"
+                  placeholder={t('auth.registerEnterprise.taxCodePlaceholder')}
                   prefix={<FileText size={12} color="#94A3B8" style={{ marginRight: 5 }} />}
                   style={{ borderRadius: 5, border: `1px solid ${AUTH_BORDER}`, padding: '5px 8px', fontSize: 11 }}
                 />
@@ -223,12 +225,12 @@ export const RegisterEnterprisePage: React.FC = () => {
 
               <Form.Item
                 name="contactPerson"
-                label={<span style={{ fontSize: 10, fontWeight: 700, color: AUTH_TEXT_DARK }}>Người đại diện <span style={{ color: AUTH_DANGER }}>*</span></span>}
-                rules={[{ required: true, message: 'Vui lòng nhập tên người đại diện!' }]}
+                label={<span style={{ fontSize: 10, fontWeight: 700, color: AUTH_TEXT_DARK }}>{t('auth.registerEnterprise.contactPerson')} <span style={{ color: AUTH_DANGER }}>*</span></span>}
+                rules={[{ required: true, message: t('auth.registerEnterprise.contactPersonReq') }]}
                 style={{ marginBottom: 6 }}
               >
                 <Input
-                  placeholder="Nhập họ và tên"
+                  placeholder={t('auth.registerEnterprise.contactPersonPlaceholder')}
                   prefix={<User size={12} color="#94A3B8" style={{ marginRight: 5 }} />}
                   style={{ borderRadius: 5, border: `1px solid ${AUTH_BORDER}`, padding: '5px 8px', fontSize: 11 }}
                 />
@@ -236,8 +238,8 @@ export const RegisterEnterprisePage: React.FC = () => {
 
               <Form.Item
                 name="email"
-                label={<span style={{ fontSize: 10, fontWeight: 700, color: AUTH_TEXT_DARK }}>Email <span style={{ color: AUTH_DANGER }}>*</span></span>}
-                rules={[{ required: true, message: 'Vui lòng nhập email!' }, { type: 'email', message: 'Email không hợp lệ!' }]}
+                label={<span style={{ fontSize: 10, fontWeight: 700, color: AUTH_TEXT_DARK }}>{t('auth.registerEnterprise.email')} <span style={{ color: AUTH_DANGER }}>*</span></span>}
+                rules={[{ required: true, message: t('auth.registerEnterprise.emailReq') }, { type: 'email', message: t('auth.emailInvalid') }]}
                 className="regis-span2"
                 style={{ gridColumn: 'span 2', marginBottom: 6 }}
               >
@@ -250,13 +252,13 @@ export const RegisterEnterprisePage: React.FC = () => {
 
               <Form.Item
                 name="address"
-                label={<span style={{ fontSize: 10, fontWeight: 700, color: AUTH_TEXT_DARK }}>Địa chỉ trụ sở <span style={{ color: AUTH_DANGER }}>*</span></span>}
-                rules={[{ required: true, message: 'Vui lòng nhập địa chỉ trụ sở công ty!' }]}
+                label={<span style={{ fontSize: 10, fontWeight: 700, color: AUTH_TEXT_DARK }}>{t('auth.registerEnterprise.address')} <span style={{ color: AUTH_DANGER }}>*</span></span>}
+                rules={[{ required: true, message: t('auth.registerEnterprise.addressReq') }]}
                 className="regis-span2"
                 style={{ gridColumn: 'span 2', marginBottom: 6 }}
               >
                 <Input
-                  placeholder="Nhập địa chỉ trụ sở công ty"
+                  placeholder={t('auth.registerEnterprise.addressPlaceholder')}
                   prefix={<MapPin size={12} color="#94A3B8" style={{ marginRight: 5 }} />}
                   style={{ borderRadius: 5, border: `1px solid ${AUTH_BORDER}`, padding: '5px 8px', fontSize: 11 }}
                 />
@@ -264,12 +266,12 @@ export const RegisterEnterprisePage: React.FC = () => {
 
               <Form.Item
                 name="password"
-                label={<span style={{ fontSize: 10, fontWeight: 700, color: AUTH_TEXT_DARK }}>Mật khẩu <span style={{ color: AUTH_DANGER }}>*</span></span>}
-                rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
+                label={<span style={{ fontSize: 10, fontWeight: 700, color: AUTH_TEXT_DARK }}>{t('auth.registerEnterprise.password')} <span style={{ color: AUTH_DANGER }}>*</span></span>}
+                rules={[{ required: true, message: t('auth.registerEnterprise.passwordReq') }]}
                 style={{ marginBottom: 6 }}
               >
                 <Input.Password
-                  placeholder="Nhập mật khẩu"
+                  placeholder={t('auth.registerEnterprise.passwordPlaceholder')}
                   prefix={<Lock size={12} color="#94A3B8" style={{ marginRight: 5 }} />}
                   iconRender={renderPasswordIcon}
                   onChange={(e) => setPassword(e.target.value)}
@@ -279,12 +281,12 @@ export const RegisterEnterprisePage: React.FC = () => {
 
               <Form.Item
                 name="confirmPassword"
-                label={<span style={{ fontSize: 10, fontWeight: 700, color: AUTH_TEXT_DARK }}>Xác nhận mật khẩu <span style={{ color: AUTH_DANGER }}>*</span></span>}
-                rules={[{ required: true, message: 'Vui lòng nhập lại mật khẩu!' }]}
+                label={<span style={{ fontSize: 10, fontWeight: 700, color: AUTH_TEXT_DARK }}>{t('auth.registerEnterprise.confirmPassword')} <span style={{ color: AUTH_DANGER }}>*</span></span>}
+                rules={[{ required: true, message: t('auth.registerEnterprise.confirmPasswordReq') }]}
                 style={{ marginBottom: 6 }}
               >
                 <Input.Password
-                  placeholder="Nhập lại mật khẩu"
+                  placeholder={t('auth.registerEnterprise.confirmPasswordPlaceholder')}
                   prefix={<Lock size={12} color="#94A3B8" style={{ marginRight: 5 }} />}
                   iconRender={renderPasswordIcon}
                   style={{ borderRadius: 5, border: `1px solid ${AUTH_BORDER}`, padding: '5px 8px', fontSize: 11 }}
@@ -299,8 +301,8 @@ export const RegisterEnterprisePage: React.FC = () => {
                 <ShieldCheck size={10} fill={AUTH_WHITE} color={AUTH_PRIMARY} />
               </div>
               <div>
-                <strong style={{ display: 'block', color: AUTH_TEXT_DARK, fontSize: 10, margin: '0 0 1px 0' }}>Thông tin của bạn được bảo mật tuyệt đối</strong>
-                <p style={{ color: AUTH_TEXT_GRAY, fontSize: 9, lineHeight: 1.3, margin: 0 }}>UEIMS cam kết bảo vệ thông tin doanh nghiệp của bạn theo chính sách bảo mật.</p>
+                <strong style={{ display: 'block', color: AUTH_TEXT_DARK, fontSize: 10, margin: '0 0 1px 0' }}>{t('auth.registerEnterprise.securedInfo')}</strong>
+                <p style={{ color: AUTH_TEXT_GRAY, fontSize: 9, lineHeight: 1.3, margin: 0 }}>{t('auth.registerEnterprise.securedInfoDesc')}</p>
               </div>
             </div>
 
@@ -324,7 +326,7 @@ export const RegisterEnterprisePage: React.FC = () => {
               }}
             >
               <UserPlus size={14} />
-              Đăng ký tài khoản
+              {t('auth.registerEnterprise.registerBtn')}
             </Button>
           </Form>
 
@@ -347,7 +349,7 @@ export const RegisterEnterprisePage: React.FC = () => {
             onMouseLeave={(e) => { e.currentTarget.style.color = AUTH_TEXT_GRAY; }}
           >
             <ArrowLeft size={16} />
-            Quay lại đăng nhập
+            {t('auth.registerEnterprise.backToLogin')}
           </button>
         </div>
       </div>

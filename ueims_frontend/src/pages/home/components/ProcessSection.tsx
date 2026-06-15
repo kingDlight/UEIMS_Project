@@ -1,18 +1,21 @@
 import React from 'react';
 import { steps } from '../constants';
+import { useTranslation } from 'react-i18next';
 
-export const ProcessSection = ({ isDark }: { isDark: boolean }) => (
+export const ProcessSection = ({ isDark }: { isDark: boolean }) => {
+  const { t } = useTranslation();
+  return (
   <section id="process" className={`py-20 md:py-28 px-6 md:px-12 relative z-10 border-b scroll-mt-20 transition-colors duration-300 ease-in-out ${isDark ? 'border-zinc-900' : 'border-slate-200'}`}>
     <div
       className="max-w-6xl mx-auto"
     >
       <div className="scroll-animate transition-all duration-700 ease-out text-center mb-16 md:mb-20">
-        <span className="text-xs font-bold tracking-widest text-blue-500 uppercase">Quy Trình Hoạt Động</span>
+        <span className="text-xs font-bold tracking-widest text-blue-500 uppercase">{t('home.processSection.subtitle')}</span>
         <h2 className={`text-3xl sm:text-4xl md:text-5xl font-extrabold mt-3 mb-4 tracking-tight transition-colors duration-300 ease-in-out ${isDark ? 'text-white' : 'text-slate-900'}`}>
-          Bốn bước khép kín thông minh
+          {t('home.processSection.title')}
         </h2>
         <p className={`text-sm sm:text-base max-w-xl mx-auto transition-colors duration-300 ease-in-out ${isDark ? 'text-zinc-300' : 'text-slate-600'}`}>
-          Vận hành đồng bộ nhịp nhàng giữa Nhà trường - Sinh viên - Doanh nghiệp.
+          {t('home.processSection.description')}
         </p>
       </div>
 
@@ -23,11 +26,12 @@ export const ProcessSection = ({ isDark }: { isDark: boolean }) => (
             <div className="text-3xl font-extrabold text-[#f37021]/40 group-hover:text-[#f37021]/70 mb-4 transition-colors">
               {step.num}
             </div>
-            <h3 className={`text-sm font-bold mb-2 transition-colors duration-300 ease-in-out ${isDark ? 'text-zinc-200' : 'text-slate-800'}`}>{step.title}</h3>
-            <p className={`text-xs leading-relaxed transition-colors duration-300 ease-in-out ${isDark ? 'text-zinc-300' : 'text-slate-600'}`}>{step.desc}</p>
+            <h3 className={`text-sm font-bold mb-2 transition-colors duration-300 ease-in-out ${isDark ? 'text-zinc-200' : 'text-slate-800'}`}>{t(step.title)}</h3>
+            <p className={`text-xs leading-relaxed transition-colors duration-300 ease-in-out ${isDark ? 'text-zinc-300' : 'text-slate-600'}`}>{t(step.desc)}</p>
           </div>
         ))}
       </div>
     </div>
   </section>
-);
+  );
+};

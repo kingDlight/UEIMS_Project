@@ -60,14 +60,223 @@
     "accountLocked": "Tài khoản bị khóa do nhập sai mật khẩu 5 lần. Vui lòng thử lại sau 30 phút.",
     "authFailed": "Xác thực thất bại. Vui lòng kiểm tra lại thông tin đăng nhập.",
     "accountNotFound": "Tài khoản không tồn tại trong hệ thống.",
+    "systemSubtitleLine1": "Hệ thống quản lý thực tập sinh",
+    "systemSubtitleLine2": "và doanh nghiệp",
     "googleLoginSuccess": "Đăng nhập với Google thành công!",
     "googleLoginFail": "Đăng nhập với Google thất bại. Vui lòng thử lại!",
-    "backToHome": "Quay về trang chủ"
+    "backToHome": "Quay về trang chủ",
+    "registerEnterprise": {
+      "passwordMismatch": "Mật khẩu xác nhận không khớp!",
+      "registerSuccess": "Đăng ký thành công! Vui lòng đợi Training Manager phê duyệt.",
+      "taxCodeUsed": "Mã số thuế đã được sử dụng bởi doanh nghiệp khác.",
+      "emailUsed": "Email đã được sử dụng trong hệ thống.",
+      "registerFail": "Đăng ký thất bại. Vui lòng thử lại!",
+      "systemName": "Hệ thống quản lý thực tập sinh và doanh nghiệp",
+      "connect": "Kết nối doanh nghiệp với",
+      "talents": "sinh viên tài năng",
+      "desc": "Đăng ký tài khoản nhà tuyển dụng để tiếp cận nguồn nhân lực chất lượng và quản lý tuyển dụng hiệu quả trên UEIMS.",
+      "easyPost": "Đăng tuyển dễ dàng",
+      "easyPostDesc": "Tạo và quản lý tin tuyển dụng chỉ trong vài phút.",
+      "manageCandidates": "Quản lý ứng viên",
+      "manageCandidatesDesc": "Theo dõi, đánh giá và lựa chọn ứng viên phù hợp.",
+      "reports": "Báo cáo & thống kê",
+      "reportsDesc": "Thống kê chi tiết giúp tối ưu quy trình tuyển dụng.",
+      "partnerEnterprises": "Doanh nghiệp đối tác",
+      "activeStudents": "Sinh viên đang hoạt động",
+      "satisfactionRate": "Tỷ lệ hài lòng của doanh nghiệp",
+      "registerAccount": "Đăng ký tài khoản nhà tuyển dụng",
+      "fillInfo": "Điền đầy đủ thông tin. Tài khoản sẽ được Training Manager phê duyệt trước khi kích hoạt.",
+      "enterpriseName": "Tên doanh nghiệp",
+      "enterpriseNamePlaceholder": "Nhập tên doanh nghiệp",
+      "enterpriseNameReq": "Vui lòng nhập tên doanh nghiệp!",
+      "taxCode": "Mã số thuế",
+      "taxCodePlaceholder": "Nhập mã số thuế",
+      "taxCodeReq": "Vui lòng nhập mã số thuế!",
+      "contactPerson": "Người đại diện",
+      "contactPersonPlaceholder": "Nhập họ và tên",
+      "contactPersonReq": "Vui lòng nhập tên người đại diện!",
+      "email": "Email",
+      "emailReq": "Vui lòng nhập email!",
+      "address": "Địa chỉ trụ sở",
+      "addressPlaceholder": "Nhập địa chỉ trụ sở công ty",
+      "addressReq": "Vui lòng nhập địa chỉ trụ sở công ty!",
+      "password": "Mật khẩu",
+      "passwordPlaceholder": "Nhập mật khẩu",
+      "passwordReq": "Vui lòng nhập mật khẩu!",
+      "confirmPassword": "Xác nhận mật khẩu",
+      "confirmPasswordPlaceholder": "Nhập lại mật khẩu",
+      "confirmPasswordReq": "Vui lòng nhập lại mật khẩu!",
+      "securedInfo": "Thông tin của bạn được bảo mật tuyệt đối",
+      "securedInfoDesc": "UEIMS cam kết bảo vệ thông tin doanh nghiệp của bạn theo chính sách bảo mật.",
+      "registerBtn": "Đăng ký tài khoản",
+      "backToLogin": "Quay lại đăng nhập"
+    },
+    "noRole": {
+      "title": "Tài khoản chưa được phân quyền",
+      "description": "Tài khoản của bạn hiện chưa được gán bất kỳ vai trò nào trong hệ thống. Vui lòng liên hệ với quản trị viên để được cấp quyền truy cập.",
+      "logout": "Đăng xuất"
+    },
+    "forgotPasswordPage": {
+      "checkEmailSuccess": "Vui lòng kiểm tra email để đặt lại mật khẩu!",
+      "requestFailed": "Gửi yêu cầu thất bại. Vui lòng thử lại!",
+      "title": "Bảo mật tài khoản của bạn",
+      "description": "Chúng tôi sẽ gửi liên kết khôi phục mật khẩu đến email đã đăng ký trong hệ thống.",
+      "forgotTitle": "Quên mật khẩu?",
+      "forgotDescLine1": "Nhập email đã đăng ký. Chúng tôi sẽ gửi link khôi phục",
+      "forgotDescLine2": "mật khẩu đến hộp thư của bạn.",
+      "emailRequired": "Vui lòng nhập email!",
+      "rememberPassword": "Nhớ mật khẩu?",
+      "sendLinkBtn": "Gửi Link Khôi Phục",
+      "noteTitle": "Lưu ý",
+      "noteDesc": "Link khôi phục sẽ hết hạn sau <strong>2 giờ</strong>. Nếu không nhận được email, hãy kiểm tra thư mục Spam hoặc liên hệ Training Manager."
+    },
+    "resetPasswordPage": {
+      "invalidToken": "Token không hợp lệ. Vui lòng yêu cầu gửi lại link khôi phục.",
+      "weakPassword": "Mật khẩu chưa đủ mạnh. Vui lòng kiểm tra lại!",
+      "passwordMismatch": "Mật khẩu xác nhận không khớp!",
+      "success": "Đặt lại mật khẩu thành công!",
+      "failed": "Đặt lại mật khẩu thất bại. Link có thể đã hết hạn.",
+      "newPasswordHighlight": "mật khẩu mới",
+      "description": "Tạo mật khẩu mới an toàn cho tài khoản của bạn. Đảm bảo mật khẩu đáp ứng đủ độ mạnh để bảo vệ dữ liệu.",
+      "title": "Đặt lại mật khẩu",
+      "subtitle": "Vui lòng nhập mật khẩu mới bên dưới.",
+      "newPasswordLabel": "Mật khẩu mới",
+      "newPasswordRequired": "Vui lòng nhập mật khẩu mới!",
+      "confirmPasswordLabel": "Xác nhận mật khẩu mới",
+      "confirmPasswordRequired": "Vui lòng xác nhận mật khẩu!",
+      "confirmPasswordPlaceholder": "Nhập lại mật khẩu mới",
+      "submitBtn": "Đặt lại mật khẩu"
+    }
   },
   "home": {
     "login": "Đăng nhập",
     "enterSystem": "Vào hệ thống",
-    "dashboard": "Vào bảng điều khiển"
+    "dashboard": "Vào bảng điều khiển",
+    "hero": {
+      "ojtFpt": "OJT - Đại học FPT",
+      "title1": "Chuyển Đổi Số Toàn Diện",
+      "title2": "Quy Trình Thực Tập OJT",
+      "description": "Đơn giản hóa việc kết nối Doanh nghiệp, quản lý hồ sơ sinh viên, sắp xếp phỏng vấn và đánh giá điểm năng lực bằng hệ thống số hóa thông minh, minh bạch.",
+      "startNow": "Bắt đầu ngay",
+      "learnFeatures": "Tìm hiểu tính năng"
+    },
+    "nav": {
+      "about": "Giới thiệu",
+      "features": "Tính năng",
+      "process": "Quy trình OJT",
+      "partner": "Doanh nghiệp"
+    },
+    "stats": {
+      "interns": "Sinh viên thực tập",
+      "enterprises": "Doanh nghiệp liên kết",
+      "completion": "Tỷ lệ hoàn thành OJT",
+      "satisfaction": "Đánh giá hài lòng"
+    },
+    "features": {
+      "f1": {
+        "title": "Quản lý Kỳ OJT Linh hoạt",
+        "desc": "Tự động tạo kỳ thực tập, thiết lập tiêu chí đánh giá, kết quả đầu ra và điều hành toàn bộ tiến độ sinh viên một cách có hệ thống."
+      },
+      "f2": {
+        "title": "Hợp tác Doanh nghiệp 3.0",
+        "desc": "Nhà tuyển dụng trực tiếp phê duyệt hồ sơ, đăng tin tuyển dụng, và phản hồi chất lượng đào tạo chỉ trên một cổng duy nhất."
+      },
+      "f3": {
+        "title": "Báo cáo & Đánh giá Rubric",
+        "desc": "Sinh viên báo cáo hàng tuần và được Mentor doanh nghiệp, Giảng viên chấm điểm bằng thang đo Rubric chuẩn hóa, minh bạch."
+      },
+      "f4": {
+        "title": "Phân quyền Role-based (RBAC)",
+        "desc": "Bảo mật thông tin tối đa với cơ chế phân quyền chi tiết cho 6 đối tượng: Admin, Training Manager, Enterprise, Mentor, Lecturer, Student."
+      },
+      "f5": {
+        "title": "Đặt lịch Phỏng vấn Tự động",
+        "desc": "Hệ thống tự động phát hiện trùng lịch, sắp xếp phòng phỏng vấn trực tiếp giữa Doanh nghiệp và Sinh viên, gửi email nhắc lịch tức thì."
+      },
+      "f6": {
+        "title": "Dashboard Thống kê Realtime",
+        "desc": "Trực quan hóa dữ liệu OJT với biểu đồ trực tuyến về tình trạng sinh viên, đánh giá kỹ năng mềm và phân bổ địa điểm thực tập."
+      }
+    },
+    "steps": {
+      "s1": {
+        "title": "Chuẩn bị OJT",
+        "desc": "Nhà trường mở kỳ OJT mới, import thông tin sinh viên đủ điều kiện và thiết lập các tiêu chí chuẩn hóa."
+      },
+      "s2": {
+        "title": "Tuyển dụng & Phỏng vấn",
+        "desc": "Doanh nghiệp đăng tin tuyển dụng. Sinh viên nộp CV trực tuyến và đặt lịch phỏng vấn thông qua hệ thống."
+      },
+      "s3": {
+        "title": "Thực tập & Báo cáo",
+        "desc": "Sinh viên làm việc tại doanh nghiệp, gửi báo cáo tuần. Mentor doanh nghiệp theo dõi, hướng dẫn và ký duyệt."
+      },
+      "s4": {
+        "title": "Đánh giá & Tổng kết",
+        "desc": "Doanh nghiệp chấm điểm đánh giá. Giảng viên chấm báo cáo cuối kỳ. Hệ thống tổng hợp điểm số và xuất file Excel."
+      }
+    },
+    "featuresSection": {
+      "subtitle": "Tính Năng Cốt Lõi",
+      "title": "Quản lý thực tập chuyên nghiệp",
+      "description": "Thiết kế giải pháp phù hợp cho tất cả các đối tượng tham gia vào kỳ học doanh nghiệp OJT."
+    },
+    "ctaSection": {
+      "titleLine1": "Bắt đầu số hóa hành trình",
+      "titleLine2": "quản lý OJT",
+      "titleLine3": "ngay hôm nay",
+      "description": "Hợp tác bền vững, theo dõi liền mạch, quản lý hiệu quả. Trải nghiệm hệ thống quản lý thực tập tốt nhất.",
+      "loginBtn": "Đăng nhập hệ thống"
+    },
+    "processSection": {
+      "subtitle": "Quy Trình Hoạt Động",
+      "title": "Bốn bước khép kín thông minh",
+      "description": "Vận hành đồng bộ nhịp nhàng giữa Nhà trường - Sinh viên - Doanh nghiệp."
+    },
+    "aboutSection": {
+      "subtitle": "Giới thiệu",
+      "title": "Cầu nối hiện đại giữa Giảng đường & Doanh nghiệp",
+      "p1": "Hệ thống Quản lý Thực tập Doanh nghiệp (UEIMS) là nền tảng số hóa tối ưu được xây dựng nhằm phục vụ kỳ thực tập doanh nghiệp (On-the-Job Training) tại Trường Đại học FPT Đà Nẵng.",
+      "p2": "Chúng tôi loại bỏ hoàn toàn các rào cản hành chính thủ công, kết nối trực tiếp nhà trường, sinh viên và nhà tuyển dụng để cùng kiến tạo những trải nghiệm học tập thực tế chất lượng nhất.",
+      "items": {
+        "i1": {
+          "title": "Số hóa 100%",
+          "desc": "Toàn bộ biểu mẫu báo cáo, phê duyệt CV và chấm điểm Rubric được thực hiện trực tuyến hoàn toàn."
+        },
+        "i2": {
+          "title": "Đồng bộ Đa bên",
+          "desc": "Cập nhật thông tin tức thời giữa Sinh viên, Giảng viên Hướng dẫn và Doanh nghiệp đối tác."
+        },
+        "i3": {
+          "title": "Tuyển dụng Trực tiếp",
+          "desc": "Doanh nghiệp đăng tin tuyển dụng OJT và chủ động lọc hồ sơ, xếp lịch phỏng vấn nhanh gọn."
+        },
+        "i4": {
+          "title": "Thống kê Minh bạch",
+          "desc": "Theo dõi trực quan tiến độ và xuất dữ liệu báo cáo OJT đầy đủ chuẩn xác chỉ với một cú click."
+        }
+      }
+    },
+    "partnerSection": {
+      "tag": "Dành cho Doanh nghiệp",
+      "title": "Đồng hành cùng nguồn nhân lực chất lượng cao",
+      "description": "Đăng ký hợp tác ngay để tiếp cận hàng nghìn sinh viên công nghệ, quản trị và thiết kế năng động của Đại học FPT, đồng thời số hóa hoạt động tiếp nhận thực tập sinh một cách nhanh chóng.",
+      "registerBtn": "Đăng ký tài khoản Doanh nghiệp",
+      "supportBtn": "Hỗ trợ & Liên hệ OJT"
+    },
+    "footer": {
+      "description": "University-Enterprise Internship Management System. Nền tảng quản trị thông minh đồng hành cùng nhà trường và doanh nghiệp trong từng kỳ OJT của sinh viên.",
+      "system": "Hệ Thống",
+      "roles": "Vai Trò",
+      "development": "Phát Triển",
+      "roleEnterprise": "Doanh nghiệp",
+      "roleStudent": "Sinh viên",
+      "roleManager": "Giảng viên / Quản lý",
+      "fpt": "Đại học FPT",
+      "group": "Nhóm 7 - SE20A05",
+      "copyright": "© 2026 UEIMS. Bản quyền thuộc về Nhóm 7 - Trường Đại học FPT Đà Nẵng.",
+      "subtitle": "Chương trình thực tập Doanh nghiệp (On-the-Job Training)"
+    }
   },
   "nav": {
     "dashboard": "Bảng Điều Khiển",
@@ -110,5 +319,80 @@
     "statusUpdates": "Cập nhật trạng thái ứng tuyển",
     "phoneUpdated": "Cập nhật số điện thoại thành công!",
     "phoneUpdateFailed": "Cập nhật số điện thoại thất bại!"
+  },
+  "studentsTab": {
+    "studentManagement": "Quản lý sinh viên",
+    "studentManagementDesc": "Quản lý và theo dõi tất cả sinh viên qua các kỳ học",
+    "totalStudents": "Tổng sinh viên",
+    "eligibleStudents": "SV đủ điều kiện",
+    "searchPlaceholder": "Tìm theo Tên hoặc MSSV...",
+    "importSuccess": "Import thành công!",
+    "importError": "Lỗi khi import Excel.",
+    "exportSuccess": "Xuất file thành công!",
+    "exportError": "Lỗi khi xuất file.",
+    "showingStudents": "Đang hiển thị {{start}}-{{end}} trong tổng số {{total}} sinh viên",
+    "studentId": "MSSV",
+    "fullName": "Họ và tên",
+    "major": "Chuyên ngành",
+    "semesterShort": "Học kỳ",
+    "gpa": "Điểm trung bình",
+    "ojtStatus": "Trạng thái OJT",
+    "viewDetails": "Xem chi tiết",
+    "edit": "Chỉnh sửa",
+    "emailAddress": "Địa chỉ Email",
+    "currentSemester": "Học kỳ hiện tại",
+    "cumulativeGpa": "GPA tích lũy",
+    "cancel": "Hủy",
+    "editStudent": "Sửa thông tin SV",
+    "note": "Lưu ý:",
+    "majors": {
+      "allMajors": "Tất cả chuyên ngành",
+      "computerScience": "Khoa học máy tính",
+      "softwareEngineering": "Kỹ thuật phần mềm",
+      "informationAssurance": "An toàn thông tin",
+      "artificialIntelligence": "Trí tuệ nhân tạo"
+    },
+    "semesters": {
+      "allAcademicSem": "Tất cả học kỳ",
+      "sem1_4": "Kỳ 1-4",
+      "sem5Eligible": "Kỳ 5 - Đủ điều kiện",
+      "sem6InOjt": "Kỳ 6 - Đang OJT",
+      "sem7_9Completed": "Kỳ 7-9 - Đã hoàn thành"
+    },
+    "ojtStatuses": {
+      "preRegistration": "Chưa đến kỳ",
+      "preRegistrationDesc": "Chưa thể đăng ký OJT — học kỳ dưới mức yêu cầu",
+      "eligible": "Đủ điều kiện",
+      "eligibleDesc": "Đạt mọi tiêu chí OJT — sẵn sàng đăng ký thực tập",
+      "inOjt": "Đang OJT",
+      "inOjtDesc": "Đang trong kỳ OJT — thực tập đang diễn ra",
+      "completed": "Đã hoàn thành",
+      "completedDesc": "OJT hoàn tất — đủ điều kiện xem kết quả"
+    }
+  },
+  "dev": {
+    "emailPreview": {
+      "enterpriseManagement": "Quản lý thực tập doanh nghiệp",
+      "compose": "Soạn thư",
+      "inbox": "Hộp thư đến",
+      "sent": "Đã gửi",
+      "drafts": "Thư nháp",
+      "to": "Đến",
+      "copied": "Đã sao chép!",
+      "copyHtml": "Sao chép HTML",
+      "mockDataEditor": "Trình chỉnh sửa dữ liệu mẫu",
+      "resetPasswordLabel": "Đặt lại mật khẩu (EN)",
+      "resetSubject": "Đặt lại mật khẩu — UEIMS",
+      "resetPreview": "Bạn đã yêu cầu đặt lại mật khẩu cho tài khoản UEIMS của mình...",
+      "passwordResetLabel": "Đặt lại mật khẩu (VI)",
+      "passwordResetSubject": "Yêu cầu đặt lại mật khẩu — UEIMS",
+      "passwordResetPreview": "Bạn đã yêu cầu đặt lại mật khẩu cho tài khoản UEIMS của bạn...",
+      "passwordChangedLabel": "Mật khẩu đã đổi (VI)",
+      "passwordChangedSubject": "Mật khẩu đã được thay đổi — UEIMS",
+      "passwordChangedPreview": "Mật khẩu tài khoản UEIMS của bạn đã được thay đổi thành công...",
+      "welcomeLabel": "Chào mừng (VI)",
+      "welcomeSubject": "Chào mừng bạn đến với UEIMS",
+      "welcomePreview": "Tài khoản UEIMS của bạn đã được tạo. Vui lòng đăng nhập..."
+    }
   }
 }
