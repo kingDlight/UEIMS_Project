@@ -28,6 +28,7 @@ export const LoginPage: React.FC = () => {
   const user = useAuthStore((state) => state.user);
 
   const getRedirectPath = (roles: string[]): string => {
+    _log('getRedirectPath input', { roles, hasAdmin: roles.includes('ADMIN'), hasStudent: roles.includes('STUDENT'), hasEnterprise: roles.includes('ENTERPRISE') });
     if (!roles || roles.length === 0) return '/no-role';
     if (roles.includes('ADMIN')) return '/admin/dashboard';
     if (roles.includes('STUDENT')) return '/student/dashboard';
@@ -57,6 +58,7 @@ export const LoginPage: React.FC = () => {
         deviceId: getDeviceId(),
       });
 
+      _log('Login API response', { mustChangePassword: result.mustChangePassword, hasToken: !!result.token, tokenPreview: result.token?.slice(0, 30) });
       if (result.mustChangePassword) {
         loginWithTokens(result.token, result.refreshToken);
         message.warning(t('auth.mustChangePassword', 'You must change your password before continuing!'));
