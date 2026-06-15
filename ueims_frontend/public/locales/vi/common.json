@@ -266,14 +266,16 @@
     },
     "footer": {
       "description": "University-Enterprise Internship Management System. Nền tảng quản trị thông minh đồng hành cùng nhà trường và doanh nghiệp trong từng kỳ OJT của sinh viên.",
-      "system": "Hệ Thống",
-      "roles": "Vai Trò",
-      "development": "Phát Triển",
+      "system": "Khám Phá",
+      "roles": "Dành Cho",
+      "development": "Liên Hệ",
       "roleEnterprise": "Doanh nghiệp",
       "roleStudent": "Sinh viên",
       "roleManager": "Giảng viên / Quản lý",
-      "fpt": "Đại học FPT",
-      "group": "Nhóm 7 - SE20A05",
+      "fpt": "Đại học FPT Đà Nẵng",
+      "address": "Khu đô thị FPT City, TP. Đà Nẵng",
+      "email": "ojt.support@fe.edu.vn",
+      "phone": "(0236) 7300 999",
       "copyright": "© 2026 UEIMS. Bản quyền thuộc về Nhóm 7 - Trường Đại học FPT Đà Nẵng.",
       "subtitle": "Chương trình thực tập Doanh nghiệp (On-the-Job Training)"
     }
