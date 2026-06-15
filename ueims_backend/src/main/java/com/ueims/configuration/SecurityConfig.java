@@ -84,12 +84,18 @@ public class SecurityConfig {
         DefaultBearerTokenResolver delegate = new DefaultBearerTokenResolver();
         AntPathMatcher matcher = new AntPathMatcher();
         List<String> publicPaths = Arrays.asList(PUBLIC_ENDPOINTS);
+        List<String> publicGetPaths = Arrays.asList(PUBLIC_GET_ENDPOINTS);
 
         return (request) -> {
             String path = request.getRequestURI();
+            String method = request.getMethod();
+
             // Skip token extraction for public endpoints
-            boolean isPublic = publicPaths.stream().anyMatch(p -> matcher.match(p, path));
-            if (isPublic) {
+            boolean isPublicPost = "POST".equalsIgnoreCase(method) && publicPaths.stream().anyMatch(p -> matcher.match(p, path));
+            boolean isPublicGet = "GET".equalsIgnoreCase(method) && publicGetPaths.stream().anyMatch(p -> matcher.match(p, path));
+            boolean isPublicLogin = "GET".equalsIgnoreCase(method) && "/google-login-test.html".equals(path);
+
+            if (isPublicPost || isPublicGet || isPublicLogin) {
                 return null; // No token → no JWT validation → request flows to permitAll
             }
             return delegate.resolve(request);
