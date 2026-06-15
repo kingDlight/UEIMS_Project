@@ -152,7 +152,7 @@ public class EnterpriseEvaluationServiceImpl implements EnterpriseEvaluationServ
         boolean isStaff = currentUser.getRoles().stream()
                 .anyMatch(r -> r.getRole().getRoleName().equals("TRAINING_MANAGER")
                         || r.getRole().getRoleName().equals("SYSTEM_ADMIN")
-                        || role.getRole().getRoleName().equals("ADMIN"));
+                        || r.getRole().getRoleName().equals("ADMIN"));
         if (isStaff) return;
 
         // 2. Nếu là ENTERPRISE -> Phải là doanh nghiệp đã chấm điểm
