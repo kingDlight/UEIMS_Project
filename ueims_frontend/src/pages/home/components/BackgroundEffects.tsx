@@ -9,7 +9,7 @@ export const BackgroundEffects = ({ isDark }: { isDark: boolean }) => (
       isDark ? 'rounded-full' : 'animate-morph'
     }`} style={{ background: '#00aeff21', willChange: 'transform', animationDelay: '5s' }}></div>
 
-    <div className={`fixed top-12 right-12 w-[400px] h-[250px] pointer-events-none z-0 rounded-2xl ${isDark ? 'bg-slate-800/20' : 'bg-white/20'} backdrop-blur-md border ${isDark ? 'border-slate-700/50' : 'border-white/50'}`} style={{ 
+    <div className={`fixed top-16 right-12 w-[400px] h-[250px] pointer-events-none z-0 rounded-2xl ${isDark ? 'bg-slate-800/20' : 'bg-white/20'} backdrop-blur-md border ${isDark ? 'border-slate-700/50' : 'border-white/50'}`} style={{ 
       transform: 'rotate(15deg)', 
       boxShadow: '0 40px 100px -10px rgba(255, 122, 48, 0.4), 0 0 40px rgba(255, 122, 48, 0.05) inset' 
     }}></div>
