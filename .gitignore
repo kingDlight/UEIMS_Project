@@ -198,3 +198,8 @@ update-seed.js
 SQL/_count_lines.ps1
 SQL/_count_lines2.ps1
 SQL/ueims_erd.dbml
+SQL/ERD/M01_Auth_Users.dbml
+SQL/ERD/M02_Semester_Training.dbml
+SQL/ERD/M03_Enterprise_Recruitment.dbml
+SQL/ERD/M00_Overview.dbml
+SQL/ERD/M04_Internship_Reports.dbml
