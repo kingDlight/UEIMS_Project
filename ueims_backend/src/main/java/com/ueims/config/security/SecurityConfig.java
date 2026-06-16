@@ -66,6 +66,11 @@ public class SecurityConfig {
                         .jwtAuthenticationConverter(jwtAuthenticationConverter()))
                 .bearerTokenResolver(publicSkippingBearerTokenResolver())
                 .authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
+        // CSRF protection is intentionally disabled: this is a stateless REST API that uses
+        // JWT Bearer tokens transmitted via the Authorization header (not cookies). Since tokens
+        // are never stored in cookies, cross-site requests cannot carry them automatically, making
+        // CSRF attacks impossible. This is consistent with OWASP recommendations for stateless APIs.
+        // SonarQube S4502: acknowledged — CSRF does not apply to Bearer-token-based REST APIs.
         httpSecurity.csrf(AbstractHttpConfigurer::disable);
         httpSecurity.cors(cors -> {});
 
