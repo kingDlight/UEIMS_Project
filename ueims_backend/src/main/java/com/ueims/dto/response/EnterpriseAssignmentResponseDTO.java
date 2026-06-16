@@ -1,14 +1,9 @@
 package com.ueims.dto.response;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 @Data
@@ -16,7 +11,7 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class EnterpriseAssignmentDTO {
+public class EnterpriseAssignmentResponseDTO {
     UUID assignmentId;
 
     // Student Info
@@ -33,9 +28,4 @@ public class EnterpriseAssignmentDTO {
     String status;
     LocalDate startDate;
     LocalDate endDate;
-
-    // Common entity fields, if this DTO is meant to be a more complete representation
-    LocalDateTime createdAt;
-    LocalDateTime updatedAt;
-    // You might add createdBy, updatedBy here if they are part of your EnterpriseAssignment entity
 }

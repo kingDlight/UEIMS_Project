@@ -9,7 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import com.ueims.dto.response.EnterpriseAssignmentDTO;
+import com.ueims.dto.response.EnterpriseAssignmentResponseDTO;
 import com.ueims.service.EnterpriseAssignmentService;
 import com.ueims.service.UserService;
 
@@ -28,45 +28,47 @@ public class EnterpriseAssignmentController {
 
     @GetMapping
     @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
-    public ResponseEntity<List<EnterpriseAssignmentDTO>> getAll() {
+    public ResponseEntity<List<EnterpriseAssignmentResponseDTO>> getAll() {
         return ResponseEntity.ok(service.findAll().stream().map(mapper::toDto).toList());
     }
 
     @GetMapping("/my-enterprise")
     @PreAuthorize("hasRole('ENTERPRISE') or hasRole('TRAINING_MANAGER')")
-    public ResponseEntity<List<EnterpriseAssignmentDTO>> getMyEnterpriseAssignments(@RequestParam(required = false) String keyword) {
+    public ResponseEntity<List<EnterpriseAssignmentResponseDTO>> getMyEnterpriseAssignments(
+            @RequestParam(required = false) String keyword) {
         if (keyword != null && !keyword.trim().isEmpty()) {
             return ResponseEntity.ok(service.searchMyEnterpriseAssignments(keyword.trim()).stream()
-                .map(mapper::toDto)
-                .toList());
+                    .map(mapper::toDto)
+                    .toList());
         }
         return ResponseEntity.ok(service.findMyEnterpriseAssignments().stream()
-            .map(mapper::toDto)
-            .toList());
+                .map(mapper::toDto)
+                .toList());
     }
 
     @GetMapping("/my-assignment")
     @PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<EnterpriseAssignmentDTO> getMyAssignment() {
+    public ResponseEntity<EnterpriseAssignmentResponseDTO> getMyAssignment() {
         return ResponseEntity.ok(mapper.toDto(service.findMyAssignment(userService.getCurrentUserId())));
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('ENTERPRISE') or hasRole('SYSTEM_ADMIN')")
-    public ResponseEntity<EnterpriseAssignmentDTO> getById(@PathVariable UUID id) {
+    public ResponseEntity<EnterpriseAssignmentResponseDTO> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(mapper.toDto(service.findById(id)));
     }
 
     @PostMapping
     @PreAuthorize("hasRole('STUDENT') or hasRole('TRAINING_MANAGER')")
-    public ResponseEntity<EnterpriseAssignmentDTO> create(@Valid @RequestBody EnterpriseAssignmentDTO dto) {
+    public ResponseEntity<EnterpriseAssignmentResponseDTO> create(
+            @Valid @RequestBody EnterpriseAssignmentResponseDTO dto) {
         return ResponseEntity.ok(mapper.toDto(service.save(mapper.toEntity(dto))));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ENTERPRISE') or hasRole('TRAINING_MANAGER')")
-    public ResponseEntity<EnterpriseAssignmentDTO> update(
-            @PathVariable UUID id, @RequestBody EnterpriseAssignmentDTO dto) {
+    public ResponseEntity<EnterpriseAssignmentResponseDTO> update(
+            @PathVariable UUID id, @RequestBody EnterpriseAssignmentResponseDTO dto) {
         return ResponseEntity.ok(mapper.toDto(service.update(id, dto)));
     }
 
