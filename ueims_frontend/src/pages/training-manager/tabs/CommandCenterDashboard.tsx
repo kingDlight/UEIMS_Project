@@ -312,6 +312,7 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
   const [mounted, setMounted] = useState(false);
   const [summary, setSummary] = useState<any>(null);
   const [semesters, setSemesters] = useState<SemesterResponse[]>([]);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [selectedSemesterId, setSelectedSemesterId] = useState<string>('');
   const [selectedSemester, setSelectedSemester] = useState<SemesterResponse | null>(null);
 
@@ -346,6 +347,8 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
         }
       } catch (err) {
         console.error('Error initializing dashboard:', err);
+      } finally {
+        setIsInitialLoading(false);
       }
     };
     initDashboard();
@@ -394,9 +397,16 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
     }
   };
 
-  if (!summary || semesters.length === 0) {
+  if (isInitialLoading) {
     return <div style={{ padding: 60, textAlign: 'center', color: cc.textMuted, fontFamily: 'Inter, sans-serif' }}>Loading Dashboard Data...</div>;
   }
+
+  // Fallback default summary if DB is empty
+  const safeSummary = summary || {
+    pendingEnterprises: [],
+    activeIncidents: [],
+    pipeline: { eligible: 0, applied: 0, interviewed: 0, placed: 0 }
+  };
 
   // Calculate percentages and counts from dynamic data
   const ojtItem = employmentData.find(d => d.label === 'OJT Students');
@@ -581,7 +591,7 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
                     <div>
                       <Label>Corporate Approvals</Label>
                       <div style={{ fontSize: 28, fontWeight: 800, color: cc.textPrimary, marginTop: 4, letterSpacing: '-0.02em' }}>
-                        {summary.pendingEnterprises.length}
+                        {safeSummary.pendingEnterprises.length}
                       </div>
                       <div style={{ fontSize: 12, color: cc.textSecondary, marginTop: 4 }}>
                         Companies awaiting registration
@@ -602,7 +612,7 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
                     <div>
                       <Label>Active Incidents</Label>
                       <div style={{ fontSize: 28, fontWeight: 800, color: cc.textPrimary, marginTop: 4, letterSpacing: '-0.02em' }}>
-                        {summary.activeIncidents.length}
+                        {safeSummary.activeIncidents.length}
                       </div>
                       <div style={{ fontSize: 12, color: cc.textSecondary, marginTop: 4 }}>
                         Open student discipline cases
@@ -756,7 +766,7 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
                           </div>
                           {/* Funnel display */}
                           {(() => {
-                            const pipeline = summary.pipeline;
+                            const pipeline = safeSummary.pipeline;
                             const stages = [
                               { label: 'ELIGIBLE', value: pipeline.eligible, color: cc.info, desc: 'Qualified students' },
                               { label: 'APPLIED', value: pipeline.applied, color: cc.warning, desc: 'Submitted CVs' },
