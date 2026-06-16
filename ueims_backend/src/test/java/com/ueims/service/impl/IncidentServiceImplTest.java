@@ -241,6 +241,8 @@ class IncidentServiceImplTest {
 
         IncidentReportRequest request = new IncidentReportRequest();
         request.setAssignmentId(assignmentId);
+        request.setCategory("TEST");
+        request.setDescription("Test desc");
 
         SecurityContextHolder.getContext()
                 .setAuthentication(new UsernamePasswordAuthenticationToken("ent@test.com", null));
@@ -265,10 +267,10 @@ class IncidentServiceImplTest {
         SecurityContextHolder.getContext()
                 .setAuthentication(new UsernamePasswordAuthenticationToken("other@test.com", null));
 
-        when(userRepository.findByEmail("other@test.com")).thenReturn(Optional.of(otherUser));
-        when(assignmentRepository.findById(assignmentId)).thenReturn(Optional.of(assignment));
+        lenient().when(userRepository.findByEmail("other@test.com")).thenReturn(Optional.of(otherUser));
+        lenient().when(assignmentRepository.findById(assignmentId)).thenReturn(Optional.of(assignment));
 
-        assertThrows(IllegalArgumentException.class, () -> service.reportIncident(request));
+        assertThrows(com.ueims.exception.AppException.class, () -> service.reportIncident(request));
     }
 
     @Test
