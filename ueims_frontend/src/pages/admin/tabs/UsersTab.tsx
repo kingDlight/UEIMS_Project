@@ -1,18 +1,42 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { motion } from 'framer-motion';
-import { Spin, App, Modal, Select, Tag, Tooltip, Badge } from 'antd';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
+  Spin,
+  App,
+  Modal,
+  Form,
+  Input,
+  Select,
+  Empty,
+  Pagination,
+  Button,
+  Tooltip,
+} from 'antd';
+import {
+  PlusOutlined,
+  EditOutlined,
+  EyeOutlined,
+  PoweroffOutlined,
+  ReloadOutlined,
   UserOutlined,
-  SearchOutlined,
-  KeyOutlined,
+  PhoneOutlined,
+  MailOutlined,
   CheckCircleOutlined,
-  CloseCircleOutlined,
-  ClockCircleOutlined,
   SafetyCertificateOutlined,
+  KeyOutlined,
+  ClockCircleOutlined,
+  LockOutlined,
+  WarningOutlined,
+  TeamOutlined,
+  CalendarOutlined,
 } from '@ant-design/icons';
 import { AdminService } from '@/services/AdminService';
+import type { UserDetail, UserCreatePayload, UserUpdatePayload } from '@/services/AdminService';
 import { c } from '../constants';
 
+// ============================================================
+// HELPERS
+// ============================================================
 function hexToRgba(hex: string, alpha: number): string {
   const h = hex.replace('#', '');
   const r = parseInt(h.substring(0, 2), 16);
@@ -23,61 +47,259 @@ function hexToRgba(hex: string, alpha: number): string {
 
 const ROLE_COLORS: Record<string, { color: string; bg: string }> = {
   SYSTEM_ADMIN: { color: c.brand, bg: hexToRgba(c.brand, 0.1) },
+  ADMIN: { color: c.brand, bg: hexToRgba(c.brand, 0.1) },
   TRAINING_MANAGER: { color: c.purple, bg: hexToRgba(c.purple, 0.1) },
   ENTERPRISE: { color: c.success, bg: hexToRgba(c.success, 0.1) },
   STUDENT: { color: c.info, bg: hexToRgba(c.info, 0.1) },
+  MENTOR: { color: c.warning, bg: hexToRgba(c.warning, 0.1) },
+  LECTURER: { color: c.textSecondary, bg: hexToRgba(c.textSecondary, 0.1) },
 };
 
-const ALL_ROLES = ['SYSTEM_ADMIN', 'TRAINING_MANAGER', 'ENTERPRISE', 'STUDENT'];
+const ALL_ROLES = ['SYSTEM_ADMIN', 'ADMIN', 'TRAINING_MANAGER', 'ENTERPRISE', 'STUDENT', 'MENTOR', 'LECTURER'];
+
+const STATUS_COLORS: Record<string, { color: string; bg: string; label: string }> = {
+  ACTIVE: { color: c.success, bg: hexToRgba(c.success, 0.1), label: 'Active' },
+  INACTIVE: { color: c.error, bg: hexToRgba(c.error, 0.1), label: 'Inactive' },
+  LOCKED: { color: c.warning, bg: hexToRgba(c.warning, 0.1), label: 'Locked' },
+};
 
 const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
-  const { message } = App.useApp();
-  const isActive = status === 'ACTIVE';
+  const cfg = STATUS_COLORS[status] || STATUS_COLORS.INACTIVE;
   return (
     <span style={{
       display: 'inline-flex', alignItems: 'center', gap: 4,
       padding: '3px 10px', borderRadius: c.radiusFull,
-      background: isActive ? hexToRgba(c.success, 0.1) : hexToRgba(c.error, 0.1),
-      color: isActive ? c.success : c.error,
+      background: cfg.bg, color: cfg.color,
       fontSize: 11, fontWeight: 700,
-      border: `1px solid ${hexToRgba(isActive ? c.success : c.error, 0.3)}`,
-    }}>
-      {isActive ? <CheckCircleOutlined size={10} /> : <CloseCircleOutlined size={10} />}
-      {status}
-    </span>
+      textTransform: 'uppercase', letterSpacing: '0.05em',
+      border: `1px solid ${hexToRgba(cfg.color, 0.25)}`,
+    }}>{cfg.label}</span>
   );
 };
 
+// ============================================================
+// TYPES
+// ============================================================
+interface CreateFormValues {
+  fullName: string;
+  email: string;
+  phone?: string;
+  role: string;
+}
+
+interface EditFormValues {
+  fullName: string;
+  phone?: string;
+}
+
+// ============================================================
+// MAIN COMPONENT (UC-06 → UC-11)
+// ============================================================
 export const UsersTab: React.FC = () => {
   const { message } = App.useApp();
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<UserDetail[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  // Search + filter (mirrors JobPostManagementTab pattern)
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('ALL');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 12;
+  const pageSize = 9;
 
-  const [assignModal, setAssignModal] = useState<{ open: boolean; user: any }>({ open: false, user: null });
-  const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
-  const [savingRoles, setSavingRoles] = useState(false);
-  const [statusModal, setStatusModal] = useState<{ open: boolean; user: any; newStatus: string }>({ open: false, user: null, newStatus: 'ACTIVE' });
+  // Modals
+  const [viewing, setViewing] = useState<UserDetail | null>(null);
+  const [viewLoading, setViewLoading] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [createForm] = Form.useForm<CreateFormValues>();
+  const [editing, setEditing] = useState<UserDetail | null>(null);
+  const [editForm] = Form.useForm<EditFormValues>();
+  const [savingEdit, setSavingEdit] = useState(false);
+
+  const [statusModal, setStatusModal] = useState<{
+    open: boolean;
+    user: UserDetail | null;
+    nextStatus: string;
+  }>({ open: false, user: null, nextStatus: 'ACTIVE' });
   const [savingStatus, setSavingStatus] = useState(false);
 
+  const [assignModal, setAssignModal] = useState<{ open: boolean; user: UserDetail | null }>({
+    open: false, user: null,
+  });
+  const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
+  const [savingRoles, setSavingRoles] = useState(false);
+
+  // ========== FETCH LIST (UC-06.0 Step 2) ==========
   const fetchUsers = async () => {
     try {
       setLoading(true);
       const data = await AdminService.getUsers();
       setUsers(Array.isArray(data) ? data : []);
-    } catch (err) {
-      message.error('Failed to load users.');
+    } catch (err: any) {
+      message.error(err.response?.data?.message || 'Failed to load users.');
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { fetchUsers(); }, []);
+  useEffect(() => {
+    fetchUsers();
+    // Try to capture current user id for "cannot edit own status" guard
+    try {
+      const token = localStorage.getItem('token') || '';
+      if (token) {
+        const payload = JSON.parse(atob(token.split('.')[1] || ''));
+        setCurrentUserId(payload?.userId || payload?.sub || null);
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
 
+  // ========== VIEW DETAILS (UC-07) ==========
+  const openView = async (user: UserDetail) => {
+    setViewing(user);
+    setViewLoading(true);
+    try {
+      const detail = await AdminService.getUserById(user.userId);
+      setViewing(detail ?? user);
+    } catch {
+      // keep current snapshot
+    } finally {
+      setViewLoading(false);
+    }
+  };
+
+  // ========== CREATE (UC-08) ==========
+  const openCreate = () => {
+    createForm.resetFields();
+    setCreateOpen(true);
+  };
+
+  const handleCreate = async () => {
+    try {
+      const values = await createForm.validateFields();
+      setCreating(true);
+      const payload: UserCreatePayload = {
+        email: values.email,
+        fullName: values.fullName,
+        phone: values.phone,
+      };
+      await AdminService.createUser(payload);
+      // After account is created, assign the selected role so it's not orphan
+      const created = await AdminService.getUsers();
+      const found = (Array.isArray(created) ? created : []).find(
+        (u: UserDetail) => u.email === values.email,
+      );
+      if (found && values.role) {
+        try {
+          await AdminService.assignRole(found.userId, values.role);
+        } catch (err: any) {
+          message.warning('User created but role assignment failed. Assign role manually.');
+        }
+      }
+      message.success('User created successfully. Temporary password emailed.');
+      setCreateOpen(false);
+      createForm.resetFields();
+      await fetchUsers();
+    } catch (err: any) {
+      if (err.errorFields) {
+        message.error('Please complete all required fields.');
+      } else {
+        message.error(err.response?.data?.message || 'Failed to create user.');
+      }
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  // ========== EDIT (UC-09) ==========
+  const openEdit = (user: UserDetail) => {
+    setEditing(user);
+    editForm.setFieldsValue({
+      fullName: user.fullName,
+      phone: user.phone || '',
+    });
+  };
+
+  const handleEdit = async () => {
+    if (!editing) return;
+    try {
+      const values = await editForm.validateFields();
+      setSavingEdit(true);
+      const payload: UserUpdatePayload = {
+        fullName: values.fullName,
+        phone: values.phone,
+      };
+      await AdminService.updateUser(editing.userId, payload);
+      message.success('User information updated.');
+      setEditing(null);
+      editForm.resetFields();
+      await fetchUsers();
+    } catch (err: any) {
+      if (err.errorFields) {
+        message.error('Please complete all required fields.');
+      } else {
+        message.error(err.response?.data?.message || 'Failed to update user.');
+      }
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
+  // ========== STATUS (UC-10) ==========
+  const requestStatusChange = (user: UserDetail) => {
+    const next = user.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+    setStatusModal({ open: true, user, nextStatus: next });
+  };
+
+  const confirmStatusChange = async () => {
+    if (!statusModal.user) return;
+    setSavingStatus(true);
+    try {
+      await AdminService.updateUserStatus(statusModal.user.userId, statusModal.nextStatus);
+      message.success('User status updated.');
+      setStatusModal({ open: false, user: null, nextStatus: 'ACTIVE' });
+      await fetchUsers();
+    } catch (err: any) {
+      message.error(err.response?.data?.message || 'Failed to update status.');
+    } finally {
+      setSavingStatus(false);
+    }
+  };
+
+  // ========== ASSIGN ROLES (UC-11) ==========
+  const openAssign = (user: UserDetail) => {
+    setSelectedRoles([...(user.roles || [])]);
+    setAssignModal({ open: true, user });
+  };
+
+  const handleAssignRoles = async () => {
+    if (!assignModal.user) return;
+    setSavingRoles(true);
+    try {
+      const currentRoles = assignModal.user.roles || [];
+      const toAdd = selectedRoles.filter(r => !currentRoles.includes(r));
+      const toRemove = currentRoles.filter(r => !selectedRoles.includes(r));
+
+      await Promise.all([
+        ...toAdd.map(role => AdminService.assignRole(assignModal.user!.userId, role)),
+        ...toRemove.map(role => AdminService.revokeRole(assignModal.user!.userId, role)),
+      ]);
+
+      message.success('Roles updated.');
+      setAssignModal({ open: false, user: null });
+      await fetchUsers();
+    } catch (err: any) {
+      message.error(err.response?.data?.message || 'Failed to update roles.');
+    } finally {
+      setSavingRoles(false);
+    }
+  };
+
+  // ========== FILTER + PAGINATE (mirrors JobPostManagementTab) ==========
   const filteredUsers = useMemo(() => {
     return users.filter(u => {
       const matchesSearch = !searchTerm ||
@@ -96,305 +318,527 @@ export const UsersTab: React.FC = () => {
     return filteredUsers.slice(start, start + pageSize);
   }, [filteredUsers, currentPage]);
 
-  const openAssignModal = (user: any) => {
-    setSelectedRoles([...(user.roles || [])]);
-    setAssignModal({ open: true, user });
-  };
-
-  const handleAssignRoles = async () => {
-    if (!assignModal.user) return;
-    setSavingRoles(true);
-    try {
-      const currentRoles = assignModal.user.roles || [];
-      const toAdd = selectedRoles.filter(r => !currentRoles.includes(r));
-      const toRemove = currentRoles.filter(r => !selectedRoles.includes(r));
-
-      await Promise.all([
-        ...toAdd.map(role => AdminService.assignRole(assignModal.user.userId, role)),
-        ...toRemove.map(role => AdminService.revokeRole(assignModal.user.userId, role)),
-      ]);
-
-      message.success(`Roles updated for ${assignModal.user.fullName}`);
-      setAssignModal({ open: false, user: null });
-      fetchUsers();
-    } catch (err: any) {
-      message.error(err.response?.data?.message || 'Failed to update roles.');
-    } finally {
-      setSavingRoles(false);
-    }
-  };
-
-  const handleStatusChange = async () => {
-    if (!statusModal.user) return;
-    setSavingStatus(true);
-    try {
-      await AdminService.updateUserStatus(statusModal.user.userId, statusModal.newStatus);
-      message.success('User status updated.');
-      setStatusModal({ open: false, user: null, newStatus: 'ACTIVE' });
-      fetchUsers();
-    } catch (err: any) {
-      message.error(err.response?.data?.message || 'Failed to update status.');
-    } finally {
-      setSavingStatus(false);
-    }
-  };
-
-  const Card: React.FC<{ children: React.ReactNode; style?: React.CSSProperties }> = ({ children, style }) => (
-    <div style={{ background: c.surface, borderRadius: c.radiusLg, border: `1px solid ${c.border}`, boxShadow: c.shadowSm, overflow: 'hidden', ...style }}>
-      {children}
-    </div>
-  );
-
   if (loading) {
-    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}><Spin size="large" /></div>;
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}>
+        <Spin size="large" />
+      </div>
+    );
   }
 
   return (
-    <div style={{ fontFamily: 'Inter, -apple-system, sans-serif' }}>
-      <div style={{ maxWidth: 1240, margin: '0 auto', padding: '24px 20px 40px' }}>
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-
-          {/* Header */}
-          <div style={{ marginBottom: 20, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-            <div>
-              <h2 style={{ fontSize: 20, fontWeight: 800, color: c.text, margin: 0 }}>User Management</h2>
-              <p style={{ fontSize: 13, color: c.textSecondary, margin: '4px 0 0' }}>Manage user accounts and role assignments</p>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 12, color: c.textMuted }}>
-                {filteredUsers.length} of {users.length} users
-              </span>
-            </div>
+    <div style={{ padding: '0 0 40px', fontFamily: 'Inter, sans-serif' }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px' }}>
+        {/* HEADER */}
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}
+        >
+          <div>
+            <h2 style={{ fontSize: 20, fontWeight: 800, color: c.text, margin: '0 0 4px' }}>User Management</h2>
+            <p style={{ fontSize: 13, color: c.textMuted, margin: 0 }}>Manage user accounts, profile info, status and role assignments</p>
           </div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <Button icon={<ReloadOutlined />} onClick={fetchUsers} style={{ borderRadius: c.radiusMd }}>
+              Refresh
+            </Button>
+            <motion.button
+              whileHover={{ y: -1 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={openCreate}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                padding: '10px 18px', borderRadius: c.radiusMd,
+                background: c.brand, color: '#fff', fontWeight: 700, fontSize: 13,
+                border: 'none', cursor: 'pointer', boxShadow: c.shadowBrand,
+                fontFamily: 'Inter, sans-serif',
+              }}
+            >
+              <PlusOutlined /> Add New User
+            </motion.button>
+          </div>
+        </motion.div>
 
-          {/* Filters */}
-          <Card style={{ padding: 16, marginBottom: 20 }}>
-            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-              <div style={{ position: 'relative', flex: 1, minWidth: 200 }}>
-                <SearchOutlined style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: c.textMuted }} />
-                <input
-                  type="text"
-                  placeholder="Search by name or email..."
-                  value={searchTerm}
-                  onChange={e => setSearchTerm(e.target.value)}
-                  style={{ width: '100%', padding: '8px 12px 8px 36px', borderRadius: c.radiusMd, border: `1px solid ${c.border}`, fontSize: 13, outline: 'none', fontFamily: 'Inter, sans-serif', color: c.text }}
-                />
-              </div>
-              <Select
-                value={roleFilter}
-                onChange={val => { setRoleFilter(val); setCurrentPage(1); }}
-                style={{ minWidth: 160 }}
-                options={[
-                  { value: 'ALL', label: 'All Roles' },
-                  ...ALL_ROLES.map(r => ({ value: r, label: r.replace('_', ' ') })),
-                ]}
-              />
-              <Select
-                value={statusFilter}
-                onChange={val => { setStatusFilter(val); setCurrentPage(1); }}
-                style={{ minWidth: 140 }}
-                options={[
-                  { value: 'ALL', label: 'All Status' },
-                  { value: 'ACTIVE', label: 'Active' },
-                  { value: 'INACTIVE', label: 'Inactive' },
-                  { value: 'LOCKED', label: 'Locked' },
-                ]}
-              />
-            </div>
-          </Card>
+        {/* SEARCH + FILTERS */}
+        {users.length > 0 && (
+          <div style={{
+            display: 'flex', gap: 12, marginBottom: 20, alignItems: 'center',
+            background: c.surface, padding: 12, borderRadius: c.radiusMd,
+            border: `1px solid ${c.border}`,
+          }}>
+            <Input
+              placeholder="Search by name or email..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              allowClear
+              prefix={<UserOutlined style={{ color: c.textMuted }} />}
+              style={{ flex: 1, borderRadius: c.radiusMd }}
+            />
+            <Select
+              value={roleFilter}
+              onChange={setRoleFilter}
+              style={{ width: 170 }}
+              options={[
+                { value: 'ALL', label: 'All roles' },
+                ...ALL_ROLES.map(r => ({ value: r, label: r.replace('_', ' ') })),
+              ]}
+            />
+            <Select
+              value={statusFilter}
+              onChange={setStatusFilter}
+              style={{ width: 150 }}
+              options={[
+                { value: 'ALL', label: 'All statuses' },
+                { value: 'ACTIVE', label: 'Active' },
+                { value: 'INACTIVE', label: 'Inactive' },
+                { value: 'LOCKED', label: 'Locked' },
+              ]}
+            />
+            <span style={{ fontSize: 12, color: c.textMuted, whiteSpace: 'nowrap' }}>
+              {filteredUsers.length} of {users.length}
+            </span>
+          </div>
+        )}
 
-          {/* User Table */}
-          <Card>
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ background: c.neutralBg, borderBottom: `1px solid ${c.border}` }}>
-                    {['User', 'Email', 'Phone', 'Roles', 'Status', 'Created', 'Actions'].map(h => (
-                      <th key={h} style={{ padding: '12px 16px', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: c.textMuted, textAlign: 'left', whiteSpace: 'nowrap' }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginatedUsers.length === 0 ? (
-                    <tr>
-                      <td colSpan={7} style={{ padding: 40, textAlign: 'center', color: c.textMuted, fontSize: 13 }}>No users match your filters</td>
-                    </tr>
-                  ) : paginatedUsers.map((user, idx) => (
-                    <tr key={user.userId ?? idx} style={{ borderBottom: idx < paginatedUsers.length - 1 ? `1px solid ${c.borderSubtle}` : 'none' }}>
-                      <td style={{ padding: '14px 16px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          <div style={{ width: 36, height: 36, borderRadius: '50%', background: hexToRgba(c.brand, 0.1), color: c.brand, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, flexShrink: 0 }}>
+        {/* LIST */}
+        {users.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+            style={{ background: c.surface, borderRadius: c.radiusLg, border: `1px solid ${c.border}`, padding: 60 }}
+          >
+            <Empty
+              image={<TeamOutlined style={{ fontSize: 48, color: c.textMuted }} />}
+              description={
+                <div>
+                  <div style={{ fontSize: 15, fontWeight: 600, color: c.text, marginBottom: 4 }}>No users yet</div>
+                  <div style={{ fontSize: 13, color: c.textMuted }}>Click "Add New User" to provision the first account</div>
+                </div>
+              }
+            />
+          </motion.div>
+        ) : filteredUsers.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+            style={{ background: c.surface, borderRadius: c.radiusLg, border: `1px solid ${c.border}`, padding: 60 }}
+          >
+            <Empty
+              image={<UserOutlined style={{ fontSize: 48, color: c.textMuted }} />}
+              description={
+                <div>
+                  <div style={{ fontSize: 15, fontWeight: 600, color: c.text, marginBottom: 4 }}>No matching users</div>
+                  <div style={{ fontSize: 13, color: c.textMuted }}>Try changing your search or filter</div>
+                </div>
+              }
+            />
+          </motion.div>
+        ) : (
+          <>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: 16 }}>
+              <AnimatePresence>
+                {paginatedUsers.map((user, i) => {
+                  const isSelf = currentUserId === user.userId;
+                  return (
+                    <motion.div
+                      key={user.userId}
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ duration: 0.3, delay: i * 0.04 }}
+                      style={{
+                        background: c.surface, borderRadius: c.radiusLg,
+                        border: `1px solid ${c.border}`, boxShadow: c.shadowSm,
+                        overflow: 'hidden', display: 'flex', flexDirection: 'column',
+                      }}
+                    >
+                      {/* Card header */}
+                      <div style={{ padding: '16px 18px', borderBottom: `1px solid ${c.border}` }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
+                          <div style={{
+                            width: 44, height: 44, borderRadius: '50%',
+                            background: hexToRgba(c.brand, 0.12),
+                            color: c.brand, fontWeight: 800, fontSize: 16,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            flexShrink: 0,
+                          }}>
                             {user.fullName?.charAt(0)?.toUpperCase() || 'U'}
                           </div>
-                          <span style={{ fontSize: 13, fontWeight: 600, color: c.text }}>{user.fullName}</span>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <h3 style={{ fontSize: 15, fontWeight: 700, color: c.text, margin: 0, lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {user.fullName}
+                            </h3>
+                            <div style={{ fontSize: 12, color: c.textMuted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {user.email}
+                            </div>
+                          </div>
+                          <StatusBadge status={user.status} />
                         </div>
-                      </td>
-                      <td style={{ padding: '14px 16px', fontSize: 13, color: c.textSecondary }}>{user.email}</td>
-                      <td style={{ padding: '14px 16px', fontSize: 13, color: c.textMuted }}>{user.phone || '—'}</td>
-                      <td style={{ padding: '14px 16px' }}>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
                           {(user.roles || []).length === 0 ? (
-                            <span style={{ fontSize: 12, color: c.textMuted }}>No roles</span>
+                            <span style={{ fontSize: 11, color: c.textMuted, fontStyle: 'italic' }}>No roles assigned</span>
                           ) : (user.roles || []).map(role => {
                             const cfg = ROLE_COLORS[role] || { color: c.textMuted, bg: hexToRgba(c.textMuted, 0.1) };
                             return (
-                              <span key={role} style={{ padding: '2px 8px', borderRadius: c.radiusFull, fontSize: 11, fontWeight: 700, background: cfg.bg, color: cfg.color, border: `1px solid ${hexToRgba(cfg.color, 0.3)}` }}>
+                              <span key={role} style={{ padding: '2px 8px', borderRadius: c.radiusFull, fontSize: 10, fontWeight: 700, background: cfg.bg, color: cfg.color, border: `1px solid ${hexToRgba(cfg.color, 0.3)}` }}>
                                 {role.replace('_', ' ')}
                               </span>
                             );
                           })}
                         </div>
-                      </td>
-                      <td style={{ padding: '14px 16px' }}><StatusBadge status={user.status} /></td>
-                      <td style={{ padding: '14px 16px', fontSize: 12, color: c.textMuted, whiteSpace: 'nowrap' }}>
-                        {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '—'}
-                      </td>
-                      <td style={{ padding: '14px 16px' }}>
-                        <div style={{ display: 'flex', gap: 8 }}>
-                          <Tooltip title="Assign Roles">
-                            <motion.button
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                              onClick={() => openAssignModal(user)}
-                              style={{ width: 32, height: 32, borderRadius: c.radiusMd, border: `1px solid ${c.border}`, background: c.neutralBg, color: c.brand, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                            >
-                              <KeyOutlined size={14} />
-                            </motion.button>
-                          </Tooltip>
-                          <Tooltip title="Change Status">
-                            <motion.button
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.95 }}
-                              onClick={() => setStatusModal({ open: true, user, newStatus: user.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE' })}
-                              style={{ width: 32, height: 32, borderRadius: c.radiusMd, border: `1px solid ${c.border}`, background: c.neutralBg, color: user.status === 'ACTIVE' ? c.error : c.success, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                            >
-                              {user.status === 'ACTIVE' ? <CloseCircleOutlined size={14} /> : <CheckCircleOutlined size={14} />}
-                            </motion.button>
-                          </Tooltip>
+                      </div>
+
+                      {/* Card meta */}
+                      <div style={{ padding: '12px 18px', display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: c.textSecondary }}>
+                          <PhoneOutlined style={{ color: c.brand }} />
+                          <span>{user.phone || <em style={{ color: c.textMuted }}>No phone</em>}</span>
                         </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: c.textSecondary }}>
+                          <CalendarOutlined style={{ color: c.brand }} />
+                          <span>Created: {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '—'}</span>
+                        </div>
+                        {user.lastLogin && (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: c.textSecondary }}>
+                            <ClockCircleOutlined style={{ color: c.brand }} />
+                            <span>Last login: {new Date(user.lastLogin).toLocaleString()}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Card actions */}
+                      <div style={{ padding: '12px 18px', borderTop: `1px solid ${c.border}`, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                        <Button size="small" icon={<EyeOutlined />} onClick={() => openView(user)} style={{ borderRadius: c.radiusMd, flex: 1 }}>
+                          View
+                        </Button>
+                        <Button size="small" icon={<EditOutlined />} onClick={() => openEdit(user)} style={{ borderRadius: c.radiusMd, flex: 1 }}>
+                          Edit
+                        </Button>
+                        <Tooltip title={isSelf ? 'You cannot change your own status' : 'Change status'}>
+                          <Button
+                            size="small"
+                            icon={user.status === 'ACTIVE' ? <PoweroffOutlined /> : <CheckCircleOutlined />}
+                            onClick={() => requestStatusChange(user)}
+                            disabled={isSelf}
+                            style={{
+                              borderRadius: c.radiusMd, flex: 1,
+                              color: user.status === 'ACTIVE' ? c.error : c.success,
+                              borderColor: hexToRgba(user.status === 'ACTIVE' ? c.error : c.success, 0.3),
+                              background: user.status === 'ACTIVE' ? c.errorMuted : c.successMuted,
+                              fontWeight: 700,
+                            }}
+                          >
+                            {user.status === 'ACTIVE' ? 'Lock' : 'Unlock'}
+                          </Button>
+                        </Tooltip>
+                        <Button size="small" icon={<KeyOutlined />} onClick={() => openAssign(user)} style={{ borderRadius: c.radiusMd, flex: 1 }}>
+                          Roles
+                        </Button>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
             </div>
-
-            {/* Pagination */}
-            {filteredUsers.length > pageSize && (
-              <div style={{ display: 'flex', justifyContent: 'center', padding: 16, borderTop: `1px solid ${c.border}` }}>
-                <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-                  {Array.from({ length: Math.ceil(filteredUsers.length / pageSize) }, (_, i) => i + 1).map(page => (
-                    <button
-                      key={page}
-                      onClick={() => setCurrentPage(page)}
-                      style={{
-                        width: 36, height: 36, borderRadius: c.radiusMd,
-                        border: `1px solid ${currentPage === page ? c.brand : c.border}`,
-                        background: currentPage === page ? c.brand : 'transparent',
-                        color: currentPage === page ? '#fff' : c.textSecondary,
-                        fontSize: 13, fontWeight: 600,
-                        cursor: 'pointer',
-                      }}
-                    >
-                      {page}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </Card>
-
-        </motion.div>
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: 24 }}>
+              <Pagination
+                current={currentPage}
+                pageSize={pageSize}
+                total={filteredUsers.length}
+                onChange={setCurrentPage}
+                showSizeChanger={false}
+                showTotal={(total, range) => `${range[0]}-${range[1]} of ${total} users`}
+              />
+            </div>
+          </>
+        )}
       </div>
 
-      {/* Assign Roles Modal */}
+      {/* ========== VIEW DETAILS MODAL (UC-07) ========== */}
       <Modal
         title={
-          <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, color: c.text, fontSize: 15 }}>
-            <KeyOutlined style={{ marginRight: 8, color: c.brand }} />
-            Assign Roles — {assignModal.user?.fullName}
+          <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, color: c.text, fontSize: 16 }}>
+            <EyeOutlined style={{ marginRight: 8, color: c.brand }} /> User Details
+          </div>
+        }
+        open={!!viewing}
+        onCancel={() => setViewing(null)}
+        footer={null}
+        width={680}
+        styles={{ content: { borderRadius: c.radiusLg, padding: '24px 28px' }, header: { borderBottom: 'none', marginBottom: 16, padding: 0 }, body: { padding: 0 } }}
+      >
+        {viewing && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <Spin spinning={viewLoading}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                <div style={{
+                  width: 64, height: 64, borderRadius: '50%',
+                  background: hexToRgba(c.brand, 0.12),
+                  color: c.brand, fontWeight: 800, fontSize: 24,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  flexShrink: 0,
+                }}>
+                  {viewing.fullName?.charAt(0)?.toUpperCase() || 'U'}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <h2 style={{ fontSize: 18, fontWeight: 800, color: c.text, margin: 0 }}>{viewing.fullName}</h2>
+                  <div style={{ fontSize: 13, color: c.textMuted, marginTop: 2 }}>{viewing.email}</div>
+                  <div style={{ marginTop: 6 }}>
+                    <StatusBadge status={viewing.status} />
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 8 }}>
+                <Field icon={<PhoneOutlined />} label="Phone" value={viewing.phone || '—'} />
+                <Field icon={<SafetyCertificateOutlined />} label="Auth Provider" value={viewing.authProvider || 'LOCAL'} />
+                <Field icon={<CalendarOutlined />} label="Created At" value={viewing.createdAt ? new Date(viewing.createdAt).toLocaleString() : '—'} />
+                <Field icon={<ClockCircleOutlined />} label="Last Login" value={viewing.lastLogin ? new Date(viewing.lastLogin).toLocaleString() : 'Never'} />
+                {typeof viewing.failedLoginAttempts === 'number' && (
+                  <Field
+                    icon={<WarningOutlined />}
+                    label="Failed Login Attempts"
+                    value={viewing.failedLoginAttempts.toString()}
+                  />
+                )}
+                {viewing.mustChangePassword !== undefined && (
+                  <Field
+                    icon={<LockOutlined />}
+                    label="Must Change Password"
+                    value={viewing.mustChangePassword ? 'Yes' : 'No'}
+                  />
+                )}
+              </div>
+
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: c.textMuted, textTransform: 'uppercase', marginBottom: 6 }}>
+                  Assigned Roles
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                  {(viewing.roles || []).length === 0 ? (
+                    <span style={{ fontSize: 12, color: c.textMuted, fontStyle: 'italic' }}>No roles assigned</span>
+                  ) : (viewing.roles || []).map(role => {
+                    const cfg = ROLE_COLORS[role] || { color: c.textMuted, bg: hexToRgba(c.textMuted, 0.1) };
+                    return (
+                      <span key={role} style={{ padding: '4px 10px', borderRadius: c.radiusFull, fontSize: 12, fontWeight: 700, background: cfg.bg, color: cfg.color, border: `1px solid ${hexToRgba(cfg.color, 0.3)}` }}>
+                        {role.replace('_', ' ')}
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+            </Spin>
+          </div>
+        )}
+      </Modal>
+
+      {/* ========== CREATE USER MODAL (UC-08) ========== */}
+      <Modal
+        title={
+          <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, color: c.text, fontSize: 16 }}>
+            <PlusOutlined style={{ marginRight: 8, color: c.brand }} /> Add New User
+          </div>
+        }
+        open={createOpen}
+        onCancel={() => setCreateOpen(false)}
+        footer={null}
+        width={560}
+        styles={{ content: { borderRadius: c.radiusLg, padding: '24px 28px' }, header: { borderBottom: 'none', marginBottom: 16, padding: 0 }, body: { padding: 0 } }}
+      >
+        <Form form={createForm} layout="vertical" requiredMark="optional">
+          <Form.Item
+            name="fullName"
+            label="Full Name"
+            rules={[{ required: true, message: 'Full name is required' }]}
+          >
+            <Input placeholder="Jane Doe" />
+          </Form.Item>
+          <Form.Item
+            name="email"
+            label="Email"
+            rules={[
+              { required: true, message: 'Email is required' },
+              { type: 'email', message: 'Please enter a valid email' },
+            ]}
+          >
+            <Input prefix={<MailOutlined />} placeholder="user@ueims.edu.vn" />
+          </Form.Item>
+          <Form.Item name="phone" label="Phone">
+            <Input prefix={<PhoneOutlined />} placeholder="Optional" />
+          </Form.Item>
+          <Form.Item
+            name="role"
+            label="Role"
+            rules={[{ required: true, message: 'Please choose an initial role' }]}
+            extra="A random temporary password will be generated and emailed to the user."
+          >
+            <Select placeholder="Select a role">
+              {ALL_ROLES.map(r => (
+                <Select.Option key={r} value={r}>{r.replace('_', ' ')}</Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 8, paddingTop: 16, borderTop: `1px solid ${c.border}` }}>
+            <Button onClick={() => setCreateOpen(false)} style={{ borderRadius: c.radiusMd }}>Cancel</Button>
+            <Button
+              type="primary"
+              onClick={handleCreate}
+              loading={creating}
+              style={{ background: c.brand, borderColor: c.brand, borderRadius: c.radiusMd, fontWeight: 700 }}
+            >
+              Create Account
+            </Button>
+          </div>
+        </Form>
+      </Modal>
+
+      {/* ========== EDIT USER MODAL (UC-09) ========== */}
+      <Modal
+        title={
+          <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, color: c.text, fontSize: 16 }}>
+            <EditOutlined style={{ marginRight: 8, color: c.brand }} /> Edit User — {editing?.fullName}
+          </div>
+        }
+        open={!!editing}
+        onCancel={() => setEditing(null)}
+        footer={null}
+        width={520}
+        styles={{ content: { borderRadius: c.radiusLg, padding: '24px 28px' }, header: { borderBottom: 'none', marginBottom: 16, padding: 0 }, body: { padding: 0 } }}
+      >
+        {editing && (
+          <Form form={editForm} layout="vertical" requiredMark="optional">
+            <div style={{ marginBottom: 12, padding: '8px 12px', borderRadius: c.radiusMd, background: c.brandMuted, border: `1px solid ${hexToRgba(c.brand, 0.2)}` }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: c.textMuted, textTransform: 'uppercase' }}>Email (read-only)</div>
+              <div style={{ fontSize: 14, color: c.text, fontWeight: 600, marginTop: 2 }}>{editing.email}</div>
+            </div>
+            <Form.Item
+              name="fullName"
+              label="Full Name"
+              rules={[{ required: true, message: 'Full name is required' }]}
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item name="phone" label="Phone">
+              <Input prefix={<PhoneOutlined />} />
+            </Form.Item>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 8, paddingTop: 16, borderTop: `1px solid ${c.border}` }}>
+              <Button onClick={() => setEditing(null)} style={{ borderRadius: c.radiusMd }}>Cancel</Button>
+              <Button
+                type="primary"
+                onClick={handleEdit}
+                loading={savingEdit}
+                style={{ background: c.brand, borderColor: c.brand, borderRadius: c.radiusMd, fontWeight: 700 }}
+              >
+                Save Changes
+              </Button>
+            </div>
+          </Form>
+        )}
+      </Modal>
+
+      {/* ========== STATUS CHANGE CONFIRMATION (UC-10) ========== */}
+      <Modal
+        open={statusModal.open}
+        onCancel={() => setStatusModal({ open: false, user: null, nextStatus: 'ACTIVE' })}
+        footer={null}
+        width={420}
+        centered
+        styles={{ content: { borderRadius: c.radiusLg, padding: '24px 28px' }, header: { display: 'none' }, body: { padding: 0 } }}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 16 }}>
+          <div style={{
+            width: 64, height: 64, borderRadius: '50%',
+            background: statusModal.nextStatus === 'INACTIVE' || statusModal.nextStatus === 'LOCKED' ? c.errorMuted : c.successMuted,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: statusModal.nextStatus === 'INACTIVE' || statusModal.nextStatus === 'LOCKED' ? c.error : c.success,
+          }}>
+            <WarningOutlined style={{ fontSize: 28 }} />
+          </div>
+          <div>
+            <h3 style={{ fontSize: 17, fontWeight: 700, color: c.text, margin: '0 0 6px' }}>
+              {statusModal.nextStatus === 'INACTIVE' || statusModal.nextStatus === 'LOCKED' ? 'Deactivate this user?' : 'Reactivate this user?'}
+            </h3>
+            <p style={{ fontSize: 13, color: c.textMuted, margin: 0, lineHeight: 1.5 }}>
+              {statusModal.nextStatus === 'INACTIVE' || statusModal.nextStatus === 'LOCKED'
+                ? 'Active sessions will be terminated immediately and the user will be unable to log in.'
+                : 'The user will regain access and be able to log in normally.'}
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: 10, width: '100%' }}>
+            <Button
+              block
+              onClick={() => setStatusModal({ open: false, user: null, nextStatus: 'ACTIVE' })}
+              style={{ borderRadius: c.radiusMd }}
+            >
+              Cancel
+            </Button>
+            <Button
+              block
+              type="primary"
+              danger={statusModal.nextStatus === 'INACTIVE' || statusModal.nextStatus === 'LOCKED'}
+              loading={savingStatus}
+              onClick={confirmStatusChange}
+              style={{
+                borderRadius: c.radiusMd, fontWeight: 700,
+                background: statusModal.nextStatus === 'INACTIVE' || statusModal.nextStatus === 'LOCKED' ? c.error : c.success,
+                borderColor: statusModal.nextStatus === 'INACTIVE' || statusModal.nextStatus === 'LOCKED' ? c.error : c.success,
+              }}
+            >
+              Yes, {statusModal.nextStatus === 'INACTIVE' || statusModal.nextStatus === 'LOCKED' ? 'Deactivate' : 'Reactivate'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* ========== ASSIGN ROLES MODAL (UC-11) ========== */}
+      <Modal
+        title={
+          <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, color: c.text, fontSize: 16 }}>
+            <KeyOutlined style={{ marginRight: 8, color: c.brand }} /> Assign Roles — {assignModal.user?.fullName}
           </div>
         }
         open={assignModal.open}
         onCancel={() => setAssignModal({ open: false, user: null })}
         footer={null}
-        width={480}
-        styles={{ content: { borderRadius: c.radiusLg, padding: '24px' }, body: { padding: 0 } }}
+        width={520}
+        styles={{ content: { borderRadius: c.radiusLg, padding: '24px 28px' }, header: { borderBottom: 'none', marginBottom: 16, padding: 0 }, body: { padding: 0 } }}
       >
-        <div style={{ marginBottom: 16 }}>
-          <p style={{ fontSize: 13, color: c.textSecondary, margin: '0 0 12px' }}>
-            Select roles for <strong>{assignModal.user?.email}</strong>. Changes take effect immediately.
-          </p>
-          <Select
-            mode="multiple"
-            value={selectedRoles}
-            onChange={setSelectedRoles}
-            style={{ width: '100%' }}
-            placeholder="Select roles..."
-            options={ALL_ROLES.map(r => ({ value: r, label: r.replace('_', ' ') }))}
-          />
-        </div>
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', paddingTop: 16, borderTop: `1px solid ${c.border}` }}>
-          <button
-            onClick={() => setAssignModal({ open: false, user: null })}
-            style={{ padding: '8px 16px', borderRadius: c.radiusMd, border: `1px solid ${c.border}`, background: 'transparent', color: c.textSecondary, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleAssignRoles}
-            disabled={savingRoles}
-            style={{ padding: '8px 16px', borderRadius: c.radiusMd, border: 'none', background: c.brand, color: '#fff', fontSize: 13, fontWeight: 700, cursor: savingRoles ? 'not-allowed' : 'pointer', opacity: savingRoles ? 0.6 : 1 }}
-          >
-            {savingRoles ? 'Saving...' : 'Save Changes'}
-          </button>
-        </div>
-      </Modal>
-
-      {/* Status Change Modal */}
-      <Modal
-        title={
-          <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, color: c.text, fontSize: 15 }}>
-            <SafetyCertificateOutlined style={{ marginRight: 8, color: c.brand }} />
-            Change User Status
-          </div>
-        }
-        open={statusModal.open}
-        onCancel={() => setStatusModal({ open: false, user: null, newStatus: 'ACTIVE' })}
-        footer={null}
-        width={420}
-        centered
-        styles={{ content: { borderRadius: c.radiusLg, padding: '24px' } }}
-      >
-        <p style={{ fontSize: 13, color: c.textSecondary, margin: '0 0 16px' }}>
-          Set status for <strong>{statusModal.user?.fullName}</strong>:
+        <p style={{ fontSize: 13, color: c.textSecondary, margin: '0 0 12px' }}>
+          Select roles for <strong>{assignModal.user?.email}</strong>. BR-06 enforces single-role assignment — only one role at a time.
         </p>
         <Select
-          value={statusModal.newStatus}
-          onChange={val => setStatusModal(s => ({ ...s, newStatus: val }))}
-          style={{ width: '100%', marginBottom: 16 }}
-          options={[
-            { value: 'ACTIVE', label: 'Active — User can log in normally' },
-            { value: 'INACTIVE', label: 'Inactive — User temporarily disabled' },
-            { value: 'LOCKED', label: 'Locked — User locked due to security' },
-          ]}
+          mode="multiple"
+          maxTagCount="responsive"
+          value={selectedRoles}
+          onChange={setSelectedRoles}
+          style={{ width: '100%' }}
+          placeholder="Select a role..."
+          options={ALL_ROLES.map(r => ({ value: r, label: r.replace('_', ' ') }))}
         />
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-          <button
-            onClick={() => setStatusModal({ open: false, user: null, newStatus: 'ACTIVE' })}
-            style={{ padding: '8px 16px', borderRadius: c.radiusMd, border: `1px solid ${c.border}`, background: 'transparent', color: c.textSecondary, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', paddingTop: 16, borderTop: `1px solid ${c.border}`, marginTop: 16 }}>
+          <Button onClick={() => setAssignModal({ open: false, user: null })} style={{ borderRadius: c.radiusMd }}>Cancel</Button>
+          <Button
+            type="primary"
+            onClick={handleAssignRoles}
+            loading={savingRoles}
+            style={{ background: c.brand, borderColor: c.brand, borderRadius: c.radiusMd, fontWeight: 700 }}
           >
-            Cancel
-          </button>
-          <button
-            onClick={handleStatusChange}
-            disabled={savingStatus}
-            style={{ padding: '8px 16px', borderRadius: c.radiusMd, border: 'none', background: c.brand, color: '#fff', fontSize: 13, fontWeight: 700, cursor: savingStatus ? 'not-allowed' : 'pointer', opacity: savingStatus ? 0.6 : 1 }}
-          >
-            {savingStatus ? 'Updating...' : 'Update Status'}
-          </button>
+            Save Configuration
+          </Button>
         </div>
       </Modal>
     </div>
   );
 };
+
+// ============================================================
+// SUB COMPONENTS
+// ============================================================
+const Field: React.FC<{ icon: React.ReactNode; label: string; value: string }> = ({ icon, label, value }) => (
+  <div style={{ padding: '10px 12px', borderRadius: c.radiusMd, background: c.bg, border: `1px solid ${c.border}` }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 10, fontWeight: 700, color: c.textMuted, textTransform: 'uppercase' }}>
+      {icon} {label}
+    </div>
+    <div style={{ fontSize: 14, fontWeight: 600, color: c.text, marginTop: 4, wordBreak: 'break-word' }}>{value}</div>
+  </div>
+);

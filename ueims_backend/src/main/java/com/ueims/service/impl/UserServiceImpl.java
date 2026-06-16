@@ -1,41 +1,51 @@
 package com.ueims.service.impl;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.ueims.dto.request.UserCreationRequest;
+import com.ueims.dto.response.UserDetailResponse;
 import com.ueims.dto.response.UserResponse;
 import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
 import com.ueims.model.entity.User;
+import com.ueims.repository.InvalidatedTokenRepository;
 import com.ueims.repository.UserRepository;
+import com.ueims.repository.UserSessionRepository;
 import com.ueims.service.MailService;
 import com.ueims.service.UserService;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Slf4j
 public class UserServiceImpl implements UserService {
     UserRepository repository;
     MailService mailService;
     PasswordEncoder passwordEncoder;
+    UserSessionRepository userSessionRepository;
+    InvalidatedTokenRepository invalidatedTokenRepository;
 
     @Override
-    public List<User> findAll() {
-        return repository.findAll();
+    public List<UserDetailResponse> findAll() {
+        return repository.findAll().stream().map(this::toDetailResponse).toList();
     }
 
     @Override
-    public User findById(UUID id) {
-        return repository.findById(id).orElse(null);
+    public UserDetailResponse findById(UUID id) {
+        return toDetailResponse(
+                repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED)));
     }
 
     @Override
@@ -45,6 +55,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User createUser(UserCreationRequest request) {
+        // BR-05: Email must be universally unique across all roles
+        if (repository.existsByEmail(request.getEmail())) {
+            throw new AppException(ErrorCode.USER_EXISTED);
+        }
         String randomPassword = UUID.randomUUID().toString().replace("-", "").substring(0, 12);
         User user = User.builder()
                 .email(request.getEmail())
@@ -67,8 +81,33 @@ public class UserServiceImpl implements UserService {
     @Override
     public void updateUserStatus(UUID id, String status) {
         User user = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        // UC-10 PRE-1 + 10.0.E1: Admin cannot change status of their own active session account
+        UUID currentUserId = getCurrentUserId();
+        if (user.getUserId().equals(currentUserId)) {
+            throw new AppException(ErrorCode.ADMIN_INTERVENTION_REQUIRED);
+        }
         user.setStatus(status);
         repository.save(user);
+
+        // UC-10 Other Information: Force logout active sessions when status becomes INACTIVE/LOCKED
+        if ("INACTIVE".equalsIgnoreCase(status) || "LOCKED".equalsIgnoreCase(status)) {
+            forceLogoutUser(user.getEmail());
+        }
+    }
+
+    private void forceLogoutUser(String email) {
+        try {
+            var sessions = userSessionRepository.findByEmail(email);
+            for (var session : sessions) {
+                invalidatedTokenRepository.save(com.ueims.model.entity.InvalidatedToken.builder()
+                        .tokenId(session.getTokenId())
+                        .expiresAt(session.getExpiresAt())
+                        .build());
+            }
+            userSessionRepository.deleteByEmail(email);
+        } catch (Exception e) {
+            log.warn("Force logout failed for user {}: {}", email, e.getMessage());
+        }
     }
 
     @Override
@@ -115,14 +154,48 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User updateUser(UUID id, com.ueims.dto.request.UserUpdateRequest request) {
+    public UserDetailResponse updateUser(UUID id, com.ueims.dto.request.UserUpdateRequest request) {
         User user = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        // UC-09 Other Information: Email is read-only; only fullName and phone can be updated via this UC.
+        // Status is changed through UC-10 (updateUserStatus), not here.
         if (request.getFullName() != null) user.setFullName(request.getFullName());
         if (request.getPhone() != null) user.setPhone(request.getPhone());
-        if (request.getStatus() != null) user.setStatus(request.getStatus());
         if (request.getPassword() != null && !request.getPassword().isEmpty()) {
             user.setPassword(passwordEncoder.encode(request.getPassword()));
         }
-        return repository.save(user);
+        repository.save(user);
+        return toDetailResponse(user);
+    }
+
+    private UserDetailResponse toDetailResponse(User user) {
+        var sessions = userSessionRepository.findByEmail(user.getEmail());
+        var lastLogin = sessions.stream()
+                .map(s -> s.getLastActivity())
+                .max(java.time.LocalDateTime::compareTo)
+                .orElse(null);
+
+        Set<String> roleNames = user.getRoles() == null
+                ? Set.of()
+                : user.getRoles().stream()
+                        .map(ur -> ur.getRole() != null ? ur.getRole().getRoleName() : null)
+                        .filter(r -> r != null)
+                        .collect(Collectors.toSet());
+
+        return UserDetailResponse.builder()
+                .userId(user.getUserId())
+                .email(user.getEmail())
+                .fullName(user.getFullName())
+                .phone(user.getPhone())
+                .status(user.getStatus())
+                .avatarUrl(user.getAvatarUrl())
+                .authProvider(user.getAuthProvider())
+                .failedLoginAttempts(user.getFailedLoginAttempts())
+                .lockedUntil(user.getLockedUntil())
+                .mustChangePassword(user.getMustChangePassword())
+                .createdAt(user.getCreatedAt())
+                .updatedAt(user.getUpdatedAt())
+                .lastLogin(lastLogin)
+                .roles(roleNames)
+                .build();
     }
 }
