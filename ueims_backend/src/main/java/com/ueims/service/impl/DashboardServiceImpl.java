@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -110,6 +111,9 @@ public class DashboardServiceImpl implements DashboardService {
                 .build();
     }
 
+    private static final Set<String> SUBMITTED_STATUSES = Set.of("SUBMITTED", "APPROVED", "REJECTED");
+    private static final Set<String> PENDING_STATUSES = Set.of("DRAFT", "PENDING", "NOT_SUBMITTED");
+
     private CommandCenterSummaryDTO.WeeklyReportSummary getWeeklyReportSummary() {
         List<WeeklyReport> allReports = weeklyReportRepository.findAll();
         int submitted = 0;
@@ -120,24 +124,15 @@ public class DashboardServiceImpl implements DashboardService {
 
         for (WeeklyReport r : allReports) {
             String s = r.getStatus() != null ? r.getStatus().toUpperCase() : "";
-            switch (s) {
-                case "SUBMITTED":
-                case "APPROVED":
-                case "REJECTED":
-                    submitted++;
-                    break;
-                case "DRAFT":
-                case "PENDING":
-                case "NOT_SUBMITTED":
-                    pending++;
-                    break;
-                case "LATE":
-                    late++;
-                    lateStudents.add(createLateStudentSummary(r));
-                    break;
-                default:
-                    notStarted++;
-                    break;
+            if (SUBMITTED_STATUSES.contains(s)) {
+                submitted++;
+            } else if (PENDING_STATUSES.contains(s)) {
+                pending++;
+            } else if ("LATE".equals(s)) {
+                late++;
+                lateStudents.add(createLateStudentSummary(r));
+            } else {
+                notStarted++;
             }
         }
 
