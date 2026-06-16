@@ -60,7 +60,7 @@ public class Application extends BaseEntity {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
-    @Column(name = "cv_download_count", nullable = false)
+    @Column(name = "cv_download_count", nullable = false, columnDefinition = "integer default 0")
     @Builder.Default
     private Integer cvDownloadCount = 0;
 }

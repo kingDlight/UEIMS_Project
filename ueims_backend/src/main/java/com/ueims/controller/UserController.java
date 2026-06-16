@@ -64,14 +64,14 @@ public class UserController {
     }
 
     @PutMapping("/{id}/lock")
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')")
     public ResponseEntity<Void> lockUser(@PathVariable UUID id) {
         service.updateUserStatus(id, "INACTIVE");
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/{id}/unlock")
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')")
     public ResponseEntity<Void> unlockUser(@PathVariable UUID id) {
         service.updateUserStatus(id, "ACTIVE");
         return ResponseEntity.ok().build();

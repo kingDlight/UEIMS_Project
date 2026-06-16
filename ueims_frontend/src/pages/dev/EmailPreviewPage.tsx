@@ -5,6 +5,7 @@ import { PasswordResetEmail } from '../../../emails/PasswordResetEmail';
 import { ResetPasswordEmail } from '../../../emails/ResetPasswordEmail';
 import { WelcomeEmail } from '../../../emails/WelcomeEmail';
 import { renderEmailAsync } from '../../../emails/renderEmail';
+import { useTranslation } from 'react-i18next';
 
 type TemplateId = 'reset-password' | 'password-reset' | 'password-changed' | 'welcome';
 
@@ -18,44 +19,7 @@ interface EmailMeta {
   preview: string;
 }
 
-const templates: EmailMeta[] = [
-  {
-    id: 'reset-password',
-    label: 'Reset Password (EN)',
-    subject: 'Reset Password — UEIMS',
-    from: 'UEIMS <noreply@ueims.edu.vn>',
-    to: 'a.nguyen@example.com',
-    time: '10:30 AM',
-    preview: 'You have requested a password reset for your UEIMS account...',
-  },
-  {
-    id: 'password-reset',
-    label: 'Password Reset (VI)',
-    subject: 'Yêu cầu đặt lại mật khẩu — UEIMS',
-    from: 'UEIMS <noreply@ueims.edu.vn>',
-    to: 'a.nguyen@example.com',
-    time: '10:28 AM',
-    preview: 'Bạn đã yêu cầu đặt lại mật khẩu cho tài khoản UEIMS của bạn...',
-  },
-  {
-    id: 'password-changed',
-    label: 'Password Changed (VI)',
-    subject: 'Mật khẩu đã được thay đổi — UEIMS',
-    from: 'UEIMS <noreply@ueims.edu.vn>',
-    to: 'a.nguyen@example.com',
-    time: '09:15 AM',
-    preview: 'Mật khẩu tài khoản UEIMS của bạn đã được thay đổi thành công...',
-  },
-  {
-    id: 'welcome',
-    label: 'Welcome (VI)',
-    subject: 'Chào mừng bạn đến với UEIMS',
-    from: 'UEIMS <noreply@ueims.edu.vn>',
-    to: 'a.nguyen@example.com',
-    time: '08:00 AM',
-    preview: 'Tài khoản UEIMS của bạn đã được tạo. Vui lòng đăng nhập...',
-  },
-];
+
 
 const defaultData = {
   resetPassword: { fullName: 'Nguyen Van A', resetUrl: 'https://ueims.edu.vn/reset?token=dummy-token-12345' },
@@ -70,6 +34,47 @@ const defaultData = {
 };
 
 export function EmailPreviewPage() {
+  const { t } = useTranslation('common');
+
+  const templates: EmailMeta[] = [
+    {
+      id: 'reset-password',
+      label: t('dev.emailPreview.resetPasswordLabel'),
+      subject: t('dev.emailPreview.resetSubject'),
+      from: 'UEIMS <noreply@ueims.edu.vn>',
+      to: 'a.nguyen@example.com',
+      time: '10:30 AM',
+      preview: t('dev.emailPreview.resetPreview'),
+    },
+    {
+      id: 'password-reset',
+      label: t('dev.emailPreview.passwordResetLabel'),
+      subject: t('dev.emailPreview.passwordResetSubject'),
+      from: 'UEIMS <noreply@ueims.edu.vn>',
+      to: 'a.nguyen@example.com',
+      time: '10:28 AM',
+      preview: t('dev.emailPreview.passwordResetPreview'),
+    },
+    {
+      id: 'password-changed',
+      label: t('dev.emailPreview.passwordChangedLabel'),
+      subject: t('dev.emailPreview.passwordChangedSubject'),
+      from: 'UEIMS <noreply@ueims.edu.vn>',
+      to: 'a.nguyen@example.com',
+      time: '09:15 AM',
+      preview: t('dev.emailPreview.passwordChangedPreview'),
+    },
+    {
+      id: 'welcome',
+      label: t('dev.emailPreview.welcomeLabel'),
+      subject: t('dev.emailPreview.welcomeSubject'),
+      from: 'UEIMS <noreply@ueims.edu.vn>',
+      to: 'a.nguyen@example.com',
+      time: '08:00 AM',
+      preview: t('dev.emailPreview.welcomePreview'),
+    },
+  ];
+
   const [active, setActive] = React.useState<TemplateId>('reset-password');
   const [html, setHtml] = React.useState<string>('');
   const [form, setForm] = React.useState(defaultData);
@@ -143,28 +148,30 @@ export function EmailPreviewPage() {
             </div>
             <div>
               <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: '#1F2937' }}>UEIMS</p>
-              <p style={{ margin: 0, fontSize: 11, color: '#9CA3AF' }}>Enterprise Internship Management</p>
+              <p style={{ margin: 0, fontSize: 11, color: '#9CA3AF' }}>{t('dev.emailPreview.enterpriseManagement')}</p>
             </div>
           </div>
           <div style={{ background: '#E67E22', borderRadius: 10, padding: '9px 14px', color: '#FFF', fontSize: 13, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
             </svg>
-            Compose
+            {t('dev.emailPreview.compose')}
           </div>
         </div>
 
         {/* Folder tabs */}
         <div style={{ display: 'flex', borderBottom: '1px solid #E8E8E8' }}>
-          {['Inbox', 'Sent', 'Drafts'].map((f) => (
+          {['inbox', 'sent', 'drafts'].map((f) => {
+            const isInbox = f === 'inbox';
+            return (
             <div key={f} style={{
-              flex: 1, textAlign: 'center', padding: '10px 0', fontSize: 12, fontWeight: f === 'Inbox' ? 700 : 400,
-              color: f === 'Inbox' ? '#E67E22' : '#6B7280', cursor: 'pointer',
-              borderBottom: f === 'Inbox' ? '2px solid #E67E22' : '2px solid transparent',
+              flex: 1, textAlign: 'center', padding: '10px 0', fontSize: 12, fontWeight: isInbox ? 700 : 400,
+              color: isInbox ? '#E67E22' : '#6B7280', cursor: 'pointer',
+              borderBottom: isInbox ? '2px solid #E67E22' : '2px solid transparent',
             }}>
-              {f}
+              {t(`dev.emailPreview.${f}`)}
             </div>
-          ))}
+          )})}
         </div>
 
         {/* Email list */}
@@ -217,7 +224,7 @@ export function EmailPreviewPage() {
             </div>
           ))}
           <div style={{ flex: 1 }} />
-          <span style={{ fontSize: 12, color: '#5F6368' }}>1 of 4</span>
+          <span style={{ fontSize: 12, color: '#5F6368' }}>{t('dev.emailPreview.pageInfo')}</span>
           <div style={{ width: 34, height: 34, borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#5F6368' }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
           </div>
@@ -238,7 +245,7 @@ export function EmailPreviewPage() {
                 <span style={{ fontSize: 12, color: '#9CA3AF' }}>&lt;noreply@ueims.edu.vn&gt;</span>
               </div>
               <p style={{ margin: '2px 0 0', fontSize: 12, color: '#6B7280' }}>
-                To: <span style={{ color: '#374151' }}>{currentProps.email ?? currentMeta.to}</span>
+                {t('dev.emailPreview.to')}: <span style={{ color: '#374151' }}>{currentProps.email ?? currentMeta.to}</span>
               </p>
             </div>
             <div style={{ marginLeft: 'auto', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -257,7 +264,7 @@ export function EmailPreviewPage() {
                   transition: 'all 0.2s',
                 }}
               >
-                {copied ? 'Copied!' : 'Copy HTML'}
+                {copied ? t('dev.emailPreview.copied') : t('dev.emailPreview.copyHtml')}
               </button>
             </div>
           </div>
@@ -280,7 +287,7 @@ export function EmailPreviewPage() {
               <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
             </svg>
             <span style={{ fontSize: 11, color: '#9CA3AF', fontWeight: 700, letterSpacing: 1.5, textTransform: 'uppercase' }}>
-              Mock Data Editor
+              {t('dev.emailPreview.mockDataEditor')}
             </span>
           </div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>

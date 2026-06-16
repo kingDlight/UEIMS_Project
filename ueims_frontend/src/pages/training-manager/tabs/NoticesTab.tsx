@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Table, Modal, Form, Input, Select, Button, Popconfirm, message } from 'antd';
+import { Table, Modal, Form, Input, Select, Button, Popconfirm, App } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import {
   Plus,
@@ -99,6 +99,7 @@ interface AudienceBadgeProps {
 }
 
 const AudienceBadge: React.FC<AudienceBadgeProps> = ({ audience, label }) => {
+  const { message } = App.useApp();
   const config: Record<Audience, { bg: string; border: string; color: string; icon: React.ReactNode }> = {
     All: {
       bg: cc.neutralMuted,
@@ -156,6 +157,7 @@ interface StatusBadgeProps {
 }
 
 const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
+  const { message } = App.useApp();
   const cfg = status === 'Published'
     ? { bg: cc.successMuted, border: '#A7F3D0', color: cc.successText, dot: cc.success, label: 'Published' }
     : { bg: cc.warningMuted, border: '#FDE68A', color: cc.warningText, dot: cc.warning, label: 'Draft' };
@@ -187,6 +189,7 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
 // MAIN COMPONENT
 // ============================================================
 export const NoticesTab: React.FC = () => {
+  const { message } = App.useApp();
   const [notices, setNotices] = useState<NoticeRecord[]>([]);
   const [audienceFilter, setAudienceFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');

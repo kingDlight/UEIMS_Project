@@ -25,7 +25,7 @@ public class UserRoleController {
     UserRoleService service;
 
     @GetMapping
-    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    @PreAuthorize("hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')")
     public ApiResponse<List<UserRole>> getAll() {
         return ApiResponse.<List<UserRole>>builder()
                 .result(service.findAll())
@@ -34,14 +34,14 @@ public class UserRoleController {
     }
 
     @PostMapping("/assign")
-    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    @PreAuthorize("hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')")
     public ApiResponse<Void> assignRole(@Valid @RequestBody UserRoleRequest request) {
         service.assignRole(request);
         return ApiResponse.<Void>builder().message("Gán quyền thành công").build();
     }
 
     @DeleteMapping("/revoke/{userId}/{roleName}")
-    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    @PreAuthorize("hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')")
     public ApiResponse<Void> revokeRole(@PathVariable UUID userId, @PathVariable String roleName) {
         service.revokeRole(userId, roleName);
         return ApiResponse.<Void>builder().message("Thu hồi quyền thành công").build();

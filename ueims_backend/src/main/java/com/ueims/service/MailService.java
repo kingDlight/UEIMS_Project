@@ -34,6 +34,7 @@ public class MailService {
     String appBaseUrl;
 
     // ===== Password Reset (VI) =====
+    @org.springframework.scheduling.annotation.Async("mailTaskExecutor")
     public void sendPasswordResetMail(String to, String fullName, String token) {
         String resetUrl = appBaseUrl + "/reset-password?token=" + token;
         String subject = "Yêu cầu đặt lại mật khẩu — UEIMS";
@@ -68,6 +69,7 @@ public class MailService {
     }
 
     // ===== Password Changed (VI) =====
+    @org.springframework.scheduling.annotation.Async("mailTaskExecutor")
     public void sendPasswordChangedMail(String to, String fullName, String changedAt) {
         String loginUrl = appBaseUrl + PATH_LOGIN;
         String subject = "Mật khẩu đã được thay đổi — UEIMS";

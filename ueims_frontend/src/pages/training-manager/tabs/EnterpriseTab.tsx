@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useScrollAnimation } from '../../../hooks/useScrollAnimation';
 
-import { Table, Modal, Button, Input, message } from 'antd';
+import { Table, Modal, Button, Input, App } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import {
   Building2,
@@ -314,6 +314,7 @@ const ApprovalRow: React.FC<{
 };
 
 const AllEnterprisesTable: React.FC<{ data: Enterprise[] }> = ({ data }) => {
+  const { message } = App.useApp();
   const columns: ColumnsType<Enterprise> = [
     {
       title: 'Company',
@@ -388,6 +389,7 @@ const AllEnterprisesTable: React.FC<{ data: Enterprise[] }> = ({ data }) => {
 };
 
 export const EnterpriseTab: React.FC = () => {
+  const { message } = App.useApp();
   useScrollAnimation();
 
   const [activeView, setActiveView] = useState<'pending' | 'all'>('pending');

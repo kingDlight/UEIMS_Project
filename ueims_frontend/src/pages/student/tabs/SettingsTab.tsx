@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { message, Spin } from 'antd';
+import { App, Spin } from 'antd';
 import { LockOutlined, BellOutlined, SaveOutlined, UserOutlined, PhoneOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { NeuSurface } from '../components/shared/NeuSurface';
@@ -35,6 +35,7 @@ const CTAButton: React.FC<{
 };
 
 export const SettingsTab: React.FC = () => {
+  const { message } = App.useApp();
   const { t } = useTranslation(['common']);
   const [loading, setLoading] = useState(false);
   const [savingPhone, setSavingPhone] = useState(false);

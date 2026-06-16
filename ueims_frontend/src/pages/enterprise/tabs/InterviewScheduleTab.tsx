@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Spin, message, Modal, Button, Input, Select, DatePicker, InputNumber, Form } from 'antd';
+import { Spin, App, Modal, Button, Input, Select, DatePicker, InputNumber, Form } from 'antd';
 import {
   CalendarOutlined,
   ClockCircleOutlined,
@@ -70,6 +70,7 @@ function matchesFilter(i: InterviewRow, filter: StatusFilter): boolean {
 }
 
 export const InterviewScheduleTab: React.FC = () => {
+  const { message } = App.useApp();
   const [interviews, setInterviews] = useState<InterviewRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

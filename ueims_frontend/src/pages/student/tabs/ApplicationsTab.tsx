@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { message, Spin, Pagination } from 'antd';
+import { App, Spin, Pagination } from 'antd';
 import { motion } from 'framer-motion';
 import { FileTextOutlined, CloseCircleOutlined, DownOutlined, UpOutlined } from '@ant-design/icons';
 import { NeuSurface } from '../components/shared/NeuSurface';
@@ -55,6 +55,7 @@ const EmptyState: React.FC<{ icon: React.ReactNode; title: string; description: 
 );
 
 export const ApplicationsTab: React.FC = () => {
+  const { message } = App.useApp();
   const { t } = useTranslation(['applications']);
   const [applications, setApplications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);

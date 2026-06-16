@@ -11,10 +11,12 @@ import { HomePage } from '@/pages/home/HomePage';
 import { ProtectedRoute } from '@/components/guards/ProtectedRoute';
 import { EmailPreviewPage } from '@/pages/dev/EmailPreviewPage';
 import { NoRolePage } from '@/pages/auth/NoRolePage';
+import { NotFoundPage } from '@/pages/errors/NotFoundPage';
 
 const TrainingManagerDashboard = React.lazy(() => import('@/pages/TrainingManagerDashboard').then(m => ({ default: m.TrainingManagerDashboard })));
 const StudentDashboard = React.lazy(() => import('@/pages/student/StudentDashboard').then(m => ({ default: m.StudentDashboard })));
 const EnterpriseDashboard = React.lazy(() => import('@/pages/enterprise/EnterpriseDashboard').then(m => ({ default: m.EnterpriseDashboard })));
+const AdminDashboard = React.lazy(() => import('@/pages/admin/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
 
 const PageLoader = () => (
   <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', width: '100%' }}>
@@ -101,8 +103,16 @@ export const router = createBrowserRouter([
     ),
   },
   {
+    path: '/admin/:tab?',
+    element: (
+      <Suspense fallback={<PageLoader />}>
+        <AdminDashboard />
+      </Suspense>
+    ),
+  },
+  {
     path: '*',
-    element: <div>404 Not Found</div>,
+    element: <NotFoundPage />,
   },
 ], {
   future: {

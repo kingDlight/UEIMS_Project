@@ -1,6 +1,6 @@
 import { LogoIcon } from '@/components/LogoIcon';
 import React, { useState, useEffect } from 'react';
-import { Form, Input, Button, message, Divider } from 'antd';
+import { Form, Input, Button, App, Divider } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -24,15 +24,19 @@ export const LoginPage: React.FC = () => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
+  const { message } = App.useApp();
 
   const user = useAuthStore((state) => state.user);
 
   const getRedirectPath = (roles: string[]): string => {
     if (!roles || roles.length === 0) return '/no-role';
+    if (roles.includes('ADMIN')) return '/admin/dashboard';
     if (roles.includes('STUDENT')) return '/student/dashboard';
     if (roles.includes('ENTERPRISE')) return '/enterprise-dashboard';
     return '/training-manager/dashboard';
   };
+
+
 
   useEffect(() => {
     if (isAuthenticated && user) {
@@ -266,15 +270,8 @@ export const LoginPage: React.FC = () => {
           </Divider>
 
           <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: 20 }}>
-            <GoogleLogin
-              onSuccess={handleGoogleSuccess}
-              onError={() => {
-                message.error(t('auth.googleLoginFail', 'Login with Google failed. Please try again!'));
-              }}
-              useOneTap
-              shape="pill"
-              theme="outline"
-            />
+            {/* Google Sign-In disabled — uncomment and configure client_id in .env when ready */}
+            <GoogleLogin onSuccess={handleGoogleSuccess} onError={() => message.error('Google login failed')} useOneTap shape="pill" theme="outline" />
           </div>
         </div>
 

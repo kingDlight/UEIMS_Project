@@ -26,7 +26,7 @@ public class EnterpriseController {
     EnterpriseMapper mapper;
 
     @GetMapping
-    @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')") // UC-18
+    @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')") // UC-18
     public ApiResponse<List<EnterpriseDTO>> getAll() {
         return ApiResponse.<List<EnterpriseDTO>>builder()
                 .result(service.findAll().stream().map(mapper::toDto).toList())
@@ -34,7 +34,8 @@ public class EnterpriseController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN') or hasRole('ENTERPRISE')") // UC-35
+    @PreAuthorize(
+            "hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN') or hasRole('ADMIN') or hasRole('ENTERPRISE')") // UC-35
     public ApiResponse<EnterpriseDTO> getById(@PathVariable UUID id) {
         return ApiResponse.<EnterpriseDTO>builder()
                 .result(mapper.toDto(service.findById(id)))
@@ -51,7 +52,7 @@ public class EnterpriseController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    @PreAuthorize("hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')")
     public ApiResponse<EnterpriseDTO> create(@Valid @RequestBody com.ueims.dto.request.EnterpriseRequest request) {
         return ApiResponse.<EnterpriseDTO>builder()
                 .result(mapper.toDto(service.save(request)))
@@ -79,7 +80,7 @@ public class EnterpriseController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    @PreAuthorize("hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')")
     public ApiResponse<Void> delete(@PathVariable UUID id) {
         service.deleteById(id);
         return ApiResponse.<Void>builder()
