@@ -3,7 +3,7 @@ package com.ueims.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 
-import com.ueims.dto.response.StudentProfileDTO;
+import com.ueims.dto.response.StudentProfileResponseDTO;
 import com.ueims.model.entity.StudentProfile;
 
 @Mapper(
@@ -11,7 +11,7 @@ import com.ueims.model.entity.StudentProfile;
         unmappedTargetPolicy = ReportingPolicy.IGNORE,
         builder = @org.mapstruct.Builder(disableBuilder = true))
 public interface StudentProfileMapper {
-    StudentProfileDTO toDto(StudentProfile entity);
+    StudentProfileResponseDTO toDto(StudentProfile entity);
 
-    StudentProfile toEntity(StudentProfileDTO dto);
+    StudentProfile toEntity(StudentProfileResponseDTO dto);
 }

@@ -373,20 +373,8 @@ public class InterviewServiceImpl implements InterviewService {
         LocalDateTime cursor = LocalDateTime.now().plusDays(1).with(LocalTime.of(9, 0));
         List<Interview> existing = findMyEnterpriseInterviews();
         while (slots.size() < 3 && cursor.isBefore(LocalDateTime.now().plusDays(14))) {
-            int dow = cursor.getDayOfWeek().getValue();
-            if (dow >= 1 && dow <= 5) {
-                int hour = cursor.getHour();
-                if ((hour >= 9 && hour < 12) || (hour >= 14 && hour < 17)) {
-                    final LocalDateTime candidate = cursor;
-                    boolean conflict = existing.stream()
-                            .anyMatch(i -> i.getScheduledTime() != null
-                                    && Math.abs(java.time.Duration.between(i.getScheduledTime(), candidate)
-                                                    .toMinutes())
-                                            < 60);
-                    if (!conflict) {
-                        slots.add(candidate);
-                    }
-                }
+            if (isValidSlot(cursor, existing)) {
+                slots.add(cursor);
             }
             cursor = cursor.plusMinutes(60);
         }
@@ -397,5 +385,19 @@ public class InterviewServiceImpl implements InterviewService {
     private User getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+    }
+
+    private boolean isValidSlot(LocalDateTime candidate, List<Interview> existing) {
+        int dow = candidate.getDayOfWeek().getValue();
+        if (dow < 1 || dow > 5) return false;
+
+        int hour = candidate.getHour();
+        if ((hour < 9 || hour >= 12) && (hour < 14 || hour >= 17)) return false;
+
+        return existing.stream()
+                .noneMatch(i -> i.getScheduledTime() != null
+                        && Math.abs(java.time.Duration.between(i.getScheduledTime(), candidate)
+                                        .toMinutes())
+                                < 60);
     }
 }

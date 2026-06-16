@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { message, Spin, Modal, Form, Input } from 'antd';
+import { App, Spin, Modal, Form, Input } from 'antd';
 import {
   FileTextOutlined, EyeOutlined,
   PlusOutlined, UploadOutlined, IdcardOutlined,
@@ -319,6 +319,7 @@ const EditProfileModal: React.FC<{
   const { t } = useTranslation(['profile', 'common']);
   const [form] = Form.useForm();
   const [saving, setSaving] = useState(false);
+  const { message } = App.useApp();
 
   useEffect(() => {
     if (open) {
@@ -485,6 +486,7 @@ const CvView: React.FC<{ cvUrl?: string; cvFileName?: string; onRefresh: () => v
   const [dragActive, setDragActive] = useState(false);
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [showUpload, setShowUpload] = useState(false);
+  const { message } = App.useApp();
 
   const validateFile = (file: File): string | null => {
     if (file.type !== 'application/pdf') return t('onlyPdfAccept', 'Only PDF files are accepted!');

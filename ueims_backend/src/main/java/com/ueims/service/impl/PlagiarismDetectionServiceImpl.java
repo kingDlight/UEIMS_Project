@@ -38,9 +38,9 @@ public class PlagiarismDetectionServiceImpl implements PlagiarismDetectionServic
                 .split("\\s+");
         Set<String> tokens = new HashSet<>();
         for (String w : raw) {
-            if (w.length() < 3) continue;
-            if (STOP_WORDS.contains(w)) continue;
-            tokens.add(w);
+            if (w.length() >= 3 && !STOP_WORDS.contains(w)) {
+                tokens.add(w);
+            }
         }
         return tokens;
     }
@@ -76,19 +76,19 @@ public class PlagiarismDetectionServiceImpl implements PlagiarismDetectionServic
             return 0.0;
         }
         for (WeeklyReport other : all) {
-            if (other.getReportId() == null || other.getReportId().equals(report.getReportId())) {
-                continue;
+            if (other.getReportId() != null && !other.getReportId().equals(report.getReportId())) {
+                String otherText = String.join(
+                        " ",
+                        nullSafe(other.getTasksCompleted()),
+                        nullSafe(other.getIssuesChallenges()),
+                        nullSafe(other.getLessonsLearned()),
+                        nullSafe(other.getPlanNextWeek()));
+                Set<String> otherTokens = tokenize(otherText);
+                if (!otherTokens.isEmpty()) {
+                    double score = jaccard(tokens, otherTokens);
+                    if (score > max) max = score;
+                }
             }
-            String otherText = String.join(
-                    " ",
-                    nullSafe(other.getTasksCompleted()),
-                    nullSafe(other.getIssuesChallenges()),
-                    nullSafe(other.getLessonsLearned()),
-                    nullSafe(other.getPlanNextWeek()));
-            Set<String> otherTokens = tokenize(otherText);
-            if (otherTokens.isEmpty()) continue;
-            double score = jaccard(tokens, otherTokens);
-            if (score > max) max = score;
         }
         return max;
     }

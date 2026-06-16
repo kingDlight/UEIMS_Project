@@ -44,7 +44,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     @Transactional(readOnly = true)
     public List<ApplicationResponse> findAll() {
-        return repository.findAll().stream().map(mapper::toApplicationResponse).toList();
+        return repository.findAll().stream().map(this::mapToResponse).toList();
     }
 
     @Override
@@ -52,7 +52,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     public List<ApplicationResponse> findMyApplications() {
         User currentUser = getCurrentUser();
         return repository.findByStudent_UserId(currentUser.getUserId()).stream()
-                .map(mapper::toApplicationResponse)
+                .map(this::mapToResponse)
                 .toList();
     }
 
@@ -70,7 +70,7 @@ public class ApplicationServiceImpl implements ApplicationService {
             return List.of();
         }
         return repository.findByJobPost_Enterprise_EnterpriseIdAndDeletedAtIsNull(enterpriseUUID).stream()
-                .map(mapper::toApplicationResponse)
+                .map(this::mapToResponse)
                 .toList();
     }
 
@@ -79,7 +79,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     public ApplicationResponse findById(UUID id) {
         Application application =
                 repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.APPLICATION_NOT_FOUND));
-        return mapper.toApplicationResponse(application);
+        return mapToResponse(application);
     }
 
     @Override
@@ -113,7 +113,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                 .build();
 
         Application saved = repository.save(entity);
-        return mapper.toApplicationResponse(saved);
+        return mapToResponse(saved);
     }
 
     private void validateJobPost(JobPost jobPost) {
@@ -207,7 +207,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         application.setStatus(ApplicationStatus.WITHDRAWN);
         Application updated = repository.save(application);
 
-        return mapper.toApplicationResponse(updated);
+        return mapToResponse(updated);
     }
 
     @Override
@@ -249,7 +249,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 
         application.setScreenedBy(currentUser);
 
-        return mapper.toApplicationResponse(repository.save(application));
+        return mapToResponse(repository.save(application));
     }
 
     @Override
@@ -284,7 +284,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         }
         application.setScreenedBy(currentUser);
 
-        return mapper.toApplicationResponse(repository.save(application));
+        return mapToResponse(repository.save(application));
     }
 
     private User getCurrentUser() {
@@ -330,5 +330,17 @@ public class ApplicationServiceImpl implements ApplicationService {
         repository.incrementDownloadCount(applicationId);
 
         return new org.springframework.core.io.FileSystemResource(filePath);
+    }
+
+    private ApplicationResponse mapToResponse(Application app) {
+        ApplicationResponse res = mapper.toApplicationResponse(app);
+        if (app.getStudent() != null) {
+            var profile =
+                    studentProfileRepository.findByUser_UserId(app.getStudent().getUserId());
+            if (profile != null) {
+                res.setStudentCode(profile.getStudentCode());
+            }
+        }
+        return res;
     }
 }

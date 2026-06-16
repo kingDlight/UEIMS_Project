@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Spin, message, Modal, Form, Input, Button, Upload } from 'antd';
+import { Spin, App, Modal, Form, Input, Button, Upload } from 'antd';
 import { motion } from 'framer-motion';
 import {
   EditOutlined,
@@ -54,6 +54,7 @@ function hexToRgba(hex: string, alpha: number): string {
 }
 
 const StatusBadge: React.FC<{ status?: string }> = ({ status }) => {
+  const { message } = App.useApp();
   const map: Record<string, { color: string; bg: string; label: string; icon: React.ReactNode }> = {
     ACTIVE: { color: c.success, bg: hexToRgba(c.success, 0.1), label: 'Active', icon: <CheckCircleOutlined /> },
     APPROVED: { color: c.success, bg: hexToRgba(c.success, 0.1), label: 'Approved', icon: <CheckCircleOutlined /> },
@@ -102,6 +103,7 @@ const InfoRow: React.FC<{ icon: React.ReactNode; label: string; value?: string }
 // MAIN COMPONENT (UC-35 + UC-36)
 // ============================================================
 export const EnterpriseProfileTab: React.FC = () => {
+  const { message } = App.useApp();
   const [profile, setProfile] = useState<EnterpriseProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [editOpen, setEditOpen] = useState(false);

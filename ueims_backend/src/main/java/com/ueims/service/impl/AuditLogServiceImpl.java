@@ -12,8 +12,10 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 
+import com.ueims.dto.response.AuditLogResponseDTO;
 import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
+import com.ueims.mapper.AuditLogMapper;
 import com.ueims.model.entity.AuditLog;
 import com.ueims.repository.AuditLogRepository;
 import com.ueims.service.AuditLogService;
@@ -29,15 +31,17 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class AuditLogServiceImpl implements AuditLogService {
     AuditLogRepository repository;
+    AuditLogMapper mapper;
 
     @Override
-    public List<AuditLog> findAll() {
-        return repository.findAll();
+    public List<AuditLogResponseDTO> findAll() {
+        return repository.findAll().stream().map(mapper::toDto).toList();
     }
 
     @Override
-    public AuditLog findById(UUID id) {
-        return repository.findById(id).orElse(null);
+    public AuditLogResponseDTO findById(UUID id) {
+        AuditLog log = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.FILE_NOT_FOUND));
+        return mapper.toDto(log);
     }
 
     @Override

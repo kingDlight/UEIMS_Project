@@ -919,7 +919,7 @@ export const StudentDashboardTab: React.FC = () => {
   }
 
   return (
-    <div style={{
+      <div style={{
       fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
     }}>
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px 40px' }}>
@@ -943,7 +943,7 @@ export const StudentDashboardTab: React.FC = () => {
               {/* QUICK ACTIONS ROW (Full Width) */}
               <div style={{ marginBottom: 24 }}>
                 <QuickActionsRow onNavigate={handleNavigate} actions={quickActions} />
-              </div>
+            </div>
 
               {/* SPLIT SCREEN WORKSPACE GRID */}
               <div style={{ display: 'grid', gridTemplateColumns: '7fr 3fr', gap: 24 }}>

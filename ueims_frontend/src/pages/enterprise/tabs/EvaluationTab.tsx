@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Spin, message } from 'antd';
+import { Spin, App } from 'antd';
 import { motion } from 'framer-motion';
 import { StarOutlined, LockOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import { ApplicationService } from '@/services/ApplicationService';
@@ -339,6 +339,7 @@ const EvaluationSummary: React.FC<{
 // MAIN EVALUATION TAB
 // ============================================================
 export const EvaluationTab: React.FC = () => {
+  const { message } = App.useApp();
   const [loading, setLoading] = useState(true);
   const [students, setStudents] = useState<AssignedStudent[]>([]);
   const [selectedStudent, setSelectedStudent] = useState<AssignedStudent | null>(null);

@@ -44,7 +44,8 @@ public class SemesterController {
     }
 
     @PostMapping
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
+    @org.springframework.security.access.prepost.PreAuthorize(
+            "hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')")
     public ResponseEntity<SemesterResponse> create(@Valid @RequestBody SemesterCreationRequest request) {
         var context = SecurityContextHolder.getContext();
         String email = context.getAuthentication().getName();
@@ -66,32 +67,37 @@ public class SemesterController {
     }
 
     @DeleteMapping("/{id}")
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
+    @org.springframework.security.access.prepost.PreAuthorize(
+            "hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         service.deleteById(id);
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/{id}/open")
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
+    @org.springframework.security.access.prepost.PreAuthorize(
+            "hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')")
     public ResponseEntity<SemesterResponse> openSemester(@PathVariable UUID id) {
         return ResponseEntity.ok(SemesterResponse.fromEntity(service.openSemester(id)));
     }
 
     @PutMapping("/{id}/active")
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
+    @org.springframework.security.access.prepost.PreAuthorize(
+            "hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')")
     public ResponseEntity<SemesterResponse> activeSemester(@PathVariable UUID id) {
         return ResponseEntity.ok(SemesterResponse.fromEntity(service.activeSemester(id)));
     }
 
     @PutMapping("/{id}/close")
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
+    @org.springframework.security.access.prepost.PreAuthorize(
+            "hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')")
     public ResponseEntity<SemesterResponse> closeSemester(@PathVariable UUID id) {
         return ResponseEntity.ok(SemesterResponse.fromEntity(service.closeSemester(id)));
     }
 
     @PutMapping("/{id}/lock")
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
+    @org.springframework.security.access.prepost.PreAuthorize(
+            "hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')")
     public ResponseEntity<SemesterResponse> lockSemester(@PathVariable UUID id) {
         return ResponseEntity.ok(SemesterResponse.fromEntity(service.lockSemester(id)));
     }

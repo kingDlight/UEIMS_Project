@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { message, Spin } from 'antd';
+import { App, Spin } from 'antd';
 import { FileOutlined, UploadOutlined, EyeOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { NeuSurface } from '../components/shared/NeuSurface';
@@ -40,6 +40,7 @@ const CTAButton: React.FC<{
 };
 
 export const FinalReportTab: React.FC = () => {
+  const { message } = App.useApp();
   const { t } = useTranslation(['finalReport', 'common']);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);

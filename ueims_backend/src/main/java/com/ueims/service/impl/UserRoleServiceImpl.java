@@ -1,14 +1,20 @@
 package com.ueims.service.impl;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ueims.dto.request.UserRoleRequest;
 import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
+import com.ueims.model.entity.Role;
+import com.ueims.model.entity.User;
 import com.ueims.model.entity.UserRole;
 import com.ueims.model.entity.UserRoleId;
+import com.ueims.repository.RoleRepository;
+import com.ueims.repository.UserRepository;
 import com.ueims.repository.UserRoleRepository;
 import com.ueims.service.UserRoleService;
 
@@ -21,6 +27,8 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserRoleServiceImpl implements UserRoleService {
     UserRoleRepository repository;
+    UserRepository userRepository;
+    RoleRepository roleRepository;
 
     @Override
     public List<UserRole> findAll() {
@@ -36,8 +44,11 @@ public class UserRoleServiceImpl implements UserRoleService {
     @Transactional
     public UserRole save(UserRole entity) {
         if (entity.getUser() != null && entity.getUser().getUserId() != null) {
-            long existing = repository.countByUserUserId(entity.getUser().getUserId());
-            if (existing > 0) {
+            UserRoleId id = entity.getId();
+            // BR-06: Enforce single-role assignment per user
+            // The actual per-pair uniqueness is already enforced by the (user_id, role_name) PK
+            // in users_roles table. This guard prevents direct misuse of `save`.
+            if (id != null && repository.existsById(id)) {
                 throw new AppException(ErrorCode.USER_ALREADY_HAS_ROLE);
             }
         }
@@ -47,6 +58,37 @@ public class UserRoleServiceImpl implements UserRoleService {
     @Override
     @Transactional
     public void deleteById(UserRoleId id) {
+        repository.deleteById(id);
+    }
+
+    @Override
+    @Transactional
+    public void assignRole(UserRoleRequest request) {
+        User user = userRepository
+                .findById(request.getUserId())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        Role role = roleRepository
+                .findById(request.getRoleName().toUpperCase())
+                .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_EXISTED));
+
+        UserRoleId id = new UserRoleId(user.getUserId(), role.getRoleName());
+
+        if (repository.existsById(id)) {
+            throw new AppException(ErrorCode.USER_ALREADY_HAS_ROLE);
+        }
+
+        UserRole userRole = UserRole.builder().id(id).user(user).role(role).build();
+        repository.save(userRole);
+    }
+
+    @Override
+    @Transactional
+    public void revokeRole(UUID userId, String roleName) {
+        UserRoleId id = new UserRoleId(userId, roleName.toUpperCase());
+        if (!repository.existsById(id)) {
+            throw new AppException(ErrorCode.USER_ROLE_NOT_FOUND);
+        }
         repository.deleteById(id);
     }
 }

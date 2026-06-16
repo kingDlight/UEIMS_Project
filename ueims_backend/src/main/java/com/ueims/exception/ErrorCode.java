@@ -13,6 +13,8 @@ public enum ErrorCode {
     USERNAME_INVALID(1003, "Username must be at least {min} characters", HttpStatus.BAD_REQUEST),
     INVALID_PASSWORD(1004, "Password must be at least {min} characters", HttpStatus.BAD_REQUEST),
     USER_NOT_EXISTED(1005, "User not existed", HttpStatus.NOT_FOUND),
+    ROLE_NOT_EXISTED(10051, "Role not existed", HttpStatus.NOT_FOUND),
+    USER_ROLE_NOT_FOUND(10052, "User role not found", HttpStatus.NOT_FOUND),
     UNAUTHENTICATED(1006, "Unauthenticated", HttpStatus.UNAUTHORIZED),
     UNAUTHORIZED(1007, "You do not have permission", HttpStatus.FORBIDDEN),
     INVALID_DOB(1008, "Your age must be at least {min}", HttpStatus.BAD_REQUEST),
@@ -129,6 +131,9 @@ public enum ErrorCode {
     // File related
     FILE_NOT_FOUND(1073, "The requested file is currently unavailable or has been removed", HttpStatus.NOT_FOUND),
     FILE_DOWNLOAD_ERROR(1074, "Failed to stream the requested file", HttpStatus.INTERNAL_SERVER_ERROR),
+
+    // Rate limiting
+    RATE_LIMIT_EXCEEDED(4029, "Too many requests. Please try again after 1 minute.", HttpStatus.TOO_MANY_REQUESTS),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
