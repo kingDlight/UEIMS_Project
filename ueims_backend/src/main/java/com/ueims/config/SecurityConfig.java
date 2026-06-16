@@ -1,4 +1,4 @@
-package com.ueims.configuration;
+package com.ueims.config;
 
 import java.util.Arrays;
 import java.util.List;
