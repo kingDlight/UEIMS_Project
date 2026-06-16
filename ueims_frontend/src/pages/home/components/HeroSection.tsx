@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
-import { stats as defaultStats } from '../constants';
+
 import { FloatingShapes } from './FloatingShapes';
 import { useTranslation } from 'react-i18next';
 import { PublicService } from '../../../services/PublicService';
@@ -10,7 +10,12 @@ export const HeroSection = ({ isDark, handleMouseMove, spotlightRef, scrollToSec
   const navigate = useNavigate();
   const { t } = useTranslation();
   
-  const [dynamicStats, setDynamicStats] = useState(defaultStats);
+  const [dynamicStats, setDynamicStats] = useState([
+    { value: '0', label: 'home.stats.interns' },
+    { value: '0', label: 'home.stats.enterprises' },
+    { value: '0%', label: 'home.stats.completion' },
+    { value: '0%', label: 'home.stats.satisfaction' },
+  ]);
 
   useEffect(() => {
     let isMounted = true;
@@ -20,8 +25,8 @@ export const HeroSection = ({ isDark, handleMouseMove, spotlightRef, scrollToSec
         const data = await PublicService.getHomeStats();
         if (isMounted) {
           setDynamicStats([
-            { value: `${data.interns}+`, label: 'home.stats.interns' },
-            { value: `${data.enterprises}+`, label: 'home.stats.enterprises' },
+            { value: data.interns > 0 ? `${data.interns}+` : `${data.interns}`, label: 'home.stats.interns' },
+            { value: data.enterprises > 0 ? `${data.enterprises}+` : `${data.enterprises}`, label: 'home.stats.enterprises' },
             { value: `${data.completion}%`, label: 'home.stats.completion' },
             { value: `${data.satisfaction}%`, label: 'home.stats.satisfaction' },
           ]);
