@@ -96,6 +96,20 @@ public class DashboardServiceImpl implements DashboardService {
                 .toList();
     }
 
+    private CommandCenterSummaryDTO.LateStudentSummary createLateStudentSummary(WeeklyReport r) {
+        long daysOverdue = r.getCreatedAt() != null
+                ? ChronoUnit.DAYS.between(r.getCreatedAt().plusDays(7), LocalDateTime.now())
+                : 0;
+        String studentName = r.getAssignment() != null && r.getAssignment().getStudent() != null
+                ? r.getAssignment().getStudent().getFullName()
+                : UNKNOWN_TEXT;
+        return CommandCenterSummaryDTO.LateStudentSummary.builder()
+                .name(studentName)
+                .daysOverdue((int) Math.max(0, daysOverdue))
+                .status("LATE")
+                .build();
+    }
+
     private CommandCenterSummaryDTO.WeeklyReportSummary getWeeklyReportSummary() {
         List<WeeklyReport> allReports = weeklyReportRepository.findAll();
         int submitted = 0;
@@ -106,22 +120,25 @@ public class DashboardServiceImpl implements DashboardService {
 
         for (WeeklyReport r : allReports) {
             String s = r.getStatus() != null ? r.getStatus().toUpperCase() : "";
-            if (s.equals("SUBMITTED") || s.equals("APPROVED") || s.equals("REJECTED")) submitted++;
-            else if (s.equals("DRAFT") || s.equals("PENDING") || s.equals("NOT_SUBMITTED")) pending++;
-            else if (s.equals("LATE")) {
-                late++;
-                long daysOverdue = r.getCreatedAt() != null
-                        ? ChronoUnit.DAYS.between(r.getCreatedAt().plusDays(7), LocalDateTime.now())
-                        : 0;
-                lateStudents.add(CommandCenterSummaryDTO.LateStudentSummary.builder()
-                        .name(
-                                r.getAssignment() != null && r.getAssignment().getStudent() != null
-                                        ? r.getAssignment().getStudent().getFullName()
-                                        : UNKNOWN_TEXT)
-                        .daysOverdue((int) Math.max(0, daysOverdue))
-                        .status("LATE")
-                        .build());
-            } else notStarted++;
+            switch (s) {
+                case "SUBMITTED":
+                case "APPROVED":
+                case "REJECTED":
+                    submitted++;
+                    break;
+                case "DRAFT":
+                case "PENDING":
+                case "NOT_SUBMITTED":
+                    pending++;
+                    break;
+                case "LATE":
+                    late++;
+                    lateStudents.add(createLateStudentSummary(r));
+                    break;
+                default:
+                    notStarted++;
+                    break;
+            }
         }
 
         return CommandCenterSummaryDTO.WeeklyReportSummary.builder()
