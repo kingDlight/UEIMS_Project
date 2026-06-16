@@ -18,8 +18,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.ueims.dto.response.AuditLogResponseDTO;
 import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
+import com.ueims.mapper.AuditLogMapper;
 import com.ueims.model.entity.AuditLog;
 import com.ueims.model.entity.User;
 import com.ueims.repository.AuditLogRepository;
@@ -29,6 +31,9 @@ class AuditLogServiceImplTest {
 
     @Mock
     private AuditLogRepository repository;
+
+    @Mock
+    private AuditLogMapper mapper;
 
     @InjectMocks
     private AuditLogServiceImpl service;
@@ -55,14 +60,18 @@ class AuditLogServiceImplTest {
     @Test
     void findAll_returnsList() {
         when(repository.findAll()).thenReturn(List.of(auditLog));
-        List<AuditLog> result = service.findAll();
+        when(mapper.toDto(any())).thenReturn(new AuditLogResponseDTO());
+        List<AuditLogResponseDTO> result = service.findAll();
         assertEquals(1, result.size());
     }
 
     @Test
     void findById_exists_returnsAuditLog() {
         when(repository.findById(logId)).thenReturn(Optional.of(auditLog));
-        AuditLog result = service.findById(logId);
+        AuditLogResponseDTO dto = new AuditLogResponseDTO();
+        dto.setLogId(logId);
+        when(mapper.toDto(any())).thenReturn(dto);
+        AuditLogResponseDTO result = service.findById(logId);
         assertNotNull(result);
         assertEquals(logId, result.getLogId());
     }
@@ -70,8 +79,8 @@ class AuditLogServiceImplTest {
     @Test
     void findById_notExists_returnsNull() {
         when(repository.findById(any())).thenReturn(Optional.empty());
-        AuditLog result = service.findById(UUID.randomUUID());
-        assertNull(result);
+        AppException exception = assertThrows(AppException.class, () -> service.findById(UUID.randomUUID()));
+        assertEquals(ErrorCode.FILE_NOT_FOUND, exception.getErrorCode());
     }
 
     @Test
