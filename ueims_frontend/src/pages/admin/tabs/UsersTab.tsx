@@ -46,16 +46,13 @@ function hexToRgba(hex: string, alpha: number): string {
 }
 
 const ROLE_COLORS: Record<string, { color: string; bg: string }> = {
-  SYSTEM_ADMIN: { color: c.brand, bg: hexToRgba(c.brand, 0.1) },
   ADMIN: { color: c.brand, bg: hexToRgba(c.brand, 0.1) },
   TRAINING_MANAGER: { color: c.purple, bg: hexToRgba(c.purple, 0.1) },
   ENTERPRISE: { color: c.success, bg: hexToRgba(c.success, 0.1) },
   STUDENT: { color: c.info, bg: hexToRgba(c.info, 0.1) },
-  MENTOR: { color: c.warning, bg: hexToRgba(c.warning, 0.1) },
-  LECTURER: { color: c.textSecondary, bg: hexToRgba(c.textSecondary, 0.1) },
 };
 
-const ALL_ROLES = ['SYSTEM_ADMIN', 'ADMIN', 'TRAINING_MANAGER', 'ENTERPRISE', 'STUDENT', 'MENTOR', 'LECTURER'];
+const ALL_ROLES = ['ADMIN', 'TRAINING_MANAGER', 'ENTERPRISE', 'STUDENT'];
 
 const STATUS_COLORS: Record<string, { color: string; bg: string; label: string }> = {
   ACTIVE: { color: c.success, bg: hexToRgba(c.success, 0.1), label: 'Active' },
