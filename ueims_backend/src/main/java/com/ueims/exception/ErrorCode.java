@@ -131,6 +131,9 @@ public enum ErrorCode {
     // File related
     FILE_NOT_FOUND(1073, "The requested file is currently unavailable or has been removed", HttpStatus.NOT_FOUND),
     FILE_DOWNLOAD_ERROR(1074, "Failed to stream the requested file", HttpStatus.INTERNAL_SERVER_ERROR),
+
+    // Rate limiting
+    RATE_LIMIT_EXCEEDED(4029, "Too many requests. Please try again after 1 minute.", HttpStatus.TOO_MANY_REQUESTS),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

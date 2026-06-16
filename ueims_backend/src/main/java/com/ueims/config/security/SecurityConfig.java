@@ -1,4 +1,4 @@
-package com.ueims.config;
+package com.ueims.config.security;
 
 import java.util.Arrays;
 import java.util.List;
@@ -18,6 +18,7 @@ import org.springframework.security.oauth2.server.resource.web.BearerTokenResolv
 import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -45,7 +46,9 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(
             HttpSecurity httpSecurity,
             CustomJwtDecoder customJwtDecoder,
-            RequirePasswordChangeFilter requirePasswordChangeFilter)
+            RequirePasswordChangeFilter requirePasswordChangeFilter,
+            RateLimitFilter rateLimitFilter,
+            SecurityHeadersFilter securityHeadersFilter)
             throws Exception {
         httpSecurity.authorizeHttpRequests(request -> request.requestMatchers(HttpMethod.OPTIONS, "/**")
                 .permitAll()
@@ -66,6 +69,11 @@ public class SecurityConfig {
         httpSecurity.csrf(AbstractHttpConfigurer::disable);
         httpSecurity.cors(cors -> {});
 
+        // Security headers on every response
+        httpSecurity.addFilterBefore(securityHeadersFilter, UsernamePasswordAuthenticationFilter.class);
+        // Rate limiting before JWT processing
+        httpSecurity.addFilterBefore(rateLimitFilter, BearerTokenAuthenticationFilter.class);
+        // Enforce password change after JWT validation
         httpSecurity.addFilterAfter(requirePasswordChangeFilter, BearerTokenAuthenticationFilter.class);
 
         return httpSecurity.build();
