@@ -69,17 +69,18 @@ class AuditLogServiceImplTest {
     void findById_exists_returnsAuditLog() {
         when(repository.findById(logId)).thenReturn(Optional.of(auditLog));
         AuditLogResponseDTO dto = new AuditLogResponseDTO();
-        dto.setLogId(logId);
+        dto.setId(logId.toString());
         when(mapper.toDto(any())).thenReturn(dto);
         AuditLogResponseDTO result = service.findById(logId);
         assertNotNull(result);
-        assertEquals(logId, result.getLogId());
+        assertEquals(logId.toString(), result.getId());
     }
 
     @Test
     void findById_notExists_returnsNull() {
         when(repository.findById(any())).thenReturn(Optional.empty());
-        AppException exception = assertThrows(AppException.class, () -> service.findById(UUID.randomUUID()));
+        UUID id = UUID.randomUUID();
+        AppException exception = assertThrows(AppException.class, () -> service.findById(id));
         assertEquals(ErrorCode.FILE_NOT_FOUND, exception.getErrorCode());
     }
 

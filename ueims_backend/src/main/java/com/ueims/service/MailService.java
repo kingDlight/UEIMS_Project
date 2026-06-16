@@ -152,8 +152,8 @@ public class MailService {
                     incident.getReportedBy() != null ? incident.getReportedBy().getEmail() : null;
             if (reporterEmail == null) return;
             Context ctx = new Context();
-            ctx.setVariable("fullName", incident.getReportedBy().getFullName());
-            ctx.setVariable("subject", "Sự cố đã được ghi nhận — UEIMS");
+            ctx.setVariable(VAR_FULL_NAME, incident.getReportedBy().getFullName());
+            ctx.setVariable(VAR_SUBJECT, "Sự cố đã được ghi nhận — UEIMS");
             ctx.setVariable("category", incident.getCategory());
             ctx.setVariable("description", incident.getDescription());
             String html = templateEngine.process("incident-reported", ctx);

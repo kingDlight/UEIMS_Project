@@ -98,7 +98,7 @@ public class SecurityConfig {
         List<String> publicPaths = Arrays.asList(PUBLIC_ENDPOINTS);
         List<String> publicGetPaths = Arrays.asList(PUBLIC_GET_ENDPOINTS);
 
-        return (request) -> {
+        return request -> {
             String path = request.getRequestURI();
             String method = request.getMethod();
 

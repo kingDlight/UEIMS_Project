@@ -177,8 +177,8 @@ public class UserServiceImpl implements UserService {
         Set<String> roleNames = user.getRoles() == null
                 ? Set.of()
                 : user.getRoles().stream()
-                        .map(ur -> ur.getRole() != null ? ur.getRole().getRoleName() : null)
-                        .filter(r -> r != null)
+                        .filter(ur -> ur.getRole() != null)
+                        .map(ur -> ur.getRole().getRoleName())
                         .collect(Collectors.toSet());
 
         return UserDetailResponse.builder()

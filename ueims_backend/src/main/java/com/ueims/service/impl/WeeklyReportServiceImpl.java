@@ -141,7 +141,7 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
             double maxScore = plagiarismService.computeMaxSimilarity(saved);
             saved.setPlagiarismScore(maxScore);
             saved.setIsAnomaly(maxScore >= 0.85);
-            if (saved.getIsAnomaly()) {
+            if (Boolean.TRUE.equals(saved.getIsAnomaly())) {
                 log.info("[BR-58] Weekly report {} flagged as ANOMALY (score={})", saved.getReportId(), maxScore);
             }
             repository.save(saved);

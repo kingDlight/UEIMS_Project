@@ -150,6 +150,12 @@ class UserServiceImplTest {
 
     @Test
     void updateUserStatusSuccess() {
+        SecurityContextHolder.getContext()
+                .setAuthentication(new UsernamePasswordAuthenticationToken("admin@test.com", null));
+        User adminUser =
+                User.builder().userId(UUID.randomUUID()).email("admin@test.com").build();
+        when(repository.findByEmail("admin@test.com")).thenReturn(Optional.of(adminUser));
+
         when(repository.findById(userId)).thenReturn(Optional.of(user));
 
         userService.updateUserStatus(userId, LOCKED_STATUS);

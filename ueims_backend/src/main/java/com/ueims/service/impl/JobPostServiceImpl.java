@@ -47,26 +47,7 @@ public class JobPostServiceImpl implements JobPostService {
 
         try {
             User currentUser = getCurrentUser();
-            boolean isStudent = currentUser.getRoles().stream()
-                    .anyMatch(r -> "STUDENT".equals(r.getRole().getRoleName()));
-
-            if (isStudent) {
-                StudentProfile profile = studentProfileRepository.findByUser_UserId(currentUser.getUserId());
-
-                if (profile != null && profile.getSkills() != null) {
-                    for (JobPost job : activeJobs) {
-                        double score =
-                                recommenderService.calculateCompatibility(profile.getSkills(), job.getRequiredSkills());
-                        job.setCompatibilityScore(score);
-                        job.setIsHighlyRecommended(score >= 0.6); // BR-57
-                    }
-
-                    // Sort descending by compatibility score
-                    activeJobs.sort((a, b) -> Double.compare(
-                            b.getCompatibilityScore() != null ? b.getCompatibilityScore() : 0.0,
-                            a.getCompatibilityScore() != null ? a.getCompatibilityScore() : 0.0));
-                }
-            }
+            applyStudentRecommendations(activeJobs, currentUser);
         } catch (Exception e) {
             // Ignore if not logged in or any other error, just return the raw list
         }
@@ -194,5 +175,24 @@ public class JobPostServiceImpl implements JobPostService {
     private User getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+    }
+
+    private void applyStudentRecommendations(List<JobPost> activeJobs, User currentUser) {
+        boolean isStudent = currentUser.getRoles().stream()
+                .anyMatch(r -> "STUDENT".equals(r.getRole().getRoleName()));
+        if (!isStudent) return;
+
+        StudentProfile profile = studentProfileRepository.findByUser_UserId(currentUser.getUserId());
+        if (profile == null || profile.getSkills() == null) return;
+
+        for (JobPost job : activeJobs) {
+            double score = recommenderService.calculateCompatibility(profile.getSkills(), job.getRequiredSkills());
+            job.setCompatibilityScore(score);
+            job.setIsHighlyRecommended(score >= 0.6); // BR-57
+        }
+
+        activeJobs.sort((a, b) -> Double.compare(
+                b.getCompatibilityScore() != null ? b.getCompatibilityScore() : 0.0,
+                a.getCompatibilityScore() != null ? a.getCompatibilityScore() : 0.0));
     }
 }
