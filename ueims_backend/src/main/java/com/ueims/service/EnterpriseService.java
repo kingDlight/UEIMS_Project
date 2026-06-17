@@ -17,6 +17,13 @@ public interface EnterpriseService {
 
     Enterprise update(UUID id, EnterpriseRequest request);
 
+    /**
+     * UC-36: edit the currently authenticated Enterprise's own profile.
+     * Convenience method that derives the target id from the security context,
+     * so callers don't have to pass (and can't spoof) the enterprise id.
+     */
+    Enterprise updateMyProfile(EnterpriseRequest request);
+
     Enterprise approveReject(UUID id, String status, String reason);
 
     void deleteById(UUID id);

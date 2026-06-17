@@ -12,6 +12,7 @@ const AuditLogTab = React.lazy(() => import('./tabs/AuditLogTab').then(m => ({ d
 const AdminSystemTab = React.lazy(() => import('./tabs/AdminSystemTab').then(m => ({ default: m.AdminSystemTab })));
 const AdminStatsTab = React.lazy(() => import('./tabs/AdminStatsTab').then(m => ({ default: m.AdminStatsTab })));
 const NoticesTab = React.lazy(() => import('./tabs/NoticesTab').then(m => ({ default: m.NoticesTab })));
+const RequestLogTab = React.lazy(() => import('./tabs/RequestLogTab').then(m => ({ default: m.RequestLogTab })));
 
 export type AdminPageKey =
   | 'dashboard'
@@ -19,7 +20,8 @@ export type AdminPageKey =
   | 'audit'
   | 'system'
   | 'analytics'
-  | 'notifications';
+  | 'notifications'
+  | 'request-logs';
 
 export const AdminDashboard: React.FC = () => {
   const { tab } = useParams<{ tab: string }>();
@@ -60,6 +62,7 @@ export const AdminDashboard: React.FC = () => {
     system: <AdminSystemTab />,
     analytics: <AdminStatsTab />,
     notifications: <NoticesTab />,
+    'request-logs': <RequestLogTab />,
   };
 
   const allowedItem = navItems.find((item) => item.key === currentTab);

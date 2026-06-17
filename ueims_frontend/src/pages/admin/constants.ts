@@ -8,6 +8,7 @@ import {
   BellOutlined,
   HomeOutlined,
   KeyOutlined,
+  ApiOutlined,
 } from '@ant-design/icons';
 import type { NavItem } from '@/components/layout/ModernLayout';
 
@@ -66,6 +67,7 @@ export const navItems: NavItem[] = [
   { key: 'dashboard', label: 'Dashboard', icon: React.createElement(HomeOutlined), roles: ['ADMIN', 'SYSTEM_ADMIN', 'TRAINING_MANAGER', 'ENTERPRISE', 'STUDENT'] },
   { key: 'users', label: 'Users', icon: React.createElement(UserOutlined), roles: ['ADMIN', 'SYSTEM_ADMIN'] },
   { key: 'audit', label: 'Audit Logs', icon: React.createElement(AuditOutlined), roles: ['ADMIN', 'SYSTEM_ADMIN', 'TRAINING_MANAGER'] },
+  { key: 'request-logs', label: 'Request Logs', icon: React.createElement(ApiOutlined), roles: ['ADMIN', 'SYSTEM_ADMIN'] },
   { key: 'system', label: 'System', icon: React.createElement(SettingOutlined), roles: ['ADMIN', 'SYSTEM_ADMIN'] },
   { key: 'analytics', label: 'Stats', icon: React.createElement(BarChartOutlined), roles: ['ADMIN', 'SYSTEM_ADMIN', 'TRAINING_MANAGER'] },
   { key: 'notifications', label: 'Notices', icon: React.createElement(BellOutlined), roles: ['ADMIN', 'SYSTEM_ADMIN', 'TRAINING_MANAGER', 'ENTERPRISE', 'STUDENT'] },
