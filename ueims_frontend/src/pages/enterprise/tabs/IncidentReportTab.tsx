@@ -208,7 +208,7 @@ export const IncidentReportTab: React.FC = () => {
         onCancel={() => { if (!submitting) setFormOpen(false); }}
         footer={null}
         width={560}
-        destroyOnClose
+        destroyOnHidden
       >
         <Form form={form} layout="vertical" preserve={false}>
           <Form.Item label="Student" name="assignmentId" rules={[{ required: true, message: 'Pick a student' }]}>

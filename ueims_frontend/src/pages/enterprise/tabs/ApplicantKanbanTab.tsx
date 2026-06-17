@@ -450,7 +450,7 @@ const DetailModal: React.FC<DetailModalProps> = ({ applicant, open, onClose, onS
         onCancel={closeConfirm}
         footer={null}
         width={420}
-        destroyOnClose
+        destroyOnHidden
       >
         <div style={{ fontSize: 13, color: c.text, marginBottom: 12, lineHeight: 1.5 }}>
           Are you sure you want to{' '}

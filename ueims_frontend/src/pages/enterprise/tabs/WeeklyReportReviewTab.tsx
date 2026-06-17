@@ -228,7 +228,7 @@ export const WeeklyReportReviewTab: React.FC = () => {
           onCancel={() => { if (!submitting) { setSelected(null); setFeedback(''); } }}
           footer={null}
           width={680}
-          destroyOnClose
+          destroyOnHidden
         >
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14, maxHeight: 480, overflowY: 'auto', padding: '4px 2px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>

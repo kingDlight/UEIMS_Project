@@ -440,7 +440,7 @@ export const EnterpriseProfileTab: React.FC = () => {
         width={720}
         footer={null}
         maskClosable={false}
-        destroyOnClose
+        destroyOnHidden
         styles={{ content: { borderRadius: c.radiusLg, padding: '24px 28px' }, header: { borderBottom: 'none', marginBottom: 16, padding: 0 }, body: { padding: 0 } }}
       >
         <Form
