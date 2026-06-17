@@ -132,6 +132,7 @@ public enum ErrorCode {
     FILE_NOT_FOUND(1073, "The requested file is currently unavailable or has been removed", HttpStatus.NOT_FOUND),
     FILE_DOWNLOAD_ERROR(1074, "Failed to stream the requested file", HttpStatus.INTERNAL_SERVER_ERROR),
     RESOURCE_NOT_FOUND(1075, "Resource not found", HttpStatus.NOT_FOUND),
+    INVALID_MESSAGE_PAYLOAD(1076, "Invalid JSON format or data type mismatch in request body", HttpStatus.BAD_REQUEST),
 
     // Rate limiting
     RATE_LIMIT_EXCEEDED(4029, "Too many requests. Please try again after 1 minute.", HttpStatus.TOO_MANY_REQUESTS),
