@@ -485,7 +485,7 @@ const EditStudentModal: React.FC<{
       footer={null}
       width={520}
       centered
-      destroyOnClose
+      destroyOnHidden
       styles={{ body: { padding: '8px 4px 0' } }}
     >
       <Form form={form} layout="vertical" requiredMark="optional" onFinish={handleSubmit}>
