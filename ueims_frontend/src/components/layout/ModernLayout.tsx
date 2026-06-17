@@ -158,6 +158,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
   const { tab } = useParams<{ tab: string }>();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { t } = useTranslation();
+  const { message } = App.useApp();
 
   useScrollAnimation();
 
