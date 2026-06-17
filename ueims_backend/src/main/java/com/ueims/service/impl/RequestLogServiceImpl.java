@@ -11,8 +11,8 @@ import java.util.UUID;
 import jakarta.persistence.criteria.Predicate;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -130,11 +130,11 @@ public class RequestLogServiceImpl implements RequestLogService {
             if (endDate != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("timestamp"), endDate));
             }
-            
+
             if (query != null && query.getResultType() != Long.class && query.getResultType() != long.class) {
                 query.orderBy(cb.desc(root.get("timestamp")));
             }
-            
+
             return cb.and(predicates.toArray(new Predicate[0]));
         };
     }
