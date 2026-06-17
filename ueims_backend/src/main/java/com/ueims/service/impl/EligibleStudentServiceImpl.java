@@ -79,8 +79,34 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
                 .findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.ELIGIBLE_STUDENT_NOT_FOUND));
 
-        // Guard: same OJT → non-OJT admin-only rule as save()
+        // BR-14: cannot modify records under a LOCKED semester (DB trigger will
+        // also enforce, but checking here gives a clean 4xx with a clear message
+        // instead of a 500 from the trigger exception).
+        Semester semester = existing.getSemester();
+        if (semester != null && "LOCKED".equals(semester.getStatus())) {
+            throw new AppException(ErrorCode.SEMESTER_INVALID_TRANSITION);
+        }
+
+        // BR-21: locked (OJT-approved) students can only change status. Any
+        // edit to other fields will be blocked by the DB trigger — fail fast.
         String newStatus = request.getStatus() != null ? request.getStatus() : existing.getStatus();
+        if (Boolean.TRUE.equals(existing.getIsLocked())) {
+            boolean onlyStatusChanged =
+                    request.getStudentCode().equals(existing.getStudentCode())
+                            && request.getFullName().equals(existing.getFullName())
+                            && java.util.Objects.equals(request.getEmail(), existing.getEmail())
+                            && request.getMajor().equals(existing.getMajor())
+                            && (request.getGpa() == null
+                                    ? existing.getGpa() == null
+                                    : request.getGpa().compareTo(existing.getGpa()) == 0)
+                            && java.util.Objects.equals(
+                                    request.getCurrentSemester(), existing.getCurrentSemester());
+            if (!onlyStatusChanged) {
+                throw new AppException(ErrorCode.SEMESTER_INVALID_TRANSITION);
+            }
+        }
+
+        // Guard: OJT → non-OJT admin-only rule
         if ("OJT".equals(existing.getStatus()) && !"OJT".equals(newStatus)) {
             var authentication = org.springframework.security.core.context.SecurityContextHolder.getContext()
                     .getAuthentication();
