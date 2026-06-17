@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Spin, message, Modal, Button, Input } from 'antd';
+import { Spin, App, Modal, Button, Input } from 'antd';
 import {
   CheckCircleOutlined,
   CloseCircleOutlined,
@@ -33,6 +33,7 @@ function hexToRgba(hex: string, alpha: number): string {
 }
 
 export const InterviewResultTab: React.FC = () => {
+  const { message } = App.useApp();
   const [rows, setRows] = useState<InterviewRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [decisionOpen, setDecisionOpen] = useState<{ row: InterviewRow; decision: 'PASS' | 'FAIL' } | null>(null);

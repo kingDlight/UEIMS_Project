@@ -9,8 +9,9 @@ i18n
   .use(initReactI18next)
   .init({
     fallbackLng: 'en',
+    lng: 'en',
     supportedLngs: ['en', 'vi'],
-    ns: ['common', 'studentDashboard', 'profile', 'jobs', 'applications', 'schedule', 'trainingPlan', 'feedback', 'finalReport', 'evaluation', 'reports'],
+    ns: ['common'],
     defaultNS: 'common',
     backend: {
       loadPath: '/locales/{{lng}}/{{ns}}.json',

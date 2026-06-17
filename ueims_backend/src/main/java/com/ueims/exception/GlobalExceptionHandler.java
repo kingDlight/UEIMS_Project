@@ -183,6 +183,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
+    @SuppressWarnings("unchecked")
     ResponseEntity<ApiResponse<Void>> handlingValidation(MethodArgumentNotValidException exception) {
         String enumKey = exception.getFieldError().getDefaultMessage();
 
@@ -199,16 +200,34 @@ public class GlobalExceptionHandler {
             log.info(attributes.toString());
 
         } catch (IllegalArgumentException e) {
-            // Keep default ErrorCode.INVALID_KEY if the violation message is not a valid ErrorCode enum name
+            // enumKey is not a valid ErrorCode name — fall through; the raw
+            // field message will be used as the user-facing message below.
         }
+
+        // UC-36 Exception 36.0.E1: when any mandatory field is left blank,
+        // surface the generic "Please fill in all required fields." message.
+        // Field-level details are still shown to the user via the client-side
+        // form validation (Antd Form rules) for highlighted inputs.
+        String firstFieldMessage =
+                exception.getFieldError() != null ? exception.getFieldError().getDefaultMessage() : null;
+        boolean hasBlankOrNullFailure = exception.getBindingResult().getFieldErrors().stream()
+                .anyMatch(fe -> fe.getCode() != null
+                        && (fe.getCode().equals("NotBlank")
+                                || fe.getCode().equals("NotNull")
+                                || fe.getCode().equals("NotEmpty")));
 
         ApiResponse<Void> apiResponse = new ApiResponse<>();
 
-        apiResponse.setCode(errorCode.getCode());
-        apiResponse.setMessage(
-                Objects.nonNull(attributes)
-                        ? mapAttribute(errorCode.getMessage(), attributes)
-                        : errorCode.getMessage());
+        if (hasBlankOrNullFailure) {
+            apiResponse.setCode(ErrorCode.FIELD_REQUIRED.getCode());
+            apiResponse.setMessage("Please fill in all required fields.");
+        } else {
+            apiResponse.setCode(errorCode.getCode());
+            apiResponse.setMessage(
+                    Objects.nonNull(attributes)
+                            ? mapAttribute(errorCode.getMessage(), attributes)
+                            : (firstFieldMessage != null ? firstFieldMessage : errorCode.getMessage()));
+        }
 
         return ResponseEntity.badRequest().body(apiResponse);
     }

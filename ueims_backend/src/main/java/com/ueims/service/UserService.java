@@ -5,13 +5,14 @@ import java.util.UUID;
 
 import com.ueims.dto.request.UserCreationRequest;
 import com.ueims.dto.request.UserUpdateRequest;
+import com.ueims.dto.response.UserDetailResponse;
 import com.ueims.dto.response.UserResponse;
 import com.ueims.model.entity.User;
 
 public interface UserService {
-    List<User> findAll();
+    List<UserDetailResponse> findAll();
 
-    User findById(UUID id);
+    UserDetailResponse findById(UUID id);
 
     User save(User entity);
 
@@ -27,5 +28,5 @@ public interface UserService {
 
     UserResponse updateMyInfo(UserUpdateRequest request);
 
-    User updateUser(UUID id, UserUpdateRequest request);
+    UserDetailResponse updateUser(UUID id, UserUpdateRequest request);
 }

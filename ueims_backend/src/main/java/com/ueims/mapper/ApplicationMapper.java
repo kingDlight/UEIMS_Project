@@ -4,18 +4,9 @@ import org.mapstruct.*;
 
 import com.ueims.dto.response.ApplicationResponse;
 import com.ueims.model.entity.Application;
-import com.ueims.model.entity.StudentProfile;
-import com.ueims.repository.StudentProfileRepository;
 
-import lombok.RequiredArgsConstructor;
-
-@Mapper(
-        componentModel = "spring",
-        uses = {StudentProfileRepository.class},
-        unmappedTargetPolicy = ReportingPolicy.IGNORE)
-@RequiredArgsConstructor
-public abstract class ApplicationMapper {
-    private StudentProfileRepository studentProfileRepository;
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
+public interface ApplicationMapper {
 
     @Mapping(source = "jobPost.jobPostId", target = "jobPostId")
     @Mapping(source = "jobPost.title", target = "jobPostTitle")
@@ -26,16 +17,5 @@ public abstract class ApplicationMapper {
     @Mapping(source = "interviewDate", target = "interviewDate")
     @Mapping(source = "interviewLink", target = "interviewLink")
     @Mapping(source = "cvDownloadCount", target = "cvDownloadCount")
-    public abstract ApplicationResponse toApplicationResponse(Application application);
-
-    @AfterMapping
-    protected void afterMapping(Application source, @MappingTarget ApplicationResponse target) {
-        if (source.getStudent() != null) {
-            StudentProfile profile = studentProfileRepository.findByUser_UserId(
-                    source.getStudent().getUserId());
-            if (profile != null) {
-                target.setStudentCode(profile.getStudentCode());
-            }
-        }
-    }
+    ApplicationResponse toApplicationResponse(Application application);
 }

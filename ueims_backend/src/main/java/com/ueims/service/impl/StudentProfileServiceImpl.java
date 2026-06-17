@@ -67,6 +67,7 @@ public class StudentProfileServiceImpl implements StudentProfileService {
 
         boolean isAdminOrTM = currentUser.getRoles().stream()
                 .anyMatch(role -> role.getRole().getRoleName().equals("SYSTEM_ADMIN")
+                        || role.getRole().getRoleName().equals("ADMIN")
                         || role.getRole().getRoleName().equals("TRAINING_MANAGER"));
 
         if (isAdminOrTM) {

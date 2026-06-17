@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useScrollAnimation } from '../../../hooks/useScrollAnimation';
 
-import { Table, Select, message } from 'antd';
+import { Table, Select, App } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import {
   FileSpreadsheet,
@@ -242,6 +242,7 @@ const TemplateCard: React.FC<{
 // MAIN COMPONENT
 // ============================================================
 export const ReportsTab: React.FC = () => {
+  const { message } = App.useApp();
   useScrollAnimation();
 
   const [semester, setSemester] = useState<string>('SUMMER_2026');

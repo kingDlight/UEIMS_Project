@@ -1,4 +1,4 @@
-package com.ueims.configuration;
+package com.ueims.config.security;
 
 import java.io.IOException;
 

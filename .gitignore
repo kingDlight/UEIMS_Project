@@ -163,29 +163,6 @@ prisma/
 .scannerwork
 
 # test files
-create-collection.js
-query.js
-test-api.js
-test-prisma.js
-test-prisma.js
-create-collection.js
-test-api.js
-query.js
-test-collection.json
-update-pass.js
-test-internship-plan.js
-test-plan-collection.json
-get_student.js
-replace_hash.js
-update_db.js
-generate_additional_dataset.js
-check_schema.js
-check_counts.js
-student_evaluation_data.sql
-ueims_frontend/patch_microinteractions.cjs
-ueims_frontend/patch_glass.cjs
-ueims_frontend/patch_all_tabs.cjs
-ueims_frontend/patch_student_tabs.cjs
 
 # Playwright — keep spec files + config, ignore build/runtime artifacts
 ueims_frontend/playwright-report/
@@ -193,3 +170,12 @@ ueims_frontend/test-results/
 ueims_frontend/blob-report/
 ueims_frontend/playwright/.cache/
 playwright/.cache/
+SQL/_count_lines.ps1
+SQL/_count_lines2.ps1
+SQL/ueims_erd.dbml
+SQL/ERD/M01_Auth_Users.dbml
+SQL/ERD/M02_Semester_Training.dbml
+SQL/ERD/M03_Enterprise_Recruitment.dbml
+SQL/ERD/M00_Overview.dbml
+SQL/ERD/M04_Internship_Reports.dbml
+openapi.json

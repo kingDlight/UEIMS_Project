@@ -31,6 +31,8 @@ export const TrainingManagerDashboard: React.FC = () => {
   const payload = extractUserFromToken(token);
   const roles = payload?.roles || [];
 
+
+
   // Redirect if no role
   if (roles.length === 0) {
     return <Navigate to="/no-role" replace />;

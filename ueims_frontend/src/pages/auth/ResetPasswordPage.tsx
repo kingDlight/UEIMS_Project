@@ -2,10 +2,11 @@ import bgAuth from '@/assets/bg-auth.png';
 import authShield3d from '@/assets/auth_shield_3d.png';
 import { LogoIcon } from '@/components/LogoIcon';
 import React, { useState, useEffect } from 'react';
-import { Form, Input, Button, message } from 'antd';
+import { Form, Input, Button, App } from 'antd';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Lock, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { AuthService } from '@/services/AuthService';
+import { useTranslation } from 'react-i18next';
 import {
   AUTH_PRIMARY,
   AUTH_PRIMARY_LIGHT,
@@ -24,6 +25,8 @@ import {
 const renderPasswordIcon = (visible: boolean) => visible ? <Eye size={18} color="#94A3B8" /> : <EyeOff size={18} color="#94A3B8" />;
 
 export const ResetPasswordPage: React.FC = () => {
+  const { message } = App.useApp();
+  const { t } = useTranslation('common');
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
@@ -33,27 +36,27 @@ export const ResetPasswordPage: React.FC = () => {
   const [showConfirm, setShowConfirm] = useState(false);
 
   useEffect(() => {
-    const t = searchParams.get('token');
-    if (!t) {
-      message.error('Link khôi phục không hợp lệ hoặc đã hết hạn.');
+    const t_query = searchParams.get('token');
+    if (!t_query) {
+      message.error(t('auth.resetPasswordPage.invalidToken'));
     }
-    setToken(t);
+    setToken(t_query);
   }, [searchParams]);
 
   const onFinish = async (values: { newPassword: string; confirmPassword: string }) => {
     if (!token) {
-      message.error('Token không hợp lệ. Vui lòng yêu cầu gửi lại link khôi phục.');
+      message.error(t('auth.resetPasswordPage.invalidToken'));
       return;
     }
 
     const { valid } = validatePassword(values.newPassword);
     if (!valid) {
-      message.error('Mật khẩu chưa đủ mạnh. Vui lòng kiểm tra lại!');
+      message.error(t('auth.resetPasswordPage.weakPassword'));
       return;
     }
 
     if (values.newPassword !== values.confirmPassword) {
-      message.error('Mật khẩu xác nhận không khớp!');
+      message.error(t('auth.resetPasswordPage.passwordMismatch'));
       return;
     }
 
@@ -64,11 +67,11 @@ export const ResetPasswordPage: React.FC = () => {
         newPassword: values.newPassword,
         confirmPassword: values.confirmPassword,
       });
-      message.success('Đặt lại mật khẩu thành công!');
+      message.success(t('auth.resetPasswordPage.success'));
       setTimeout(() => navigate('/login'), 1500);
     } catch (error: any) {
       const msg = error.response?.data?.message;
-      message.error(msg || 'Đặt lại mật khẩu thất bại. Link có thể đã hết hạn.');
+      message.error(msg || t('auth.resetPasswordPage.failed'));
     } finally {
       setLoading(false);
     }
@@ -106,7 +109,7 @@ export const ResetPasswordPage: React.FC = () => {
             UEIMS
           </h1>
           <p style={{ fontSize: 8, color: AUTH_TEXT_DARK, textTransform: 'uppercase', fontWeight: 600, margin: '2px 0 0 0', letterSpacing: 0.5 }}>
-            Hệ thống quản lý thực tập sinh<br />và doanh nghiệp
+            {t('auth.systemSubtitleLine1')}<br />{t('auth.systemSubtitleLine2')}
           </p>
         </div>
       </div>
@@ -140,11 +143,11 @@ export const ResetPasswordPage: React.FC = () => {
           }}
         >
           <h2 style={{ fontSize: 24, fontWeight: 800, color: AUTH_TEXT_DARK, lineHeight: 1.3, margin: '20px 0 12px 0' }}>
-            Khôi phục<br />
-            <span style={{ color: AUTH_PRIMARY }}>mật khẩu mới</span>
+            {t('auth.resetPasswordPage.title')}<br />
+            <span style={{ color: AUTH_PRIMARY }}>{t('auth.resetPasswordPage.newPasswordHighlight')}</span>
           </h2>
           <p style={{ fontSize: 13, color: AUTH_TEXT_GRAY, lineHeight: 1.6, margin: '0 0 40px 0', maxWidth: '95%' }}>
-            Tạo mật khẩu mới an toàn cho tài khoản của bạn. Đảm bảo mật khẩu đáp ứng đủ độ mạnh để bảo vệ dữ liệu.
+            {t('auth.resetPasswordPage.description')}
           </p>
 
           <div style={{ display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
@@ -160,17 +163,17 @@ export const ResetPasswordPage: React.FC = () => {
             <h1 style={{ fontSize: 16, fontWeight: 800, color: AUTH_PRIMARY, margin: 0, letterSpacing: 0.5 }}>UEIMS</h1>
           </div>
 
-          <h1 style={{ fontSize: 24, fontWeight: 800, color: AUTH_TEXT_DARK, margin: '0 0 8px 0' }}>Đặt lại mật khẩu</h1>
+          <h1 style={{ fontSize: 24, fontWeight: 800, color: AUTH_TEXT_DARK, margin: '0 0 8px 0' }}>{t('auth.resetPasswordPage.title')}</h1>
           <p style={{ fontSize: 13, color: AUTH_TEXT_GRAY, lineHeight: 1.5, margin: '0 0 32px 0' }}>
-            Vui lòng nhập mật khẩu mới bên dưới.
+            {t('auth.resetPasswordPage.subtitle')}
           </p>
 
           <Form onFinish={onFinish} layout="vertical" requiredMark={false} style={{ width: '100%' }}>
 
             <Form.Item
               name="newPassword"
-              label={<span style={{ fontSize: 13, fontWeight: 700, color: AUTH_TEXT_DARK }}>Mật khẩu mới <span style={{ color: AUTH_DANGER }}>*</span></span>}
-              rules={[{ required: true, message: 'Vui lòng nhập mật khẩu mới!' }]}
+              label={<span style={{ fontSize: 13, fontWeight: 700, color: AUTH_TEXT_DARK }}>{t('auth.resetPasswordPage.newPasswordLabel')} <span style={{ color: AUTH_DANGER }}>*</span></span>}
+              rules={[{ required: true, message: t('auth.resetPasswordPage.newPasswordRequired') }]}
               style={{ marginBottom: 12 }}
             >
               <Input.Password
@@ -188,14 +191,14 @@ export const ResetPasswordPage: React.FC = () => {
 
             <Form.Item
               name="confirmPassword"
-              label={<span style={{ fontSize: 13, fontWeight: 700, color: AUTH_TEXT_DARK }}>Xác nhận mật khẩu mới <span style={{ color: AUTH_DANGER }}>*</span></span>}
+              label={<span style={{ fontSize: 13, fontWeight: 700, color: AUTH_TEXT_DARK }}>{t('auth.resetPasswordPage.confirmPasswordLabel')} <span style={{ color: AUTH_DANGER }}>*</span></span>}
               rules={[
-                { required: true, message: 'Vui lòng xác nhận mật khẩu!' },
+                { required: true, message: t('auth.resetPasswordPage.confirmPasswordRequired') },
               ]}
               style={{ marginBottom: 24 }}
             >
               <Input.Password
-                placeholder="Nhập lại mật khẩu mới"
+                placeholder={t('auth.resetPasswordPage.confirmPasswordPlaceholder')}
                 size="large"
                 prefix={<Lock size={18} color="#94A3B8" style={{ marginRight: 8 }} />}
                 visibilityToggle={{ visible: showConfirm, onVisibleChange: setShowConfirm }}
@@ -221,7 +224,7 @@ export const ResetPasswordPage: React.FC = () => {
                   letterSpacing: 0.5,
                 }}
               >
-                Đặt lại mật khẩu
+                {t('auth.resetPasswordPage.submitBtn')}
               </Button>
             </Form.Item>
           </Form>
@@ -245,7 +248,7 @@ export const ResetPasswordPage: React.FC = () => {
             onMouseLeave={(e) => { e.currentTarget.style.color = AUTH_TEXT_GRAY; }}
           >
             <ArrowLeft size={16} />
-            Quay lại đăng nhập
+            {t('auth.backToHome')}
           </button>
         </div>
       </div>

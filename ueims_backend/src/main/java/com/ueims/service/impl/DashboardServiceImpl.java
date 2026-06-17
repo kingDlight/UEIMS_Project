@@ -5,9 +5,11 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,8 +17,6 @@ import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
 import com.ueims.model.dto.dashboard.ChartDataDTO;
 import com.ueims.model.dto.dashboard.CommandCenterSummaryDTO;
-import com.ueims.model.entity.Enterprise;
-import com.ueims.model.entity.Incident;
 import com.ueims.model.entity.SemesterStatistics;
 import com.ueims.model.entity.WeeklyReport;
 import com.ueims.repository.ApplicationRepository;
@@ -39,6 +39,9 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Transactional(readOnly = true)
 public class DashboardServiceImpl implements DashboardService {
+    private static final Logger log = LoggerFactory.getLogger(DashboardServiceImpl.class);
+
+    private static final String UNKNOWN_TEXT = "Unknown";
 
     SemesterStatisticsRepository semesterStatisticsRepository;
     EligibleStudentRepository eligibleStudentRepository;
@@ -50,15 +53,9 @@ public class DashboardServiceImpl implements DashboardService {
     InterviewRepository interviewRepository;
     EnterpriseAssignmentRepository enterpriseAssignmentRepository;
 
-    @Override
-    public CommandCenterSummaryDTO getCommandCenterSummary() {
-        // 1. Pending Enterprises
-        List<Enterprise> allEnterprises = enterpriseRepository.findAll();
-        List<Enterprise> pendingEnterprises = allEnterprises.stream()
+    private List<CommandCenterSummaryDTO.PendingEnterpriseSummary> getPendingEnterpriseSummaries() {
+        return enterpriseRepository.findAll().stream()
                 .filter(e -> "PENDING".equalsIgnoreCase(e.getStatus()))
-                .collect(Collectors.toList());
-
-        List<CommandCenterSummaryDTO.PendingEnterpriseSummary> pendingSummaries = pendingEnterprises.stream()
                 .map(e -> {
                     long daysWaiting = e.getCreatedAt() != null
                             ? ChronoUnit.DAYS.between(e.getCreatedAt(), LocalDateTime.now())
@@ -70,28 +67,25 @@ public class DashboardServiceImpl implements DashboardService {
                             .sector(e.getIndustry())
                             .build();
                 })
-                .collect(Collectors.toList());
+                .toList();
+    }
 
-        // 2. Incidents
-        List<Incident> allIncidents = incidentRepository.findAll();
-        List<Incident> activeIncidents = allIncidents.stream()
+    private List<CommandCenterSummaryDTO.IncidentSummary> getActiveIncidentSummaries() {
+        return incidentRepository.findAll().stream()
                 .filter(i -> "OPEN".equalsIgnoreCase(i.getStatus()) || "IN_PROGRESS".equalsIgnoreCase(i.getStatus()))
-                .collect(Collectors.toList());
-
-        List<CommandCenterSummaryDTO.IncidentSummary> incidentSummaries = activeIncidents.stream()
                 .map(i -> {
                     long daysAgo = i.getCreatedAt() != null
                             ? ChronoUnit.DAYS.between(i.getCreatedAt(), LocalDateTime.now())
                             : 0;
                     String studentName =
-                            i.getReportedBy() != null ? i.getReportedBy().getFullName() : "Unknown";
+                            i.getReportedBy() != null ? i.getReportedBy().getFullName() : UNKNOWN_TEXT;
                     String studentId = i.getReportedBy() != null
                             ? i.getReportedBy().getUserId().toString()
-                            : "Unknown";
+                            : UNKNOWN_TEXT;
                     String enterpriseName =
                             (i.getAssignment() != null && i.getAssignment().getEnterprise() != null)
                                     ? i.getAssignment().getEnterprise().getCompanyName()
-                                    : "Unknown";
+                                    : UNKNOWN_TEXT;
 
                     return CommandCenterSummaryDTO.IncidentSummary.builder()
                             .id(i.getIncidentId())
@@ -103,64 +97,105 @@ public class DashboardServiceImpl implements DashboardService {
                             .daysAgo((int) daysAgo)
                             .build();
                 })
-                .collect(Collectors.toList());
+                .toList();
+    }
 
-        // 3. Pipeline
-        long eligibleCount = eligibleStudentRepository.count();
-        long appliedCount = applicationRepository.count();
-        long interviewedCount = interviewRepository.count();
-        long placedCount = enterpriseAssignmentRepository.count();
-
-        CommandCenterSummaryDTO.PipelineSummary pipelineSummary = CommandCenterSummaryDTO.PipelineSummary.builder()
-                .eligible((int) eligibleCount)
-                .applied((int) appliedCount)
-                .interviewed((int) interviewedCount)
-                .placed((int) placedCount)
+    private CommandCenterSummaryDTO.LateStudentSummary createLateStudentSummary(WeeklyReport r) {
+        long daysOverdue = r.getCreatedAt() != null
+                ? ChronoUnit.DAYS.between(r.getCreatedAt().plusDays(7), LocalDateTime.now())
+                : 0;
+        String studentName = r.getAssignment() != null && r.getAssignment().getStudent() != null
+                ? r.getAssignment().getStudent().getFullName()
+                : UNKNOWN_TEXT;
+        return CommandCenterSummaryDTO.LateStudentSummary.builder()
+                .name(studentName)
+                .daysOverdue((int) Math.max(0, daysOverdue))
+                .status("LATE")
                 .build();
+    }
 
-        // 4. Weekly Reports
+    private static final Set<String> SUBMITTED_STATUSES = Set.of("SUBMITTED", "APPROVED", "REJECTED");
+    private static final Set<String> PENDING_STATUSES = Set.of("DRAFT", "PENDING", "NOT_SUBMITTED");
+
+    private CommandCenterSummaryDTO.WeeklyReportSummary getWeeklyReportSummary() {
         List<WeeklyReport> allReports = weeklyReportRepository.findAll();
-        int submitted = 0, pending = 0, late = 0, notStarted = 0;
+        int submitted = 0;
+        int pending = 0;
+        int late = 0;
+        int notStarted = 0;
         List<CommandCenterSummaryDTO.LateStudentSummary> lateStudents = new ArrayList<>();
 
         for (WeeklyReport r : allReports) {
             String s = r.getStatus() != null ? r.getStatus().toUpperCase() : "";
-            if (s.equals("SUBMITTED") || s.equals("APPROVED") || s.equals("REJECTED")) submitted++;
-            else if (s.equals("DRAFT") || s.equals("PENDING") || s.equals("NOT_SUBMITTED")) pending++;
-            else if (s.equals("LATE")) {
+            if (SUBMITTED_STATUSES.contains(s)) {
+                submitted++;
+            } else if (PENDING_STATUSES.contains(s)) {
+                pending++;
+            } else if ("LATE".equals(s)) {
                 late++;
-                long daysOverdue = r.getCreatedAt() != null
-                        ? ChronoUnit.DAYS.between(r.getCreatedAt().plusDays(7), LocalDateTime.now())
-                        : 0;
-                lateStudents.add(CommandCenterSummaryDTO.LateStudentSummary.builder()
-                        .name(
-                                r.getAssignment() != null && r.getAssignment().getStudent() != null
-                                        ? r.getAssignment().getStudent().getFullName()
-                                        : "Unknown")
-                        .daysOverdue((int) Math.max(0, daysOverdue))
-                        .status("LATE")
-                        .build());
-            } else notStarted++;
+                lateStudents.add(createLateStudentSummary(r));
+            } else {
+                notStarted++;
+            }
         }
 
-        CommandCenterSummaryDTO.WeeklyReportSummary reportSummary =
-                CommandCenterSummaryDTO.WeeklyReportSummary.builder()
-                        .week(1) // Default or calculate from current date
-                        .submitted(submitted)
-                        .pending(pending)
-                        .late(late)
-                        .notStarted(notStarted)
-                        .students(lateStudents)
-                        .build();
-
-        return CommandCenterSummaryDTO.builder()
-                .activeIncidents(incidentSummaries)
-                .totalActiveIncidents(incidentSummaries.size())
-                .pendingEnterprises(pendingSummaries)
-                .totalPendingEnterprises(pendingSummaries.size())
-                .pipeline(pipelineSummary)
-                .weeklyReports(reportSummary)
+        return CommandCenterSummaryDTO.WeeklyReportSummary.builder()
+                .week(1) // Default or calculate from current date
+                .submitted(submitted)
+                .pending(pending)
+                .late(late)
+                .notStarted(notStarted)
+                .students(lateStudents)
                 .build();
+    }
+
+    @Override
+    public CommandCenterSummaryDTO getCommandCenterSummary() {
+        log.info("[DEBUG] getCommandCenterSummary called");
+        try {
+            List<CommandCenterSummaryDTO.PendingEnterpriseSummary> pendingSummaries = getPendingEnterpriseSummaries();
+            log.info("[DEBUG] pendingSummaries count: {}", pendingSummaries.size());
+            List<CommandCenterSummaryDTO.IncidentSummary> incidentSummaries = getActiveIncidentSummaries();
+            log.info("[DEBUG] incidentSummaries count: {}", incidentSummaries.size());
+            CommandCenterSummaryDTO.WeeklyReportSummary reportSummary = getWeeklyReportSummary();
+            log.info(
+                    "[DEBUG] reportSummary: submitted={}, pending={}, late={}",
+                    reportSummary.getSubmitted(),
+                    reportSummary.getPending(),
+                    reportSummary.getLate());
+
+            // 3. Pipeline
+            long eligibleCount = eligibleStudentRepository.count();
+            log.info("[DEBUG] eligibleCount: {}", eligibleCount);
+            long appliedCount = applicationRepository.count();
+            log.info("[DEBUG] appliedCount: {}", appliedCount);
+            long interviewedCount = interviewRepository.count();
+            log.info("[DEBUG] interviewedCount: {}", interviewedCount);
+            long placedCount = enterpriseAssignmentRepository.count();
+            log.info("[DEBUG] placedCount: {}", placedCount);
+
+            CommandCenterSummaryDTO.PipelineSummary pipelineSummary = CommandCenterSummaryDTO.PipelineSummary.builder()
+                    .eligible((int) eligibleCount)
+                    .applied((int) appliedCount)
+                    .interviewed((int) interviewedCount)
+                    .placed((int) placedCount)
+                    .build();
+
+            CommandCenterSummaryDTO result = CommandCenterSummaryDTO.builder()
+                    .activeIncidents(incidentSummaries)
+                    .totalActiveIncidents(incidentSummaries.size())
+                    .pendingEnterprises(pendingSummaries)
+                    .totalPendingEnterprises(pendingSummaries.size())
+                    .pipeline(pipelineSummary)
+                    .weeklyReports(reportSummary)
+                    .build();
+
+            log.info("[DEBUG] getCommandCenterSummary completed successfully");
+            return result;
+        } catch (Exception e) {
+            log.error("[DEBUG] getCommandCenterSummary failed: {}", e.getMessage(), e);
+            throw e;
+        }
     }
 
     @Override

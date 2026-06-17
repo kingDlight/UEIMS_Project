@@ -34,6 +34,7 @@ public class MailService {
     String appBaseUrl;
 
     // ===== Password Reset (VI) =====
+    @org.springframework.scheduling.annotation.Async("mailTaskExecutor")
     public void sendPasswordResetMail(String to, String fullName, String token) {
         String resetUrl = appBaseUrl + "/reset-password?token=" + token;
         String subject = "Yêu cầu đặt lại mật khẩu — UEIMS";
@@ -68,6 +69,7 @@ public class MailService {
     }
 
     // ===== Password Changed (VI) =====
+    @org.springframework.scheduling.annotation.Async("mailTaskExecutor")
     public void sendPasswordChangedMail(String to, String fullName, String changedAt) {
         String loginUrl = appBaseUrl + PATH_LOGIN;
         String subject = "Mật khẩu đã được thay đổi — UEIMS";
@@ -150,8 +152,8 @@ public class MailService {
                     incident.getReportedBy() != null ? incident.getReportedBy().getEmail() : null;
             if (reporterEmail == null) return;
             Context ctx = new Context();
-            ctx.setVariable("fullName", incident.getReportedBy().getFullName());
-            ctx.setVariable("subject", "Sự cố đã được ghi nhận — UEIMS");
+            ctx.setVariable(VAR_FULL_NAME, incident.getReportedBy().getFullName());
+            ctx.setVariable(VAR_SUBJECT, "Sự cố đã được ghi nhận — UEIMS");
             ctx.setVariable("category", incident.getCategory());
             ctx.setVariable("description", incident.getDescription());
             String html = templateEngine.process("incident-reported", ctx);

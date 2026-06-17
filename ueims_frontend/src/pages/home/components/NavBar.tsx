@@ -47,7 +47,7 @@ export const NavBar = ({ isDark, toggleTheme, scrolled, scrollToSection }: { isD
             className={`text-xs font-medium px-3.5 py-2 rounded-lg transition-all duration-300 ease-in-out ${isDark ? 'text-zinc-300 hover:text-white hover:bg-zinc-800/40' : 'text-slate-700 hover:text-slate-950 hover:bg-slate-100'
               }`}
           >
-            {link.label}
+            {t(link.label)}
           </a>
         ))}
       </div>
@@ -132,7 +132,7 @@ export const NavBar = ({ isDark, toggleTheme, scrolled, scrollToSection }: { isD
               className={`text-sm font-medium py-1 transition-colors duration-300 ease-in-out ${isDark ? 'text-zinc-300 hover:text-white' : 'text-slate-700 hover:text-slate-950'
                 }`}
             >
-              {link.label}
+              {t(link.label)}
             </a>
           ))}
           <button
@@ -153,7 +153,7 @@ export const NavBar = ({ isDark, toggleTheme, scrolled, scrollToSection }: { isD
             }}
             className="text-sm font-bold text-white px-4 py-2.5 rounded-lg bg-[#f37021] flex justify-center items-center gap-1.5 shadow-md shadow-[#f37021]/15 mt-2"
           >
-            {isReallyAuthenticated ? 'Bảng điều khiển' : 'Vào hệ thống'}
+            {isReallyAuthenticated ? t('home.dashboard') : t('home.enterSystem')}
             <ArrowRight className="h-4 w-4" />
           </button>
         </div>

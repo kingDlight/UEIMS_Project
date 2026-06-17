@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Layout, Menu, Button, Dropdown, Modal, Form, Input, message } from 'antd';
+import { Layout, Menu, Button, Dropdown, Modal, Form, Input, App } from 'antd';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { AuthService } from '@/services/AuthService';
@@ -11,13 +11,17 @@ import {
   DashboardOutlined,
   LockOutlined,
 } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 
 const { Header, Sider, Content } = Layout;
 
 export const AppLayout: React.FC = () => {
+  const { message } = App.useApp();
+  const { t } = useTranslation('common');
   const [collapsed, setCollapsed] = useState(false);
   const [changePasswordVisible, setChangePasswordVisible] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [form] = Form.useForm();
   const navigate = useNavigate();
   const { user, token, logout } = useAuthStore();
   const mustChangePassword = (user as any)?.mustChangePassword;
@@ -53,7 +57,8 @@ export const AppLayout: React.FC = () => {
         newPassword: values.newPassword,
         confirmPassword: values.confirmPassword,
       });
-      message.success('Đổi mật khẩu thành công! Vui lòng đăng nhập lại.');
+      message.success(t('layout.passwordChangeSuccess'));
+      form.resetFields();
       setChangePasswordVisible(false);
       if (mustChangePassword) {
         logout();
@@ -62,13 +67,13 @@ export const AppLayout: React.FC = () => {
     } catch (error: any) {
       const code = error.response?.data?.code;
       if (code === 2002) {
-        message.error('Mật khẩu cũ không chính xác!');
+        message.error(t('layout.invalidCurrentPassword'));
       } else if (code === 2003) {
-        message.error('Mật khẩu xác nhận không khớp!');
+        message.error(t('layout.passwordMismatch'));
       } else if (code === 1015) {
-        message.error('Mật khẩu mới không hợp lệ. Phải có ít nhất 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt!');
+        message.error(t('layout.passwordPolicy'));
       } else {
-        message.error(error.response?.data?.message || 'Đổi mật khẩu thất bại!');
+        message.error(error.response?.data?.message || t('layout.passwordChangeFail'));
       }
     } finally {
       setLoading(false);
@@ -77,10 +82,10 @@ export const AppLayout: React.FC = () => {
 
   const userMenu = {
     items: [
-      { key: 'profile', icon: <UserOutlined />, label: user?.email || 'Tài khoản' },
-      { key: 'change-password', icon: <LockOutlined />, label: 'Đổi mật khẩu', onClick: () => setChangePasswordVisible(true) },
+      { key: 'profile', icon: <UserOutlined />, label: user?.email || t('layout.userFallback') },
+      { key: 'change-password', icon: <LockOutlined />, label: t('layout.changePassword'), onClick: () => setChangePasswordVisible(true) },
       { type: 'divider' as const },
-      { key: 'logout', icon: <LogoutOutlined />, label: 'Đăng xuất', onClick: handleLogout, danger: true },
+      { key: 'logout', icon: <LogoutOutlined />, label: t('layout.logout'), onClick: handleLogout, danger: true },
     ],
   };
 
@@ -169,7 +174,7 @@ export const AppLayout: React.FC = () => {
 
       {/* Change Password Modal */}
       <Modal
-        title="Đổi mật khẩu"
+        title={t('layout.changePassword')}
         open={changePasswordVisible}
         onCancel={() => !mustChangePassword && setChangePasswordVisible(false)}
         footer={null}
@@ -178,39 +183,39 @@ export const AppLayout: React.FC = () => {
         maskClosable={!mustChangePassword}
         keyboard={!mustChangePassword}
       >
-        <Form layout="vertical" onFinish={handleChangePassword}>
+        <Form form={form} layout="vertical" onFinish={handleChangePassword}>
           <Form.Item
             name="oldPassword"
-            label="Mật khẩu cũ"
-            rules={[{ required: true, message: 'Vui lòng nhập mật khẩu cũ!' }]}
+            label={t('layout.currentPassword')}
+            rules={[{ required: true, message: t('layout.passwordRequired') }]}
           >
-            <Input.Password placeholder="Nhập mật khẩu cũ" />
+            <Input.Password placeholder={t('layout.currentPasswordPlaceholder')} />
           </Form.Item>
           <Form.Item
             name="newPassword"
-            label="Mật khẩu mới"
+            label={t('layout.newPassword')}
             rules={[
-              { required: true, message: 'Vui lòng nhập mật khẩu mới!' },
-              { min: 8, message: 'Mật khẩu phải có ít nhất 8 ký tự!' },
+              { required: true, message: t('layout.passwordRequired') },
+              { min: 8, message: t('layout.passwordMinLength') },
             ]}
           >
-            <Input.Password placeholder="Nhập mật khẩu mới" />
+            <Input.Password placeholder={t('layout.newPasswordPlaceholder')} />
           </Form.Item>
           <Form.Item
             name="confirmPassword"
-            label="Xác nhận mật khẩu mới"
-            rules={[{ required: true, message: 'Vui lòng xác nhận mật khẩu!' }]}
+            label={t('layout.confirmPassword')}
+            rules={[{ required: true, message: t('layout.confirmPasswordRequired') }]}
           >
-            <Input.Password placeholder="Nhập lại mật khẩu mới" />
+            <Input.Password placeholder={t('layout.confirmPasswordPlaceholder')} />
           </Form.Item>
           <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
             {!mustChangePassword && (
               <Button onClick={() => setChangePasswordVisible(false)} style={{ marginRight: 8 }}>
-                Hủy
+                {t('layout.cancel')}
               </Button>
             )}
             <Button type="primary" htmlType="submit" loading={loading}>
-              Xác nhận
+              {t('layout.saveChanges')}
             </Button>
           </Form.Item>
         </Form>

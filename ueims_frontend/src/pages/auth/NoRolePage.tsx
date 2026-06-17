@@ -4,8 +4,10 @@ import { Button } from 'antd';
 import { LogoutOutlined, SafetyCertificateOutlined } from '@ant-design/icons';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { AuthService } from '@/services/AuthService';
+import { useTranslation } from 'react-i18next';
 
 export const NoRolePage: React.FC = () => {
+  const { t } = useTranslation('common');
   const navigate = useNavigate();
   const { logout, token } = useAuthStore();
 
@@ -27,9 +29,9 @@ export const NoRolePage: React.FC = () => {
         <div style={{ width: 80, height: 80, borderRadius: '50%', background: '#fff7ed', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', border: '1px solid #ffedd5' }}>
           <SafetyCertificateOutlined style={{ fontSize: 36, color: '#ea580c' }} />
         </div>
-        <h1 style={{ fontSize: 24, fontWeight: 800, color: '#0f172a', marginBottom: 12 }}>Tài khoản chưa được phân quyền</h1>
+        <h1 style={{ fontSize: 24, fontWeight: 800, color: '#0f172a', marginBottom: 12 }}>{t('auth.noRole.title')}</h1>
         <p style={{ fontSize: 15, color: '#64748b', lineHeight: 1.6, marginBottom: 32 }}>
-          Tài khoản của bạn hiện chưa được gán bất kỳ vai trò nào trong hệ thống. Vui lòng liên hệ với quản trị viên để được cấp quyền truy cập.
+          {t('auth.noRole.description')}
         </p>
         <Button 
           type="primary" 
@@ -38,7 +40,7 @@ export const NoRolePage: React.FC = () => {
           onClick={handleLogout}
           style={{ background: '#ea580c', borderColor: '#ea580c', fontWeight: 600, height: 44, borderRadius: 12, width: '100%' }}
         >
-          Đăng xuất
+          {t('auth.noRole.logout')}
         </Button>
       </div>
     </div>

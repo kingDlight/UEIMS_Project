@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
 
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.SQLRestriction;
 
 import lombok.*;
@@ -24,6 +26,7 @@ public class Application extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "job_post_id", nullable = false)
+    @NotFound(action = NotFoundAction.IGNORE)
     private JobPost jobPost;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -36,7 +39,7 @@ public class Application extends BaseEntity {
     @Column(name = "cv_snapshot_url", length = 500)
     private String cvSnapshotUrl;
 
-    @Column(name = "cover_letter", columnDefinition = "TEXT")
+    @Transient
     private String coverLetter;
 
     @Enumerated(EnumType.STRING)
@@ -48,19 +51,19 @@ public class Application extends BaseEntity {
     @JoinColumn(name = "screened_by")
     private User screenedBy;
 
-    @Column(name = "rejection_reason", columnDefinition = "TEXT")
+    @Column(name = "screening_note", columnDefinition = "TEXT")
     private String rejectionReason;
 
-    @Column(name = "interview_date")
+    @Transient
     private LocalDateTime interviewDate;
 
-    @Column(name = "interview_link", length = 500)
+    @Transient
     private String interviewLink;
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
-    @Column(name = "cv_download_count", nullable = false)
+    @Column(name = "cv_download_count", nullable = false, columnDefinition = "integer default 0")
     @Builder.Default
     private Integer cvDownloadCount = 0;
 }

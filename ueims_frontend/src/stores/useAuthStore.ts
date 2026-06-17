@@ -11,6 +11,10 @@ export interface User {
   roles: UserRole[];
   mustChangePassword?: boolean;
   avatarUrl?: string;
+  phone?: string;
+  status?: string;
+  authProvider?: string;
+  enterpriseId?: string;
 }
 
 interface AuthState {
@@ -50,12 +54,16 @@ export const useAuthStore = create<AuthState>()(
         const primaryRole = (payload.roles[0] as UserRole) || null;
         set({
           user: {
-            id: '',
+            id: payload.userId || '',
             email: payload.email,
             fullName: payload.fullName || payload.email.split('@')[0],
             roles: payload.roles as UserRole[],
             mustChangePassword: payload.mustChangePassword,
             avatarUrl: payload.avatarUrl,
+            phone: payload.phone,
+            status: payload.status,
+            authProvider: payload.authProvider,
+            enterpriseId: payload.enterpriseId,
           },
           token,
           refreshToken,

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Spin, message, Button, Input, Select, Empty } from 'antd';
+import { Spin, App, Button, Input, Select, Empty } from 'antd';
 import {
   UserOutlined,
   MailOutlined,
@@ -47,6 +47,7 @@ const STATUS_META: Record<string, { label: string; color: string; bg: string }> 
 const PAGE_SIZE = 20;
 
 export const AssignedStudentsTab: React.FC = () => {
+  const { message } = App.useApp();
   const [rows, setRows] = useState<AssignmentRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -56,7 +57,7 @@ export const AssignedStudentsTab: React.FC = () => {
   const fetchRows = async () => {
     setLoading(true);
     try {
-      const res = await EnterpriseAssignmentService.getMyEnterprise();
+      const res = await EnterpriseAssignmentService.getMyEnterpriseAssignments();
       const data: AssignmentRow[] = res.data?.result ?? res.data ?? [];
       setRows(Array.isArray(data) ? data : []);
     } catch (err: any) {

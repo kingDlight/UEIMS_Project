@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="UEIMS Backend API Server" />
+    <title>UEIMS Backend · API Server</title>
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' x2='1' y1='0' y2='1'%3E%3Cstop offset='0' stop-color='%23FF7A30'/%3E%3Cstop offset='1' stop-color='%23E86A20'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='14' fill='url(%23g)'/%3E%3Ctext x='50%25' y='58%25' text-anchor='middle' font-family='Inter, Arial' font-size='28' font-weight='800' fill='white'%3EU%3C/text%3E%3C/svg%3E" />
+    <style>
+        :root {
+            --brand: #FF7A30;
+            --brand-hover: #E86A20;
+            --brand-active: #CC5A18;
+            --brand-muted: #FFF3E8;
+            --brand-subtle: #FFF8F0;
+            --brand-strong: #9B4A10;
+
+            --bg: #0F1115;
+            --bg-soft: #161A22;
+            --surface: #1C2230;
+            --surface-2: #232B3D;
+            --border: rgba(255, 255, 255, 0.08);
+            --border-strong: rgba(255, 255, 255, 0.14);
+
+            --text-primary: #F4F5F7;
+            --text-secondary: #B7BCC8;
+            --text-muted: #7A8194;
+
+            --success: #10B981;
+            --warning: #F59E0B;
+            --error: #EF4444;
+            --info: #3B82F6;
+
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 18px;
+            --radius-xl: 24px;
+
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.30);
+            --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.35);
+            --shadow-lg: 0 18px 50px rgba(0, 0, 0, 0.45);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100%;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: var(--text-primary);
+            background: var(--bg);
+            background-image:
+                radial-gradient(1200px 600px at 10% -10%, rgba(255, 122, 48, 0.18), transparent 60%),
+                radial-gradient(900px 500px at 110% 10%, rgba(59, 130, 246, 0.12), transparent 60%),
+                radial-gradient(700px 700px at 50% 120%, rgba(16, 185, 129, 0.10), transparent 60%);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            line-height: 1.55;
+        }
+
+        a {
+            color: var(--brand);
+            text-decoration: none;
+        }
+
+        a:hover {
+            color: var(--brand-hover);
+        }
+
+        .page {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 48px 24px 80px;
+        }
+
+        /* ---------- HEADER ---------- */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 56px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            font-weight: 800;
+            font-size: 18px;
+            letter-spacing: -0.01em;
+        }
+
+        .brand-mark {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--brand), var(--brand-active));
+            display: grid;
+            place-items: center;
+            color: white;
+            font-weight: 800;
+            font-size: 18px;
+            box-shadow: 0 6px 18px rgba(255, 122, 48, 0.35);
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            background: rgba(16, 185, 129, 0.12);
+            color: #34D399;
+            border: 1px solid rgba(16, 185, 129, 0.30);
+        }
+
+        .status-pill .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #34D399;
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.18);
+            animation: pulse 1.6s ease-in-out infinite;
+        }
+
+        .status-pill.checking {
+            background: rgba(245, 158, 11, 0.10);
+            color: #FBBF24;
+            border-color: rgba(245, 158, 11, 0.30);
+        }
+
+        .status-pill.checking .dot {
+            background: #FBBF24;
+            box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.18);
+        }
+
+        .status-pill.down {
+            background: rgba(239, 68, 68, 0.10);
+            color: #F87171;
+            border-color: rgba(239, 68, 68, 0.30);
+        }
+
+        .status-pill.down .dot {
+            background: #F87171;
+            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.18);
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.3); opacity: 0.6; }
+        }
+
+        /* ---------- HERO ---------- */
+        .hero {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr;
+            gap: 32px;
+            align-items: stretch;
+            margin-bottom: 32px;
+        }
+
+        @media (max-width: 880px) {
+            .hero { grid-template-columns: 1fr; }
+        }
+
+        .card {
+            background: linear-gradient(180deg, var(--surface), var(--bg-soft));
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            padding: 32px;
+            box-shadow: var(--shadow-md);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card.featured::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(600px 200px at 100% 0%, rgba(255, 122, 48, 0.15), transparent 60%);
+            pointer-events: none;
+        }
+
+        .eyebrow {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.10em;
+            color: var(--brand);
+            background: var(--brand-muted);
+            padding: 4px 10px;
+            border-radius: 999px;
+            margin-bottom: 16px;
+        }
+
+        .hero h1 {
+            font-size: clamp(28px, 4vw, 40px);
+            font-weight: 800;
+            letter-spacing: -0.025em;
+            margin: 0 0 12px;
+            line-height: 1.1;
+            background: linear-gradient(180deg, #FFFFFF, #C8CDD9);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .hero p {
+            color: var(--text-secondary);
+            font-size: 15px;
+            margin: 0 0 24px;
+            max-width: 56ch;
+        }
+
+        .cta-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 18px;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+            text-decoration: none;
+        }
+
+        .btn:hover { transform: translateY(-1px); }
+        .btn:active { transform: translateY(0); }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--brand), var(--brand-active));
+            color: white;
+            box-shadow: 0 8px 24px rgba(255, 122, 48, 0.35);
+        }
+
+        .btn-primary:hover { background: linear-gradient(135deg, var(--brand-hover), var(--brand-active)); }
+
+        .btn-ghost {
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-primary);
+            border-color: var(--border-strong);
+        }
+
+        .btn-ghost:hover { background: rgba(255, 255, 255, 0.08); border-color: var(--brand); color: var(--brand); }
+
+        .meta-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-top: 28px;
+        }
+
+        .meta-item {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 14px 16px;
+        }
+
+        .meta-item .label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .meta-item .value {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            word-break: break-all;
+        }
+
+        .meta-item code {
+            font-family: 'JetBrains Mono', 'Fira Code', Menlo, Consolas, monospace;
+            font-size: 13px;
+            color: var(--brand);
+        }
+
+        /* ---------- INFO PANEL ---------- */
+        .info h3 {
+            margin: 0 0 6px;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .info p {
+            margin: 0 0 18px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .kv {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .kv .row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px dashed var(--border);
+            font-size: 13px;
+        }
+
+        .kv .row:last-child { border-bottom: none; }
+
+        .kv .k {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .kv .v {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* ---------- ENDPOINTS ---------- */
+        .section-title {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            margin: 16px 0 18px;
+        }
+
+        .section-title h2 {
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: -0.01em;
+            margin: 0;
+        }
+
+        .section-title small {
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        .endpoints {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 14px;
+        }
+
+        .endpoint {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px 18px;
+            transition: border-color 0.15s ease, transform 0.15s ease;
+        }
+
+        .endpoint:hover {
+            border-color: var(--brand);
+            transform: translateY(-1px);
+        }
+
+        .endpoint .row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .method {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10.5px;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 6px;
+            letter-spacing: 0.04em;
+        }
+
+        .m-GET    { background: rgba(59, 130, 246, 0.18); color: #60A5FA; }
+        .m-POST   { background: rgba(16, 185, 129, 0.18); color: #34D399; }
+        .m-PUT    { background: rgba(245, 158, 11, 0.18); color: #FBBF24; }
+        .m-PATCH  { background: rgba(168, 85, 247, 0.18); color: #C084FC; }
+        .m-DELETE { background: rgba(239, 68, 68, 0.18); color: #F87171; }
+
+        .endpoint .path {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            color: var(--text-primary);
+            font-weight: 600;
+            word-break: break-all;
+        }
+
+        .endpoint .desc {
+            color: var(--text-secondary);
+            font-size: 12.5px;
+            margin: 0;
+        }
+
+        .endpoint .tag {
+            display: inline-block;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-top: 10px;
+        }
+
+        /* ---------- API RESPONSE PANEL ---------- */
+        .response {
+            margin-top: 32px;
+            display: none;
+        }
+
+        .response.visible { display: block; }
+
+        .response-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .response-head h2 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 800;
+        }
+
+        .badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+
+        .b-2xx { background: rgba(16, 185, 129, 0.18); color: #34D399; }
+        .b-4xx { background: rgba(245, 158, 11, 0.18); color: #FBBF24; }
+        .b-5xx { background: rgba(239, 68, 68, 0.18); color: #F87171; }
+
+        pre.response-body {
+            margin: 0;
+            padding: 18px 20px;
+            background: #0B0E14;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            color: #E5E7EB;
+            font-family: 'JetBrains Mono', 'Fira Code', Menlo, Consolas, monospace;
+            font-size: 12.5px;
+            line-height: 1.65;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        /* ---------- FOOTER ---------- */
+        footer {
+            margin-top: 64px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            color: var(--text-muted);
+            font-size: 12.5px;
+        }
+
+        footer .links {
+            display: flex;
+            gap: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="page">
+        <!-- ===== TOP BAR ===== -->
+        <div class="topbar">
+            <div class="brand">
+                <div class="brand-mark">U</div>
+                <span>UEIMS&nbsp;·&nbsp;Backend</span>
+            </div>
+            <div id="serverStatus" class="status-pill checking">
+                <span class="dot"></span>
+                <span id="statusLabel">Checking…</span>
+            </div>
+        </div>
+
+        <!-- ===== HERO ===== -->
+        <section class="hero">
+            <div class="card featured">
+                <span class="eyebrow">Spring Boot REST API</span>
+                <h1>UEIMS API Server is running.</h1>
+                <p>
+                    This is the backend service for the University Enterprise Internship Management System.
+                    The web application is served on a different port — use the button below to open it.
+                </p>
+                <div class="cta-row">
+                    <a class="btn btn-primary" href="http://localhost:5173" target="_blank" rel="noopener">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>
+                        Open UEIMS App
+                    </a>
+                    <button class="btn btn-ghost" id="probeBtn" type="button">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9-6-18-3 9H2"/></svg>
+                        Test API
+                    </button>
+                    <a class="btn btn-ghost" href="/google-login-test.html" target="_blank" rel="noopener">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/></svg>
+                        Google Login Test
+                    </a>
+                </div>
+
+                <div class="meta-grid">
+                    <div class="meta-item">
+                        <div class="label">Base URL</div>
+                        <div class="value"><code id="baseUrl">/api</code></div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="label">Frontend</div>
+                        <div class="value"><code>localhost:5173</code></div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="label">Server Time</div>
+                        <div class="value" id="serverTime">—</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="label">Java / Spring</div>
+                        <div class="value">Java 17 · Spring Boot 3</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card info">
+                <h3>About this server</h3>
+                <p>The browser-friendly landing page for the UEIMS REST API.</p>
+                <div class="kv">
+                    <div class="row"><span class="k">Service</span><span class="v">ueims_backend</span></div>
+                    <div class="row"><span class="k">Status</span><span class="v" id="kvStatus">—</span></div>
+                    <div class="row"><span class="k">CORS</span><span class="v">Enabled for <code>localhost:5173</code></span></div>
+                    <div class="row"><span class="k">Auth</span><span class="v">JWT Bearer</span></div>
+                    <div class="row"><span class="k">Database</span><span class="v">PostgreSQL</span></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== ENDPOINTS ===== -->
+        <div class="section-title">
+            <h2>Available Endpoints</h2>
+            <small>Public routes do not require authentication.</small>
+        </div>
+        <div class="endpoints" id="endpointsList">
+            <div class="endpoint">
+                <div class="row"><span class="method m-POST">POST</span><span class="path">/api/auth/token</span></div>
+                <p class="desc">Authenticate with username + password and obtain a JWT.</p>
+                <span class="tag">Public</span>
+            </div>
+            <div class="endpoint">
+                <div class="row"><span class="method m-POST">POST</span><span class="path">/api/auth/introspect</span></div>
+                <p class="desc">Validate a JWT and return its principal &amp; validity.</p>
+                <span class="tag">Public</span>
+            </div>
+            <div class="endpoint">
+                <div class="row"><span class="method m-POST">POST</span><span class="path">/api/auth/refresh</span></div>
+                <p class="desc">Exchange a refresh token for a new access token.</p>
+                <span class="tag">Public</span>
+            </div>
+            <div class="endpoint">
+                <div class="row"><span class="method m-POST">POST</span><span class="path">/api/auth/logout</span></div>
+                <p class="desc">Invalidate the current access token.</p>
+                <span class="tag">Public</span>
+            </div>
+            <div class="endpoint">
+                <div class="row"><span class="method m-POST">POST</span><span class="path">/api/auth/google</span></div>
+                <p class="desc">Login with a Google ID token (OAuth 2.0).</p>
+                <span class="tag">Public</span>
+            </div>
+            <div class="endpoint">
+                <div class="row"><span class="method m-POST">POST</span><span class="path">/api/auth/forgot-password</span></div>
+                <p class="desc">Send a password-reset email to the user.</p>
+                <span class="tag">Public</span>
+            </div>
+            <div class="endpoint">
+                <div class="row"><span class="method m-GET">GET</span><span class="path">/api/test/**</span></div>
+                <p class="desc">Diagnostic routes used for smoke-testing the API.</p>
+                <span class="tag">Public</span>
+            </div>
+            <div class="endpoint">
+                <div class="row"><span class="method m-GET">GET</span><span class="path">/uploads/**</span></div>
+                <p class="desc">Static uploaded files (CVs, reports, logos, …).</p>
+                <span class="tag">Public</span>
+            </div>
+        </div>
+
+        <!-- ===== RESPONSE PREVIEW ===== -->
+        <div class="response" id="responsePanel">
+            <div class="response-head">
+                <h2>Last API Response</h2>
+                <span id="statusBadge" class="badge b-2xx">200 OK</span>
+            </div>
+            <pre class="response-body" id="responseBody">{}</pre>
+        </div>
+
+        <!-- ===== FOOTER ===== -->
+        <footer>
+            <div>© 2026 UEIMS · University Enterprise Internship Management System</div>
+            <div class="links">
+                <a href="http://localhost:5173" target="_blank" rel="noopener">Web App</a>
+                <a href="/api/auth/introspect" target="_blank" rel="noopener">Introspect</a>
+                <a href="/api/auth/token" target="_blank" rel="noopener">Login</a>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        (function () {
+            const statusEl = document.getElementById('serverStatus');
+            const statusLabel = document.getElementById('statusLabel');
+            const kvStatus = document.getElementById('kvStatus');
+            const serverTimeEl = document.getElementById('serverTime');
+            const probeBtn = document.getElementById('probeBtn');
+            const responsePanel = document.getElementById('responsePanel');
+            const responseBody = document.getElementById('responseBody');
+            const statusBadge = document.getElementById('statusBadge');
+
+            function setStatus(state, label) {
+                statusEl.classList.remove('checking', 'down');
+                if (state === 'up') {
+                    statusLabel.textContent = label || 'Online';
+                } else if (state === 'down') {
+                    statusEl.classList.add('down');
+                    statusLabel.textContent = label || 'Unreachable';
+                } else {
+                    statusEl.classList.add('checking');
+                    statusLabel.textContent = label || 'Checking…';
+                }
+                kvStatus.textContent = label || '—';
+            }
+
+            function renderBadge(status) {
+                statusBadge.classList.remove('b-2xx', 'b-4xx', 'b-5xx');
+                if (status >= 200 && status < 300) statusBadge.classList.add('b-2xx');
+                else if (status >= 400 && status < 500) statusBadge.classList.add('b-4xx');
+                else statusBadge.classList.add('b-5xx');
+                statusBadge.textContent = status + (status >= 200 && status < 300 ? ' OK' : ' Error');
+            }
+
+            function pretty(value) {
+                try {
+                    if (typeof value === 'string') {
+                        try { return JSON.stringify(JSON.parse(value), null, 2); }
+                        catch (_) { return value; }
+                    }
+                    return JSON.stringify(value, null, 2);
+                } catch (_) { return String(value); }
+            }
+
+            async function probe(url) {
+                setStatus('checking', 'Probing…');
+                responsePanel.classList.add('visible');
+                responseBody.textContent = 'Loading ' + url + ' …';
+                statusBadge.classList.remove('b-2xx', 'b-4xx', 'b-5xx');
+                statusBadge.classList.add('b-2xx');
+                statusBadge.textContent = '…';
+
+                try {
+                    const res = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ token: 'healthcheck' })
+                    });
+                    renderBadge(res.status);
+                    const text = await res.text();
+                    responseBody.textContent = pretty(text);
+                    if (res.ok) {
+                        setStatus('up', 'Online · ' + res.status);
+                    } else if (res.status >= 400 && res.status < 500) {
+                        // 4xx means the server is alive and speaking the UEIMS protocol.
+                        setStatus('up', 'Online · responding ' + res.status);
+                    } else {
+                        setStatus('down', 'Error ' + res.status);
+                    }
+                } catch (err) {
+                    renderBadge(0);
+                    responseBody.textContent = 'Network error:\n' + (err && err.message ? err.message : String(err));
+                    setStatus('down', 'Unreachable');
+                }
+            }
+
+            // Local-clock tick so the user always sees a live "Server Time" line.
+            function tickClock() {
+                const now = new Date();
+                serverTimeEl.textContent = now.toLocaleString();
+            }
+            tickClock();
+            setInterval(tickClock, 1000);
+
+            // Run a self-probe on load: hit /api/auth/introspect to confirm the server is alive.
+            probe('/api/auth/introspect');
+
+            probeBtn.addEventListener('click', function () { probe('/api/auth/introspect'); });
+        })();
+    </script>
+</body>
+
+</html>

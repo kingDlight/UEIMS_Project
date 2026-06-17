@@ -179,8 +179,37 @@ class EnterpriseServiceImplTest {
         Enterprise updated = service.update(enterprise.getEnterpriseId(), request);
         assertNotNull(updated);
         assertEquals("Updated Company", updated.getCompanyName());
+        assertEquals("IT", updated.getIndustry());
+        assertEquals("https://updated.com", updated.getWebsite());
+        // Representative info mirrored to current user (fullName + phone only,
+        // email is intentionally NOT overwritten to avoid invalidating the
+        // current session / colliding with another user's unique email).
         assertEquals("Jane Doe", currentUser.getFullName());
-        assertEquals("updated@company.com", currentUser.getEmail());
+        assertEquals("0987654321", currentUser.getPhone());
+    }
+
+    @Test
+    void update_suspendedEnterprise_forbidden() {
+        enterprise.setStatus("SUSPENDED");
+        mockSecurityContext(currentUser, "ROLE_ENTERPRISE");
+        when(repository.findById(enterprise.getEnterpriseId())).thenReturn(Optional.of(enterprise));
+
+        UUID id = enterprise.getEnterpriseId();
+        AppException e = assertThrows(AppException.class, () -> service.update(id, request));
+        assertEquals(ErrorCode.UNAUTHORIZED, e.getErrorCode());
+    }
+
+    @Test
+    void updateMyProfile_success() {
+        mockSecurityContext(currentUser, "ROLE_ENTERPRISE");
+        when(repository.findById(enterprise.getEnterpriseId())).thenReturn(Optional.of(enterprise));
+        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
+        when(repository.save(any(Enterprise.class))).thenAnswer(i -> i.getArgument(0));
+
+        Enterprise updated = service.updateMyProfile(request);
+        assertNotNull(updated);
+        assertEquals("Updated Company", updated.getCompanyName());
+        assertEquals("Jane Doe", currentUser.getFullName());
     }
 
     @Test

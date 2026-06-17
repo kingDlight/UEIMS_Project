@@ -82,6 +82,7 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
         User currentUser = getCurrentUser();
         boolean isStaff = currentUser.getRoles().stream()
                 .anyMatch(role -> role.getRole().getRoleName().equals("SYSTEM_ADMIN")
+                        || role.getRole().getRoleName().equals("ADMIN")
                         || role.getRole().getRoleName().equals("TRAINING_MANAGER"));
         if (isStaff) {
             return report;
@@ -140,7 +141,7 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
             double maxScore = plagiarismService.computeMaxSimilarity(saved);
             saved.setPlagiarismScore(maxScore);
             saved.setIsAnomaly(maxScore >= 0.85);
-            if (saved.getIsAnomaly()) {
+            if (Boolean.TRUE.equals(saved.getIsAnomaly())) {
                 log.info("[BR-58] Weekly report {} flagged as ANOMALY (score={})", saved.getReportId(), maxScore);
             }
             repository.save(saved);
@@ -190,6 +191,7 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
         User currentUser = getCurrentUser();
         boolean isStaff = currentUser.getRoles().stream()
                 .anyMatch(role -> role.getRole().getRoleName().equals("SYSTEM_ADMIN")
+                        || role.getRole().getRoleName().equals("ADMIN")
                         || role.getRole().getRoleName().equals("TRAINING_MANAGER"));
         if (!isStaff && !report.getAssignment().getStudent().getUserId().equals(currentUser.getUserId())) {
             throw new AppException(ErrorCode.UNAUTHORIZED);

@@ -54,9 +54,10 @@ export interface EnterpriseRegistrationRequest {
 
 export const AuthService = {
   login: async (data: LoginRequest): Promise<LoginResponse> => {
+    const deviceId = getDeviceId();
     const response = await api.post<{ code: number; message: string; result: LoginResponse }>(
       '/auth/token',
-      data
+      { ...data, deviceId }
     );
     return response.data.result;
   },

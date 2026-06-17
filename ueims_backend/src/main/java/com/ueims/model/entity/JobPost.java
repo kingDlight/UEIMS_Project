@@ -51,10 +51,10 @@ public class JobPost extends BaseEntity {
     @Column(name = "benefits", columnDefinition = "TEXT")
     private String benefits;
 
-    @Column(name = "required_skills", length = 500)
+    @Column(name = "required_technologies", length = 500)
     private String requiredSkills;
 
-    @Column(name = "positions_count", nullable = false)
+    @Column(name = "max_positions", nullable = false)
     @NotNull(message = "Positions count is mandatory")
     private Integer positionsCount;
 

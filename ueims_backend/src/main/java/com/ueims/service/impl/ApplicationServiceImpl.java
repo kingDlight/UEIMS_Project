@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +36,8 @@ import lombok.experimental.FieldDefaults;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ApplicationServiceImpl implements ApplicationService {
+    private static final Logger log = LoggerFactory.getLogger(ApplicationServiceImpl.class);
+
     ApplicationRepository repository;
     JobPostRepository jobPostRepository;
     UserRepository userRepository;
@@ -44,16 +48,26 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     @Transactional(readOnly = true)
     public List<ApplicationResponse> findAll() {
-        return repository.findAll().stream().map(mapper::toApplicationResponse).toList();
+        return repository.findAll().stream().map(this::mapToResponse).toList();
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<ApplicationResponse> findMyApplications() {
-        User currentUser = getCurrentUser();
-        return repository.findByStudent_UserId(currentUser.getUserId()).stream()
-                .map(mapper::toApplicationResponse)
-                .toList();
+        log.info("[DEBUG] findMyApplications called");
+        try {
+            User currentUser = getCurrentUser();
+            log.info("[DEBUG] currentUser: {}", currentUser.getEmail());
+            log.info("[DEBUG] currentUser.userId: {}", currentUser.getUserId());
+            List<ApplicationResponse> result = repository.findByStudent_UserId(currentUser.getUserId()).stream()
+                    .map(this::mapToResponse)
+                    .toList();
+            log.info("[DEBUG] findMyApplications returning {} results", result.size());
+            return result;
+        } catch (Exception e) {
+            log.error("[DEBUG] findMyApplications failed: {}", e.getMessage(), e);
+            throw e;
+        }
     }
 
     @Override
@@ -70,7 +84,7 @@ public class ApplicationServiceImpl implements ApplicationService {
             return List.of();
         }
         return repository.findByJobPost_Enterprise_EnterpriseIdAndDeletedAtIsNull(enterpriseUUID).stream()
-                .map(mapper::toApplicationResponse)
+                .map(this::mapToResponse)
                 .toList();
     }
 
@@ -79,7 +93,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     public ApplicationResponse findById(UUID id) {
         Application application =
                 repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.APPLICATION_NOT_FOUND));
-        return mapper.toApplicationResponse(application);
+        return mapToResponse(application);
     }
 
     @Override
@@ -113,7 +127,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                 .build();
 
         Application saved = repository.save(entity);
-        return mapper.toApplicationResponse(saved);
+        return mapToResponse(saved);
     }
 
     private void validateJobPost(JobPost jobPost) {
@@ -207,7 +221,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         application.setStatus(ApplicationStatus.WITHDRAWN);
         Application updated = repository.save(application);
 
-        return mapper.toApplicationResponse(updated);
+        return mapToResponse(updated);
     }
 
     @Override
@@ -249,7 +263,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 
         application.setScreenedBy(currentUser);
 
-        return mapper.toApplicationResponse(repository.save(application));
+        return mapToResponse(repository.save(application));
     }
 
     @Override
@@ -284,12 +298,18 @@ public class ApplicationServiceImpl implements ApplicationService {
         }
         application.setScreenedBy(currentUser);
 
-        return mapper.toApplicationResponse(repository.save(application));
+        return mapToResponse(repository.save(application));
     }
 
     private User getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        log.info("[DEBUG] getCurrentUser: email={}", email);
+        User user = userRepository.findByEmail(email).orElseThrow(() -> {
+            log.error("[DEBUG] User not found for email: {}", email);
+            return new AppException(ErrorCode.USER_NOT_EXISTED);
+        });
+        log.info("[DEBUG] getCurrentUser: found userId={}", user.getUserId());
+        return user;
     }
 
     @Override
@@ -330,5 +350,25 @@ public class ApplicationServiceImpl implements ApplicationService {
         repository.incrementDownloadCount(applicationId);
 
         return new org.springframework.core.io.FileSystemResource(filePath);
+    }
+
+    private ApplicationResponse mapToResponse(Application app) {
+        log.info("[DEBUG] mapToResponse: appId={}, student={}", app.getApplicationId(), app.getStudent());
+        try {
+            ApplicationResponse res = mapper.toApplicationResponse(app);
+            if (app.getStudent() != null) {
+                log.info("[DEBUG] mapToResponse: student not null, fetching profile");
+                var profile = studentProfileRepository.findByUser_UserId(
+                        app.getStudent().getUserId());
+                if (profile != null) {
+                    res.setStudentCode(profile.getStudentCode());
+                    log.info("[DEBUG] mapToResponse: set studentCode={}", profile.getStudentCode());
+                }
+            }
+            return res;
+        } catch (Exception e) {
+            log.error("[DEBUG] mapToResponse failed: {}", e.getMessage(), e);
+            throw e;
+        }
     }
 }

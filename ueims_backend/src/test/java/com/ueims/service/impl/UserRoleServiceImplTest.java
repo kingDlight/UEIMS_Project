@@ -79,7 +79,7 @@ class UserRoleServiceImplTest {
 
     @Test
     void saveSuccess() {
-        when(repository.countByUserUserId(userId)).thenReturn(0L);
+        when(repository.existsById(userRoleId)).thenReturn(false);
         when(repository.save(any(UserRole.class))).thenReturn(userRole);
 
         UserRole result = service.save(userRole);
@@ -90,7 +90,7 @@ class UserRoleServiceImplTest {
 
     @Test
     void saveUserAlreadyHasRoleThrowsException() {
-        when(repository.countByUserUserId(userId)).thenReturn(1L);
+        when(repository.existsById(userRoleId)).thenReturn(true);
 
         AppException exception = assertThrows(AppException.class, () -> service.save(userRole));
 

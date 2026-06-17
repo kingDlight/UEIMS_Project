@@ -55,6 +55,7 @@ public class FinalReportServiceImpl implements FinalReportService {
         User currentUser = getCurrentUser();
         boolean isStaff = currentUser.getRoles().stream()
                 .anyMatch(role -> role.getRole().getRoleName().equals("SYSTEM_ADMIN")
+                        || role.getRole().getRoleName().equals("ADMIN")
                         || role.getRole().getRoleName().equals("TRAINING_MANAGER"));
         if (isStaff) {
             return report;
@@ -149,6 +150,7 @@ public class FinalReportServiceImpl implements FinalReportService {
         User currentUser = getCurrentUser();
         boolean isStaff = currentUser.getRoles().stream()
                 .anyMatch(role -> role.getRole().getRoleName().equals("SYSTEM_ADMIN")
+                        || role.getRole().getRoleName().equals("ADMIN")
                         || role.getRole().getRoleName().equals("TRAINING_MANAGER"));
         if (!isStaff && !report.getAssignment().getStudent().getUserId().equals(currentUser.getUserId())) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
