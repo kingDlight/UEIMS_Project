@@ -23,8 +23,12 @@ import {
   GlobalOutlined,
   ClockCircleOutlined,
   ThunderboltOutlined,
+  WifiOutlined,
+  DisconnectOutlined,
+  SyncOutlined,
 } from '@ant-design/icons';
 import { RequestLogService, type RequestLogEntry, type HttpMethod } from '@/services/RequestLogService';
+import { useRequestLogStream } from '@/hooks/useRequestLogStream';
 import { c } from '../constants';
 
 const { RangePicker } = DatePicker;
@@ -90,6 +94,36 @@ export const RequestLogTab: React.FC = () => {
   const [investigateTotal, setInvestigateTotal] = useState(0);
   const [investigatePage, setInvestigatePage] = useState(1);
 
+  // Live-stream state — entries that arrived via WebSocket but couldn't be
+  // prepended (because a filter is active or the user is paginated away
+  // from page 1). Surfaced as a "X new logs" badge.
+  const [pendingNew, setPendingNew] = useState(0);
+  const { status: streamStatus, onLog } = useRequestLogStream();
+
+  // Are we in a state where incoming live logs can be prepended directly?
+  const canLivePrepend =
+    currentPage === 1 &&
+    pageSize === 20 &&
+    !searchTerm &&
+    !methodFilter &&
+    !dateRange[0] &&
+    !dateRange[1];
+
+  useEffect(() => {
+    const off = onLog((entry) => {
+      if (canLivePrepend) {
+        setLogs((prev) => {
+          if (prev.some((e) => e.id === entry.id)) return prev;
+          return [entry, ...prev].slice(0, pageSize);
+        });
+        setTotal((t) => t + 1);
+      } else {
+        setPendingNew((n) => n + 1);
+      }
+    });
+    return off;
+  }, [onLog, canLivePrepend, pageSize]);
+
   const fetchLogs = async (page = currentPage) => {
     setLoading(true);
     try {
@@ -117,6 +151,10 @@ export const RequestLogTab: React.FC = () => {
   };
 
   useEffect(() => { fetchLogs(); }, [currentPage, pageSize, searchTerm, methodFilter, dateRange]);
+
+  // Whenever the visible query changes, drain the "new logs" backlog so it
+  // doesn't linger after the user has already navigated.
+  useEffect(() => { setPendingNew(0); }, [currentPage, searchTerm, methodFilter, dateRange]);
 
   const handleExport = async () => {
     setExporting(true);
@@ -331,9 +369,12 @@ export const RequestLogTab: React.FC = () => {
           }}
         >
           <div>
-            <h2 style={{ fontSize: 20, fontWeight: 800, color: c.text, margin: '0 0 4px' }}>
-              Request Logs
-            </h2>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <h2 style={{ fontSize: 20, fontWeight: 800, color: c.text, margin: '0 0 4px' }}>
+                Request Logs
+              </h2>
+              <LiveStatusBadge status={streamStatus} />
+            </div>
             <p style={{ fontSize: 13, color: c.textMuted, margin: 0 }}>
               HTTP request activity — auto-purged after 7 days
             </p>
@@ -388,6 +429,23 @@ export const RequestLogTab: React.FC = () => {
             }}
             style={{ borderRadius: c.radiusMd }}
           />
+          {pendingNew > 0 ? (
+            <Button
+              type="primary"
+              size="small"
+              onClick={() => {
+                setPendingNew(0);
+                setSearchTerm(''); setMethodFilter(''); setDateRange([null, null]);
+                setCurrentPage(1);
+              }}
+              style={{
+                background: c.brand, borderColor: c.brand,
+                borderRadius: c.radiusMd, fontWeight: 700,
+              }}
+            >
+              {pendingNew} new {pendingNew === 1 ? 'log' : 'logs'}
+            </Button>
+          ) : null}
           <span style={{ fontSize: 12, color: c.textMuted, whiteSpace: 'nowrap' }}>
             {total.toLocaleString()} entries
           </span>
@@ -492,5 +550,52 @@ export const RequestLogTab: React.FC = () => {
 
       </div>
     </div>
+  );
+};
+
+const LiveStatusBadge: React.FC<{ status: 'connecting' | 'open' | 'closed' | 'error' }> = ({ status }) => {
+  if (status === 'open') {
+    return (
+      <span
+        title="Live stream connected — new logs appear in real time"
+        style={{
+          display: 'inline-flex', alignItems: 'center', gap: 4,
+          padding: '2px 8px', borderRadius: 999,
+          background: hexToRgba(c.success, 0.12), color: c.success,
+          fontSize: 11, fontWeight: 700, letterSpacing: 0.3,
+        }}
+      >
+        <span style={{
+          width: 6, height: 6, borderRadius: '50%', background: c.success,
+          boxShadow: `0 0 0 4px ${hexToRgba(c.success, 0.25)}`,
+        }} />
+        LIVE
+      </span>
+    );
+  }
+  if (status === 'connecting') {
+    return (
+      <span style={{
+        display: 'inline-flex', alignItems: 'center', gap: 4,
+        padding: '2px 8px', borderRadius: 999,
+        background: hexToRgba(c.warning, 0.12), color: c.warning,
+        fontSize: 11, fontWeight: 700,
+      }}>
+        <SyncOutlined spin style={{ fontSize: 11 }} /> CONNECTING
+      </span>
+    );
+  }
+  return (
+    <Tooltip title="Live stream unavailable — press Refresh to reload manually">
+      <span style={{
+        display: 'inline-flex', alignItems: 'center', gap: 4,
+        padding: '2px 8px', borderRadius: 999,
+        background: hexToRgba(c.error, 0.10), color: c.error,
+        fontSize: 11, fontWeight: 700,
+      }}>
+        {status === 'error' ? <DisconnectOutlined style={{ fontSize: 11 }} /> : <WifiOutlined style={{ fontSize: 11 }} />}
+        OFFLINE
+      </span>
+    </Tooltip>
   );
 };

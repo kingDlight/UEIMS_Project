@@ -22,6 +22,7 @@ import com.ueims.model.entity.RequestLog;
 import com.ueims.model.entity.RequestLog.HttpMethod;
 import com.ueims.repository.RequestLogRepository;
 import com.ueims.service.RequestLogService;
+import com.ueims.service.websocket.RequestLogBroadcaster;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 public class RequestLogServiceImpl implements RequestLogService {
 
     RequestLogRepository repository;
+    RequestLogBroadcaster broadcaster;
 
     private static final DateTimeFormatter CSV_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -43,7 +45,8 @@ public class RequestLogServiceImpl implements RequestLogService {
     @Transactional
     public void logRequest(RequestLog requestLog) {
         try {
-            repository.save(requestLog);
+            RequestLog saved = repository.save(requestLog);
+            broadcaster.broadcast(toDto(saved));
         } catch (Exception e) {
             log.error(
                     "Failed to save request log: {} {} -> {}",

@@ -41,7 +41,7 @@ public class SecurityConfig {
     };
 
     private static final String[] PUBLIC_GET_ENDPOINTS = {
-        "/uploads/**", "/api/public/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html"
+        "/uploads/**", "/api/public/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/ws/**"
     };
 
     @Bean
@@ -57,6 +57,10 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/google-login-test.html")
                 .permitAll()
                 .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS)
+                .permitAll()
+                // SockJS/WebSocket handshake (incl. info/transport endpoints) is authenticated via
+                // the JWT attached as ?token=... by the JwtHandshakeInterceptor, not the filter chain.
+                .requestMatchers("/ws/**")
                 .permitAll()
                 .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS)
                 .permitAll()

@@ -43,7 +43,7 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private static final Set<String> SKIP_PATTERNS =
-            Set.of("/api/auth/", "/actuator/", "/uploads/", "/static/", "/favicon", "/error");
+            Set.of("/api/auth/", "/actuator/", "/uploads/", "/static/", "/favicon", "/error", "/ws/");
 
     private static final Set<String> SKIP_EXTENSIONS = Set.of(
             ".js", ".css", ".ico", ".png", ".jpg", ".jpeg", ".gif", ".svg", ".woff", ".woff2", ".ttf", ".eot", ".map",
