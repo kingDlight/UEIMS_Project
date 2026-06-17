@@ -854,7 +854,7 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
                             <h4 style={{ fontSize: 13, fontWeight: 700, color: cc.textPrimary, marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.04em' }}>OJT Placements</h4>
                             {employmentData.length > 0 ? (
                               <div style={{ width: '100%', height: 180 }}>
-                                <ResponsiveContainer width="100%" height="100%">
+                                <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                                   <PieChart>
                                     <Pie
                                       data={employmentData.map(d => ({ name: d.label, value: d.value }))}
@@ -886,7 +886,7 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
                             <h4 style={{ fontSize: 13, fontWeight: 700, color: cc.textPrimary, marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Interview Results</h4>
                             {interviewData.length > 0 ? (
                               <div style={{ width: '100%', height: 180 }}>
-                                <ResponsiveContainer width="100%" height="100%">
+                                <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                                   <PieChart>
                                     <Pie
                                       data={interviewData.map(d => ({ name: d.label, value: d.value }))}
@@ -920,7 +920,7 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
                         <div>
                           {majorData.length > 0 ? (
                             <div style={{ width: '100%', height: 220 }}>
-                              <ResponsiveContainer width="100%" height="100%">
+                              <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                                 <BarChart data={majorData.map(d => ({ major: d.label, count: d.value }))} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={cc.borderSubtle} />
                                   <XAxis dataKey="major" tick={{ fontSize: 11, fill: cc.textSecondary }} axisLine={false} tickLine={false} />
@@ -942,7 +942,7 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
                           {gradeData.length > 0 && gradeData.some(d => d.value > 0) ? (
                             <>
                               <div style={{ width: '100%', height: 180 }}>
-                                <ResponsiveContainer width="100%" height="100%">
+                                <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
                                   <PieChart>
                                     <Pie
                                       data={gradeData.map(d => ({ name: d.label, value: d.value }))}
