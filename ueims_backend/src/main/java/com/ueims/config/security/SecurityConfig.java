@@ -40,7 +40,9 @@ public class SecurityConfig {
         "/api/test/**"
     };
 
-    private static final String[] PUBLIC_GET_ENDPOINTS = {"/uploads/**", "/api/public/**"};
+    private static final String[] PUBLIC_GET_ENDPOINTS = {
+        "/uploads/**", "/api/public/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html"
+    };
 
     @Bean
     public SecurityFilterChain filterChain(

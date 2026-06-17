@@ -16,11 +16,11 @@ public interface ApplicationRepository extends JpaRepository<Application, UUID> 
 
     long countByStudent_UserIdAndStudent_DeletedAtIsNull(UUID studentId);
 
-    @org.springframework.data.jpa.repository.Query("SELECT a FROM Application a " +
-            "LEFT JOIN FETCH a.jobPost jp " +
-            "LEFT JOIN FETCH jp.enterprise " +
-            "WHERE a.student.userId = :studentId")
-    List<Application> findByStudent_UserId(@org.springframework.data.repository.query.Param("studentId") UUID studentId);
+    @org.springframework.data.jpa.repository.Query("SELECT a FROM Application a " + "LEFT JOIN FETCH a.jobPost jp "
+            + "LEFT JOIN FETCH jp.enterprise "
+            + "WHERE a.student.userId = :studentId")
+    List<Application> findByStudent_UserId(
+            @org.springframework.data.repository.query.Param("studentId") UUID studentId);
 
     boolean existsByJobPost_Enterprise_EnterpriseIdAndStudent_UserId(UUID enterpriseId, UUID studentId);
 
