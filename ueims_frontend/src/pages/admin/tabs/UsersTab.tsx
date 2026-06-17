@@ -801,7 +801,7 @@ export const UsersTab: React.FC = () => {
         styles={{ content: { borderRadius: c.radiusLg, padding: '24px 28px' }, header: { borderBottom: 'none', marginBottom: 16, padding: 0 }, body: { padding: 0 } }}
       >
         <p style={{ fontSize: 13, color: c.textSecondary, margin: '0 0 12px' }}>
-          Select roles for <strong>{assignModal.user?.email}</strong>. BR-06 enforces single-role assignment — only one role at a time.
+          Select roles for <strong>{assignModal.user?.email}</strong>.
         </p>
         <Select
           mode="multiple"
