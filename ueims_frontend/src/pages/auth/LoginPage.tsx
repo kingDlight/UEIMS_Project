@@ -1,5 +1,5 @@
 import { LogoIcon } from '@/components/LogoIcon';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Form, Input, Button, App, Divider } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -16,6 +16,14 @@ import {
   AUTH_TEXT_GRAY,
   AUTH_FONT,
 } from '@/theme/authTheme';
+
+const GoogleLoginButton = React.memo<{
+  onSuccess: (response: CredentialResponse) => void;
+  onError: () => void;
+}>(({ onSuccess, onError }) => (
+  <GoogleLogin onSuccess={onSuccess} onError={onError} shape="pill" theme="outline" />
+));
+GoogleLoginButton.displayName = 'GoogleLoginButton';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -86,7 +94,7 @@ export const LoginPage: React.FC = () => {
     }
   };
 
-  const handleGoogleSuccess = async (credentialResponse: CredentialResponse) => {
+  const handleGoogleSuccess = React.useCallback(async (credentialResponse: CredentialResponse) => {
     if (!credentialResponse.credential) return;
     setLoading(true);
     try {
@@ -114,7 +122,11 @@ export const LoginPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [loginWithTokens, message, navigate, t]);
+
+  const handleGoogleError = useCallback(() => {
+    message.error('Google login failed');
+  }, [message]);
 
   return (
     <div
@@ -270,9 +282,7 @@ export const LoginPage: React.FC = () => {
           </Divider>
 
           <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: 20 }}>
-            {/* Google Sign-In disabled — needs a real VITE_GOOGLE_CLIENT_ID in .env.
-                Uncomment AND configure client_id before re-enabling. */}
-            {/* <GoogleLogin onSuccess={handleGoogleSuccess} onError={() => message.error('Google login failed')} shape="pill" theme="outline" /> */}
+            <GoogleLoginButton onSuccess={handleGoogleSuccess} onError={handleGoogleError} />
           </div>
         </div>
 
