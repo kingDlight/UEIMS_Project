@@ -28,7 +28,7 @@ public class SemesterEnterprise extends BaseEntity {
     @JoinColumn(name = "enterprise_id")
     private Enterprise enterprise;
 
-    @Column(name = "status", nullable = false, length = 20)
+    @Column(name = "status", nullable = false, length = 20, columnDefinition = "varchar(20) NOT NULL DEFAULT 'PENDING'")
     @Builder.Default
     private String status = "PENDING";
 
