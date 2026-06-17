@@ -49,7 +49,7 @@ export const TrainingManagerDashboard: React.FC = () => {
     ojt: <OJTTab />,
     analytics: <StatsTab />,
     incidents: <IncidentsTab />,
-    reports: <ReportsTab />,
+    'system-reports': <ReportsTab />,
     'weekly-reports': <WeeklyReportsTab />,
     calendar: <SemesterTab />,
     notifications: <NoticesTab />,
