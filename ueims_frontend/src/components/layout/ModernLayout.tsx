@@ -688,7 +688,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder={t('layout.notUpdated', 'Not updated')}
-              bordered={false}
+              variant="borderless"
               style={{ fontSize: 14, color: '#0f172a', fontWeight: 600, fontFamily: 'Inter, sans-serif', padding: '0 0 0 12px', boxShadow: 'none' }}
             />
           </div>
