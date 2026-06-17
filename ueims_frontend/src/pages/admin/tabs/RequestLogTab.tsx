@@ -24,7 +24,7 @@ import {
   ClockCircleOutlined,
   ThunderboltOutlined,
 } from '@ant-design/icons';
-import { RequestLogService, RequestLogEntry, HttpMethod } from '@/services/RequestLogService';
+import { RequestLogService, type RequestLogEntry, type HttpMethod } from '@/services/RequestLogService';
 import { c } from '../constants';
 
 const { RangePicker } = DatePicker;
@@ -465,7 +465,7 @@ export const RequestLogTab: React.FC = () => {
           onCancel={() => setInvestigateModal(false)}
           footer={null}
           width={900}
-          bodyStyle={{ padding: 0 }}
+          styles={{ body: { padding: 0 } }}
         >
           <div style={{ padding: '16px 24px' }}>
             <Table

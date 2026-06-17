@@ -38,4 +38,3 @@ public class PublicController {
         return ApiResponse.<Map<String, Object>>builder().result(stats).build();
     }
 }
-

@@ -32,7 +32,7 @@ public interface RequestLogRepository extends JpaRepository<RequestLog, UUID> {
 		SELECT r FROM RequestLog r
 		WHERE (:userId IS NULL OR r.userId = :userId)
 		AND (:method IS NULL OR r.method = :method)
-		AND (:endpoint IS NULL OR r.endpoint LIKE CONCAT('%', :endpoint, '%'))
+		AND (:endpoint IS NULL OR r.endpoint LIKE :endpoint)
 		AND (:startDate IS NULL OR r.timestamp >= :startDate)
 		AND (:endDate IS NULL OR r.timestamp <= :endDate)
 		ORDER BY r.timestamp DESC

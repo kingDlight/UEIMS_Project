@@ -57,8 +57,9 @@ public class RequestLogServiceImpl implements RequestLogService {
             LocalDateTime startDate,
             LocalDateTime endDate,
             Pageable pageable) {
+        String endpointFilter = (endpoint != null && !endpoint.isBlank()) ? "%" + endpoint + "%" : null;
         return repository
-                .searchLogs(userId, method, endpoint, startDate, endDate, pageable)
+                .searchLogs(userId, method, endpointFilter, startDate, endDate, pageable)
                 .map(this::toDto);
     }
 
@@ -79,7 +80,8 @@ public class RequestLogServiceImpl implements RequestLogService {
     @Transactional(readOnly = true)
     public byte[] exportCsv(
             UUID userId, HttpMethod method, String endpoint, LocalDateTime startDate, LocalDateTime endDate) {
-        Page<RequestLog> logs = repository.searchLogs(userId, method, endpoint, startDate, endDate, Pageable.unpaged());
+        String endpointFilter = (endpoint != null && !endpoint.isBlank()) ? "%" + endpoint + "%" : null;
+        Page<RequestLog> logs = repository.searchLogs(userId, method, endpointFilter, startDate, endDate, Pageable.unpaged());
 
         try (ByteArrayOutputStream out = new ByteArrayOutputStream();
                 PrintWriter writer = new PrintWriter(out)) {
