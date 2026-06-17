@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +39,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Transactional(readOnly = true)
 public class DashboardServiceImpl implements DashboardService {
+    private static final Logger log = LoggerFactory.getLogger(DashboardServiceImpl.class);
 
     private static final String UNKNOWN_TEXT = "Unknown";
 
@@ -148,31 +151,48 @@ public class DashboardServiceImpl implements DashboardService {
 
     @Override
     public CommandCenterSummaryDTO getCommandCenterSummary() {
-        List<CommandCenterSummaryDTO.PendingEnterpriseSummary> pendingSummaries = getPendingEnterpriseSummaries();
-        List<CommandCenterSummaryDTO.IncidentSummary> incidentSummaries = getActiveIncidentSummaries();
-        CommandCenterSummaryDTO.WeeklyReportSummary reportSummary = getWeeklyReportSummary();
+        log.info("[DEBUG] getCommandCenterSummary called");
+        try {
+            List<CommandCenterSummaryDTO.PendingEnterpriseSummary> pendingSummaries = getPendingEnterpriseSummaries();
+            log.info("[DEBUG] pendingSummaries count: {}", pendingSummaries.size());
+            List<CommandCenterSummaryDTO.IncidentSummary> incidentSummaries = getActiveIncidentSummaries();
+            log.info("[DEBUG] incidentSummaries count: {}", incidentSummaries.size());
+            CommandCenterSummaryDTO.WeeklyReportSummary reportSummary = getWeeklyReportSummary();
+            log.info("[DEBUG] reportSummary: submitted={}, pending={}, late={}", 
+                reportSummary.getSubmitted(), reportSummary.getPending(), reportSummary.getLate());
 
-        // 3. Pipeline
-        long eligibleCount = eligibleStudentRepository.count();
-        long appliedCount = applicationRepository.count();
-        long interviewedCount = interviewRepository.count();
-        long placedCount = enterpriseAssignmentRepository.count();
+            // 3. Pipeline
+            long eligibleCount = eligibleStudentRepository.count();
+            log.info("[DEBUG] eligibleCount: {}", eligibleCount);
+            long appliedCount = applicationRepository.count();
+            log.info("[DEBUG] appliedCount: {}", appliedCount);
+            long interviewedCount = interviewRepository.count();
+            log.info("[DEBUG] interviewedCount: {}", interviewedCount);
+            long placedCount = enterpriseAssignmentRepository.count();
+            log.info("[DEBUG] placedCount: {}", placedCount);
 
-        CommandCenterSummaryDTO.PipelineSummary pipelineSummary = CommandCenterSummaryDTO.PipelineSummary.builder()
-                .eligible((int) eligibleCount)
-                .applied((int) appliedCount)
-                .interviewed((int) interviewedCount)
-                .placed((int) placedCount)
-                .build();
+            CommandCenterSummaryDTO.PipelineSummary pipelineSummary = CommandCenterSummaryDTO.PipelineSummary.builder()
+                    .eligible((int) eligibleCount)
+                    .applied((int) appliedCount)
+                    .interviewed((int) interviewedCount)
+                    .placed((int) placedCount)
+                    .build();
 
-        return CommandCenterSummaryDTO.builder()
-                .activeIncidents(incidentSummaries)
-                .totalActiveIncidents(incidentSummaries.size())
-                .pendingEnterprises(pendingSummaries)
-                .totalPendingEnterprises(pendingSummaries.size())
-                .pipeline(pipelineSummary)
-                .weeklyReports(reportSummary)
-                .build();
+            CommandCenterSummaryDTO result = CommandCenterSummaryDTO.builder()
+                    .activeIncidents(incidentSummaries)
+                    .totalActiveIncidents(incidentSummaries.size())
+                    .pendingEnterprises(pendingSummaries)
+                    .totalPendingEnterprises(pendingSummaries.size())
+                    .pipeline(pipelineSummary)
+                    .weeklyReports(reportSummary)
+                    .build();
+            
+            log.info("[DEBUG] getCommandCenterSummary completed successfully");
+            return result;
+        } catch (Exception e) {
+            log.error("[DEBUG] getCommandCenterSummary failed: {}", e.getMessage(), e);
+            throw e;
+        }
     }
 
     @Override
