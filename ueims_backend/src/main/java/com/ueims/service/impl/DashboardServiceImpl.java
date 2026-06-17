@@ -158,8 +158,11 @@ public class DashboardServiceImpl implements DashboardService {
             List<CommandCenterSummaryDTO.IncidentSummary> incidentSummaries = getActiveIncidentSummaries();
             log.info("[DEBUG] incidentSummaries count: {}", incidentSummaries.size());
             CommandCenterSummaryDTO.WeeklyReportSummary reportSummary = getWeeklyReportSummary();
-            log.info("[DEBUG] reportSummary: submitted={}, pending={}, late={}", 
-                reportSummary.getSubmitted(), reportSummary.getPending(), reportSummary.getLate());
+            log.info(
+                    "[DEBUG] reportSummary: submitted={}, pending={}, late={}",
+                    reportSummary.getSubmitted(),
+                    reportSummary.getPending(),
+                    reportSummary.getLate());
 
             // 3. Pipeline
             long eligibleCount = eligibleStudentRepository.count();
@@ -186,7 +189,7 @@ public class DashboardServiceImpl implements DashboardService {
                     .pipeline(pipelineSummary)
                     .weeklyReports(reportSummary)
                     .build();
-            
+
             log.info("[DEBUG] getCommandCenterSummary completed successfully");
             return result;
         } catch (Exception e) {
