@@ -4,8 +4,8 @@ Tài liệu này hướng dẫn các thành viên trong nhóm cách thiết lậ
 
 ## 1. Chuẩn bị cơ sở dữ liệu (Database Seed)
 Để các test case chạy đúng (ví dụ: test đăng nhập thành công, reset password), database của bạn **phải** có sẵn dữ liệu test.
-1. Khởi động MySQL Server.
-2. Import 2 file SQL sau vào database `ueims` của bạn:
+1. Khởi động PostgreSQL Server và mở phần mềm **pgAdmin 4**.
+2. Tạo database `ueims` (nếu chưa có). Nhấn chuột phải vào database `ueims`, chọn **Query Tool**, sau đó mở và chạy lần lượt 2 file SQL sau:
    - `SQL/full_seed.sql`
    - `SQL/008_fix_status_columns.sql`
    *(Các file này chứa sẵn tài khoản như `sv_test@fpt.edu.vn`, `tm@ueims.edu.vn` và các token cần thiết).*
