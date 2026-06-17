@@ -86,7 +86,11 @@ export const NavBar = ({ isDark, toggleTheme, scrolled, scrollToSection }: { isD
               const roles = payload?.roles || [];
               if (roles.length === 0) {
                 navigate('/no-role');
-              } else if (roles.includes('STUDENT') || roles.includes('ROLE_STUDENT') || roles.includes('ENTERPRISE') || roles.includes('ROLE_ENTERPRISE')) {
+              } else if (roles.includes('ADMIN') || roles.includes('ROLE_ADMIN')) {
+                navigate('/admin/dashboard');
+              } else if (roles.includes('ENTERPRISE') || roles.includes('ROLE_ENTERPRISE')) {
+                navigate('/enterprise-dashboard');
+              } else if (roles.includes('STUDENT') || roles.includes('ROLE_STUDENT')) {
                 navigate('/student/dashboard');
               } else {
                 navigate('/training-manager/dashboard');
@@ -142,7 +146,11 @@ export const NavBar = ({ isDark, toggleTheme, scrolled, scrollToSection }: { isD
                 const roles = payload?.roles || [];
                 if (roles.length === 0) {
                   navigate('/no-role');
-                } else if (roles.includes('STUDENT') || roles.includes('ROLE_STUDENT') || roles.includes('ENTERPRISE') || roles.includes('ROLE_ENTERPRISE')) {
+                } else if (roles.includes('ADMIN') || roles.includes('ROLE_ADMIN')) {
+                  navigate('/admin/dashboard');
+                } else if (roles.includes('ENTERPRISE') || roles.includes('ROLE_ENTERPRISE')) {
+                  navigate('/enterprise-dashboard');
+                } else if (roles.includes('STUDENT') || roles.includes('ROLE_STUDENT')) {
                   navigate('/student/dashboard');
                 } else {
                   navigate('/training-manager/dashboard');
