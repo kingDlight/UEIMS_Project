@@ -1,6 +1,7 @@
 package com.ueims.dto.response;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import lombok.*;
@@ -28,4 +29,8 @@ public class EnterpriseAssignmentResponseDTO {
     String status;
     LocalDate startDate;
     LocalDate endDate;
+
+    // Audit fields inherited from BaseEntity
+    LocalDateTime createdAt;
+    LocalDateTime updatedAt;
 }

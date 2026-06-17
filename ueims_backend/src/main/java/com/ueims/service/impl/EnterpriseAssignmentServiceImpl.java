@@ -7,7 +7,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.ueims.dto.response.EnterpriseAssignmentDTO;
+import com.ueims.dto.response.EnterpriseAssignmentResponseDTO;
 import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
 import com.ueims.mapper.EnterpriseAssignmentMapper;
@@ -85,7 +85,7 @@ public class EnterpriseAssignmentServiceImpl implements EnterpriseAssignmentServ
 
     @Override
     @Transactional
-    public EnterpriseAssignment update(UUID id, EnterpriseAssignmentDTO dto) {
+    public EnterpriseAssignment update(UUID id, EnterpriseAssignmentResponseDTO dto) {
         EnterpriseAssignment existing =
                 repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ASSIGNMENT_NOT_FOUND));
 
