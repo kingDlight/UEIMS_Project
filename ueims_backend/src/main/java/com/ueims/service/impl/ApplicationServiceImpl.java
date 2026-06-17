@@ -358,7 +358,8 @@ public class ApplicationServiceImpl implements ApplicationService {
             ApplicationResponse res = mapper.toApplicationResponse(app);
             if (app.getStudent() != null) {
                 log.info("[DEBUG] mapToResponse: student not null, fetching profile");
-                var profile = studentProfileRepository.findByUser_UserId(app.getStudent().getUserId());
+                var profile = studentProfileRepository.findByUser_UserId(
+                        app.getStudent().getUserId());
                 if (profile != null) {
                     res.setStudentCode(profile.getStudentCode());
                     log.info("[DEBUG] mapToResponse: set studentCode={}", profile.getStudentCode());

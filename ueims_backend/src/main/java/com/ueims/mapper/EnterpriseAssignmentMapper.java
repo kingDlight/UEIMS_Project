@@ -23,9 +23,4 @@ public interface EnterpriseAssignmentMapper {
     EnterpriseAssignment toEntity(EnterpriseAssignmentResponseDTO dto);
 
     void updateEntity(EnterpriseAssignmentResponseDTO dto, @MappingTarget EnterpriseAssignment entity);
-    EnterpriseAssignmentResponseDTO toDto(EnterpriseAssignment entity);
-
-    EnterpriseAssignment toEntity(EnterpriseAssignmentResponseDTO dto);
-
-    void updateEntity(EnterpriseAssignmentResponseDTO dto, @MappingTarget EnterpriseAssignment entity);
 }
