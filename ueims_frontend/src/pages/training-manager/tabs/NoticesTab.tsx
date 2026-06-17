@@ -1,5 +1,5 @@
 ﻿import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { Table, Modal, Form, Input, Select, Button, Popconfirm, App, Tag, Space, Tooltip, Switch, Segmented } from 'antd';
+import { Table, Modal, Form, Input, Select, Button, Popconfirm, App, Tooltip, Switch } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import {
   Plus,
@@ -10,13 +10,10 @@ import {
   Send,
   XCircle,
   BellRing,
-  History,
-  Inbox,
   Trash2,
 } from 'lucide-react';
 import dayjs from 'dayjs';
 import { SystemAnnouncementService } from '@/services/SystemAnnouncementService';
-import { NotificationService } from '@/services/NotificationService';
 import { SemesterService } from '@/services/SemesterService';
 import type { SemesterResponse } from '@/services/SemesterService';
 
@@ -63,7 +60,7 @@ const cc = {
 // TYPES
 // ============================================================
 type NoticeStatus = 'Draft' | 'Published';
-type Audience = 'All' | 'Students' | 'Enterprise' | 'Admin' | 'Semester';
+type Audience = 'All' | 'Students' | 'Enterprise' | 'TrainingManager' | 'Admin' | 'Semester';
 
 interface NoticeRecord {
   id: string;
@@ -124,6 +121,12 @@ const AudienceBadge: React.FC<AudienceBadgeProps> = ({ audience, label }) => {
       bg: cc.purpleMuted,
       border: '#DDD6FE',
       color: cc.purple,
+      icon: <Megaphone size={11} />,
+    },
+    TrainingManager: {
+      bg: cc.successMuted,
+      border: '#A7F3D0',
+      color: cc.successText,
       icon: <Megaphone size={11} />,
     },
     Admin: {
@@ -206,8 +209,7 @@ export const NoticesTab: React.FC = () => {
   const [notices, setNotices] = useState<NoticeRecord[]>([]);
   const [audienceFilter, setAudienceFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [activeSubTab, setActiveSubTab] = useState<'active' | 'history'>('active');
-  const [historyMonth, setHistoryMonth] = useState<string>('all'); // 'all' | 'YYYY-MM'
+  const [monthFilter, setMonthFilter] = useState<string>('all'); // 'all' | 'YYYY-MM'
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedNotice, setSelectedNotice] = useState<NoticeRecord | null>(null);
@@ -247,7 +249,7 @@ export const NoticesTab: React.FC = () => {
               audienceLabel = 'Admins';
               break;
             case 'TRAINING_MANAGER':
-              audience = 'Admin';
+              audience = 'TrainingManager';
               audienceLabel = 'Training Managers';
               break;
             default:
@@ -301,47 +303,26 @@ export const NoticesTab: React.FC = () => {
     void fetchNotices();
   }, [fetchNotices]);
 
-  const scopedNotices = useMemo(() => {
-    if (activeSubTab === 'history') {
-      // History: only PUBLISHED, sorted newest first, with optional month filter
-      return notices
-        .filter((n) => n.status === 'Published')
-        .filter((n) => {
-          if (historyMonth === 'all') return true;
+  const filteredNotices = useMemo(() => {
+    return notices
+      .filter((n) => {
+        const matchAudience = audienceFilter === 'all' || n.audienceLabel === audienceFilter;
+        const matchStatus = statusFilter === 'all' || n.status === statusFilter;
+        let matchMonth = true;
+        if (monthFilter !== 'all') {
           const d = dayjs(n.publishedDate ?? n.createdDate);
-          return d.isValid() && d.format('YYYY-MM') === historyMonth;
-        })
-        .sort((a, b) => {
-          const ad = new Date(a.publishedDate ?? a.createdDate).getTime();
-          const bd = new Date(b.publishedDate ?? b.createdDate).getTime();
-          return bd - ad;
-        });
-    }
-    // Active: drafts + recent published (last 30 days) for at-a-glance
-    const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
-    return notices.filter((n) => {
-      if (n.status === 'Draft') return true;
-      const t = new Date(n.publishedDate ?? n.createdDate).getTime();
-      return t >= cutoff;
-    });
-  }, [notices, activeSubTab, historyMonth]);
+          matchMonth = d.isValid() && d.format('YYYY-MM') === monthFilter;
+        }
+        return matchAudience && matchStatus && matchMonth;
+      })
+      .sort((a, b) => {
+        const ad = new Date(a.publishedDate ?? a.createdDate).getTime();
+        const bd = new Date(b.publishedDate ?? b.createdDate).getTime();
+        return bd - ad;
+      });
+  }, [notices, audienceFilter, statusFilter, monthFilter]);
 
-  const filteredNotices = scopedNotices.filter((n) => {
-    const matchAudience = audienceFilter === 'all' || n.audienceLabel === audienceFilter;
-    const matchStatus = statusFilter === 'all' || n.status === statusFilter;
-    return matchAudience && matchStatus;
-  });
-
-  const activeCount = useMemo(
-    () => notices.filter((n) => n.status === 'Draft' || new Date(n.publishedDate ?? n.createdDate).getTime() >= Date.now() - 30 * 24 * 60 * 60 * 1000).length,
-    [notices],
-  );
-  const historyCount = useMemo(
-    () => notices.filter((n) => n.status === 'Published').length,
-    [notices],
-  );
-
-  const historyMonthOptions = useMemo(() => {
+  const monthOptions = useMemo(() => {
     const set = new Set<string>();
     notices.forEach((n) => {
       const d = dayjs(n.publishedDate ?? n.createdDate);
@@ -400,6 +381,7 @@ export const NoticesTab: React.FC = () => {
         All: undefined,
         Students: 'STUDENT',
         Enterprise: 'ENTERPRISE',
+        TrainingManager: 'TRAINING_MANAGER',
         Admin: 'ADMIN',
         Semester: undefined,
       };
@@ -842,6 +824,7 @@ export const NoticesTab: React.FC = () => {
     { value: 'All Users', label: 'All Users' },
     { value: 'Students', label: 'Students' },
     { value: 'Enterprises', label: 'Enterprises' },
+    { value: 'Training Managers', label: 'Training Managers' },
     { value: 'Admins', label: 'Admins' },
     { value: 'Specific Semester', label: 'Specific Semester' },
   ];
@@ -885,46 +868,6 @@ export const NoticesTab: React.FC = () => {
         >
           Broadcast official school-wide notices to enterprises and students
         </p>
-      </div>
-
-      {/* SUB-TAB SWITCHER — Active (draft + recent) / History (read-only) */}
-      <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-        <Segmented
-          value={activeSubTab}
-          onChange={(v) => setActiveSubTab(v as 'active' | 'history')}
-          options={[
-            {
-              label: (
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: 12.5 }}>
-                  <Inbox size={14} strokeWidth={2.5} />
-                  Active
-                  <Tag color="orange" style={{ marginLeft: 4, marginRight: 0, fontSize: 10, fontWeight: 700, padding: '0 6px', lineHeight: '16px' }}>
-                    {activeCount}
-                  </Tag>
-                </span>
-              ),
-              value: 'active',
-            },
-            {
-              label: (
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: 12.5 }}>
-                  <History size={14} strokeWidth={2.5} />
-                  History
-                  <Tag color="default" style={{ marginLeft: 4, marginRight: 0, fontSize: 10, fontWeight: 700, padding: '0 6px', lineHeight: '16px' }}>
-                    {historyCount}
-                  </Tag>
-                </span>
-              ),
-              value: 'history',
-            },
-          ]}
-          style={{
-            background: cc.neutralBg,
-            padding: 4,
-            borderRadius: cc.radiusMd,
-            border: `1px solid ${cc.border}`,
-          }}
-        />
       </div>
 
       {/* TABLE CARD */}
@@ -996,29 +939,27 @@ export const NoticesTab: React.FC = () => {
               />
             </div>
 
-            {/* Month Filter — only on History tab */}
-            {activeSubTab === 'history' && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span
-                  style={{
-                    fontFamily: 'Inter, sans-serif',
-                    fontSize: 12,
-                    fontWeight: 600,
-                    color: cc.textMuted,
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  Month:
-                </span>
-                <Select
-                  value={historyMonth}
-                  onChange={setHistoryMonth}
-                  options={historyMonthOptions}
-                  style={{ width: 160, fontFamily: 'Inter, sans-serif' }}
-                  size="small"
-                />
-              </div>
-            )}
+            {/* Month Filter */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span
+                style={{
+                  fontFamily: 'Inter, sans-serif',
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: cc.textMuted,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                Month:
+              </span>
+              <Select
+                value={monthFilter}
+                onChange={setMonthFilter}
+                options={monthOptions}
+                style={{ width: 160, fontFamily: 'Inter, sans-serif' }}
+                size="small"
+              />
+            </div>
 
             <span
               style={{
@@ -1029,9 +970,7 @@ export const NoticesTab: React.FC = () => {
                 marginLeft: 4,
               }}
             >
-              {activeSubTab === 'history'
-                ? `${filteredNotices.length} historical record${filteredNotices.length !== 1 ? 's' : ''}`
-                : `${filteredNotices.length} active notice${filteredNotices.length !== 1 ? 's' : ''}`}
+              {`${filteredNotices.length} notice${filteredNotices.length !== 1 ? 's' : ''}`}
             </span>
           </div>
 
@@ -1175,6 +1114,7 @@ export const NoticesTab: React.FC = () => {
                 { value: 'All', label: 'All Users' },
                 { value: 'Students', label: 'Students' },
                 { value: 'Enterprise', label: 'Enterprises' },
+                { value: 'TrainingManager', label: 'Training Managers' },
                 { value: 'Admin', label: 'Admins' },
                 { value: 'Semester', label: 'Specific Semester' },
               ]}
