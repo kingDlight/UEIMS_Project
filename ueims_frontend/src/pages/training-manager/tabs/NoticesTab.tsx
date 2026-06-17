@@ -20,7 +20,7 @@ import { NotificationService } from '@/services/NotificationService';
 
 
 // ============================================================
-// DESIGN TOKENS â€” matches SemesterTab / OJTTab Command Center
+// DESIGN TOKENS — matches SemesterTab / OJTTab Command Center
 // ============================================================
 const cc = {
   brand: '#FF7A30',
@@ -378,7 +378,7 @@ export const NoticesTab: React.FC = () => {
   }, [form, fetchNotices]);
 
   const formatDate = (dateStr?: string) => {
-    if (!dateStr) return 'â€”';
+    if (!dateStr) return '—';
     return dayjs(dateStr).format('MMM D, YYYY');
   };
 
@@ -449,7 +449,7 @@ export const NoticesTab: React.FC = () => {
               }}
             >
               {record.content.slice(0, 55)}
-              {record.content.length > 55 ? 'â€¦' : ''}
+              {record.content.length > 55 ? 'Ã¢â¬Â¦' : ''}
             </div>
           </div>
         </div>
@@ -511,7 +511,7 @@ export const NoticesTab: React.FC = () => {
         <div style={{ ...row, justifyContent: 'flex-end', gap: 8 }}>
           {record.status === 'Draft' ? (
             <>
-              {/* Publish Now â€” Solid Green */}
+              {/* Publish Now — Solid Green */}
               <Popconfirm
                 title={`Publish "${record.title}"?`}
                 description="This announcement will be visible to the selected audience."
@@ -555,7 +555,7 @@ export const NoticesTab: React.FC = () => {
                 </button>
               </Popconfirm>
 
-              {/* Edit â€” Ghost Icon */}
+              {/* Edit — Ghost Icon */}
               <button
                 onClick={() => { setSelectedNotice(record); setIsModalOpen(true); }}
                 style={{
@@ -639,7 +639,7 @@ export const NoticesTab: React.FC = () => {
             </>
           ) : (
             <>
-              {/* Unpublish â€” Danger Outline */}
+              {/* Unpublish — Danger Outline */}
               <Popconfirm
                 title={`Unpublish "${record.title}"?`}
                 description="This announcement will be hidden from the audience."
@@ -684,7 +684,7 @@ export const NoticesTab: React.FC = () => {
                 </button>
               </Popconfirm>
 
-              {/* View â€” Ghost Icon */}
+              {/* View — Ghost Icon */}
               <button
                 onClick={() => handleView(record)}
                 style={{
@@ -974,7 +974,7 @@ export const NoticesTab: React.FC = () => {
 
           {/* Right-side actions */}
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            {/* Create Announcement â€” also pushes live bell automatically */}
+            {/* Create Announcement — also pushes live bell automatically */}
             <button
               onClick={() => { setSelectedNotice(null); setIsModalOpen(true); }}
               style={{
@@ -1148,7 +1148,7 @@ export const NoticesTab: React.FC = () => {
             }
           </Form.Item>
 
-          {/* Realtime delivery â€” always on (one source of truth: announcement = notification) */}
+          {/* Realtime delivery — always on (one source of truth: announcement = notification) */}
           <div
             style={{
               marginTop: 4,
@@ -1167,7 +1167,7 @@ export const NoticesTab: React.FC = () => {
                 Live bell push
               </div>
               <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 11.5, color: cc.textSecondary, marginTop: 1, lineHeight: 1.4 }}>
-                On publish, every matching recipient gets a WebSocket bell-frame â€” no refresh needed.
+                On publish, every matching recipient gets a WebSocket bell-frame — no refresh needed.
               </div>
             </div>
             <Switch checked disabled style={{ backgroundColor: cc.brand }} />
