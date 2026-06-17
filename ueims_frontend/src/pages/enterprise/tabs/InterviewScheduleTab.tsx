@@ -389,7 +389,7 @@ export const InterviewScheduleTab: React.FC = () => {
         onCancel={() => { if (!submitting) { setScheduleOpen(false); setProposedSlots([]); } }}
         footer={null}
         width={520}
-        destroyOnClose
+        destroyOnHidden
       >
         <Form form={form} layout="vertical" preserve={false}>
           <Form.Item label="Candidate / Application" name="applicationId" rules={[{ required: true, message: 'Please pick an application' }]}>
@@ -466,7 +466,7 @@ export const InterviewScheduleTab: React.FC = () => {
         onCancel={() => { if (!submitting) setRescheduleOpen(false); }}
         footer={null}
         width={460}
-        destroyOnClose
+        destroyOnHidden
       >
         <Form form={rescheduleForm} layout="vertical" preserve={false}>
           <Form.Item label="New date & time" name="newTime" rules={[{ required: true }]}>
@@ -496,7 +496,7 @@ export const InterviewScheduleTab: React.FC = () => {
         onCancel={() => { if (!submitting) setCancelOpen(false); }}
         footer={null}
         width={460}
-        destroyOnClose
+        destroyOnHidden
       >
         <p style={{ fontSize: 13, color: c.textSecondary, marginBottom: 8 }}>
           Please provide a reason. The student will be notified via email.
