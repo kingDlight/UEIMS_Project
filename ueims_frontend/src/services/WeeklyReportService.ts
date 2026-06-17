@@ -6,39 +6,39 @@ export const WeeklyReportService = {
   getAll: () => api.get(API_URL),
   getAllReports: async () => {
     const response = await api.get('/weekly-reports');
-    return response.data.result;
+    return response.data.result || response.data;
   },
   getById: (id: string) => api.get(`${API_URL}/${id}`),
   getMyReports: async () => {
     const response = await api.get('/weekly-reports/my-reports');
-    return response.data.result;
+    return response.data.result || response.data;
   },
   getReportById: async (id: string) => {
     const response = await api.get(`/weekly-reports/${id}`);
-    return response.data.result;
+    return response.data.result || response.data;
   },
   getByEnterprise: async () => {
     const response = await api.get('/weekly-reports/by-enterprise');
-    return response.data.result;
+    return response.data.result || response.data;
   },
   create: (data: any) => api.post(API_URL, data),
   createReport: async (reportData: any) => {
     const response = await api.post('/weekly-reports', reportData);
-    return response.data.result;
+    return response.data.result || response.data;
   },
   update: (id: string, data: any) => api.put(`${API_URL}/${id}`, data),
   updateReport: async (id: string, reportData: any) => {
     const response = await api.put(`/weekly-reports/${id}`, reportData);
-    return response.data.result;
+    return response.data.result || response.data;
   },
   delete: (id: string) => api.delete(`${API_URL}/${id}`),
   approveReport: async (id: string, feedback?: string) => {
     const response = await api.put(`/weekly-reports/${id}/approve`, feedback ? { feedback } : undefined);
-    return response.data.result;
+    return response.data.result || response.data;
   },
   rejectReport: async (id: string, feedback: string) => {
     const response = await api.put(`/weekly-reports/${id}/reject`, { feedback });
-    return response.data.result;
+    return response.data.result || response.data;
   }
 };
 
