@@ -69,6 +69,15 @@ public class NotificationController {
         return ResponseEntity.ok(mapper.toDto(service.markAsRead(id, email)));
     }
 
+    @PutMapping("/read-all")
+    public ResponseEntity<java.util.Map<String, Object>> markAllAsRead() {
+        String email = org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+        int updated = service.markAllAsRead(email);
+        return ResponseEntity.ok(java.util.Map.of("updated", updated));
+    }
+
     @PostMapping("/broadcast")
     public ResponseEntity<java.util.Map<String, Object>> broadcast(
             @Valid @RequestBody com.ueims.dto.request.BroadcastNotificationRequest request) {

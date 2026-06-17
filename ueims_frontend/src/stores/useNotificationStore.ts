@@ -19,6 +19,7 @@ interface NotificationState {
   fetched: boolean;
   fetch: () => Promise<void>;
   markAsRead: (id: string) => Promise<void>;
+  markAllAsRead: () => Promise<void>;
   applyIncoming: (n: NotificationItem) => void;
   applyUnreadCount: (count: number) => void;
   reset: () => void;
@@ -66,6 +67,23 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
         items: get().items.map((n) => (n.notificationId === id ? { ...n, isRead: false } : n)),
         unreadCount: get().unreadCount + 1,
       });
+    }
+  },
+
+  markAllAsRead: async () => {
+    if (get().unreadCount === 0) return;
+    const prevItems = get().items;
+    const prevCount = get().unreadCount;
+    // Optimistic: flip every unread -> read
+    set({
+      items: prevItems.map((n) => (n.isRead ? n : { ...n, isRead: true })),
+      unreadCount: 0,
+    });
+    try {
+      await api.put('/notifications/read-all');
+    } catch {
+      // Revert on failure
+      set({ items: prevItems, unreadCount: prevCount });
     }
   },
 

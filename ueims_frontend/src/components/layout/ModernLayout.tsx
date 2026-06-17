@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Modal, Dropdown, Drawer, Form, Input, Button, App } from 'antd';
 import type { MenuProps } from 'antd';
 import { BellOutlined, DownOutlined, MenuOutlined } from '@ant-design/icons';
-import { X, Mail, Phone, ShieldCheck, Activity, Camera } from 'lucide-react';
+import { X, Mail, Phone, ShieldCheck, Activity, Camera, CheckCheck } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { SmallPill } from '@/pages/training-manager/components/shared/SmallPill';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -257,6 +257,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
   }, [navItems, token]);
 
   const [profileOpen, setProfileOpen] = useState(false);
+  const [detailsItem, setDetailsItem] = useState<NotificationItem | null>(null);
 
   const [customAvatarUrl, setCustomAvatarUrl] = useState<string | null>(() => {
     return localStorage.getItem('ueims_custom_avatar');
@@ -274,6 +275,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
   const unreadCount = useNotificationStore((s) => s.unreadCount);
   const fetchNotifications = useNotificationStore((s) => s.fetch);
   const markNotificationAsRead = useNotificationStore((s) => s.markAsRead);
+  const markAllNotificationsAsRead = useNotificationStore((s) => s.markAllAsRead);
   const resetNotifications = useNotificationStore((s) => s.reset);
 
   useNotificationStream();
@@ -292,6 +294,15 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
 
   const markAsRead = async (id: string) => {
     await markNotificationAsRead(id);
+  };
+
+  const handleNotificationClick = async (item: NotificationItem) => {
+    if (!item.isRead) await markNotificationAsRead(item.notificationId);
+    setDetailsItem(item);
+  };
+
+  const handleMarkAllRead = async () => {
+    await markAllNotificationsAsRead();
   };
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -451,12 +462,38 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
           {notificationOpen && (
             <div onMouseDown={(e) => e.stopPropagation()} className="modern-floating-menu">
               <div className="modern-floating-menu-arrow" style={{ left: 32 }} />
-              <div style={{ padding: '14px 16px', borderBottom: '1px solid rgba(230, 126, 34,.10)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
+              <div style={{ padding: '14px 16px', borderBottom: '1px solid rgba(230, 126, 34,.10)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+                <div style={{ minWidth: 0 }}>
                   <div style={{ fontSize: 14, fontWeight: 800, color: '#1e293b' }}>{t('layout.alerts', 'Alerts')}</div>
                   <div style={{ fontSize: 11.5, color: '#64748b' }}>{t('layout.alertsDesc', 'Latest reminders and urgent items')}</div>
                 </div>
-                {unreadCount > 0 && <SmallPill color="#E67E22" glow>{t('layout.unreadCount', { count: unreadCount })}</SmallPill>}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                  {unreadCount > 0 && <SmallPill color="#E67E22" glow>{t('layout.unreadCount', { count: unreadCount })}</SmallPill>}
+                  <button
+                    type="button"
+                    onClick={handleMarkAllRead}
+                    disabled={unreadCount === 0}
+                    title={t('layout.markAllRead', 'Mark all as read')}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 4,
+                      padding: '5px 10px',
+                      borderRadius: 10,
+                      border: '1px solid rgba(230, 126, 34,.18)',
+                      background: unreadCount === 0 ? 'rgba(241, 245, 249, .6)' : '#fff7ed',
+                      color: unreadCount === 0 ? '#94a3b8' : '#E67E22',
+                      fontFamily: 'Inter, sans-serif',
+                      fontSize: 11,
+                      fontWeight: 700,
+                      cursor: unreadCount === 0 ? 'not-allowed' : 'pointer',
+                      transition: 'all 0.15s',
+                    }}
+                  >
+                    <CheckCheck size={12} strokeWidth={2.6} />
+                    {t('layout.markAllReadShort', 'Read all')}
+                  </button>
+                </div>
               </div>
               <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 10, maxHeight: 400, overflowY: 'auto' }}>
                 {notifications.length === 0 ? (
@@ -465,20 +502,23 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
                   notifications.map((item: any) => (
                     <div
                       key={item.notificationId}
-                      onClick={() => { if (!item.isRead) markAsRead(item.notificationId); }}
+                      onClick={() => handleNotificationClick(item)}
                       style={{
                         display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 12px', borderRadius: 16,
                         background: item.isRead ? 'rgba(255,255,255,.78)' : '#fff3ed',
                         border: '1px solid rgba(230, 126, 34,.08)',
                         boxShadow: '0 8px 18px rgba(15,23,42,.04)',
-                        cursor: item.isRead ? 'default' : 'pointer',
+                        cursor: 'pointer',
                         transition: 'all 0.2s'
                       }}>
-                      <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#E67E22', boxShadow: `0 0 0 4px #E67E2220`, marginTop: 4 }} />
+                      <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#E67E22', boxShadow: `0 0 0 4px #E67E2220`, marginTop: 4, flexShrink: 0 }} />
                       <div style={{ minWidth: 0, flex: 1 }}>
                         <div style={{ fontSize: 13.5, fontWeight: 800, color: '#1e293b' }}>{item.title}</div>
-                        <div style={{ fontSize: 11.5, color: '#64748b', marginTop: 2 }}>{item.message}</div>
-                        <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 4 }}>{new Date(item.createdAt).toLocaleString()}</div>
+                        <div style={{ fontSize: 11.5, color: '#64748b', marginTop: 2, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{item.message}</div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 6 }}>
+                          <span style={{ fontSize: 10, color: '#94a3b8' }}>{new Date(item.createdAt).toLocaleString()}</span>
+                          <span style={{ fontSize: 10, fontWeight: 700, color: '#E67E22', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('layout.viewDetails', 'View details →')}</span>
+                        </div>
                       </div>
                     </div>
                   ))
@@ -486,6 +526,62 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
               </div>
             </div>
           )}
+
+          {/* Notification Detail Modal — opened from bell dropdown */}
+          <Modal
+            open={detailsItem !== null}
+            onCancel={() => setDetailsItem(null)}
+            footer={null}
+            width={520}
+            centered
+            title={
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontFamily: 'Inter, sans-serif', fontWeight: 800, color: '#0f172a', fontSize: 15 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 36, height: 36, borderRadius: 10, background: '#fff7ed', border: '1px solid #ffedd5' }}>
+                  <BellOutlined style={{ color: '#ea580c', fontSize: 16 }} />
+                </div>
+                {t('layout.notificationDetails', 'Notification Details')}
+              </div>
+            }
+            styles={{
+              content: { borderRadius: 20 },
+              header: { borderBottom: '1px solid #f1f5f9', marginBottom: 0, paddingBottom: 12 },
+              body: { paddingTop: 16 }
+            }}
+          >
+            {detailsItem && (
+              <div style={{ fontFamily: 'Inter, sans-serif' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+                  <div style={{ fontSize: 16, fontWeight: 800, color: '#0f172a' }}>{detailsItem.title}</div>
+                  <SmallPill color="#E67E22">{detailsItem.type}</SmallPill>
+                </div>
+                <div style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600, marginBottom: 12 }}>
+                  {new Date(detailsItem.createdAt).toLocaleString()}
+                </div>
+                <div style={{
+                  fontSize: 13.5,
+                  lineHeight: 1.7,
+                  color: '#334155',
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: 12,
+                  padding: '14px 16px',
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word',
+                }}>
+                  {detailsItem.message}
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 16 }}>
+                  <Button
+                    type="primary"
+                    onClick={() => setDetailsItem(null)}
+                    style={{ background: '#ea580c', borderColor: '#ea580c', fontWeight: 700, borderRadius: 10 }}
+                  >
+                    {t('layout.close', 'Close')}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </Modal>
 
           {/* Account Dropdown */}
           {accountOpen && (

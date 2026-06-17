@@ -24,6 +24,12 @@ public interface NotificationService {
     Notification markAsRead(UUID id, String email);
 
     /**
+     * Mark every unread notification for the given recipient as read.
+     * Returns the number of notifications flipped from unread -> read.
+     */
+    int markAllAsRead(String email);
+
+    /**
      * Send a notification to one or more recipients. When {@code recipientIds}
      * is empty, {@code targetRole} is used to filter; when both are null,
      * the notification is sent to every active user in the system.

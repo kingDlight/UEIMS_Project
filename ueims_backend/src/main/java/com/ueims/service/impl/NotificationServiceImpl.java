@@ -136,6 +136,16 @@ public class NotificationServiceImpl implements NotificationService {
         return saved;
     }
 
+    @Override
+    @org.springframework.transaction.annotation.Transactional
+    public int markAllAsRead(String email) {
+        int updated = repository.markAllAsReadForRecipient(email);
+        if (updated > 0) {
+            broadcaster.pushUnreadCountToUser(email, 0L);
+        }
+        return updated;
+    }
+
     private void pushCreated(Notification n) {
         if (n == null || n.getRecipient() == null) return;
         String email = n.getRecipient().getEmail();
