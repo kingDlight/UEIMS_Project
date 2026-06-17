@@ -17,6 +17,8 @@ import {
 import dayjs from 'dayjs';
 import { SystemAnnouncementService } from '@/services/SystemAnnouncementService';
 import { NotificationService } from '@/services/NotificationService';
+import { SemesterService } from '@/services/SemesterService';
+import type { SemesterResponse } from '@/services/SemesterService';
 
 
 // ============================================================
@@ -61,7 +63,7 @@ const cc = {
 // TYPES
 // ============================================================
 type NoticeStatus = 'Draft' | 'Published';
-type Audience = 'All' | 'Students' | 'Enterprise' | 'Semester';
+type Audience = 'All' | 'Students' | 'Enterprise' | 'Admin' | 'Semester';
 
 interface NoticeRecord {
   id: string;
@@ -122,6 +124,12 @@ const AudienceBadge: React.FC<AudienceBadgeProps> = ({ audience, label }) => {
       bg: cc.purpleMuted,
       border: '#DDD6FE',
       color: cc.purple,
+      icon: <Megaphone size={11} />,
+    },
+    Admin: {
+      bg: cc.errorMuted,
+      border: '#FECACA',
+      color: cc.errorText,
       icon: <Megaphone size={11} />,
     },
     Semester: {
@@ -205,37 +213,93 @@ export const NoticesTab: React.FC = () => {
   const [selectedNotice, setSelectedNotice] = useState<NoticeRecord | null>(null);
   const [form] = Form.useForm();
   const [publishing, setPublishing] = useState(false);
+  const [semesters, setSemesters] = useState<SemesterResponse[]>([]);
+  const [semestersLoading, setSemestersLoading] = useState(false);
 
   const [isMobile, setIsMobile] = useState(false);
   
   const fetchNotices = useCallback(async () => {
     try {
-      const data: any[] = await SystemAnnouncementService.getAll();
-      const mapped: NoticeRecord[] = data.map(n => ({
-        id: n.announcementId,
-        title: n.title,
-        content: n.content,
-        audience: 'All', // Simplifying as we only have semesterId or global
-        audienceLabel: n.semester ? n.semester.name : 'All Users',
-        semesterCode: n.semester ? n.semester.semesterCode : undefined,
-        status: n.status === 'PUBLISHED' ? 'Published' : 'Draft',
-        publishedDate: n.publishedAt,
-        createdDate: n.createdAt,
-      }));
+      const data: SystemAnnouncement[] = await SystemAnnouncementService.getAll();
+      const semesterById = new Map(semesters.map((s) => [s.semesterId, s]));
+      const mapped: NoticeRecord[] = data.map(n => {
+        let audience: Audience = 'All';
+        let audienceLabel = 'All Users';
+
+        if (n.semesterId) {
+          const sem = semesterById.get(n.semesterId);
+          audience = 'Semester';
+          audienceLabel = sem
+            ? `${sem.name} (${sem.semesterCode})`
+            : (n.semester ? `${n.semester.name ?? n.semester.semesterCode}` : 'Specific Semester');
+        } else {
+          switch (n.targetRole) {
+            case 'STUDENT':
+              audience = 'Students';
+              audienceLabel = 'Students';
+              break;
+            case 'ENTERPRISE':
+              audience = 'Enterprise';
+              audienceLabel = 'Enterprises';
+              break;
+            case 'ADMIN':
+              audience = 'Admin';
+              audienceLabel = 'Admins';
+              break;
+            case 'TRAINING_MANAGER':
+              audience = 'Admin';
+              audienceLabel = 'Training Managers';
+              break;
+            default:
+              audience = 'All';
+              audienceLabel = 'All Users';
+          }
+        }
+
+        return {
+          id: n.announcementId,
+          title: n.title,
+          content: n.content,
+          audience,
+          audienceLabel,
+          semesterCode: n.semester?.semesterCode,
+          status: n.status === 'PUBLISHED' ? 'Published' : 'Draft',
+          publishedDate: n.publishedAt,
+          createdDate: n.createdAt,
+        };
+      });
       setNotices(mapped);
     } catch (err) {
       console.error(err);
       message.error('Failed to fetch announcements');
     }
-  }, []);
+  }, [semesters]);
+
+  const fetchSemesters = useCallback(async () => {
+    setSemestersLoading(true);
+    try {
+      const data = await SemesterService.getAllSemesters();
+      setSemesters(data);
+    } catch (err) {
+      console.error(err);
+      message.error('Failed to fetch semesters');
+      setSemesters([]);
+    } finally {
+      setSemestersLoading(false);
+    }
+  }, [message]);
 
   useEffect(() => {
-    void fetchNotices();
+    void fetchSemesters();
     const check = () => setIsMobile(window.innerWidth < 768);
     check();
     window.addEventListener('resize', check);
     return () => window.removeEventListener('resize', check);
   }, []);
+
+  useEffect(() => {
+    void fetchNotices();
+  }, [fetchNotices]);
 
   const scopedNotices = useMemo(() => {
     if (activeSubTab === 'history') {
@@ -336,8 +400,6 @@ export const NoticesTab: React.FC = () => {
         All: undefined,
         Students: 'STUDENT',
         Enterprise: 'ENTERPRISE',
-        Lecturer: 'LECTURER',
-        Mentor: 'MENTOR',
         Admin: 'ADMIN',
         Semester: undefined,
       };
@@ -779,8 +841,9 @@ export const NoticesTab: React.FC = () => {
     { value: 'all', label: 'All Audiences' },
     { value: 'All Users', label: 'All Users' },
     { value: 'Students', label: 'Students' },
-    { value: 'Enterprise', label: 'Enterprise' },
-    { value: 'Summer 2026', label: 'Summer 2026' },
+    { value: 'Enterprises', label: 'Enterprises' },
+    { value: 'Admins', label: 'Admins' },
+    { value: 'Specific Semester', label: 'Specific Semester' },
   ];
 
   const statusOptions = [
@@ -1112,8 +1175,6 @@ export const NoticesTab: React.FC = () => {
                 { value: 'All', label: 'All Users' },
                 { value: 'Students', label: 'Students' },
                 { value: 'Enterprise', label: 'Enterprises' },
-                { value: 'Lecturer', label: 'Lecturers' },
-                { value: 'Mentor', label: 'Mentors' },
                 { value: 'Admin', label: 'Admins' },
                 { value: 'Semester', label: 'Specific Semester' },
               ]}
@@ -1135,13 +1196,13 @@ export const NoticesTab: React.FC = () => {
                     placeholder="Pick a semester"
                     size="large"
                     allowClear
+                    loading={semestersLoading}
+                    notFoundContent={semestersLoading ? 'Loading semesters…' : 'No semesters available'}
                     style={{ borderRadius: cc.radiusMd, fontFamily: 'Inter, sans-serif' }}
-                    options={[
-                      { value: 'sm-001', label: 'Fall 2025 (FA25)' },
-                      { value: 'sm-002', label: 'Spring 2026 (SP26)' },
-                      { value: 'sm-003', label: 'Summer 2026 (SU26)' },
-                      { value: 'sm-004', label: 'Fall 2026 (FA26)' },
-                    ]}
+                    options={semesters.map((s) => ({
+                      value: s.semesterId,
+                      label: `${s.name} (${s.semesterCode})`,
+                    }))}
                   />
                 </Form.Item>
               ) : null

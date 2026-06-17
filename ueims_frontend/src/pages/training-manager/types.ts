@@ -146,15 +146,22 @@ export type SystemAnnouncement = {
   title: string;
   content: string;
   status: string;
+  type?: string;
+  audience?: string;
+  targetRole?: string;
   publishedAt?: string;
   createdAt?: string;
+  semesterId?: string;
   semester?: {
     semesterId: string;
     semesterCode: string;
+    name?: string;
   };
   createdBy?: {
     userId: string;
     fullName: string;
     email: string;
   };
+  createdById?: string;
+  createdByFullName?: string;
 };
