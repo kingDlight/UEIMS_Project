@@ -17,6 +17,8 @@ const InterviewResultTab = React.lazy(() => import('./tabs/InterviewResultTab').
 const InternshipPlanTab = React.lazy(() => import('./tabs/InternshipPlanTab').then(m => ({ default: m.InternshipPlanTab })));
 const WeeklyReportReviewTab = React.lazy(() => import('./tabs/WeeklyReportReviewTab').then(m => ({ default: m.WeeklyReportReviewTab })));
 const IncidentReportTab = React.lazy(() => import('./tabs/IncidentReportTab').then(m => ({ default: m.IncidentReportTab })));
+const AnalyticsTab = React.lazy(() => import('./tabs/AnalyticsTab'));
+const NoticesTab = React.lazy(() => import('./tabs/NoticesTab'));
 
 export type EnterprisePageKey =
   | 'dashboard'
@@ -31,7 +33,8 @@ export type EnterprisePageKey =
   | 'evaluation'
   | 'profile'
   | 'analytics'
-  | 'notifications';
+  | 'notifications'
+  | 'notices';
 
 export const enterpriseNavItems = navItems;
 
@@ -63,16 +66,9 @@ export const EnterpriseDashboard: React.FC = () => {
     incidents: <IncidentReportTab />,
     evaluation: <EvaluationTab />,
     profile: <EnterpriseProfileTab />,
-    analytics: (
-      <div style={{ padding: '40px 24px', fontFamily: 'Inter, sans-serif', color: '#64748b', textAlign: 'center' }}>
-        Analytics — Coming Soon
-      </div>
-    ),
-    notifications: (
-      <div style={{ padding: '40px 24px', fontFamily: 'Inter, sans-serif', color: '#64748b', textAlign: 'center' }}>
-        Notifications — Coming Soon
-      </div>
-    ),
+    analytics: <AnalyticsTab />,
+    notifications: <NoticesTab />,
+    notices: <NoticesTab />,
   };
 
   return (
