@@ -107,11 +107,26 @@ const Avatar: React.FC<{ initials: string }> = ({ initials }) => {
 //   - Sem 7-9 : Completed        (finished OJT, can view results)
 //   - Note: "Pre-Registration" students do NOT appear in the Eligible list
 //     by default; they are only shown when "All" filter is applied.
+//   - Status from DB (set by TM in Edit form) takes priority over derivation.
+//     Manual statuses include PENDING, ACCEPTED, MATCHED, OJT, CANCELLED.
 // ============================================================
-const OJT_STATUS: Record<string, {
+type OJT_STATUS_KEY =
+  | 'PRE_REGISTRATION'
+  | 'ELIGIBLE'
+  | 'IN_OJT'
+  | 'COMPLETED'
+  | 'PENDING'
+  | 'ACCEPTED'
+  | 'MATCHED'
+  | 'OJT'
+  | 'CANCELLED';
+
+type OJTStatusConfig = {
   color: string; bg: string; borderColor: string;
   semRange: string; key: string; descKey: string;
-}> = {
+};
+
+const OJT_STATUS: Record<string, OJTStatusConfig> = {
   PRE_REGISTRATION: {
     color: st.textMuted,  bg: hexToRgba(st.textMuted,  0.06), borderColor: hexToRgba(st.textMuted,  0.25), semRange: 'Sem. 1-4', key: 'preRegistration', descKey: 'preRegistrationDesc',
   },
@@ -123,6 +138,21 @@ const OJT_STATUS: Record<string, {
   },
   COMPLETED: {
     color: st.warning,  bg: hexToRgba(st.warning,  0.06), borderColor: hexToRgba(st.warning,  0.25), semRange: 'Sem. 7-9',   key: 'completed', descKey: 'completedDesc',
+  },
+  PENDING: {
+    color: st.warning,  bg: hexToRgba(st.warning,  0.06), borderColor: hexToRgba(st.warning,  0.25), semRange: '',            key: 'pending',    descKey: 'pendingDesc',
+  },
+  ACCEPTED: {
+    color: st.info,     bg: hexToRgba(st.info,     0.06), borderColor: hexToRgba(st.info,     0.25), semRange: '',            key: 'accepted',   descKey: 'acceptedDesc',
+  },
+  MATCHED: {
+    color: st.success,  bg: hexToRgba(st.success,  0.06), borderColor: hexToRgba(st.success,  0.25), semRange: '',            key: 'matched',    descKey: 'matchedDesc',
+  },
+  OJT: {
+    color: st.success,  bg: hexToRgba(st.success,  0.06), borderColor: hexToRgba(st.success,  0.25), semRange: '',            key: 'inOjt',      descKey: 'inOjtDesc',
+  },
+  CANCELLED: {
+    color: st.error,    bg: hexToRgba(st.error,    0.06), borderColor: hexToRgba(st.error,    0.25), semRange: '',            key: 'cancelled',  descKey: 'cancelledDesc',
   },
 };
 
@@ -811,7 +841,35 @@ export const StudentsTab: React.FC = () => {
       title: <span style={thStyle}>{t('studentsTab.ojtStatus')}</span>,
       key: 'status',
       width: 200,
-      render: (_: unknown, r: EligibleStudent) => <StatusBadge sem={r.currentSemester} />,
+      render: (_: unknown, r: EligibleStudent) => {
+        // Prefer the explicit status from DB (what TM set via Edit form).
+        // Fall back to deriving from semester when status is missing
+        // (e.g. freshly imported students with no manual override yet).
+        const derived = deriveStatus(r.currentSemester);
+        const statusKey = r.status && r.status.trim() !== '' && OJT_STATUS[r.status]
+          ? r.status
+          : derived;
+        const cfg = OJT_STATUS[statusKey];
+        return (
+          <span
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 5,
+              padding: '3px 9px',
+              borderRadius: 6,
+              backgroundColor: cfg.bg,
+              border: `1px solid ${cfg.borderColor}`,
+              color: cfg.color,
+              fontSize: 11,
+              fontWeight: 600,
+              fontFamily: 'Inter, sans-serif',
+            }}
+          >
+            {t(`studentsTab.ojtStatuses.${cfg.key}`)}
+          </span>
+        );
+      },
     },
     {
       title: '',
