@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class EnterpriseEvaluationDTO extends EnterpriseEvaluation {
-    // DTO subclass to resolve java:S4684 while maintaining exact JSON serialization contract.
+    private java.util.UUID assignmentId;
 }

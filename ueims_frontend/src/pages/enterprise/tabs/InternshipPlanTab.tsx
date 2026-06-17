@@ -63,7 +63,7 @@ export const InternshipPlanTab: React.FC = () => {
   const fetchAssignments = async () => {
     setLoading(true);
     try {
-      const res = await EnterpriseAssignmentService.getMyAssignment();
+      const res = await EnterpriseAssignmentService.getMyEnterpriseAssignments();
       const data: Assignment[] = res.data?.result ?? res.data ?? [];
       setAssignments(Array.isArray(data) ? data : []);
     } catch (err: any) {

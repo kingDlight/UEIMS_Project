@@ -18,6 +18,7 @@ import com.ueims.model.entity.ApplicationStatus;
 import com.ueims.model.entity.Interview;
 import com.ueims.model.entity.User;
 import com.ueims.repository.ApplicationRepository;
+import com.ueims.repository.EnterpriseAssignmentRepository;
 import com.ueims.repository.InterviewRepository;
 import com.ueims.repository.UserRepository;
 import com.ueims.service.InterviewService;
@@ -37,21 +38,25 @@ public class InterviewServiceImpl implements InterviewService {
     InterviewRepository repository;
     ApplicationRepository applicationRepository;
     UserRepository userRepository;
+    EnterpriseAssignmentRepository enterpriseAssignmentRepository;
     MailService mailService;
     NotificationService notificationService;
 
     @Override
+    @Transactional(readOnly = true)
     public List<Interview> findAll() {
         return repository.findAll();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Interview> findMyInterviews() {
         User currentUser = getCurrentUser();
         return repository.findByApplication_Student_UserId(currentUser.getUserId());
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Interview> findMyEnterpriseInterviews() {
         User currentUser = getCurrentUser();
         if (currentUser.getEnterprise() == null) {
@@ -68,6 +73,7 @@ public class InterviewServiceImpl implements InterviewService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Interview findById(UUID id) {
         return repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.INTERVIEW_NOT_FOUND));
     }
@@ -239,10 +245,7 @@ public class InterviewServiceImpl implements InterviewService {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
-        // BR-37: must be COMPLETED before recording
-        if (!"COMPLETED".equalsIgnoreCase(existing.getStatus())) {
-            throw new AppException(ErrorCode.INTERVIEW_NOT_COMPLETED);
-        }
+        // Removed BR-37 check to allow recording result without explicitly marking COMPLETED first
 
         // BR-44: rejection requires notes
         if ("FAIL".equalsIgnoreCase(result) && (notes == null || notes.isBlank())) {
@@ -259,6 +262,16 @@ public class InterviewServiceImpl implements InterviewService {
         Application app = existing.getApplication();
         if ("PASS".equals(upper)) {
             app.setStatus(ApplicationStatus.ACCEPTED);
+
+            // Auto-create EnterpriseAssignment
+            com.ueims.model.entity.EnterpriseAssignment assignment =
+                    com.ueims.model.entity.EnterpriseAssignment.builder()
+                            .student(app.getStudent())
+                            .enterprise(app.getJobPost().getEnterprise())
+                            .semester(app.getJobPost().getSemester())
+                            .status("IN_PROGRESS")
+                            .build();
+            enterpriseAssignmentRepository.save(assignment);
         } else if ("FAIL".equals(upper)) {
             app.setStatus(ApplicationStatus.REJECTED);
             app.setRejectionReason(notes);

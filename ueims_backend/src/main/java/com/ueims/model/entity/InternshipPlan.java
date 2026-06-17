@@ -23,10 +23,10 @@ public class InternshipPlan extends BaseEntity {
     @JoinColumn(name = "assignment_id", nullable = false, unique = true)
     private EnterpriseAssignment assignment;
 
-    @Column(name = "overall_goal", columnDefinition = "TEXT")
+    @Transient
     private String overallGoal;
 
-    @Column(name = "is_locked", nullable = false)
+    @Transient
     @Builder.Default
     private Boolean isLocked = false;
 

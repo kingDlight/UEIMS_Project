@@ -37,11 +37,13 @@ public class JobPostServiceImpl implements JobPostService {
     StudentProfileRepository studentProfileRepository;
 
     @Override
+    @Transactional(readOnly = true)
     public List<JobPost> findAll() {
         return repository.findAllByDeletedAtIsNull();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<JobPost> findActive() {
         List<JobPost> activeJobs = repository.findByStatusAndDeletedAtIsNull("OPEN");
 
@@ -56,6 +58,7 @@ public class JobPostServiceImpl implements JobPostService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public JobPost findById(UUID id) {
         return repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.JOB_POST_NOT_FOUND));
     }

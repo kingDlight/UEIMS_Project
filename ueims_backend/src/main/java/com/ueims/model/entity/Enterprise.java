@@ -32,7 +32,7 @@ public class Enterprise extends BaseEntity {
     @Column(name = "tax_code", nullable = false, unique = true, length = 50)
     private String taxCode;
 
-    @Column(name = "website", length = 255)
+    @Transient
     private String website;
 
     @Column(name = "industry", length = 100)
@@ -47,16 +47,16 @@ public class Enterprise extends BaseEntity {
     @Column(name = "logo_url", length = 500)
     private String logoUrl;
 
-    @Column(name = "contact_person", length = 255)
+    @Column(name = "contact_person_name", length = 255)
     private String contactPerson;
 
-    @Column(name = "contact_phone", length = 20)
+    @Column(name = "contact_person_phone", length = 20)
     private String contactPhone;
 
-    @Column(name = "contact_email", length = 255)
+    @Column(name = "contact_person_email", length = 255)
     private String contactEmail;
 
-    @Column(name = "status", nullable = false, length = 20)
+    @Column(name = "approval_status", nullable = false, length = 20)
     @Builder.Default
     private String status = "PENDING";
 

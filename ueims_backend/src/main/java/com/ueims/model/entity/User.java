@@ -20,8 +20,9 @@ import lombok.*;
 @Builder
 @EqualsAndHashCode(
         callSuper = true,
-        exclude = {"roles", "enterprise"})
-@ToString(exclude = {"roles", "enterprise"})
+        exclude = {"roles", "enterprise", "studentProfile"})
+@ToString(exclude = {"roles", "enterprise", "studentProfile"})
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class User extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -78,4 +79,8 @@ public class User extends BaseEntity {
     @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<UserRole> roles;
+
+    @JsonIgnore
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private StudentProfile studentProfile;
 }

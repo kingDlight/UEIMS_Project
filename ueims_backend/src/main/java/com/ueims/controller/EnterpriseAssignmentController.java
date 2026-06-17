@@ -28,12 +28,14 @@ public class EnterpriseAssignmentController {
 
     @GetMapping
     @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public ResponseEntity<List<EnterpriseAssignmentResponseDTO>> getAll() {
         return ResponseEntity.ok(service.findAll().stream().map(mapper::toDto).toList());
     }
 
     @GetMapping("/my-enterprise")
     @PreAuthorize("hasRole('ENTERPRISE') or hasRole('TRAINING_MANAGER')")
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public ResponseEntity<List<EnterpriseAssignmentResponseDTO>> getMyEnterpriseAssignments(
             @RequestParam(required = false) String keyword) {
         if (keyword != null && !keyword.trim().isEmpty()) {
@@ -48,12 +50,14 @@ public class EnterpriseAssignmentController {
 
     @GetMapping("/my-assignment")
     @PreAuthorize("hasRole('STUDENT')")
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public ResponseEntity<EnterpriseAssignmentResponseDTO> getMyAssignment() {
         return ResponseEntity.ok(mapper.toDto(service.findMyAssignment(userService.getCurrentUserId())));
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('ENTERPRISE') or hasRole('SYSTEM_ADMIN')")
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public ResponseEntity<EnterpriseAssignmentResponseDTO> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(mapper.toDto(service.findById(id)));
     }

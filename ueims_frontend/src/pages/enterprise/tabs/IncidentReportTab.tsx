@@ -83,7 +83,7 @@ export const IncidentReportTab: React.FC = () => {
     setLoading(true);
     try {
       const [a, i] = await Promise.allSettled([
-        EnterpriseAssignmentService.getMyAssignment(),
+        EnterpriseAssignmentService.getMyEnterpriseAssignments(),
         // The Incident service may not have a list-by-enterprise endpoint; we'll fetch all and filter
         IncidentService.getAll().catch(() => ({ data: { result: [] } })),
       ]);

@@ -57,7 +57,7 @@ export const AssignedStudentsTab: React.FC = () => {
   const fetchRows = async () => {
     setLoading(true);
     try {
-      const res = await EnterpriseAssignmentService.getMyAssignment();
+      const res = await EnterpriseAssignmentService.getMyEnterpriseAssignments();
       const data: AssignmentRow[] = res.data?.result ?? res.data ?? [];
       setRows(Array.isArray(data) ? data : []);
     } catch (err: any) {
