@@ -13,6 +13,6 @@ import com.ueims.model.entity.*;
 public interface UserRoleRepository extends JpaRepository<UserRole, UserRoleId> {
     long countByUserUserId(UUID userId);
 
-    @Query("SELECT COUNT(ur) FROM UserRole ur WHERE ur.role.id.roleName = :roleName")
+    @Query("SELECT COUNT(ur) FROM UserRole ur WHERE ur.id.roleName = :roleName")
     long countByRoleName(@Param("roleName") String roleName);
 }
