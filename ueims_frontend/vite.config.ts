@@ -29,4 +29,22 @@ export default defineConfig({
       '@stomp/stompjs',
     ],
   },
+  build: {
+    // antd's full bundle is ~1.2MB minified; the project tree-shakes
+    // poorly because ~50 files `import { ... } from 'antd'`. We accept
+    // the larger chunk in exchange for simpler build configuration.
+    chunkSizeWarningLimit: 1500,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'antd-vendor': ['antd', '@ant-design/icons'],
+          'charts-vendor': ['recharts'],
+          'socket-vendor': ['sockjs-client', '@stomp/stompjs'],
+          'motion-vendor': ['framer-motion'],
+          'utils-vendor': ['dayjs', 'axios', 'i18next', 'react-i18next'],
+        },
+      },
+    },
+  },
 })

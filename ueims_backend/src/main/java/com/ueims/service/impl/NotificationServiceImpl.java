@@ -1,16 +1,21 @@
 package com.ueims.service.impl;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import com.ueims.dto.request.BroadcastNotificationRequest;
 import com.ueims.model.entity.Interview;
 import com.ueims.model.entity.Notification;
+import com.ueims.model.entity.User;
 import com.ueims.model.entity.WeeklyReport;
 import com.ueims.repository.NotificationRepository;
 import com.ueims.repository.UserRepository;
 import com.ueims.service.NotificationService;
+import com.ueims.service.websocket.NotificationBroadcaster;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 public class NotificationServiceImpl implements NotificationService {
     NotificationRepository repository;
     UserRepository userRepository;
+    NotificationBroadcaster broadcaster;
 
     @Override
     public List<Notification> findAll() {
@@ -51,12 +57,90 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    public long countUnreadForEmail(String email) {
+        return repository.countByRecipient_EmailAndIsReadFalse(email);
+    }
+
+    @Override
+    public int broadcast(BroadcastNotificationRequest req) {
+        if (req == null || isBlank(req.getTitle()) || isBlank(req.getMessage())) {
+            throw new IllegalArgumentException("title and message are required");
+        }
+        Set<UUID> recipientIds = new HashSet<>();
+        if (req.getRecipientIds() != null) {
+            recipientIds.addAll(req.getRecipientIds());
+        }
+        if (recipientIds.isEmpty()) {
+            List<User> targets;
+            if (req.getTargetRole() != null && !req.getTargetRole().isBlank()) {
+                targets = userRepository.findActiveUsersByRoleName(
+                        req.getTargetRole().trim());
+            } else {
+                targets = userRepository.findAll();
+            }
+            for (User u : targets) {
+                if (u != null
+                        && u.getUserId() != null
+                        && u.getDeletedAt() == null
+                        && (u.getStatus() == null || !"DISABLED".equalsIgnoreCase(u.getStatus()))) {
+                    recipientIds.add(u.getUserId());
+                }
+            }
+        }
+        if (recipientIds.isEmpty()) {
+            log.warn(
+                    "[Notification] broadcast: no recipients resolved (role={}, explicit={})",
+                    req.getTargetRole(),
+                    req.getRecipientIds());
+            return 0;
+        }
+        int sent = 0;
+        for (UUID id : recipientIds) {
+            User recipient = userRepository.findById(id).orElse(null);
+            if (recipient == null) continue;
+            try {
+                Notification n = Notification.builder()
+                        .recipient(recipient)
+                        .type(req.getType() != null ? req.getType() : "GENERAL")
+                        .title(req.getTitle())
+                        .message(req.getMessage())
+                        .referenceEntity(req.getReferenceEntity())
+                        .referenceId(req.getReferenceId())
+                        .isRead(false)
+                        .build();
+                Notification saved = repository.save(n);
+                pushCreated(saved);
+                sent++;
+            } catch (Exception ex) {
+                log.warn("[Notification] broadcast save failed for {}: {}", id, ex.getMessage());
+            }
+        }
+        return sent;
+    }
+
+    private static boolean isBlank(String s) {
+        return s == null || s.trim().isEmpty();
+    }
+
+    @Override
     public Notification markAsRead(UUID id, String email) {
         Notification notification = repository
                 .findByNotificationIdAndRecipient_Email(id, email)
                 .orElseThrow(() -> new com.ueims.exception.ResourceNotFoundException("Notification not found"));
+        if (Boolean.TRUE.equals(notification.getIsRead())) {
+            return notification;
+        }
         notification.setIsRead(true);
-        return repository.save(notification);
+        Notification saved = repository.save(notification);
+        broadcaster.pushUnreadCountToUser(email, repository.countByRecipient_EmailAndIsReadFalse(email));
+        return saved;
+    }
+
+    private void pushCreated(Notification n) {
+        if (n == null || n.getRecipient() == null) return;
+        String email = n.getRecipient().getEmail();
+        broadcaster.pushToUser(email, n);
+        broadcaster.pushUnreadCountToUser(email, repository.countByRecipient_EmailAndIsReadFalse(email));
     }
 
     private void notifyStudent(Interview interview, String type, String title, String message) {
@@ -73,7 +157,8 @@ public class NotificationServiceImpl implements NotificationService {
                     .message(message)
                     .isRead(false)
                     .build();
-            repository.save(n);
+            Notification saved = repository.save(n);
+            pushCreated(saved);
         } catch (Exception ex) {
             log.warn("[Notification] Failed to save notification: {}", ex.getMessage());
         }
@@ -122,13 +207,14 @@ public class NotificationServiceImpl implements NotificationService {
                 || report.getAssignment() == null
                 || report.getAssignment().getStudent() == null) return;
         try {
-            repository.save(Notification.builder()
+            Notification saved = repository.save(Notification.builder()
                     .recipient(report.getAssignment().getStudent())
                     .type("WEEKLY_REPORT_APPROVED")
                     .title("Báo cáo tuần đã được duyệt")
                     .message("Báo cáo tuần của bạn đã được doanh nghiệp phê duyệt.")
                     .isRead(false)
                     .build());
+            pushCreated(saved);
         } catch (Exception ex) {
             log.warn("[Notification] weekly report approved save failed: {}", ex.getMessage());
         }
@@ -140,13 +226,14 @@ public class NotificationServiceImpl implements NotificationService {
                 || report.getAssignment() == null
                 || report.getAssignment().getStudent() == null) return;
         try {
-            repository.save(Notification.builder()
+            Notification saved = repository.save(Notification.builder()
                     .recipient(report.getAssignment().getStudent())
                     .type("WEEKLY_REPORT_REJECTED")
                     .title("Báo cáo tuần cần chỉnh sửa")
                     .message("Báo cáo tuần của bạn đã bị từ chối. Lý do: " + feedback)
                     .isRead(false)
                     .build());
+            pushCreated(saved);
         } catch (Exception ex) {
             log.warn("[Notification] weekly report rejected save failed: {}", ex.getMessage());
         }
@@ -165,13 +252,14 @@ public class NotificationServiceImpl implements NotificationService {
                                                             ur.getRole().getRoleName())))
                     .forEach(tm -> {
                         try {
-                            repository.save(Notification.builder()
+                            Notification saved = repository.save(Notification.builder()
                                     .recipient(tm)
                                     .type("INCIDENT_REPORTED")
                                     .title("Sự cố mới từ doanh nghiệp")
                                     .message("Một sự cố mới đã được báo cáo: " + incident.getCategory())
                                     .isRead(false)
                                     .build());
+                            pushCreated(saved);
                         } catch (Exception ignored) {
                             // Ignore exceptions to ensure other notifications are sent
                         }

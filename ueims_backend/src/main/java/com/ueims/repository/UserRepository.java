@@ -21,6 +21,12 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     List<User> findByEnterprise_EnterpriseId(UUID enterpriseId);
 
+    @Query("SELECT DISTINCT u FROM User u JOIN u.roles ur JOIN ur.role r "
+            + "WHERE UPPER(r.roleName) = UPPER(:roleName) "
+            + "AND (u.deletedAt IS NULL) "
+            + "AND (u.status IS NULL OR UPPER(u.status) <> 'DISABLED')")
+    List<User> findActiveUsersByRoleName(@Param("roleName") String roleName);
+
     @Modifying
     @Transactional
     @Query(
