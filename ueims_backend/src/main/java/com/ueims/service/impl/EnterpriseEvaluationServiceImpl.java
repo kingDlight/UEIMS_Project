@@ -107,7 +107,7 @@ public class EnterpriseEvaluationServiceImpl implements EnterpriseEvaluationServ
         // Kiểm tra quyền sở hữu: Chỉ doanh nghiệp được phân công cho sinh viên này mới có thể đánh giá
         User currentUser = getCurrentUser();
         if (currentUser.getEnterprise() == null
-                || !"ACTIVE".equals(currentUser.getEnterprise().getStatus())
+                || !"APPROVED".equals(currentUser.getEnterprise().getStatus())
                 || !assignment
                         .getEnterprise()
                         .getEnterpriseId()

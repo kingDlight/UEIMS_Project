@@ -68,7 +68,7 @@ public class JobPostServiceImpl implements JobPostService {
     public JobPost create(JobPostRequest request) {
         User currentUser = getCurrentUser();
         if (currentUser.getEnterprise() == null
-                || !"ACTIVE".equals(currentUser.getEnterprise().getStatus())) {
+                || !"APPROVED".equals(currentUser.getEnterprise().getStatus())) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
