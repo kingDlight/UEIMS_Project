@@ -15,6 +15,8 @@ public interface EligibleStudentService {
 
     EligibleStudent save(EligibleStudent entity);
 
+    EligibleStudent update(UUID id, com.ueims.dto.request.EligibleStudentUpdateRequest request);
+
     void deleteById(UUID id);
 
     List<EligibleStudentResponse> importFromExcel(MultipartFile file, UUID semesterId);

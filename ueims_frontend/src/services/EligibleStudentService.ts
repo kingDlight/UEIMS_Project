@@ -37,6 +37,22 @@ export const EligibleStudentService = {
     return response.data;
   },
 
+  async updateEligibleStudent(
+    id: string,
+    payload: {
+      studentCode: string;
+      fullName: string;
+      email?: string;
+      major: string;
+      gpa: number;
+      currentSemester: number;
+      status?: string;
+    }
+  ): Promise<EligibleStudent> {
+    const response = await api.put<EligibleStudent>(`/eligible-students/${id}`, payload);
+    return response.data;
+  },
+
   async cancelOjtResult(id: string, reason: string): Promise<EligibleStudent> {
     const response = await api.put(`/eligible-students/${id}/cancel`, { reason });
     return response.data;

@@ -1,5 +1,5 @@
-import React, { useState, useRef, useMemo, useEffect } from 'react';
-import { Table, Modal, Select, Input, Upload, App } from 'antd';
+import React, { useState, useRef, useMemo, useEffect, useCallback } from 'react';
+import { Table, Modal, Select, Input, InputNumber, Form, Upload, App } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import type { UploadFile } from 'antd/es/upload';
 import {
@@ -408,6 +408,203 @@ const StudentDetailModal: React.FC<{
 };
 
 // ============================================================
+// EDIT STUDENT MODAL
+// ============================================================
+const STATUS_OPTIONS = [
+  { value: 'ELIGIBLE', label: 'Eligible' },
+  { value: 'PENDING', label: 'Pending' },
+  { value: 'ACCEPTED', label: 'Accepted' },
+  { value: 'MATCHED', label: 'Matched' },
+  { value: 'OJT', label: 'OJT' },
+  { value: 'CANCELLED', label: 'Cancelled' },
+];
+
+const EditStudentModal: React.FC<{
+  open: boolean;
+  student: EligibleStudent | null;
+  onClose: () => void;
+  onSaved: (updated: EligibleStudent) => void;
+}> = ({ open, student, onClose, onSaved }) => {
+  const [form] = Form.useForm();
+  const { message } = App.useApp();
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (open && student) {
+      form.setFieldsValue({
+        studentCode: student.studentCode,
+        fullName: student.fullName,
+        email: student.email ?? '',
+        major: student.major,
+        gpa: typeof student.gpa === 'number' ? student.gpa : Number(student.gpa) || 0,
+        currentSemester: student.currentSemester,
+        status: student.status ?? 'ELIGIBLE',
+      });
+    }
+  }, [open, student, form]);
+
+  const handleSubmit = useCallback(async () => {
+    if (!student) return;
+    try {
+      const values = await form.validateFields();
+      setSaving(true);
+      const updated = await EligibleStudentService.updateEligibleStudent(student.eligibleId, {
+        studentCode: values.studentCode,
+        fullName: values.fullName,
+        email: values.email || undefined,
+        major: values.major,
+        gpa: Number(values.gpa),
+        currentSemester: Number(values.currentSemester),
+        status: values.status,
+      });
+      message.success({ content: `Updated "${updated.fullName}"`, key: 'edit' });
+      onSaved(updated);
+      onClose();
+    } catch (err) {
+      console.error('Failed to update student', err);
+      const apiMsg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      if (apiMsg) {
+        message.error({ content: apiMsg, key: 'edit' });
+      } else if (!(err as { errorFields?: unknown }).errorFields) {
+        message.error({ content: 'Failed to update student', key: 'edit' });
+      }
+    } finally {
+      setSaving(false);
+    }
+  }, [student, form, message, onSaved, onClose]);
+
+  return (
+    <Modal
+      open={open}
+      title={
+        <span style={{ fontSize: 16, fontWeight: 800, color: st.textPrimary }}>
+          Edit Student
+        </span>
+      }
+      onCancel={() => { if (!saving) { form.resetFields(); onClose(); } }}
+      footer={null}
+      width={520}
+      centered
+      destroyOnClose
+      styles={{ body: { padding: '8px 4px 0' } }}
+    >
+      <Form form={form} layout="vertical" requiredMark="optional" onFinish={handleSubmit}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 16px' }}>
+          <Form.Item
+            name="studentCode"
+            label="Student Code"
+            rules={[{ required: true, message: 'Please enter student code' }]}
+          >
+            <Input size="large" placeholder="e.g. SE170001" />
+          </Form.Item>
+          <Form.Item
+            name="fullName"
+            label="Full Name"
+            rules={[{ required: true, message: 'Please enter full name' }]}
+          >
+            <Input size="large" placeholder="Full name" />
+          </Form.Item>
+        </div>
+
+        <Form.Item
+          name="email"
+          label="Email"
+          rules={[{ type: 'email', message: 'Please enter a valid email' }]}
+        >
+          <Input size="large" placeholder="name@example.com" />
+        </Form.Item>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 16px' }}>
+          <Form.Item
+            name="major"
+            label="Major"
+            rules={[{ required: true, message: 'Please select a major' }]}
+          >
+            <Select
+              size="large"
+              options={MAJORS.filter((m) => m.value !== 'All Majors').map((m) => ({
+                value: m.value,
+                label: m.value,
+              }))}
+            />
+          </Form.Item>
+          <Form.Item
+            name="gpa"
+            label="GPA"
+            rules={[
+              { required: true, message: 'Please enter GPA' },
+              {
+                validator: (_r, v) =>
+                  v === undefined || v === null || (Number(v) >= 0 && Number(v) <= 4)
+                    ? Promise.resolve()
+                    : Promise.reject(new Error('GPA must be 0.00 – 4.00')),
+              },
+            ]}
+          >
+            <InputNumber
+              size="large"
+              min={0}
+              max={4}
+              step={0.01}
+              style={{ width: '100%' }}
+              placeholder="0.00 – 4.00"
+            />
+          </Form.Item>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 16px' }}>
+          <Form.Item
+            name="currentSemester"
+            label="Current Semester"
+            rules={[
+              { required: true, message: 'Please enter current semester' },
+              {
+                validator: (_r, v) =>
+                  v === undefined || v === null || (Number.isInteger(Number(v)) && Number(v) >= 1 && Number(v) <= 12)
+                    ? Promise.resolve()
+                    : Promise.reject(new Error('Semester must be 1 – 12')),
+              },
+            ]}
+          >
+            <InputNumber size="large" min={1} max={12} step={1} style={{ width: '100%' }} />
+          </Form.Item>
+          <Form.Item name="status" label="Status">
+            <Select size="large" options={STATUS_OPTIONS} />
+          </Form.Item>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 8 }}>
+          <button
+            type="button"
+            onClick={() => { if (!saving) { form.resetFields(); onClose(); } }}
+            disabled={saving}
+            style={{
+              padding: '9px 18px', borderRadius: st.radiusMd, border: `1px solid ${st.border}`,
+              background: '#fff', color: st.textSecondary, fontSize: 13, fontWeight: 600,
+              cursor: saving ? 'not-allowed' : 'pointer', fontFamily: 'Inter, sans-serif',
+            }}
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={saving}
+            style={{
+              padding: '9px 18px', borderRadius: st.radiusMd, border: 'none',
+              background: st.brand, color: '#fff', fontSize: 13, fontWeight: 700,
+              cursor: saving ? 'not-allowed' : 'pointer', fontFamily: 'Inter, sans-serif',
+              boxShadow: st.shadowBrand, opacity: saving ? 0.7 : 1,
+            }}
+          >
+            {saving ? 'Saving...' : 'Save Changes'}
+          </button>
+        </div>
+      </Form>
+    </Modal>
+  );
+};
+
+// ============================================================
 // MAIN COMPONENT
 // ============================================================
 export const StudentsTab: React.FC = () => {
@@ -418,6 +615,7 @@ export const StudentsTab: React.FC = () => {
   const [acadSem, setAcadSem] = useState<string>('ALL');
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] =
     useState<EligibleStudent | null>(null);
   const [uploadedFile, setUploadedFile] = useState<UploadFile | null>(null);
@@ -426,25 +624,27 @@ export const StudentsTab: React.FC = () => {
   const pageSize = 10;
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Refetch helper (used after edit)
+  const refetchStudents = useCallback(async () => {
+    try {
+      setLoading(true);
+      const data = await EligibleStudentService.getAllEligibleStudents();
+      setStudents(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error('Failed to load students', err);
+      setStudents([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   // Fetch from real database via API
   const [students, setStudents] = useState<EligibleStudent[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const fetchStudents = async () => {
-      try {
-        setLoading(true);
-        const data = await EligibleStudentService.getAllEligibleStudents();
-        setStudents(Array.isArray(data) ? data : []);
-      } catch (err) {
-        console.error('Failed to load students', err);
-        setStudents([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    void fetchStudents();
-  }, []);
+    void refetchStudents();
+  }, [refetchStudents]);
 
   const eligibleCount = students.filter(
     (s) => deriveStatus(s.currentSemester) === 'ELIGIBLE'
@@ -484,8 +684,14 @@ export const StudentsTab: React.FC = () => {
     setDetailModalOpen(true);
   };
   const handleEdit = (s: EligibleStudent) => {
-    message.info({ content: `Editing: ${s.fullName}`, key: 'edit' });
+    setSelectedStudent(s);
+    setDetailModalOpen(false);
+    setEditModalOpen(true);
   };
+  const handleEditSaved = useCallback((updated: EligibleStudent) => {
+    setStudents((prev) => prev.map((s) => (s.eligibleId === updated.eligibleId ? updated : s)));
+    void refetchStudents();
+  }, [refetchStudents]);
 
   const handleImport = async () => {
     if (!uploadedFile || !fileInputRef.current?.files?.[0]) return;
@@ -1092,6 +1298,14 @@ export const StudentsTab: React.FC = () => {
         student={selectedStudent}
         onClose={() => setDetailModalOpen(false)}
         onEdit={handleEdit}
+      />
+
+      {/* Edit Student Modal */}
+      <EditStudentModal
+        open={editModalOpen}
+        student={selectedStudent}
+        onClose={() => setEditModalOpen(false)}
+        onSaved={handleEditSaved}
       />
     </div>
   );

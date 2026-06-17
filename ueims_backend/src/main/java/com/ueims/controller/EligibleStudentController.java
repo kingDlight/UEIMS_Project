@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.ueims.dto.request.EligibleStudentRequest;
+import com.ueims.dto.request.EligibleStudentUpdateRequest;
 import com.ueims.dto.response.EligibleStudentDTO;
 import com.ueims.dto.response.EligibleStudentResponse;
 import com.ueims.mapper.EligibleStudentMapper;
@@ -46,6 +47,13 @@ public class EligibleStudentController {
     @PreAuthorize("hasRole('TRAINING_MANAGER')")
     public ResponseEntity<EligibleStudentDTO> create(@Valid @RequestBody EligibleStudentRequest request) {
         return ResponseEntity.ok(mapper.toDto(service.save(mapper.toEntity(request))));
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('TRAINING_MANAGER')")
+    public ResponseEntity<EligibleStudentDTO> update(
+            @PathVariable UUID id, @Valid @RequestBody EligibleStudentUpdateRequest request) {
+        return ResponseEntity.ok(mapper.toDto(service.update(id, request)));
     }
 
     @DeleteMapping("/{id}")

@@ -87,6 +87,9 @@ public enum ErrorCode {
             HttpStatus.BAD_REQUEST),
     ADMIN_INTERVENTION_REQUIRED(
             1052, "Admin intervention is required to modify an already approved OJT student", HttpStatus.FORBIDDEN),
+    ELIGIBLE_STUDENT_NOT_FOUND(10521, "Eligible student not found", HttpStatus.NOT_FOUND),
+    ELIGIBLE_STUDENT_DUPLICATE(
+            10522, "Another student with the same student code already exists in this semester", HttpStatus.BAD_REQUEST),
     INTERVIEW_DATE_MUST_BE_IN_FUTURE(1053, "Interview date must be in the future", HttpStatus.BAD_REQUEST),
     INTERVIEW_ELIGIBILITY_RULE(
             1054, "Chỉ những ứng viên đã vượt qua vòng sơ loại mới được lên lịch phỏng vấn", HttpStatus.BAD_REQUEST),

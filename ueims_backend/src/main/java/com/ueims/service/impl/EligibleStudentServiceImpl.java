@@ -14,6 +14,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.ueims.dto.request.EligibleStudentUpdateRequest;
 import com.ueims.dto.response.EligibleStudentResponse;
 import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
@@ -69,6 +70,47 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
     @Override
     public void deleteById(UUID id) {
         repository.deleteById(id);
+    }
+
+    @Override
+    @org.springframework.transaction.annotation.Transactional
+    public EligibleStudent update(UUID id, EligibleStudentUpdateRequest request) {
+        EligibleStudent existing = repository
+                .findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.ELIGIBLE_STUDENT_NOT_FOUND));
+
+        // Guard: same OJT → non-OJT admin-only rule as save()
+        String newStatus = request.getStatus() != null ? request.getStatus() : existing.getStatus();
+        if ("OJT".equals(existing.getStatus()) && !"OJT".equals(newStatus)) {
+            var authentication = org.springframework.security.core.context.SecurityContextHolder.getContext()
+                    .getAuthentication();
+            boolean isAdmin = authentication != null
+                    && authentication.getAuthorities().stream()
+                            .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+            if (!isAdmin) {
+                throw new AppException(ErrorCode.ADMIN_INTERVENTION_REQUIRED);
+            }
+        }
+
+        // Uniqueness: studentCode must not collide with another row in the same semester
+        if (request.getStudentCode() != null
+                && !request.getStudentCode().equals(existing.getStudentCode())) {
+            UUID semesterId = existing.getSemester() != null ? existing.getSemester().getSemesterId() : null;
+            if (semesterId != null
+                    && repository.existsByStudentCodeAndSemester_SemesterId(request.getStudentCode(), semesterId)) {
+                throw new AppException(ErrorCode.ELIGIBLE_STUDENT_DUPLICATE);
+            }
+        }
+
+        existing.setStudentCode(request.getStudentCode());
+        existing.setFullName(request.getFullName());
+        existing.setEmail(request.getEmail());
+        existing.setMajor(request.getMajor());
+        existing.setGpa(request.getGpa());
+        existing.setCurrentSemester(request.getCurrentSemester());
+        existing.setStatus(newStatus);
+
+        return repository.save(existing);
     }
 
     @Override
