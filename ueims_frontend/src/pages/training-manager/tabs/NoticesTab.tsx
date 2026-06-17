@@ -12,6 +12,7 @@ import {
   BellRing,
   History,
   Inbox,
+  Trash2,
 } from 'lucide-react';
 import dayjs from 'dayjs';
 import { SystemAnnouncementService } from '@/services/SystemAnnouncementService';
@@ -310,6 +311,17 @@ export const NoticesTab: React.FC = () => {
     }
   }, [fetchNotices]);
 
+  const handleDelete = useCallback(async (record: NoticeRecord) => {
+    try {
+      await SystemAnnouncementService.delete(record.id);
+      message.success({ content: `"${record.title}" deleted.`, duration: 2.5 });
+      void fetchNotices();
+    } catch (err) {
+      console.error(err);
+      message.error('Failed to delete announcement');
+    }
+  }, [fetchNotices]);
+
   const handleView = useCallback((record: NoticeRecord) => {
     setSelectedNotice(record);
     setIsViewModalOpen(true);
@@ -494,7 +506,7 @@ export const NoticesTab: React.FC = () => {
       key: 'actions',
       fixed: isMobile ? undefined : 'right',
       align: 'right' as const,
-      width: 220,
+      width: 280,
       render: (_: unknown, record: NoticeRecord) => (
         <div style={{ ...row, justifyContent: 'flex-end', gap: 8 }}>
           {record.status === 'Draft' ? (
@@ -580,6 +592,50 @@ export const NoticesTab: React.FC = () => {
                 <Edit3 size={11} />
                 Edit
               </button>
+
+              {/* Delete (Draft) — Danger Solid */}
+              <Popconfirm
+                title={`Delete "${record.title}"?`}
+                description="This draft will be permanently removed."
+                onConfirm={() => handleDelete(record)}
+                okText="Delete"
+                cancelText="Cancel"
+                okButtonProps={{ style: { borderRadius: cc.radiusMd, fontWeight: 700, background: cc.error, borderColor: cc.error } }}
+                cancelButtonProps={{ style: { borderRadius: cc.radiusMd } }}
+              >
+                <button
+                  aria-label="Delete"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: 30,
+                    height: 30,
+                    borderRadius: cc.radiusMd,
+                    border: `1.5px solid ${cc.error}40`,
+                    background: 'transparent',
+                    color: cc.error,
+                    cursor: 'pointer',
+                    transition: 'all 0.18s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    const b = e.currentTarget as HTMLButtonElement;
+                    b.style.background = cc.error;
+                    b.style.color = '#fff';
+                    b.style.borderColor = cc.error;
+                    b.style.transform = 'translateY(-1px)';
+                  }}
+                  onMouseLeave={(e) => {
+                    const b = e.currentTarget as HTMLButtonElement;
+                    b.style.background = 'transparent';
+                    b.style.color = cc.error;
+                    b.style.borderColor = `${cc.error}40`;
+                    b.style.transform = 'translateY(0)';
+                  }}
+                >
+                  <Trash2 size={13} />
+                </button>
+              </Popconfirm>
             </>
           ) : (
             <>
@@ -665,6 +721,50 @@ export const NoticesTab: React.FC = () => {
                 <Eye size={11} />
                 View
               </button>
+
+              {/* Delete (Published) — Danger Solid Icon */}
+              <Popconfirm
+                title={`Delete "${record.title}"?`}
+                description="Already-published — recipients will no longer be able to view it in the announcement list."
+                onConfirm={() => handleDelete(record)}
+                okText="Delete"
+                cancelText="Cancel"
+                okButtonProps={{ style: { borderRadius: cc.radiusMd, fontWeight: 700, background: cc.error, borderColor: cc.error } }}
+                cancelButtonProps={{ style: { borderRadius: cc.radiusMd } }}
+              >
+                <button
+                  aria-label="Delete"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: 30,
+                    height: 30,
+                    borderRadius: cc.radiusMd,
+                    border: `1.5px solid ${cc.error}40`,
+                    background: 'transparent',
+                    color: cc.error,
+                    cursor: 'pointer',
+                    transition: 'all 0.18s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    const b = e.currentTarget as HTMLButtonElement;
+                    b.style.background = cc.error;
+                    b.style.color = '#fff';
+                    b.style.borderColor = cc.error;
+                    b.style.transform = 'translateY(-1px)';
+                  }}
+                  onMouseLeave={(e) => {
+                    const b = e.currentTarget as HTMLButtonElement;
+                    b.style.background = 'transparent';
+                    b.style.color = cc.error;
+                    b.style.borderColor = `${cc.error}40`;
+                    b.style.transform = 'translateY(0)';
+                  }}
+                >
+                  <Trash2 size={13} />
+                </button>
+              </Popconfirm>
             </>
           )}
         </div>
