@@ -107,6 +107,18 @@ public class GlobalExceptionHandler {
                         .build());
     }
 
+    @ExceptionHandler(value = org.springframework.web.HttpMediaTypeNotSupportedException.class)
+    ResponseEntity<ApiResponse<Void>> handlingHttpMediaTypeNotSupportedException(
+            org.springframework.web.HttpMediaTypeNotSupportedException exception) {
+        log.warn("Unsupported media type: {}", exception.getMessage());
+        ErrorCode errorCode = ErrorCode.UNSUPPORTED_MEDIA_TYPE;
+        return ResponseEntity.status(errorCode.getStatusCode())
+                .body(ApiResponse.<Void>builder()
+                        .code(errorCode.getCode())
+                        .message(errorCode.getMessage())
+                        .build());
+    }
+
     @ExceptionHandler(value = Exception.class)
     ResponseEntity<ApiResponse<Void>> handlingRuntimeException(Exception exception) {
         log.error("Exception: ", exception);
