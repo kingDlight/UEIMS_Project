@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 
 import com.ueims.dto.request.PlacementApplicationRequest;
 import com.ueims.dto.request.RejectApplicationRequest;
-import com.ueims.dto.response.OjtPlacementViewDTO;
 import com.ueims.dto.response.PlacementApplicationResponseDTO;
 import com.ueims.service.PlacementApplicationService;
 import com.ueims.service.UserService;
@@ -94,15 +93,5 @@ public class PlacementApplicationController {
     public ResponseEntity<PlacementApplicationResponseDTO> withdraw(@PathVariable UUID id) {
         UUID studentId = userService.getCurrentUserId();
         return ResponseEntity.ok(service.withdraw(id, studentId));
-    }
-
-    /**
-     * TM xem combined view cho tab OJT.
-     * GET /api/placement-applications/ojt-view
-     */
-    @GetMapping("/ojt-view")
-    @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
-    public ResponseEntity<List<OjtPlacementViewDTO>> getOjtPlacementView() {
-        return ResponseEntity.ok(service.getOjtPlacementView());
     }
 }

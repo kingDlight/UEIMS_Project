@@ -57,5 +57,5 @@ export const PlacementApplicationService = {
     approve: (id: string) => api.put(`${API_URL}/${id}/approve`),
     reject: (id: string, data: RejectApplicationRequest) => api.put(`${API_URL}/${id}/reject`, data),
     withdraw: (id: string) => api.put(`${API_URL}/${id}/withdraw`),
-    getOjtPlacementView: () => api.get(`${API_URL}/ojt-view`),
+    getOjtPlacementView: () => api.get('/ojt-placements/view'),
 };
