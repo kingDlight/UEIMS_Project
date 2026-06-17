@@ -95,6 +95,18 @@ public class GlobalExceptionHandler {
                         .build());
     }
 
+    @ExceptionHandler(value = org.springframework.http.converter.HttpMessageNotReadableException.class)
+    ResponseEntity<ApiResponse<Void>> handlingHttpMessageNotReadableException(
+            org.springframework.http.converter.HttpMessageNotReadableException exception) {
+        log.warn("Http message not readable: {}", exception.getMessage());
+        ErrorCode errorCode = ErrorCode.INVALID_MESSAGE_PAYLOAD;
+        return ResponseEntity.status(errorCode.getStatusCode())
+                .body(ApiResponse.<Void>builder()
+                        .code(errorCode.getCode())
+                        .message(errorCode.getMessage())
+                        .build());
+    }
+
     @ExceptionHandler(value = Exception.class)
     ResponseEntity<ApiResponse<Void>> handlingRuntimeException(Exception exception) {
         log.error("Exception: ", exception);
