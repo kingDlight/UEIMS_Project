@@ -246,13 +246,27 @@ export const SemesterTab: React.FC = () => {
   const handleCreateSemester = useCallback(async () => {
     try {
       const values = await form.validateFields();
-      message.success({ content: `Semester "${values.name}" created successfully.`, duration: 2.5 });
+      const payload = {
+        semesterCode: values.semesterCode,
+        name: values.name,
+        startDate: dayjs(values.startDate).format('YYYY-MM-DD'),
+        endDate: dayjs(values.endDate).format('YYYY-MM-DD'),
+        weeklyReportDeadlineDay: values.weeklyReportDeadlineDay ?? 'SUNDAY',
+        weeklyReportDeadlineTime: values.weeklyReportDeadlineTime ?? '23:59',
+        status: values.status ?? 'DRAFT',
+      };
+      const created = await SemesterService.createSemester(payload);
+      message.success({ content: `Semester "${created.name}" created successfully.`, duration: 2.5 });
       setIsModalOpen(false);
       form.resetFields();
-    } catch {
-      // validation failed
+      void fetchSemesters();
+    } catch (err) {
+      console.error(err);
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
+        ?? 'Failed to create semester';
+      message.error(msg);
     }
-  }, [form]);
+  }, [form, fetchSemesters]);
 
   const formatDate = (dateStr: string) => dayjs(dateStr).format('MMM D, YYYY');
 
