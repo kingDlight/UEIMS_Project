@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Spin, App, Modal, Form, Input, Button, Upload, Popconfirm, Alert } from 'antd';
 import { motion } from 'framer-motion';
 import {
@@ -19,7 +19,6 @@ import {
   ClockCircleOutlined,
   ExclamationCircleOutlined,
 } from '@ant-design/icons';
-import type { UploadProps } from 'antd';
 import { api } from '@/services/api';
 import { c } from '../constants';
 
@@ -103,6 +102,219 @@ const InfoRow: React.FC<{ icon: React.ReactNode; label: string; value?: string }
 );
 
 // ============================================================
+// INNER FORM COMPONENT (own form instance — survives destroyOnHidden)
+// ============================================================
+interface EditProfileFormProps {
+  initialValues: Partial<EnterpriseProfile>;
+  onCancel: () => void;
+  onSubmit: (values: Partial<EnterpriseProfile>) => Promise<void>;
+  saving: boolean;
+  logoPreview: string | null;
+  setLogoPreview: (url: string | null) => void;
+}
+
+const EditProfileForm: React.FC<EditProfileFormProps> = ({
+  initialValues, onCancel, onSubmit, saving, logoPreview, setLogoPreview
+}) => {
+  const [form] = Form.useForm();
+  const [dirty, setDirty] = useState(false);
+  const { message } = App.useApp();
+
+  useEffect(() => {
+    form.setFieldsValue(initialValues);
+    setDirty(false);
+  }, [initialValues, form]);
+
+  const handleClearLogo = () => {
+    form.setFieldValue('logoUrl', '');
+    setLogoPreview(null);
+  };
+
+  const handleLogoUpload = (file: File) => {
+    if (file.size > 500 * 1024) {
+      message.error('Logo must be 500KB or smaller.');
+      return Upload.LIST_IGNORE;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      form.setFieldValue('logoUrl', dataUrl);
+      setLogoPreview(dataUrl);
+    };
+    reader.readAsDataURL(file);
+    return Upload.LIST_IGNORE;
+  };
+
+  const handleCancel = () => {
+    if (dirty) {
+      Modal.confirm({
+        title: 'Discard unsaved changes?',
+        icon: <ExclamationCircleOutlined style={{ color: c.warning }} />,
+        content: 'You have unsaved changes in the edit form. Closing now will discard them.',
+        okText: 'Discard',
+        cancelText: 'Keep editing',
+        okButtonProps: { danger: true },
+        onOk: onCancel,
+      });
+    } else {
+      onCancel();
+    }
+  };
+
+  const handleSave = async () => {
+    try {
+      const values = await form.validateFields();
+      await onSubmit(values);
+    } catch (err) {
+      // validation failed — antd highlights fields
+    }
+  };
+
+  return (
+    <Form
+      form={form}
+      layout="vertical"
+      requiredMark="optional"
+      onValuesChange={() => setDirty(true)}
+    >
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+        <Form.Item
+          name="companyName"
+          label="Enterprise Name"
+          rules={[{ required: true, whitespace: true, message: 'Enterprise name is required' }]}
+        >
+          <Input placeholder="FPT Software" maxLength={500} showCount />
+        </Form.Item>
+        <Form.Item name="taxCode" label="Tax Code (read-only)" tooltip="Tax code is set during registration and cannot be changed here.">
+          <Input placeholder="0123456789" disabled />
+        </Form.Item>
+        <Form.Item name="industry" label="Industry / Field">
+          <Input placeholder="Software, Banking, ..." maxLength={100} />
+        </Form.Item>
+        <Form.Item
+          name="website"
+          label="Website"
+          rules={[
+            {
+              pattern: /^(https?:\/\/)?[\w.-]+\.[a-zA-Z]{2,}.*$/,
+              message: 'Website must be a valid URL (e.g. https://example.com)',
+            },
+          ]}
+        >
+          <Input placeholder="https://example.com" maxLength={255} />
+        </Form.Item>
+        <div style={{ gridColumn: '1 / -1' }}>
+          <Form.Item
+            name="address"
+            label="Address"
+            rules={[{ required: true, whitespace: true, message: 'Address is required' }]}
+          >
+            <Input placeholder="Street, District, City" maxLength={500} showCount />
+          </Form.Item>
+        </div>
+        <Form.Item
+          name="contactPerson"
+          label="Representative / Contact Person"
+          rules={[{ required: true, whitespace: true, message: 'Contact person is required' }]}
+        >
+          <Input placeholder="John Doe" maxLength={255} />
+        </Form.Item>
+        <Form.Item
+          name="contactPhone"
+          label="Contact Phone"
+          rules={[
+            { required: true, whitespace: true, message: 'Contact phone is required' },
+            { pattern: /^[+0-9\-\s()]{6,20}$/, message: 'Phone format is invalid' },
+          ]}
+        >
+          <Input placeholder="+84 xxx xxx xxx" maxLength={20} />
+        </Form.Item>
+        <div style={{ gridColumn: '1 / -1' }}>
+          <Form.Item
+            name="contactEmail"
+            label="Contact Email"
+            rules={[
+              { required: true, whitespace: true, message: 'Contact email is required' },
+              { type: 'email', message: 'Contact email must be a valid email address' },
+            ]}
+          >
+            <Input placeholder="contact@company.com" maxLength={255} />
+          </Form.Item>
+        </div>
+        <div style={{ gridColumn: '1 / -1' }}>
+          <Form.Item
+            name="logoUrl"
+            label="Logo (URL or upload)"
+            tooltip="Upload an image (max 500KB) or paste a public URL. The logo URL must not exceed 500 characters."
+          >
+            <Input
+              placeholder="https://... or upload below"
+              prefix={<UploadOutlined />}
+              maxLength={500}
+              onChange={(e) => setLogoPreview((e.target.value as string) || null)}
+            />
+          </Form.Item>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: -8 }}>
+            <Upload beforeUpload={handleLogoUpload} showUploadList={false} accept="image/*">
+              <Button icon={<UploadOutlined />}>Upload Logo (max 500KB)</Button>
+            </Upload>
+            {logoPreview && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <img
+                  src={logoPreview}
+                  alt="logo preview"
+                  style={{
+                    width: 40, height: 40, borderRadius: c.radiusSm,
+                    objectFit: 'contain', background: c.bgLight, border: `1px solid ${c.border}`,
+                    padding: 2,
+                  }}
+                />
+                <Button type="text" size="small" icon={<CloseOutlined />} onClick={handleClearLogo}>
+                  Remove
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+        <div style={{ gridColumn: '1 / -1' }}>
+          <Form.Item
+            name="description"
+            label="Company Description"
+            rules={[{ required: true, whitespace: true, message: 'Description is required' }]}
+          >
+            <Input.TextArea
+              rows={4}
+              placeholder="Brief introduction about your company..."
+              maxLength={5000}
+              showCount
+            />
+          </Form.Item>
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 8, paddingTop: 16, borderTop: `1px solid ${c.border}` }}>
+        <Button
+          onClick={handleCancel}
+          icon={<CloseOutlined />}
+          style={{ borderRadius: c.radiusMd }}
+        >
+          Cancel
+        </Button>
+        <Button
+          type="primary"
+          onClick={handleSave}
+          loading={saving}
+          icon={<SaveOutlined />}
+          style={{ background: c.brand, borderColor: c.brand, borderRadius: c.radiusMd, fontWeight: 700 }}
+        >
+          Save
+        </Button>
+      </div>
+    </Form>
+  );
+};
+
+// ============================================================
 // MAIN COMPONENT (UC-35 + UC-36)
 // ============================================================
 export const EnterpriseProfileTab: React.FC = () => {
@@ -110,10 +322,10 @@ export const EnterpriseProfileTab: React.FC = () => {
   const [profile, setProfile] = useState<EnterpriseProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [editOpen, setEditOpen] = useState(false);
-  const [form] = Form.useForm();
   const [saving, setSaving] = useState(false);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
-  const initialValuesRef = useRef<Partial<EnterpriseProfile> | null>(null);
+  const [editInitial, setEditInitial] = useState<Partial<EnterpriseProfile>>({});
+  const [editKey, setEditKey] = useState(0);
 
   // ============================================================
   // UC-35 Normal Flow: fetch & display enterprise profile
@@ -151,129 +363,32 @@ export const EnterpriseProfileTab: React.FC = () => {
       contactPhone: profile.contactPhone,
       contactEmail: profile.contactEmail,
     };
-    initialValuesRef.current = initial;
-    form.setFieldsValue(initial);
+    setEditInitial(initial);
     setLogoPreview(profile.logoUrl || null);
+    setEditKey((k) => k + 1);
     setEditOpen(true);
   };
 
-  // ============================================================
-  // UC-36 Alternative Flow 36.1: Cancel editing
-  // - If form is dirty, confirm before discarding
-  // - Always reset form to the read-only view's data
-  // ============================================================
-  const handleCancel = () => {
-    form
-      .validateFields()
-      .then(() => {
-        // Validation passed → no inline errors visible
-        attemptCancel();
-      })
-      .catch(() => {
-        // Form has validation errors → definitely dirty
-        attemptCancel();
-      });
-  };
-
-  const attemptCancel = () => {
-    if (form.isFieldsTouched()) {
-      Modal.confirm({
-        title: 'Discard unsaved changes?',
-        icon: <ExclamationCircleOutlined style={{ color: c.warning }} />,
-        content: 'You have unsaved changes in the edit form. Closing now will discard them.',
-        okText: 'Discard',
-        cancelText: 'Keep editing',
-        okButtonProps: { danger: true },
-        onOk: () => closeEdit(),
-      });
-    } else {
-      closeEdit();
-    }
-  };
-
-  const closeEdit = () => {
-    setEditOpen(false);
-    if (initialValuesRef.current) {
-      form.setFieldsValue(initialValuesRef.current);
-    }
-    form.resetFields();
-    setLogoPreview(profile?.logoUrl || null);
-  };
-
-  // ============================================================
-  // UC-36 Normal Flow step 3-4: Save (validate, submit)
-  // ============================================================
-  const handleSave = async () => {
+  const handleEditSubmit = async (values: Partial<EnterpriseProfile>) => {
+    setSaving(true);
     try {
-      const values = await form.validateFields();
-      setSaving(true);
-
-      const payload = {
-        ...values,
-        contactPerson: (values.contactPerson ?? '').trim(),
-        contactPhone: (values.contactPhone ?? '').trim(),
-        contactEmail: (values.contactEmail ?? '').trim().toLowerCase(),
-        companyName: (values.companyName ?? '').trim(),
-        address: (values.address ?? '').trim(),
-        website: (values.website ?? '').trim(),
-        industry: (values.industry ?? '').trim(),
-        description: values.description ?? '',
-      };
-
-      // UC-36: edit the currently authenticated enterprise's own profile
-      await api.put('/enterprises/my-profile', payload);
-
-      // UC-36 step 5: success message + back to read-only view with new data
-      message.success('Profile updated successfully.');
+      const res = await api.put('/enterprises/my-profile', values);
+      const updated = (res.data?.result ?? res.data ?? values) as EnterpriseProfile;
+      setProfile(updated);
+      setLogoPreview(updated?.logoUrl || null);
       setEditOpen(false);
-      form.resetFields();
-      await fetchProfile();
+      message.success('Profile updated successfully.');
     } catch (err: any) {
-      if (err?.errorFields) {
-        // UC-36 Exception 36.0.E1
-        message.error('Please fill in all required fields.');
-      } else {
-        message.error(err.response?.data?.message || 'Failed to update profile.');
-      }
+      message.error(err.response?.data?.message || 'Failed to save changes. Please try again.');
     } finally {
       setSaving(false);
     }
   };
 
   // ============================================================
-  // Logo upload: convert to base64 (kept inline so no separate file
-  // hosting is required). Data URLs grow quickly, so we enforce a
-  // size + length cap that matches the backend's logo_url column.
+  // UC-36 Normal Flow step 3-4: Save (now lives inside EditProfileForm)
   // ============================================================
-  const handleLogoUpload: UploadProps['beforeUpload'] = (file) => {
-    if (!file.type.startsWith('image/')) {
-      message.error('Logo must be an image file (PNG/JPG/SVG).');
-      return Upload.LIST_IGNORE;
-    }
-    const isLt500Kb = file.size / 1024 < 500;
-    if (!isLt500Kb) {
-      message.error('Logo must be smaller than 500KB to fit the URL field.');
-      return Upload.LIST_IGNORE;
-    }
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = reader.result as string;
-      if (dataUrl.length > MAX_LOGO_DATA_URL_LENGTH) {
-        message.error('Encoded logo is too large. Please use a smaller image or a public URL.');
-        return;
-      }
-      form.setFieldValue('logoUrl', dataUrl);
-      setLogoPreview(dataUrl);
-      message.success('Logo loaded.');
-    };
-    reader.readAsDataURL(file);
-    return Upload.LIST_IGNORE; // prevent antd default upload
-  };
-
-  const handleClearLogo = () => {
-    form.setFieldValue('logoUrl', '');
-    setLogoPreview(null);
-  };
+  // (old handleSave / handleLogoUpload / handleClearLogo removed — moved to EditProfileForm)
 
   const isSuspended = useMemo(() => profile?.status === 'SUSPENDED', [profile]);
 
@@ -435,155 +550,24 @@ export const EnterpriseProfileTab: React.FC = () => {
           </div>
         }
         open={editOpen}
-        // UC-36 Alt 36.1: Cancel button (also used by Esc / backdrop click)
-        onCancel={handleCancel}
+        onCancel={() => setEditOpen(false)}
         width={720}
         footer={null}
         maskClosable={false}
         destroyOnHidden
         styles={{ content: { borderRadius: c.radiusLg, padding: '24px 28px' }, header: { borderBottom: 'none', marginBottom: 16, padding: 0 }, body: { padding: 0 } }}
       >
-        <Form
-          form={form}
-          layout="vertical"
-          requiredMark="optional"
-          // Mark fields as required per UC-36 Exception 36.0.E1
-          // (Enterprise Name, Address, Contact Person are mandatory; Phone & Email too)
-        >
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <Form.Item
-              name="companyName"
-              label="Enterprise Name"
-              rules={[{ required: true, whitespace: true, message: 'Enterprise name is required' }]}
-            >
-              <Input placeholder="FPT Software" maxLength={500} showCount />
-            </Form.Item>
-            <Form.Item name="taxCode" label="Tax Code (read-only)" tooltip="Tax code is set during registration and cannot be changed here.">
-              <Input placeholder="0123456789" disabled />
-            </Form.Item>
-            <Form.Item name="industry" label="Industry / Field">
-              <Input placeholder="Software, Banking, ..." maxLength={100} />
-            </Form.Item>
-            <Form.Item
-              name="website"
-              label="Website"
-              rules={[
-                {
-                  pattern: /^(https?:\/\/)?[\w.-]+\.[a-zA-Z]{2,}.*$/,
-                  message: 'Website must be a valid URL (e.g. https://example.com)',
-                },
-              ]}
-            >
-              <Input placeholder="https://example.com" maxLength={255} />
-            </Form.Item>
-            <div style={{ gridColumn: '1 / -1' }}>
-              <Form.Item
-                name="address"
-                label="Address"
-                rules={[{ required: true, whitespace: true, message: 'Address is required' }]}
-              >
-                <Input placeholder="Street, District, City" maxLength={500} showCount />
-              </Form.Item>
-            </div>
-            <Form.Item
-              name="contactPerson"
-              label="Representative / Contact Person"
-              rules={[{ required: true, whitespace: true, message: 'Contact person is required' }]}
-            >
-              <Input placeholder="John Doe" maxLength={255} />
-            </Form.Item>
-            <Form.Item
-              name="contactPhone"
-              label="Contact Phone"
-              rules={[
-                { required: true, whitespace: true, message: 'Contact phone is required' },
-                { pattern: /^[+0-9\-\s()]{6,20}$/, message: 'Phone format is invalid' },
-              ]}
-            >
-              <Input placeholder="+84 xxx xxx xxx" maxLength={20} />
-            </Form.Item>
-            <div style={{ gridColumn: '1 / -1' }}>
-              <Form.Item
-                name="contactEmail"
-                label="Contact Email"
-                rules={[
-                  { required: true, whitespace: true, message: 'Contact email is required' },
-                  { type: 'email', message: 'Contact email must be a valid email address' },
-                ]}
-              >
-                <Input placeholder="contact@company.com" maxLength={255} />
-              </Form.Item>
-            </div>
-            <div style={{ gridColumn: '1 / -1' }}>
-              <Form.Item
-                name="logoUrl"
-                label="Logo (URL or upload)"
-                tooltip="Upload an image (max 500KB) or paste a public URL. The logo URL must not exceed 500 characters."
-              >
-                <Input
-                  placeholder="https://... or upload below"
-                  prefix={<UploadOutlined />}
-                  maxLength={500}
-                  onChange={(e) => setLogoPreview((e.target.value as string) || null)}
-                />
-              </Form.Item>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: -8 }}>
-                <Upload beforeUpload={handleLogoUpload} showUploadList={false} accept="image/*">
-                  <Button icon={<UploadOutlined />}>Upload Logo (max 500KB)</Button>
-                </Upload>
-                {logoPreview && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <img
-                      src={logoPreview}
-                      alt="logo preview"
-                      style={{
-                        width: 40, height: 40, borderRadius: c.radiusSm,
-                        objectFit: 'contain', background: c.bgLight, border: `1px solid ${c.border}`,
-                        padding: 2,
-                      }}
-                    />
-                    <Button type="text" size="small" icon={<CloseOutlined />} onClick={handleClearLogo}>
-                      Remove
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </div>
-            <div style={{ gridColumn: '1 / -1' }}>
-              <Form.Item
-                name="description"
-                label="Company Description"
-                rules={[{ required: true, whitespace: true, message: 'Description is required' }]}
-              >
-                <Input.TextArea
-                  rows={4}
-                  placeholder="Brief introduction about your company..."
-                  maxLength={5000}
-                  showCount
-                />
-              </Form.Item>
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 8, paddingTop: 16, borderTop: `1px solid ${c.border}` }}>
-            <Button
-              onClick={handleCancel}
-              icon={<CloseOutlined />}
-              style={{ borderRadius: c.radiusMd }}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="primary"
-              onClick={handleSave}
-              loading={saving}
-              icon={<SaveOutlined />}
-              style={{ background: c.brand, borderColor: c.brand, borderRadius: c.radiusMd, fontWeight: 700 }}
-            >
-              Save
-            </Button>
-          </div>
-        </Form>
+        {editOpen && (
+          <EditProfileForm
+            key={editKey}
+            initialValues={editInitial}
+            onCancel={() => setEditOpen(false)}
+            onSubmit={handleEditSubmit}
+            saving={saving}
+            logoPreview={logoPreview}
+            setLogoPreview={setLogoPreview}
+          />
+        )}
       </Modal>
     </div>
   );
