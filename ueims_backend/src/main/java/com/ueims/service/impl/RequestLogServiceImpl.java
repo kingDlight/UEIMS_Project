@@ -4,10 +4,15 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+
+import jakarta.persistence.criteria.Predicate;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,10 +62,8 @@ public class RequestLogServiceImpl implements RequestLogService {
             LocalDateTime startDate,
             LocalDateTime endDate,
             Pageable pageable) {
-        String endpointFilter = (endpoint != null && !endpoint.isBlank()) ? "%" + endpoint + "%" : null;
-        return repository
-                .searchLogs(userId, method, endpointFilter, startDate, endDate, pageable)
-                .map(this::toDto);
+        Specification<RequestLog> spec = createSpecification(userId, method, endpoint, startDate, endDate);
+        return repository.findAll(spec, pageable).map(this::toDto);
     }
 
     @Override
@@ -80,8 +83,8 @@ public class RequestLogServiceImpl implements RequestLogService {
     @Transactional(readOnly = true)
     public byte[] exportCsv(
             UUID userId, HttpMethod method, String endpoint, LocalDateTime startDate, LocalDateTime endDate) {
-        String endpointFilter = (endpoint != null && !endpoint.isBlank()) ? "%" + endpoint + "%" : null;
-        Page<RequestLog> logs = repository.searchLogs(userId, method, endpointFilter, startDate, endDate, Pageable.unpaged());
+        Specification<RequestLog> spec = createSpecification(userId, method, endpoint, startDate, endDate);
+        Page<RequestLog> logs = repository.findAll(spec, Pageable.unpaged());
 
         try (ByteArrayOutputStream out = new ByteArrayOutputStream();
                 PrintWriter writer = new PrintWriter(out)) {
@@ -106,6 +109,34 @@ public class RequestLogServiceImpl implements RequestLogService {
             log.error("Failed to export request logs CSV", e);
             return new byte[0];
         }
+    }
+
+    private Specification<RequestLog> createSpecification(
+            UUID userId, HttpMethod method, String endpoint, LocalDateTime startDate, LocalDateTime endDate) {
+        return (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (userId != null) {
+                predicates.add(cb.equal(root.get("userId"), userId));
+            }
+            if (method != null) {
+                predicates.add(cb.equal(root.get("method"), method));
+            }
+            if (endpoint != null && !endpoint.isBlank()) {
+                predicates.add(cb.like(root.get("endpoint"), "%" + endpoint + "%"));
+            }
+            if (startDate != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("timestamp"), startDate));
+            }
+            if (endDate != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("timestamp"), endDate));
+            }
+
+            if (query != null && query.getResultType() != Long.class && query.getResultType() != long.class) {
+                query.orderBy(cb.desc(root.get("timestamp")));
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
     }
 
     private RequestLogResponseDTO toDto(RequestLog log) {
