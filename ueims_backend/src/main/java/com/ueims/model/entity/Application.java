@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
 
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 import org.hibernate.annotations.SQLRestriction;
 
 import lombok.*;
@@ -24,6 +26,7 @@ public class Application extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "job_post_id", nullable = false)
+    @NotFound(action = NotFoundAction.IGNORE)
     private JobPost jobPost;
 
     @ManyToOne(fetch = FetchType.LAZY)

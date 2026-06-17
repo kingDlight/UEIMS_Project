@@ -38,7 +38,6 @@ public class EnterpriseServiceImpl implements EnterpriseService {
 
     @Override
     public Enterprise findById(UUID id) {
-        // Nên dùng mã lỗi chung hoặc mã lỗi liên quan đến Enterprise nếu có
         Enterprise enterprise =
                 repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ENTERPRISE_NOT_FOUND));
 
@@ -78,6 +77,19 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         return repository.save(entity);
     }
 
+    /**
+     * UC-36 Edit Enterprise Profile.
+     * - Normal flow: persists updated company information (description, address, logo,
+     *   contact details) and returns the updated entity (POST-1).
+     * - Ownership check: only the Enterprise that owns this profile can edit it.
+     * - Business rule: an Enterprise whose status is SUSPENDED cannot edit.
+     *   PENDING/REJECTED enterprises may edit so they can fix the rejection reason
+     *   and resubmit.
+     * - Contact person/phone/email are mirrored to the current User account so the
+     *   representative's login contact details stay in sync. The User's email is
+     *   intentionally NOT changed here (would invalidate the current session and
+     *   may collide with another user's email).
+     */
     @Override
     @Transactional
     public Enterprise update(UUID id, EnterpriseRequest request) {
@@ -85,26 +97,42 @@ public class EnterpriseServiceImpl implements EnterpriseService {
         Enterprise existing =
                 repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ENTERPRISE_NOT_FOUND));
 
-        // UC-36 & Ownership check: Chỉ Enterprise sở hữu profile này mới được sửa
+        // UC-36 & Ownership check: chỉ Enterprise sở hữu profile này mới được sửa
         validateOwnership(id, currentUser);
 
+        // Không cho phép enterprise đang bị SUSPENDED tự chỉnh sửa
+        if ("SUSPENDED".equalsIgnoreCase(existing.getStatus())) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        // Persist all editable fields from UC-36 step 3 (description, address, logo,
+        // contact details). taxCode, status, rejectionReason are admin-managed and
+        // intentionally not writable through this endpoint.
         existing.setCompanyName(request.getCompanyName());
+        existing.setWebsite(request.getWebsite());
+        existing.setIndustry(request.getIndustry());
         existing.setAddress(request.getAddress());
         existing.setDescription(request.getDescription());
         existing.setLogoUrl(request.getLogoUrl());
-
-        // UC-36: Cập nhật thông tin liên hệ và đồng bộ sang tài khoản User
         existing.setContactPerson(request.getContactPerson());
         existing.setContactPhone(request.getContactPhone());
         existing.setContactEmail(request.getContactEmail());
 
-        // UC-36: Đồng bộ thông tin sang tài khoản User hiện tại (Người đại diện)
+        // Mirror representative info onto the current User account for consistency
         currentUser.setFullName(request.getContactPerson());
         currentUser.setPhone(request.getContactPhone());
-        currentUser.setEmail(request.getContactEmail());
         userRepository.save(currentUser);
 
-        return repository.save(existing);
+        Enterprise saved = repository.save(existing);
+        log.info("Enterprise {} profile updated by user {}", id, currentUser.getEmail());
+        return saved;
+    }
+
+    @Override
+    @Transactional
+    public Enterprise updateMyProfile(EnterpriseRequest request) {
+        Enterprise current = getMyEnterpriseProfile();
+        return update(current.getEnterpriseId(), request);
     }
 
     @Override
