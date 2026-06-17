@@ -421,7 +421,7 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
         <AlertTriangle size={40} color={cc.error} />
         <div style={{ color: cc.error, fontSize: 15, fontWeight: 600 }}>Lỗi tải dữ liệu</div>
         <div style={{ color: cc.textSecondary, fontSize: 13 }}>{initError}</div>
-        <button 
+        <button
           onClick={() => { setInitError(null); setLoading(true); window.location.reload(); }}
           style={{ marginTop: 8, padding: '8px 20px', borderRadius: cc.radiusMd, background: cc.brand, color: '#fff', border: 'none', fontWeight: 600, cursor: 'pointer', fontSize: 13 }}
         >
@@ -429,7 +429,6 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
         </button>
       </div>
     );
-  }
   }
 
   // Fallback default summary if DB is empty
