@@ -18,6 +18,16 @@ public class CommandCenterSummaryDTO {
     private WeeklyReportSummary weeklyReports;
     private PipelineSummary pipeline;
 
+    // Aggregate KPIs shown on the Admin Command Center top cards
+    private long totalUsers;
+    private long totalStudents;
+    private long totalEnterprises;
+    private long totalTrainers;
+    private long totalAdmins;
+    private long totalJobPosts;
+    private long totalApplications;
+    private long activeInternships;
+
     @Data
     @Builder
     public static class IncidentSummary {
