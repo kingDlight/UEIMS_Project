@@ -222,18 +222,23 @@ public class StudentProfileServiceImpl implements StudentProfileService {
                 .avatarUrl(user.getAvatarUrl())
                 .status(user.getStatus());
 
-        if (profile != null) {
-            builder.profileId(profile.getProfileId())
-                    .studentCode(profile.getStudentCode())
-                    .major(profile.getMajor())
-                    .skills(profile.getSkills())
-                    .cvUrl(profile.getCvUrl())
-                    .cvFileName(profile.getCvFileName())
-                    .linkedinUrl(profile.getLinkedinUrl())
-                    .githubUrl(profile.getGithubUrl())
-                    .portfolioUrl(profile.getPortfolioUrl())
-                    .bio(profile.getBio());
+        if (profile == null) {
+            // Lazily create profile if not exists
+            profile = new StudentProfile();
+            profile.setUser(user);
+            profile = repository.save(profile);
         }
+
+        builder.profileId(profile.getProfileId())
+                .studentCode(profile.getStudentCode())
+                .major(profile.getMajor())
+                .skills(profile.getSkills())
+                .cvUrl(profile.getCvUrl())
+                .cvFileName(profile.getCvFileName())
+                .linkedinUrl(profile.getLinkedinUrl())
+                .githubUrl(profile.getGithubUrl())
+                .portfolioUrl(profile.getPortfolioUrl())
+                .bio(profile.getBio());
 
         // Get latest eligible student record for semester info
         var latestEligible = eligibleStudentRepository.findTopByUser_UserIdOrderByImportedAtDesc(userId);

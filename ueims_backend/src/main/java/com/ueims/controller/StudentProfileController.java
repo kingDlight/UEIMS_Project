@@ -41,10 +41,6 @@ public class StudentProfileController {
     @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<Map<String, Object>> getMyProfile() {
         UUID userId = userService.getCurrentUserId();
-        com.ueims.model.entity.StudentProfile profile = service.findByUserId(userId);
-        if (profile == null) {
-            return ResponseEntity.ok(Map.of("result", Map.of()));
-        }
         return ResponseEntity.ok(Map.of("result", service.getMyFullProfile(userId)));
     }
 
