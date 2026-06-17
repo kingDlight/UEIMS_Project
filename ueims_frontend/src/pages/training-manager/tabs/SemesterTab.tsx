@@ -214,11 +214,24 @@ export const SemesterTab: React.FC = () => {
 
   const handleSetCurrent = useCallback(async (record: SemesterRecord) => {
     try {
+      // Backend state machine: DRAFT -> OPEN -> ACTIVE. If the semester is
+      // still DRAFT, promote it to OPEN first so the activate call succeeds.
+      if (record.status === 'Upcoming') {
+        try {
+          await SemesterService.openSemester(record.id);
+        } catch (openErr) {
+          // Already OPEN / not in DRAFT — ignore and try activate.
+          console.debug('openSemester skipped:', openErr);
+        }
+      }
       await SemesterService.activateSemester(record.id);
       message.success({ content: `"${record.name}" is now set as Current semester.`, duration: 2.5 });
       void fetchSemesters();
     } catch (err) {
-      message.error('Failed to set current semester');
+      console.error(err);
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
+        ?? 'Failed to set current semester';
+      message.error(msg);
     }
   }, [fetchSemesters]);
 
@@ -485,8 +498,8 @@ export const SemesterTab: React.FC = () => {
             Edit Timeline
           </button>
 
-          {/* Set as Current — only if not Current */}
-          {record.status !== 'Current' && (
+          {/* Set as Current — only for Upcoming (DRAFT/OPEN) */}
+          {record.status === 'Upcoming' && (
             <Popconfirm
               title={`Set "${record.name}" as Current?`}
               description="The current active semester will be moved to Completed."
