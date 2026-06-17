@@ -11,6 +11,10 @@ import { SmallPill } from '@/pages/training-manager/components/shared/SmallPill'
 import { useAuthStore } from '@/stores/useAuthStore';
 import { AuthService } from '@/services/AuthService';
 import { api } from '@/services/api';
+import { useNotificationStore, type NotificationItem } from '@/stores/useNotificationStore';
+import { useAnnouncementStore } from '@/stores/useAnnouncementStore';
+import { useNotificationStream } from '@/hooks/useNotificationStream';
+import { useAnnouncementStream } from '@/hooks/useAnnouncementStream';
 import './ModernLayout.css';
 import { BackgroundEffects } from '@/pages/home/components/BackgroundEffects';
 
@@ -262,33 +266,33 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
   const [cropModalOpen, setCropModalOpen] = useState(false);
   const [tempImageUrl, setTempImageUrl] = useState<string | null>(null);
 
-  const [notifications, setNotifications] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
 
-  const fetchNotifications = async () => {
-    if (!token) return;
-    try {
-      const res = await api.get('/notifications/my');
-      setNotifications(res.data);
-    } catch (err) {
-      console.error('Failed to fetch notifications', err);
-    }
-  };
+  // Global notification state — bell badge + dropdown list. The store is
+  // updated by the WebSocket stream below.
+  const notifItems = useNotificationStore((s) => s.items);
+  const unreadCount = useNotificationStore((s) => s.unreadCount);
+  const fetchNotifications = useNotificationStore((s) => s.fetch);
+  const markNotificationAsRead = useNotificationStore((s) => s.markAsRead);
+  const resetNotifications = useNotificationStore((s) => s.reset);
+
+  useNotificationStream();
+  useAnnouncementStream();
+
+  // Local mirror so the existing JSX keeps working without rewriting it
+  // entirely; the store is the source of truth.
+  useEffect(() => {
+    setNotifications(notifItems);
+  }, [notifItems]);
 
   useEffect(() => {
-    fetchNotifications();
-    // Optionally set up an interval to poll notifications here
-  }, [token]);
+    if (token) fetchNotifications();
+    else resetNotifications();
+  }, [token, fetchNotifications, resetNotifications]);
 
   const markAsRead = async (id: string) => {
-    try {
-      await api.put(`/notifications/${id}/read`);
-      fetchNotifications();
-    } catch (err) {
-      console.error('Failed to mark notification as read', err);
-    }
+    await markNotificationAsRead(id);
   };
-
-  const unreadCount = notifications.filter(n => !n.isRead).length;
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

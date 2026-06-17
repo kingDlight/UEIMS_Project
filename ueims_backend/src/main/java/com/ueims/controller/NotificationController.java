@@ -27,6 +27,14 @@ public class NotificationController {
         return ResponseEntity.ok(service.findAll().stream().map(mapper::toDto).toList());
     }
 
+    @GetMapping("/my/unread-count")
+    public ResponseEntity<java.util.Map<String, Long>> getUnreadCount() {
+        String email = org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+        return ResponseEntity.ok(java.util.Map.of("count", service.countUnreadForEmail(email)));
+    }
+
     @GetMapping("/my")
     public ResponseEntity<List<com.ueims.dto.response.NotificationDTO>> getMyNotifications() {
         String email = org.springframework.security.core.context.SecurityContextHolder.getContext()
@@ -59,5 +67,12 @@ public class NotificationController {
                 .getAuthentication()
                 .getName();
         return ResponseEntity.ok(mapper.toDto(service.markAsRead(id, email)));
+    }
+
+    @PostMapping("/broadcast")
+    public ResponseEntity<java.util.Map<String, Object>> broadcast(
+            @Valid @RequestBody com.ueims.dto.request.BroadcastNotificationRequest request) {
+        int sent = service.broadcast(request);
+        return ResponseEntity.ok(java.util.Map.of("sent", sent, "title", request.getTitle()));
     }
 }

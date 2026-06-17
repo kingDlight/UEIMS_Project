@@ -41,32 +41,32 @@ public class SystemAnnouncementController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('TRAINING_MANAGER')")
+    @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')")
     public ResponseEntity<SystemAnnouncement> create(@Valid @RequestBody AnnouncementCreationRequest request) {
         return ResponseEntity.ok(service.createAnnouncement(request));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('TRAINING_MANAGER')")
+    @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')")
     public ResponseEntity<SystemAnnouncement> update(
             @PathVariable UUID id, @Valid @RequestBody AnnouncementCreationRequest request) {
         return ResponseEntity.ok(service.updateAnnouncement(id, request));
     }
 
     @PutMapping("/{id}/publish")
-    @PreAuthorize("hasRole('TRAINING_MANAGER')")
+    @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')")
     public ResponseEntity<SystemAnnouncement> publish(@PathVariable UUID id) {
         return ResponseEntity.ok(service.updateStatus(id, "PUBLISHED"));
     }
 
     @PutMapping("/{id}/archive")
-    @PreAuthorize("hasRole('TRAINING_MANAGER')")
+    @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')")
     public ResponseEntity<SystemAnnouncement> archive(@PathVariable UUID id) {
         return ResponseEntity.ok(service.updateStatus(id, "ARCHIVED"));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('TRAINING_MANAGER')")
+    @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         service.deleteById(id);
         return ResponseEntity.ok().build();

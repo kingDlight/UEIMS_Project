@@ -18,6 +18,7 @@ import com.ueims.repository.SemesterRepository;
 import com.ueims.repository.SystemAnnouncementRepository;
 import com.ueims.repository.UserRepository;
 import com.ueims.service.SystemAnnouncementService;
+import com.ueims.service.websocket.AnnouncementBroadcaster;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ public class SystemAnnouncementServiceImpl implements SystemAnnouncementService 
     SystemAnnouncementRepository repository;
     UserRepository userRepository;
     SemesterRepository semesterRepository;
+    AnnouncementBroadcaster broadcaster;
 
     @Override
     public List<SystemAnnouncement> findAll() {
@@ -66,7 +68,9 @@ public class SystemAnnouncementServiceImpl implements SystemAnnouncementService 
                 .semester(semester)
                 .build();
 
-        return repository.save(announcement);
+        SystemAnnouncement saved = repository.save(announcement);
+        broadcaster.broadcastCreated(saved);
+        return saved;
     }
 
     @Override
@@ -85,7 +89,9 @@ public class SystemAnnouncementServiceImpl implements SystemAnnouncementService 
             announcement.setSemester(null);
         }
 
-        return repository.save(announcement);
+        SystemAnnouncement saved = repository.save(announcement);
+        broadcaster.broadcastUpdated(saved);
+        return saved;
     }
 
     @Override
@@ -96,11 +102,21 @@ public class SystemAnnouncementServiceImpl implements SystemAnnouncementService 
         if ("PUBLISHED".equals(status)) {
             announcement.setPublishedAt(LocalDateTime.now());
         }
-        return repository.save(announcement);
+        SystemAnnouncement saved = repository.save(announcement);
+        if ("PUBLISHED".equals(status)) {
+            broadcaster.broadcastPublished(saved);
+        } else if ("ARCHIVED".equals(status)) {
+            broadcaster.broadcastArchived(saved);
+        } else {
+            broadcaster.broadcastUpdated(saved);
+        }
+        return saved;
     }
 
     @Override
+    @Transactional
     public void deleteById(UUID id) {
         repository.deleteById(id);
+        broadcaster.broadcastDeleted(id);
     }
 }
