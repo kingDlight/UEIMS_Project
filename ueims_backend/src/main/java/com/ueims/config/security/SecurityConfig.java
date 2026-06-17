@@ -24,6 +24,9 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
+import com.ueims.filter.RequestLoggingFilter;
+import com.ueims.service.RequestLogService;
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -50,7 +53,8 @@ public class SecurityConfig {
             CustomJwtDecoder customJwtDecoder,
             RequirePasswordChangeFilter requirePasswordChangeFilter,
             RateLimitFilter rateLimitFilter,
-            SecurityHeadersFilter securityHeadersFilter)
+            SecurityHeadersFilter securityHeadersFilter,
+            RequestLogService requestLogService)
             throws Exception {
         httpSecurity.authorizeHttpRequests(request -> request.requestMatchers(HttpMethod.OPTIONS, "/**")
                 .permitAll()
@@ -86,6 +90,9 @@ public class SecurityConfig {
         httpSecurity.addFilterBefore(rateLimitFilter, BearerTokenAuthenticationFilter.class);
         // Enforce password change after JWT validation
         httpSecurity.addFilterAfter(requirePasswordChangeFilter, BearerTokenAuthenticationFilter.class);
+        // Capture full request context (incl. user) for the admin request log.
+        // Placed after BearerTokenAuthenticationFilter so SecurityContext already holds the JWT principal.
+        httpSecurity.addFilterAfter(new RequestLoggingFilter(requestLogService), BearerTokenAuthenticationFilter.class);
 
         return httpSecurity.build();
     }
