@@ -16,6 +16,7 @@ import dayjs from 'dayjs';
 import { SystemAnnouncementService } from '@/services/SystemAnnouncementService';
 import { SemesterService } from '@/services/SemesterService';
 import type { SemesterResponse } from '@/services/SemesterService';
+import type { SystemAnnouncement } from '@/pages/training-manager/types';
 
 
 // ============================================================
@@ -69,6 +70,8 @@ interface NoticeRecord {
   audience: Audience;
   audienceLabel: string;
   semesterCode?: string;
+  semesterId?: string;
+  type?: string;
   status: NoticeStatus;
   publishedDate?: string;
   createdDate: string;
@@ -265,6 +268,8 @@ export const NoticesTab: React.FC = () => {
           audience,
           audienceLabel,
           semesterCode: n.semester?.semesterCode,
+          semesterId: n.semesterId,
+          type: n.type,
           status: n.status === 'PUBLISHED' ? 'Published' : 'Draft',
           publishedDate: n.publishedAt,
           createdDate: n.createdAt,
@@ -302,6 +307,22 @@ export const NoticesTab: React.FC = () => {
   useEffect(() => {
     void fetchNotices();
   }, [fetchNotices]);
+
+  // Prefill form when entering edit mode; reset when switching back to create.
+  useEffect(() => {
+    if (!isModalOpen) return;
+    if (selectedNotice) {
+      form.setFieldsValue({
+        title: selectedNotice.title,
+        content: selectedNotice.content,
+        type: selectedNotice.type ?? 'GENERAL',
+        audience: selectedNotice.audience,
+        semesterId: selectedNotice.semesterId,
+      });
+    } else {
+      form.resetFields();
+    }
+  }, [isModalOpen, selectedNotice, form]);
 
   const filteredNotices = useMemo(() => {
     return notices
@@ -372,7 +393,7 @@ export const NoticesTab: React.FC = () => {
     setIsViewModalOpen(true);
   }, []);
 
-  const handleCreate = useCallback(async () => {
+  const handleSubmit = useCallback(async () => {
     try {
       const values = await form.validateFields();
       setPublishing(true);
@@ -387,29 +408,40 @@ export const NoticesTab: React.FC = () => {
       };
       const targetRole = audienceToRole[values.audience];
 
-      // 1. Persist (status=DRAFT on server). Backend will use these fields
-      //    later when publish() fans out the live bell.
-      const created = await SystemAnnouncementService.create({
-        title: values.title,
-        content: values.content,
-        semesterId: values.audience === 'Semester' ? values.semesterId : undefined,
-        type: values.type ?? 'GENERAL',
-        audience: values.audience,
-        targetRole,
-      } as unknown as Parameters<typeof SystemAnnouncementService.create>[0]);
-
-      // 2. Publish immediately — backend fans out the live bell automatically
-      //    (one source of truth: announcement = notification).
-      await SystemAnnouncementService.publish(created.announcementId);
-
-      const audienceLabel =
-        values.audience === 'Semester'
-          ? '(semester-scoped, bell pending per-semester route)'
-          : `(live bell -> ${values.audience === 'All' ? 'all users' : values.audience.toLowerCase()})`;
-      message.success({
-        content: `Announcement "${values.title}" published ${audienceLabel}.`,
-        duration: 3,
-      });
+      if (selectedNotice) {
+        // EDIT: only update fields, do not re-publish or re-fanout.
+        await SystemAnnouncementService.update(selectedNotice.id, {
+          title: values.title,
+          content: values.content,
+          semesterId: values.audience === 'Semester' ? values.semesterId : undefined,
+          type: values.type ?? 'GENERAL',
+          audience: values.audience,
+          targetRole,
+        } as unknown as Parameters<typeof SystemAnnouncementService.update>[1]);
+        message.success({
+          content: `Announcement "${values.title}" updated.`,
+          duration: 2.5,
+        });
+      } else {
+        // CREATE: persist then publish (one source of truth = bell push)
+        const created = await SystemAnnouncementService.create({
+          title: values.title,
+          content: values.content,
+          semesterId: values.audience === 'Semester' ? values.semesterId : undefined,
+          type: values.type ?? 'GENERAL',
+          audience: values.audience,
+          targetRole,
+        } as unknown as Parameters<typeof SystemAnnouncementService.create>[0]);
+        await SystemAnnouncementService.publish(created.announcementId);
+        const audienceLabel =
+          values.audience === 'Semester'
+            ? '(semester-scoped, bell pending per-semester route)'
+            : `(live bell -> ${values.audience === 'All' ? 'all users' : values.audience.toLowerCase()})`;
+        message.success({
+          content: `Announcement "${values.title}" published ${audienceLabel}.`,
+          duration: 3,
+        });
+      }
       setIsModalOpen(false);
       form.resetFields();
       setSelectedNotice(null);
@@ -419,7 +451,7 @@ export const NoticesTab: React.FC = () => {
     } finally {
       setPublishing(false);
     }
-  }, [form, fetchNotices]);
+  }, [form, fetchNotices, selectedNotice]);
 
   const formatDate = (dateStr?: string) => {
     if (!dateStr) return '—';
@@ -1184,7 +1216,7 @@ export const NoticesTab: React.FC = () => {
             <Button
               type="primary"
               loading={publishing}
-              onClick={handleCreate}
+              onClick={handleSubmit}
               icon={<Send size={14} />}
               style={{
                 borderRadius: cc.radiusMd,
