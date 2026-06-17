@@ -10,6 +10,11 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  // sockjs-client references the Node-only `global` identifier; alias it
+  // to `globalThis` so the bundled code runs in the browser.
+  define: {
+    global: 'globalThis',
+  },
   optimizeDeps: {
     force: true,
     include: [
@@ -20,6 +25,8 @@ export default defineConfig({
       '@ant-design/icons',
       'dayjs',
       'framer-motion',
+      'sockjs-client',
+      '@stomp/stompjs',
     ],
   },
 })
