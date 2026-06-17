@@ -33,7 +33,11 @@ public class InternshipPlanController {
     @GetMapping("/my-plan")
     @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<com.ueims.dto.response.InternshipPlanDTO> getMyPlan() {
-        return ResponseEntity.ok(mapper.toDto(service.findMyPlan(userService.getCurrentUserId())));
+        com.ueims.model.entity.InternshipPlan plan = service.findMyPlan(userService.getCurrentUserId());
+        if (plan == null) {
+            return ResponseEntity.ok(mapper.toDto(null));
+        }
+        return ResponseEntity.ok(mapper.toDto(plan));
     }
 
     /**

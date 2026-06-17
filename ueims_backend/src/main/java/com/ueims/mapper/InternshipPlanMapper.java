@@ -10,8 +10,14 @@ import com.ueims.model.entity.InternshipPlan;
         unmappedTargetPolicy = ReportingPolicy.IGNORE,
         builder = @org.mapstruct.Builder(disableBuilder = true))
 public interface InternshipPlanMapper {
-    @Mapping(target = "enterpriseName", expression = "java(entity.getAssignment().getEnterprise().getCompanyName())")
-    @Mapping(target = "startDate", expression = "java(entity.getAssignment().getSemester().getStartDate().toString())")
+    @Mapping(
+            target = "enterpriseName",
+            expression =
+                    "java(entity != null && entity.getAssignment() != null && entity.getAssignment().getEnterprise() != null ? entity.getAssignment().getEnterprise().getCompanyName() : null)")
+    @Mapping(
+            target = "startDate",
+            expression =
+                    "java(entity != null && entity.getAssignment() != null && entity.getAssignment().getSemester() != null && entity.getAssignment().getSemester().getStartDate() != null ? entity.getAssignment().getSemester().getStartDate().toString() : null)")
     @Mapping(target = "tasks", source = "items")
     InternshipPlanDTO toDto(InternshipPlan entity);
 
