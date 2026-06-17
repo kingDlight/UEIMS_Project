@@ -24,8 +24,7 @@ import {
   ClockCircleOutlined,
   ThunderboltOutlined,
 } from '@ant-design/icons';
-import { RequestLogService, RequestLogEntry } from '@/services/RequestLogService';
-import type { HttpMethod } from '@/services/RequestLogService';
+import { RequestLogService, RequestLogEntry, HttpMethod } from '@/services/RequestLogService';
 import { c } from '../constants';
 
 const { RangePicker } = DatePicker;
