@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react'
 import Cropper from 'react-easy-crop';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Modal, Dropdown, Drawer, Form, Input, Button, message } from 'antd';
+import { Modal, Dropdown, Drawer, Form, Input, Button, App } from 'antd';
 import type { MenuProps } from 'antd';
 import { BellOutlined, DownOutlined, MenuOutlined } from '@ant-design/icons';
 import { X, Mail, Phone, ShieldCheck, Activity, Camera } from 'lucide-react';
@@ -188,6 +188,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
         confirmPassword: values.confirmPassword,
       });
       message.success(t('layout.passwordChangeSuccess', 'Password changed successfully! Please log in again.'));
+      form.resetFields();
       setChangePasswordVisible(false);
       // Force user to log out and log back in to get a fresh token with mustChangePassword=false
       if (mustChangePassword) {

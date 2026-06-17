@@ -36,6 +36,9 @@ class InternshipPlanItemServiceImplTest {
     @Mock
     private InternshipPlanRepository planRepository;
 
+    @Mock
+    private com.ueims.repository.UserRepository userRepository;
+
     @InjectMocks
     private InternshipPlanItemServiceImpl service;
 
@@ -54,14 +57,25 @@ class InternshipPlanItemServiceImplTest {
                 .endDate(LocalDate.of(2023, 12, 31))
                 .build();
 
-        EnterpriseAssignment assignment =
-                EnterpriseAssignment.builder().semester(semester).build();
+        com.ueims.model.entity.Enterprise enterprise = com.ueims.model.entity.Enterprise.builder()
+                .enterpriseId(UUID.randomUUID())
+                .build();
+
+        EnterpriseAssignment assignment = EnterpriseAssignment.builder()
+                .semester(semester)
+                .enterprise(enterprise)
+                .build();
 
         plan = InternshipPlan.builder().planId(planId).assignment(assignment).build();
+
+        org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .setAuthentication(new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
+                        "admin@test.com", null));
 
         item = InternshipPlanItem.builder()
                 .planItemId(itemId)
                 .plan(plan)
+                .taskDescription("Test description")
                 .targetDate(LocalDate.of(2023, 10, 15))
                 .build();
     }
@@ -97,6 +111,10 @@ class InternshipPlanItemServiceImplTest {
 
     @Test
     void saveSuccess() {
+        when(userRepository.findByEmail("admin@test.com"))
+                .thenReturn(Optional.of(com.ueims.model.entity.User.builder()
+                        .enterprise(plan.getAssignment().getEnterprise())
+                        .build()));
         when(planRepository.findById(planId)).thenReturn(Optional.of(plan));
         when(repository.save(any(InternshipPlanItem.class))).thenReturn(item);
 
@@ -110,25 +128,28 @@ class InternshipPlanItemServiceImplTest {
     void savePlanNullThrowsException() {
         item.setPlan(null);
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.save(item));
+        com.ueims.exception.AppException exception =
+                assertThrows(com.ueims.exception.AppException.class, () -> service.save(item));
 
-        assertEquals("Plan ID is required", exception.getMessage());
+        assertEquals("This field is required", exception.getMessage());
     }
 
     @Test
     void savePlanIdNullThrowsException() {
         item.getPlan().setPlanId(null);
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.save(item));
+        com.ueims.exception.AppException exception =
+                assertThrows(com.ueims.exception.AppException.class, () -> service.save(item));
 
-        assertEquals("Plan ID is required", exception.getMessage());
+        assertEquals("This field is required", exception.getMessage());
     }
 
     @Test
     void savePlanNotFoundThrowsException() {
         when(planRepository.findById(planId)).thenReturn(Optional.empty());
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.save(item));
+        com.ueims.exception.AppException exception =
+                assertThrows(com.ueims.exception.AppException.class, () -> service.save(item));
 
         assertEquals("Plan not found", exception.getMessage());
     }
@@ -137,9 +158,14 @@ class InternshipPlanItemServiceImplTest {
     void saveTargetDateBeforeSemesterThrowsException() {
         item.setTargetDate(LocalDate.of(2023, 8, 31)); // Before start date
 
+        when(userRepository.findByEmail("admin@test.com"))
+                .thenReturn(Optional.of(com.ueims.model.entity.User.builder()
+                        .enterprise(plan.getAssignment().getEnterprise())
+                        .build()));
         when(planRepository.findById(planId)).thenReturn(Optional.of(plan));
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.save(item));
+        com.ueims.exception.AppException exception =
+                assertThrows(com.ueims.exception.AppException.class, () -> service.save(item));
 
         assertEquals(
                 "Target date must be within the semester boundaries (2023-09-01 to 2023-12-31)",
@@ -150,9 +176,14 @@ class InternshipPlanItemServiceImplTest {
     void saveTargetDateAfterSemesterThrowsException() {
         item.setTargetDate(LocalDate.of(2024, 1, 1)); // After end date
 
+        when(userRepository.findByEmail("admin@test.com"))
+                .thenReturn(Optional.of(com.ueims.model.entity.User.builder()
+                        .enterprise(plan.getAssignment().getEnterprise())
+                        .build()));
         when(planRepository.findById(planId)).thenReturn(Optional.of(plan));
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.save(item));
+        com.ueims.exception.AppException exception =
+                assertThrows(com.ueims.exception.AppException.class, () -> service.save(item));
 
         assertEquals(
                 "Target date must be within the semester boundaries (2023-09-01 to 2023-12-31)",
@@ -160,15 +191,10 @@ class InternshipPlanItemServiceImplTest {
     }
 
     @Test
-    void saveTargetDateNullSuccess() {
+    void saveTargetDateNullThrowsException() {
         item.setTargetDate(null);
 
-        when(planRepository.findById(planId)).thenReturn(Optional.of(plan));
-        when(repository.save(any(InternshipPlanItem.class))).thenReturn(item);
-
-        InternshipPlanItem result = service.save(item);
-
-        assertNotNull(result);
+        assertThrows(Exception.class, () -> service.save(item));
     }
 
     @Test

@@ -10,4 +10,16 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  optimizeDeps: {
+    force: true,
+    include: [
+      'react',
+      'react-dom',
+      'react-router-dom',
+      'antd',
+      '@ant-design/icons',
+      'dayjs',
+      'framer-motion',
+    ],
+  },
 })

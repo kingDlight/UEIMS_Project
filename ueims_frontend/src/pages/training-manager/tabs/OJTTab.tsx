@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Table, Select, Modal, message, Spin } from 'antd';
+import { Table, Select, Modal, App, Spin } from 'antd';
 import { EnterpriseAssignmentService } from '@/services/EnterpriseAssignmentService';
 import type { ColumnsType } from 'antd/es/table';
 import {
@@ -126,6 +126,7 @@ function getAvatarColor(name: string) {
 // AVATAR — minimal circle with deterministic brand palette
 // ============================================================
 const Avatar: React.FC<{ initials: string; color?: string; bg?: string }> = ({ initials, color, bg }) => {
+  const { message } = App.useApp();
   const palette = (color || bg) ? null : getAvatarColor(initials);
   return (
     <div style={{
@@ -145,6 +146,7 @@ const Avatar: React.FC<{ initials: string; color?: string; bg?: string }> = ({ i
 // STATUS BADGE — only visual accent in a row
 // ============================================================
 const StatusBadge: React.FC<{ status: PlacementStatus }> = ({ status }) => {
+  const { message } = App.useApp();
   const cfg = STATUS_CONFIG[status];
   return (
     <span style={{
@@ -184,6 +186,7 @@ const renderPaginationTotal = (total: number, range: [number, number]) => (
 );
 
 export const OJTTab: React.FC = () => {
+  const { message } = App.useApp();
   const [majorFilter, setMajorFilter] = useState<string>('ALL');
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [sourceFilter, setSourceFilter] = useState<string>('ALL');

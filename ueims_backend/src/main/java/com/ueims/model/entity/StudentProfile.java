@@ -2,6 +2,8 @@ package com.ueims.model.entity;
 
 import jakarta.persistence.*;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import lombok.*;
 
 @Entity
@@ -19,6 +21,7 @@ public class StudentProfile extends BaseEntity {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private User user;
 
     @Column(name = "student_code", nullable = false, unique = true, length = 20)

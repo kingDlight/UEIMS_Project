@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Layout, Menu, Button, Dropdown, Modal, Form, Input, message } from 'antd';
+import { Layout, Menu, Button, Dropdown, Modal, Form, Input, App } from 'antd';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { AuthService } from '@/services/AuthService';
@@ -16,10 +16,12 @@ import { useTranslation } from 'react-i18next';
 const { Header, Sider, Content } = Layout;
 
 export const AppLayout: React.FC = () => {
+  const { message } = App.useApp();
   const { t } = useTranslation('common');
   const [collapsed, setCollapsed] = useState(false);
   const [changePasswordVisible, setChangePasswordVisible] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [form] = Form.useForm();
   const navigate = useNavigate();
   const { user, token, logout } = useAuthStore();
   const mustChangePassword = (user as any)?.mustChangePassword;
@@ -56,6 +58,7 @@ export const AppLayout: React.FC = () => {
         confirmPassword: values.confirmPassword,
       });
       message.success(t('layout.passwordChangeSuccess'));
+      form.resetFields();
       setChangePasswordVisible(false);
       if (mustChangePassword) {
         logout();
@@ -180,7 +183,7 @@ export const AppLayout: React.FC = () => {
         maskClosable={!mustChangePassword}
         keyboard={!mustChangePassword}
       >
-        <Form layout="vertical" onFinish={handleChangePassword}>
+        <Form form={form} layout="vertical" onFinish={handleChangePassword}>
           <Form.Item
             name="oldPassword"
             label={t('layout.currentPassword')}

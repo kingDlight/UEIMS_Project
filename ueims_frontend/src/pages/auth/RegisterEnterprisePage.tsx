@@ -2,7 +2,7 @@ import bgRegis from '@/assets/bg-regis.png';
 import registerIllustration from '@/assets/register_illustration.png';
 import { LogoIcon } from '@/components/LogoIcon';
 import React, { useState } from 'react';
-import { Form, Input, Button, message } from 'antd';
+import { Form, Input, Button, App } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Building2, Briefcase, Users, BarChart2, GraduationCap, Smile, UserPlus, FileText, User, Mail, MapPin, Lock, ShieldCheck, ArrowLeft, Eye, EyeOff } from 'lucide-react';
@@ -24,6 +24,7 @@ import {
 const renderPasswordIcon = (visible: boolean) => visible ? <Eye size={12} color="#94A3B8" /> : <EyeOff size={12} color="#94A3B8" />;
 
 export const RegisterEnterprisePage: React.FC = () => {
+  const { message } = App.useApp();
   const navigate = useNavigate();
   const { t } = useTranslation('common');
   const [loading, setLoading] = useState(false);

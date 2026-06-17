@@ -17,9 +17,10 @@ content = content.replace(
   /const TabSwitcher: React\.FC<\{ active: ProfileView; onChange: \(v: ProfileView\) => void \}> = \(\{ active, onChange \}\) => \(/,
   "const TabSwitcher: React.FC<{ active: ProfileView; onChange: (v: ProfileView) => void }> = ({ active, onChange }) => {\n  const { t } = useTranslation(['profile', 'common']);\n  return ("
 );
+// Replaced with safe literal string replacement (avoids ReDoS-prone regex alternation)
 content = content.replace(
-  /(\s*\{\s*v === 'profile'\s*\?\s*(?:'Profile Info'|t\('profileInfo',\s*'Profile Info'\))\s*:\s*(?:'My CVs'|t\('myCvs',\s*'My CVs'\))\s*\}\s*<\/button>\s*\);\s*\}\)\}\s*<\/div>\s*)\);/,
-  "$1  );\n};"
+  "{v === 'profile' ? 'Profile Info' : 'My CVs'}</button>\n          );\n        })}\n      </div>\n    );",
+  "{v === 'profile' ? t('profileInfo', 'Profile Info') : t('myCvs', 'My CVs')}</button>\n          );\n        })}\n      </div>\n      );\n};"
 );
 
 content = content.replace(
@@ -31,9 +32,14 @@ content = content.replace(
   /const ProfileInfoView: React\.FC<\{ profile: MyProfile \}> = \(\{ profile \}\) => \(/,
   "const ProfileInfoView: React.FC<{ profile: MyProfile }> = ({ profile }) => {\n  const { t } = useTranslation(['profile']);\n  return ("
 );
+// Replaced with safe literal replacements (avoids ReDoS-prone regex with \r?\n and \s+)
 content = content.replace(
-  /([ \t]*<\/NeuSurface>\r?\n[ \t]*)\}\s*<\/>\s*\);/,
-  "$1  }\n  </>\n  );\n};"
+  "</NeuSurface>\r\n    )}\r\n  </>\r\n);",
+  "</NeuSurface>\r\n    )}\r\n  </>\r\n  );\n};"
+);
+content = content.replace(
+  "</NeuSurface>\n    )}\n  </>\n);",
+  "</NeuSurface>\n    )}\n  </>\n  );\n};"
 );
 
 // If the above didn't match because of `    )}`, let's do a more robust string replacement:

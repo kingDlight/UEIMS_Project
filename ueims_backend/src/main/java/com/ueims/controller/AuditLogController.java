@@ -11,7 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import com.ueims.model.entity.AuditLog;
+import com.ueims.dto.response.ApiResponse;
+import com.ueims.dto.response.AuditLogResponseDTO;
 import com.ueims.service.AuditLogService;
 
 import lombok.AccessLevel;
@@ -26,19 +27,25 @@ public class AuditLogController {
     AuditLogService service;
 
     @GetMapping
-    @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
-    public ResponseEntity<List<AuditLog>> getAll() {
-        return ResponseEntity.ok(service.findAll());
+    @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')")
+    public ApiResponse<List<AuditLogResponseDTO>> getAll() {
+        return ApiResponse.<List<AuditLogResponseDTO>>builder()
+                .result(service.findAll())
+                .message("Lấy danh sách audit log thành công")
+                .build();
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
-    public ResponseEntity<AuditLog> getById(@PathVariable UUID id) {
-        return ResponseEntity.ok(service.findById(id));
+    @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')")
+    public ApiResponse<AuditLogResponseDTO> getById(@PathVariable UUID id) {
+        return ApiResponse.<AuditLogResponseDTO>builder()
+                .result(service.findById(id))
+                .message("Lấy chi tiết audit log thành công")
+                .build();
     }
 
     @GetMapping("/export")
-    @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
+    @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')")
     public ResponseEntity<byte[]> exportExcel(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {

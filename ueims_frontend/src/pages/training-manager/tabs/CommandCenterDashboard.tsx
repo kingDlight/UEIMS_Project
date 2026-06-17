@@ -310,6 +310,8 @@ const CustomTooltip: React.FC<any> = ({ active, payload, label }) => {
 // ============================================================
 export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => void }> = ({ onNavigate }) => {
   const [mounted, setMounted] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [initError, setInitError] = useState<string | null>(null);
   const [summary, setSummary] = useState<any>(null);
   const [semesters, setSemesters] = useState<SemesterResponse[]>([]);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
@@ -333,11 +335,14 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
   useEffect(() => {
     setMounted(true);
     const initDashboard = async () => {
+      setLoading(true);
+      setInitError(null);
       try {
-        const summaryData = await DashboardService.getCommandCenterSummary();
+        const [summaryData, semesterList] = await Promise.all([
+          DashboardService.getCommandCenterSummary(),
+          SemesterService.getAllSemesters(),
+        ]);
         setSummary(summaryData);
-
-        const semesterList = await SemesterService.getAllSemesters();
         setSemesters(semesterList);
 
         const activeSem = semesterList.find(s => s.status === 'ACTIVE') || semesterList[0];
@@ -345,10 +350,12 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
           setSelectedSemesterId(activeSem.semesterId);
           setSelectedSemester(activeSem);
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error('Error initializing dashboard:', err);
+        setInitError(err?.response?.data?.message || err?.message || 'Không thể tải dữ liệu');
       } finally {
         setIsInitialLoading(false);
+        setLoading(false);
       }
     };
     initDashboard();
@@ -397,8 +404,32 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
     }
   };
 
-  if (isInitialLoading) {
-    return <div style={{ padding: 60, textAlign: 'center', color: cc.textMuted, fontFamily: 'Inter, sans-serif' }}>Loading Dashboard Data...</div>;
+  // Show spinner while initial data is loading
+  if (isInitialLoading || loading) {
+    return (
+      <div style={{ padding: 80, textAlign: 'center', fontFamily: 'Inter, sans-serif', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+        <RefreshCw size={32} className="animate-spin" color={cc.brand} />
+        <div style={{ color: cc.textSecondary, fontSize: 14, fontWeight: 500 }}>Đang tải dữ liệu dashboard...</div>
+      </div>
+    );
+  }
+
+  // Show error state if initial fetch failed
+  if (initError) {
+    return (
+      <div style={{ padding: 60, textAlign: 'center', fontFamily: 'Inter, sans-serif', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+        <AlertTriangle size={40} color={cc.error} />
+        <div style={{ color: cc.error, fontSize: 15, fontWeight: 600 }}>Lỗi tải dữ liệu</div>
+        <div style={{ color: cc.textSecondary, fontSize: 13 }}>{initError}</div>
+        <button 
+          onClick={() => { setInitError(null); setLoading(true); window.location.reload(); }}
+          style={{ marginTop: 8, padding: '8px 20px', borderRadius: cc.radiusMd, background: cc.brand, color: '#fff', border: 'none', fontWeight: 600, cursor: 'pointer', fontSize: 13 }}
+        >
+          Thử lại
+        </button>
+      </div>
+    );
+  }
   }
 
   // Fallback default summary if DB is empty

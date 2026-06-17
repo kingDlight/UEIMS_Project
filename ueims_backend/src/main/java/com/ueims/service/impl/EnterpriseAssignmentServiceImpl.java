@@ -46,20 +46,36 @@ public class EnterpriseAssignmentServiceImpl implements EnterpriseAssignmentServ
 
     @Override
     public EnterpriseAssignment findMyAssignment(UUID studentId) {
-        return repository.findByStudent_UserId(studentId).orElse(null);
+        // Chỉ lấy phân công trong học kỳ đang ACTIVE để sinh viên xem Roadmap đúng kỳ
+        return repository
+                .findByStudent_UserIdAndSemester_Status(studentId, "ACTIVE")
+                .orElse(null);
     }
 
     @Override
     public List<EnterpriseAssignment> findMyEnterpriseAssignments() {
-        User currentUser = userRepository
-                .findByEmail(
-                        SecurityContextHolder.getContext().getAuthentication().getName())
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        User currentUser = getCurrentUser();
         if (currentUser.getEnterprise() == null) {
             return List.of();
         }
         UUID enterpriseId = currentUser.getEnterprise().getEnterpriseId();
-        return repository.findByEnterprise_EnterpriseId(enterpriseId);
+        // UC-45: Chỉ hiển thị sinh viên được phân công trong học kỳ ACTIVE
+        return repository.findByEnterprise_EnterpriseIdAndSemester_Status(enterpriseId, "ACTIVE");
+    }
+
+    @Override
+    public List<EnterpriseAssignment> searchMyEnterpriseAssignments(String keyword) {
+        User currentUser = getCurrentUser();
+        if (currentUser.getEnterprise() == null) {
+            return List.of();
+        }
+        UUID enterpriseId = currentUser.getEnterprise().getEnterpriseId();
+        return repository.searchMyAssignments(enterpriseId, keyword);
+    }
+
+    private User getCurrentUser() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
     }
 
     @Override
@@ -72,6 +88,25 @@ public class EnterpriseAssignmentServiceImpl implements EnterpriseAssignmentServ
     public EnterpriseAssignment update(UUID id, EnterpriseAssignmentDTO dto) {
         EnterpriseAssignment existing =
                 repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ASSIGNMENT_NOT_FOUND));
+
+        User currentUser = getCurrentUser();
+        // Kiểm tra quyền: Chỉ doanh nghiệp sở hữu phân công này (hoặc TM) mới được cập nhật Supervisor
+        boolean isStaff = currentUser.getRoles().stream()
+                .anyMatch(r -> r.getRole().getRoleName().equals("TRAINING_MANAGER")
+                        || r.getRole().getRoleName().equals("SYSTEM_ADMIN"));
+
+        if (!isStaff
+                && (currentUser.getEnterprise() == null
+                        || !existing.getEnterprise()
+                                .getEnterpriseId()
+                                .equals(currentUser.getEnterprise().getEnterpriseId()))) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        // BR-11: Nếu học kỳ đã bị LOCKED, không cho phép chỉnh sửa thông tin phân công (Read-only)
+        if ("LOCKED".equals(existing.getSemester().getStatus())) {
+            throw new AppException(ErrorCode.SEMESTER_LOCKED_DATE);
+        }
 
         mapper.updateEntity(dto, existing);
         return repository.save(existing);

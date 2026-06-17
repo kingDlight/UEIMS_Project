@@ -151,7 +151,8 @@ public class EnterpriseEvaluationServiceImpl implements EnterpriseEvaluationServ
         // 1. Nếu là TM hoặc ADMIN -> Cho phép xem
         boolean isStaff = currentUser.getRoles().stream()
                 .anyMatch(r -> r.getRole().getRoleName().equals("TRAINING_MANAGER")
-                        || r.getRole().getRoleName().equals("SYSTEM_ADMIN"));
+                        || r.getRole().getRoleName().equals("SYSTEM_ADMIN")
+                        || r.getRole().getRoleName().equals("ADMIN"));
         if (isStaff) return;
 
         // 2. Nếu là ENTERPRISE -> Phải là doanh nghiệp đã chấm điểm

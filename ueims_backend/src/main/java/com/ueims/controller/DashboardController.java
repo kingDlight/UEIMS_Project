@@ -22,7 +22,7 @@ import lombok.experimental.FieldDefaults;
 @RequestMapping("/api/dashboard")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
+@PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')")
 public class DashboardController {
 
     DashboardService dashboardService;

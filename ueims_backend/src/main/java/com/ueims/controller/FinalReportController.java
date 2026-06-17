@@ -27,7 +27,7 @@ public class FinalReportController {
     private final UserService userService;
 
     @GetMapping
-    @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
+    @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')")
     public ResponseEntity<List<com.ueims.dto.response.FinalReportDTO>> getAll() {
         return ResponseEntity.ok(service.findAll().stream().map(mapper::toDto).toList());
     }
@@ -40,7 +40,7 @@ public class FinalReportController {
 
     @GetMapping("/{id}")
     @PreAuthorize(
-            "hasRole('STUDENT') or hasRole('ENTERPRISE') or hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
+            "hasRole('STUDENT') or hasRole('ENTERPRISE') or hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')")
     public ResponseEntity<com.ueims.dto.response.FinalReportDTO> getById(@PathVariable UUID id) {
         com.ueims.model.entity.FinalReport report = service.findById(id);
         if (report == null) {
@@ -50,7 +50,7 @@ public class FinalReportController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    @PreAuthorize("hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')")
     public ResponseEntity<com.ueims.dto.response.FinalReportDTO> create(
             @Valid @RequestBody com.ueims.dto.response.FinalReportDTO entity) {
         return ResponseEntity.ok(mapper.toDto(service.save(mapper.toEntity(entity))));
@@ -64,7 +64,7 @@ public class FinalReportController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('STUDENT') or hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
+    @PreAuthorize("hasRole('STUDENT') or hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         service.deleteById(id);
         return ResponseEntity.ok().build();
