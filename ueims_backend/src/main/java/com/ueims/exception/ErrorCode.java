@@ -89,11 +89,11 @@ public enum ErrorCode {
             1052, "Admin intervention is required to modify an already approved OJT student", HttpStatus.FORBIDDEN),
     ELIGIBLE_STUDENT_NOT_FOUND(10521, "Eligible student not found", HttpStatus.NOT_FOUND),
     ELIGIBLE_STUDENT_DUPLICATE(
-            10522, "Another student with the same student code already exists in this semester", HttpStatus.BAD_REQUEST),
-    CANCEL_REASON_REQUIRED(
-            10523,
-            "Cancellation reason is required when status is set to CANCELLED (BR-23)",
+            10522,
+            "Another student with the same student code already exists in this semester",
             HttpStatus.BAD_REQUEST),
+    CANCEL_REASON_REQUIRED(
+            10523, "Cancellation reason is required when status is set to CANCELLED (BR-23)", HttpStatus.BAD_REQUEST),
     INTERVIEW_DATE_MUST_BE_IN_FUTURE(1053, "Interview date must be in the future", HttpStatus.BAD_REQUEST),
     INTERVIEW_ELIGIBILITY_RULE(
             1054, "Chỉ những ứng viên đã vượt qua vòng sơ loại mới được lên lịch phỏng vấn", HttpStatus.BAD_REQUEST),
@@ -150,8 +150,7 @@ public enum ErrorCode {
     PLACEMENT_APP_NOT_FOUND(1078, "Placement application not found", HttpStatus.NOT_FOUND),
     DUPLICATE_PLACEMENT_APPLICATION(
             1079, "You have already applied to this enterprise for this semester", HttpStatus.BAD_REQUEST),
-    PLACEMENT_APP_ALREADY_REVIEWED(
-            1080, "This application has already been reviewed", HttpStatus.BAD_REQUEST),
+    PLACEMENT_APP_ALREADY_REVIEWED(1080, "This application has already been reviewed", HttpStatus.BAD_REQUEST),
     PLACEMENT_APP_NOT_PENDING(
             1081, "Only PENDING_APPROVAL applications can be reviewed or withdrawn", HttpStatus.BAD_REQUEST),
     STUDENT_HAS_ACTIVE_PLACEMENT(
@@ -162,10 +161,20 @@ public enum ErrorCode {
             1084,
             "Student must be ACCEPTED or MATCHED in eligible_students before applying for placement",
             HttpStatus.BAD_REQUEST),
-    ENTERPRISE_NOT_APPROVED(
-            1085, "Enterprise must be APPROVED before students can apply", HttpStatus.BAD_REQUEST),
+    ENTERPRISE_NOT_APPROVED(1085, "Enterprise must be APPROVED before students can apply", HttpStatus.BAD_REQUEST),
     NO_ACTIVE_SEMESTER(
             1086, "No OPEN or ACTIVE semester is available for placement applications", HttpStatus.BAD_REQUEST),
+    STUDENT_NOT_UNPLACED(
+            1087,
+            "Student already has an active placement or pending application in this semester",
+            HttpStatus.BAD_REQUEST),
+    SAME_ENTERPRISE_REPLACEMENT_BLOCKED(
+            1088,
+            "Cannot request replacement to the same enterprise as the current active placement",
+            HttpStatus.BAD_REQUEST),
+    NO_AVAILABLE_ENTERPRISE_FOR_MATCH(
+            1089, "No APPROVED enterprise is available to match this student", HttpStatus.BAD_REQUEST),
+    GPA_BELOW_AUTO_MATCH_THRESHOLD(1090, "Student GPA is below the auto-match threshold (7.0)", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

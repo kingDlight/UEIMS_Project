@@ -47,4 +47,7 @@ public class OjtPlacementViewDTO {
     String applicationStatus;
     String coverLetter;
     LocalDateTime applicationCreatedAt;
+
+    // Self-Replace flag: TRUE nếu application mới nhất là replacement request
+    Boolean isReplacement;
 }

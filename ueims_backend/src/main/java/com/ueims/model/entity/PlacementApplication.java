@@ -3,9 +3,10 @@ package com.ueims.model.entity;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import jakarta.persistence.*;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
@@ -60,4 +61,20 @@ public class PlacementApplication extends BaseEntity {
 
     @Column(name = "rejection_reason", columnDefinition = "TEXT")
     private String rejectionReason;
+
+    /**
+     * Self-Replace workflow: application này yêu cầu thay thế assignment ACTIVE hiện tại.
+     * Khi TM approve:
+     *   - assignment cũ → TERMINATED (reason = "Replaced by new placement")
+     *   - assignment mới → ACTIVE
+     */
+    @Column(name = "is_replacement", nullable = false)
+    @Builder.Default
+    private Boolean isReplacement = false;
+
+    /** Application APPROVED trước đó mà application này thay thế (chỉ có khi isReplacement = true). */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "replaces_application_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private PlacementApplication replacesApplication;
 }

@@ -29,6 +29,8 @@ export interface PlacementApplicationResponse {
     reviewedAt?: string;
     createdAt: string;
     updatedAt: string;
+    isReplacement?: boolean;
+    replacesApplicationId?: string;
 }
 
 export interface OjtPlacementView {
@@ -48,6 +50,34 @@ export interface OjtPlacementView {
     applicationStatus?: string;
     coverLetter?: string;
     applicationCreatedAt?: string;
+    isReplacement?: boolean;
+}
+
+export interface ManualMatchRequest {
+    studentId: string;
+    enterpriseId: string;
+    note?: string;
+}
+
+export interface AutoMatchResult {
+    matchedCount: number;
+    skippedCount: number;
+    durationMs: number;
+    details: Array<{
+        studentId: string;
+        studentName: string;
+        studentCode: string;
+        enterpriseId: string;
+        enterpriseName: string;
+        applicationId: string;
+        score: number;
+        reason: string;
+    }>;
+    skipped: Array<{
+        studentId: string;
+        studentName: string;
+        reason: string;
+    }>;
 }
 
 export const PlacementApplicationService = {
@@ -58,4 +88,6 @@ export const PlacementApplicationService = {
     reject: (id: string, data: RejectApplicationRequest) => api.put(`${API_URL}/${id}/reject`, data),
     withdraw: (id: string) => api.put(`${API_URL}/${id}/withdraw`),
     getOjtPlacementView: () => api.get('/ojt-placements/view'),
+    manualMatch: (data: ManualMatchRequest) => api.post('/ojt-placements/manual-match', data),
+    autoMatch: () => api.post('/ojt-placements/auto-match'),
 };

@@ -38,6 +38,10 @@ public class PlacementApplicationResponseDTO {
     String reviewedByName;
     LocalDateTime reviewedAt;
 
+    // Self-Replace
+    Boolean isReplacement;
+    UUID replacesApplicationId;
+
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
 }

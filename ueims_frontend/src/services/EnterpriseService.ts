@@ -17,6 +17,11 @@ export const EnterpriseService = {
     return this.getAllEnterprises();
   },
 
+  async getApproved(): Promise<Enterprise[]> {
+    const all = await this.getAllEnterprises();
+    return all.filter((e) => e.status === 'APPROVED');
+  },
+
   async updateEnterpriseStatus(
     id: string,
     status: 'APPROVED' | 'REJECTED',

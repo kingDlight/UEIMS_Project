@@ -54,4 +54,17 @@ public class EnterpriseAssignment extends BaseEntity {
 
     @Column(name = "end_date")
     private java.time.LocalDate endDate;
+
+    /** Self-Replace: assignment bị terminate do SV đổi sang DN khác. */
+    @Column(name = "termination_reason", columnDefinition = "TEXT")
+    private String terminationReason;
+
+    @Column(name = "terminated_at")
+    private java.time.LocalDateTime terminatedAt;
+
+    /** Assignment mới thay thế assignment này (chỉ có khi status = TERMINATED do replacement). */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "replaced_by_assignment_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private EnterpriseAssignment replacedByAssignment;
 }

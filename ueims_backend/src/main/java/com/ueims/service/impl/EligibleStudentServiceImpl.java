@@ -77,9 +77,8 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
     @Override
     @org.springframework.transaction.annotation.Transactional
     public EligibleStudent update(UUID id, EligibleStudentUpdateRequest request) {
-        EligibleStudent existing = repository
-                .findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.ELIGIBLE_STUDENT_NOT_FOUND));
+        EligibleStudent existing =
+                repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ELIGIBLE_STUDENT_NOT_FOUND));
 
         // BR-14: cannot modify records under a LOCKED semester (DB trigger will
         // also enforce, but checking here gives a clean 4xx with a clear message
@@ -93,16 +92,14 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
         // edit to other fields will be blocked by the DB trigger — fail fast.
         String newStatus = request.getStatus() != null ? request.getStatus() : existing.getStatus();
         if (Boolean.TRUE.equals(existing.getIsLocked())) {
-            boolean onlyStatusChanged =
-                    request.getStudentCode().equals(existing.getStudentCode())
-                            && request.getFullName().equals(existing.getFullName())
-                            && java.util.Objects.equals(request.getEmail(), existing.getEmail())
-                            && request.getMajor().equals(existing.getMajor())
-                            && (request.getGpa() == null
-                                    ? existing.getGpa() == null
-                                    : request.getGpa().compareTo(existing.getGpa()) == 0)
-                            && java.util.Objects.equals(
-                                    request.getCurrentSemester(), existing.getCurrentSemester());
+            boolean onlyStatusChanged = request.getStudentCode().equals(existing.getStudentCode())
+                    && request.getFullName().equals(existing.getFullName())
+                    && java.util.Objects.equals(request.getEmail(), existing.getEmail())
+                    && request.getMajor().equals(existing.getMajor())
+                    && (request.getGpa() == null
+                            ? existing.getGpa() == null
+                            : request.getGpa().compareTo(existing.getGpa()) == 0)
+                    && java.util.Objects.equals(request.getCurrentSemester(), existing.getCurrentSemester());
             if (!onlyStatusChanged) {
                 throw new AppException(ErrorCode.SEMESTER_INVALID_TRANSITION);
             }
@@ -130,9 +127,9 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
         }
 
         // Uniqueness: studentCode must not collide with another row in the same semester
-        if (request.getStudentCode() != null
-                && !request.getStudentCode().equals(existing.getStudentCode())) {
-            UUID semesterId = existing.getSemester() != null ? existing.getSemester().getSemesterId() : null;
+        if (request.getStudentCode() != null && !request.getStudentCode().equals(existing.getStudentCode())) {
+            UUID semesterId =
+                    existing.getSemester() != null ? existing.getSemester().getSemesterId() : null;
             if (semesterId != null
                     && repository.existsByStudentCodeAndSemester_SemesterId(request.getStudentCode(), semesterId)) {
                 throw new AppException(ErrorCode.ELIGIBLE_STUDENT_DUPLICATE);
@@ -155,7 +152,8 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
                 throw new AppException(ErrorCode.CANCEL_REASON_REQUIRED);
             }
             org.springframework.security.core.Authentication authentication =
-                    org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+                    org.springframework.security.core.context.SecurityContextHolder.getContext()
+                            .getAuthentication();
             if (authentication == null
                     || authentication.getName() == null
                     || "anonymousUser".equals(authentication.getName())) {
@@ -297,16 +295,17 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
         // Resolve the actor from the security context so DB constraint
         // chk_cancel_audit (cancelled_by NOT NULL when status = CANCELLED) is satisfied.
         org.springframework.security.core.Authentication authentication =
-                org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+                org.springframework.security.core.context.SecurityContextHolder.getContext()
+                        .getAuthentication();
         if (authentication == null
                 || authentication.getName() == null
                 || "anonymousUser".equals(authentication.getName())) {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
         String actorEmail = authentication.getName();
-        com.ueims.model.entity.User actor =
-                userRepository.findByEmail(actorEmail)
-                        .orElseThrow(() -> new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION));
+        com.ueims.model.entity.User actor = userRepository
+                .findByEmail(actorEmail)
+                .orElseThrow(() -> new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION));
 
         // Admin-only when cancelling an active OJT (BR-24, mirrors DB trigger trg_locked_student_edit).
         if ("OJT".equals(student.getStatus())) {

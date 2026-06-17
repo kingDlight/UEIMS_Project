@@ -14,7 +14,10 @@ import {
   PlacementApplicationService,
   type OjtPlacementView,
   type PlacementApplicationResponse,
+  type AutoMatchResult,
 } from '@/services/PlacementApplicationService';
+import { EnterpriseService } from '@/services/EnterpriseService';
+import type { Enterprise } from '@/pages/training-manager/types';
 
 // ============================================================
 // DESIGN TOKENS
@@ -215,6 +218,10 @@ export const OJTTab: React.FC = () => {
 
   const [placementData, setPlacementData] = useState<PlacementRecord[]>([]);
   const [loading, setLoading] = useState(false);
+  const [enterprises, setEnterprises] = useState<Enterprise[]>([]);
+  const [autoMatchResult, setAutoMatchResult] = useState<AutoMatchResult | null>(null);
+  const [autoMatchModalOpen, setAutoMatchModalOpen] = useState(false);
+  const [manualMatchLoading, setManualMatchLoading] = useState(false);
 
   const fetchOjtView = useCallback(async () => {
     try {
@@ -242,9 +249,20 @@ export const OJTTab: React.FC = () => {
     }
   }, []);
 
+  const fetchEnterprises = useCallback(async () => {
+    try {
+      const list = await EnterpriseService.getApproved();
+      setEnterprises(list);
+    } catch (err) {
+      console.error('Failed to load enterprises', err);
+      setEnterprises([]);
+    }
+  }, []);
+
   useEffect(() => {
     void fetchOjtView();
-  }, [fetchOjtView]);
+    void fetchEnterprises();
+  }, [fetchOjtView, fetchEnterprises]);
 
   const pendingCount = placementData.filter(
     (p) => p.workflowStatus === 'PENDING_APPROVAL'
@@ -259,13 +277,52 @@ export const OJTTab: React.FC = () => {
 
   const handleAutoMatch = useCallback(async () => {
     setRunning(true);
-    await new Promise((r) => setTimeout(r, 1500));
-    setRunning(false);
-    void message.info({
-      content: 'Auto-match will be wired to backend in a follow-up. Use Approve on pending applications meanwhile.',
-      duration: 3,
-    });
-  }, []);
+    try {
+      const { data } = await PlacementApplicationService.autoMatch();
+      const result = data as AutoMatchResult;
+      setAutoMatchResult(result);
+      setAutoMatchModalOpen(true);
+      if (result.matchedCount > 0) {
+        void message.success(
+          `Auto-matched ${result.matchedCount} students in ${result.durationMs}ms — review in the modal.`,
+          4
+        );
+        await fetchOjtView();
+      } else {
+        void message.info('No students were matched. Check the result modal for details.', 3);
+      }
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      void message.error(msg ?? 'Auto-match failed', 3);
+    } finally {
+      setRunning(false);
+    }
+  }, [fetchOjtView]);
+
+  const handleManualMatchSubmit = useCallback(
+    async (enterpriseId: string, enterpriseName: string) => {
+      if (!selectedRecord) return;
+      setManualMatchLoading(true);
+      try {
+        await PlacementApplicationService.manualMatch({
+          studentId: selectedRecord.studentId,
+          enterpriseId,
+        });
+        void message.success(
+          `Matched ${selectedRecord.studentName} → ${enterpriseName}!`,
+          3
+        );
+        setMatchModalOpen(false);
+        await fetchOjtView();
+      } catch (err: unknown) {
+        const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+        void message.error(msg ?? 'Manual match failed', 3);
+      } finally {
+        setManualMatchLoading(false);
+      }
+    },
+    [selectedRecord, fetchOjtView]
+  );
 
   const openManualMatch = useCallback((record: PlacementRecord) => {
     setSelectedRecord(record);
@@ -431,16 +488,31 @@ export const OJTTab: React.FC = () => {
       title: <HeaderBadge>Enterprise</HeaderBadge>,
       key: 'enterprise',
       align: 'left' as const,
-      width: 170,
+      width: 200,
       render: (_: unknown, record: PlacementRecord) => (
         <div style={row}>
           {record.enterpriseName ? (
-            <>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
               <Avatar initials={record.enterpriseInitials ?? '??'} color={record.enterpriseColor ?? undefined} />
-              <span style={{ ...cellBase, fontSize: 12, fontWeight: 600, color: cc.textPrimary, marginLeft: 8, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {record.enterpriseName}
-              </span>
-            </>
+              <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <span style={{ ...cellBase, fontSize: 12, fontWeight: 600, color: cc.textPrimary, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {record.enterpriseName}
+                </span>
+                {record.isReplacement && (
+                  <span style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 3,
+                    padding: '1px 6px', borderRadius: 4,
+                    backgroundColor: hexToRgba(cc.warning, 0.10),
+                    border: `1px solid ${hexToRgba(cc.warning, 0.30)}`,
+                    color: cc.warningText,
+                    fontSize: 9, fontWeight: 700, fontFamily: 'Inter, sans-serif',
+                    letterSpacing: '0.02em', width: 'fit-content',
+                  }}>
+                    REPLACEMENT
+                  </span>
+                )}
+              </div>
+            </div>
           ) : (
             <span style={{ ...cellBase, fontSize: 12, color: cc.textMuted, fontStyle: 'italic' }}>—</span>
           )}
@@ -810,8 +882,9 @@ export const OJTTab: React.FC = () => {
       {/* ── MODAL: Manual Match ───────────────────────────── */}
       <Modal
         title={null} open={matchModalOpen}
-        onCancel={() => setMatchModalOpen(false)} footer={null}
-        width={440} centered
+        onCancel={() => !manualMatchLoading && setMatchModalOpen(false)}
+        footer={null}
+        width={460} centered
         styles={{ body: { padding: 0 }, mask: { backdropFilter: 'blur(2px)' } }}
       >
         <div style={{
@@ -823,60 +896,73 @@ export const OJTTab: React.FC = () => {
             <div style={{ fontSize: 15, fontWeight: 800, color: '#fff', fontFamily: 'Inter, sans-serif' }}>Manual Match</div>
             {selectedRecord && (
               <div style={{ fontSize: 12, color: 'rgba(255,255,255,.80)', marginTop: 2, fontFamily: 'Inter, sans-serif' }}>
-                {selectedRecord.studentName}
+                {selectedRecord.studentName} &middot; {selectedRecord.studentCode} &middot; {selectedRecord.major}
               </div>
             )}
           </div>
         </div>
         <div style={{ padding: '20px 24px', background: cc.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)' }}>
           <p style={{ fontSize: 12.5, color: cc.textSecondary, marginBottom: 14, fontFamily: 'Inter, sans-serif', lineHeight: 1.6 }}>
-            Assign an enterprise to {selectedRecord?.studentName ?? 'this student'}. Backend endpoint for manual match is being wired up.
+            Assign an APPROVED enterprise to this student. This will instantly create a
+            placement and an active assignment (no approval step needed).
           </p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            {[
-              { name: 'FPT Software',    initials: 'FP', ...getEnterpriseColor('FPT Software')     },
-              { name: 'VinBigData',     initials: 'VB', ...getEnterpriseColor('VinBigData')      },
-              { name: 'VNG Corporation', initials: 'VN', ...getEnterpriseColor('VNG Corporation') },
-              { name: 'NashTech VN',    initials: 'NT', ...getEnterpriseColor('NashTech VN')     },
-            ].map((ent) => (
-              <button
-                key={ent.name}
-                onClick={() => {
-                  setMatchModalOpen(false);
-                  void message.info({
-                    content: `Manual match backend endpoint TBD. Would assign ${selectedRecord?.studentName} → ${ent.name}`,
-                    duration: 3,
-                  });
-                }}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 10,
-                  padding: '9px 12px', borderRadius: cc.radiusMd,
-                  border: `1px solid ${cc.border}`, background: cc.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
-                  cursor: 'pointer', transition: 'all 0.15s ease', textAlign: 'left',
-                }}
-                onMouseEnter={(e) => {
-                  const b = e.currentTarget as HTMLButtonElement;
-                  b.style.background = cc.neutralBg; b.style.borderColor = cc.neutral;
-                }}
-                onMouseLeave={(e) => {
-                  const b = e.currentTarget as HTMLButtonElement;
-                  b.style.background = cc.surface; b.style.borderColor = cc.border;
-                }}
-              >
-                <Avatar initials={ent.initials} color={ent.color} />
-                <span style={{ fontSize: 12.5, fontWeight: 600, color: cc.textPrimary, fontFamily: 'Inter, sans-serif' }}>
-                  {ent.name}
-                </span>
-              </button>
-            ))}
-          </div>
+          {enterprises.length === 0 ? (
+            <div style={{ padding: '24px', textAlign: 'center', color: cc.textMuted, fontSize: 12, fontFamily: 'Inter, sans-serif' }}>
+              No APPROVED enterprises available.
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 320, overflowY: 'auto' }}>
+              {enterprises.map((ent) => {
+                const c = getEnterpriseColor(ent.companyName);
+                return (
+                  <button
+                    key={ent.enterpriseId}
+                    disabled={manualMatchLoading}
+                    onClick={() => void handleManualMatchSubmit(ent.enterpriseId, ent.companyName)}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 10,
+                      padding: '9px 12px', borderRadius: cc.radiusMd,
+                      border: `1px solid ${cc.border}`, background: cc.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+                      cursor: manualMatchLoading ? 'not-allowed' : 'pointer',
+                      transition: 'all 0.15s ease', textAlign: 'left',
+                      opacity: manualMatchLoading ? 0.5 : 1,
+                    }}
+                    onMouseEnter={(e) => {
+                      if (manualMatchLoading) return;
+                      const b = e.currentTarget as HTMLButtonElement;
+                      b.style.background = cc.neutralBg; b.style.borderColor = cc.neutral;
+                    }}
+                    onMouseLeave={(e) => {
+                      const b = e.currentTarget as HTMLButtonElement;
+                      b.style.background = cc.surface; b.style.borderColor = cc.border;
+                    }}
+                  >
+                    <Avatar initials={ent.companyName.substring(0, 2).toUpperCase()} color={c.color} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 12.5, fontWeight: 600, color: cc.textPrimary, fontFamily: 'Inter, sans-serif', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {ent.companyName}
+                      </div>
+                      {ent.industry && (
+                        <div style={{ fontSize: 10.5, color: cc.textMuted, marginTop: 1, fontFamily: 'Inter, sans-serif' }}>
+                          {ent.industry}
+                        </div>
+                      )}
+                    </div>
+                    {manualMatchLoading && <Spin size="small" />}
+                  </button>
+                );
+              })}
+            </div>
+          )}
           <div style={{ marginTop: 14, textAlign: 'right' }}>
             <button
               onClick={() => setMatchModalOpen(false)}
+              disabled={manualMatchLoading}
               style={{
                 padding: '6px 14px', borderRadius: cc.radiusMd,
                 border: `1px solid ${cc.border}`, background: 'transparent', color: cc.textSecondary,
                 fontSize: 12.5, fontWeight: 600, fontFamily: 'Inter, sans-serif', cursor: 'pointer',
+                opacity: manualMatchLoading ? 0.5 : 1,
               }}
             >
               Cancel
@@ -1166,6 +1252,110 @@ export const OJTTab: React.FC = () => {
         }}>
           <button
             onClick={() => setReviewDrawerOpen(false)}
+            style={{
+              padding: '6px 14px', borderRadius: cc.radiusMd,
+              border: `1px solid ${cc.border}`, background: 'transparent', color: cc.textSecondary,
+              fontSize: 12.5, fontWeight: 600, fontFamily: 'Inter, sans-serif', cursor: 'pointer',
+            }}
+          >
+            Close
+          </button>
+        </div>
+      </Modal>
+
+      {/* ── MODAL: Auto-Match Results ─────────────────────── */}
+      <Modal
+        title={null} open={autoMatchModalOpen}
+        onCancel={() => setAutoMatchModalOpen(false)} footer={null}
+        width={620} centered
+        styles={{ body: { padding: 0 }, mask: { backdropFilter: 'blur(2px)' } }}
+      >
+        <div style={{
+          background: `linear-gradient(135deg, ${cc.purple}, #6D28D9)`,
+          padding: '20px 24px', display: 'flex', alignItems: 'center', gap: 12,
+        }}>
+          <Sparkles size={20} color="#fff" strokeWidth={2} />
+          <div>
+            <div style={{ fontSize: 15, fontWeight: 800, color: '#fff', fontFamily: 'Inter, sans-serif' }}>Auto-Match Results</div>
+            {autoMatchResult && (
+              <div style={{ fontSize: 12, color: 'rgba(255,255,255,.85)', marginTop: 2, fontFamily: 'Inter, sans-serif' }}>
+                {autoMatchResult.matchedCount} matched &middot; {autoMatchResult.skippedCount} skipped &middot; {autoMatchResult.durationMs}ms
+              </div>
+            )}
+          </div>
+        </div>
+        <div style={{ padding: '16px 20px', background: cc.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', maxHeight: 460, overflowY: 'auto' }}>
+          {autoMatchResult && autoMatchResult.details.length > 0 && (
+            <>
+              <div style={{ fontSize: 11, fontWeight: 700, color: cc.textMuted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8, fontFamily: 'Inter, sans-serif' }}>
+                Matched ({autoMatchResult.details.length})
+              </div>
+              {autoMatchResult.details.map((d) => (
+                <div key={d.applicationId} style={{
+                  display: 'flex', alignItems: 'center', gap: 10,
+                  padding: '8px 12px', borderRadius: cc.radiusMd,
+                  background: cc.neutralBg, border: `1px solid ${cc.border}`,
+                  marginBottom: 6,
+                }}>
+                  <Avatar initials={d.studentName.substring(0, 2).toUpperCase()} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 12.5, fontWeight: 700, color: cc.textPrimary, fontFamily: 'Inter, sans-serif' }}>
+                      {d.studentName} <span style={{ color: cc.textMuted, fontWeight: 500 }}>· {d.studentCode}</span>
+                    </div>
+                    <div style={{ fontSize: 11, color: cc.textMuted, marginTop: 1, fontFamily: 'Inter, sans-serif' }}>
+                      {d.reason} &middot; score <strong style={{ color: cc.brand }}>{d.score.toFixed(1)}</strong>
+                    </div>
+                  </div>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: cc.textSecondary, fontFamily: 'Inter, sans-serif', textAlign: 'right' }}>
+                    → {d.enterpriseName}
+                  </span>
+                  <StatusBadge status="PENDING_APPROVAL" />
+                </div>
+              ))}
+            </>
+          )}
+
+          {autoMatchResult && autoMatchResult.skipped.length > 0 && (
+            <>
+              <div style={{ fontSize: 11, fontWeight: 700, color: cc.textMuted, textTransform: 'uppercase', letterSpacing: '0.05em', marginTop: 14, marginBottom: 8, fontFamily: 'Inter, sans-serif' }}>
+                Skipped ({autoMatchResult.skipped.length})
+              </div>
+              {autoMatchResult.skipped.map((s) => (
+                <div key={s.studentId} style={{
+                  display: 'flex', alignItems: 'center', gap: 10,
+                  padding: '6px 12px', borderRadius: cc.radiusMd,
+                  background: cc.neutralBg, border: `1px solid ${cc.borderSubtle}`,
+                  marginBottom: 4,
+                }}>
+                  <Avatar initials={s.studentName.substring(0, 2).toUpperCase()} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: cc.textPrimary, fontFamily: 'Inter, sans-serif' }}>
+                      {s.studentName}
+                    </div>
+                    <div style={{ fontSize: 10.5, color: cc.textMuted, marginTop: 1, fontFamily: 'Inter, sans-serif' }}>
+                      {s.reason}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
+
+          {autoMatchResult && autoMatchResult.details.length === 0 && autoMatchResult.skipped.length === 0 && (
+            <div style={{ textAlign: 'center', padding: '24px', color: cc.textMuted, fontSize: 12.5, fontFamily: 'Inter, sans-serif' }}>
+              No eligible students to match.
+            </div>
+          )}
+        </div>
+        <div style={{
+          padding: '10px 20px', background: cc.neutralBg,
+          borderTop: `1px solid ${cc.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        }}>
+          <div style={{ fontSize: 11, color: cc.textMuted, fontFamily: 'Inter, sans-serif' }}>
+            Approve from <strong>Self-Placements</strong> inbox
+          </div>
+          <button
+            onClick={() => setAutoMatchModalOpen(false)}
             style={{
               padding: '6px 14px', borderRadius: cc.radiusMd,
               border: `1px solid ${cc.border}`, background: 'transparent', color: cc.textSecondary,

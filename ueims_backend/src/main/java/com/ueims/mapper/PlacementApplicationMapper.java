@@ -23,5 +23,7 @@ public interface PlacementApplicationMapper {
     @Mapping(source = "semester.semesterCode", target = "semesterCode")
     @Mapping(source = "reviewedBy.userId", target = "reviewedBy")
     @Mapping(source = "reviewedBy.fullName", target = "reviewedByName")
+    @Mapping(source = "isReplacement", target = "isReplacement")
+    @Mapping(source = "replacesApplication.applicationId", target = "replacesApplicationId")
     PlacementApplicationResponseDTO toDto(PlacementApplication entity);
 }
