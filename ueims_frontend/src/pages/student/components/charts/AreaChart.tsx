@@ -47,7 +47,7 @@ export const AreaChart: React.FC<AreaChartProps> = ({
   const chartData = data.map((value, index) => ({ value, index }));
 
   return (
-    <ResponsiveContainer width="100%" height={height} minWidth={1} minHeight={1} debounce={50}>
+    <ResponsiveContainer width="100%" height={height} minWidth={10} minHeight={10} debounce={50}>
       <RechartsAreaChart data={chartData} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
         <defs>
           <linearGradient id={`areaGrad-${color.replace('#', '')}`} x1="0" y1="0" x2="0" y2="1">
