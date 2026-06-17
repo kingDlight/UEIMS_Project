@@ -7,6 +7,8 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
 
+import jakarta.transaction.Transactional;
+
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -25,7 +27,6 @@ import com.ueims.repository.StudentProfileRepository;
 import com.ueims.repository.UserRepository;
 import com.ueims.service.StudentProfileService;
 
-import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -61,8 +62,8 @@ public class StudentProfileServiceImpl implements StudentProfileService {
 
     @Override
     public StudentProfile findById(UUID id) {
-        StudentProfile profile = repository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.STUDENT_PROFILE_NOT_FOUND));
+        StudentProfile profile =
+                repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.STUDENT_PROFILE_NOT_FOUND));
 
         User currentUser = getCurrentUser();
 
@@ -113,8 +114,8 @@ public class StudentProfileServiceImpl implements StudentProfileService {
 
     @Override
     public StudentProfile updateProfile(UUID id, StudentProfileUpdateRequest request) {
-        StudentProfile profile = repository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.STUDENT_PROFILE_NOT_FOUND));
+        StudentProfile profile =
+                repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.STUDENT_PROFILE_NOT_FOUND));
 
         // Ownership verification (Security BOLA check)
         User currentUser = getCurrentUser();
@@ -133,8 +134,8 @@ public class StudentProfileServiceImpl implements StudentProfileService {
 
     @Override
     public StudentProfile uploadCv(UUID id, MultipartFile file) {
-        StudentProfile profile = repository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.STUDENT_PROFILE_NOT_FOUND));
+        StudentProfile profile =
+                repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.STUDENT_PROFILE_NOT_FOUND));
 
         // Ownership verification (Security BOLA check)
         User currentUser = getCurrentUser();
@@ -159,15 +160,15 @@ public class StudentProfileServiceImpl implements StudentProfileService {
             // Delete existing CV file if present (prevent spam / orphan files)
             String oldCvUrl = profile.getCvUrl();
             if (oldCvUrl != null && !oldCvUrl.isBlank()) {
-                Path oldPath = Paths.get(System.getProperty(USER_DIR_PROPERTY),
-                        oldCvUrl.replace("/uploads/", "uploads/"));
+                Path oldPath =
+                        Paths.get(System.getProperty(USER_DIR_PROPERTY), oldCvUrl.replace("/uploads/", "uploads/"));
                 Files.deleteIfExists(oldPath);
             }
 
             Path uploadDir = Paths.get(System.getProperty(USER_DIR_PROPERTY), "uploads", "cv");
             Files.createDirectories(uploadDir);
-            String stored = id.toString() + "_" + System.currentTimeMillis() + "_"
-                    + StringUtils.cleanPath(originalFilename);
+            String stored =
+                    id.toString() + "_" + System.currentTimeMillis() + "_" + StringUtils.cleanPath(originalFilename);
             Path path = uploadDir.resolve(stored);
             file.transferTo(path.toFile());
             profile.setCvUrl("/uploads/cv/" + stored);
@@ -181,8 +182,8 @@ public class StudentProfileServiceImpl implements StudentProfileService {
 
     @Override
     public StudentProfile deleteCv(UUID id) {
-        StudentProfile profile = repository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.STUDENT_PROFILE_NOT_FOUND));
+        StudentProfile profile =
+                repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.STUDENT_PROFILE_NOT_FOUND));
 
         User currentUser = getCurrentUser();
         if (!profile.getUser().getUserId().equals(currentUser.getUserId())) {
@@ -192,8 +193,8 @@ public class StudentProfileServiceImpl implements StudentProfileService {
         String oldCvUrl = profile.getCvUrl();
         if (oldCvUrl != null && !oldCvUrl.isBlank()) {
             try {
-                Path oldPath = Paths.get(System.getProperty(USER_DIR_PROPERTY),
-                        oldCvUrl.replace("/uploads/", "uploads/"));
+                Path oldPath =
+                        Paths.get(System.getProperty(USER_DIR_PROPERTY), oldCvUrl.replace("/uploads/", "uploads/"));
                 Files.deleteIfExists(oldPath);
             } catch (IOException e) {
                 log.error("[CV Delete] Failed to delete file: {}", e.getMessage(), e);

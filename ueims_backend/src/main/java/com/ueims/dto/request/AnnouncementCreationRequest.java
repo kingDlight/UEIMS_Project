@@ -21,4 +21,13 @@ public class AnnouncementCreationRequest {
     private String content;
 
     private UUID semesterId;
+
+    /** GENERAL / WARNING / INCIDENT / SYSTEM_ANNOUNCEMENT / APPROVAL — maps to notifications.type */
+    private String type;
+
+    /** ALL / STUDENTS / ENTERPRISE / LECTURER / MENTOR / ADMIN / SEMESTER — purely descriptive / for history list */
+    private String audience;
+
+    /** Role enum for NotificationService.broadcast(); null = broadcast to all users */
+    private String targetRole;
 }

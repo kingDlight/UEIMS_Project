@@ -1,5 +1,5 @@
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { Table, Modal, Form, Input, Select, Button, Popconfirm, App, Tag, Space, Tooltip } from 'antd';
+﻿import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import { Table, Modal, Form, Input, Select, Button, Popconfirm, App, Tag, Space, Tooltip, Switch, Segmented } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import {
   Plus,
@@ -10,16 +10,16 @@ import {
   Send,
   XCircle,
   BellRing,
-  RotateCw,
+  History,
+  Inbox,
 } from 'lucide-react';
 import dayjs from 'dayjs';
 import { SystemAnnouncementService } from '@/services/SystemAnnouncementService';
 import { NotificationService } from '@/services/NotificationService';
-import { api } from '@/services/api';
 
 
 // ============================================================
-// DESIGN TOKENS — matches SemesterTab / OJTTab Command Center
+// DESIGN TOKENS â€” matches SemesterTab / OJTTab Command Center
 // ============================================================
 const cc = {
   brand: '#FF7A30',
@@ -197,18 +197,13 @@ export const NoticesTab: React.FC = () => {
   const [notices, setNotices] = useState<NoticeRecord[]>([]);
   const [audienceFilter, setAudienceFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [activeSubTab, setActiveSubTab] = useState<'active' | 'history'>('active');
+  const [historyMonth, setHistoryMonth] = useState<string>('all'); // 'all' | 'YYYY-MM'
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  const [isNotifyModalOpen, setIsNotifyModalOpen] = useState(false);
   const [selectedNotice, setSelectedNotice] = useState<NoticeRecord | null>(null);
   const [form] = Form.useForm();
-  const [notifyForm] = Form.useForm();
-  const [users, setUsers] = useState<Array<{ userId: string; email: string; fullName: string; status?: string }>>([]);
-  const [notifyScope, setNotifyScope] = useState<'all' | 'role' | 'users'>('all');
-  const [notifyTargetRole, setNotifyTargetRole] = useState<string>('STUDENT');
-  const [notifySelectedIds, setNotifySelectedIds] = useState<string[]>([]);
-  const [notifySending, setNotifySending] = useState(false);
-  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [publishing, setPublishing] = useState(false);
 
   const [isMobile, setIsMobile] = useState(false);
   
@@ -241,11 +236,59 @@ export const NoticesTab: React.FC = () => {
     return () => window.removeEventListener('resize', check);
   }, []);
 
-  const filteredNotices = notices.filter((n) => {
+  const scopedNotices = useMemo(() => {
+    if (activeSubTab === 'history') {
+      // History: only PUBLISHED, sorted newest first, with optional month filter
+      return notices
+        .filter((n) => n.status === 'Published')
+        .filter((n) => {
+          if (historyMonth === 'all') return true;
+          const d = dayjs(n.publishedDate ?? n.createdDate);
+          return d.isValid() && d.format('YYYY-MM') === historyMonth;
+        })
+        .sort((a, b) => {
+          const ad = new Date(a.publishedDate ?? a.createdDate).getTime();
+          const bd = new Date(b.publishedDate ?? b.createdDate).getTime();
+          return bd - ad;
+        });
+    }
+    // Active: drafts + recent published (last 30 days) for at-a-glance
+    const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
+    return notices.filter((n) => {
+      if (n.status === 'Draft') return true;
+      const t = new Date(n.publishedDate ?? n.createdDate).getTime();
+      return t >= cutoff;
+    });
+  }, [notices, activeSubTab, historyMonth]);
+
+  const filteredNotices = scopedNotices.filter((n) => {
     const matchAudience = audienceFilter === 'all' || n.audienceLabel === audienceFilter;
     const matchStatus = statusFilter === 'all' || n.status === statusFilter;
     return matchAudience && matchStatus;
   });
+
+  const activeCount = useMemo(
+    () => notices.filter((n) => n.status === 'Draft' || new Date(n.publishedDate ?? n.createdDate).getTime() >= Date.now() - 30 * 24 * 60 * 60 * 1000).length,
+    [notices],
+  );
+  const historyCount = useMemo(
+    () => notices.filter((n) => n.status === 'Published').length,
+    [notices],
+  );
+
+  const historyMonthOptions = useMemo(() => {
+    const set = new Set<string>();
+    notices.forEach((n) => {
+      const d = dayjs(n.publishedDate ?? n.createdDate);
+      if (d.isValid()) set.add(d.format('YYYY-MM'));
+    });
+    return [
+      { value: 'all', label: 'All time' },
+      ...Array.from(set)
+        .sort((a, b) => b.localeCompare(a))
+        .map((m) => ({ value: m, label: dayjs(m + '-01').format('MMMM YYYY') })),
+    ];
+  }, [notices]);
 
   const handlePublish = useCallback(async (record: NoticeRecord) => {
     try {
@@ -275,83 +318,57 @@ export const NoticesTab: React.FC = () => {
   const handleCreate = useCallback(async () => {
     try {
       const values = await form.validateFields();
-      await SystemAnnouncementService.create({
-         title: values.title,
-         content: values.content,
-         semesterId: values.semesterId === 'all' ? undefined : values.semesterId
+      setPublishing(true);
+
+      const audienceToRole: Record<string, string | undefined> = {
+        All: undefined,
+        Students: 'STUDENT',
+        Enterprise: 'ENTERPRISE',
+        Lecturer: 'LECTURER',
+        Mentor: 'MENTOR',
+        Admin: 'ADMIN',
+        Semester: undefined,
+      };
+      const targetRole = audienceToRole[values.audience];
+
+      // 1. Persist (status=DRAFT on server). Backend will use these fields
+      //    later when publish() fans out the live bell.
+      const created = await SystemAnnouncementService.create({
+        title: values.title,
+        content: values.content,
+        semesterId: values.audience === 'Semester' ? values.semesterId : undefined,
+        type: values.type ?? 'GENERAL',
+        audience: values.audience,
+        targetRole,
+      } as unknown as Parameters<typeof SystemAnnouncementService.create>[0]);
+
+      // 2. Publish immediately — backend fans out the live bell automatically
+      //    (one source of truth: announcement = notification).
+      await SystemAnnouncementService.publish(created.announcementId);
+
+      const audienceLabel =
+        values.audience === 'Semester'
+          ? '(semester-scoped, bell pending per-semester route)'
+          : `(live bell -> ${values.audience === 'All' ? 'all users' : values.audience.toLowerCase()})`;
+      message.success({
+        content: `Announcement "${values.title}" published ${audienceLabel}.`,
+        duration: 3,
       });
-      message.success({ content: `Announcement "${values.title}" created.`, duration: 2.5 });
       setIsModalOpen(false);
       form.resetFields();
+      setSelectedNotice(null);
       void fetchNotices();
     } catch (err) {
       console.error(err);
+    } finally {
+      setPublishing(false);
     }
   }, [form, fetchNotices]);
 
   const formatDate = (dateStr?: string) => {
-    if (!dateStr) return '—';
+    if (!dateStr) return 'â€”';
     return dayjs(dateStr).format('MMM D, YYYY');
   };
-
-  // ----- Broadcast notification (real-time WS test console) -----
-  const loadUsers = useCallback(async () => {
-    setLoadingUsers(true);
-    try {
-      const res = await api.get<Array<{ userId: string; email: string; fullName: string; status?: string }>>('/users');
-      setUsers(res.data ?? []);
-    } catch {
-      setUsers([]);
-    } finally {
-      setLoadingUsers(false);
-    }
-  }, []);
-
-  const openNotifyModal = useCallback(() => {
-    setIsNotifyModalOpen(true);
-    notifyForm.resetFields();
-    notifyForm.setFieldsValue({ type: 'GENERAL' });
-    setNotifyScope('all');
-    setNotifyTargetRole('STUDENT');
-    setNotifySelectedIds([]);
-    void loadUsers();
-  }, [notifyForm, loadUsers]);
-
-  const notifyRecipientCount = useMemo(() => {
-    const active = users.filter((u) => (u.status ?? 'ACTIVE').toUpperCase() !== 'DISABLED');
-    if (notifyScope === 'all') return active.length;
-    if (notifyScope === 'users') return notifySelectedIds.length;
-    return active.length;
-  }, [notifyScope, notifySelectedIds, users]);
-
-  const handleSendNotification = useCallback(async () => {
-    try {
-      const values = await notifyForm.validateFields();
-      if (notifyRecipientCount === 0) {
-        message.warning('No recipients selected.');
-        return;
-      }
-      const payload: Parameters<typeof NotificationService.broadcast>[0] = {
-        title: String(values.title).trim(),
-        message: String(values.message).trim(),
-        type: values.type ?? 'GENERAL',
-      };
-      if (notifyScope === 'role') payload.targetRole = notifyTargetRole;
-      if (notifyScope === 'users') payload.recipientIds = notifySelectedIds;
-      setNotifySending(true);
-      const res = await NotificationService.broadcast(payload);
-      message.success({
-        content: `Notification "${res.data.title}" sent to ${res.data.sent} recipient(s). Their bell badge will update live.`,
-        duration: 3.5,
-      });
-      setIsNotifyModalOpen(false);
-    } catch (err: any) {
-      if (err?.errorFields) return;
-      message.error(err?.response?.data?.message ?? 'Failed to send notification');
-    } finally {
-      setNotifySending(false);
-    }
-  }, [notifyForm, notifyScope, notifyTargetRole, notifySelectedIds, notifyRecipientCount]);
 
   // ============================================================
   // TABLE COLUMNS
@@ -420,7 +437,7 @@ export const NoticesTab: React.FC = () => {
               }}
             >
               {record.content.slice(0, 55)}
-              {record.content.length > 55 ? '…' : ''}
+              {record.content.length > 55 ? 'â€¦' : ''}
             </div>
           </div>
         </div>
@@ -482,7 +499,7 @@ export const NoticesTab: React.FC = () => {
         <div style={{ ...row, justifyContent: 'flex-end', gap: 8 }}>
           {record.status === 'Draft' ? (
             <>
-              {/* Publish Now — Solid Green */}
+              {/* Publish Now â€” Solid Green */}
               <Popconfirm
                 title={`Publish "${record.title}"?`}
                 description="This announcement will be visible to the selected audience."
@@ -526,7 +543,7 @@ export const NoticesTab: React.FC = () => {
                 </button>
               </Popconfirm>
 
-              {/* Edit — Ghost Icon */}
+              {/* Edit â€” Ghost Icon */}
               <button
                 onClick={() => { setSelectedNotice(record); setIsModalOpen(true); }}
                 style={{
@@ -566,7 +583,7 @@ export const NoticesTab: React.FC = () => {
             </>
           ) : (
             <>
-              {/* Unpublish — Danger Outline */}
+              {/* Unpublish â€” Danger Outline */}
               <Popconfirm
                 title={`Unpublish "${record.title}"?`}
                 description="This announcement will be hidden from the audience."
@@ -611,7 +628,7 @@ export const NoticesTab: React.FC = () => {
                 </button>
               </Popconfirm>
 
-              {/* View — Ghost Icon */}
+              {/* View â€” Ghost Icon */}
               <button
                 onClick={() => handleView(record)}
                 style={{
@@ -707,6 +724,46 @@ export const NoticesTab: React.FC = () => {
         </p>
       </div>
 
+      {/* SUB-TAB SWITCHER — Active (draft + recent) / History (read-only) */}
+      <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+        <Segmented
+          value={activeSubTab}
+          onChange={(v) => setActiveSubTab(v as 'active' | 'history')}
+          options={[
+            {
+              label: (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: 12.5 }}>
+                  <Inbox size={14} strokeWidth={2.5} />
+                  Active
+                  <Tag color="orange" style={{ marginLeft: 4, marginRight: 0, fontSize: 10, fontWeight: 700, padding: '0 6px', lineHeight: '16px' }}>
+                    {activeCount}
+                  </Tag>
+                </span>
+              ),
+              value: 'active',
+            },
+            {
+              label: (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: 12.5 }}>
+                  <History size={14} strokeWidth={2.5} />
+                  History
+                  <Tag color="default" style={{ marginLeft: 4, marginRight: 0, fontSize: 10, fontWeight: 700, padding: '0 6px', lineHeight: '16px' }}>
+                    {historyCount}
+                  </Tag>
+                </span>
+              ),
+              value: 'history',
+            },
+          ]}
+          style={{
+            background: cc.neutralBg,
+            padding: 4,
+            borderRadius: cc.radiusMd,
+            border: `1px solid ${cc.border}`,
+          }}
+        />
+      </div>
+
       {/* TABLE CARD */}
       <div
         style={{
@@ -776,6 +833,30 @@ export const NoticesTab: React.FC = () => {
               />
             </div>
 
+            {/* Month Filter — only on History tab */}
+            {activeSubTab === 'history' && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span
+                  style={{
+                    fontFamily: 'Inter, sans-serif',
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: cc.textMuted,
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  Month:
+                </span>
+                <Select
+                  value={historyMonth}
+                  onChange={setHistoryMonth}
+                  options={historyMonthOptions}
+                  style={{ width: 160, fontFamily: 'Inter, sans-serif' }}
+                  size="small"
+                />
+              </div>
+            )}
+
             <span
               style={{
                 fontFamily: 'Inter, sans-serif',
@@ -785,48 +866,15 @@ export const NoticesTab: React.FC = () => {
                 marginLeft: 4,
               }}
             >
-              {filteredNotices.length} notice{filteredNotices.length !== 1 ? 's' : ''}
+              {activeSubTab === 'history'
+                ? `${filteredNotices.length} historical record${filteredNotices.length !== 1 ? 's' : ''}`
+                : `${filteredNotices.length} active notice${filteredNotices.length !== 1 ? 's' : ''}`}
             </span>
           </div>
 
           {/* Right-side actions */}
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            {/* Send Notification (real-time WS) — outline accent */}
-            <button
-              onClick={openNotifyModal}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 6,
-                padding: '8px 14px',
-                borderRadius: cc.radiusMd,
-                border: `1.5px solid ${cc.brand}`,
-                background: cc.brandMuted,
-                color: cc.brand,
-                fontSize: 12.5,
-                fontWeight: 700,
-                fontFamily: 'Inter, sans-serif',
-                cursor: 'pointer',
-                transition: 'all 0.18s ease',
-              }}
-              onMouseEnter={(e) => {
-                const b = e.currentTarget as HTMLButtonElement;
-                b.style.background = cc.brand;
-                b.style.color = '#fff';
-                b.style.transform = 'translateY(-1px)';
-              }}
-              onMouseLeave={(e) => {
-                const b = e.currentTarget as HTMLButtonElement;
-                b.style.background = cc.brandMuted;
-                b.style.color = cc.brand;
-                b.style.transform = 'translateY(0)';
-              }}
-            >
-              <BellRing size={14} strokeWidth={2.5} />
-              Send Notification
-            </button>
-
-            {/* Create Announcement — Solid Brand Orange */}
+            {/* Create Announcement â€” also pushes live bell automatically */}
             <button
               onClick={() => { setSelectedNotice(null); setIsModalOpen(true); }}
               style={{
@@ -914,19 +962,40 @@ export const NoticesTab: React.FC = () => {
             <Input
               placeholder="e.g. OJT Registration Deadline Extended"
               size="large"
+              maxLength={200}
               style={{ borderRadius: cc.radiusMd, fontFamily: 'Inter, sans-serif' }}
             />
           </Form.Item>
 
           <Form.Item
             name="content"
-            label={<span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: 13, color: cc.textSecondary }}>Content</span>}
-            rules={[{ required: true, message: 'Please enter the announcement content.' }]}
+            label={<span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: 13, color: cc.textSecondary }}>Message</span>}
+            rules={[{ required: true, message: 'Please enter the announcement message.' }]}
           >
             <Input.TextArea
               rows={4}
-              placeholder="Enter the full announcement text..."
+              maxLength={1000}
+              placeholder="Enter the full message that recipients will see in their bell..."
               style={{ borderRadius: cc.radiusMd, fontFamily: 'Inter, sans-serif' }}
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="type"
+            label={<span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: 13, color: cc.textSecondary }}>Type</span>}
+            initialValue="GENERAL"
+            rules={[{ required: true }]}
+          >
+            <Select
+              size="large"
+              style={{ borderRadius: cc.radiusMd, fontFamily: 'Inter, sans-serif' }}
+              options={[
+                { value: 'GENERAL', label: 'General' },
+                { value: 'WARNING', label: 'Warning' },
+                { value: 'INCIDENT', label: 'Incident' },
+                { value: 'SYSTEM_ANNOUNCEMENT', label: 'System Announcement' },
+                { value: 'APPROVAL', label: 'Approval' },
+              ]}
             />
           </Form.Item>
 
@@ -942,31 +1011,69 @@ export const NoticesTab: React.FC = () => {
               options={[
                 { value: 'All', label: 'All Users' },
                 { value: 'Students', label: 'Students' },
-                { value: 'Enterprise', label: 'Enterprise' },
+                { value: 'Enterprise', label: 'Enterprises' },
+                { value: 'Lecturer', label: 'Lecturers' },
+                { value: 'Mentor', label: 'Mentors' },
+                { value: 'Admin', label: 'Admins' },
                 { value: 'Semester', label: 'Specific Semester' },
               ]}
             />
           </Form.Item>
 
           <Form.Item
-            name="semesterId"
-            label={<span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: 13, color: cc.textSecondary }}>Semester (Optional)</span>}
+            noStyle
+            shouldUpdate={(prev, curr) => prev.audience !== curr.audience}
           >
-            <Select
-              placeholder="Leave empty for school-wide"
-              size="large"
-              allowClear
-              style={{ borderRadius: cc.radiusMd, fontFamily: 'Inter, sans-serif' }}
-              options={[
-                { value: 'sm-001', label: 'Fall 2025 (FA25)' },
-                { value: 'sm-002', label: 'Spring 2026 (SP26)' },
-                { value: 'sm-003', label: 'Summer 2026 (SU26)' },
-                { value: 'sm-004', label: 'Fall 2026 (FA26)' },
-              ]}
-            />
+            {({ getFieldValue }) =>
+              getFieldValue('audience') === 'Semester' ? (
+                <Form.Item
+                  name="semesterId"
+                  label={<span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: 13, color: cc.textSecondary }}>Semester</span>}
+                  rules={[{ required: true, message: 'Please pick a semester.' }]}
+                >
+                  <Select
+                    placeholder="Pick a semester"
+                    size="large"
+                    allowClear
+                    style={{ borderRadius: cc.radiusMd, fontFamily: 'Inter, sans-serif' }}
+                    options={[
+                      { value: 'sm-001', label: 'Fall 2025 (FA25)' },
+                      { value: 'sm-002', label: 'Spring 2026 (SP26)' },
+                      { value: 'sm-003', label: 'Summer 2026 (SU26)' },
+                      { value: 'sm-004', label: 'Fall 2026 (FA26)' },
+                    ]}
+                  />
+                </Form.Item>
+              ) : null
+            }
           </Form.Item>
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 8 }}>
+          {/* Realtime delivery â€” always on (one source of truth: announcement = notification) */}
+          <div
+            style={{
+              marginTop: 4,
+              padding: '12px 14px',
+              background: '#FFF8F0',
+              border: `1px solid ${cc.brandMuted}`,
+              borderRadius: cc.radiusMd,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+            }}
+          >
+            <BellRing size={16} color={cc.brand} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: 12.5, color: cc.textPrimary }}>
+                Live bell push
+              </div>
+              <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 11.5, color: cc.textSecondary, marginTop: 1, lineHeight: 1.4 }}>
+                On publish, every matching recipient gets a WebSocket bell-frame â€” no refresh needed.
+              </div>
+            </div>
+            <Switch checked disabled style={{ backgroundColor: cc.brand }} />
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 16 }}>
             <Button
               onClick={() => { setIsModalOpen(false); form.resetFields(); setSelectedNotice(null); }}
               style={{ borderRadius: cc.radiusMd, fontFamily: 'Inter, sans-serif', fontWeight: 600 }}
@@ -975,7 +1082,9 @@ export const NoticesTab: React.FC = () => {
             </Button>
             <Button
               type="primary"
+              loading={publishing}
               onClick={handleCreate}
+              icon={<Send size={14} />}
               style={{
                 borderRadius: cc.radiusMd,
                 fontFamily: 'Inter, sans-serif',
@@ -984,7 +1093,7 @@ export const NoticesTab: React.FC = () => {
                 borderColor: cc.brand,
               }}
             >
-              {selectedNotice ? 'Save Changes' : 'Create Announcement'}
+              {selectedNotice ? 'Save Changes' : 'Publish Now'}
             </Button>
           </div>
         </Form>
@@ -1071,171 +1180,6 @@ export const NoticesTab: React.FC = () => {
         )}
       </Modal>
 
-      {/* ============================================================ */}
-      {/* BROADCAST NOTIFICATION MODAL (real-time WS) */}
-      {/* ============================================================ */}
-      <Modal
-        title={
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <BellRing size={20} color={cc.brand} />
-            <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 800, fontSize: 17, color: cc.textPrimary }}>
-              Send Real-time Notification
-            </span>
-            <Tag color="orange" style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700 }}>
-              WebSocket
-            </Tag>
-          </div>
-        }
-        open={isNotifyModalOpen}
-        onCancel={() => { if (!notifySending) setIsNotifyModalOpen(false); }}
-        footer={null}
-        centered
-        width={560}
-        styles={{ content: { borderRadius: cc.radiusXl, overflow: 'hidden' } }}
-      >
-        <div style={{ paddingTop: 8, fontFamily: 'Inter, sans-serif', fontSize: 12.5, color: cc.textSecondary, marginBottom: 14, lineHeight: 1.5 }}>
-          Recipients receive a bell-badge update <strong>without refreshing</strong>.
-          Opens a per-user <code>/user/queue/notifications</code> STOMP frame.
-        </div>
-
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center', marginBottom: 14 }}>
-          <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, fontWeight: 600, color: cc.textMuted }}>Recipients:</span>
-          <Select
-            value={notifyScope}
-            onChange={setNotifyScope}
-            size="middle"
-            style={{ width: 150 }}
-            options={[
-              { value: 'all', label: 'All users' },
-              { value: 'role', label: 'By role' },
-              { value: 'users', label: 'Pick users' },
-            ]}
-          />
-          {notifyScope === 'role' && (
-            <Select
-              value={notifyTargetRole}
-              onChange={setNotifyTargetRole}
-              size="middle"
-              style={{ width: 200 }}
-              options={[
-                { value: 'STUDENT', label: 'Students' },
-                { value: 'ENTERPRISE', label: 'Enterprises' },
-                { value: 'TRAINING_MANAGER', label: 'Training Managers' },
-                { value: 'MENTOR', label: 'Mentors' },
-                { value: 'LECTURER', label: 'Lecturers' },
-                { value: 'SYSTEM_ADMIN', label: 'System Admins' },
-                { value: 'ADMIN', label: 'Admins' },
-              ]}
-            />
-          )}
-          {notifyScope === 'users' && (
-            <Select
-              mode="multiple"
-              allowClear
-              placeholder="Select users"
-              size="middle"
-              style={{ minWidth: 320, flex: 1 }}
-              loading={loadingUsers}
-              value={notifySelectedIds}
-              onChange={setNotifySelectedIds}
-              options={users.map((u) => ({
-                value: u.userId,
-                label: `${u.fullName} (${u.email})`,
-                disabled: (u.status ?? 'ACTIVE').toUpperCase() === 'DISABLED',
-              }))}
-              filterOption={(input, option) =>
-                (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
-              }
-              maxTagCount="responsive"
-              notFoundContent={loadingUsers ? 'Loading users...' : 'No users found'}
-            />
-          )}
-          <Tooltip title="Reload user list">
-            <Button
-              size="middle"
-              icon={<RotateCw size={13} />}
-              onClick={loadUsers}
-              loading={loadingUsers}
-              style={{ borderRadius: cc.radiusMd }}
-            />
-          </Tooltip>
-          <Tag color={notifyRecipientCount > 0 ? 'green' : 'red'}>
-            {notifyRecipientCount} recipient{notifyRecipientCount === 1 ? '' : 's'}
-          </Tag>
-        </div>
-
-        <Form form={notifyForm} layout="vertical" initialValues={{ type: 'GENERAL' }}>
-          <Form.Item
-            name="title"
-            label={<span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: 13, color: cc.textSecondary }}>Title</span>}
-            rules={[{ required: true, max: 200 }]}
-          >
-            <Input
-              placeholder="e.g. System maintenance tonight"
-              size="large"
-              maxLength={200}
-              style={{ borderRadius: cc.radiusMd, fontFamily: 'Inter, sans-serif' }}
-            />
-          </Form.Item>
-          <Form.Item
-            name="message"
-            label={<span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: 13, color: cc.textSecondary }}>Message</span>}
-            rules={[{ required: true }]}
-          >
-            <Input.TextArea
-              rows={3}
-              maxLength={1000}
-              placeholder="Notification body"
-              style={{ borderRadius: cc.radiusMd, fontFamily: 'Inter, sans-serif' }}
-            />
-          </Form.Item>
-          <Form.Item
-            name="type"
-            label={<span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: 13, color: cc.textSecondary }}>Type</span>}
-          >
-            <Select
-              size="large"
-              style={{ borderRadius: cc.radiusMd, fontFamily: 'Inter, sans-serif', width: 240 }}
-              options={[
-                { value: 'GENERAL', label: 'General' },
-                { value: 'WARNING', label: 'Warning' },
-                { value: 'INCIDENT', label: 'Incident' },
-                { value: 'SYSTEM_ANNOUNCEMENT', label: 'System Announcement' },
-                { value: 'APPROVAL', label: 'Approval' },
-              ]}
-            />
-          </Form.Item>
-
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-            <Button
-              onClick={() => setIsNotifyModalOpen(false)}
-              disabled={notifySending}
-              style={{ borderRadius: cc.radiusMd, fontFamily: 'Inter, sans-serif', fontWeight: 600 }}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="primary"
-              icon={<Send size={14} />}
-              onClick={handleSendNotification}
-              loading={notifySending}
-              disabled={notifyRecipientCount === 0}
-              style={{
-                borderRadius: cc.radiusMd,
-                fontFamily: 'Inter, sans-serif',
-                fontWeight: 700,
-                background: cc.brand,
-                borderColor: cc.brand,
-              }}
-            >
-              Send to {notifyRecipientCount} recipient{notifyRecipientCount === 1 ? '' : 's'}
-            </Button>
-          </div>
-        </Form>
-      </Modal>
-
-      {/* ============================================================ */}
-      {/* INLINE STYLES — table customisation */}
       {/* ============================================================ */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');

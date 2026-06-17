@@ -48,4 +48,13 @@ public class SystemAnnouncement extends BaseEntity {
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
+
+    @Column(name = "type", length = 30)
+    private String type;
+
+    @Column(name = "audience", length = 30)
+    private String audience;
+
+    @Column(name = "target_role", length = 30)
+    private String targetRole;
 }

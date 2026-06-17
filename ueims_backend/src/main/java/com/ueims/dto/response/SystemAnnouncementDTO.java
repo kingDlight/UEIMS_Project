@@ -27,6 +27,9 @@ public class SystemAnnouncementDTO {
     private LocalDateTime publishedAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private String type;
+    private String audience;
+    private String targetRole;
 
     public static SystemAnnouncementDTO from(SystemAnnouncement a) {
         if (a == null) return null;
@@ -43,6 +46,9 @@ public class SystemAnnouncementDTO {
                 .publishedAt(a.getPublishedAt())
                 .createdAt(a.getCreatedAt())
                 .updatedAt(a.getUpdatedAt())
+                .type(a.getType())
+                .audience(a.getAudience())
+                .targetRole(a.getTargetRole())
                 .build();
     }
 }
