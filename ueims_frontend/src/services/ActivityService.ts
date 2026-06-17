@@ -2,15 +2,15 @@ import { api } from './api';
 
 export const ActivityService = {
   /**
-   * Lightweight heartbeat to record that the current user is on a page.
-   * Used so the backend request log captures page-level activity (e.g. HomePage)
-   * which would otherwise never hit the API.
+   * Records that the current user opened a page. The request is picked up
+   * by the backend's {@code RequestLoggingFilter} so the page appears in the
+   * admin "Request Logs" tab together with the user's email/userId.
    */
-  heartbeat: async () => {
+  pageView: async (page: string) => {
     try {
-      await api.post('/activity/heartbeat');
+      await api.post('/activity/page-view', { page });
     } catch {
-      // Heartbeat must never break the UI; swallow errors silently.
+      // Activity tracking must never break the UI; swallow errors silently.
     }
   },
 };

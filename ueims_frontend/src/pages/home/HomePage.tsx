@@ -11,7 +11,7 @@ const CTASection = React.lazy(() => import('./components/CTASection').then(m => 
 const Footer = React.lazy(() => import('./components/Footer').then(m => ({ default: m.Footer })));
 
 import { useScrollAnimation } from '../../hooks/useScrollAnimation';
-import { useActivityHeartbeat } from '../../hooks/useActivityHeartbeat';
+import { usePageView } from '../../hooks/usePageView';
 
 const FallbackLoader = ({ minHeight = "50vh" }: { minHeight?: string }) => (
   <div style={{ minHeight }} className="flex items-center justify-center w-full">
@@ -22,7 +22,7 @@ const FallbackLoader = ({ minHeight = "50vh" }: { minHeight?: string }) => (
 export const HomePage: React.FC = () => {
   const [scrolled, setScrolled] = useState(false);
   useScrollAnimation();
-  useActivityHeartbeat();
+  usePageView();
   
   const [isDark, setIsDark] = useState(() => {
     const saved = localStorage.getItem('homepage-theme');
