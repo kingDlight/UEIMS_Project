@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react'
 import Cropper from 'react-easy-crop';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Modal, Dropdown, Drawer, Form, Input, Button, App } from 'antd';
+import { Modal, Dropdown, Drawer, Form, Input, Button, App, Tooltip } from 'antd';
 import type { MenuProps } from 'antd';
 import { BellOutlined, DownOutlined, MenuOutlined } from '@ant-design/icons';
 import { X, Mail, Phone, ShieldCheck, Activity, Camera, CheckCheck } from 'lucide-react';
@@ -469,30 +469,28 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
                   {unreadCount > 0 && <SmallPill color="#E67E22" glow>{t('layout.unreadCount', { count: unreadCount })}</SmallPill>}
-                  <button
-                    type="button"
-                    onClick={handleMarkAllRead}
-                    disabled={unreadCount === 0}
-                    title={t('layout.markAllRead', 'Mark all as read')}
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: 4,
-                      padding: '5px 10px',
-                      borderRadius: 10,
-                      border: '1px solid rgba(230, 126, 34,.18)',
-                      background: unreadCount === 0 ? 'rgba(241, 245, 249, .6)' : '#fff7ed',
-                      color: unreadCount === 0 ? '#94a3b8' : '#E67E22',
-                      fontFamily: 'Inter, sans-serif',
-                      fontSize: 11,
-                      fontWeight: 700,
-                      cursor: unreadCount === 0 ? 'not-allowed' : 'pointer',
-                      transition: 'all 0.15s',
-                    }}
-                  >
-                    <CheckCheck size={12} strokeWidth={2.6} />
-                    {t('layout.markAllReadShort', 'Read all')}
-                  </button>
+                  <Tooltip title={t('layout.markAllRead', 'Mark all as read')} placement="bottom">
+                    <button
+                      type="button"
+                      onClick={handleMarkAllRead}
+                      disabled={unreadCount === 0}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: 30,
+                        height: 30,
+                        borderRadius: 10,
+                        border: '1px solid rgba(230, 126, 34,.18)',
+                        background: unreadCount === 0 ? 'rgba(241, 245, 249, .6)' : '#fff7ed',
+                        color: unreadCount === 0 ? '#94a3b8' : '#E67E22',
+                        cursor: unreadCount === 0 ? 'not-allowed' : 'pointer',
+                        transition: 'all 0.15s',
+                      }}
+                    >
+                      <CheckCheck size={14} strokeWidth={2.6} />
+                    </button>
+                  </Tooltip>
                 </div>
               </div>
               <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 10, maxHeight: 400, overflowY: 'auto' }}>
