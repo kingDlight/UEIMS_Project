@@ -109,6 +109,10 @@ export type EligibleStudent = {
   currentSemester: number;
   status: string;
   isLocked: boolean;
+  cancelledReason?: string | null;
+  cancelledBy?: string | null;
+  importedAt?: string;
+  approvedAt?: string | null;
   tone?: string;
 };
 

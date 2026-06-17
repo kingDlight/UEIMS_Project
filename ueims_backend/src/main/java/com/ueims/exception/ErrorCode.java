@@ -90,6 +90,10 @@ public enum ErrorCode {
     ELIGIBLE_STUDENT_NOT_FOUND(10521, "Eligible student not found", HttpStatus.NOT_FOUND),
     ELIGIBLE_STUDENT_DUPLICATE(
             10522, "Another student with the same student code already exists in this semester", HttpStatus.BAD_REQUEST),
+    CANCEL_REASON_REQUIRED(
+            10523,
+            "Cancellation reason is required when status is set to CANCELLED (BR-23)",
+            HttpStatus.BAD_REQUEST),
     INTERVIEW_DATE_MUST_BE_IN_FUTURE(1053, "Interview date must be in the future", HttpStatus.BAD_REQUEST),
     INTERVIEW_ELIGIBILITY_RULE(
             1054, "Chỉ những ứng viên đã vượt qua vòng sơ loại mới được lên lịch phỏng vấn", HttpStatus.BAD_REQUEST),

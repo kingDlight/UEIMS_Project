@@ -99,27 +99,48 @@ const Avatar: React.FC<{ initials: string }> = ({ initials }) => {
 };
 
 // ============================================================
-// RDS BUSINESS RULES — OJT Status by Semester
-// RDS UC-20 / BR-19:
-//   - Sem 1-4 : Pre-Registration  (cannot register OJT, just view list)
-//   - Sem 5   : Eligible          (can register OJT, GPA >= 2.0 required)
-//   - Sem 6   : In OJT           (active internship)
-//   - Sem 7-9 : Completed        (finished OJT, can view results)
-//   - Note: "Pre-Registration" students do NOT appear in the Eligible list
-//     by default; they are only shown when "All" filter is applied.
-//   - Status from DB (set by TM in Edit form) takes priority over derivation.
-//     Manual statuses include PENDING, ACCEPTED, MATCHED, OJT, CANCELLED.
+// RDS BUSINESS RULES — OJT Status
+// DB has exactly 6 status values (eligible_students.status CHECK constraint):
+//   ELIGIBLE | PENDING | ACCEPTED | MATCHED | OJT | CANCELLED
+//
+// Sem-based hints (BR-19) for FRESH students (just imported, no manual status yet):
+//   - Sem 1-4 : suggested ELIGIBLE (DB stores ELIGIBLE for these, just informational hint)
+//   - Sem 5   : suggested ELIGIBLE
+//   - Sem 6   : suggested OJT
+//   - Sem 7-9 : no automatic suggestion (DB has no equivalent). Falls back
+//     to ELIGIBLE so the badge still renders, then TM sets the real value
+//     via Edit form (typically CANCELLED for "finished early" or matching
+//     the actual workflow position).
+//
+// Manual status workflow (set by TM or system):
+//   ELIGIBLE → PENDING (student applies to a job)
+//   PENDING  → ACCEPTED (enterprise accepts CV)
+//   ACCEPTED → MATCHED (matched to a specific position)
+//   MATCHED  → OJT (TM approves the OJT list, record auto-locks)
+//   ANY      → CANCELLED (with cancelled_reason + cancelled_by, BR-23)
+//   OJT      → CANCELLED is ADMIN-ONLY (BR-24)
+//
+// DB-level invariants enforced via triggers:
+//   trg_validate_ojt:        OJT must come from ACCEPTED or MATCHED
+//   trg_locked_student_edit: OJT-locked record only allows status = CANCELLED
+//   chk_cancel_audit:        CANCELLED requires (cancelled_reason, cancelled_by)
 // ============================================================
 type OJT_STATUS_KEY =
-  | 'PRE_REGISTRATION'
   | 'ELIGIBLE'
-  | 'IN_OJT'
-  | 'COMPLETED'
   | 'PENDING'
   | 'ACCEPTED'
   | 'MATCHED'
   | 'OJT'
   | 'CANCELLED';
+
+const OJT_STATUS_VALUES: OJT_STATUS_KEY[] = [
+  'ELIGIBLE',
+  'PENDING',
+  'ACCEPTED',
+  'MATCHED',
+  'OJT',
+  'CANCELLED',
+];
 
 type OJTStatusConfig = {
   color: string; bg: string; borderColor: string;
@@ -127,48 +148,41 @@ type OJTStatusConfig = {
 };
 
 const OJT_STATUS: Record<string, OJTStatusConfig> = {
-  PRE_REGISTRATION: {
-    color: st.textMuted,  bg: hexToRgba(st.textMuted,  0.06), borderColor: hexToRgba(st.textMuted,  0.25), semRange: 'Sem. 1-4', key: 'preRegistration', descKey: 'preRegistrationDesc',
-  },
   ELIGIBLE: {
-    color: st.info,     bg: hexToRgba(st.info,     0.06), borderColor: hexToRgba(st.info,     0.25), semRange: 'Sem. 5',     key: 'eligible', descKey: 'eligibleDesc',
-  },
-  IN_OJT: {
-    color: st.success,  bg: hexToRgba(st.success,  0.06), borderColor: hexToRgba(st.success,  0.25), semRange: 'Sem. 6',     key: 'inOjt', descKey: 'inOjtDesc',
-  },
-  COMPLETED: {
-    color: st.warning,  bg: hexToRgba(st.warning,  0.06), borderColor: hexToRgba(st.warning,  0.25), semRange: 'Sem. 7-9',   key: 'completed', descKey: 'completedDesc',
+    color: st.info,     bg: hexToRgba(st.info,     0.06), borderColor: hexToRgba(st.info,     0.25), semRange: 'Sem. 1-5', key: 'eligible', descKey: 'eligibleDesc',
   },
   PENDING: {
-    color: st.warning,  bg: hexToRgba(st.warning,  0.06), borderColor: hexToRgba(st.warning,  0.25), semRange: '',            key: 'pending',    descKey: 'pendingDesc',
+    color: st.warning,  bg: hexToRgba(st.warning,  0.06), borderColor: hexToRgba(st.warning,  0.25), semRange: '',          key: 'pending',    descKey: 'pendingDesc',
   },
   ACCEPTED: {
-    color: st.info,     bg: hexToRgba(st.info,     0.06), borderColor: hexToRgba(st.info,     0.25), semRange: '',            key: 'accepted',   descKey: 'acceptedDesc',
+    color: st.info,     bg: hexToRgba(st.info,     0.06), borderColor: hexToRgba(st.info,     0.25), semRange: '',          key: 'accepted',   descKey: 'acceptedDesc',
   },
   MATCHED: {
-    color: st.success,  bg: hexToRgba(st.success,  0.06), borderColor: hexToRgba(st.success,  0.25), semRange: '',            key: 'matched',    descKey: 'matchedDesc',
+    color: st.success,  bg: hexToRgba(st.success,  0.06), borderColor: hexToRgba(st.success,  0.25), semRange: '',          key: 'matched',    descKey: 'matchedDesc',
   },
   OJT: {
-    color: st.success,  bg: hexToRgba(st.success,  0.06), borderColor: hexToRgba(st.success,  0.25), semRange: '',            key: 'inOjt',      descKey: 'inOjtDesc',
+    color: st.success,  bg: hexToRgba(st.success,  0.06), borderColor: hexToRgba(st.success,  0.25), semRange: '',          key: 'inOjt',      descKey: 'inOjtDesc',
   },
   CANCELLED: {
-    color: st.error,    bg: hexToRgba(st.error,    0.06), borderColor: hexToRgba(st.error,    0.25), semRange: '',            key: 'cancelled',  descKey: 'cancelledDesc',
+    color: st.error,    bg: hexToRgba(st.error,    0.06), borderColor: hexToRgba(st.error,    0.25), semRange: '',          key: 'cancelled',  descKey: 'cancelledDesc',
   },
 };
 
-function deriveStatus(sem: number): string {
-  if (sem < 5) return 'PRE_REGISTRATION';
-  if (sem === 5) return 'ELIGIBLE';
-  if (sem === 6) return 'IN_OJT';
-  return 'COMPLETED';
+/**
+ * Resolve the badge key for a student.
+ * Priority: explicit DB status → sem-based hint (safe default: ELIGIBLE).
+ * Never returns a value outside OJT_STATUS_VALUES so the badge always renders.
+ */
+function resolveStatusKey(r: { status?: string | null; currentSemester: number }): OJT_STATUS_KEY {
+  const raw = (r.status ?? '').trim();
+  if (raw && OJT_STATUS_VALUES.includes(raw as OJT_STATUS_KEY)) {
+    return raw as OJT_STATUS_KEY;
+  }
+  return 'ELIGIBLE';
 }
 
 // ============================================================
-// MOCK DATA — RDS-aligned students
-// Sem 1-4: PRE_REGISTRATION (not yet eligible)
-// Sem 5:   ELIGIBLE (meets criteria, can register OJT)
-// Sem 6:   IN_OJT (active internship)
-// Sem 7-9: COMPLETED (finished OJT)
+// UI COMPONENTS
 // ============================================================
 const MAJORS = [
   { value: 'All Majors', key: 'allMajors' },
@@ -192,10 +206,9 @@ const ACAD_SEM_OPTIONS = [
 // ============================================================
 // STATUS BADGE — ghost outline (text color + whisper border, no solid fill)
 // ============================================================
-const StatusBadge: React.FC<{ sem: number }> = ({ sem }) => {
-  const { message } = App.useApp();
+const StatusBadge: React.FC<{ student: EligibleStudent }> = ({ student }) => {
   const { t } = useTranslation('common');
-  const key = deriveStatus(sem);
+  const key = resolveStatusKey(student);
   const cfg = OJT_STATUS[key];
   return (
     <span
@@ -290,7 +303,7 @@ const StudentDetailModal: React.FC<{
 }> = ({ open, student, onClose, onEdit }) => {
   const { t } = useTranslation('common');
   if (!student) return null;
-  const key = deriveStatus(student.currentSemester);
+  const key = resolveStatusKey(student);
   const cfg = OJT_STATUS[key];
   const initials = student.fullName
     .split(' ')
@@ -440,14 +453,59 @@ const StudentDetailModal: React.FC<{
 // ============================================================
 // EDIT STUDENT MODAL
 // ============================================================
-const STATUS_OPTIONS = [
-  { value: 'ELIGIBLE', label: 'Eligible' },
-  { value: 'PENDING', label: 'Pending' },
-  { value: 'ACCEPTED', label: 'Accepted' },
-  { value: 'MATCHED', label: 'Matched' },
-  { value: 'OJT', label: 'OJT' },
+const ALL_STATUS_OPTIONS: { value: OJT_STATUS_KEY; label: string }[] = [
+  { value: 'ELIGIBLE',  label: 'Eligible' },
+  { value: 'PENDING',   label: 'Pending' },
+  { value: 'ACCEPTED',  label: 'Accepted' },
+  { value: 'MATCHED',   label: 'Matched' },
+  { value: 'OJT',       label: 'OJT' },
   { value: 'CANCELLED', label: 'Cancelled' },
 ];
+
+/**
+ * Workflow-aware option filtering (BR-19, BR-22, BR-23, BR-24).
+ * Returns the options TM may select from the Edit form, given the current
+ * DB status of the student. Disabled options still show as a tooltip so
+ * the user understands why a transition is blocked.
+ */
+function getAllowedStatusOptions(currentStatus: string | null | undefined): {
+  value: OJT_STATUS_KEY;
+  label: string;
+  disabled: boolean;
+  reason: string;
+}[] {
+  const cur = (currentStatus ?? 'ELIGIBLE').trim() || 'ELIGIBLE';
+  return ALL_STATUS_OPTIONS.map((o) => {
+    if (o.value === cur) return { ...o, disabled: false, reason: 'Current status' };
+    // CANCELLED is terminal
+    if (cur === 'CANCELLED') {
+      return { ...o, disabled: true, reason: 'Cancelled is terminal' };
+    }
+    // OJT -> non-CANCELLED is admin-only; we still surface it but mark disabled
+    // (backend enforces admin role).
+    if (cur === 'OJT' && o.value !== 'CANCELLED') {
+      return { ...o, disabled: true, reason: 'Only admin can roll back an OJT' };
+    }
+    // OJT requires ACCEPTED or MATCHED (BR-22)
+    if (o.value === 'OJT' && cur !== 'ACCEPTED' && cur !== 'MATCHED') {
+      return { ...o, disabled: true, reason: 'OJT requires ACCEPTED or MATCHED' };
+    }
+    // Workflow forward chain: ELIGIBLE -> PENDING -> ACCEPTED -> MATCHED
+    // Allow backward 1 step (DN re-apply) but not arbitrary jumps.
+    const chain: Record<string, number> = {
+      ELIGIBLE: 0, PENDING: 1, ACCEPTED: 2, MATCHED: 3, OJT: 4, CANCELLED: 5,
+    };
+    const curIdx = chain[cur] ?? 0;
+    const tgtIdx = chain[o.value] ?? 0;
+    if (tgtIdx > curIdx + 1) {
+      return { ...o, disabled: true, reason: 'Workflow: go through intermediate steps' };
+    }
+    if (tgtIdx < curIdx - 1) {
+      return { ...o, disabled: true, reason: 'Workflow: cannot skip backwards more than 1 step' };
+    }
+    return { ...o, disabled: false, reason: '' };
+  });
+}
 
 const EditStudentModal: React.FC<{
   open: boolean;
@@ -458,6 +516,7 @@ const EditStudentModal: React.FC<{
   const [form] = Form.useForm();
   const { message } = App.useApp();
   const [saving, setSaving] = useState(false);
+  const [chosenStatus, setChosenStatus] = useState<OJT_STATUS_KEY>('ELIGIBLE');
 
   useEffect(() => {
     if (open && student) {
@@ -468,8 +527,10 @@ const EditStudentModal: React.FC<{
         major: student.major,
         gpa: typeof student.gpa === 'number' ? student.gpa : Number(student.gpa) || 0,
         currentSemester: student.currentSemester,
-        status: student.status ?? 'ELIGIBLE',
+        status: (student.status as OJT_STATUS_KEY) ?? 'ELIGIBLE',
+        cancelledReason: student.cancelledReason ?? '',
       });
+      setChosenStatus((student.status as OJT_STATUS_KEY) ?? 'ELIGIBLE');
     }
   }, [open, student, form]);
 
@@ -478,7 +539,16 @@ const EditStudentModal: React.FC<{
     try {
       const values = await form.validateFields();
       setSaving(true);
-      const updated = await EligibleStudentService.updateEligibleStudent(student.eligibleId, {
+      const payload: {
+        studentCode: string;
+        fullName: string;
+        email?: string;
+        major: string;
+        gpa: number;
+        currentSemester: number;
+        status: string;
+        cancelledReason?: string;
+      } = {
         studentCode: values.studentCode,
         fullName: values.fullName,
         email: values.email || undefined,
@@ -486,7 +556,16 @@ const EditStudentModal: React.FC<{
         gpa: Number(values.gpa),
         currentSemester: Number(values.currentSemester),
         status: values.status,
-      });
+      };
+      if (values.status === 'CANCELLED') {
+        if (!values.cancelledReason || !values.cancelledReason.trim()) {
+          message.error({ content: 'Cancellation reason is required', key: 'edit' });
+          setSaving(false);
+          return;
+        }
+        payload.cancelledReason = values.cancelledReason.trim();
+      }
+      const updated = await EligibleStudentService.updateEligibleStudent(student.eligibleId, payload);
       message.success({ content: `Updated "${updated.fullName}"`, key: 'edit' });
       onSaved(updated);
       onClose();
@@ -502,6 +581,11 @@ const EditStudentModal: React.FC<{
       setSaving(false);
     }
   }, [student, form, message, onSaved, onClose]);
+
+  const statusOptions = useMemo(
+    () => (student ? getAllowedStatusOptions(student.status) : []),
+    [student]
+  );
 
   return (
     <Modal
@@ -598,10 +682,40 @@ const EditStudentModal: React.FC<{
           >
             <InputNumber size="large" min={1} max={12} step={1} style={{ width: '100%' }} />
           </Form.Item>
-          <Form.Item name="status" label="Status">
-            <Select size="large" options={STATUS_OPTIONS} />
+          <Form.Item name="status" label="Status" extra="Workflow-aware: invalid transitions are disabled.">
+            <Select
+              size="large"
+              value={chosenStatus}
+              onChange={(v) => setChosenStatus(v as OJT_STATUS_KEY)}
+              options={statusOptions.map((o) => ({
+                value: o.value,
+                label: o.label,
+                disabled: o.disabled,
+                title: o.disabled ? o.reason : undefined,
+              }))}
+            />
           </Form.Item>
         </div>
+
+        {chosenStatus === 'CANCELLED' && (
+          <Form.Item
+            name="cancelledReason"
+            label="Cancellation Reason"
+            rules={[
+              { required: true, message: 'Reason is required when cancelling' },
+              { min: 5, message: 'Please provide at least 5 characters' },
+              { max: 1000, message: 'Reason must be at most 1000 characters' },
+            ]}
+            extra="Recorded in audit trail. Required by BR-23 / chk_cancel_audit."
+            style={{ marginTop: 4 }}
+          >
+            <Input.TextArea
+              size="large"
+              rows={3}
+              placeholder="e.g. Student withdrew from the program before registration"
+            />
+          </Form.Item>
+        )}
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 8 }}>
           <button
@@ -677,7 +791,7 @@ export const StudentsTab: React.FC = () => {
   }, [refetchStudents]);
 
   const eligibleCount = students.filter(
-    (s) => deriveStatus(s.currentSemester) === 'ELIGIBLE'
+    (s) => resolveStatusKey(s) === 'ELIGIBLE'
   ).length;
   const eligibleTotal = eligibleCount;
 
@@ -841,35 +955,9 @@ export const StudentsTab: React.FC = () => {
       title: <span style={thStyle}>{t('studentsTab.ojtStatus')}</span>,
       key: 'status',
       width: 200,
-      render: (_: unknown, r: EligibleStudent) => {
-        // Prefer the explicit status from DB (what TM set via Edit form).
-        // Fall back to deriving from semester when status is missing
-        // (e.g. freshly imported students with no manual override yet).
-        const derived = deriveStatus(r.currentSemester);
-        const statusKey = r.status && r.status.trim() !== '' && OJT_STATUS[r.status]
-          ? r.status
-          : derived;
-        const cfg = OJT_STATUS[statusKey];
-        return (
-          <span
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 5,
-              padding: '3px 9px',
-              borderRadius: 6,
-              backgroundColor: cfg.bg,
-              border: `1px solid ${cfg.borderColor}`,
-              color: cfg.color,
-              fontSize: 11,
-              fontWeight: 600,
-              fontFamily: 'Inter, sans-serif',
-            }}
-          >
-            {t(`studentsTab.ojtStatuses.${cfg.key}`)}
-          </span>
-        );
-      },
+      render: (_: unknown, r: EligibleStudent) => (
+        <StatusBadge student={r} />
+      ),
     },
     {
       title: '',

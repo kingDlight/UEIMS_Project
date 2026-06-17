@@ -47,6 +47,7 @@ export const EligibleStudentService = {
       gpa: number;
       currentSemester: number;
       status?: string;
+      cancelledReason?: string;
     }
   ): Promise<EligibleStudent> {
     const response = await api.put<EligibleStudent>(`/eligible-students/${id}`, payload);

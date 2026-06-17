@@ -22,6 +22,7 @@ import com.ueims.model.entity.EligibleStudent;
 import com.ueims.model.entity.Semester;
 import com.ueims.repository.EligibleStudentRepository;
 import com.ueims.repository.SemesterRepository;
+import com.ueims.repository.UserRepository;
 import com.ueims.service.EligibleStudentService;
 import com.ueims.util.ExcelImportUtil;
 
@@ -37,6 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 public class EligibleStudentServiceImpl implements EligibleStudentService {
     EligibleStudentRepository repository;
     SemesterRepository semesterRepository;
+    UserRepository userRepository;
 
     @Override
     public List<EligibleStudent> findAll() {
@@ -118,6 +120,15 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
             }
         }
 
+        // Guard: BR-22 / validate_ojt_approval trigger — entering OJT requires ACCEPTED or MATCHED.
+        // Mirrored here so the API returns a clean 400 instead of leaking the raw DB trigger message.
+        if ("OJT".equals(newStatus)
+                && !"OJT".equals(existing.getStatus())
+                && !"ACCEPTED".equals(existing.getStatus())
+                && !"MATCHED".equals(existing.getStatus())) {
+            throw new AppException(ErrorCode.INVALID_STATUS_FOR_OJT);
+        }
+
         // Uniqueness: studentCode must not collide with another row in the same semester
         if (request.getStudentCode() != null
                 && !request.getStudentCode().equals(existing.getStudentCode())) {
@@ -134,6 +145,29 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
         existing.setMajor(request.getMajor());
         existing.setGpa(request.getGpa());
         existing.setCurrentSemester(request.getCurrentSemester());
+
+        // BR-23 / chk_cancel_audit: when status flips to CANCELLED we MUST
+        // populate cancelled_reason and cancelled_by together, otherwise the
+        // DB CHECK constraint throws and the request returns 500.
+        if ("CANCELLED".equals(newStatus) && !"CANCELLED".equals(existing.getStatus())) {
+            String reason = request.getCancelledReason();
+            if (reason == null || reason.isBlank()) {
+                throw new AppException(ErrorCode.CANCEL_REASON_REQUIRED);
+            }
+            org.springframework.security.core.Authentication authentication =
+                    org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null
+                    || authentication.getName() == null
+                    || "anonymousUser".equals(authentication.getName())) {
+                throw new AppException(ErrorCode.UNAUTHENTICATED);
+            }
+            com.ueims.model.entity.User actor = userRepository
+                    .findByEmail(authentication.getName())
+                    .orElseThrow(() -> new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION));
+            existing.setCancelledReason(reason);
+            existing.setCancelledBy(actor);
+        }
+
         existing.setStatus(newStatus);
 
         return repository.save(existing);
@@ -260,8 +294,32 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
         EligibleStudent student =
                 repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION));
 
+        // Resolve the actor from the security context so DB constraint
+        // chk_cancel_audit (cancelled_by NOT NULL when status = CANCELLED) is satisfied.
+        org.springframework.security.core.Authentication authentication =
+                org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null
+                || authentication.getName() == null
+                || "anonymousUser".equals(authentication.getName())) {
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
+        String actorEmail = authentication.getName();
+        com.ueims.model.entity.User actor =
+                userRepository.findByEmail(actorEmail)
+                        .orElseThrow(() -> new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION));
+
+        // Admin-only when cancelling an active OJT (BR-24, mirrors DB trigger trg_locked_student_edit).
+        if ("OJT".equals(student.getStatus())) {
+            boolean isAdmin = authentication.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+            if (!isAdmin) {
+                throw new AppException(ErrorCode.ADMIN_INTERVENTION_REQUIRED);
+            }
+        }
+
         student.setStatus("CANCELLED");
         student.setCancelledReason(reason);
+        student.setCancelledBy(actor);
 
         return repository.save(student);
     }
