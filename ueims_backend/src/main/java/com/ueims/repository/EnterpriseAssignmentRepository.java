@@ -16,6 +16,17 @@ public interface EnterpriseAssignmentRepository extends JpaRepository<Enterprise
 
     List<EnterpriseAssignment> findByEnterprise_EnterpriseId(UUID enterpriseId);
 
+    // UC-45: Lọc danh sách phân công theo doanh nghiệp và học kỳ đang ACTIVE
+    List<EnterpriseAssignment> findByEnterprise_EnterpriseIdAndSemester_Status(UUID enterpriseId, String status);
+
+    // UC-45.1: Tìm kiếm sinh viên trong danh sách phân công của doanh nghiệp
+    @Query("SELECT ea FROM EnterpriseAssignment ea WHERE ea.enterprise.enterpriseId = :enterpriseId "
+            + "AND ea.semester.status = 'ACTIVE' "
+            + "AND (:keyword IS NULL OR LOWER(ea.student.fullName) LIKE LOWER(CONCAT('%', :keyword, '%')) "
+            + "OR LOWER(ea.student.email) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    List<EnterpriseAssignment> searchMyAssignments(
+            @Param("enterpriseId") UUID enterpriseId, @Param("keyword") String keyword);
+
     @Query("SELECT ea FROM EnterpriseAssignment ea WHERE ea.semester.semesterId = :semesterId AND NOT EXISTS "
             + "(SELECT wr FROM WeeklyReport wr WHERE wr.assignment.assignmentId = ea.assignmentId "
             + "AND wr.weekNumber = :weekNumber AND wr.status != 'NOT_SUBMITTED')")
@@ -25,6 +36,9 @@ public interface EnterpriseAssignmentRepository extends JpaRepository<Enterprise
     boolean existsByEnterprise_EnterpriseIdAndStudent_UserId(UUID enterpriseId, UUID studentId);
 
     Optional<EnterpriseAssignment> findByStudent_UserId(UUID studentId);
+
+    // Lấy phân công hiện tại của sinh viên trong học kỳ ACTIVE
+    Optional<EnterpriseAssignment> findByStudent_UserIdAndSemester_Status(UUID studentId, String status);
 
     List<EnterpriseAssignment> findByAssignmentIdIn(List<UUID> assignmentIds);
 
