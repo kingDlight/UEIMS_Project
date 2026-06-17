@@ -25,6 +25,11 @@
 -- ============================================================
 -- BƯỚC 0: Đảm bảo các SV có status 'ACCEPTED' trong eligible_students
 -- (mặc định seed là 'ELIGIBLE', cần đổi thành 'ACCEPTED' để được apply)
+--
+-- LƯU Ý: Trigger prevent_locked_student_edit() (BR-21) sẽ chặn update
+-- nếu SV đã bị is_locked = TRUE (do test trước đó).
+-- Cách 1: WHERE thêm AND is_locked = FALSE để SKIP row đã lock (không lỗi)
+-- Cách 2: Nếu muốn reset hoàn toàn → chạy lại seed 008 trước
 -- ============================================================
 UPDATE eligible_students
 SET status = 'ACCEPTED'
@@ -35,7 +40,15 @@ WHERE user_id IN (
     '7770a57b-b560-4692-8db4-792d16ef3146',
     '2d4fcd13-0753-4c46-bca8-4396c0bb981f'
 )
-AND semester_id = '26f11784-e2dc-48bb-aec0-80ee582b49a0';
+AND semester_id = '26f11784-e2dc-48bb-aec0-80ee582b49a0'
+AND is_locked = FALSE;
+
+-- Nếu update trả về 0 row mà vẫn muốn test, dùng SV chưa bị lock.
+-- Query kiểm tra SV nào còn ELIGIBLE + is_locked = FALSE:
+--   SELECT user_id, student_code, status, is_locked
+--   FROM eligible_students
+--   WHERE semester_id = '26f11784-e2dc-48bb-aec0-80ee582b49a0'
+--   ORDER BY student_code;
 
 -- ============================================================
 -- TEST 1: TM test workflow (dùng tab OJT trên frontend)
