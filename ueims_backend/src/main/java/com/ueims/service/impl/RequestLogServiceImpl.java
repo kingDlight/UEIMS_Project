@@ -41,6 +41,15 @@ public class RequestLogServiceImpl implements RequestLogService {
     private static final DateTimeFormatter CSV_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Override
+    @Transactional
+    public long clearAll() {
+        long count = repository.count();
+        repository.deleteAllInBatch();
+        log.info("Cleared {} request log entries", count);
+        return count;
+    }
+
+    @Override
     @Async
     @Transactional
     public void logRequest(RequestLog requestLog) {

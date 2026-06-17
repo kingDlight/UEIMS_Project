@@ -32,6 +32,16 @@ public class RequestLogController {
 
     RequestLogService service;
 
+    @DeleteMapping
+    @PreAuthorize("hasRole('ADMIN') or hasRole('SYSTEM_ADMIN')")
+    public ApiResponse<Long> clearAllLogs() {
+        long deleted = service.clearAll();
+        return ApiResponse.<Long>builder()
+                .result(deleted)
+                .message("Cleared " + deleted + " request log entries")
+                .build();
+    }
+
     @GetMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('SYSTEM_ADMIN')")
     public ApiResponse<Page<RequestLogResponseDTO>> getLogs(

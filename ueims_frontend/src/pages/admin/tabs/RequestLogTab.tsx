@@ -23,6 +23,7 @@ import {
   GlobalOutlined,
   ClockCircleOutlined,
   ThunderboltOutlined,
+  DeleteOutlined,
   WifiOutlined,
   DisconnectOutlined,
   SyncOutlined,
@@ -87,6 +88,8 @@ export const RequestLogTab: React.FC = () => {
   const [pageSize, setPageSize] = useState(20);
 
   const [exporting, setExporting] = useState(false);
+  const [clearing, setClearing] = useState(false);
+  const [confirmClear, setConfirmClear] = useState(false);
   const [investigateModal, setInvestigateModal] = useState(false);
   const [investigateUserId, setInvestigateUserId] = useState<string | null>(null);
   const [investigateLogs, setInvestigateLogs] = useState<RequestLogEntry[]>([]);
@@ -176,6 +179,22 @@ export const RequestLogTab: React.FC = () => {
       message.error(err.response?.data?.message || 'Failed to export request logs.');
     } finally {
       setExporting(false);
+    }
+  };
+
+  const handleClear = async () => {
+    setClearing(true);
+    try {
+      const removed = await RequestLogService.clearAll();
+      setLogs([]);
+      setTotal(0);
+      setPendingNew(0);
+      message.success(`Cleared ${Number(removed).toLocaleString()} request log entries.`);
+    } catch (err: any) {
+      message.error(err.response?.data?.message || 'Failed to clear request logs.');
+    } finally {
+      setClearing(false);
+      setConfirmClear(false);
     }
   };
 
@@ -388,6 +407,16 @@ export const RequestLogTab: React.FC = () => {
               Refresh
             </Button>
             <Button
+              icon={<DeleteOutlined />}
+              danger
+              disabled={total === 0 && logs.length === 0}
+              loading={clearing}
+              onClick={() => setConfirmClear(true)}
+              style={{ borderRadius: c.radiusMd }}
+            >
+              Clear all
+            </Button>
+            <Button
               icon={<DownloadOutlined />}
               type="primary"
               loading={exporting}
@@ -546,6 +575,31 @@ export const RequestLogTab: React.FC = () => {
               />
             </div>
           </div>
+        </Modal>
+
+        {/* CLEAR CONFIRMATION */}
+        <Modal
+          title={
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <DeleteOutlined style={{ color: c.error }} />
+              <span>Clear all request logs</span>
+            </div>
+          }
+          open={confirmClear}
+          onCancel={() => !clearing && setConfirmClear(false)}
+          confirmLoading={clearing}
+          okText="Yes, clear all"
+          okButtonProps={{ danger: true }}
+          cancelButtonProps={{ disabled: clearing }}
+          onOk={handleClear}
+        >
+          <p style={{ margin: '8px 0 4px', fontSize: 14, color: c.text }}>
+            This will permanently delete <b>{total.toLocaleString()}</b> request log
+            {total === 1 ? '' : 's'} from the database.
+          </p>
+          <p style={{ margin: 0, fontSize: 13, color: c.textMuted }}>
+            Future requests will be logged again as usual. This action cannot be undone.
+          </p>
         </Modal>
 
       </div>

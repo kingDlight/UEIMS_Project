@@ -49,4 +49,9 @@ export const RequestLogService = {
     });
     return res.data;
   },
+
+  clearAll: async () => {
+    const res = await api.delete('/request-logs');
+    return res.data?.result ?? 0;
+  },
 };

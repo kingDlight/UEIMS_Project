@@ -26,4 +26,6 @@ public interface RequestLogService {
     Page<RequestLogResponseDTO> getRecentLogs(Pageable pageable);
 
     byte[] exportCsv(UUID userId, HttpMethod method, String endpoint, LocalDateTime startDate, LocalDateTime endDate);
+
+    long clearAll();
 }
