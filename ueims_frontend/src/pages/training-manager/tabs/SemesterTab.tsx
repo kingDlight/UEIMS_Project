@@ -246,14 +246,19 @@ export const SemesterTab: React.FC = () => {
   const handleCreateSemester = useCallback(async () => {
     try {
       const values = await form.validateFields();
+      const [start, end] = values.dateRange ?? [];
+      if (!start || !end) {
+        message.error('Please pick a start and end date.');
+        return;
+      }
       const payload = {
         semesterCode: values.semesterCode,
         name: values.name,
-        startDate: dayjs(values.startDate).format('YYYY-MM-DD'),
-        endDate: dayjs(values.endDate).format('YYYY-MM-DD'),
-        weeklyReportDeadlineDay: values.weeklyReportDeadlineDay ?? 'SUNDAY',
-        weeklyReportDeadlineTime: values.weeklyReportDeadlineTime ?? '23:59',
-        status: values.status ?? 'DRAFT',
+        startDate: dayjs(start).format('YYYY-MM-DD'),
+        endDate: dayjs(end).format('YYYY-MM-DD'),
+        weeklyReportDeadlineDay: values.weeklyDeadline ?? 'SUNDAY',
+        weeklyReportDeadlineTime: '23:59',
+        status: 'DRAFT',
       };
       const created = await SemesterService.createSemester(payload);
       message.success({ content: `Semester "${created.name}" created successfully.`, duration: 2.5 });
