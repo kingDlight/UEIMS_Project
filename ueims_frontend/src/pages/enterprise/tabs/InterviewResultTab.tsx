@@ -175,7 +175,7 @@ export const InterviewResultTab: React.FC = () => {
         onCancel={() => { if (!submitting) { setDecisionOpen(null); setNotes(''); } }}
         footer={null}
         width={460}
-        destroyOnClose
+        destroyOnHidden
       >
         <p style={{ fontSize: 13, color: c.textSecondary, marginBottom: 12 }}>
           Are you sure you want to record <strong>{decisionOpen?.decision}</strong> for{' '}
