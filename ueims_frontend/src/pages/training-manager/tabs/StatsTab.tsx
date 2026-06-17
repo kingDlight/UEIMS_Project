@@ -408,7 +408,7 @@ trailColor={cc.borderSubtle}
           <div style={{ fontSize: 13.5, fontWeight: 700, color: cc.textPrimary, marginBottom: 4 }}>Placement Overview</div>
           <div style={{ fontSize: 12, color: cc.textMuted, marginBottom: 20 }}>Placed vs. still searching — current semester</div>
           <div style={{ height: 220, minHeight: 0 }}>
-            <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
+            <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1} debounce={50}>
               <PieChart>
                 <Pie
                   data={placementData}
@@ -459,7 +459,7 @@ trailColor={cc.borderSubtle}
           <div style={{ fontSize: 13.5, fontWeight: 700, color: cc.textPrimary, marginBottom: 4 }}>GPA by Major</div>
           <div style={{ fontSize: 12, color: cc.textMuted, marginBottom: 16 }}>Average GPA distribution across majors</div>
           <div style={{ height: 220, minHeight: 0, paddingRight: 24 }}>
-            <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
+            <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1} debounce={50}>
               <BarChart data={gpaData} margin={{ top: 8, right: 8, left: -16, bottom: 0 }} barCategoryGap="28%">
                 <defs>
                   <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
@@ -504,7 +504,7 @@ trailColor={cc.borderSubtle}
           </div>
         </div>
         <div style={{ height: 160, minHeight: 0, paddingRight: 24 }}>
-          <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
+          <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1} debounce={50}>
             <AreaChart data={TREND_DATA} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="placedGrad" x1="0" y1="0" x2="0" y2="1">
