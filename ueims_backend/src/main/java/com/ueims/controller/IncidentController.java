@@ -24,7 +24,7 @@ public class IncidentController {
     IncidentService service;
 
     @GetMapping
-    @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')")
+    @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN') or hasRole('ADMIN') or hasRole('ENTERPRISE')")
     public ResponseEntity<List<Incident>> getAll() {
         return ResponseEntity.ok(service.findAll());
     }

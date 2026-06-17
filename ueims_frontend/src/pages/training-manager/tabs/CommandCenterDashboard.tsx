@@ -430,7 +430,6 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
       </div>
     );
   }
-  }
 
   // Fallback default summary if DB is empty
   const safeSummary = summary || {

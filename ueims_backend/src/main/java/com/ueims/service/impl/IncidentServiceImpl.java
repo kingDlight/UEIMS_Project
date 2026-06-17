@@ -42,6 +42,20 @@ public class IncidentServiceImpl implements IncidentService {
 
     @Override
     public List<Incident> findAll() {
+        String email = org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
+        User currentUser = userRepository.findByEmail(email).orElse(null);
+        if (currentUser != null && currentUser.getEnterprise() != null) {
+            return repository.findAll().stream()
+                    .filter(inc -> inc.getAssignment() != null
+                            && inc.getAssignment().getEnterprise() != null
+                            && inc.getAssignment()
+                                    .getEnterprise()
+                                    .getEnterpriseId()
+                                    .equals(currentUser.getEnterprise().getEnterpriseId()))
+                    .toList();
+        }
         return repository.findAll();
     }
 

@@ -9,7 +9,8 @@ import lombok.*;
 @Entity
 @Table(name = "student_profiles")
 @Data
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = true, exclude = "user")
+@ToString(exclude = "user")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

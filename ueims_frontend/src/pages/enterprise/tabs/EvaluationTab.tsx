@@ -354,13 +354,12 @@ export const EvaluationTab: React.FC = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const res = await ApplicationService.getMyEnterprise();
+        const res = await EnterpriseAssignmentService.getMyEnterpriseAssignments();
         const data = res.data?.result ?? res.data ?? [];
         if (Array.isArray(data) && data.length > 0) {
           const mapped: AssignedStudent[] = data
-            .filter((item: any) => item.status === 'ACCEPTED' || item.status === 'INTERVIEW_SCHEDULED')
             .map((item: any) => ({
-              assignmentId: item.applicationId ?? item.id,
+              assignmentId: item.assignmentId ?? item.id,
               studentName: item.studentName ?? 'Student',
               studentCode: item.studentCode ?? '—',
               major: item.major ?? '—',

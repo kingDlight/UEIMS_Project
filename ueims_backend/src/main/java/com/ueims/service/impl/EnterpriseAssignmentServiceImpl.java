@@ -30,21 +30,25 @@ public class EnterpriseAssignmentServiceImpl implements EnterpriseAssignmentServ
     EnterpriseAssignmentMapper mapper;
 
     @Override
+    @Transactional(readOnly = true)
     public List<EnterpriseAssignment> findAll() {
         return repository.findAll();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public EnterpriseAssignment findById(UUID id) {
         return repository.findById(id).orElse(null);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<EnterpriseAssignment> findByEnterpriseId(UUID enterpriseId) {
         return repository.findByEnterprise_EnterpriseId(enterpriseId);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public EnterpriseAssignment findMyAssignment(UUID studentId) {
         // Chỉ lấy phân công trong học kỳ đang ACTIVE để sinh viên xem Roadmap đúng kỳ
         return repository
@@ -53,6 +57,7 @@ public class EnterpriseAssignmentServiceImpl implements EnterpriseAssignmentServ
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<EnterpriseAssignment> findMyEnterpriseAssignments() {
         User currentUser = getCurrentUser();
         if (currentUser.getEnterprise() == null) {
@@ -64,6 +69,7 @@ public class EnterpriseAssignmentServiceImpl implements EnterpriseAssignmentServ
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<EnterpriseAssignment> searchMyEnterpriseAssignments(String keyword) {
         User currentUser = getCurrentUser();
         if (currentUser.getEnterprise() == null) {

@@ -23,7 +23,7 @@ public class Interview extends BaseEntity {
     @JoinColumn(name = "application_id", nullable = false)
     private Application application;
 
-    @Column(name = "scheduled_time", nullable = false)
+    @Column(name = "scheduled_datetime", nullable = false)
     private LocalDateTime scheduledTime;
 
     @Column(name = "location", length = 500)
@@ -45,7 +45,7 @@ public class Interview extends BaseEntity {
     @Column(name = "result", length = 20)
     private String result;
 
-    @Column(name = "feedback", columnDefinition = "TEXT")
+    @Column(name = "result_note", columnDefinition = "TEXT")
     private String feedback;
 
     @Column(name = "cancel_reason", columnDefinition = "TEXT")

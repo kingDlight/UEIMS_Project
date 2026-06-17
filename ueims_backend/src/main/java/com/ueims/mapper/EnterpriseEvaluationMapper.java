@@ -11,7 +11,9 @@ import com.ueims.model.entity.EnterpriseEvaluation;
         unmappedTargetPolicy = ReportingPolicy.IGNORE,
         builder = @org.mapstruct.Builder(disableBuilder = true))
 public interface EnterpriseEvaluationMapper {
+    @org.mapstruct.Mapping(source = "assignment.assignmentId", target = "assignmentId")
     EnterpriseEvaluationDTO toDto(EnterpriseEvaluation entity);
 
+    @org.mapstruct.Mapping(source = "assignmentId", target = "assignment.assignmentId")
     EnterpriseEvaluation toEntity(EnterpriseEvaluationDTO dto);
 }

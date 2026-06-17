@@ -36,7 +36,7 @@ public class Application extends BaseEntity {
     @Column(name = "cv_snapshot_url", length = 500)
     private String cvSnapshotUrl;
 
-    @Column(name = "cover_letter", columnDefinition = "TEXT")
+    @Transient
     private String coverLetter;
 
     @Enumerated(EnumType.STRING)
@@ -48,13 +48,13 @@ public class Application extends BaseEntity {
     @JoinColumn(name = "screened_by")
     private User screenedBy;
 
-    @Column(name = "rejection_reason", columnDefinition = "TEXT")
+    @Column(name = "screening_note", columnDefinition = "TEXT")
     private String rejectionReason;
 
-    @Column(name = "interview_date")
+    @Transient
     private LocalDateTime interviewDate;
 
-    @Column(name = "interview_link", length = 500)
+    @Transient
     private String interviewLink;
 
     @Column(name = "deleted_at")

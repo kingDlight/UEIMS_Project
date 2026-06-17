@@ -23,6 +23,8 @@ public class EnterpriseAssignmentDTO {
     UUID studentId;
     String studentName;
     String studentCode;
+    String studentEmail;
+    String major;
 
     // Enterprise & Semester Info
     UUID enterpriseId;
