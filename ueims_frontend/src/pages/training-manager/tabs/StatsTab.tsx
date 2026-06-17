@@ -408,7 +408,7 @@ trailColor={cc.borderSubtle}
           <div style={{ fontSize: 13.5, fontWeight: 700, color: cc.textPrimary, marginBottom: 4 }}>Placement Overview</div>
           <div style={{ fontSize: 12, color: cc.textMuted, marginBottom: 20 }}>Placed vs. still searching — current semester</div>
           <div style={{ width: '100%', height: 220, minHeight: 0 }}>
-            <ResponsiveContainer width="100%" height="100%" minWidth={10} minHeight={10}>
+            <ResponsiveContainer width="99%" height="99%" initialDimension={{ width: 400, height: 220 }}>
               <PieChart>
                 <Pie
                   data={placementData}
@@ -458,9 +458,9 @@ trailColor={cc.borderSubtle}
         <div style={{ background: cc.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: `1px solid ${cc.border}`, borderRadius: cc.radiusLg, boxShadow: cc.shadowSm, padding: 20 }}>
           <div style={{ fontSize: 13.5, fontWeight: 700, color: cc.textPrimary, marginBottom: 4 }}>GPA by Major</div>
           <div style={{ fontSize: 12, color: cc.textMuted, marginBottom: 16 }}>Average GPA distribution across majors</div>
-          <div style={{ width: '100%', height: 220, minHeight: 0, paddingRight: 24 }}>
-            <ResponsiveContainer width="100%" height="100%" minWidth={10} minHeight={10}>
-              <BarChart data={gpaData} margin={{ top: 8, right: 8, left: -16, bottom: 0 }} barCategoryGap="28%">
+          <div style={{ width: '100%', height: 220, minHeight: 0 }}>
+            <ResponsiveContainer width="99%" height="99%" initialDimension={{ width: 400, height: 220 }}>
+              <BarChart data={gpaData} margin={{ top: 8, right: 32, left: -16, bottom: 0 }} barCategoryGap="28%">
                 <defs>
                   <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#FF7A30" />
@@ -503,9 +503,9 @@ trailColor={cc.borderSubtle}
             ))}
           </div>
         </div>
-        <div style={{ width: '100%', height: 160, minHeight: 0, paddingRight: 24 }}>
-          <ResponsiveContainer width="100%" height="100%" minWidth={10} minHeight={10}>
-            <AreaChart data={TREND_DATA} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
+        <div style={{ width: '100%', height: 160, minHeight: 0 }}>
+          <ResponsiveContainer width="99%" height="99%" initialDimension={{ width: 400, height: 160 }}>
+            <AreaChart data={TREND_DATA} margin={{ top: 8, right: 32, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="placedGrad" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor={cc.success} stopOpacity={0.25} />
