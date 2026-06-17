@@ -145,6 +145,27 @@ public enum ErrorCode {
 
     // Rate limiting
     RATE_LIMIT_EXCEEDED(4029, "Too many requests. Please try again after 1 minute.", HttpStatus.TOO_MANY_REQUESTS),
+
+    // Placement application (OJT self-apply workflow)
+    PLACEMENT_APP_NOT_FOUND(1078, "Placement application not found", HttpStatus.NOT_FOUND),
+    DUPLICATE_PLACEMENT_APPLICATION(
+            1079, "You have already applied to this enterprise for this semester", HttpStatus.BAD_REQUEST),
+    PLACEMENT_APP_ALREADY_REVIEWED(
+            1080, "This application has already been reviewed", HttpStatus.BAD_REQUEST),
+    PLACEMENT_APP_NOT_PENDING(
+            1081, "Only PENDING_APPROVAL applications can be reviewed or withdrawn", HttpStatus.BAD_REQUEST),
+    STUDENT_HAS_ACTIVE_PLACEMENT(
+            1082, "Student already has an active placement in this semester", HttpStatus.BAD_REQUEST),
+    REJECTION_REASON_REQUIRED(
+            1083, "Rejection reason is required and must be at least 5 characters", HttpStatus.BAD_REQUEST),
+    STUDENT_NOT_ELIGIBLE_FOR_PLACEMENT(
+            1084,
+            "Student must be ACCEPTED or MATCHED in eligible_students before applying for placement",
+            HttpStatus.BAD_REQUEST),
+    ENTERPRISE_NOT_APPROVED(
+            1085, "Enterprise must be APPROVED before students can apply", HttpStatus.BAD_REQUEST),
+    NO_ACTIVE_SEMESTER(
+            1086, "No OPEN or ACTIVE semester is available for placement applications", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

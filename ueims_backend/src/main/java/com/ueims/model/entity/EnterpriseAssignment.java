@@ -44,6 +44,11 @@ public class EnterpriseAssignment extends BaseEntity {
     @Column(name = "supervisor_email", length = 200)
     private String supervisorEmail;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "assigned_by", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private User assignedBy;
+
     @Column(name = "start_date")
     private java.time.LocalDate startDate;
 
