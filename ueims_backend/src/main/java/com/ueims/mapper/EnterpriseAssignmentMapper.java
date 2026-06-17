@@ -4,7 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
 
-import com.ueims.dto.response.EnterpriseAssignmentDTO;
+import com.ueims.dto.response.EnterpriseAssignmentResponseDTO;
 import com.ueims.model.entity.EnterpriseAssignment;
 
 @Mapper(
@@ -18,9 +18,9 @@ public interface EnterpriseAssignmentMapper {
     @org.mapstruct.Mapping(source = "student.studentProfile.major", target = "major")
     @org.mapstruct.Mapping(source = "enterprise.companyName", target = "enterpriseName")
     @org.mapstruct.Mapping(source = "semester.semesterCode", target = "semesterCode")
-    EnterpriseAssignmentDTO toDto(EnterpriseAssignment entity);
+    EnterpriseAssignmentResponseDTO toDto(EnterpriseAssignment entity);
 
-    EnterpriseAssignment toEntity(EnterpriseAssignmentDTO dto);
+    EnterpriseAssignment toEntity(EnterpriseAssignmentResponseDTO dto);
 
-    void updateEntity(EnterpriseAssignmentDTO dto, @MappingTarget EnterpriseAssignment entity);
+    void updateEntity(EnterpriseAssignmentResponseDTO dto, @MappingTarget EnterpriseAssignment entity);
 }
