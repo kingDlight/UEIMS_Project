@@ -15,12 +15,9 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;
@@ -30,17 +27,17 @@ import com.ueims.model.entity.RequestLog;
 import com.ueims.model.entity.RequestLog.HttpMethod;
 import com.ueims.service.RequestLogService;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-@Component
-@RequiredArgsConstructor
 @Slf4j
-@Order(Ordered.LOWEST_PRECEDENCE - 10)
 public class RequestLoggingFilter extends OncePerRequestFilter {
 
     private final RequestLogService requestLogService;
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    public RequestLoggingFilter(RequestLogService requestLogService) {
+        this.requestLogService = requestLogService;
+    }
 
     private static final Set<String> SKIP_PATTERNS =
             Set.of("/api/auth/", "/actuator/", "/uploads/", "/static/", "/favicon", "/error", "/ws/");
