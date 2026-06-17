@@ -88,7 +88,7 @@ export const ReportsTab: React.FC = () => {
     try {
       setLoading(true);
       const res = await WeeklyReportService.getMyReports();
-      const data = res.data?.result ?? res.data;
+      const data = res?.data?.result ?? res?.data ?? res;
       setReports(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error('Failed to fetch reports', err);
