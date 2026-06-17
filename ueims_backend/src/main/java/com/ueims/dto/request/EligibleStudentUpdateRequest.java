@@ -9,6 +9,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import lombok.Data;
@@ -41,5 +42,9 @@ public class EligibleStudentUpdateRequest {
     private Integer currentSemester;
 
     @Size(max = 20)
+    @Pattern(
+        regexp = "^(ELIGIBLE|PENDING|ACCEPTED|MATCHED|OJT|CANCELLED)$",
+        message = "Status must be one of: ELIGIBLE, PENDING, ACCEPTED, MATCHED, OJT, CANCELLED"
+    )
     private String status;
 }

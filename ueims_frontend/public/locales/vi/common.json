@@ -371,7 +371,15 @@
       "inOjt": "Đang OJT",
       "inOjtDesc": "Đang trong kỳ OJT — thực tập đang diễn ra",
       "completed": "Đã hoàn thành",
-      "completedDesc": "OJT hoàn tất — đủ điều kiện xem kết quả"
+      "completedDesc": "OJT hoàn tất — đủ điều kiện xem kết quả",
+      "pending": "Đang chờ",
+      "pendingDesc": "Đã nộp đơn — đang chờ Training Manager xét duyệt",
+      "accepted": "Đã nhận",
+      "acceptedDesc": "Doanh nghiệp đã nhận — đang chờ match vị trí cụ thể",
+      "matched": "Đã match",
+      "matchedDesc": "Đã match vị trí — đang chờ ngày bắt đầu thực tập",
+      "cancelled": "Đã hủy",
+      "cancelledDesc": "Đăng ký OJT đã bị hủy — xem lý do chi tiết"
     }
   },
   "dev": {

@@ -371,7 +371,15 @@
       "inOjt": "In OJT",
       "inOjtDesc": "Currently in OJT — active internship",
       "completed": "Completed",
-      "completedDesc": "OJT finished — eligible to view results"
+      "completedDesc": "OJT finished — eligible to view results",
+      "pending": "Pending",
+      "pendingDesc": "Application submitted — awaiting Training Manager review",
+      "accepted": "Accepted",
+      "acceptedDesc": "Accepted by enterprise — waiting to be matched to a position",
+      "matched": "Matched",
+      "matchedDesc": "Matched to a position — internship start date pending",
+      "cancelled": "Cancelled",
+      "cancelledDesc": "OJT registration cancelled — see reason for details"
     }
   },
   "dev": {
