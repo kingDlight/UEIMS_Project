@@ -270,8 +270,9 @@ export const LoginPage: React.FC = () => {
           </Divider>
 
           <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: 20 }}>
-            {/* Google Sign-In disabled — uncomment and configure client_id in .env when ready */}
-            <GoogleLogin onSuccess={handleGoogleSuccess} onError={() => message.error('Google login failed')} shape="pill" theme="outline" />
+            {/* Google Sign-In disabled — needs a real VITE_GOOGLE_CLIENT_ID in .env.
+                Uncomment AND configure client_id before re-enabling. */}
+            {/* <GoogleLogin onSuccess={handleGoogleSuccess} onError={() => message.error('Google login failed')} shape="pill" theme="outline" /> */}
           </div>
         </div>
 
