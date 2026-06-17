@@ -27,6 +27,9 @@ class InternshipPlanServiceImplTest {
     @Mock
     private InternshipPlanRepository repository;
 
+    @Mock
+    private com.ueims.repository.UserRepository userRepository;
+
     @InjectMocks
     private InternshipPlanServiceImpl service;
 
@@ -36,8 +39,17 @@ class InternshipPlanServiceImplTest {
     @BeforeEach
     void setUp() {
         planId = UUID.randomUUID();
+        com.ueims.model.entity.Enterprise enterprise = com.ueims.model.entity.Enterprise.builder()
+                .enterpriseId(UUID.randomUUID())
+                .build();
+        com.ueims.model.entity.EnterpriseAssignment assignment = com.ueims.model.entity.EnterpriseAssignment.builder()
+                .assignmentId(UUID.randomUUID())
+                .enterprise(enterprise)
+                .build();
+
         internshipPlan = InternshipPlan.builder()
                 .planId(planId)
+                .assignment(assignment)
                 .overallGoal("To learn a lot")
                 .isLocked(false)
                 .build();
@@ -74,6 +86,13 @@ class InternshipPlanServiceImplTest {
 
     @Test
     void saveSuccess() {
+        org.springframework.security.core.context.SecurityContextHolder.getContext()
+                .setAuthentication(new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
+                        "admin@test.com", null));
+        when(userRepository.findByEmail("admin@test.com"))
+                .thenReturn(Optional.of(com.ueims.model.entity.User.builder()
+                        .enterprise(internshipPlan.getAssignment().getEnterprise())
+                        .build()));
         when(repository.save(any(InternshipPlan.class))).thenReturn(internshipPlan);
 
         InternshipPlan result = service.save(internshipPlan);

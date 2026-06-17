@@ -2,7 +2,6 @@ package com.ueims.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -27,7 +26,9 @@ import com.ueims.dto.response.UserResponse;
 import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
 import com.ueims.model.entity.User;
+import com.ueims.repository.InvalidatedTokenRepository;
 import com.ueims.repository.UserRepository;
+import com.ueims.repository.UserSessionRepository;
 import com.ueims.service.MailService;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,6 +42,12 @@ class UserServiceImplTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private UserSessionRepository userSessionRepository;
+
+    @Mock
+    private InvalidatedTokenRepository invalidatedTokenRepository;
 
     private UserServiceImpl userService;
 
@@ -57,7 +64,8 @@ class UserServiceImplTest {
                 mailSent = true;
             }
         };
-        userService = new UserServiceImpl(repository, mailService, passwordEncoder);
+        userService = new UserServiceImpl(
+                repository, mailService, passwordEncoder, userSessionRepository, invalidatedTokenRepository);
 
         userId = UUID.randomUUID();
         user = User.builder()
@@ -72,8 +80,9 @@ class UserServiceImplTest {
     @Test
     void findAllSuccess() {
         when(repository.findAll()).thenReturn(List.of(user));
+        when(userSessionRepository.findByEmail(TEST_EMAIL)).thenReturn(List.of());
 
-        List<User> result = userService.findAll();
+        List<com.ueims.dto.response.UserDetailResponse> result = userService.findAll();
 
         assertEquals(1, result.size());
         assertEquals(TEST_EMAIL, result.get(0).getEmail());
@@ -82,8 +91,9 @@ class UserServiceImplTest {
     @Test
     void findByIdSuccess() {
         when(repository.findById(userId)).thenReturn(Optional.of(user));
+        when(userSessionRepository.findByEmail(TEST_EMAIL)).thenReturn(List.of());
 
-        User result = userService.findById(userId);
+        com.ueims.dto.response.UserDetailResponse result = userService.findById(userId);
 
         assertNotNull(result);
         assertEquals(TEST_EMAIL, result.getEmail());
@@ -93,9 +103,9 @@ class UserServiceImplTest {
     void findByIdNotFound() {
         when(repository.findById(userId)).thenReturn(Optional.empty());
 
-        User result = userService.findById(userId);
+        AppException exception = assertThrows(AppException.class, () -> userService.findById(userId));
 
-        assertNull(result);
+        assertEquals(ErrorCode.USER_NOT_EXISTED, exception.getErrorCode());
     }
 
     @Test
@@ -140,6 +150,12 @@ class UserServiceImplTest {
 
     @Test
     void updateUserStatusSuccess() {
+        SecurityContextHolder.getContext()
+                .setAuthentication(new UsernamePasswordAuthenticationToken("admin@test.com", null));
+        User adminUser =
+                User.builder().userId(UUID.randomUUID()).email("admin@test.com").build();
+        when(repository.findByEmail("admin@test.com")).thenReturn(Optional.of(adminUser));
+
         when(repository.findById(userId)).thenReturn(Optional.of(user));
 
         userService.updateUserStatus(userId, LOCKED_STATUS);

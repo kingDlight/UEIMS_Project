@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Spin, message, Modal, Form, Input, Button, Upload } from 'antd';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Spin, App, Modal, Form, Input, Button, Upload, Popconfirm, Alert } from 'antd';
 import { motion } from 'framer-motion';
 import {
   EditOutlined,
@@ -17,7 +17,9 @@ import {
   CheckCircleOutlined,
   CloseCircleOutlined,
   ClockCircleOutlined,
+  ExclamationCircleOutlined,
 } from '@ant-design/icons';
+import type { UploadProps } from 'antd';
 import { api } from '@/services/api';
 import { c } from '../constants';
 
@@ -41,6 +43,8 @@ interface EnterpriseProfile {
   createdAt?: string;
   updatedAt?: string;
 }
+
+const MAX_LOGO_DATA_URL_LENGTH = 500; // matches enterprises.logo_url length
 
 // ============================================================
 // HELPERS
@@ -102,19 +106,25 @@ const InfoRow: React.FC<{ icon: React.ReactNode; label: string; value?: string }
 // MAIN COMPONENT (UC-35 + UC-36)
 // ============================================================
 export const EnterpriseProfileTab: React.FC = () => {
+  const { message } = App.useApp();
   const [profile, setProfile] = useState<EnterpriseProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [editOpen, setEditOpen] = useState(false);
   const [form] = Form.useForm();
   const [saving, setSaving] = useState(false);
-  const [logoUploading, setLogoUploading] = useState(false);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const initialValuesRef = useRef<Partial<EnterpriseProfile> | null>(null);
 
+  // ============================================================
+  // UC-35 Normal Flow: fetch & display enterprise profile
+  // ============================================================
   const fetchProfile = async () => {
     try {
       setLoading(true);
       const res = await api.get('/enterprises/my-profile');
-      const data = res.data?.result ?? res.data;
+      const data = (res.data?.result ?? res.data) as EnterpriseProfile;
       setProfile(data);
+      setLogoPreview(data?.logoUrl || null);
     } catch (err: any) {
       message.error(err.response?.data?.message || 'Unable to load profile information at this time. Please try again later.');
     } finally {
@@ -124,32 +134,103 @@ export const EnterpriseProfileTab: React.FC = () => {
 
   useEffect(() => { fetchProfile(); }, []);
 
+  // ============================================================
+  // UC-36 Normal Flow step 2: open the edit form with current values
+  // ============================================================
   const openEdit = () => {
-    form.setFieldsValue({
-      companyName: profile?.companyName,
-      taxCode: profile?.taxCode,
-      website: profile?.website,
-      industry: profile?.industry,
-      description: profile?.description,
-      address: profile?.address,
-      logoUrl: profile?.logoUrl,
-      contactPerson: profile?.contactPerson,
-      contactPhone: profile?.contactPhone,
-      contactEmail: profile?.contactEmail,
-    });
+    if (!profile) return;
+    const initial: Partial<EnterpriseProfile> = {
+      companyName: profile.companyName,
+      taxCode: profile.taxCode,
+      website: profile.website,
+      industry: profile.industry,
+      description: profile.description,
+      address: profile.address,
+      logoUrl: profile.logoUrl,
+      contactPerson: profile.contactPerson,
+      contactPhone: profile.contactPhone,
+      contactEmail: profile.contactEmail,
+    };
+    initialValuesRef.current = initial;
+    form.setFieldsValue(initial);
+    setLogoPreview(profile.logoUrl || null);
     setEditOpen(true);
   };
 
+  // ============================================================
+  // UC-36 Alternative Flow 36.1: Cancel editing
+  // - If form is dirty, confirm before discarding
+  // - Always reset form to the read-only view's data
+  // ============================================================
+  const handleCancel = () => {
+    form
+      .validateFields()
+      .then(() => {
+        // Validation passed → no inline errors visible
+        attemptCancel();
+      })
+      .catch(() => {
+        // Form has validation errors → definitely dirty
+        attemptCancel();
+      });
+  };
+
+  const attemptCancel = () => {
+    if (form.isFieldsTouched()) {
+      Modal.confirm({
+        title: 'Discard unsaved changes?',
+        icon: <ExclamationCircleOutlined style={{ color: c.warning }} />,
+        content: 'You have unsaved changes in the edit form. Closing now will discard them.',
+        okText: 'Discard',
+        cancelText: 'Keep editing',
+        okButtonProps: { danger: true },
+        onOk: () => closeEdit(),
+      });
+    } else {
+      closeEdit();
+    }
+  };
+
+  const closeEdit = () => {
+    setEditOpen(false);
+    if (initialValuesRef.current) {
+      form.setFieldsValue(initialValuesRef.current);
+    }
+    form.resetFields();
+    setLogoPreview(profile?.logoUrl || null);
+  };
+
+  // ============================================================
+  // UC-36 Normal Flow step 3-4: Save (validate, submit)
+  // ============================================================
   const handleSave = async () => {
     try {
       const values = await form.validateFields();
       setSaving(true);
-      await api.put(`/enterprises/${profile?.enterpriseId}`, values);
+
+      const payload = {
+        ...values,
+        contactPerson: (values.contactPerson ?? '').trim(),
+        contactPhone: (values.contactPhone ?? '').trim(),
+        contactEmail: (values.contactEmail ?? '').trim().toLowerCase(),
+        companyName: (values.companyName ?? '').trim(),
+        address: (values.address ?? '').trim(),
+        website: (values.website ?? '').trim(),
+        industry: (values.industry ?? '').trim(),
+        description: values.description ?? '',
+      };
+
+      // UC-36: edit the currently authenticated enterprise's own profile
+      await api.put('/enterprises/my-profile', payload);
+
+      // UC-36 step 5: success message + back to read-only view with new data
       message.success('Profile updated successfully.');
       setEditOpen(false);
+      form.resetFields();
       await fetchProfile();
     } catch (err: any) {
-      if (err.errorFields) {
+      if (err?.errorFields) {
+        // UC-36 Exception 36.0.E1
         message.error('Please fill in all required fields.');
       } else {
         message.error(err.response?.data?.message || 'Failed to update profile.');
@@ -159,26 +240,42 @@ export const EnterpriseProfileTab: React.FC = () => {
     }
   };
 
-  // Logo upload to base64 (UC-36 Other Information: standard file formats)
-  const handleLogoUpload = (file: File) => {
-    const isImage = file.type.startsWith('image/');
-    if (!isImage) {
+  // ============================================================
+  // Logo upload: convert to base64 (kept inline so no separate file
+  // hosting is required). Data URLs grow quickly, so we enforce a
+  // size + length cap that matches the backend's logo_url column.
+  // ============================================================
+  const handleLogoUpload: UploadProps['beforeUpload'] = (file) => {
+    if (!file.type.startsWith('image/')) {
       message.error('Logo must be an image file (PNG/JPG/SVG).');
-      return false;
+      return Upload.LIST_IGNORE;
     }
-    const isLt2M = file.size / 1024 / 1024 < 2;
-    if (!isLt2M) {
-      message.error('Logo must be smaller than 2MB.');
-      return false;
+    const isLt500Kb = file.size / 1024 < 500;
+    if (!isLt500Kb) {
+      message.error('Logo must be smaller than 500KB to fit the URL field.');
+      return Upload.LIST_IGNORE;
     }
     const reader = new FileReader();
     reader.onload = () => {
-      form.setFieldValue('logoUrl', reader.result as string);
+      const dataUrl = reader.result as string;
+      if (dataUrl.length > MAX_LOGO_DATA_URL_LENGTH) {
+        message.error('Encoded logo is too large. Please use a smaller image or a public URL.');
+        return;
+      }
+      form.setFieldValue('logoUrl', dataUrl);
+      setLogoPreview(dataUrl);
       message.success('Logo loaded.');
     };
     reader.readAsDataURL(file);
-    return false; // prevent antd default upload
+    return Upload.LIST_IGNORE; // prevent antd default upload
   };
+
+  const handleClearLogo = () => {
+    form.setFieldValue('logoUrl', '');
+    setLogoPreview(null);
+  };
+
+  const isSuspended = useMemo(() => profile?.status === 'SUSPENDED', [profile]);
 
   if (loading) {
     return (
@@ -213,22 +310,43 @@ export const EnterpriseProfileTab: React.FC = () => {
             <p style={{ fontSize: 13, color: c.textMuted, margin: 0 }}>View and manage your company information</p>
           </div>
           {!editOpen && (
-            <motion.button
-              whileHover={{ y: -1 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={openEdit}
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 6,
-                padding: '10px 18px', borderRadius: c.radiusMd,
-                background: c.brand, color: '#fff', fontWeight: 700, fontSize: 13,
-                border: 'none', cursor: 'pointer', boxShadow: c.shadowBrand,
-                fontFamily: 'Inter, sans-serif',
-              }}
+            <Popconfirm
+              title="Edit Profile"
+              description="Open the editor to update your company information?"
+              okText="Continue"
+              cancelText="Cancel"
+              disabled={isSuspended}
+              onConfirm={openEdit}
             >
-              <EditOutlined /> Edit Profile
-            </motion.button>
+              <motion.button
+                whileHover={isSuspended ? undefined : { y: -1 }}
+                whileTap={isSuspended ? undefined : { scale: 0.98 }}
+                disabled={isSuspended}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 6,
+                  padding: '10px 18px', borderRadius: c.radiusMd,
+                  background: isSuspended ? c.textMuted : c.brand,
+                  color: '#fff', fontWeight: 700, fontSize: 13,
+                  border: 'none', cursor: isSuspended ? 'not-allowed' : 'pointer',
+                  opacity: isSuspended ? 0.6 : 1,
+                  boxShadow: isSuspended ? 'none' : c.shadowBrand,
+                  fontFamily: 'Inter, sans-serif',
+                }}
+              >
+                <EditOutlined /> Edit Profile
+              </motion.button>
+            </Popconfirm>
           )}
         </motion.div>
+
+        {isSuspended && (
+          <Alert
+            type="error"
+            showIcon
+            style={{ marginBottom: 16, borderRadius: c.radiusMd }}
+            message="Your account is suspended. Editing is disabled until the issue is resolved."
+          />
+        )}
 
         {/* READ-ONLY VIEW (UC-35) */}
         <motion.div
@@ -299,6 +417,11 @@ export const EnterpriseProfileTab: React.FC = () => {
             <div style={{ gridColumn: '1 / -1' }}>
               <InfoRow icon={<FileTextOutlined />} label="Company Description" value={profile.description} />
             </div>
+            {profile.updatedAt && (
+              <div style={{ gridColumn: '1 / -1', fontSize: 12, color: c.textMuted, textAlign: 'right' }}>
+                Last updated: {new Date(profile.updatedAt).toLocaleString()}
+              </div>
+            )}
           </div>
         </motion.div>
       </div>
@@ -312,59 +435,139 @@ export const EnterpriseProfileTab: React.FC = () => {
           </div>
         }
         open={editOpen}
-        onCancel={() => setEditOpen(false)}
+        // UC-36 Alt 36.1: Cancel button (also used by Esc / backdrop click)
+        onCancel={handleCancel}
         width={720}
         footer={null}
+        maskClosable={false}
+        destroyOnClose
         styles={{ content: { borderRadius: c.radiusLg, padding: '24px 28px' }, header: { borderBottom: 'none', marginBottom: 16, padding: 0 }, body: { padding: 0 } }}
       >
-        <Form form={form} layout="vertical" requiredMark="optional">
+        <Form
+          form={form}
+          layout="vertical"
+          requiredMark="optional"
+          // Mark fields as required per UC-36 Exception 36.0.E1
+          // (Enterprise Name, Address, Contact Person are mandatory; Phone & Email too)
+        >
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <Form.Item name="companyName" label="Company Name" rules={[{ required: true, message: 'Company name is required' }]}>
-              <Input placeholder="FPT Software" />
+            <Form.Item
+              name="companyName"
+              label="Enterprise Name"
+              rules={[{ required: true, whitespace: true, message: 'Enterprise name is required' }]}
+            >
+              <Input placeholder="FPT Software" maxLength={500} showCount />
             </Form.Item>
-            <Form.Item name="taxCode" label="Tax Code">
-              <Input placeholder="0123456789" />
+            <Form.Item name="taxCode" label="Tax Code (read-only)" tooltip="Tax code is set during registration and cannot be changed here.">
+              <Input placeholder="0123456789" disabled />
             </Form.Item>
-            <Form.Item name="industry" label="Industry / Field" rules={[{ required: true, message: 'Industry is required' }]}>
-              <Input placeholder="Software, Banking, ..." />
+            <Form.Item name="industry" label="Industry / Field">
+              <Input placeholder="Software, Banking, ..." maxLength={100} />
             </Form.Item>
-            <Form.Item name="website" label="Website">
-              <Input placeholder="https://example.com" />
+            <Form.Item
+              name="website"
+              label="Website"
+              rules={[
+                {
+                  pattern: /^(https?:\/\/)?[\w.-]+\.[a-zA-Z]{2,}.*$/,
+                  message: 'Website must be a valid URL (e.g. https://example.com)',
+                },
+              ]}
+            >
+              <Input placeholder="https://example.com" maxLength={255} />
             </Form.Item>
             <div style={{ gridColumn: '1 / -1' }}>
-              <Form.Item name="address" label="Address" rules={[{ required: true, message: 'Address is required' }]}>
-                <Input placeholder="Street, District, City" />
+              <Form.Item
+                name="address"
+                label="Address"
+                rules={[{ required: true, whitespace: true, message: 'Address is required' }]}
+              >
+                <Input placeholder="Street, District, City" maxLength={500} showCount />
               </Form.Item>
             </div>
-            <Form.Item name="contactPerson" label="Contact Person" rules={[{ required: true, message: 'Contact person is required' }]}>
-              <Input placeholder="John Doe" />
+            <Form.Item
+              name="contactPerson"
+              label="Representative / Contact Person"
+              rules={[{ required: true, whitespace: true, message: 'Contact person is required' }]}
+            >
+              <Input placeholder="John Doe" maxLength={255} />
             </Form.Item>
-            <Form.Item name="contactPhone" label="Contact Phone" rules={[{ required: true, message: 'Contact phone is required' }]}>
-              <Input placeholder="+84 xxx xxx xxx" />
+            <Form.Item
+              name="contactPhone"
+              label="Contact Phone"
+              rules={[
+                { required: true, whitespace: true, message: 'Contact phone is required' },
+                { pattern: /^[+0-9\-\s()]{6,20}$/, message: 'Phone format is invalid' },
+              ]}
+            >
+              <Input placeholder="+84 xxx xxx xxx" maxLength={20} />
             </Form.Item>
             <div style={{ gridColumn: '1 / -1' }}>
-              <Form.Item name="contactEmail" label="Contact Email" rules={[{ required: true, type: 'email', message: 'Valid email is required' }]}>
-                <Input placeholder="contact@company.com" />
+              <Form.Item
+                name="contactEmail"
+                label="Contact Email"
+                rules={[
+                  { required: true, whitespace: true, message: 'Contact email is required' },
+                  { type: 'email', message: 'Contact email must be a valid email address' },
+                ]}
+              >
+                <Input placeholder="contact@company.com" maxLength={255} />
               </Form.Item>
             </div>
             <div style={{ gridColumn: '1 / -1' }}>
-              <Form.Item name="logoUrl" label="Logo URL">
-                <Input placeholder="https://... or upload below" prefix={<UploadOutlined />} />
+              <Form.Item
+                name="logoUrl"
+                label="Logo (URL or upload)"
+                tooltip="Upload an image (max 500KB) or paste a public URL. The logo URL must not exceed 500 characters."
+              >
+                <Input
+                  placeholder="https://... or upload below"
+                  prefix={<UploadOutlined />}
+                  maxLength={500}
+                  onChange={(e) => setLogoPreview((e.target.value as string) || null)}
+                />
               </Form.Item>
-              <Upload beforeUpload={handleLogoUpload} showUploadList={false} accept="image/*">
-                <Button icon={<UploadOutlined />} loading={logoUploading}>Upload Logo (max 2MB)</Button>
-              </Upload>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: -8 }}>
+                <Upload beforeUpload={handleLogoUpload} showUploadList={false} accept="image/*">
+                  <Button icon={<UploadOutlined />}>Upload Logo (max 500KB)</Button>
+                </Upload>
+                {logoPreview && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <img
+                      src={logoPreview}
+                      alt="logo preview"
+                      style={{
+                        width: 40, height: 40, borderRadius: c.radiusSm,
+                        objectFit: 'contain', background: c.bgLight, border: `1px solid ${c.border}`,
+                        padding: 2,
+                      }}
+                    />
+                    <Button type="text" size="small" icon={<CloseOutlined />} onClick={handleClearLogo}>
+                      Remove
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
             <div style={{ gridColumn: '1 / -1' }}>
-              <Form.Item name="description" label="Company Description" rules={[{ required: true, message: 'Description is required' }]}>
-                <Input.TextArea rows={4} placeholder="Brief introduction about your company..." />
+              <Form.Item
+                name="description"
+                label="Company Description"
+                rules={[{ required: true, whitespace: true, message: 'Description is required' }]}
+              >
+                <Input.TextArea
+                  rows={4}
+                  placeholder="Brief introduction about your company..."
+                  maxLength={5000}
+                  showCount
+                />
               </Form.Item>
             </div>
           </div>
 
           <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 8, paddingTop: 16, borderTop: `1px solid ${c.border}` }}>
             <Button
-              onClick={() => setEditOpen(false)}
+              onClick={handleCancel}
               icon={<CloseOutlined />}
               style={{ borderRadius: c.radiusMd }}
             >
@@ -377,7 +580,7 @@ export const EnterpriseProfileTab: React.FC = () => {
               icon={<SaveOutlined />}
               style={{ background: c.brand, borderColor: c.brand, borderRadius: c.radiusMd, fontWeight: 700 }}
             >
-              Save Changes
+              Save
             </Button>
           </div>
         </Form>

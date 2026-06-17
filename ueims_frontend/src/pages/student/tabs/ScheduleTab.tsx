@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { message, Spin, Pagination } from 'antd';
+import { App, Spin, Pagination } from 'antd';
 import { motion } from 'framer-motion';
 import { CalendarOutlined, ClockCircleOutlined, BankOutlined, CheckCircleOutlined, CloseCircleOutlined, WarningOutlined, ExclamationCircleOutlined, LinkOutlined, EnvironmentOutlined } from '@ant-design/icons';
 import { NeuSurface } from '../components/shared/NeuSurface';
@@ -55,6 +55,7 @@ const EmptyState: React.FC<{ icon: React.ReactNode; title: string; description: 
 );
 
 export const ScheduleTab: React.FC = () => {
+  const { message } = App.useApp();
   const { t } = useTranslation(['schedule', 'common']);
   const [interviews, setInterviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);

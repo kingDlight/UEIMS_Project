@@ -25,7 +25,7 @@ public class SystemAnnouncementController {
     SystemAnnouncementService service;
 
     @GetMapping
-    @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
+    @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')")
     public ResponseEntity<List<SystemAnnouncement>> getAll() {
         return ResponseEntity.ok(service.findAll());
     }

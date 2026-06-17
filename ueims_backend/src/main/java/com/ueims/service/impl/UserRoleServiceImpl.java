@@ -44,8 +44,11 @@ public class UserRoleServiceImpl implements UserRoleService {
     @Transactional
     public UserRole save(UserRole entity) {
         if (entity.getUser() != null && entity.getUser().getUserId() != null) {
-            long existing = repository.countByUserUserId(entity.getUser().getUserId());
-            if (existing > 0) {
+            UserRoleId id = entity.getId();
+            // BR-06: Enforce single-role assignment per user
+            // The actual per-pair uniqueness is already enforced by the (user_id, role_name) PK
+            // in users_roles table. This guard prevents direct misuse of `save`.
+            if (id != null && repository.existsById(id)) {
                 throw new AppException(ErrorCode.USER_ALREADY_HAS_ROLE);
             }
         }

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Spin, message, Button, Input, Select, Form, Modal, Empty } from 'antd';
+import { Spin, App, Button, Input, Select, Form, Modal, Empty } from 'antd';
 import {
   PlusOutlined,
   ReloadOutlined,
@@ -36,6 +36,7 @@ interface Incident {
   resolutionNote?: string;
   studentName?: string;
   studentCode?: string;
+  studentId?: string;
 }
 
 const CATEGORIES = [
@@ -70,6 +71,7 @@ const STATUS_META: Record<string, { label: string; color: string; bg: string }> 
 };
 
 export const IncidentReportTab: React.FC = () => {
+  const { message } = App.useApp();
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [loading, setLoading] = useState(true);
@@ -81,7 +83,7 @@ export const IncidentReportTab: React.FC = () => {
     setLoading(true);
     try {
       const [a, i] = await Promise.allSettled([
-        EnterpriseAssignmentService.getMyEnterprise(),
+        EnterpriseAssignmentService.getMyEnterpriseAssignments(),
         // The Incident service may not have a list-by-enterprise endpoint; we'll fetch all and filter
         IncidentService.getAll().catch(() => ({ data: { result: [] } })),
       ]);
@@ -262,6 +264,7 @@ export const IncidentReportTab: React.FC = () => {
 };
 
 const IncidentCard: React.FC<{ incident: Incident }> = ({ incident }) => {
+  const { message } = App.useApp();
   const meta = STATUS_META[incident.status ?? 'OPEN'] ?? STATUS_META.OPEN;
   return (
     <div

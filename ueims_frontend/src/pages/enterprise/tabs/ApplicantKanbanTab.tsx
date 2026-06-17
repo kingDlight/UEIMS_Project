@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Spin, message, Modal, Button, Input } from 'antd';
+import { Spin, App, Modal, Button, Input } from 'antd';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   DndContext,
@@ -150,6 +150,7 @@ const STATUS_PALETTE: Record<string, { color: string; bg: string; label: string;
 };
 
 const StatusBadge: React.FC<{ status: ApplicationStatus }> = ({ status }) => {
+  const { message } = App.useApp();
   const config = STATUS_PALETTE[status] || STATUS_PALETTE.PENDING;
   return (
     <span style={{
@@ -241,6 +242,7 @@ const SortableCard: React.FC<{
 // DRAG OVERLAY
 // ============================================================
 const DragCard: React.FC<{ applicant: ApplicantCard }> = ({ applicant }) => {
+  const { message } = App.useApp();
   const avatarColor = applicant.avatarColor;
   const initials = (applicant.studentName || 'ST').substring(0, 2).toUpperCase();
   return (
@@ -278,6 +280,7 @@ interface DetailModalProps {
 }
 
 const DetailModal: React.FC<DetailModalProps> = ({ applicant, open, onClose, onScreenComplete }) => {
+  const { message } = App.useApp();
   const [downloading, setDownloading] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingDecision, setPendingDecision] = useState<'SCREENING_PASSED' | 'SCREENING_REJECTED' | null>(null);
@@ -530,6 +533,7 @@ const KanbanColumn: React.FC<{
 // MAIN KANBAN BOARD
 // ============================================================
 export const ApplicantKanbanTab: React.FC = () => {
+  const { message } = App.useApp();
   const [applicants, setApplicants] = useState<ApplicantCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

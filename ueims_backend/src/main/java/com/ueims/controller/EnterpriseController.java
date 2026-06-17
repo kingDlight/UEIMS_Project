@@ -26,7 +26,7 @@ public class EnterpriseController {
     EnterpriseMapper mapper;
 
     @GetMapping
-    @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')") // UC-18
+    @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')") // UC-18
     public ApiResponse<List<EnterpriseDTO>> getAll() {
         return ApiResponse.<List<EnterpriseDTO>>builder()
                 .result(service.findAll().stream().map(mapper::toDto).toList())
@@ -34,7 +34,8 @@ public class EnterpriseController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN') or hasRole('ENTERPRISE')") // UC-35
+    @PreAuthorize(
+            "hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN') or hasRole('ADMIN') or hasRole('ENTERPRISE')") // UC-35
     public ApiResponse<EnterpriseDTO> getById(@PathVariable UUID id) {
         return ApiResponse.<EnterpriseDTO>builder()
                 .result(mapper.toDto(service.findById(id)))
@@ -51,7 +52,7 @@ public class EnterpriseController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    @PreAuthorize("hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')")
     public ApiResponse<EnterpriseDTO> create(@Valid @RequestBody com.ueims.dto.request.EnterpriseRequest request) {
         return ApiResponse.<EnterpriseDTO>builder()
                 .result(mapper.toDto(service.save(request)))
@@ -59,17 +60,33 @@ public class EnterpriseController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ENTERPRISE')") // UC-36: Chỉ Enterprise được sửa profile của chính họ
+    @PreAuthorize("hasRole('ENTERPRISE')") // UC-36: chỉ Enterprise được sửa profile của chính họ
     public ApiResponse<EnterpriseDTO> update(
             @PathVariable UUID id, @Valid @RequestBody com.ueims.dto.request.EnterpriseRequest request) {
         return ApiResponse.<EnterpriseDTO>builder()
                 .result(mapper.toDto(service.update(id, request)))
-                .message("Enterprise profile updated successfully")
+                .message("Profile updated successfully.") // UC-36 step 5
+                .build();
+    }
+
+    /**
+     * UC-36 alternative endpoint: edit the currently authenticated Enterprise's
+     * own profile. Safer than /{id} because the enterprise does not need to
+     * know its own id and there is no risk of editing a different enterprise
+     * by guessing UUIDs.
+     */
+    @PutMapping("/my-profile")
+    @PreAuthorize("hasRole('ENTERPRISE')") // UC-36
+    public ApiResponse<EnterpriseDTO> updateMyProfile(
+            @Valid @RequestBody com.ueims.dto.request.EnterpriseRequest request) {
+        return ApiResponse.<EnterpriseDTO>builder()
+                .result(mapper.toDto(service.updateMyProfile(request)))
+                .message("Profile updated successfully.")
                 .build();
     }
 
     @PutMapping("/{id}/status")
-    @PreAuthorize("hasRole('TRAINING_MANAGER')") // UC-19: Chỉ TM có quyền duyệt/từ chối
+    @PreAuthorize("hasRole('TRAINING_MANAGER')") // UC-19: chỉ TM có quyền duyệt/từ chối
     public ApiResponse<EnterpriseDTO> approveRejectEnterprise(
             @PathVariable UUID id, @RequestParam String status, @RequestParam(required = false) String reason) {
         return ApiResponse.<EnterpriseDTO>builder()
@@ -79,7 +96,7 @@ public class EnterpriseController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    @PreAuthorize("hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')")
     public ApiResponse<Void> delete(@PathVariable UUID id) {
         service.deleteById(id);
         return ApiResponse.<Void>builder()

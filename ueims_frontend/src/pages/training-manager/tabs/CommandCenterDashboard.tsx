@@ -310,8 +310,11 @@ const CustomTooltip: React.FC<any> = ({ active, payload, label }) => {
 // ============================================================
 export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => void }> = ({ onNavigate }) => {
   const [mounted, setMounted] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [initError, setInitError] = useState<string | null>(null);
   const [summary, setSummary] = useState<any>(null);
   const [semesters, setSemesters] = useState<SemesterResponse[]>([]);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [selectedSemesterId, setSelectedSemesterId] = useState<string>('');
   const [selectedSemester, setSelectedSemester] = useState<SemesterResponse | null>(null);
 
@@ -332,11 +335,14 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
   useEffect(() => {
     setMounted(true);
     const initDashboard = async () => {
+      setLoading(true);
+      setInitError(null);
       try {
-        const summaryData = await DashboardService.getCommandCenterSummary();
+        const [summaryData, semesterList] = await Promise.all([
+          DashboardService.getCommandCenterSummary(),
+          SemesterService.getAllSemesters(),
+        ]);
         setSummary(summaryData);
-
-        const semesterList = await SemesterService.getAllSemesters();
         setSemesters(semesterList);
 
         const activeSem = semesterList.find(s => s.status === 'ACTIVE') || semesterList[0];
@@ -344,8 +350,12 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
           setSelectedSemesterId(activeSem.semesterId);
           setSelectedSemester(activeSem);
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error('Error initializing dashboard:', err);
+        setInitError(err?.response?.data?.message || err?.message || 'Không thể tải dữ liệu');
+      } finally {
+        setIsInitialLoading(false);
+        setLoading(false);
       }
     };
     initDashboard();
@@ -390,13 +400,43 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
     if (onNavigate) {
       onNavigate(route);
     } else {
-      navigate(`/tm-dashboard/${route}`);
+      navigate(`/training-manager/${route}`);
     }
   };
 
-  if (!summary || semesters.length === 0) {
-    return <div style={{ padding: 60, textAlign: 'center', color: cc.textMuted, fontFamily: 'Inter, sans-serif' }}>Loading Dashboard Data...</div>;
+  // Show spinner while initial data is loading
+  if (isInitialLoading || loading) {
+    return (
+      <div style={{ padding: 80, textAlign: 'center', fontFamily: 'Inter, sans-serif', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+        <RefreshCw size={32} className="animate-spin" color={cc.brand} />
+        <div style={{ color: cc.textSecondary, fontSize: 14, fontWeight: 500 }}>Đang tải dữ liệu dashboard...</div>
+      </div>
+    );
   }
+
+  // Show error state if initial fetch failed
+  if (initError) {
+    return (
+      <div style={{ padding: 60, textAlign: 'center', fontFamily: 'Inter, sans-serif', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+        <AlertTriangle size={40} color={cc.error} />
+        <div style={{ color: cc.error, fontSize: 15, fontWeight: 600 }}>Lỗi tải dữ liệu</div>
+        <div style={{ color: cc.textSecondary, fontSize: 13 }}>{initError}</div>
+        <button
+          onClick={() => { setInitError(null); setLoading(true); window.location.reload(); }}
+          style={{ marginTop: 8, padding: '8px 20px', borderRadius: cc.radiusMd, background: cc.brand, color: '#fff', border: 'none', fontWeight: 600, cursor: 'pointer', fontSize: 13 }}
+        >
+          Thử lại
+        </button>
+      </div>
+    );
+  }
+
+  // Fallback default summary if DB is empty
+  const safeSummary = summary || {
+    pendingEnterprises: [],
+    activeIncidents: [],
+    pipeline: { eligible: 0, applied: 0, interviewed: 0, placed: 0 }
+  };
 
   // Calculate percentages and counts from dynamic data
   const ojtItem = employmentData.find(d => d.label === 'OJT Students');
@@ -581,7 +621,7 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
                     <div>
                       <Label>Corporate Approvals</Label>
                       <div style={{ fontSize: 28, fontWeight: 800, color: cc.textPrimary, marginTop: 4, letterSpacing: '-0.02em' }}>
-                        {summary.pendingEnterprises.length}
+                        {safeSummary.pendingEnterprises.length}
                       </div>
                       <div style={{ fontSize: 12, color: cc.textSecondary, marginTop: 4 }}>
                         Companies awaiting registration
@@ -602,7 +642,7 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
                     <div>
                       <Label>Active Incidents</Label>
                       <div style={{ fontSize: 28, fontWeight: 800, color: cc.textPrimary, marginTop: 4, letterSpacing: '-0.02em' }}>
-                        {summary.activeIncidents.length}
+                        {safeSummary.activeIncidents.length}
                       </div>
                       <div style={{ fontSize: 12, color: cc.textSecondary, marginTop: 4 }}>
                         Open student discipline cases
@@ -756,7 +796,7 @@ export const CommandCenterDashboard: React.FC<{ onNavigate?: (route: string) => 
                           </div>
                           {/* Funnel display */}
                           {(() => {
-                            const pipeline = summary.pipeline;
+                            const pipeline = safeSummary.pipeline;
                             const stages = [
                               { label: 'ELIGIBLE', value: pipeline.eligible, color: cc.info, desc: 'Qualified students' },
                               { label: 'APPLIED', value: pipeline.applied, color: cc.warning, desc: 'Submitted CVs' },

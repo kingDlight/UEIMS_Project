@@ -60,14 +60,225 @@
     "accountLocked": "Account locked due to 5 failed password attempts. Please try again after 30 minutes.",
     "authFailed": "Authentication failed. Please check your login information.",
     "accountNotFound": "Account does not exist in the system.",
+    "systemSubtitleLine1": "Intern and Enterprise",
+    "systemSubtitleLine2": "Management System",
     "googleLoginSuccess": "Login with Google successful!",
     "googleLoginFail": "Login with Google failed. Please try again!",
-    "backToHome": "Back to homepage"
+    "backToHome": "Back to homepage",
+    "registerEnterprise": {
+      "passwordMismatch": "Password confirmation does not match!",
+      "registerSuccess": "Registration successful! Please wait for Training Manager approval.",
+      "taxCodeUsed": "Tax code is already used by another enterprise.",
+      "emailUsed": "Email is already used in the system.",
+      "registerFail": "Registration failed. Please try again!",
+      "systemName": "Intern and Enterprise Management System",
+      "connect": "Connecting enterprises with",
+      "talents": "talented students",
+      "desc": "Register an employer account to access quality human resources and manage recruitment efficiently on UEIMS.",
+      "easyPost": "Easy job posting",
+      "easyPostDesc": "Create and manage job postings in just a few minutes.",
+      "manageCandidates": "Candidate management",
+      "manageCandidatesDesc": "Track, evaluate and select suitable candidates.",
+      "reports": "Reports & statistics",
+      "reportsDesc": "Detailed statistics help optimize the recruitment process.",
+      "partnerEnterprises": "Partner enterprises",
+      "activeStudents": "Active students",
+      "satisfactionRate": "Enterprise satisfaction rate",
+      "registerAccount": "Register employer account",
+      "fillInfo": "Fill in all information. The account will be approved by the Training Manager before activation.",
+      "enterpriseName": "Enterprise Name",
+      "enterpriseNamePlaceholder": "Enter enterprise name",
+      "enterpriseNameReq": "Please enter enterprise name!",
+      "taxCode": "Tax Code",
+      "taxCodePlaceholder": "Enter tax code",
+      "taxCodeReq": "Please enter tax code!",
+      "contactPerson": "Contact Person",
+      "contactPersonPlaceholder": "Enter full name",
+      "contactPersonReq": "Please enter contact person name!",
+      "email": "Email",
+      "emailReq": "Please enter email!",
+      "address": "Headquarters Address",
+      "addressPlaceholder": "Enter headquarters address",
+      "addressReq": "Please enter headquarters address!",
+      "password": "Password",
+      "passwordPlaceholder": "Enter password",
+      "passwordReq": "Please enter password!",
+      "confirmPassword": "Confirm Password",
+      "confirmPasswordPlaceholder": "Re-enter password",
+      "confirmPasswordReq": "Please re-enter password!",
+      "securedInfo": "Your information is absolutely secured",
+      "securedInfoDesc": "UEIMS is committed to protecting your enterprise information according to the privacy policy.",
+      "registerBtn": "Register Account",
+      "backToLogin": "Back to login"
+    },
+    "noRole": {
+      "title": "Account Not Authorized",
+      "description": "Your account has not been assigned any role in the system. Please contact the administrator for access.",
+      "logout": "Logout"
+    },
+    "forgotPasswordPage": {
+      "checkEmailSuccess": "Please check your email to reset your password!",
+      "requestFailed": "Failed to send request. Please try again!",
+      "title": "Secure your account",
+      "description": "We will send a password recovery link to the email registered in the system.",
+      "forgotTitle": "Forgot password?",
+      "forgotDescLine1": "Enter your registered email. We will send a password",
+      "forgotDescLine2": "recovery link to your mailbox.",
+      "emailRequired": "Please enter your email!",
+      "rememberPassword": "Remember password?",
+      "sendLinkBtn": "Send Recovery Link",
+      "noteTitle": "Note",
+      "noteDesc": "The recovery link will expire in <strong>2 hours</strong>. If you do not receive the email, please check your Spam folder or contact the Training Manager."
+    },
+    "resetPasswordPage": {
+      "invalidToken": "Invalid token. Please request a new recovery link.",
+      "weakPassword": "Password is not strong enough. Please check again!",
+      "passwordMismatch": "Password confirmation does not match!",
+      "success": "Password reset successfully!",
+      "failed": "Password reset failed. The link may have expired.",
+      "newPasswordHighlight": "new password",
+      "description": "Create a new secure password for your account. Ensure the password is strong enough to protect your data.",
+      "title": "Reset password",
+      "subtitle": "Please enter your new password below.",
+      "newPasswordLabel": "New password",
+      "newPasswordRequired": "Please enter your new password!",
+      "confirmPasswordLabel": "Confirm new password",
+      "confirmPasswordRequired": "Please confirm your password!",
+      "confirmPasswordPlaceholder": "Re-enter new password",
+      "submitBtn": "Reset Password"
+    }
   },
   "home": {
     "login": "Login",
     "enterSystem": "Enter System",
-    "dashboard": "Go to Dashboard"
+    "dashboard": "Go to Dashboard",
+    "hero": {
+      "ojtFpt": "OJT - FPT University",
+      "title1": "Comprehensive Digital Transformation",
+      "title2": "OJT Internship Process",
+      "description": "Simplify Enterprise connection, student profile management, interview scheduling, and capability evaluation with a smart, transparent digital system.",
+      "startNow": "Start Now",
+      "learnFeatures": "Learn Features"
+    },
+    "nav": {
+      "about": "About",
+      "features": "Features",
+      "process": "OJT Process",
+      "partner": "Enterprises"
+    },
+    "stats": {
+      "interns": "Interns",
+      "enterprises": "Partner Enterprises",
+      "completion": "OJT Completion Rate",
+      "satisfaction": "Satisfaction Rate"
+    },
+    "features": {
+      "f1": {
+        "title": "Flexible OJT Semester Management",
+        "desc": "Automatically create internship semesters, set evaluation criteria, expected outcomes, and manage student progress systematically."
+      },
+      "f2": {
+        "title": "Enterprise Collaboration 3.0",
+        "desc": "Employers directly approve CVs, post job openings, and provide feedback on training quality all through a single portal."
+      },
+      "f3": {
+        "title": "Rubric-based Reports & Evaluation",
+        "desc": "Students submit weekly reports and are evaluated by Enterprise Mentors and Lecturers using standardized, transparent Rubric scales."
+      },
+      "f4": {
+        "title": "Role-based Access Control (RBAC)",
+        "desc": "Maximum information security with detailed access control for 6 roles: Admin, Training Manager, Enterprise, Mentor, Lecturer, Student."
+      },
+      "f5": {
+        "title": "Automated Interview Scheduling",
+        "desc": "The system automatically detects scheduling conflicts, arranges direct interview rooms between Enterprises and Students, and sends instant email reminders."
+      },
+      "f6": {
+        "title": "Realtime Statistics Dashboard",
+        "desc": "Visualize OJT data with real-time charts on student status, soft skills assessment, and internship placement distribution."
+      }
+    },
+    "steps": {
+      "s1": {
+        "title": "OJT Preparation",
+        "desc": "The school opens a new OJT semester, imports eligible student information, and sets up standardized criteria."
+      },
+      "s2": {
+        "title": "Recruitment & Interviews",
+        "desc": "Enterprises post job listings. Students submit CVs online and schedule interviews through the system."
+      },
+      "s3": {
+        "title": "Internship & Reporting",
+        "desc": "Students work at the enterprise, submit weekly reports. Enterprise Mentors track, guide, and sign off."
+      },
+      "s4": {
+        "title": "Evaluation & Summary",
+        "desc": "Enterprises provide grading evaluations. Lecturers grade final reports. The system aggregates scores and exports Excel files."
+      }
+    },
+    "featuresSection": {
+      "subtitle": "Core Features",
+      "title": "Professional Internship Management",
+      "description": "Designed tailored solutions for all stakeholders participating in the OJT enterprise semester."
+    },
+    "ctaSection": {
+      "titleLine1": "Start digitizing the",
+      "titleLine2": "OJT management",
+      "titleLine3": "journey today",
+      "description": "Sustainable partnership, seamless tracking, efficient management. Experience the best internship management system.",
+      "loginBtn": "Login to system"
+    },
+    "processSection": {
+      "subtitle": "Operational Process",
+      "title": "Four Smart Closed-Loop Steps",
+      "description": "Synchronous and smooth operation among School - Student - Enterprise."
+    },
+    "aboutSection": {
+      "subtitle": "About Us",
+      "title": "Modern Bridge between University & Enterprise",
+      "p1": "The University Enterprise Internship Management System (UEIMS) is an optimized digital platform built to serve the On-the-Job Training (OJT) semester at FPT University Da Nang.",
+      "p2": "We completely eliminate manual administrative barriers, directly connecting the university, students, and employers to co-create the highest quality practical learning experiences.",
+      "items": {
+        "i1": {
+          "title": "100% Digitized",
+          "desc": "All report forms, CV approvals, and Rubric grading are done entirely online."
+        },
+        "i2": {
+          "title": "Multi-party Sync",
+          "desc": "Real-time information updates between Students, Instructors, and Partner Enterprises."
+        },
+        "i3": {
+          "title": "Direct Recruitment",
+          "desc": "Enterprises post OJT job openings, actively filter CVs, and quickly schedule interviews."
+        },
+        "i4": {
+          "title": "Transparent Statistics",
+          "desc": "Visually track progress and export complete, accurate OJT report data with just one click."
+        }
+      }
+    },
+    "partnerSection": {
+      "tag": "For Enterprises",
+      "title": "Partner with high-quality human resources",
+      "description": "Register for partnership now to access thousands of dynamic technology, business, and design students from FPT University, while rapidly digitizing your intern onboarding operations.",
+      "registerBtn": "Register Enterprise Account",
+      "supportBtn": "OJT Support & Contact"
+    },
+    "footer": {
+      "description": "University-Enterprise Internship Management System. A smart management platform accompanying the university and enterprises in every student's OJT semester.",
+      "system": "Explore",
+      "roles": "For Users",
+      "development": "Contact Us",
+      "roleEnterprise": "Enterprise",
+      "roleStudent": "Student",
+      "roleManager": "Lecturer / Manager",
+      "fpt": "FPT University Da Nang",
+      "address": "FPT City Urban Area, Da Nang",
+      "email": "ojt.support@fe.edu.vn",
+      "phone": "(0236) 7300 999",
+      "copyright": "© 2026 UEIMS. Copyright by Group 7 - FPT University Da Nang.",
+      "subtitle": "On-the-Job Training Program"
+    }
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -110,5 +321,80 @@
     "statusUpdates": "Application status updates",
     "phoneUpdated": "Phone number updated successfully!",
     "phoneUpdateFailed": "Failed to update phone number!"
+  },
+  "studentsTab": {
+    "studentManagement": "Student Management",
+    "studentManagementDesc": "Manage and track all students across academic semesters",
+    "totalStudents": "Total Students",
+    "eligibleStudents": "Eligible Students",
+    "searchPlaceholder": "Search by Name or Student ID...",
+    "importSuccess": "Import successful!",
+    "importError": "Error importing Excel.",
+    "exportSuccess": "File exported successfully!",
+    "exportError": "Error exporting file.",
+    "showingStudents": "Showing {{start}}-{{end}} of {{total}} students",
+    "studentId": "Student ID",
+    "fullName": "Full Name",
+    "major": "Major",
+    "semesterShort": "Sem.",
+    "gpa": "GPA",
+    "ojtStatus": "OJT Status",
+    "viewDetails": "View Details",
+    "edit": "Edit",
+    "emailAddress": "Email Address",
+    "currentSemester": "Current Semester",
+    "cumulativeGpa": "Cumulative GPA",
+    "cancel": "Cancel",
+    "editStudent": "Edit Student",
+    "note": "Note:",
+    "majors": {
+      "allMajors": "All Majors",
+      "computerScience": "Computer Science",
+      "softwareEngineering": "Software Engineering",
+      "informationAssurance": "Information Assurance",
+      "artificialIntelligence": "Artificial Intelligence"
+    },
+    "semesters": {
+      "allAcademicSem": "All Academic Sem",
+      "sem1_4": "Sem. 1-4",
+      "sem5Eligible": "Sem. 5 - Eligible",
+      "sem6InOjt": "Sem. 6 - In OJT",
+      "sem7_9Completed": "Sem. 7-9 - Completed"
+    },
+    "ojtStatuses": {
+      "preRegistration": "Pre-Registration",
+      "preRegistrationDesc": "Cannot register OJT — semester below eligibility threshold",
+      "eligible": "Eligible",
+      "eligibleDesc": "Meets all OJT criteria — ready to register for internship",
+      "inOjt": "In OJT",
+      "inOjtDesc": "Currently in OJT — active internship",
+      "completed": "Completed",
+      "completedDesc": "OJT finished — eligible to view results"
+    }
+  },
+  "dev": {
+    "emailPreview": {
+      "enterpriseManagement": "Enterprise Internship Management",
+      "compose": "Compose",
+      "inbox": "Inbox",
+      "sent": "Sent",
+      "drafts": "Drafts",
+      "to": "To",
+      "copied": "Copied!",
+      "copyHtml": "Copy HTML",
+      "mockDataEditor": "Mock Data Editor",
+      "resetPasswordLabel": "Reset Password (EN)",
+      "resetSubject": "Reset Password — UEIMS",
+      "resetPreview": "You have requested a password reset for your UEIMS account...",
+      "passwordResetLabel": "Password Reset (VI)",
+      "passwordResetSubject": "Password Reset Request — UEIMS",
+      "passwordResetPreview": "You have requested a password reset for your UEIMS account...",
+      "passwordChangedLabel": "Password Changed (VI)",
+      "passwordChangedSubject": "Password Changed — UEIMS",
+      "passwordChangedPreview": "Your UEIMS account password has been changed successfully...",
+      "welcomeLabel": "Welcome (VI)",
+      "welcomeSubject": "Welcome to UEIMS",
+      "welcomePreview": "Your UEIMS account has been created. Please log in..."
+    }
   }
 }

@@ -173,6 +173,7 @@ public class NotificationServiceImpl implements NotificationService {
                                     .isRead(false)
                                     .build());
                         } catch (Exception ignored) {
+                            // Ignore exceptions to ensure other notifications are sent
                         }
                     });
         } catch (Exception ex) {
