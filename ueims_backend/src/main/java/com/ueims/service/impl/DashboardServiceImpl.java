@@ -26,7 +26,10 @@ import com.ueims.repository.EnterpriseRepository;
 import com.ueims.repository.FinalGradeRepository;
 import com.ueims.repository.IncidentRepository;
 import com.ueims.repository.InterviewRepository;
+import com.ueims.repository.JobPostRepository;
 import com.ueims.repository.SemesterStatisticsRepository;
+import com.ueims.repository.UserRepository;
+import com.ueims.repository.UserRoleRepository;
 import com.ueims.repository.WeeklyReportRepository;
 import com.ueims.service.DashboardService;
 
@@ -52,6 +55,9 @@ public class DashboardServiceImpl implements DashboardService {
     ApplicationRepository applicationRepository;
     InterviewRepository interviewRepository;
     EnterpriseAssignmentRepository enterpriseAssignmentRepository;
+    UserRepository userRepository;
+    UserRoleRepository userRoleRepository;
+    JobPostRepository jobPostRepository;
 
     private List<CommandCenterSummaryDTO.PendingEnterpriseSummary> getPendingEnterpriseSummaries() {
         return enterpriseRepository.findAll().stream()
@@ -174,6 +180,27 @@ public class DashboardServiceImpl implements DashboardService {
             long placedCount = enterpriseAssignmentRepository.count();
             log.info("[DEBUG] placedCount: {}", placedCount);
 
+            // 4. Aggregate KPIs for Admin Command Center cards
+            long totalUsers = userRepository.count();
+            long totalStudents = userRoleRepository.countByRoleName("STUDENT");
+            long totalEnterprises = enterpriseRepository.count();
+            long totalTrainers = userRoleRepository.countByRoleName("TRAINING_MANAGER");
+            long totalAdmins = userRoleRepository.countByRoleName("ADMIN");
+            long totalJobPosts = jobPostRepository.count();
+            long totalApplications = applicationRepository.count();
+            long activeInternships = enterpriseAssignmentRepository.countByStatus("ACTIVE");
+
+            log.info(
+                    "[DEBUG] KPIs users={}, students={}, enterprises={}, trainers={}, admins={}, jobs={}, apps={}, activeOjt={}",
+                    totalUsers,
+                    totalStudents,
+                    totalEnterprises,
+                    totalTrainers,
+                    totalAdmins,
+                    totalJobPosts,
+                    totalApplications,
+                    activeInternships);
+
             CommandCenterSummaryDTO.PipelineSummary pipelineSummary = CommandCenterSummaryDTO.PipelineSummary.builder()
                     .eligible((int) eligibleCount)
                     .applied((int) appliedCount)
@@ -188,6 +215,14 @@ public class DashboardServiceImpl implements DashboardService {
                     .totalPendingEnterprises(pendingSummaries.size())
                     .pipeline(pipelineSummary)
                     .weeklyReports(reportSummary)
+                    .totalUsers(totalUsers)
+                    .totalStudents(totalStudents)
+                    .totalEnterprises(totalEnterprises)
+                    .totalTrainers(totalTrainers)
+                    .totalAdmins(totalAdmins)
+                    .totalJobPosts(totalJobPosts)
+                    .totalApplications(totalApplications)
+                    .activeInternships(activeInternships)
                     .build();
 
             log.info("[DEBUG] getCommandCenterSummary completed successfully");
