@@ -629,6 +629,8 @@ CREATE TABLE IF NOT EXISTS placement_applications (
     updated_at         TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_by         UUID REFERENCES users(user_id),
     updated_by         UUID REFERENCES users(user_id),
+    is_replacement     BOOLEAN NOT NULL DEFAULT FALSE,
+    replaces_application_id UUID    REFERENCES placement_applications(application_id) ON DELETE SET NULL
 
     -- 1 SV chỉ được apply 1 lần vào 1 DN trong cùng 1 kỳ
     CONSTRAINT uq_placement_app_per_student_enterprise_semester
@@ -644,6 +646,10 @@ CREATE INDEX IF NOT EXISTS idx_app_status_semester
 
 CREATE INDEX IF NOT EXISTS idx_app_enterprise_semester
     ON placement_applications(enterprise_id, semester_id);
+
+CREATE INDEX IF NOT EXISTS idx_pa_is_replacement
+    ON placement_applications(is_replacement)
+    WHERE is_replacement = TRUE;
 
 -- Updated_at tự động refresh
 CREATE OR REPLACE FUNCTION trg_set_updated_at_placement_applications()
@@ -849,6 +855,11 @@ CREATE TABLE enterprise_assignments (
     updated_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     start_date      DATE,
     end_date        DATE,
+    termination_reason    TEXT,
+    terminated_at   TIMESTAMP,
+    replaced_by_assignment_id UUID      REFERENCES enterprise_assignments(assignment_id) ON DELETE SET NULL,
+
+
 
     -- Enforces a student has at most one assignment placement per semester
     CONSTRAINT uq_student_semester_assignment UNIQUE (student_id, semester_id)
@@ -857,6 +868,13 @@ CREATE TABLE enterprise_assignments (
 CREATE INDEX idx_ea_enterprise ON enterprise_assignments(enterprise_id);
 CREATE INDEX idx_ea_student ON enterprise_assignments(student_id);
 CREATE INDEX idx_ea_semester ON enterprise_assignments(semester_id);
+CREATE INDEX IF NOT EXISTS idx_ea_status ON enterprise_assignments(status);
+
+COMMENT ON COLUMN placement_applications.is_replacement IS 'TRUE if this application requires replacing the current ACTIVE assignment (Self-Replace workflow)';
+COMMENT ON COLUMN placement_applications.replaces_application_id IS 'The previously APPROVED application that this application replaces.';
+COMMENT ON COLUMN enterprise_assignments.termination_reason IS 'Reason for assignment being terminated (e.g. Replaced by new placement, Student withdrawal)';
+COMMENT ON COLUMN enterprise_assignments.terminated_at IS 'The time when the assignment is terminated';
+COMMENT ON COLUMN enterprise_assignments.replaced_by_assignment_id IS 'A new assignment replaces this one (only if terminated due to replacement).';
 
 -- TRIGGER: BR-54 — Verify Student is in Semester 6 to participate in active internship
 CREATE OR REPLACE FUNCTION enforce_student_internship_permission()
