@@ -953,12 +953,12 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
             const { blob, ext } = dataUrlToBlob(url);
             const form = new FormData();
             form.append('file', blob, `avatar.${ext}`);
-            const res = await api.post<{ code: number; result: { avatarUrl: string } }>(
+            const res = await api.post<{ avatarUrl: string }>(
               '/users/me/avatar',
               form,
               { headers: { 'Content-Type': 'multipart/form-data' } }
             );
-            const newAvatarUrl = res.data?.result?.avatarUrl;
+            const newAvatarUrl = res.data?.avatarUrl;
             if (newAvatarUrl) {
               setCustomAvatarUrl(newAvatarUrl);
               updateUser({ avatarUrl: newAvatarUrl });
