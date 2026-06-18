@@ -1184,8 +1184,7 @@ CREATE TABLE incidents (
     assignment_id   UUID NOT NULL REFERENCES enterprise_assignments(assignment_id),
     reported_by     UUID NOT NULL REFERENCES users(user_id),
     category        VARCHAR(50) NOT NULL                             -- BR-41: Mandatory
-                    CHECK (category IN ('PROLONGED_ABSENCE', 'DISCIPLINARY_VIOLATION',
-                                        'POOR_ATTITUDE', 'CONFIDENTIALITY_BREACH', 'OTHER')),
+                    CHECK (category IN ('PROLONGED_ABSENCE', 'DISCIPLINARY_VIOLATION','POOR_ATTITUDE', 'CONFIDENTIALITY_BREACH', 'OTHER')),
     description     TEXT NOT NULL,                                   -- BR-41: Mandatory
     evidence_urls   JSONB,
     status          VARCHAR(20) NOT NULL DEFAULT 'OPEN'
