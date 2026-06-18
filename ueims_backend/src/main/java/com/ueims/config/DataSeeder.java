@@ -42,36 +42,42 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private void seedUsers() {
-        if (!userRepository.existsByEmail("tm@ueims.edu.vn")) {
-            log.info("Seeding Training Manager Account...");
+        seedUser("tm@ueims.edu.vn", "Angie Do", "TRAINING_MANAGER", "Training Manager Role");
+        seedUser("sv_test@fpt.edu.vn", "Test Student 01", "STUDENT", "Student Role");
+        seedUser("admin@ueims.vn", "System Admin", "ADMIN", "Admin Role");
+        seedUser("enterprise@ueims.test", "Enterprise Test", "ENTERPRISE", "Enterprise Role");
+    }
 
-            Role tmRole = roleRepository.findById("TRAINING_MANAGER").orElseGet(() -> {
-                Role role = Role.builder()
-                        .roleName("TRAINING_MANAGER")
-                        .description("Training Manager Role")
+    private void seedUser(String email, String fullName, String roleName, String roleDesc) {
+        if (!userRepository.existsByEmail(email)) {
+            log.info("Seeding {} Account...", email);
+
+            Role role = roleRepository.findById(roleName).orElseGet(() -> {
+                Role r = Role.builder()
+                        .roleName(roleName)
+                        .description(roleDesc)
                         .build();
-                return roleRepository.save(role);
+                return roleRepository.save(r);
             });
 
-            User tmUser = User.builder()
-                    .email("tm@ueims.edu.vn")
+            User user = User.builder()
+                    .email(email)
                     .password(passwordEncoder.encode(defaultPassword))
-                    .fullName("Angie Do")
-                    .phone("0987654321")
+                    .fullName(fullName)
                     .status("ACTIVE")
                     .mustChangePassword(false)
                     .build();
 
-            tmUser = userRepository.save(tmUser);
+            user = userRepository.save(user);
 
             UserRole userRole = UserRole.builder()
-                    .id(new UserRoleId(tmUser.getUserId(), tmRole.getRoleName()))
-                    .user(tmUser)
-                    .role(tmRole)
+                    .id(new UserRoleId(user.getUserId(), role.getRoleName()))
+                    .user(user)
+                    .role(role)
                     .build();
 
             userRoleRepository.save(userRole);
-            log.info("Successfully seeded Training Manager account.");
+            log.info("Successfully seeded {} account.", email);
         }
     }
 }
