@@ -17,4 +17,5 @@ public class UserUpdateRequest {
     String fullName;
     String phone;
     String status;
+    String avatarUrl;
 }
