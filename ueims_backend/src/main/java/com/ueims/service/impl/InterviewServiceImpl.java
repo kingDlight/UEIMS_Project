@@ -11,9 +11,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ueims.dto.request.InterviewRequest;
 import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
-import com.ueims.dto.request.InterviewRequest;
 import com.ueims.model.entity.Application;
 import com.ueims.model.entity.ApplicationStatus;
 import com.ueims.model.entity.Interview;
@@ -142,8 +142,7 @@ public class InterviewServiceImpl implements InterviewService {
         if (request.getApplicationId() == null) {
             throw new AppException(ErrorCode.MISSING_PARAMETER, "applicationId is required");
         }
-        if (request.getScheduledTime() == null
-                || request.getScheduledTime().isBefore(LocalDateTime.now())) {
+        if (request.getScheduledTime() == null || request.getScheduledTime().isBefore(LocalDateTime.now())) {
             throw new AppException(ErrorCode.INTERVIEW_DATE_MUST_BE_IN_FUTURE);
         }
 
@@ -180,8 +179,7 @@ public class InterviewServiceImpl implements InterviewService {
         Interview entity = Interview.builder()
                 .application(application)
                 .scheduledTime(request.getScheduledTime())
-                .durationMinutes(
-                        request.getDurationMinutes() != null ? request.getDurationMinutes() : 60)
+                .durationMinutes(request.getDurationMinutes() != null ? request.getDurationMinutes() : 60)
                 .location(request.getLocation())
                 .meetingLink(request.getMeetingLink())
                 .status(request.getStatus() != null ? request.getStatus() : "SCHEDULED")
@@ -193,8 +191,10 @@ public class InterviewServiceImpl implements InterviewService {
             mailService.sendInterviewScheduled(saved);
             notificationService.notifyInterviewScheduled(saved);
         } catch (Exception ex) {
-            log.warn("[UC-43 43.0.E2] Notification dispatch failed for interview {}: {}",
-                    saved.getInterviewId(), ex.getMessage());
+            log.warn(
+                    "[UC-43 43.0.E2] Notification dispatch failed for interview {}: {}",
+                    saved.getInterviewId(),
+                    ex.getMessage());
         }
         return saved;
     }

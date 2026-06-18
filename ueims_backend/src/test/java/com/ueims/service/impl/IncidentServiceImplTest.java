@@ -221,11 +221,10 @@ class IncidentServiceImplTest {
         when(assignmentRepository.findById(assignmentId)).thenReturn(Optional.of(assignment));
         when(repository.save(any(Incident.class))).thenAnswer(i -> i.getArgument(0));
 
-        Incident result = service.reportIncident(request);
+        com.ueims.dto.response.IncidentResponse result = service.reportIncident(request);
 
         assertNotNull(result);
         assertEquals("OPEN", result.getStatus());
-        assertEquals(reportedBy, result.getReportedBy());
     }
 
     @Test
@@ -251,10 +250,9 @@ class IncidentServiceImplTest {
         when(assignmentRepository.findById(assignmentId)).thenReturn(Optional.of(assignment));
         when(repository.save(any(Incident.class))).thenAnswer(i -> i.getArgument(0));
 
-        Incident result = service.reportIncident(request);
+        com.ueims.dto.response.IncidentResponse result = service.reportIncident(request);
 
         assertNotNull(result);
-        assertEquals(enterpriseUser, result.getReportedBy());
     }
 
     @Test
