@@ -6,6 +6,9 @@
 -- Convert tất cả giá trị hiện tại: gpa_new = gpa_old * 2.5
 -- ============================================================
 
+-- 0. Tắt trigger BR-21 (prevent_locked_student_edit) vì sẽ UPDATE record đã is_locked=true
+ALTER TABLE eligible_students DISABLE TRIGGER ALL;
+
 -- 1. eligible_students: mở rộng column từ DECIMAL(3,2) → DECIMAL(4,2) (max 10.00)
 ALTER TABLE eligible_students
     ALTER COLUMN gpa TYPE DECIMAL(4,2);
@@ -30,6 +33,10 @@ ALTER TABLE eligible_students
 ALTER TABLE eligible_students
     ADD CONSTRAINT chk_gpa_minimum CHECK (gpa >= 5.0 AND gpa <= 10.0);
 
--- 5. Verify
+-- 5. Bật lại trigger BR-21
+ALTER TABLE eligible_students ENABLE TRIGGER ALL;
+
+-- 6. Verify
 -- SELECT MIN(gpa), MAX(gpa), AVG(gpa) FROM eligible_students;
 -- SELECT MIN(gpa), MAX(gpa), AVG(gpa) FROM student_profiles;
+
