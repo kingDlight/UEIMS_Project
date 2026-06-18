@@ -29,11 +29,24 @@ public class GlobalExceptionHandler {
         private static final String MIN_ATTRIBUTE = "min";
         private static final String ERROR_PREFIX = "ERROR: ";
 
+        @ExceptionHandler(value = org.springframework.transaction.UnexpectedRollbackException.class)
+        ResponseEntity<ApiResponse<Void>> handlingUnexpectedRollbackException(
+                        org.springframework.transaction.UnexpectedRollbackException exception) {
+                String causeMessage = exception.getMostSpecificCause() != null
+                                ? exception.getMostSpecificCause().getMessage()
+                                : exception.getMessage();
+                log.error("Transaction rolled back unexpectedly, root cause: {}", causeMessage);
+                ApiResponse<Void> apiResponse = new ApiResponse<>();
+                apiResponse.setCode(ErrorCode.DATA_INTEGRITY_VIOLATION.getCode());
+                apiResponse.setMessage("Operation failed: " + causeMessage);
+                return ResponseEntity.badRequest().body(apiResponse);
+        }
+
         @ExceptionHandler(value = JpaSystemException.class)
         ResponseEntity<ApiResponse<Void>> handlingJpaSystemException(JpaSystemException exception) {
                 String message = exception.getMostSpecificCause().getMessage();
                 log.warn("DB constraint violation: {}", message);
-                ErrorCode errorCode = ErrorCode.SEMESTER_INVALID_TRANSITION;
+                ErrorCode errorCode = ErrorCode.DATA_INTEGRITY_VIOLATION;
                 // Extract the readable DB trigger message (after "ERROR: ")
                 String userMessage = message != null && message.contains(ERROR_PREFIX)
                                 ? message.substring(message.indexOf(ERROR_PREFIX) + ERROR_PREFIX.length())

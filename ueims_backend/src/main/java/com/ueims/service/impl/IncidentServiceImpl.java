@@ -54,7 +54,8 @@ public class IncidentServiceImpl implements IncidentService {
     private static String normalizeCategory(String raw) {
         if (raw == null) return null;
         String upper = raw.trim().toUpperCase().replace(' ', '_');
-        return CATEGORY_ALIAS.getOrDefault(upper, upper);
+        String mapped = CATEGORY_ALIAS.get(upper);
+        return mapped != null ? mapped : upper;
     }
 
     @Override
@@ -165,7 +166,7 @@ public class IncidentServiceImpl implements IncidentService {
     }
 
     @Override
-    @Transactional(noRollbackFor = AppException.class)
+    @Transactional
     public IncidentResponse reportIncident(IncidentReportRequest request) {
         log.info(
                 "[Incident] reportIncident called. category='{}', descLen={}, assignmentId={}",
