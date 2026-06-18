@@ -6,11 +6,13 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import com.ueims.dto.request.IncidentReportRequest;
 import com.ueims.dto.request.IncidentRequest;
 import com.ueims.dto.request.IncidentResolveRequest;
+import com.ueims.dto.response.IncidentResponse;
 import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
 import com.ueims.model.entity.EnterpriseAssignment;
@@ -164,7 +166,8 @@ public class IncidentServiceImpl implements IncidentService {
     }
 
     @Override
-    public Incident reportIncident(IncidentReportRequest request) {
+    @Transactional
+    public IncidentResponse reportIncident(IncidentReportRequest request) {
         log.info("[Incident] reportIncident called. category='{}', descLen={}, assignmentId={}",
                 request.getCategory(),
                 request.getDescription() == null ? -1 : request.getDescription().length(),
@@ -214,7 +217,7 @@ public class IncidentServiceImpl implements IncidentService {
         } catch (Exception ex) {
             log.warn("[UC-49] Incident notification failed: {}", ex.getMessage());
         }
-        return saved;
+        return IncidentResponse.from(saved);
     }
 
     @Override
