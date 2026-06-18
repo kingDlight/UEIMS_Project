@@ -50,6 +50,7 @@ export const EligibleStudentService = {
       cancelledReason?: string;
     }
   ): Promise<EligibleStudent> {
+    // DB stores GPA on scale 10 (post migration 015). Frontend also uses scale 10.
     const response = await api.put<EligibleStudent>(`/eligible-students/${id}`, payload);
     return response.data;
   },

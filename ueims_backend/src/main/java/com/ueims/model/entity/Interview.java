@@ -39,8 +39,9 @@ public class Interview extends BaseEntity {
     @Builder.Default
     private String status = "SCHEDULED";
 
-    @Column(name = "student_confirmed")
-    private Boolean studentConfirmed;
+    @Column(name = "student_confirmed", nullable = false)
+    @Builder.Default
+    private Boolean studentConfirmed = false;
 
     @Column(name = "result", length = 20)
     private String result;

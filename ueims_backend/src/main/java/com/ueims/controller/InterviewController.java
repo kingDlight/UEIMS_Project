@@ -60,8 +60,8 @@ public class InterviewController {
 
     @PostMapping
     public ResponseEntity<com.ueims.dto.response.InterviewDTO> create(
-            @Valid @RequestBody com.ueims.dto.response.InterviewDTO entity) {
-        return ResponseEntity.ok(mapper.toDto(service.save(mapper.toEntity(entity))));
+            @Valid @RequestBody com.ueims.dto.request.InterviewRequest request) {
+        return ResponseEntity.ok(mapper.toDto(service.create(request)));
     }
 
     @PutMapping("/{id}")

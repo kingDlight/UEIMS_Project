@@ -49,7 +49,7 @@ public class EligibleStudent extends BaseEntity {
     @Column(name = "major", nullable = false)
     private String major;
 
-    @Column(name = "gpa", nullable = false, precision = 3, scale = 2)
+    @Column(name = "gpa", nullable = false, precision = 4, scale = 2)
     private BigDecimal gpa;
 
     @Column(name = "current_semester", nullable = false)

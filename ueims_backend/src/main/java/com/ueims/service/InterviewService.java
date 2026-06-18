@@ -3,6 +3,7 @@ package com.ueims.service;
 import java.util.List;
 import java.util.UUID;
 
+import com.ueims.dto.request.InterviewRequest;
 import com.ueims.model.entity.Interview;
 
 public interface InterviewService {
@@ -15,6 +16,8 @@ public interface InterviewService {
     Interview findById(UUID id);
 
     Interview save(Interview entity);
+
+    Interview create(InterviewRequest request);
 
     Interview update(UUID id, Interview entity);
 
