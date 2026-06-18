@@ -84,7 +84,7 @@ public class InterviewServiceImpl implements InterviewService {
     public Interview save(Interview entity) {
         // BR-35: Kiểm tra ngày trong tương lai
         if (entity.getScheduledTime() == null || entity.getScheduledTime().isBefore(LocalDateTime.now())) {
-            throw new AppException(ErrorCode.INTERVIEW_DATE_MUST_BE_IN_FUTURE);
+            throw new AppException(ErrorCode.INTERVIEW_DATE_MUST_BE_IN_FUTURE, "Received time: " + entity.getScheduledTime());
         }
 
         Application application = applicationRepository
