@@ -165,6 +165,10 @@ public class IncidentServiceImpl implements IncidentService {
 
     @Override
     public Incident reportIncident(IncidentReportRequest request) {
+        log.info("[Incident] reportIncident called. category='{}', descLen={}, assignmentId={}",
+                request.getCategory(),
+                request.getDescription() == null ? -1 : request.getDescription().length(),
+                request.getAssignmentId());
         // BR-41: Category and Description are mandatory
         if (request.getCategory() == null || request.getCategory().isBlank()) {
             throw new AppException(ErrorCode.FIELD_REQUIRED, "Category is required");
