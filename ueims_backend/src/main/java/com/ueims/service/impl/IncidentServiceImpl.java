@@ -166,7 +166,7 @@ public class IncidentServiceImpl implements IncidentService {
     }
 
     @Override
-    @Transactional
+    @Transactional(noRollbackFor = AppException.class)
     public IncidentResponse reportIncident(IncidentReportRequest request) {
         log.info("[Incident] reportIncident called. category='{}', descLen={}, assignmentId={}",
                 request.getCategory(),
