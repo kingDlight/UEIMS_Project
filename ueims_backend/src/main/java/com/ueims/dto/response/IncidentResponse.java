@@ -44,7 +44,7 @@ public class IncidentResponse {
             assignmentId = incident.getAssignment().getAssignmentId();
             if (incident.getAssignment().getStudent() != null) {
                 var student = incident.getAssignment().getStudent();
-                studentId = student.getUserId();
+                studentId = student.getUserId().toString();
                 studentName = student.getFullName();
                 studentEmail = student.getEmail();
                 if (student.getStudentProfile() != null) {

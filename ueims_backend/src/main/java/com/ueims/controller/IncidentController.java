@@ -57,7 +57,7 @@ public class IncidentController {
 
     @PostMapping("/report")
     @PreAuthorize("hasRole('TEACHER') or hasRole('ENTERPRISE')")
-    public ResponseEntity<Incident> reportIncident(
+    public ResponseEntity<com.ueims.dto.response.IncidentResponse> reportIncident(
             @Valid @RequestBody com.ueims.dto.request.IncidentReportRequest request) {
         return ResponseEntity.ok(service.reportIncident(request));
     }

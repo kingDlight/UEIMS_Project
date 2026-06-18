@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.ueims.dto.request.IncidentReportRequest;
 import com.ueims.dto.request.IncidentRequest;
@@ -49,8 +49,7 @@ public class IncidentServiceImpl implements IncidentService {
             "CONFIDENTIALITY", "CONFIDENTIALITY_BREACH",
             "PERFORMANCE", "POOR_ATTITUDE",
             "SAFETY", "DISCIPLINARY_VIOLATION",
-            "OTHER", "OTHER"
-    );
+            "OTHER", "OTHER");
 
     private static String normalizeCategory(String raw) {
         if (raw == null) return null;
@@ -168,7 +167,8 @@ public class IncidentServiceImpl implements IncidentService {
     @Override
     @Transactional
     public IncidentResponse reportIncident(IncidentReportRequest request) {
-        log.info("[Incident] reportIncident called. category='{}', descLen={}, assignmentId={}",
+        log.info(
+                "[Incident] reportIncident called. category='{}', descLen={}, assignmentId={}",
                 request.getCategory(),
                 request.getDescription() == null ? -1 : request.getDescription().length(),
                 request.getAssignmentId());
