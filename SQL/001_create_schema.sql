@@ -302,26 +302,24 @@ BEGIN
                 RAISE EXCEPTION 'cancelled_by must be specified when cancelling an active OJT student (BR-24).';
             END IF;
             IF NOT EXISTS (
-                SELECT 1 FROM users_roles 
+                SELECT 1 FROM users_roles
                 WHERE user_id = NEW.cancelled_by AND role_name = 'ADMIN'
             ) THEN
                 RAISE EXCEPTION 'Only System Administrators can cancel an active OJT student (BR-24).';
             END IF;
         END IF;
 
-        -- Prevent modification of other columns
+        -- Prevent modification of identity columns
+        -- (gpa, full_name, email, major được phép update)
         IF OLD.eligible_id != NEW.eligible_id OR
            OLD.semester_id != NEW.semester_id OR
            OLD.user_id IS DISTINCT FROM NEW.user_id OR
            OLD.student_code != NEW.student_code OR
-           OLD.full_name != NEW.full_name OR
-           OLD.email IS DISTINCT FROM NEW.email OR
-           OLD.major != NEW.major OR
-           OLD.gpa != NEW.gpa OR
            OLD.imported_at != NEW.imported_at THEN
-            RAISE EXCEPTION 'Student record is locked. Only status and cancellation fields can be updated.';
+            RAISE EXCEPTION 'Student record is locked. Only profile fields (gpa, name, email, major) and status can be updated.';
         END IF;
     END IF;
+
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
