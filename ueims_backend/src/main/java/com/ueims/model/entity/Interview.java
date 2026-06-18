@@ -24,6 +24,8 @@ public class Interview extends BaseEntity {
     private Application application;
 
     @Column(name = "scheduled_datetime", nullable = false)
+    @com.fasterxml.jackson.annotation.JsonAlias("scheduledDatetime")
+    @com.fasterxml.jackson.annotation.JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss[.SSS][X]")
     private LocalDateTime scheduledTime;
 
     @Column(name = "location", length = 500)
