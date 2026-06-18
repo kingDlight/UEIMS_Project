@@ -183,3 +183,4 @@ openapi.json
 uploads/
 **/uploads/
 **/uploads/avatars/
+SQL/generated_schema.sql
