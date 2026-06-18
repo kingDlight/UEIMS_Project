@@ -1,5 +1,9 @@
 package com.ueims.service.impl;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -8,6 +12,8 @@ import java.util.stream.Collectors;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.ueims.dto.request.UserCreationRequest;
 import com.ueims.dto.response.UserDetailResponse;
@@ -36,6 +42,48 @@ public class UserServiceImpl implements UserService {
     PasswordEncoder passwordEncoder;
     UserSessionRepository userSessionRepository;
     InvalidatedTokenRepository invalidatedTokenRepository;
+
+    private static final long MAX_AVATAR_BYTES = 2L * 1024 * 1024;
+    private static final Set<String> ALLOWED_AVATAR_TYPES =
+            Set.of("image/png", "image/jpeg", "image/jpg", "image/gif", "image/webp");
+
+    @Transactional
+    public String uploadAvatar(MultipartFile file) throws IOException {
+        if (file == null || file.isEmpty()) {
+            throw new AppException(ErrorCode.FIELD_REQUIRED, "Avatar file is required");
+        }
+        if (file.getSize() > MAX_AVATAR_BYTES) {
+            throw new AppException(ErrorCode.INVALID_REQUEST, "Avatar file too large (max 2MB)");
+        }
+        String contentType = file.getContentType();
+        if (contentType == null || !ALLOWED_AVATAR_TYPES.contains(contentType.toLowerCase())) {
+            throw new AppException(ErrorCode.INVALID_REQUEST,
+                    "Unsupported image type. Allowed: png, jpg, jpeg, gif, webp");
+        }
+
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = repository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        Path uploadDir = Paths.get("uploads", "avatars");
+        Files.createDirectories(uploadDir);
+
+        String original = file.getOriginalFilename() == null ? "" : file.getOriginalFilename();
+        String ext = original.contains(".")
+                ? original.substring(original.lastIndexOf('.')).toLowerCase()
+                : ".png";
+        if (!ext.matches("\\.(png|jpg|jpeg|gif|webp)")) ext = ".png";
+
+        String filename = currentUser.getUserId() + "_" + UUID.randomUUID() + ext;
+        Path target = uploadDir.resolve(filename);
+        file.transferTo(target.toAbsolutePath());
+
+        currentUser.setAvatarUrl("/api/users/avatars/" + filename);
+        repository.save(currentUser);
+
+        log.info("[Avatar] user={} uploaded avatar -> {}", currentUser.getUserId(), currentUser.getAvatarUrl());
+        return currentUser.getAvatarUrl();
+    }
 
     @Override
     public List<UserDetailResponse> findAll() {

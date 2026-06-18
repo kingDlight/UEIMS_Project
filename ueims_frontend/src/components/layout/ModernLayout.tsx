@@ -259,9 +259,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
   const [profileOpen, setProfileOpen] = useState(false);
   const [detailsItem, setDetailsItem] = useState<NotificationItem | null>(null);
 
-  const [customAvatarUrl, setCustomAvatarUrl] = useState<string | null>(() => {
-    return localStorage.getItem('ueims_custom_avatar');
-  });
+  const [customAvatarUrl, setCustomAvatarUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [cropModalOpen, setCropModalOpen] = useState(false);
@@ -339,6 +337,10 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
     logout();
     navigate('/login');
   };
+
+  useEffect(() => {
+    setCustomAvatarUrl(user?.avatarUrl ?? null);
+  }, [user?.userId]);
 
   const handleNavigate = (key: string) => {
     navigate(`${basePath}/${key}`);
@@ -937,9 +939,28 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
         open={cropModalOpen}
         tempImageUrl={tempImageUrl}
         onCancel={() => setCropModalOpen(false)}
-        onSave={(url) => {
+        onSave={async (url) => {
           setCustomAvatarUrl(url);
-          localStorage.setItem('ueims_custom_avatar', url);
+          try {
+            const dataUrlToBlob = (dataUrl: string): Blob => {
+              const [meta, b64] = dataUrl.split(',');
+              const mime = /data:(.*?);/.exec(meta)?.[1] ?? 'image/png';
+              const bin = atob(b64);
+              const arr = new Uint8Array(bin.length);
+              for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+              return new Blob([arr], { type: mime });
+            };
+            const blob = dataUrlToBlob(url);
+            const form = new FormData();
+            form.append('file', blob, 'avatar.png');
+            await fetch('/api/users/me/avatar', {
+              method: 'POST',
+              headers: { Authorization: `Bearer ${token}` },
+              body: form,
+            });
+          } catch (err) {
+            console.error('Failed to upload avatar:', err);
+          }
           setCropModalOpen(false);
         }}
       />

@@ -35,6 +35,29 @@ public class UserController {
         return ResponseEntity.ok(service.updateMyInfo(request));
     }
 
+    @PostMapping(value = "/me/avatar", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<java.util.Map<String, String>> uploadAvatar(
+            @org.springframework.web.bind.annotation.RequestParam("file") org.springframework.web.multipart.MultipartFile file) throws java.io.IOException {
+        String url = service.uploadAvatar(file);
+        return ResponseEntity.ok(java.util.Map.of("avatarUrl", url));
+    }
+
+    @GetMapping("/avatars/{filename:.+}")
+    public ResponseEntity<byte[]> getAvatar(@org.springframework.web.bind.annotation.PathVariable String filename) throws java.io.IOException {
+        java.nio.file.Path path = java.nio.file.Paths.get("uploads/avatars").resolve(filename).normalize();
+        if (!path.startsWith(java.nio.file.Paths.get("uploads/avatars"))) {
+            return ResponseEntity.badRequest().build();
+        }
+        byte[] data = java.nio.file.Files.readAllBytes(path);
+        String contentType = "image/png";
+        if (filename.endsWith(".jpg") || filename.endsWith(".jpeg")) contentType = "image/jpeg";
+        else if (filename.endsWith(".gif")) contentType = "image/gif";
+        else if (filename.endsWith(".webp")) contentType = "image/webp";
+        return ResponseEntity.ok()
+                .contentType(org.springframework.http.MediaType.parseMediaType(contentType))
+                .body(data);
+    }
+
     @GetMapping
     @org.springframework.security.access.prepost.PreAuthorize("hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')")
     public ResponseEntity<List<UserDetailResponse>> getAll() {
