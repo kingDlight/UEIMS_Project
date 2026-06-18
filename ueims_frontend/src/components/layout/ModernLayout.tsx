@@ -171,7 +171,6 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
   const [loading, setLoading] = useState(false);
   const { user, token, logout, updateUser } = useAuthStore();
   const mustChangePassword = (user as any)?.mustChangePassword;
-  const { message } = App.useApp();
 
   useEffect(() => {
     if (mustChangePassword) {
