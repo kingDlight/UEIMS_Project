@@ -169,8 +169,9 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
   // Change Password state
   const [changePasswordVisible, setChangePasswordVisible] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { user, token, logout } = useAuthStore();
+  const { user, token, logout, updateUser } = useAuthStore();
   const mustChangePassword = (user as any)?.mustChangePassword;
+  const { message } = App.useApp();
 
   useEffect(() => {
     if (mustChangePassword) {
@@ -940,26 +941,32 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
         tempImageUrl={tempImageUrl}
         onCancel={() => setCropModalOpen(false)}
         onSave={async (url) => {
-          setCustomAvatarUrl(url);
           try {
-            const dataUrlToBlob = (dataUrl: string): Blob => {
+            const dataUrlToBlob = (dataUrl: string): { blob: Blob; ext: string; mime: string } => {
               const [meta, b64] = dataUrl.split(',');
-              const mime = /data:(.*?);/.exec(meta)?.[1] ?? 'image/png';
+              const mime = /data:(.*?);/.exec(meta)?.[1] ?? 'image/jpeg';
+              const ext = mime === 'image/png' ? 'png' : mime === 'image/gif' ? 'gif' : mime === 'image/webp' ? 'webp' : 'jpg';
               const bin = atob(b64);
               const arr = new Uint8Array(bin.length);
               for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
-              return new Blob([arr], { type: mime });
+              return { blob: new Blob([arr], { type: mime }), ext, mime };
             };
-            const blob = dataUrlToBlob(url);
+            const { blob, ext } = dataUrlToBlob(url);
             const form = new FormData();
-            form.append('file', blob, 'avatar.png');
-            await fetch('/api/users/me/avatar', {
-              method: 'POST',
-              headers: { Authorization: `Bearer ${token}` },
-              body: form,
-            });
+            form.append('file', blob, `avatar.${ext}`);
+            const res = await api.post<{ code: number; result: { avatarUrl: string } }>(
+              '/users/me/avatar',
+              form,
+              { headers: { 'Content-Type': 'multipart/form-data' } }
+            );
+            const newAvatarUrl = res.data?.result?.avatarUrl;
+            if (newAvatarUrl) {
+              setCustomAvatarUrl(newAvatarUrl);
+              updateUser({ avatarUrl: newAvatarUrl });
+            }
           } catch (err) {
             console.error('Failed to upload avatar:', err);
+            message.error(t('layout.avatarUploadFailed', 'Failed to upload avatar. Please try again.'));
           }
           setCropModalOpen(false);
         }}

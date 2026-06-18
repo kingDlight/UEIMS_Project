@@ -30,6 +30,7 @@ interface AuthState {
   logout: () => void;
   switchRole: (role: UserRole) => void;
   setLoading: (loading: boolean) => void;
+  updateUser: (patch: Partial<User>) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -80,6 +81,9 @@ export const useAuthStore = create<AuthState>()(
       switchRole: (role) => set({ currentRole: role }),
 
       setLoading: (loading) => set({ isLoading: loading }),
+
+      updateUser: (patch) =>
+        set((state) => (state.user ? { user: { ...state.user, ...patch } } : state)),
     }),
     {
       name: 'auth-storage',
