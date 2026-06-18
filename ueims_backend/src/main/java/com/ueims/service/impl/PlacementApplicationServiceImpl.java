@@ -44,8 +44,11 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class PlacementApplicationServiceImpl implements PlacementApplicationService {
 
-    /** Auto-match threshold: SV có GPA dưới mức này sẽ KHÔNG được auto-match. */
-    static final double AUTO_MATCH_GPA_THRESHOLD = 7.0;
+    /**
+     * Auto-match threshold: SV có GPA (quy đổi sang thang 10) dưới mức này sẽ KHÔNG được auto-match.
+     * GPA trong DB lưu thang 4 (max 4.0). Threshold tương đương 7.0/10 = 2.8/4.
+     */
+    static final double AUTO_MATCH_GPA_THRESHOLD = 2.8;
 
     /** Auto-match scoring weights. */
     static final int SCORE_MAJOR_MATCH = 50;
@@ -454,12 +457,14 @@ public class PlacementApplicationServiceImpl implements PlacementApplicationServ
                 continue;
             }
 
-            // Filter: GPA threshold
+            // Filter: GPA threshold (DB lưu thang 4, threshold tương đương 7.0/10)
             if (eligible.getGpa() == null || eligible.getGpa().doubleValue() < AUTO_MATCH_GPA_THRESHOLD) {
                 skipped.add(AutoMatchResultDTO.SkipDetail.builder()
                         .studentId(studentId)
                         .studentName(eligible.getFullName())
-                        .reason("GPA " + eligible.getGpa() + " below threshold " + AUTO_MATCH_GPA_THRESHOLD)
+                        .reason("GPA " + eligible.getGpa() + "/4 ("
+                                + String.format("%.1f", gpaToScale10(eligible.getGpa()))
+                                + "/10) below threshold 7.0/10")
                         .build());
                 continue;
             }
@@ -481,8 +486,11 @@ public class PlacementApplicationServiceImpl implements PlacementApplicationServ
                     reason = "Major match (" + ent.getIndustry() + ")";
                 }
 
-                // GPA score: gpa * 10, max 40
-                score += Math.min(eligible.getGpa().doubleValue() * 10.0, SCORE_GPA_MAX);
+                // GPA score (thang 4 → thang 10, sau đó normalize 0-40):
+                //   gpa_4 → gpa_10 = gpa_4 * 2.5, rồi lấy ra tỉ lệ 0-40 điểm.
+                //   VD: gpa_4 = 2.8 → gpa_10 = 7.0 → score = 7.0/10 * 40 = 28
+                //       gpa_4 = 4.0 → gpa_10 = 10.0 → score = 40
+                score += gpaToScale10(eligible.getGpa()) / 10.0 * SCORE_GPA_MAX;
 
                 // Tie-breaker
                 score += Math.random() * SCORE_RANDOM_MAX;
@@ -595,6 +603,17 @@ public class PlacementApplicationServiceImpl implements PlacementApplicationServ
         if (o == null) return null;
         if (o instanceof UUID u) return u;
         return UUID.fromString(o.toString());
+    }
+
+    /**
+     * Convert GPA từ thang 4 (DB) sang thang 10.
+     *   gpa_4 = 2.8 → gpa_10 = 7.0
+     *   gpa_4 = 4.0 → gpa_10 = 10.0
+     * Null-safe: trả về 0.0 nếu null.
+     */
+    private double gpaToScale10(java.math.BigDecimal gpaScale4) {
+        if (gpaScale4 == null) return 0.0;
+        return gpaScale4.doubleValue() * 2.5;
     }
 
     private Semester getActiveOrOpenSemester() {

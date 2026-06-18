@@ -390,7 +390,7 @@ const StudentDetailModal: React.FC<{
             { label: t('studentsTab.emailAddress'), value: student.email },
             { label: t('studentsTab.major'), value: student.major },
             { label: t('studentsTab.currentSemester'), value: `${t('studentsTab.semesterShort')} ${student.currentSemester}` },
-            { label: t('studentsTab.cumulativeGpa'), value: student.gpa.toFixed(2), warn: student.gpa < 2.5 },
+            { label: t('studentsTab.cumulativeGpa'), value: student.gpa.toFixed(2), warn: student.gpa < 5.0 },
           ].map(({ label, value, warn }) => (
             <div key={label}>
               <div style={{ fontSize: 11, fontWeight: 700, color: st.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6, fontFamily: 'Inter, sans-serif' }}>
@@ -649,9 +649,9 @@ const EditStudentModal: React.FC<{
               { required: true, message: 'Please enter GPA' },
               {
                 validator: (_r, v) =>
-                  v === undefined || v === null || (Number(v) >= 0 && Number(v) <= 4)
+                  v === undefined || v === null || (Number(v) >= 0 && Number(v) <= 10)
                     ? Promise.resolve()
-                    : Promise.reject(new Error('GPA must be 0.00 – 4.00')),
+                    : Promise.reject(new Error('GPA must be 0.00 – 10.00')),
               },
             ]}
           >
@@ -661,7 +661,7 @@ const EditStudentModal: React.FC<{
               max={4}
               step={0.01}
               style={{ width: '100%' }}
-              placeholder="0.00 – 4.00"
+              placeholder="0.00 – 10.00"
             />
           </Form.Item>
         </div>
@@ -944,7 +944,7 @@ export const StudentsTab: React.FC = () => {
             fontSize: 13,
             fontWeight: 700,
             fontVariantNumeric: 'tabular-nums',
-            color: gpa < 2.5 ? st.warning : st.textPrimary,
+            color: gpa < 5.0 ? st.warning : st.textPrimary,
           }}
         >
           {gpa.toFixed(2)}
