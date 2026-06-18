@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import com.ueims.dto.response.IncidentResponse;
 import com.ueims.model.entity.Incident;
 import com.ueims.service.IncidentService;
 
@@ -57,7 +58,7 @@ public class IncidentController {
 
     @PostMapping("/report")
     @PreAuthorize("hasRole('TEACHER') or hasRole('ENTERPRISE')")
-    public ResponseEntity<Incident> reportIncident(
+    public ResponseEntity<IncidentResponse> reportIncident(
             @Valid @RequestBody com.ueims.dto.request.IncidentReportRequest request) {
         return ResponseEntity.ok(service.reportIncident(request));
     }
