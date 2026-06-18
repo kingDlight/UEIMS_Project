@@ -338,7 +338,10 @@ CREATE TABLE system_announcements (
     published_at    TIMESTAMP,
     created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deleted_at      TIMESTAMP
+    deleted_at      TIMESTAMP,
+    type            VARCHAR(30),
+    audience        VARCHAR(30),
+    target_role     VARCHAR(30)
 );
 
 
