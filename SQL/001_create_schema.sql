@@ -344,6 +344,12 @@ CREATE TABLE system_announcements (
     target_role     VARCHAR(30)
 );
 
+UPDATE system_announcements
+SET type        = COALESCE(type, 'SYSTEM_ANNOUNCEMENT'),
+    audience    = COALESCE(audience, 'ALL'),
+    target_role = COALESCE(target_role, NULL)
+WHERE type IS NULL OR audience IS NULL;
+
 
 -- ============================================================
 -- MODULE 3: ENTERPRISE & RECRUITMENT
