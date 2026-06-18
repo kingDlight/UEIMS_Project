@@ -53,11 +53,11 @@ public class UserServiceImpl implements UserService {
             throw new AppException(ErrorCode.FIELD_REQUIRED, "Avatar file is required");
         }
         if (file.getSize() > MAX_AVATAR_BYTES) {
-            throw new AppException(ErrorCode.INVALID_REQUEST, "Avatar file too large (max 2MB)");
+            throw new AppException(ErrorCode.INVALID_KEY, "Avatar file too large (max 2MB)");
         }
         String contentType = file.getContentType();
         if (contentType == null || !ALLOWED_AVATAR_TYPES.contains(contentType.toLowerCase())) {
-            throw new AppException(ErrorCode.INVALID_REQUEST,
+            throw new AppException(ErrorCode.INVALID_KEY,
                     "Unsupported image type. Allowed: png, jpg, jpeg, gif, webp");
         }
 
