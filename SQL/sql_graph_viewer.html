@@ -1,0 +1,321 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+            <script>function neighbourhoodHighlight(params) {
+  // console.log("in nieghbourhoodhighlight");
+  allNodes = nodes.get({ returnType: "Object" });
+  // originalNodes = JSON.parse(JSON.stringify(allNodes));
+  // if something is selected:
+  if (params.nodes.length > 0) {
+    highlightActive = true;
+    var i, j;
+    var selectedNode = params.nodes[0];
+    var degrees = 2;
+
+    // mark all nodes as hard to read.
+    for (let nodeId in allNodes) {
+      // nodeColors[nodeId] = allNodes[nodeId].color;
+      allNodes[nodeId].color = "rgba(200,200,200,0.5)";
+      if (allNodes[nodeId].hiddenLabel === undefined) {
+        allNodes[nodeId].hiddenLabel = allNodes[nodeId].label;
+        allNodes[nodeId].label = undefined;
+      }
+    }
+    var connectedNodes = network.getConnectedNodes(selectedNode);
+    var allConnectedNodes = [];
+
+    // get the second degree nodes
+    for (i = 1; i < degrees; i++) {
+      for (j = 0; j < connectedNodes.length; j++) {
+        allConnectedNodes = allConnectedNodes.concat(
+          network.getConnectedNodes(connectedNodes[j])
+        );
+      }
+    }
+
+    // all second degree nodes get a different color and their label back
+    for (i = 0; i < allConnectedNodes.length; i++) {
+      // allNodes[allConnectedNodes[i]].color = "pink";
+      allNodes[allConnectedNodes[i]].color = "rgba(150,150,150,0.75)";
+      if (allNodes[allConnectedNodes[i]].hiddenLabel !== undefined) {
+        allNodes[allConnectedNodes[i]].label =
+          allNodes[allConnectedNodes[i]].hiddenLabel;
+        allNodes[allConnectedNodes[i]].hiddenLabel = undefined;
+      }
+    }
+
+    // all first degree nodes get their own color and their label back
+    for (i = 0; i < connectedNodes.length; i++) {
+      // allNodes[connectedNodes[i]].color = undefined;
+      allNodes[connectedNodes[i]].color = nodeColors[connectedNodes[i]];
+      if (allNodes[connectedNodes[i]].hiddenLabel !== undefined) {
+        allNodes[connectedNodes[i]].label =
+          allNodes[connectedNodes[i]].hiddenLabel;
+        allNodes[connectedNodes[i]].hiddenLabel = undefined;
+      }
+    }
+
+    // the main node gets its own color and its label back.
+    // allNodes[selectedNode].color = undefined;
+    allNodes[selectedNode].color = nodeColors[selectedNode];
+    if (allNodes[selectedNode].hiddenLabel !== undefined) {
+      allNodes[selectedNode].label = allNodes[selectedNode].hiddenLabel;
+      allNodes[selectedNode].hiddenLabel = undefined;
+    }
+  } else if (highlightActive === true) {
+    // console.log("highlightActive was true");
+    // reset all nodes
+    for (let nodeId in allNodes) {
+      // allNodes[nodeId].color = "purple";
+      allNodes[nodeId].color = nodeColors[nodeId];
+      // delete allNodes[nodeId].color;
+      if (allNodes[nodeId].hiddenLabel !== undefined) {
+        allNodes[nodeId].label = allNodes[nodeId].hiddenLabel;
+        allNodes[nodeId].hiddenLabel = undefined;
+      }
+    }
+    highlightActive = false;
+  }
+
+  // transform the object into an array
+  var updateArray = [];
+  if (params.nodes.length > 0) {
+    for (let nodeId in allNodes) {
+      if (allNodes.hasOwnProperty(nodeId)) {
+        // console.log(allNodes[nodeId]);
+        updateArray.push(allNodes[nodeId]);
+      }
+    }
+    nodes.update(updateArray);
+  } else {
+    // console.log("Nothing was selected");
+    for (let nodeId in allNodes) {
+      if (allNodes.hasOwnProperty(nodeId)) {
+        // console.log(allNodes[nodeId]);
+        // allNodes[nodeId].color = {};
+        updateArray.push(allNodes[nodeId]);
+      }
+    }
+    nodes.update(updateArray);
+  }
+}
+
+function filterHighlight(params) {
+  allNodes = nodes.get({ returnType: "Object" });
+  // if something is selected:
+  if (params.nodes.length > 0) {
+    filterActive = true;
+    let selectedNodes = params.nodes;
+
+    // hiding all nodes and saving the label
+    for (let nodeId in allNodes) {
+      allNodes[nodeId].hidden = true;
+      if (allNodes[nodeId].savedLabel === undefined) {
+        allNodes[nodeId].savedLabel = allNodes[nodeId].label;
+        allNodes[nodeId].label = undefined;
+      }
+    }
+
+    for (let i=0; i < selectedNodes.length; i++) {
+      allNodes[selectedNodes[i]].hidden = false;
+      if (allNodes[selectedNodes[i]].savedLabel !== undefined) {
+        allNodes[selectedNodes[i]].label = allNodes[selectedNodes[i]].savedLabel;
+        allNodes[selectedNodes[i]].savedLabel = undefined;
+      }
+    }
+
+  } else if (filterActive === true) {
+    // reset all nodes
+    for (let nodeId in allNodes) {
+      allNodes[nodeId].hidden = false;
+      if (allNodes[nodeId].savedLabel !== undefined) {
+        allNodes[nodeId].label = allNodes[nodeId].savedLabel;
+        allNodes[nodeId].savedLabel = undefined;
+      }
+    }
+    filterActive = false;
+  }
+
+  // transform the object into an array
+  var updateArray = [];
+  if (params.nodes.length > 0) {
+    for (let nodeId in allNodes) {
+      if (allNodes.hasOwnProperty(nodeId)) {
+        updateArray.push(allNodes[nodeId]);
+      }
+    }
+    nodes.update(updateArray);
+  } else {
+    for (let nodeId in allNodes) {
+      if (allNodes.hasOwnProperty(nodeId)) {
+        updateArray.push(allNodes[nodeId]);
+      }
+    }
+    nodes.update(updateArray);
+  }
+}
+
+function selectNode(nodes) {
+  network.selectNodes(nodes);
+  neighbourhoodHighlight({ nodes: nodes });
+  return nodes;
+}
+
+function selectNodes(nodes) {
+  network.selectNodes(nodes);
+  filterHighlight({nodes: nodes});
+  return nodes;
+}
+
+function highlightFilter(filter) {
+  let selectedNodes = []
+  let selectedProp = filter['property']
+  if (filter['item'] === 'node') {
+    let allNodes = nodes.get({ returnType: "Object" });
+    for (let nodeId in allNodes) {
+      if (allNodes[nodeId][selectedProp] && filter['value'].includes((allNodes[nodeId][selectedProp]).toString())) {
+        selectedNodes.push(nodeId)
+      }
+    }
+  }
+  else if (filter['item'] === 'edge'){
+    let allEdges = edges.get({returnType: 'object'});
+    // check if the selected property exists for selected edge and select the nodes connected to the edge
+    for (let edge in allEdges) {
+      if (allEdges[edge][selectedProp] && filter['value'].includes((allEdges[edge][selectedProp]).toString())) {
+        selectedNodes.push(allEdges[edge]['from'])
+        selectedNodes.push(allEdges[edge]['to'])
+      }
+    }
+  }
+  selectNodes(selectedNodes)
+}</script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+            
+            
+            
+            
+            
+
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 100vh;
+                 background-color: #1a1a1a;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"color": "#00ffcc", "font": {"color": "white"}, "id": "roles", "label": "roles", "shape": "dot", "size": 25, "title": "B\u1ea2NG: roles\n\ud83d\udd39 S\u1ed1 c\u1ed9t (5):\n - role_name\n - description\n - is_active\n - created_at\n - updated_at"}, {"color": "#00ffcc", "font": {"color": "white"}, "id": "permissions", "label": "permissions", "shape": "dot", "size": 23, "title": "B\u1ea2NG: permissions\n\ud83d\udd39 S\u1ed1 c\u1ed9t (4):\n - permission_name\n - description\n - created_at\n - updated_at"}, {"color": "#00ffcc", "font": {"color": "white"}, "id": "role_permissions", "label": "role_permissions", "shape": "dot", "size": 19, "title": "B\u1ea2NG: role_permissions\n\ud83d\udd39 S\u1ed1 c\u1ed9t (2):\n - role_name\n - permission_name"}, {"color": "#00ffcc", "font": {"color": "white"}, "id": "users", "label": "users", "shape": "dot", "size": 43, "title": "B\u1ea2NG: users\n\ud83d\udd39 S\u1ed1 c\u1ed9t (14):\n - user_id\n - email\n - password_hash\n - full_name\n - phone\n - status\n - failed_login_attempts\n - locked_until\n - must_change_password\n - password_changed_at\n - enterprise_id\n - created_at\n - updated_at\n - deleted_at"}, {"color": "#00ffcc", "font": {"color": "white"}, "id": "users_roles", "label": "users_roles", "shape": "dot", "size": 19, "title": "B\u1ea2NG: users_roles\n\ud83d\udd39 S\u1ed1 c\u1ed9t (2):\n - user_id\n - role_name"}, {"color": "#00ffcc", "font": {"color": "white"}, "id": "invalidated_tokens", "label": "invalidated_tokens", "shape": "dot", "size": 21, "title": "B\u1ea2NG: invalidated_tokens\n\ud83d\udd39 S\u1ed1 c\u1ed9t (3):\n - token_id\n - expires_at\n - invalidated_at"}, {"color": "#00ffcc", "font": {"color": "white"}, "id": "password_reset_tokens", "label": "password_reset_tokens", "shape": "dot", "size": 27, "title": "B\u1ea2NG: password_reset_tokens\n\ud83d\udd39 S\u1ed1 c\u1ed9t (6):\n - token_id\n - user_id\n - token_hash\n - expires_at\n - is_used\n - created_at"}, {"color": "#00ffcc", "font": {"color": "white"}, "id": "audit_logs", "label": "audit_logs", "shape": "dot", "size": 35, "title": "B\u1ea2NG: audit_logs\n\ud83d\udd39 S\u1ed1 c\u1ed9t (10):\n - log_id\n - user_id\n - action\n - target_entity\n - target_id\n - old_value\n - new_value\n - ip_address\n - user_agent\n - timestamp"}, {"color": "#00ffcc", "font": {"color": "white"}, "id": "semesters", "label": "semesters", "shape": "dot", "size": 41, "title": "B\u1ea2NG: semesters\n\ud83d\udd39 S\u1ed1 c\u1ed9t (13):\n - semester_id\n - semester_code\n - name\n - start_date\n - end_date\n - weekly_report_deadline_day\n - weekly_report_deadline_time\n - final_report_deadline\n - status\n - created_by\n - created_at\n - updated_at\n - deleted_at"}, {"color": "#00ffcc", "font": {"color": "white"}, "id": "eligible_students", "label": "eligible_students", "shape": "dot", "size": 49, "title": "B\u1ea2NG: eligible_students\n\ud83d\udd39 S\u1ed1 c\u1ed9t (17):\n - eligible_id\n - semester_id\n - user_id\n - student_code\n - full_name\n - email\n - major\n - gpa\n - current_semester\n - status\n - is_locked\n - imported_at\n - approved_at\n - cancelled_reason\n - cancelled_by\n - created_at\n - updated_at"}, {"color": "#00ffcc", "font": {"color": "white"}, "id": "system_announcements", "label": "system_announcements", "shape": "dot", "size": 35, "title": "B\u1ea2NG: system_announcements\n\ud83d\udd39 S\u1ed1 c\u1ed9t (10):\n - announcement_id\n - semester_id\n - title\n - content\n - status\n - created_by\n - published_at\n - created_at\n - updated_at\n - deleted_at"}, {"color": "#00ffcc", "font": {"color": "white"}, "id": "enterprises", "label": "enterprises", "shape": "dot", "size": 51, "title": "B\u1ea2NG: enterprises\n\ud83d\udd39 S\u1ed1 c\u1ed9t (18):\n - enterprise_id\n - company_name\n - tax_code\n - industry\n - company_size\n - description\n - address\n - logo_url\n - contact_person_name\n - contact_person_email\n - contact_person_phone\n - approval_status\n - rejection_reason\n - approved_by\n - approved_at\n - created_at\n - updated_at\n - deleted_at"}, {"color": "#00ffcc", "font": {"color": "white"}, "id": "semester_enterprises", "label": "semester_enterprises", "shape": "dot", "size": 31, "title": "B\u1ea2NG: semester_enterprises\n\ud83d\udd39 S\u1ed1 c\u1ed9t (8):\n - semester_enterprise_id\n - semester_id\n - enterprise_id\n - registration_status\n - rejection_reason\n - reviewed_by\n - reviewed_at\n - registered_at"}, {"color": "#00ffcc", "font": {"color": "white"}, "id": "job_posts", "label": "job_posts", "shape": "dot", "size": 43, "title": "B\u1ea2NG: job_posts\n\ud83d\udd39 S\u1ed1 c\u1ed9t (14):\n - job_post_id\n - enterprise_id\n - semester_id\n - title\n - description\n - requirements\n - benefits\n - required_technologies\n - max_positions\n - application_deadline\n - status\n - created_at\n - updated_at\n - deleted_at"}, {"color": "#00ffcc", "font": {"color": "white"}, "id": "applications", "label": "applications", "shape": "dot", "size": 43, "title": "B\u1ea2NG: applications\n\ud83d\udd39 S\u1ed1 c\u1ed9t (14):\n - application_id\n - job_post_id\n - student_id\n - cv_file_url\n - cv_snapshot_url\n - cv_download_count\n - status\n - screening_note\n - screened_by\n - screened_at\n - withdrawn_at\n - created_at\n - updated_at\n - deleted_at"}, {"color": "#00ffcc", "font": {"color": "white"}, "id": "interviews", "label": "interviews", "shape": "dot", "size": 53, "title": "B\u1ea2NG: interviews\n\ud83d\udd39 S\u1ed1 c\u1ed9t (19):\n - interview_id\n - application_id\n - scheduled_datetime\n - duration_minutes\n - location\n - meeting_link\n - cancel_reason\n - canceled_at\n - reschedule_reason\n - status\n - student_confirmed\n - confirmed_at\n - student_decline_reason\n - result\n - result_note\n - decided_by\n - decided_at\n - created_at\n - updated_at"}, {"color": "#00ffcc", "font": {"color": "white"}, "id": "student_profiles", "label": "student_profiles", "shape": "dot", "size": 41, "title": "B\u1ea2NG: student_profiles\n\ud83d\udd39 S\u1ed1 c\u1ed9t (13):\n - profile_id\n - user_id\n - student_code\n - university\n - major\n - gpa\n - skills\n - bio\n - cv_file_url\n - cv_file_size\n - created_at\n - updated_at\n - deleted_at"}, {"color": "#00ffcc", "font": {"color": "white"}, "id": "enterprise_assignments", "label": "enterprise_assignments", "shape": "dot", "size": 43, "title": "B\u1ea2NG: enterprise_assignments\n\ud83d\udd39 S\u1ed1 c\u1ed9t (14):\n - assignment_id\n - enterprise_id\n - student_id\n - semester_id\n - supervisor_name\n - supervisor_email\n - supervisor_phone\n - assigned_by\n - status\n - assigned_at\n - created_at\n - updated_at\n - start_date\n - end_date"}, {"color": "#00ffcc", "font": {"color": "white"}, "id": "internship_plans", "label": "internship_plans", "shape": "dot", "size": 25, "title": "B\u1ea2NG: internship_plans\n\ud83d\udd39 S\u1ed1 c\u1ed9t (5):\n - plan_id\n - assignment_id\n - created_at\n - updated_at\n - deleted_at"}, {"color": "#00ffcc", "font": {"color": "white"}, "id": "internship_plan_items", "label": "internship_plan_items", "shape": "dot", "size": 35, "title": "B\u1ea2NG: internship_plan_items\n\ud83d\udd39 S\u1ed1 c\u1ed9t (10):\n - plan_item_id\n - plan_id\n - week_number\n - task_description\n - training_objective\n - target_date\n - status\n - order_index\n - created_at\n - updated_at"}, {"color": "#00ffcc", "font": {"color": "white"}, "id": "enterprise_evaluations", "label": "enterprise_evaluations", "shape": "dot", "size": 37, "title": "B\u1ea2NG: enterprise_evaluations\n\ud83d\udd39 S\u1ed1 c\u1ed9t (11):\n - evaluation_id\n - assignment_id\n - attitude_score\n - professionalism_score\n - soft_skills_score\n - progress_score\n - total_score\n - overall_comments\n - is_locked\n - submitted_at\n - created_at"}, {"color": "#00ffcc", "font": {"color": "white"}, "id": "weekly_reports", "label": "weekly_reports", "shape": "dot", "size": 45, "title": "B\u1ea2NG: weekly_reports\n\ud83d\udd39 S\u1ed1 c\u1ed9t (15):\n - report_id\n - assignment_id\n - week_number\n - tasks_completed\n - issues_challenges\n - lessons_learned\n - plan_next_week\n - attachment_urls\n - status\n - submitted_at\n - late_override_by\n - plagiarism_score\n - is_anomaly\n - created_at\n - updated_at"}, {"color": "#00ffcc", "font": {"color": "white"}, "id": "report_feedbacks", "label": "report_feedbacks", "shape": "dot", "size": 27, "title": "B\u1ea2NG: report_feedbacks\n\ud83d\udd39 S\u1ed1 c\u1ed9t (6):\n - feedback_id\n - report_id\n - reviewer_id\n - feedback_text\n - action\n - created_at"}, {"color": "#00ffcc", "font": {"color": "white"}, "id": "final_reports", "label": "final_reports", "shape": "dot", "size": 29, "title": "B\u1ea2NG: final_reports\n\ud83d\udd39 S\u1ed1 c\u1ed9t (7):\n - final_report_id\n - assignment_id\n - file_url\n - file_size_bytes\n - submitted_at\n - is_late\n - created_at"}, {"color": "#00ffcc", "font": {"color": "white"}, "id": "incidents", "label": "incidents", "shape": "dot", "size": 39, "title": "B\u1ea2NG: incidents\n\ud83d\udd39 S\u1ed1 c\u1ed9t (12):\n - incident_id\n - assignment_id\n - reported_by\n - category\n - description\n - evidence_urls\n - status\n - resolution_note\n - resolved_by\n - resolved_at\n - created_at\n - updated_at"}, {"color": "#00ffcc", "font": {"color": "white"}, "id": "training_warnings", "label": "training_warnings", "shape": "dot", "size": 29, "title": "B\u1ea2NG: training_warnings\n\ud83d\udd39 S\u1ed1 c\u1ed9t (7):\n - warning_id\n - tm_id\n - student_id\n - semester_id\n - week_number\n - warning_message\n - sent_at"}, {"color": "#00ffcc", "font": {"color": "white"}, "id": "final_grades", "label": "final_grades", "shape": "dot", "size": 41, "title": "B\u1ea2NG: final_grades\n\ud83d\udd39 S\u1ed1 c\u1ed9t (13):\n - grade_id\n - student_id\n - tm_id\n - semester_id\n - enterprise_total_score\n - final_grade\n - overall_status\n - is_locked\n - cancelled_reason\n - cancelled_by\n - cancelled_at\n - graded_at\n - created_at"}, {"color": "#00ffcc", "font": {"color": "white"}, "id": "notifications", "label": "notifications", "shape": "dot", "size": 33, "title": "B\u1ea2NG: notifications\n\ud83d\udd39 S\u1ed1 c\u1ed9t (9):\n - notification_id\n - recipient_id\n - title\n - message\n - type\n - reference_entity\n - reference_id\n - is_read\n - created_at"}, {"color": "#00ffcc", "font": {"color": "white"}, "id": "student_enterprise_feedbacks", "label": "student_enterprise_feedbacks", "shape": "dot", "size": 39, "title": "B\u1ea2NG: student_enterprise_feedbacks\n\ud83d\udd39 S\u1ed1 c\u1ed9t (12):\n - feedback_id\n - student_id\n - enterprise_id\n - semester_id\n - training_quality_score\n - supervisor_support_score\n - work_environment_score\n - overall_score\n - positive_feedback\n - improvement_feedback\n - additional_comments\n - submitted_at"}, {"color": "#00ffcc", "font": {"color": "white"}, "id": "user_sessions", "label": "user_sessions", "shape": "dot", "size": 23, "title": "B\u1ea2NG: user_sessions\n\ud83d\udd39 S\u1ed1 c\u1ed9t (4):\n - token_id\n - email\n - last_activity\n - expires_at"}, {"color": "#00ffcc", "font": {"color": "white"}, "id": "request_logs", "label": "request_logs", "shape": "dot", "size": 37, "title": "B\u1ea2NG: request_logs\n\ud83d\udd39 S\u1ed1 c\u1ed9t (11):\n - id\n - user_id\n - user_email\n - session_id\n - http_method\n - endpoint\n - status_code\n - ip_address\n - user_agent\n - response_time_ms\n - timestamp"}]);
+                  edges = new vis.DataSet([{"arrows": "to", "color": "#555555", "from": "role_permissions", "title": "\ud83d\udd17 Kh\u00f3a ngo\u1ea1i:\nrole_permissions.role_name \u2794 roles.role_name", "to": "roles", "width": 2}, {"arrows": "to", "color": "#555555", "from": "role_permissions", "title": "\ud83d\udd17 Kh\u00f3a ngo\u1ea1i:\nrole_permissions.permission_name \u2794 permissions.permission_name", "to": "permissions", "width": 2}, {"arrows": "to", "color": "#555555", "from": "users", "title": "\ud83d\udd17 Kh\u00f3a ngo\u1ea1i:\nusers.enterprise_id \u2794 enterprises.enterprise_id", "to": "enterprises", "width": 2}, {"arrows": "to", "color": "#555555", "from": "users_roles", "title": "\ud83d\udd17 Kh\u00f3a ngo\u1ea1i:\nusers_roles.user_id \u2794 users.user_id", "to": "users", "width": 2}, {"arrows": "to", "color": "#555555", "from": "users_roles", "title": "\ud83d\udd17 Kh\u00f3a ngo\u1ea1i:\nusers_roles.role_name \u2794 roles.role_name", "to": "roles", "width": 2}, {"arrows": "to", "color": "#555555", "from": "password_reset_tokens", "title": "\ud83d\udd17 Kh\u00f3a ngo\u1ea1i:\npassword_reset_tokens.user_id \u2794 users.user_id", "to": "users", "width": 2}, {"arrows": "to", "color": "#555555", "from": "audit_logs", "title": "\ud83d\udd17 Kh\u00f3a ngo\u1ea1i:\naudit_logs.user_id \u2794 users.user_id", "to": "users", "width": 2}, {"arrows": "to", "color": "#555555", "from": "eligible_students", "title": "\ud83d\udd17 Kh\u00f3a ngo\u1ea1i:\neligible_students.semester_id \u2794 semesters.semester_id", "to": "semesters", "width": 2}, {"arrows": "to", "color": "#555555", "from": "eligible_students", "title": "\ud83d\udd17 Kh\u00f3a ngo\u1ea1i:\neligible_students.user_id \u2794 users.user_id", "to": "users", "width": 2}, {"arrows": "to", "color": "#555555", "from": "system_announcements", "title": "\ud83d\udd17 Kh\u00f3a ngo\u1ea1i:\nsystem_announcements.semester_id \u2794 semesters.semester_id", "to": "semesters", "width": 2}, {"arrows": "to", "color": "#555555", "from": "semester_enterprises", "title": "\ud83d\udd17 Kh\u00f3a ngo\u1ea1i:\nsemester_enterprises.semester_id \u2794 semesters.semester_id", "to": "semesters", "width": 2}, {"arrows": "to", "color": "#555555", "from": "semester_enterprises", "title": "\ud83d\udd17 Kh\u00f3a ngo\u1ea1i:\nsemester_enterprises.enterprise_id \u2794 enterprises.enterprise_id", "to": "enterprises", "width": 2}, {"arrows": "to", "color": "#555555", "from": "job_posts", "title": "\ud83d\udd17 Kh\u00f3a ngo\u1ea1i:\njob_posts.enterprise_id \u2794 enterprises.enterprise_id", "to": "enterprises", "width": 2}, {"arrows": "to", "color": "#555555", "from": "job_posts", "title": "\ud83d\udd17 Kh\u00f3a ngo\u1ea1i:\njob_posts.semester_id \u2794 semesters.semester_id", "to": "semesters", "width": 2}, {"arrows": "to", "color": "#555555", "from": "applications", "title": "\ud83d\udd17 Kh\u00f3a ngo\u1ea1i:\napplications.job_post_id \u2794 job_posts.job_post_id", "to": "job_posts", "width": 2}, {"arrows": "to", "color": "#555555", "from": "applications", "title": "\ud83d\udd17 Kh\u00f3a ngo\u1ea1i:\napplications.student_id \u2794 users.user_id", "to": "users", "width": 2}, {"arrows": "to", "color": "#555555", "from": "interviews", "title": "\ud83d\udd17 Kh\u00f3a ngo\u1ea1i:\ninterviews.application_id \u2794 applications.application_id", "to": "applications", "width": 2}, {"arrows": "to", "color": "#555555", "from": "student_profiles", "title": "\ud83d\udd17 Kh\u00f3a ngo\u1ea1i:\nstudent_profiles.user_id \u2794 users.user_id", "to": "users", "width": 2}, {"arrows": "to", "color": "#555555", "from": "enterprise_assignments", "title": "\ud83d\udd17 Kh\u00f3a ngo\u1ea1i:\nenterprise_assignments.enterprise_id \u2794 enterprises.enterprise_id", "to": "enterprises", "width": 2}, {"arrows": "to", "color": "#555555", "from": "enterprise_assignments", "title": "\ud83d\udd17 Kh\u00f3a ngo\u1ea1i:\nenterprise_assignments.student_id \u2794 users.user_id", "to": "users", "width": 2}, {"arrows": "to", "color": "#555555", "from": "enterprise_assignments", "title": "\ud83d\udd17 Kh\u00f3a ngo\u1ea1i:\nenterprise_assignments.semester_id \u2794 semesters.semester_id", "to": "semesters", "width": 2}, {"arrows": "to", "color": "#555555", "from": "training_warnings", "title": "\ud83d\udd17 Kh\u00f3a ngo\u1ea1i:\ntraining_warnings.student_id \u2794 users.user_id", "to": "users", "width": 2}, {"arrows": "to", "color": "#555555", "from": "training_warnings", "title": "\ud83d\udd17 Kh\u00f3a ngo\u1ea1i:\ntraining_warnings.semester_id \u2794 semesters.semester_id", "to": "semesters", "width": 2}, {"arrows": "to", "color": "#555555", "from": "final_grades", "title": "\ud83d\udd17 Kh\u00f3a ngo\u1ea1i:\nfinal_grades.student_id \u2794 users.user_id", "to": "users", "width": 2}, {"arrows": "to", "color": "#555555", "from": "final_grades", "title": "\ud83d\udd17 Kh\u00f3a ngo\u1ea1i:\nfinal_grades.semester_id \u2794 semesters.semester_id", "to": "semesters", "width": 2}, {"arrows": "to", "color": "#555555", "from": "student_enterprise_feedbacks", "title": "\ud83d\udd17 Kh\u00f3a ngo\u1ea1i:\nstudent_enterprise_feedbacks.student_id \u2794 users.user_id", "to": "users", "width": 2}, {"arrows": "to", "color": "#555555", "from": "student_enterprise_feedbacks", "title": "\ud83d\udd17 Kh\u00f3a ngo\u1ea1i:\nstudent_enterprise_feedbacks.enterprise_id \u2794 enterprises.enterprise_id", "to": "enterprises", "width": 2}, {"arrows": "to", "color": "#555555", "from": "student_enterprise_feedbacks", "title": "\ud83d\udd17 Kh\u00f3a ngo\u1ea1i:\nstudent_enterprise_feedbacks.semester_id \u2794 semesters.semester_id", "to": "semesters", "width": 2}, {"arrows": "to", "color": "#555555", "from": "request_logs", "title": "\ud83d\udd17 Kh\u00f3a ngo\u1ea1i:\nrequest_logs.user_id \u2794 users.user_id", "to": "users", "width": 2}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {"configure": {"enabled": true, "filter": ["physics"]}, "physics": {"barnesHut": {"gravitationalConstant": -3000, "centralGravity": 0.3, "springLength": 150, "springConstant": 0.04, "damping": 0.09, "avoidOverlap": 0.1}, "stabilization": {"enabled": true, "iterations": 200}}};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    </body>
+</html>
