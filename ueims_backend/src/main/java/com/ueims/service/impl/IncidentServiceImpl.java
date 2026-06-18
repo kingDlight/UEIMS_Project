@@ -201,16 +201,28 @@ public class IncidentServiceImpl implements IncidentService {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
+        String normalizedCat = normalizeCategory(request.getCategory());
+        log.info("[Incident] normalized category: '{}' -> '{}'", request.getCategory(), normalizedCat);
+
         Incident incident = Incident.builder()
                 .assignment(assignment)
                 .reportedBy(currentUser)
-                .category(normalizeCategory(request.getCategory()))
+                .category(normalizedCat)
                 .description(request.getDescription())
                 .evidenceUrls(request.getEvidenceUrls())
                 .status("OPEN")
                 .build();
 
-        Incident saved = repository.save(incident);
+        Incident saved;
+        try {
+            saved = repository.save(incident);
+        } catch (Exception ex) {
+            log.error("[Incident] DB save failed: category='{}', assignmentId={}, error={}",
+                    normalizedCat, request.getAssignmentId(), ex.getMessage());
+            throw new AppException(ErrorCode.DATA_INTEGRITY_VIOLATION,
+                    "Failed to save incident: " + ex.getMostSpecificCause().getMessage());
+        }
+
         // UC-49 POST-1: notify Training Manager + send urgent email
         try {
             notificationService.notifyTrainingManagerOfIncident(saved);
