@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
+import com.ueims.dto.request.InterviewRequest;
 import com.ueims.model.entity.Application;
 import com.ueims.model.entity.ApplicationStatus;
 import com.ueims.model.entity.Interview;
@@ -131,6 +132,69 @@ public class InterviewServiceImpl implements InterviewService {
                     "[UC-43 43.0.E2] Notification dispatch failed for interview {}: {}",
                     saved.getInterviewId(),
                     ex.getMessage());
+        }
+        return saved;
+    }
+
+    @Override
+    @Transactional
+    public Interview create(InterviewRequest request) {
+        if (request.getApplicationId() == null) {
+            throw new AppException(ErrorCode.MISSING_PARAMETER, "applicationId is required");
+        }
+        if (request.getScheduledTime() == null
+                || request.getScheduledTime().isBefore(LocalDateTime.now())) {
+            throw new AppException(ErrorCode.INTERVIEW_DATE_MUST_BE_IN_FUTURE);
+        }
+
+        Application application = applicationRepository
+                .findById(request.getApplicationId())
+                .orElseThrow(() -> new AppException(ErrorCode.APPLICATION_NOT_FOUND));
+
+        User currentUser = getCurrentUser();
+        if (currentUser.getEnterprise() == null
+                || application.getJobPost() == null
+                || application.getJobPost().getEnterprise() == null
+                || !application
+                        .getJobPost()
+                        .getEnterprise()
+                        .getEnterpriseId()
+                        .equals(currentUser.getEnterprise().getEnterpriseId())) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        if (application.getStatus() != ApplicationStatus.SCREENING_PASSED
+                && application.getStatus() != ApplicationStatus.INTERVIEW_SCHEDULED) {
+            throw new AppException(ErrorCode.INTERVIEW_ELIGIBILITY_RULE);
+        }
+
+        boolean isOverlapping = repository.existsByEnterpriseAndTime(
+                currentUser.getEnterprise().getEnterpriseId(), request.getScheduledTime());
+        if (isOverlapping) {
+            throw new AppException(ErrorCode.INTERVIEW_OVERLAP);
+        }
+
+        application.setStatus(ApplicationStatus.INTERVIEW_SCHEDULED);
+        applicationRepository.save(application);
+
+        Interview entity = Interview.builder()
+                .application(application)
+                .scheduledTime(request.getScheduledTime())
+                .durationMinutes(
+                        request.getDurationMinutes() != null ? request.getDurationMinutes() : 60)
+                .location(request.getLocation())
+                .meetingLink(request.getMeetingLink())
+                .status(request.getStatus() != null ? request.getStatus() : "SCHEDULED")
+                .studentConfirmed(Boolean.FALSE)
+                .build();
+
+        Interview saved = repository.save(entity);
+        try {
+            mailService.sendInterviewScheduled(saved);
+            notificationService.notifyInterviewScheduled(saved);
+        } catch (Exception ex) {
+            log.warn("[UC-43 43.0.E2] Notification dispatch failed for interview {}: {}",
+                    saved.getInterviewId(), ex.getMessage());
         }
         return saved;
     }

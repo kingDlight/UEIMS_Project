@@ -2,14 +2,17 @@ package com.ueims.service.impl;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import com.ueims.dto.request.IncidentReportRequest;
 import com.ueims.dto.request.IncidentRequest;
 import com.ueims.dto.request.IncidentResolveRequest;
+import com.ueims.dto.response.IncidentResponse;
 import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
 import com.ueims.model.entity.EnterpriseAssignment;
@@ -39,6 +42,21 @@ public class IncidentServiceImpl implements IncidentService {
     NotificationService notificationService;
 
     private static final String ASSIGNMENT_NOT_FOUND = "Assignment not found";
+
+    private static final Map<String, String> CATEGORY_ALIAS = Map.of(
+            "ATTENDANCE", "PROLONGED_ABSENCE",
+            "ATTITUDE", "POOR_ATTITUDE",
+            "CONFIDENTIALITY", "CONFIDENTIALITY_BREACH",
+            "PERFORMANCE", "POOR_ATTITUDE",
+            "SAFETY", "DISCIPLINARY_VIOLATION",
+            "OTHER", "OTHER"
+    );
+
+    private static String normalizeCategory(String raw) {
+        if (raw == null) return null;
+        String upper = raw.trim().toUpperCase().replace(' ', '_');
+        return CATEGORY_ALIAS.getOrDefault(upper, upper);
+    }
 
     @Override
     public List<Incident> findAll() {
@@ -148,7 +166,12 @@ public class IncidentServiceImpl implements IncidentService {
     }
 
     @Override
-    public Incident reportIncident(IncidentReportRequest request) {
+    @Transactional
+    public IncidentResponse reportIncident(IncidentReportRequest request) {
+        log.info("[Incident] reportIncident called. category='{}', descLen={}, assignmentId={}",
+                request.getCategory(),
+                request.getDescription() == null ? -1 : request.getDescription().length(),
+                request.getAssignmentId());
         // BR-41: Category and Description are mandatory
         if (request.getCategory() == null || request.getCategory().isBlank()) {
             throw new AppException(ErrorCode.FIELD_REQUIRED, "Category is required");
@@ -180,7 +203,7 @@ public class IncidentServiceImpl implements IncidentService {
         Incident incident = Incident.builder()
                 .assignment(assignment)
                 .reportedBy(currentUser)
-                .category(request.getCategory())
+                .category(normalizeCategory(request.getCategory()))
                 .description(request.getDescription())
                 .evidenceUrls(request.getEvidenceUrls())
                 .status("OPEN")
@@ -194,7 +217,7 @@ public class IncidentServiceImpl implements IncidentService {
         } catch (Exception ex) {
             log.warn("[UC-49] Incident notification failed: {}", ex.getMessage());
         }
-        return saved;
+        return IncidentResponse.from(saved);
     }
 
     @Override

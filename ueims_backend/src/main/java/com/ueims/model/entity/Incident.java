@@ -5,6 +5,8 @@ import java.util.List;
 
 import jakarta.persistence.*;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import lombok.*;
 
 @Entity
@@ -22,10 +24,16 @@ public class Incident extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "assignment_id", nullable = false)
+    @JsonIgnore
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private EnterpriseAssignment assignment;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reported_by", nullable = false)
+    @JsonIgnore
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private User reportedBy;
 
     @Column(name = "category", nullable = false, length = 50)
@@ -47,6 +55,9 @@ public class Incident extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "resolved_by")
+    @JsonIgnore
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private User resolvedBy;
 
     @Column(name = "resolved_at")

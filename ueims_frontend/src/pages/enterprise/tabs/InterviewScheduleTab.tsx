@@ -158,7 +158,7 @@ export const InterviewScheduleTab: React.FC = () => {
       setSubmitting(true);
       const dt: Dayjs = values.scheduledTime;
       const payload = {
-        application: { applicationId: values.applicationId },
+        applicationId: values.applicationId,
         scheduledTime: dt.toISOString(),
         durationMinutes: values.durationMinutes ?? 60,
         location: values.location,
