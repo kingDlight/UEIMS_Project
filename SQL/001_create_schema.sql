@@ -233,7 +233,7 @@ CREATE TABLE eligible_students (
     full_name       VARCHAR(255) NOT NULL,                           -- BR-17: Mandatory
     email           VARCHAR(255),                                    -- For auto-creating accounts
     major           VARCHAR(255) NOT NULL,                           -- BR-17: Mandatory
-    gpa             DECIMAL(3,2) NOT NULL,                           -- BR-17, BR-19: >= 2.0
+    gpa             TYPE DECIMAL(4,2);                               -- BR-17, BR-19: >= 2.0
     current_semester INT NOT NULL CHECK (current_semester BETWEEN 1 AND 9), -- BR-54: Semester-based access
     status          VARCHAR(20) NOT NULL DEFAULT 'ELIGIBLE'
                     CHECK (status IN ('ELIGIBLE', 'PENDING', 'ACCEPTED', 'MATCHED', 'OJT', 'CANCELLED')),
@@ -245,7 +245,7 @@ CREATE TABLE eligible_students (
     created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT chk_gpa_minimum CHECK (gpa >= 2.0),                  -- BR-19
+    CONSTRAINT chk_gpa_minimum CHECK (gpa >= 5.0 AND gpa <= 10.0),                  -- BR-19
     CONSTRAINT uq_student_semester UNIQUE (semester_id, student_code),
     -- BR-23: Cancelled must have reason + who cancelled
     CONSTRAINT chk_cancel_audit CHECK (
@@ -260,6 +260,10 @@ CREATE INDEX idx_eligible_status ON eligible_students(status);
 CREATE UNIQUE INDEX uq_eligible_user_semester 
     ON eligible_students(semester_id, user_id) 
     WHERE user_id IS NOT NULL;
+
+UPDATE eligible_students
+SET gpa = ROUND(gpa * 2.5, 2)
+WHERE gpa <= 4.0;
 
 -- TRIGGER: BR-22 — OJT approval only for ACCEPTED/MATCHED students
 -- BR-21: Auto-lock record when status changes to OJT
@@ -816,7 +820,7 @@ CREATE TABLE student_profiles (
     student_code    VARCHAR(20),
     university      VARCHAR(255),
     major           VARCHAR(255),
-    gpa             DECIMAL(3,2),
+    gpa             TYPE DECIMAL(4,2),
     skills          JSONB,                                           -- e.g., ["Java", "React"]
     bio             TEXT,
     cv_file_url     VARCHAR(1000),                                   -- BR-31: PDF only
@@ -831,6 +835,9 @@ CREATE TABLE student_profiles (
 
 CREATE INDEX idx_profiles_user ON student_profiles(user_id);
 
+UPDATE student_profiles
+SET gpa = ROUND(gpa * 2.5, 2)
+WHERE gpa <= 4.0 AND gpa IS NOT NULL;
 
 -- ============================================================
 -- MODULE 5: INTERNSHIP TRAINING & SUPERVISION (ENTERPRISE)
