@@ -33,11 +33,15 @@ TABLE semesters:
   Foreign Keys: (created_by) -> users(user_id)
 
 TABLE eligible_students:
-  Columns: eligible_id UUID [PK], semester_id UUID NOT NULL [UNIQUE], user_id UUID, student_code VARCHAR(20) NOT NULL [UNIQUE], full_name VARCHAR(255) NOT NULL, email VARCHAR(255), major VARCHAR(255) NOT NULL, gpa DECIMAL(3, 2) NOT NULL, current_semester INT NOT NULL, status VARCHAR(20) NOT NULL, is_locked BOOLEAN NOT NULL, imported_at TIMESTAMP NOT NULL, approved_at TIMESTAMP, cancelled_reason TEXT, cancelled_by UUID, created_at TIMESTAMP NOT NULL, updated_at TIMESTAMP NOT NULL
+  Columns: eligible_id UUID [PK], semester_id UUID NOT NULL [UNIQUE], user_id UUID, student_code VARCHAR(20) NOT NULL [UNIQUE], full_name VARCHAR(255) NOT NULL, email VARCHAR(255), major VARCHAR(255) NOT NULL, gpa DECIMAL(4, 2), current_semester INT NOT NULL, status VARCHAR(20) NOT NULL, is_locked BOOLEAN NOT NULL, imported_at TIMESTAMP NOT NULL, approved_at TIMESTAMP, cancelled_reason TEXT, cancelled_by UUID, created_at TIMESTAMP NOT NULL, updated_at TIMESTAMP NOT NULL
   Foreign Keys: (semester_id) -> semesters(semester_id), (user_id) -> users(user_id), (cancelled_by) -> users(user_id)
 
+TABLE eligible_student_status_history:
+  Columns: history_id UUID [PK], eligible_id UUID NOT NULL, old_status VARCHAR(20), new_status VARCHAR(20) NOT NULL, changed_by UUID, reason TEXT, changed_at TIMESTAMP NOT NULL
+  Foreign Keys: (eligible_id) -> eligible_students(eligible_id), (changed_by) -> users(user_id)
+
 TABLE system_announcements:
-  Columns: announcement_id UUID [PK], semester_id UUID, title VARCHAR(500) NOT NULL, content TEXT NOT NULL, status VARCHAR(20) NOT NULL, created_by UUID NOT NULL, published_at TIMESTAMP, created_at TIMESTAMP NOT NULL, updated_at TIMESTAMP NOT NULL, deleted_at TIMESTAMP
+  Columns: announcement_id UUID [PK], semester_id UUID, title VARCHAR(500) NOT NULL, content TEXT NOT NULL, status VARCHAR(20) NOT NULL, created_by UUID NOT NULL, published_at TIMESTAMP, created_at TIMESTAMP NOT NULL, updated_at TIMESTAMP NOT NULL, deleted_at TIMESTAMP, type VARCHAR(30), audience VARCHAR(30), target_role VARCHAR(30)
   Foreign Keys: (semester_id) -> semesters(semester_id), (created_by) -> users(user_id)
 
 TABLE enterprises:
@@ -56,17 +60,21 @@ TABLE applications:
   Columns: application_id UUID [PK], job_post_id UUID NOT NULL, student_id UUID NOT NULL, cv_file_url VARCHAR(1000) NOT NULL, cv_snapshot_url VARCHAR(1000), cv_download_count INT NOT NULL, status VARCHAR(30) NOT NULL, screening_note TEXT, screened_by UUID, screened_at TIMESTAMP, withdrawn_at TIMESTAMP, created_at TIMESTAMP NOT NULL, updated_at TIMESTAMP NOT NULL, deleted_at TIMESTAMP
   Foreign Keys: (job_post_id) -> job_posts(job_post_id), (student_id) -> users(user_id), (screened_by) -> users(user_id)
 
+TABLE placement_applications:
+  Columns: application_id UUID [PK], student_id UUID NOT NULL [UNIQUE], enterprise_id UUID NOT NULL [UNIQUE], semester_id UUID NOT NULL [UNIQUE], status /* workflow status. pending_approval = chờ tm; approved = đã match với dn; */ /* rejected = tm bác (kèm lý do); withdrawn = sv tự rút. */ VARCHAR(20) NOT NULL, cover_letter /* lý do sv muốn apply (do sv nhập) */ TEXT, reviewed_by /* audit duyệt (do tm) */ UUID, reviewed_at TIMESTAMP, rejection_reason TEXT, created_at /* audit chung (baseentity-style) */ TIMESTAMP NOT NULL, updated_at TIMESTAMP NOT NULL, created_by UUID, updated_by UUID, is_replacement BOOLEAN NOT NULL, replaces_application_id UUID [UNIQUE]
+  Foreign Keys: (student_id) -> users(user_id), (enterprise_id) -> enterprises(enterprise_id), (semester_id) -> semesters(semester_id), (reviewed_by /* audit duyệt (do tm) */) -> users(user_id), (created_by) -> users(user_id), (updated_by) -> users(user_id), (replaces_application_id) -> placement_applications(application_id)
+
 TABLE interviews:
   Columns: interview_id UUID [PK], application_id UUID NOT NULL, scheduled_datetime TIMESTAMP NOT NULL, duration_minutes INT, location VARCHAR(500), meeting_link VARCHAR(1000), cancel_reason TEXT, canceled_at TIMESTAMP, reschedule_reason TEXT, status VARCHAR(20) NOT NULL, student_confirmed BOOLEAN NOT NULL, confirmed_at TIMESTAMP, student_decline_reason TEXT, result VARCHAR(10), result_note TEXT, decided_by UUID, decided_at TIMESTAMP, created_at TIMESTAMP NOT NULL, updated_at TIMESTAMP NOT NULL
   Foreign Keys: (application_id) -> applications(application_id), (decided_by) -> users(user_id)
 
 TABLE student_profiles:
-  Columns: profile_id UUID [PK], user_id UUID NOT NULL [UNIQUE], student_code VARCHAR(20), university VARCHAR(255), major VARCHAR(255), gpa DECIMAL(3, 2), skills JSONB, bio TEXT, cv_file_url VARCHAR(1000), cv_file_size INT, created_at TIMESTAMP NOT NULL, updated_at TIMESTAMP NOT NULL, deleted_at TIMESTAMP
+  Columns: profile_id UUID [PK], user_id UUID NOT NULL [UNIQUE], student_code VARCHAR(20), university VARCHAR(255), major VARCHAR(255), gpa DECIMAL(4, 2), skills JSONB, bio TEXT, cv_file_url VARCHAR(1000), cv_file_size INT, created_at TIMESTAMP NOT NULL, updated_at TIMESTAMP NOT NULL, deleted_at TIMESTAMP
   Foreign Keys: (user_id) -> users(user_id)
 
 TABLE enterprise_assignments:
-  Columns: assignment_id UUID [PK], enterprise_id UUID NOT NULL, student_id UUID NOT NULL [UNIQUE], semester_id UUID NOT NULL [UNIQUE], supervisor_name VARCHAR(255), supervisor_email VARCHAR(255), supervisor_phone VARCHAR(20), assigned_by UUID NOT NULL, status VARCHAR(20) NOT NULL, assigned_at TIMESTAMP NOT NULL, created_at TIMESTAMP NOT NULL, updated_at TIMESTAMP NOT NULL, start_date DATE, end_date DATE
-  Foreign Keys: (enterprise_id) -> enterprises(enterprise_id), (student_id) -> users(user_id), (semester_id) -> semesters(semester_id), (assigned_by) -> users(user_id)
+  Columns: assignment_id UUID [PK], enterprise_id UUID NOT NULL, student_id UUID NOT NULL [UNIQUE], semester_id UUID NOT NULL [UNIQUE], supervisor_name VARCHAR(255), supervisor_email VARCHAR(255), supervisor_phone VARCHAR(20), assigned_by UUID NOT NULL, status VARCHAR(20) NOT NULL, assigned_at TIMESTAMP NOT NULL, created_at TIMESTAMP NOT NULL, updated_at TIMESTAMP NOT NULL, start_date DATE, end_date DATE, termination_reason TEXT, terminated_at TIMESTAMP, replaced_by_assignment_id UUID
+  Foreign Keys: (enterprise_id) -> enterprises(enterprise_id), (student_id) -> users(user_id), (semester_id) -> semesters(semester_id), (assigned_by) -> users(user_id), (replaced_by_assignment_id) -> enterprise_assignments(assignment_id)
 
 TABLE internship_plans:
   Columns: plan_id UUID [PK], assignment_id UUID NOT NULL [UNIQUE], created_at TIMESTAMP NOT NULL, updated_at TIMESTAMP NOT NULL, deleted_at TIMESTAMP
@@ -113,10 +121,10 @@ TABLE student_enterprise_feedbacks:
   Foreign Keys: (student_id) -> users(user_id), (enterprise_id) -> enterprises(enterprise_id), (semester_id) -> semesters(semester_id)
 
 VIEW v_semester_statistics:
-  Depends on: final_grades, interviews, job_posts, eligible_students, semesters, applications
+  Depends on: job_posts, semesters, eligible_students, final_grades, applications, interviews
 
 VIEW v_at_risk_students:
-  Depends on: weekly_reports, users, enterprises, student_profiles, semesters, enterprise_assignments
+  Depends on: weekly_reports, semesters, enterprise_assignments, student_profiles, enterprises, users
 
 TABLE user_sessions:
   Columns: token_id VARCHAR(36) [PK], email VARCHAR(100) NOT NULL, last_activity TIMESTAMP, expires_at TIMESTAMP NOT NULL

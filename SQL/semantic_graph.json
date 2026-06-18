@@ -383,8 +383,8 @@
             "nullable": false
           },
           "gpa": {
-            "type": "DECIMAL(3, 2)",
-            "nullable": false
+            "type": "DECIMAL(4, 2)",
+            "nullable": true
           },
           "current_semester": {
             "type": "INT",
@@ -427,9 +427,49 @@
           "eligible_id"
         ],
         "unique_keys": [
-          "semester_id",
-          "student_code"
+          "student_code",
+          "semester_id"
         ]
+      }
+    },
+    {
+      "id": "eligible_student_status_history",
+      "type": "TABLE",
+      "attributes": {
+        "columns": {
+          "history_id": {
+            "type": "UUID",
+            "nullable": true
+          },
+          "eligible_id": {
+            "type": "UUID",
+            "nullable": false
+          },
+          "old_status": {
+            "type": "VARCHAR(20)",
+            "nullable": true
+          },
+          "new_status": {
+            "type": "VARCHAR(20)",
+            "nullable": false
+          },
+          "changed_by": {
+            "type": "UUID",
+            "nullable": true
+          },
+          "reason": {
+            "type": "TEXT",
+            "nullable": true
+          },
+          "changed_at": {
+            "type": "TIMESTAMP",
+            "nullable": false
+          }
+        },
+        "primary_keys": [
+          "history_id"
+        ],
+        "unique_keys": []
       }
     },
     {
@@ -475,6 +515,18 @@
           },
           "deleted_at": {
             "type": "TIMESTAMP",
+            "nullable": true
+          },
+          "type": {
+            "type": "VARCHAR(30)",
+            "nullable": true
+          },
+          "audience": {
+            "type": "VARCHAR(30)",
+            "nullable": true
+          },
+          "target_role": {
+            "type": "VARCHAR(30)",
             "nullable": true
           }
         },
@@ -610,8 +662,8 @@
           "semester_enterprise_id"
         ],
         "unique_keys": [
-          "enterprise_id",
-          "semester_id"
+          "semester_id",
+          "enterprise_id"
         ]
       }
     },
@@ -752,6 +804,83 @@
       }
     },
     {
+      "id": "placement_applications",
+      "type": "TABLE",
+      "attributes": {
+        "columns": {
+          "application_id": {
+            "type": "UUID",
+            "nullable": true
+          },
+          "student_id": {
+            "type": "UUID",
+            "nullable": false
+          },
+          "enterprise_id": {
+            "type": "UUID",
+            "nullable": false
+          },
+          "semester_id": {
+            "type": "UUID",
+            "nullable": false
+          },
+          "status /* workflow status. pending_approval = chờ tm; approved = đã match với dn; */ /* rejected = tm bác (kèm lý do); withdrawn = sv tự rút. */": {
+            "type": "VARCHAR(20)",
+            "nullable": false
+          },
+          "cover_letter /* lý do sv muốn apply (do sv nhập) */": {
+            "type": "TEXT",
+            "nullable": true
+          },
+          "reviewed_by /* audit duyệt (do tm) */": {
+            "type": "UUID",
+            "nullable": true
+          },
+          "reviewed_at": {
+            "type": "TIMESTAMP",
+            "nullable": true
+          },
+          "rejection_reason": {
+            "type": "TEXT",
+            "nullable": true
+          },
+          "created_at /* audit chung (baseentity-style) */": {
+            "type": "TIMESTAMP",
+            "nullable": false
+          },
+          "updated_at": {
+            "type": "TIMESTAMP",
+            "nullable": false
+          },
+          "created_by": {
+            "type": "UUID",
+            "nullable": true
+          },
+          "updated_by": {
+            "type": "UUID",
+            "nullable": true
+          },
+          "is_replacement": {
+            "type": "BOOLEAN",
+            "nullable": false
+          },
+          "replaces_application_id": {
+            "type": "UUID",
+            "nullable": true
+          }
+        },
+        "primary_keys": [
+          "application_id"
+        ],
+        "unique_keys": [
+          "replaces_application_id",
+          "semester_id",
+          "enterprise_id",
+          "student_id"
+        ]
+      }
+    },
+    {
       "id": "interviews",
       "type": "TABLE",
       "attributes": {
@@ -865,7 +994,7 @@
             "nullable": true
           },
           "gpa": {
-            "type": "DECIMAL(3, 2)",
+            "type": "DECIMAL(4, 2)",
             "nullable": true
           },
           "skills": {
@@ -964,6 +1093,18 @@
           },
           "end_date": {
             "type": "DATE",
+            "nullable": true
+          },
+          "termination_reason": {
+            "type": "TEXT",
+            "nullable": true
+          },
+          "terminated_at": {
+            "type": "TIMESTAMP",
+            "nullable": true
+          },
+          "replaced_by_assignment_id": {
+            "type": "UUID",
             "nullable": true
           }
         },
@@ -1546,8 +1687,8 @@
           "feedback_id"
         ],
         "unique_keys": [
-          "enterprise_id",
           "semester_id",
+          "enterprise_id",
           "student_id"
         ]
       }
@@ -1557,12 +1698,12 @@
       "type": "VIEW",
       "attributes": {
         "depends_on": [
-          "final_grades",
-          "interviews",
           "job_posts",
-          "eligible_students",
           "semesters",
-          "applications"
+          "eligible_students",
+          "final_grades",
+          "applications",
+          "interviews"
         ]
       }
     },
@@ -1572,11 +1713,11 @@
       "attributes": {
         "depends_on": [
           "weekly_reports",
-          "users",
-          "enterprises",
-          "student_profiles",
           "semesters",
-          "enterprise_assignments"
+          "enterprise_assignments",
+          "student_profiles",
+          "enterprises",
+          "users"
         ]
       }
     },
@@ -1807,6 +1948,34 @@
       }
     },
     {
+      "source": "eligible_student_status_history",
+      "target": "eligible_students",
+      "type": "FOREIGN_KEY",
+      "attributes": {
+        "source_cols": [
+          "eligible_id"
+        ],
+        "target_cols": [
+          "eligible_id"
+        ],
+        "on_delete": null
+      }
+    },
+    {
+      "source": "eligible_student_status_history",
+      "target": "users",
+      "type": "FOREIGN_KEY",
+      "attributes": {
+        "source_cols": [
+          "changed_by"
+        ],
+        "target_cols": [
+          "user_id"
+        ],
+        "on_delete": null
+      }
+    },
+    {
       "source": "system_announcements",
       "target": "semesters",
       "type": "FOREIGN_KEY",
@@ -1975,6 +2144,104 @@
       }
     },
     {
+      "source": "placement_applications",
+      "target": "users",
+      "type": "FOREIGN_KEY",
+      "attributes": {
+        "source_cols": [
+          "student_id"
+        ],
+        "target_cols": [
+          "user_id"
+        ],
+        "on_delete": null
+      }
+    },
+    {
+      "source": "placement_applications",
+      "target": "enterprises",
+      "type": "FOREIGN_KEY",
+      "attributes": {
+        "source_cols": [
+          "enterprise_id"
+        ],
+        "target_cols": [
+          "enterprise_id"
+        ],
+        "on_delete": null
+      }
+    },
+    {
+      "source": "placement_applications",
+      "target": "semesters",
+      "type": "FOREIGN_KEY",
+      "attributes": {
+        "source_cols": [
+          "semester_id"
+        ],
+        "target_cols": [
+          "semester_id"
+        ],
+        "on_delete": null
+      }
+    },
+    {
+      "source": "placement_applications",
+      "target": "users",
+      "type": "FOREIGN_KEY",
+      "attributes": {
+        "source_cols": [
+          "reviewed_by /* audit duyệt (do tm) */"
+        ],
+        "target_cols": [
+          "user_id"
+        ],
+        "on_delete": null
+      }
+    },
+    {
+      "source": "placement_applications",
+      "target": "users",
+      "type": "FOREIGN_KEY",
+      "attributes": {
+        "source_cols": [
+          "created_by"
+        ],
+        "target_cols": [
+          "user_id"
+        ],
+        "on_delete": null
+      }
+    },
+    {
+      "source": "placement_applications",
+      "target": "users",
+      "type": "FOREIGN_KEY",
+      "attributes": {
+        "source_cols": [
+          "updated_by"
+        ],
+        "target_cols": [
+          "user_id"
+        ],
+        "on_delete": null
+      }
+    },
+    {
+      "source": "placement_applications",
+      "target": "placement_applications",
+      "type": "FOREIGN_KEY",
+      "attributes": {
+        "source_cols": [
+          "replaces_application_id"
+        ],
+        "target_cols": [
+          "application_id"
+        ],
+        "on_delete": null
+      }
+    },
+    {
       "source": "interviews",
       "target": "applications",
       "type": "FOREIGN_KEY",
@@ -2068,6 +2335,20 @@
         ],
         "target_cols": [
           "user_id"
+        ],
+        "on_delete": null
+      }
+    },
+    {
+      "source": "enterprise_assignments",
+      "target": "enterprise_assignments",
+      "type": "FOREIGN_KEY",
+      "attributes": {
+        "source_cols": [
+          "replaced_by_assignment_id"
+        ],
+        "target_cols": [
+          "assignment_id"
         ],
         "on_delete": null
       }
@@ -2382,31 +2663,7 @@
     },
     {
       "source": "v_semester_statistics",
-      "target": "final_grades",
-      "type": "DEPENDS_ON",
-      "attributes": {
-        "metadata": "VIEW_SELECT"
-      }
-    },
-    {
-      "source": "v_semester_statistics",
-      "target": "interviews",
-      "type": "DEPENDS_ON",
-      "attributes": {
-        "metadata": "VIEW_SELECT"
-      }
-    },
-    {
-      "source": "v_semester_statistics",
       "target": "job_posts",
-      "type": "DEPENDS_ON",
-      "attributes": {
-        "metadata": "VIEW_SELECT"
-      }
-    },
-    {
-      "source": "v_semester_statistics",
-      "target": "eligible_students",
       "type": "DEPENDS_ON",
       "attributes": {
         "metadata": "VIEW_SELECT"
@@ -2422,7 +2679,31 @@
     },
     {
       "source": "v_semester_statistics",
+      "target": "eligible_students",
+      "type": "DEPENDS_ON",
+      "attributes": {
+        "metadata": "VIEW_SELECT"
+      }
+    },
+    {
+      "source": "v_semester_statistics",
+      "target": "final_grades",
+      "type": "DEPENDS_ON",
+      "attributes": {
+        "metadata": "VIEW_SELECT"
+      }
+    },
+    {
+      "source": "v_semester_statistics",
       "target": "applications",
+      "type": "DEPENDS_ON",
+      "attributes": {
+        "metadata": "VIEW_SELECT"
+      }
+    },
+    {
+      "source": "v_semester_statistics",
+      "target": "interviews",
       "type": "DEPENDS_ON",
       "attributes": {
         "metadata": "VIEW_SELECT"
@@ -2431,30 +2712,6 @@
     {
       "source": "v_at_risk_students",
       "target": "weekly_reports",
-      "type": "DEPENDS_ON",
-      "attributes": {
-        "metadata": "VIEW_SELECT"
-      }
-    },
-    {
-      "source": "v_at_risk_students",
-      "target": "users",
-      "type": "DEPENDS_ON",
-      "attributes": {
-        "metadata": "VIEW_SELECT"
-      }
-    },
-    {
-      "source": "v_at_risk_students",
-      "target": "enterprises",
-      "type": "DEPENDS_ON",
-      "attributes": {
-        "metadata": "VIEW_SELECT"
-      }
-    },
-    {
-      "source": "v_at_risk_students",
-      "target": "student_profiles",
       "type": "DEPENDS_ON",
       "attributes": {
         "metadata": "VIEW_SELECT"
@@ -2471,6 +2728,30 @@
     {
       "source": "v_at_risk_students",
       "target": "enterprise_assignments",
+      "type": "DEPENDS_ON",
+      "attributes": {
+        "metadata": "VIEW_SELECT"
+      }
+    },
+    {
+      "source": "v_at_risk_students",
+      "target": "student_profiles",
+      "type": "DEPENDS_ON",
+      "attributes": {
+        "metadata": "VIEW_SELECT"
+      }
+    },
+    {
+      "source": "v_at_risk_students",
+      "target": "enterprises",
+      "type": "DEPENDS_ON",
+      "attributes": {
+        "metadata": "VIEW_SELECT"
+      }
+    },
+    {
+      "source": "v_at_risk_students",
+      "target": "users",
       "type": "DEPENDS_ON",
       "attributes": {
         "metadata": "VIEW_SELECT"
