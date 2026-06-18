@@ -6,11 +6,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.ueims.model.entity.Enterprise;
 import com.ueims.model.entity.Role;
+import com.ueims.model.entity.StudentProfile;
 import com.ueims.model.entity.User;
 import com.ueims.model.entity.UserRole;
 import com.ueims.model.entity.UserRoleId;
+import com.ueims.repository.EnterpriseRepository;
 import com.ueims.repository.RoleRepository;
+import com.ueims.repository.StudentProfileRepository;
 import com.ueims.repository.UserRepository;
 import com.ueims.repository.UserRoleRepository;
 
@@ -29,6 +33,8 @@ public class DataSeeder implements CommandLineRunner {
     UserRepository userRepository;
     RoleRepository roleRepository;
     UserRoleRepository userRoleRepository;
+    StudentProfileRepository studentProfileRepository;
+    EnterpriseRepository enterpriseRepository;
     PasswordEncoder passwordEncoder;
 
     @Value("${app.seed.default-password:defaultPassword}")
@@ -53,10 +59,7 @@ public class DataSeeder implements CommandLineRunner {
             log.info("Seeding {} Account...", email);
 
             Role role = roleRepository.findById(roleName).orElseGet(() -> {
-                Role r = Role.builder()
-                        .roleName(roleName)
-                        .description(roleDesc)
-                        .build();
+                Role r = Role.builder().roleName(roleName).description(roleDesc).build();
                 return roleRepository.save(r);
             });
 
@@ -77,6 +80,30 @@ public class DataSeeder implements CommandLineRunner {
                     .build();
 
             userRoleRepository.save(userRole);
+
+            if ("STUDENT".equals(roleName)) {
+                StudentProfile profile = StudentProfile.builder()
+                        .user(user)
+                        .studentCode("HE" + System.currentTimeMillis() % 100000)
+                        .major("Computer Science")
+                        .build();
+                studentProfileRepository.save(profile);
+                log.info("Successfully seeded StudentProfile for {}.", email);
+            } else if ("ENTERPRISE".equals(roleName)) {
+                Enterprise enterprise = Enterprise.builder()
+                        .companyName("FPT Software")
+                        .taxCode("TAX" + System.currentTimeMillis() % 100000)
+                        .address("Hòa Lạc, HN")
+                        .status("APPROVED")
+                        .build();
+                enterprise = enterpriseRepository.save(enterprise);
+
+                user.setEnterprise(enterprise);
+                userRepository.save(user);
+
+                log.info("Successfully seeded Enterprise profile for {}.", email);
+            }
+
             log.info("Successfully seeded {} account.", email);
         }
     }
