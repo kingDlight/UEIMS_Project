@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Modal, Dropdown, Drawer, Form, Input, Button, App, Tooltip } from 'antd';
 import type { MenuProps } from 'antd';
 import { BellOutlined, DownOutlined, MenuOutlined } from '@ant-design/icons';
-import { X, Mail, Phone, ShieldCheck, Activity, Camera, CheckCheck, ImageDown, Search } from 'lucide-react';
+import { X, Mail, Phone, ShieldCheck, Activity, CheckCheck, ImageDown, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { SmallPill } from '@/pages/training-manager/components/shared/SmallPill';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -267,10 +267,6 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
   const [detailsItem, setDetailsItem] = useState<NotificationItem | null>(null);
 
   const [customAvatarUrl, setCustomAvatarUrl] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const [cropModalOpen, setCropModalOpen] = useState(false);
-  const [tempImageUrl, setTempImageUrl] = useState<string | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [availableAvatars, setAvailableAvatars] = useState<Array<{ filename: string; url: string; size: string }>>([]);
   const [pickerLoading, setPickerLoading] = useState(false);
@@ -311,19 +307,6 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
 
   const handleMarkAllRead = async () => {
     await markAllNotificationsAsRead();
-  };
-
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setTempImageUrl(reader.result as string);
-        setCropModalOpen(true);
-      };
-      reader.readAsDataURL(file);
-    }
-    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   useEffect(() => {
@@ -769,41 +752,21 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
               </div>
 
               <button
-                onClick={() => fileInputRef.current?.click()}
+                onClick={openPicker}
+                title="Chọn từ thư viện"
                 style={{
                   position: 'absolute', bottom: 0, right: 0, width: 26, height: 26, borderRadius: '50%',
                   background: '#fff', border: '1px solid #e2e8f0', boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
                   color: '#475569', transition: 'all 0.2s', padding: 0
                 }}
-                onMouseOver={(e) => { e.currentTarget.style.color = '#ea580c'; e.currentTarget.style.borderColor = '#ea580c'; }}
-                onFocus={(e) => { e.currentTarget.style.color = '#ea580c'; e.currentTarget.style.borderColor = '#ea580c'; }}
+                onMouseOver={(e) => { e.currentTarget.style.color = '#0ea5e9'; e.currentTarget.style.borderColor = '#0ea5e9'; }}
+                onFocus={(e) => { e.currentTarget.style.color = '#0ea5e9'; e.currentTarget.style.borderColor = '#0ea5e9'; }}
                 onMouseOut={(e) => { e.currentTarget.style.color = '#475569'; e.currentTarget.style.borderColor = '#e2e8f0'; }}
                 onBlur={(e) => { e.currentTarget.style.color = '#475569'; e.currentTarget.style.borderColor = '#e2e8f0'; }}
               >
-                <Camera size={12} strokeWidth={2.5} />
-              </button>
-              <button
-                onClick={openPicker}
-                title="Chọn từ thư viện"
-                style={{
-                  position: 'absolute', bottom: -8, right: -8, width: 24, height: 24, borderRadius: '50%',
-                  background: '#fff', border: '1px solid #e2e8f0', boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
-                  color: '#475569', transition: 'all 0.2s', padding: 0
-                }}
-                onMouseOver={(e) => { e.currentTarget.style.color = '#0ea5e9'; e.currentTarget.style.borderColor = '#0ea5e9'; }}
-                onMouseOut={(e) => { e.currentTarget.style.color = '#475569'; e.currentTarget.style.borderColor = '#e2e8f0'; }}
-              >
                 <ImageDown size={12} strokeWidth={2.5} />
               </button>
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleAvatarChange}
-                accept="image/*"
-                style={{ display: 'none' }}
-              />
             </div>
 
             {/* Name & Role */}
@@ -987,43 +950,6 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
           </div>
         </Form>
       </Modal>
-
-      <CropAvatarModal
-        open={cropModalOpen}
-        tempImageUrl={tempImageUrl}
-        onCancel={() => setCropModalOpen(false)}
-        onSave={async (url) => {
-          try {
-            const dataUrlToBlob = (dataUrl: string): { blob: Blob; ext: string; mime: string } => {
-              const [meta, b64] = dataUrl.split(',');
-              const mime = /data:(.*?);/.exec(meta)?.[1] ?? 'image/jpeg';
-              const ext = mime === 'image/png' ? 'png' : mime === 'image/gif' ? 'gif' : mime === 'image/webp' ? 'webp' : 'jpg';
-              const bin = atob(b64);
-              const arr = new Uint8Array(bin.length);
-              for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
-              return { blob: new Blob([arr], { type: mime }), ext, mime };
-            };
-            const { blob, ext } = dataUrlToBlob(url);
-            const form = new FormData();
-            form.append('file', blob, `avatar.${ext}`);
-            const res = await api.post<{ avatarUrl: string }>(
-              '/users/me/avatar',
-              form,
-              { headers: { 'Content-Type': 'multipart/form-data' } }
-            );
-            const newAvatarUrl = res.data?.avatarUrl;
-            const absoluteUrl = toAbsoluteAssetUrl(newAvatarUrl);
-            if (absoluteUrl) {
-              setCustomAvatarUrl(absoluteUrl);
-              updateUser({ avatarUrl: absoluteUrl });
-            }
-          } catch (err) {
-            console.error('Failed to upload avatar:', err);
-            message.error(t('layout.avatarUploadFailed', 'Failed to upload avatar. Please try again.'));
-          }
-          setCropModalOpen(false);
-        }}
-      />
 
       {pickerOpen && (
         <div

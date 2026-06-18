@@ -181,3 +181,5 @@ SQL/ERD/M04_Internship_Reports.dbml
 openapi.json
 
 uploads/
+**/uploads/
+**/uploads/avatars/
