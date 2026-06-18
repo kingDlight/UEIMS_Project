@@ -44,7 +44,7 @@ public class UserController {
 
     @GetMapping("/avatars/{filename:.+}")
     public ResponseEntity<byte[]> getAvatar(@org.springframework.web.bind.annotation.PathVariable String filename) throws java.io.IOException {
-        java.nio.file.Path path = java.nio.file.Paths.get("uploads/avatars").resolve(filename).normalize();
+        java.nio.file.Path path = java.nio.file.Paths.get(System.getProperty("user.dir"), "uploads", "avatars").resolve(filename).normalize();
         if (!path.startsWith(java.nio.file.Paths.get("uploads/avatars"))) {
             return ResponseEntity.badRequest().build();
         }

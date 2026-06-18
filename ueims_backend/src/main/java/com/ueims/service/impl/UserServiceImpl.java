@@ -65,7 +65,7 @@ public class UserServiceImpl implements UserService {
         User currentUser = repository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-        Path uploadDir = Paths.get("uploads", "avatars");
+        Path uploadDir = Paths.get(System.getProperty("user.dir"), "uploads", "avatars");
         Files.createDirectories(uploadDir);
 
         String original = file.getOriginalFilename() == null ? "" : file.getOriginalFilename();

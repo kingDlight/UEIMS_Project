@@ -11,6 +11,13 @@ import { SmallPill } from '@/pages/training-manager/components/shared/SmallPill'
 import { useAuthStore } from '@/stores/useAuthStore';
 import { AuthService } from '@/services/AuthService';
 import { api } from '@/services/api';
+
+const toAbsoluteAssetUrl = (path?: string | null): string | null => {
+  if (!path) return null;
+  if (path.startsWith('http') || path.startsWith('data:') || path.startsWith('blob:')) return path;
+  const base = (import.meta.env.VITE_API_URL || 'http://localhost:8080/api').replace(/\/api\/?$/, '');
+  return `${base}${path.startsWith('/') ? path : `/${path}`}`;
+};
 import { useNotificationStore, type NotificationItem } from '@/stores/useNotificationStore';
 import { useAnnouncementStore } from '@/stores/useAnnouncementStore';
 import { useNotificationStream } from '@/hooks/useNotificationStream';
@@ -339,7 +346,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
   };
 
   useEffect(() => {
-    setCustomAvatarUrl(user?.avatarUrl ?? null);
+    setCustomAvatarUrl(toAbsoluteAssetUrl(user?.avatarUrl));
   }, [user?.userId]);
 
   const handleNavigate = (key: string) => {
@@ -959,9 +966,10 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
               { headers: { 'Content-Type': 'multipart/form-data' } }
             );
             const newAvatarUrl = res.data?.avatarUrl;
-            if (newAvatarUrl) {
-              setCustomAvatarUrl(newAvatarUrl);
-              updateUser({ avatarUrl: newAvatarUrl });
+            const absoluteUrl = toAbsoluteAssetUrl(newAvatarUrl);
+            if (absoluteUrl) {
+              setCustomAvatarUrl(absoluteUrl);
+              updateUser({ avatarUrl: absoluteUrl });
             }
           } catch (err) {
             console.error('Failed to upload avatar:', err);
