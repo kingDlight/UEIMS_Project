@@ -680,7 +680,7 @@ CREATE TABLE interviews (
     canceled_at     TIMESTAMP,
     reschedule_reason   TEXT,
     status          VARCHAR(20) NOT NULL DEFAULT 'SCHEDULED'
-                    CHECK (status IN ('SCHEDULED', 'CONFIRMED', 'POSTPONED', 'CANCELLED', 'COMPLETED')),
+                    CHECK (status IN ('SCHEDULED', 'CONFIRMED', 'RESCHEDULED', 'CANCELLED', 'CANCELED', 'COMPLETED', 'RESULT_RECORDED')),
     student_confirmed   BOOLEAN NOT NULL DEFAULT FALSE,              -- BR-49: Irreversible once true
     confirmed_at    TIMESTAMP,
     student_decline_reason TEXT,
@@ -754,25 +754,23 @@ BEGIN
     END IF;
 
     -- 2. Validate that recruitment result is only logged after the scheduled time has started (BR-37)
-    IF NEW.result IS NOT NULL AND NEW.status = 'COMPLETED' THEN
+    IF NEW.result IS NOT NULL AND NEW.status IN ('COMPLETED', 'RESULT_RECORDED') THEN
         IF CURRENT_TIMESTAMP < NEW.scheduled_datetime THEN
             RAISE EXCEPTION 'Cannot record interview result before the interview scheduled time has started (BR-37).';
         END IF;
     END IF;
 
     -- 3. Overlap Check (BR-35): Candidate student or hosting enterprise cannot have overlapping interviews
-    -- Get student_id and enterprise_id from application and job_post
     SELECT a.student_id, jp.enterprise_id INTO student_uuid, ent_uuid
     FROM applications a
     JOIN job_posts jp ON a.job_post_id = jp.job_post_id
     WHERE a.application_id = NEW.application_id;
 
-    -- Check overlap for student
     SELECT EXISTS (
         SELECT 1 FROM interviews i
         JOIN applications a2 ON i.application_id = a2.application_id
         WHERE i.interview_id != COALESCE(NEW.interview_id, '00000000-0000-0000-0000-000000000000'::UUID)
-          AND i.status NOT IN ('CANCELLED')
+          AND i.status NOT IN ('CANCELLED', 'CANCELED')
           AND a2.student_id = student_uuid
           AND NEW.scheduled_datetime < (i.scheduled_datetime + (i.duration_minutes || ' minutes')::INTERVAL)
           AND (NEW.scheduled_datetime + (NEW.duration_minutes || ' minutes')::INTERVAL) > i.scheduled_datetime
@@ -782,13 +780,12 @@ BEGIN
         RAISE EXCEPTION 'Student has an overlapping interview schedule (BR-35).';
     END IF;
 
-    -- Check overlap for enterprise
     SELECT EXISTS (
         SELECT 1 FROM interviews i
         JOIN applications a2 ON i.application_id = a2.application_id
         JOIN job_posts jp2 ON a2.job_post_id = jp2.job_post_id
         WHERE i.interview_id != COALESCE(NEW.interview_id, '00000000-0000-0000-0000-000000000000'::UUID)
-          AND i.status NOT IN ('CANCELLED')
+          AND i.status NOT IN ('CANCELLED', 'CANCELED')
           AND jp2.enterprise_id = ent_uuid
           AND NEW.scheduled_datetime < (i.scheduled_datetime + (i.duration_minutes || ' minutes')::INTERVAL)
           AND (NEW.scheduled_datetime + (NEW.duration_minutes || ' minutes')::INTERVAL) > i.scheduled_datetime
@@ -801,6 +798,7 @@ BEGIN
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
 
 CREATE TRIGGER trg_interview_rules
     BEFORE INSERT OR UPDATE ON interviews
@@ -1319,9 +1317,13 @@ CREATE TABLE notifications (
     recipient_id    UUID NOT NULL REFERENCES users(user_id),
     title           VARCHAR(500) NOT NULL,
     message         TEXT NOT NULL,
-    type            VARCHAR(30) NOT NULL
-                    CHECK (type IN ('WARNING', 'INCIDENT', 'REPORT_FEEDBACK', 'INTERVIEW_INVITE',
-                                    'SYSTEM_ANNOUNCEMENT', 'GRADE_PUBLISHED', 'APPROVAL', 'GENERAL')),
+    type            VARCHAR(30) NOT NULL,
+    CONSTRAINT notifications_type_check
+    CHECK (type IN (
+        'WARNING', 'INCIDENT', 'REPORT_FEEDBACK', 'INTERVIEW_INVITE',
+        'INTERVIEW_SCHEDULED', 'INTERVIEW_RESCHEDULED', 'INTERVIEW_CANCELED', 'INTERVIEW_RESULT',
+        'SYSTEM_ANNOUNCEMENT', 'GRADE_PUBLISHED', 'APPROVAL', 'GENERAL'
+    )),
     reference_entity VARCHAR(100),
     reference_id    UUID,
     is_read         BOOLEAN NOT NULL DEFAULT FALSE,
