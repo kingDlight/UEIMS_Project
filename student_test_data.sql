@@ -17,6 +17,8 @@ ALTER TABLE student_enterprise_feedbacks DISABLE TRIGGER ALL;
 ALTER TABLE internship_plans DISABLE TRIGGER ALL;
 ALTER TABLE internship_plan_items DISABLE TRIGGER ALL;
 ALTER TABLE notifications DISABLE TRIGGER ALL;
+ALTER TABLE eligible_students DISABLE TRIGGER ALL;
+ALTER TABLE users DISABLE TRIGGER ALL;
 
 -- 1. Cập nhật thông tin User và Eligible Student
 UPDATE users SET email = 'dominhgiabaobmg@gmail.com' WHERE user_id = '4c12b835-bbdb-4094-b46c-d643ba179e16';
@@ -168,6 +170,8 @@ ALTER TABLE student_enterprise_feedbacks ENABLE TRIGGER ALL;
 ALTER TABLE internship_plans ENABLE TRIGGER ALL;
 ALTER TABLE internship_plan_items ENABLE TRIGGER ALL;
 ALTER TABLE notifications ENABLE TRIGGER ALL;
+ALTER TABLE eligible_students ENABLE TRIGGER ALL;
+ALTER TABLE users ENABLE TRIGGER ALL;
 
 -- ============================================================
 -- KẾT THÚC SCRIPT
