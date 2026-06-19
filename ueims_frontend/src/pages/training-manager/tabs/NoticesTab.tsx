@@ -1,4 +1,4 @@
-﻿import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { Table, Modal, Form, Input, Select, Button, Popconfirm, App, Tooltip, Switch } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import {
@@ -272,7 +272,7 @@ export const NoticesTab: React.FC = () => {
           type: n.type,
           status: n.status === 'PUBLISHED' ? 'Published' : 'Draft',
           publishedDate: n.publishedAt,
-          createdDate: n.createdAt,
+          createdDate: n.createdAt ?? new Date().toISOString(),
         };
       });
       setNotices(mapped);

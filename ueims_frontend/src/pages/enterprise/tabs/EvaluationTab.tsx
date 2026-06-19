@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { StarOutlined, LockOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import { ApplicationService } from '@/services/ApplicationService';
 import { EnterpriseEvaluationService } from '@/services/EnterpriseEvaluationService';
+import { EnterpriseAssignmentService } from '@/services/EnterpriseAssignmentService';
 import { c } from '../constants';
 
 // ============================================================

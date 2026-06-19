@@ -7,7 +7,7 @@ export type PageKey =
   | 'ojt'
   | 'analytics'
   | 'incidents'
-  | 'reports'
+  | 'system-reports'
   | 'weekly-reports'
   | 'calendar'
   | 'notifications';

@@ -187,8 +187,8 @@ export const ScheduleTab: React.FC = () => {
                       <h4 style={{ fontSize: 15, fontWeight: 600, color: cc.textPrimary, margin: '0 0 8px' }}>{interview.jobTitle || 'Interview'}</h4>
                       <p style={{ fontSize: 13, color: cc.textMuted, margin: '0 0 8px' }}><BankOutlined /> {interview.enterpriseName}</p>
                       <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: cc.textSecondary }}><CalendarOutlined /> {new Date(interview.scheduledAt).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: cc.textSecondary }}><ClockCircleOutlined /> {new Date(interview.scheduledAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: cc.textSecondary }}><CalendarOutlined /> {new Date(interview.scheduledTime).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: cc.textSecondary }}><ClockCircleOutlined /> {new Date(interview.scheduledTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
                         {interview.type && <SmallBadge label={interview.type} variant="info" />}
                       </div>
                       {interview.meetingLink && (
@@ -201,8 +201,8 @@ export const ScheduleTab: React.FC = () => {
                       )}
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
-                      <SmallBadge label={interview.status || 'PENDING'} variant={interview.status === 'CONFIRMED' ? 'success' : interview.status === 'DECLINED' ? 'error' : 'warning'} />
-                      {interview.status === 'PENDING' && (
+                      <SmallBadge label={interview.status || 'SCHEDULED'} variant={interview.status === 'CONFIRMED' ? 'success' : (interview.status === 'CANCELLED' || interview.status === 'DECLINED') ? 'error' : 'warning'} />
+                      {interview.status === 'SCHEDULED' && (
                         <>
                           <CTAButton variant="success" icon={<CheckCircleOutlined />} onClick={() => setConfirming(interview.interviewId)}>{t('confirm', 'Confirm')}</CTAButton>
                           <CTAButton variant="danger" icon={<CloseCircleOutlined />} onClick={() => setDeclining(interview)}>{t('decline', 'Decline')}</CTAButton>

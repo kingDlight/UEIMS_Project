@@ -45,7 +45,7 @@ public class JobPostServiceImpl implements JobPostService {
     @Override
     @Transactional(readOnly = true)
     public List<JobPost> findActive() {
-        List<JobPost> activeJobs = repository.findByStatusAndDeletedAtIsNull("OPEN");
+        List<JobPost> activeJobs = repository.findByStatusAndSemester_StatusAndDeletedAtIsNull("OPEN", "ACTIVE");
 
         try {
             User currentUser = getCurrentUser();

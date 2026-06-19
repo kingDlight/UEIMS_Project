@@ -364,7 +364,9 @@
       "sem7_9Completed": "Kỳ 7-9 - Đã hoàn thành"
     },
     "ojtStatuses": {
-      "preRegistration": "Chưa đến kỳ",
+      "notQualified": "Chưa đủ ĐK",
+      "notQualifiedDesc": "GPA dưới mức quy định — chưa đủ điều kiện OJT",
+      "preRegistration": "Chưa tới kỳ OJT",
       "preRegistrationDesc": "Chưa thể đăng ký OJT — học kỳ dưới mức yêu cầu",
       "eligible": "Đủ điều kiện",
       "eligibleDesc": "Đạt mọi tiêu chí OJT — sẵn sàng đăng ký thực tập",

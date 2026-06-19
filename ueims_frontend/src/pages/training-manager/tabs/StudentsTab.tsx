@@ -131,7 +131,10 @@ type OJT_STATUS_KEY =
   | 'ACCEPTED'
   | 'MATCHED'
   | 'OJT'
-  | 'CANCELLED';
+  | 'CANCELLED'
+  | 'PRE_REGISTRATION'
+  | 'NOT_QUALIFIED'
+  | 'COMPLETED';
 
 const OJT_STATUS_VALUES: OJT_STATUS_KEY[] = [
   'ELIGIBLE',
@@ -140,6 +143,9 @@ const OJT_STATUS_VALUES: OJT_STATUS_KEY[] = [
   'MATCHED',
   'OJT',
   'CANCELLED',
+  'PRE_REGISTRATION',
+  'NOT_QUALIFIED',
+  'COMPLETED',
 ];
 
 type OJTStatusConfig = {
@@ -148,8 +154,17 @@ type OJTStatusConfig = {
 };
 
 const OJT_STATUS: Record<string, OJTStatusConfig> = {
+  PRE_REGISTRATION: {
+    color: st.textSecondary, bg: hexToRgba(st.textSecondary, 0.06), borderColor: hexToRgba(st.textSecondary, 0.25), semRange: 'Sem. 1-4', key: 'preRegistration', descKey: 'preRegistrationDesc',
+  },
+  NOT_QUALIFIED: {
+    color: st.error, bg: hexToRgba(st.error, 0.06), borderColor: hexToRgba(st.error, 0.25), semRange: 'Sem. 5+', key: 'notQualified', descKey: 'notQualifiedDesc',
+  },
+  COMPLETED: {
+    color: st.success, bg: hexToRgba(st.success, 0.06), borderColor: hexToRgba(st.success, 0.25), semRange: 'Sem. 7+', key: 'completed', descKey: 'completedDesc',
+  },
   ELIGIBLE: {
-    color: st.info,     bg: hexToRgba(st.info,     0.06), borderColor: hexToRgba(st.info,     0.25), semRange: 'Sem. 1-5', key: 'eligible', descKey: 'eligibleDesc',
+    color: st.info,     bg: hexToRgba(st.info,     0.06), borderColor: hexToRgba(st.info,     0.25), semRange: 'Sem. 5', key: 'eligible', descKey: 'eligibleDesc',
   },
   PENDING: {
     color: st.warning,  bg: hexToRgba(st.warning,  0.06), borderColor: hexToRgba(st.warning,  0.25), semRange: '',          key: 'pending',    descKey: 'pendingDesc',
@@ -173,12 +188,24 @@ const OJT_STATUS: Record<string, OJTStatusConfig> = {
  * Priority: explicit DB status → sem-based hint (safe default: ELIGIBLE).
  * Never returns a value outside OJT_STATUS_VALUES so the badge always renders.
  */
-function resolveStatusKey(r: { status?: string | null; currentSemester: number }): OJT_STATUS_KEY {
+function resolveStatusKey(r: { status?: string | null; currentSemester: number; gpa?: number }): OJT_STATUS_KEY {
   const raw = (r.status ?? '').trim();
+  let key: OJT_STATUS_KEY = 'ELIGIBLE';
   if (raw && OJT_STATUS_VALUES.includes(raw as OJT_STATUS_KEY)) {
-    return raw as OJT_STATUS_KEY;
+    key = raw as OJT_STATUS_KEY;
   }
-  return 'ELIGIBLE';
+  
+  // Transform ELIGIBLE to PRE_REGISTRATION, COMPLETED or NOT_QUALIFIED based on semester and GPA
+  if (key === 'ELIGIBLE') {
+    if (r.currentSemester < 5) {
+      return 'PRE_REGISTRATION';
+    } else if (r.currentSemester >= 7) {
+      return 'COMPLETED';
+    } else if (r.gpa != null && r.gpa < 5.0) {
+      return 'NOT_QUALIFIED';
+    }
+  }
+  return key;
 }
 
 // ============================================================
@@ -838,12 +865,13 @@ export const StudentsTab: React.FC = () => {
   }, [refetchStudents]);
 
   const handleImport = async () => {
-    if (!uploadedFile || !fileInputRef.current?.files?.[0]) return;
+    const actualFile = uploadedFile?.originFileObj;
+    if (!actualFile) return;
     try {
       setImporting(true);
       const activeSemester = await SemesterService.getActiveSemester();
       await EligibleStudentService.importFromExcel(
-        fileInputRef.current.files[0],
+        actualFile as File,
         activeSemester?.semesterId ?? ''
       );
       message.success({ content: t('studentsTab.importSuccess'), key: 'import' });
@@ -1378,7 +1406,7 @@ export const StudentsTab: React.FC = () => {
             }}
           >
             Only students with GPA{' '}
-            <strong>2.0 or higher</strong> will be imported as Eligible.
+            <strong>5.0 or higher</strong> will be imported as Eligible.
           </div>
         </div>
         <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>

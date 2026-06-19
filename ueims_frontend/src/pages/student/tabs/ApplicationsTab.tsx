@@ -171,7 +171,7 @@ export const ApplicationsTab: React.FC = () => {
                         {app.enterpriseName?.charAt(0) || 'E'}
                       </div>
                       <div>
-                        <h4 style={{ fontSize: 14, fontWeight: 600, color: cc.textPrimary, margin: '0 0 4px' }}>{app.jobTitle || t('internshipPosition', 'Internship Position')}</h4>
+                        <h4 style={{ fontSize: 14, fontWeight: 600, color: cc.textPrimary, margin: '0 0 4px' }}>{app.jobPostTitle || t('internshipPosition', 'Internship Position')}</h4>
                         <p style={{ fontSize: 12, color: cc.textMuted, margin: '0 0 8px' }}>{app.enterpriseName}</p>
                         <SmallBadge label={statusLabel(app.status)} variant={statusVariant(app.status)} />
                       </div>
@@ -190,7 +190,7 @@ export const ApplicationsTab: React.FC = () => {
                       <div style={{ display: 'grid', gap: 12 }}>
                         <div>
                           <p style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, margin: '0 0 4px' }}>{t('position', 'Position')}</p>
-                          <p style={{ fontSize: 13, color: cc.textPrimary, margin: 0 }}>{app.jobTitle || 'N/A'}</p>
+                          <p style={{ fontSize: 13, color: cc.textPrimary, margin: 0 }}>{app.jobPostTitle || 'N/A'}</p>
                         </div>
                         <div>
                           <p style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, margin: '0 0 4px' }}>{t('enterprise', 'Enterprise')}</p>

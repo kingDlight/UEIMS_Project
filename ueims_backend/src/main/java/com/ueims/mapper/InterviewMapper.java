@@ -14,6 +14,7 @@ public interface InterviewMapper {
             target = "enterpriseName",
             expression = "java(entity.getApplication().getJobPost().getEnterprise().getCompanyName())")
     @Mapping(target = "jobTitle", expression = "java(entity.getApplication().getJobPost().getTitle())")
+    @Mapping(target = "studentName", expression = "java(entity.getApplication().getStudent().getFullName())")
     InterviewDTO toDto(Interview entity);
 
     Interview toEntity(InterviewDTO dto);

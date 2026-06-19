@@ -14,6 +14,8 @@ import com.ueims.model.entity.JobPost;
 public interface JobPostRepository extends JpaRepository<JobPost, UUID> {
     List<JobPost> findByStatusAndDeletedAtIsNull(String status);
 
+    List<JobPost> findByStatusAndSemester_StatusAndDeletedAtIsNull(String status, String semesterStatus);
+
     List<JobPost> findAllByDeletedAtIsNull();
 
     List<JobPost> findByEnterprise_EnterpriseId(UUID enterpriseId);

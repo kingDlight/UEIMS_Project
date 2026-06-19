@@ -67,10 +67,14 @@ public class StudentEnterpriseFeedbackServiceImpl implements StudentEnterpriseFe
         User currentUser = getCurrentUser();
 
         // Check if student is eligible
-        eligibleStudentRepository
+        com.ueims.model.entity.EligibleStudent eligibleStudent = eligibleStudentRepository
                 .findByUser_UserIdAndSemester_SemesterId(
                         currentUser.getUserId(), entity.getSemester().getSemesterId())
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_ELIGIBLE));
+
+        if (eligibleStudent.getCurrentSemester() == null || eligibleStudent.getCurrentSemester() < 7) {
+            throw new AppException(ErrorCode.STUDENT_NOT_IN_SEMESTER_7);
+        }
 
         // Enforce ownership
         if (!currentUser.getUserId().equals(entity.getStudent().getUserId())) {

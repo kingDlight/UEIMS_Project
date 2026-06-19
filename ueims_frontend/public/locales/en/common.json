@@ -364,6 +364,8 @@
       "sem7_9Completed": "Sem. 7-9 - Completed"
     },
     "ojtStatuses": {
+      "notQualified": "Not Qualified",
+      "notQualifiedDesc": "GPA below threshold - not eligible for OJT",
       "preRegistration": "Pre-Registration",
       "preRegistrationDesc": "Cannot register OJT — semester below eligibility threshold",
       "eligible": "Eligible",

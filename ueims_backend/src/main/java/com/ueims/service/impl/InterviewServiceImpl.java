@@ -121,7 +121,7 @@ public class InterviewServiceImpl implements InterviewService {
         application.setStatus(ApplicationStatus.INTERVIEW_SCHEDULED);
         applicationRepository.save(application);
 
-        Interview saved = repository.save(entity);
+        Interview saved = repository.saveAndFlush(entity);
 
         // 43.0: send email + in-app notification to the student (43.0.E2 logged on failure)
         try {
@@ -184,10 +184,9 @@ public class InterviewServiceImpl implements InterviewService {
                 .location(request.getLocation())
                 .meetingLink(request.getMeetingLink())
                 .status(request.getStatus() != null ? request.getStatus() : "SCHEDULED")
-                .studentConfirmed(Boolean.FALSE)
                 .build();
 
-        Interview saved = repository.save(entity);
+        Interview saved = repository.saveAndFlush(entity);
         try {
             mailService.sendInterviewScheduled(saved);
             notificationService.notifyInterviewScheduled(saved);
@@ -280,7 +279,7 @@ public class InterviewServiceImpl implements InterviewService {
         if (entity.getFeedback() != null) existing.setFeedback(entity.getFeedback());
         existing.setUpdatedAt(LocalDateTime.now());
 
-        Interview saved = repository.save(existing);
+        Interview saved = repository.saveAndFlush(existing);
         // 43.2: send reschedule email to student
         try {
             mailService.sendInterviewRescheduled(saved);
@@ -320,30 +319,64 @@ public class InterviewServiceImpl implements InterviewService {
         String upper = result == null ? "PASS" : result.toUpperCase();
         existing.setResult(upper);
         existing.setFeedback(notes);
-        existing.setStatus("RESULT_RECORDED");
+        existing.setStatus("COMPLETED");
         existing.setUpdatedAt(LocalDateTime.now());
+        existing.setDecidedBy(currentUser);
 
         // Update application status accordingly
         Application app = existing.getApplication();
         if ("PASS".equals(upper)) {
             app.setStatus(ApplicationStatus.ACCEPTED);
 
-            // Auto-create EnterpriseAssignment
-            com.ueims.model.entity.EnterpriseAssignment assignment =
-                    com.ueims.model.entity.EnterpriseAssignment.builder()
-                            .student(app.getStudent())
-                            .enterprise(app.getJobPost().getEnterprise())
-                            .semester(app.getJobPost().getSemester())
-                            .status("IN_PROGRESS")
-                            .build();
-            enterpriseAssignmentRepository.save(assignment);
+            // BR-22: Create Enterprise Assignment if not exists
+            boolean exists =
+                    enterpriseAssignmentRepository
+                            .existsByStudent_UserIdAndEnterprise_EnterpriseIdAndSemester_SemesterId(
+                                    app.getStudent().getUserId(),
+                                    app.getJobPost().getEnterprise().getEnterpriseId(),
+                                    app.getJobPost().getSemester().getSemesterId());
+
+            if (!exists) {
+                com.ueims.model.entity.EnterpriseAssignment assignment =
+                        com.ueims.model.entity.EnterpriseAssignment.builder()
+                                .student(app.getStudent())
+                                .enterprise(app.getJobPost().getEnterprise())
+                                .semester(app.getJobPost().getSemester())
+                                .status("ACTIVE")
+                                .assignedBy(currentUser)
+                                .build();
+                enterpriseAssignmentRepository.save(assignment);
+
+                // BR-26: Withdraw other pending applications for this student in the current semester
+                java.util.List<Application> otherApps = applicationRepository.findByStudent_UserId(
+                        app.getStudent().getUserId());
+                for (Application otherApp : otherApps) {
+                    if (!otherApp.getApplicationId().equals(app.getApplicationId())
+                            && otherApp.getJobPost() != null
+                            && otherApp.getJobPost().getSemester() != null
+                            && otherApp.getJobPost()
+                                    .getSemester()
+                                    .getSemesterId()
+                                    .equals(app.getJobPost().getSemester().getSemesterId())) {
+
+                        if (otherApp.getStatus() == ApplicationStatus.PENDING
+                                || otherApp.getStatus() == ApplicationStatus.SCREENING_PASSED
+                                || otherApp.getStatus() == ApplicationStatus.INTERVIEW_SCHEDULED) {
+
+                            otherApp.setStatus(ApplicationStatus.WITHDRAWN);
+                            otherApp.setUpdatedAt(LocalDateTime.now());
+                            applicationRepository.save(otherApp);
+                        }
+                    }
+                }
+            }
         } else if ("FAIL".equals(upper)) {
             app.setStatus(ApplicationStatus.REJECTED);
             app.setRejectionReason(notes);
         }
         applicationRepository.save(app);
 
-        Interview saved = repository.save(existing);
+        Interview saved = repository.saveAndFlush(existing);
         // UC-44: send result email to the student
         try {
             mailService.sendInterviewResult(saved, upper, notes);
@@ -377,7 +410,7 @@ public class InterviewServiceImpl implements InterviewService {
         existing.setCancelReason(reason);
         existing.setCanceledAt(LocalDateTime.now());
         existing.setUpdatedAt(LocalDateTime.now());
-        Interview saved = repository.save(existing);
+        Interview saved = repository.saveAndFlush(existing);
 
         // 43.3: send cancellation email + notification
         try {
@@ -421,7 +454,7 @@ public class InterviewServiceImpl implements InterviewService {
         existing.setStatus("RESCHEDULED");
         existing.setRescheduleReason(reason);
         existing.setUpdatedAt(LocalDateTime.now());
-        Interview saved = repository.save(existing);
+        Interview saved = repository.saveAndFlush(existing);
         try {
             mailService.sendInterviewRescheduled(saved);
             notificationService.notifyInterviewRescheduled(saved);

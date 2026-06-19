@@ -17,4 +17,5 @@ public class InterviewDTO extends Interview {
     private String enterpriseName;
     private String jobTitle;
     private UUID applicationId;
+    private String studentName;
 }

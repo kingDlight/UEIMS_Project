@@ -73,7 +73,7 @@ public class ExcelImportUtil {
             throw new AppException(ErrorCode.INVALID_EXCEL_FORMAT);
         }
         BigDecimal gpa = new BigDecimal(String.valueOf(cell.getNumericCellValue()));
-        if (gpa.compareTo(new BigDecimal("2.0")) < 0) {
+        if (gpa.compareTo(BigDecimal.ZERO) < 0 || gpa.compareTo(new BigDecimal("10.0")) > 0) {
             throw new AppException(ErrorCode.INVALID_EXCEL_FORMAT);
         }
         return gpa;

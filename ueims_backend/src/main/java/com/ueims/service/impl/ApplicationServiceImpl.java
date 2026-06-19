@@ -23,6 +23,7 @@ import com.ueims.model.entity.JobPost;
 import com.ueims.model.entity.User;
 import com.ueims.repository.ApplicationRepository;
 import com.ueims.repository.EligibleStudentRepository;
+import com.ueims.repository.EnterpriseAssignmentRepository;
 import com.ueims.repository.JobPostRepository;
 import com.ueims.repository.StudentProfileRepository;
 import com.ueims.repository.UserRepository;
@@ -43,6 +44,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     UserRepository userRepository;
     EligibleStudentRepository eligibleStudentRepository;
     StudentProfileRepository studentProfileRepository;
+    EnterpriseAssignmentRepository enterpriseAssignmentRepository;
     ApplicationMapper mapper;
 
     @Override
@@ -140,12 +142,21 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     private void validateStudentEligibility(User student, JobPost jobPost) {
+        if (enterpriseAssignmentRepository.existsByStudent_UserIdAndSemester_SemesterIdAndStatus(
+                student.getUserId(), jobPost.getSemester().getSemesterId(), "ACTIVE")) {
+            throw new AppException(ErrorCode.STUDENT_HAS_ACTIVE_PLACEMENT);
+        }
+
         EligibleStudent eligibleStudent = eligibleStudentRepository
                 .findByUser_UserIdAndSemester_SemesterId(
                         student.getUserId(), jobPost.getSemester().getSemesterId())
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_ELIGIBLE));
         if (eligibleStudent.getCurrentSemester() == null || eligibleStudent.getCurrentSemester() != 5) {
             throw new AppException(ErrorCode.STUDENT_NOT_IN_SEMESTER_5);
+        }
+        if (eligibleStudent.getGpa() == null
+                || eligibleStudent.getGpa().compareTo(new java.math.BigDecimal("5.0")) < 0) {
+            throw new AppException(ErrorCode.STUDENT_NOT_ELIGIBLE);
         }
 
         boolean hasActiveApplication =

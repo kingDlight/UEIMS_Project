@@ -1,4 +1,4 @@
-﻿import { ApplicationService } from './ApplicationService';
+import { ApplicationService } from './ApplicationService';
 import { EnterpriseAssignmentService } from './EnterpriseAssignmentService';
 import { InterviewService } from './InterviewService';
 import { WeeklyReportService } from './WeeklyReportService';
@@ -23,7 +23,7 @@ type ApplicationDto = {
 
 type InterviewDto = {
   status?: string;
-  scheduledDatetime?: string;
+  scheduledTime?: string;
   interviewId?: string;
   enterpriseName?: string;
   createdAt?: string;
@@ -166,8 +166,8 @@ export const StudentDashboardService = {
 
       const now = new Date().getTime();
       upNextInterviews = allInterviews
-        .filter((i) => i.scheduledDatetime && new Date(i.scheduledDatetime).getTime() >= now && i.status !== 'DECLINED' && i.status !== 'CANCELLED')
-        .sort((a, b) => new Date(a.scheduledDatetime || '').getTime() - new Date(b.scheduledDatetime || '').getTime());
+        .filter((i) => i.scheduledTime && new Date(i.scheduledTime).getTime() >= now && i.status !== 'DECLINED' && i.status !== 'CANCELLED')
+        .sort((a, b) => new Date(a.scheduledTime || '').getTime() - new Date(b.scheduledTime || '').getTime());
     }
 
     // Reports count & Logged Hours (Assume 40 hours per approved report)

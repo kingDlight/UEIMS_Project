@@ -121,10 +121,15 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
         }
 
         // Validate Eligible Student
-        eligibleStudentRepository
+        com.ueims.model.entity.EligibleStudent eligibleStudent = eligibleStudentRepository
                 .findByUser_UserIdAndSemester_SemesterId(
                         currentUser.getUserId(), assignment.getSemester().getSemesterId())
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_ELIGIBLE));
+
+        // BR-54: Only Semester 6 students can submit weekly reports
+        if (eligibleStudent.getCurrentSemester() == null || eligibleStudent.getCurrentSemester() != 6) {
+            throw new AppException(ErrorCode.STUDENT_NOT_IN_SEMESTER_6);
+        }
 
         // BR-52: Weekly Report Submission Window
         LocalDate startDate = assignment.getSemester().getStartDate();
@@ -252,9 +257,6 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
         existing.setFeedback(feedback);
         WeeklyReport saved = repository.save(existing);
         try {
-            // Rejected → student may edit again, so we also set status to PENDING_REVIEW to allow edits
-            saved.setStatus("PENDING_REVIEW");
-            repository.save(saved);
             notificationService.notifyWeeklyReportRejected(saved, feedback);
         } catch (Exception ex) {
             log.warn("[UC-48] Reject notification failed: {}", ex.getMessage());

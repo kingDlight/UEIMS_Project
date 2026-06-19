@@ -47,7 +47,7 @@ export const InterviewResultTab: React.FC = () => {
       const data: InterviewRow[] = res.data?.result ?? res.data ?? [];
       // Only show completed interviews that don't yet have a result
       setRows(
-        (Array.isArray(data) ? data : []).filter(i => (i.status ?? '').toUpperCase() === 'COMPLETED')
+        (Array.isArray(data) ? data : []).filter(i => (i.status ?? '').toUpperCase() === 'COMPLETED' && !i.result)
       );
     } catch (err: any) {
       message.error(err?.response?.data?.message ?? 'Failed to load interviews.');

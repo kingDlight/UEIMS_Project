@@ -680,7 +680,7 @@ CREATE TABLE interviews (
     canceled_at     TIMESTAMP,
     reschedule_reason   TEXT,
     status          VARCHAR(20) NOT NULL DEFAULT 'SCHEDULED'
-                    CHECK (status IN ('SCHEDULED', 'CONFIRMED', 'RESCHEDULED', 'CANCELLED', 'CANCELED', 'COMPLETED', 'RESULT_RECORDED')),
+                    CHECK (status IN ('SCHEDULED', 'CONFIRMED', 'POSTPONED', 'CANCELLED', 'COMPLETED')),
     student_confirmed   BOOLEAN NOT NULL DEFAULT FALSE,              -- BR-49: Irreversible once true
     confirmed_at    TIMESTAMP,
     student_decline_reason TEXT,
@@ -754,7 +754,7 @@ BEGIN
     END IF;
 
     -- 2. Validate that recruitment result is only logged after the scheduled time has started (BR-37)
-    IF NEW.result IS NOT NULL AND NEW.status IN ('COMPLETED', 'RESULT_RECORDED') THEN
+    IF NEW.result IS NOT NULL AND NEW.status = 'COMPLETED' THEN
         IF CURRENT_TIMESTAMP < NEW.scheduled_datetime THEN
             RAISE EXCEPTION 'Cannot record interview result before the interview scheduled time has started (BR-37).';
         END IF;
@@ -770,7 +770,7 @@ BEGIN
         SELECT 1 FROM interviews i
         JOIN applications a2 ON i.application_id = a2.application_id
         WHERE i.interview_id != COALESCE(NEW.interview_id, '00000000-0000-0000-0000-000000000000'::UUID)
-          AND i.status NOT IN ('CANCELLED', 'CANCELED')
+          AND i.status NOT IN ('CANCELLED')
           AND a2.student_id = student_uuid
           AND NEW.scheduled_datetime < (i.scheduled_datetime + (i.duration_minutes || ' minutes')::INTERVAL)
           AND (NEW.scheduled_datetime + (NEW.duration_minutes || ' minutes')::INTERVAL) > i.scheduled_datetime
@@ -785,7 +785,7 @@ BEGIN
         JOIN applications a2 ON i.application_id = a2.application_id
         JOIN job_posts jp2 ON a2.job_post_id = jp2.job_post_id
         WHERE i.interview_id != COALESCE(NEW.interview_id, '00000000-0000-0000-0000-000000000000'::UUID)
-          AND i.status NOT IN ('CANCELLED', 'CANCELED')
+          AND i.status NOT IN ('CANCELLED')
           AND jp2.enterprise_id = ent_uuid
           AND NEW.scheduled_datetime < (i.scheduled_datetime + (i.duration_minutes || ' minutes')::INTERVAL)
           AND (NEW.scheduled_datetime + (NEW.duration_minutes || ' minutes')::INTERVAL) > i.scheduled_datetime
@@ -1320,7 +1320,6 @@ CREATE TABLE notifications (
     CONSTRAINT notifications_type_check
     CHECK (type IN (
         'WARNING', 'INCIDENT', 'REPORT_FEEDBACK', 'INTERVIEW_INVITE',
-        'INTERVIEW_SCHEDULED', 'INTERVIEW_RESCHEDULED', 'INTERVIEW_CANCELED', 'INTERVIEW_RESULT',
         'SYSTEM_ANNOUNCEMENT', 'GRADE_PUBLISHED', 'APPROVAL', 'GENERAL'
     )),
     reference_entity VARCHAR(100),

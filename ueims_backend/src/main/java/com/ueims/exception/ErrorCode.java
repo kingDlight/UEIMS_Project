@@ -32,6 +32,12 @@ public enum ErrorCode {
     STUDENT_ID_MANDATORY(1019, "Student ID is mandatory", HttpStatus.BAD_REQUEST),
     STUDENT_NOT_ELIGIBLE(1020, "Student is not registered or not eligible in this semester", HttpStatus.BAD_REQUEST),
     STUDENT_NOT_IN_SEMESTER_5(1021, "Only Semester 5 students are permitted to apply for jobs", HttpStatus.BAD_REQUEST),
+    STUDENT_NOT_IN_SEMESTER_6(
+            1022,
+            "Only Semester 6 students are permitted to submit weekly reports and final reports",
+            HttpStatus.BAD_REQUEST),
+    STUDENT_NOT_IN_SEMESTER_7(
+            1023, "Only Semester 7-9 students are permitted to submit enterprise feedback", HttpStatus.BAD_REQUEST),
     INVALID_FINAL_GRADE(1024, "Final grade must be at least 5.0 to pass", HttpStatus.BAD_REQUEST),
 
     // Semester / import related errors

@@ -47,6 +47,9 @@ class ApplicationServiceImplTest {
     private StudentProfileRepository studentProfileRepository;
 
     @Mock
+    private com.ueims.repository.EnterpriseAssignmentRepository enterpriseAssignmentRepository;
+
+    @Mock
     private ApplicationMapper mapper;
 
     @InjectMocks
