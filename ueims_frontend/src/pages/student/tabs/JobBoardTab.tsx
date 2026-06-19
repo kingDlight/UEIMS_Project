@@ -129,8 +129,8 @@ export const JobBoardTab: React.FC = () => {
       const matchesSearch = !searchTerm || 
         job.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         job.enterpriseName?.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesTech = techFilter.length === 0 || 
-        (job.requiredSkills && job.requiredSkills.some((skill: string) => techFilter.includes(skill.toLowerCase())));
+      const matchesTech = techFilter.length === 0 ||
+        (Array.isArray(job.requiredSkills) && job.requiredSkills.some((skill: string) => techFilter.includes(skill.toLowerCase())));
       return matchesSearch && matchesTech;
     });
   }, [jobs, searchTerm, techFilter]);
