@@ -162,8 +162,8 @@ public class AuthenticationService {
     private AuthenticationResponse handleAuthenticationSuccess(User user, String deviceId) {
         userSessionManagementService.invalidateOldSessions(user.getEmail());
 
-        String token = generateToken(user, validDuration, ACCESS_TOKEN_TYPE);
-        String refreshToken = generateToken(user, refreshableDuration, REFRESH_TOKEN_TYPE);
+        String token = generateAccessToken(user, validDuration);
+        String refreshToken = generateRefreshToken(user, refreshableDuration);
 
         saveAuthSessions(user, token, refreshToken, deviceId);
         auditLoginSuccess(user);
@@ -371,7 +371,7 @@ public class AuthenticationService {
 
             var user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
 
-            var token = generateToken(user, validDuration, ACCESS_TOKEN_TYPE);
+            var token = generateAccessToken(user, validDuration);
 
             saveAccessSession(user, token, request.getDeviceId());
 
@@ -405,7 +405,7 @@ public class AuthenticationService {
         }
     }
 
-    private String generateToken(User user, long durationInSeconds, String tokenType) {
+    private String generateAccessToken(User user, long durationInSeconds) {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
 
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
@@ -413,7 +413,7 @@ public class AuthenticationService {
                 .subject(user.getEmail())
                 .issuer("ueims.com")
                 .claim("authorities", buildScope(user))
-                .claim("token_type", tokenType)
+                .claim("token_type", ACCESS_TOKEN_TYPE)
                 .issueTime(new Date())
                 .expirationTime(new Date(Instant.now()
                         .plus(durationInSeconds, ChronoUnit.SECONDS)
@@ -430,6 +430,34 @@ public class AuthenticationService {
                         user.getEnterprise() != null
                                 ? user.getEnterprise().getEnterpriseId().toString()
                                 : null)
+                .build();
+
+        Payload payload = new Payload(jwtClaimsSet.toJSONObject());
+
+        JWSObject jwsObject = new JWSObject(header, payload);
+
+        try {
+            jwsObject.sign(new MACSigner(signerKey.getBytes()));
+            return jwsObject.serialize();
+        } catch (JOSEException e) {
+            log.error("Cannot create token", e);
+            throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
+        }
+    }
+
+    private String generateRefreshToken(User user, long durationInSeconds) {
+        JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
+
+        JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
+                .claim("userId", user.getUserId().toString())
+                .subject(user.getEmail())
+                .issuer("ueims.com")
+                .claim("token_type", REFRESH_TOKEN_TYPE)
+                .issueTime(new Date())
+                .expirationTime(new Date(Instant.now()
+                        .plus(durationInSeconds, ChronoUnit.SECONDS)
+                        .toEpochMilli()))
+                .jwtID(UUID.randomUUID().toString())
                 .build();
 
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
