@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { App, Pagination } from 'antd';
+import { App, Spin, Pagination } from 'antd';
 import { motion } from 'framer-motion';
 import { TrophyOutlined, CalendarOutlined, TeamOutlined, RightOutlined, SearchOutlined, EnvironmentOutlined } from '@ant-design/icons';
 import { NeuSurface } from '../components/shared/NeuSurface';
