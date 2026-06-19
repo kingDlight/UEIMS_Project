@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { App, Spin } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { motion } from 'framer-motion';
 import {
   LeftOutlined,
   EnvironmentOutlined,
@@ -17,33 +18,51 @@ import {
   GiftOutlined,
   FileTextOutlined,
 } from '@ant-design/icons';
-import { NeuSurface } from '@/components/common';
-import { CTAButton, SmallBadge } from '@/components/common';
+import { NeuSurface } from './components/shared/NeuSurface';
+import { SmallBadge } from './components/shared/SmallBadge';
 import { JobPostService } from '@/services/JobPostService';
 import { ApplicationService } from '@/services/ApplicationService';
 import { useStudentProfileQuery } from '@/hooks/useStudentProfile';
 import { ModernLayout } from '@/components/layout/ModernLayout';
-import { navItems } from '@/pages/student/constants';
+import { navItems, cc, hexToRgba } from './constants';
 
-const cc = {
-  surface: '#ffffff',
-  primary: '#2563eb',
-  primaryMuted: 'rgba(37,99,235,0.06)',
-  textPrimary: '#0f172a',
-  textMuted: '#64748b',
-  textSecondary: '#475569',
-  border: '#e2e8f0',
-  borderSubtle: '#f1f5f9',
-  neutralBg: '#f8fafc',
-  warning: '#d97706',
-  warningMuted: 'rgba(217,119,6,0.08)',
-  warningText: '#92400e',
-  danger: '#dc2626',
-  dangerMuted: 'rgba(220,38,38,0.08)',
-  dangerText: '#991b1b',
-  radiusMd: '8px',
-  radiusLg: '12px',
-  radiusFull: '9999px',
+const CTAButton: React.FC<{
+  children: React.ReactNode;
+  onClick?: (e?: React.MouseEvent) => void;
+  variant?: 'primary' | 'ghost' | 'success' | 'danger';
+  size?: 'sm' | 'md' | 'lg';
+  icon?: React.ReactNode;
+  disabled?: boolean;
+  loading?: boolean;
+  fullWidth?: boolean;
+}> = ({ children, onClick, variant = 'primary', size = 'sm', icon, disabled = false, loading = false, fullWidth = false }) => {
+  const styles: Record<string, { bg: string; text: string; border: string }> = {
+    primary: { bg: cc.primary, text: '#fff', border: 'none' },
+    ghost: { bg: 'transparent', text: cc.primary, border: cc.border },
+    success: { bg: cc.success, text: '#fff', border: 'none' },
+    danger: { bg: cc.danger, text: '#fff', border: 'none' },
+  };
+  const { bg, text, border } = styles[variant];
+  const padding = size === 'lg' ? '14px 24px' : size === 'md' ? '10px 16px' : '8px 14px';
+  const fontSize = size === 'lg' ? 15 : size === 'md' ? 13 : 12;
+  return (
+    <motion.button
+      whileHover={disabled ? {} : { scale: 1.01, y: -1 }}
+      whileTap={disabled ? {} : { scale: 0.98 }}
+      onClick={disabled ? undefined : onClick}
+      disabled={disabled || loading}
+      style={{
+        display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding, fontSize, fontWeight: 700,
+        color: disabled ? cc.textMuted : text, background: disabled ? cc.neutralBg : bg,
+        border: variant === 'primary' ? 'none' : `1px solid ${border}`, borderRadius: cc.radiusMd,
+        cursor: disabled ? 'not-allowed' : 'pointer', fontFamily: "'Inter', sans-serif", opacity: disabled ? 0.6 : 1,
+        ...(fullWidth ? { width: '100%' } : {}),
+      }}
+    >
+      {loading ? <Spin size="small" /> : icon && <span style={{ display: 'flex' }}>{icon}</span>}
+      {children}
+    </motion.button>
+  );
 };
 
 export const JobDetailPage: React.FC = () => {
