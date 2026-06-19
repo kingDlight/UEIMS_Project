@@ -64,8 +64,7 @@ public class InterviewController {
     }
 
     @PostMapping
-    public ResponseEntity<InterviewDTO> create(
-            @Valid @RequestBody InterviewDTO dto) {
+    public ResponseEntity<InterviewDTO> create(@Valid @RequestBody InterviewDTO dto) {
         System.out.println("RECEIVED DTO: " + dto);
         System.out.println("RECEIVED scheduledTime: " + dto.getScheduledTime());
         System.out.println("RECEIVED applicationId: " + dto.getApplicationId());
@@ -83,8 +82,7 @@ public class InterviewController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ENTERPRISE') or hasRole('TRAINING_MANAGER')")
-    public ResponseEntity<InterviewDTO> update(
-            @PathVariable UUID id, @Valid @RequestBody InterviewDTO entity) {
+    public ResponseEntity<InterviewDTO> update(@PathVariable UUID id, @Valid @RequestBody InterviewDTO entity) {
         return ResponseEntity.ok(mapper.toDto(service.update(id, entity)));
     }
 
@@ -109,16 +107,14 @@ public class InterviewController {
 
     @PostMapping("/{id}/decline")
     @PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<InterviewDTO> decline(
-            @PathVariable UUID id, @RequestParam("reason") String reason) {
+    public ResponseEntity<InterviewDTO> decline(@PathVariable UUID id, @RequestParam("reason") String reason) {
         return ResponseEntity.ok(mapper.toDto(service.declineAttendance(id, reason)));
     }
 
     // UC-43.3: Cancel interview with a reason
     @PostMapping("/{id}/cancel")
     @PreAuthorize("hasRole('ENTERPRISE') or hasRole('TRAINING_MANAGER')")
-    public ResponseEntity<InterviewDTO> cancel(
-            @PathVariable UUID id, @RequestParam("reason") String reason) {
+    public ResponseEntity<InterviewDTO> cancel(@PathVariable UUID id, @RequestParam("reason") String reason) {
         return ResponseEntity.ok(mapper.toDto(service.cancel(id, reason)));
     }
 

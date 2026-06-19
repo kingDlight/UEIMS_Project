@@ -186,7 +186,7 @@ class AuthenticationServiceTest {
         AuthenticationResponse response = service.authenticate(request);
 
         assertTrue(response.isAuthenticated());
-        assertNotNull(response.getToken());
+        assertNotNull(response.getAccessToken());
         assertNotNull(response.getRefreshToken());
         assertTrue(sessionInvalidated);
         verify(userSessionRepository, times(2)).save(any(UserSession.class));
@@ -335,7 +335,7 @@ class AuthenticationServiceTest {
         AuthenticationResponse response = service.refreshToken(request);
 
         assertTrue(response.isAuthenticated());
-        assertNotNull(response.getToken());
+        assertNotNull(response.getAccessToken());
     }
 
     @Test
@@ -364,7 +364,7 @@ class AuthenticationServiceTest {
         AuthenticationResponse response = service.authenticateWithGoogle(request);
 
         assertTrue(response.isAuthenticated());
-        assertNotNull(response.getToken());
+        assertNotNull(response.getAccessToken());
         verify(userRepository).findByEmail(GOOGLE_EMAIL);
     }
 

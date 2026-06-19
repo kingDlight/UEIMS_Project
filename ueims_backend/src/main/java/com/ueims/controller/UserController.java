@@ -37,40 +37,52 @@ public class UserController {
 
     @PostMapping(value = "/me/avatar", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<java.util.Map<String, String>> uploadAvatar(
-            @org.springframework.web.bind.annotation.RequestParam("file") org.springframework.web.multipart.MultipartFile file) throws java.io.IOException {
+            @org.springframework.web.bind.annotation.RequestParam("file")
+                    org.springframework.web.multipart.MultipartFile file)
+            throws java.io.IOException {
         String url = service.uploadAvatar(file);
         return ResponseEntity.ok(java.util.Map.of("avatarUrl", url));
     }
 
     @GetMapping("/avatars")
-    public ResponseEntity<java.util.List<java.util.Map<String, String>>> listAvailableAvatars() throws java.io.IOException {
+    public ResponseEntity<java.util.List<java.util.Map<String, String>>> listAvailableAvatars()
+            throws java.io.IOException {
         java.nio.file.Path dir = java.nio.file.Paths.get(System.getProperty("user.dir"), "uploads", "avatars");
         if (!java.nio.file.Files.exists(dir)) {
             return ResponseEntity.ok(java.util.Collections.emptyList());
         }
         java.util.List<java.util.Map<String, String>> items = new java.util.ArrayList<>();
         try (java.util.stream.Stream<java.nio.file.Path> stream = java.nio.file.Files.list(dir)) {
-            stream.filter(p -> java.nio.file.Files.isRegularFile(p))
-                    .forEach(p -> {
-                        String name = p.getFileName().toString();
-                        String lower = name.toLowerCase();
-                        if (!(lower.endsWith(".png") || lower.endsWith(".jpg") || lower.endsWith(".jpeg") || lower.endsWith(".gif") || lower.endsWith(".webp"))) return;
-                        try {
-                            items.add(java.util.Map.of(
-                                    "filename", name,
-                                    "url", "/api/users/avatars/" + name,
-                                    "size", String.valueOf(java.nio.file.Files.size(p))
-                            ));
-                        } catch (java.io.IOException ignored) {}
-                    });
+            stream.filter(p -> java.nio.file.Files.isRegularFile(p)).forEach(p -> {
+                String name = p.getFileName().toString();
+                String lower = name.toLowerCase();
+                if (!(lower.endsWith(".png")
+                        || lower.endsWith(".jpg")
+                        || lower.endsWith(".jpeg")
+                        || lower.endsWith(".gif")
+                        || lower.endsWith(".webp"))) return;
+                try {
+                    items.add(java.util.Map.of(
+                            "filename",
+                            name,
+                            "url",
+                            "/api/users/avatars/" + name,
+                            "size",
+                            String.valueOf(java.nio.file.Files.size(p))));
+                } catch (java.io.IOException ignored) {
+                }
+            });
         }
         items.sort((a, b) -> b.get("filename").compareTo(a.get("filename")));
         return ResponseEntity.ok(items);
     }
 
     @GetMapping("/avatars/{filename:.+}")
-    public ResponseEntity<byte[]> getAvatar(@org.springframework.web.bind.annotation.PathVariable String filename) throws java.io.IOException {
-        java.nio.file.Path baseDir = java.nio.file.Paths.get(System.getProperty("user.dir"), "uploads", "avatars").toAbsolutePath().normalize();
+    public ResponseEntity<byte[]> getAvatar(@org.springframework.web.bind.annotation.PathVariable String filename)
+            throws java.io.IOException {
+        java.nio.file.Path baseDir = java.nio.file.Paths.get(System.getProperty("user.dir"), "uploads", "avatars")
+                .toAbsolutePath()
+                .normalize();
         java.nio.file.Path path = baseDir.resolve(filename).normalize();
         if (!path.startsWith(baseDir)) {
             return ResponseEntity.badRequest().build();

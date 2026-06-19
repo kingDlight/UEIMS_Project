@@ -57,13 +57,12 @@ public class UserServiceImpl implements UserService {
         }
         String contentType = file.getContentType();
         if (contentType == null || !ALLOWED_AVATAR_TYPES.contains(contentType.toLowerCase())) {
-            throw new AppException(ErrorCode.INVALID_KEY,
-                    "Unsupported image type. Allowed: png, jpg, jpeg, gif, webp");
+            throw new AppException(ErrorCode.INVALID_KEY, "Unsupported image type. Allowed: png, jpg, jpeg, gif, webp");
         }
 
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User currentUser = repository.findByEmail(email)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        User currentUser =
+                repository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         Path uploadDir = Paths.get(System.getProperty("user.dir"), "uploads", "avatars");
         Files.createDirectories(uploadDir);

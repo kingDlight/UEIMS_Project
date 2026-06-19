@@ -8,7 +8,7 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  token: string;
+  accessToken: string;
   refreshToken: string;
   authenticated: boolean;
   mustChangePassword: boolean;
@@ -87,9 +87,9 @@ export const AuthService = {
     return response.data.result;
   },
 
-  refreshToken: async (refreshToken: string): Promise<{ token: string; refreshToken: string }> => {
+  refreshToken: async (refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> => {
     const deviceId = getDeviceId();
-    const response = await api.post<{ code: number; message: string; result: { token: string; refreshToken: string } }>(
+    const response = await api.post<{ code: number; message: string; result: { accessToken: string; refreshToken: string } }>(
       '/auth/refresh',
       { token: refreshToken, deviceId }
     );

@@ -169,7 +169,7 @@ public class AuthenticationService {
         auditLoginSuccess(user);
 
         return AuthenticationResponse.builder()
-                .token(token)
+                .accessToken(token)
                 .refreshToken(refreshToken)
                 .authenticated(true)
                 .mustChangePassword(Boolean.TRUE.equals(user.getMustChangePassword()))
@@ -376,7 +376,7 @@ public class AuthenticationService {
             saveAccessSession(user, token, request.getDeviceId());
 
             return AuthenticationResponse.builder()
-                    .token(token)
+                    .accessToken(token)
                     .refreshToken(request.getToken())
                     .authenticated(true)
                     .build();

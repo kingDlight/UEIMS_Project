@@ -217,11 +217,14 @@ public class IncidentServiceImpl implements IncidentService {
         try {
             saved = repository.save(incident);
         } catch (Exception ex) {
-            log.error("[Incident] DB save failed: category='{}', assignmentId={}, error={}",
-                    normalizedCat, request.getAssignmentId(), ex.getMessage());
+            log.error(
+                    "[Incident] DB save failed: category='{}', assignmentId={}, error={}",
+                    normalizedCat,
+                    request.getAssignmentId(),
+                    ex.getMessage());
             Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
-            throw new AppException(ErrorCode.DATA_INTEGRITY_VIOLATION,
-                    "Failed to save incident: " + cause.getMessage());
+            throw new AppException(
+                    ErrorCode.DATA_INTEGRITY_VIOLATION, "Failed to save incident: " + cause.getMessage());
         }
 
         // UC-49 POST-1: notify Training Manager + send urgent email

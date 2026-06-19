@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-@JsonIgnoreProperties({ "application", "decidedBy", "createdAt", "updatedAt", "createdBy", "updatedBy" })
+@JsonIgnoreProperties({"application", "decidedBy", "createdAt", "updatedAt", "createdBy", "updatedBy"})
 public class InterviewDTO extends Interview {
     private String enterpriseName;
     private String jobTitle;

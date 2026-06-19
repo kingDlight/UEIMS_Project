@@ -44,8 +44,14 @@ public class SecurityConfig {
     };
 
     private static final String[] PUBLIC_GET_ENDPOINTS = {
-        "/uploads/**", "/api/public/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/ws/**",
-        "/api/users/avatars", "/api/users/avatars/**"
+        "/uploads/**",
+        "/api/public/**",
+        "/v3/api-docs/**",
+        "/swagger-ui/**",
+        "/swagger-ui.html",
+        "/ws/**",
+        "/api/users/avatars",
+        "/api/users/avatars/**"
     };
 
     @Bean

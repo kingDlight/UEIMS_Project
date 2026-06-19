@@ -63,15 +63,15 @@ export const LoginPage: React.FC = () => {
       });
 
       if (result.mustChangePassword) {
-        loginWithTokens(result.token, result.refreshToken);
+        loginWithTokens(result.accessToken, result.refreshToken);
         message.warning(t('auth.mustChangePassword', 'You must change your password before continuing!'));
         navigate('/change-password');
         return;
       }
 
-      loginWithTokens(result.token, result.refreshToken);
+      loginWithTokens(result.accessToken, result.refreshToken);
       message.success(t('auth.loginSuccess', 'Login successful!'));
-      const payload = extractUserFromToken(result.token);
+      const payload = extractUserFromToken(result.accessToken);
       const redirectPath = getRedirectPath(payload?.roles || []);
       navigate(redirectPath);
     } catch (error: any) {
@@ -101,15 +101,15 @@ export const LoginPage: React.FC = () => {
       const result = await AuthService.loginWithGoogle(credentialResponse.credential);
 
       if (result.mustChangePassword) {
-        loginWithTokens(result.token, result.refreshToken);
+        loginWithTokens(result.accessToken, result.refreshToken);
         message.warning(t('auth.mustChangePassword', 'You must change your password before continuing!'));
         navigate('/change-password');
         return;
       }
 
-      loginWithTokens(result.token, result.refreshToken);
+      loginWithTokens(result.accessToken, result.refreshToken);
       message.success(t('auth.googleLoginSuccess', 'Login with Google successful!'));
-      const payload = extractUserFromToken(result.token);
+      const payload = extractUserFromToken(result.accessToken);
       const redirectPath = getRedirectPath(payload?.roles || []);
       navigate(redirectPath);
     } catch (error: any) {

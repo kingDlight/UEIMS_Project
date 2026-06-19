@@ -77,12 +77,12 @@ api.interceptors.response.use(
         }
 
         // Call the refresh endpoint directly with axios to avoid interceptor loops
-        const { data } = await axios.post<{ code: number; result: { token: string; refreshToken: string } }>(
+        const { data } = await axios.post<{ code: number; result: { accessToken: string; refreshToken: string } }>(
           `${import.meta.env.VITE_API_URL || 'http://localhost:8080/api'}/auth/refresh`,
           { token: refreshToken, deviceId: getDeviceId() }
         );
 
-        const newToken = data.result?.token;
+        const newToken = data.result?.accessToken;
         const newRefreshToken = data.result?.refreshToken;
 
         if (!newToken) throw new Error('Token not returned');
