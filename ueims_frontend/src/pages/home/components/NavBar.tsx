@@ -7,6 +7,13 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { extractUserFromToken, isTokenExpired } from '@/utils/jwt';
 import { LogoIcon } from '../../../components/LogoIcon';
 
+const toAbsoluteAssetUrl = (path?: string | null): string | null => {
+  if (!path) return null;
+  if (path.startsWith('http') || path.startsWith('data:') || path.startsWith('blob:')) return path;
+  const base = (import.meta.env.VITE_API_URL || 'http://localhost:8080/api').replace(/\/api\/?$/, '');
+  return `${base}${path.startsWith('/') ? path : `/${path}`}`;
+};
+
 export const NavBar = ({ isDark, toggleTheme, scrolled, scrollToSection }: { isDark: boolean, toggleTheme: () => void, scrolled: boolean, scrollToSection: (h: string) => void }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -16,7 +23,7 @@ export const NavBar = ({ isDark, toggleTheme, scrolled, scrollToSection }: { isD
   const isReallyAuthenticated = isAuthenticated && token && !isTokenExpired(token);
 
   const customAvatarUrl = localStorage.getItem('ueims_custom_avatar');
-  const finalAvatarUrl = customAvatarUrl || user?.avatarUrl;
+  const finalAvatarUrl = toAbsoluteAssetUrl(customAvatarUrl) || toAbsoluteAssetUrl(user?.avatarUrl);
   const finalFullName = user?.fullName;
 
   let navBgClass = 'h-20 bg-transparent';

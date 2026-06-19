@@ -1,7 +1,10 @@
 package com.ueims.service;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
+
+import org.springframework.web.multipart.MultipartFile;
 
 import com.ueims.dto.request.UserCreationRequest;
 import com.ueims.dto.request.UserUpdateRequest;
@@ -29,4 +32,6 @@ public interface UserService {
     UserResponse updateMyInfo(UserUpdateRequest request);
 
     UserDetailResponse updateUser(UUID id, UserUpdateRequest request);
+
+    String uploadAvatar(MultipartFile file) throws IOException;
 }

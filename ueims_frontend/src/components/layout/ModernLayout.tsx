@@ -5,12 +5,19 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Modal, Dropdown, Drawer, Form, Input, Button, App, Tooltip } from 'antd';
 import type { MenuProps } from 'antd';
 import { BellOutlined, DownOutlined, MenuOutlined } from '@ant-design/icons';
-import { X, Mail, Phone, ShieldCheck, Activity, Camera, CheckCheck } from 'lucide-react';
+import { X, Mail, Phone, ShieldCheck, Activity, CheckCheck, ImageDown, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { SmallPill } from '@/pages/training-manager/components/shared/SmallPill';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { AuthService } from '@/services/AuthService';
 import { api } from '@/services/api';
+
+const toAbsoluteAssetUrl = (path?: string | null): string | null => {
+  if (!path) return null;
+  if (path.startsWith('http') || path.startsWith('data:') || path.startsWith('blob:')) return path;
+  const base = (import.meta.env.VITE_API_URL || 'http://localhost:8080/api').replace(/\/api\/?$/, '');
+  return `${base}${path.startsWith('/') ? path : `/${path}`}`;
+};
 import { useNotificationStore, type NotificationItem } from '@/stores/useNotificationStore';
 import { useAnnouncementStore } from '@/stores/useAnnouncementStore';
 import { useNotificationStream } from '@/hooks/useNotificationStream';
@@ -169,7 +176,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
   // Change Password state
   const [changePasswordVisible, setChangePasswordVisible] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { user, token, logout } = useAuthStore();
+  const { user, token, logout, updateUser } = useAuthStore();
   const mustChangePassword = (user as any)?.mustChangePassword;
 
   useEffect(() => {
@@ -259,13 +266,10 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
   const [profileOpen, setProfileOpen] = useState(false);
   const [detailsItem, setDetailsItem] = useState<NotificationItem | null>(null);
 
-  const [customAvatarUrl, setCustomAvatarUrl] = useState<string | null>(() => {
-    return localStorage.getItem('ueims_custom_avatar');
-  });
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const [cropModalOpen, setCropModalOpen] = useState(false);
-  const [tempImageUrl, setTempImageUrl] = useState<string | null>(null);
+  const [customAvatarUrl, setCustomAvatarUrl] = useState<string | null>(null);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [availableAvatars, setAvailableAvatars] = useState<Array<{ filename: string; url: string; size: string }>>([]);
+  const [pickerLoading, setPickerLoading] = useState(false);
 
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
 
@@ -305,19 +309,6 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
     await markAllNotificationsAsRead();
   };
 
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setTempImageUrl(reader.result as string);
-        setCropModalOpen(true);
-      };
-      reader.readAsDataURL(file);
-    }
-    if (fileInputRef.current) fileInputRef.current.value = '';
-  };
-
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node;
@@ -338,6 +329,39 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
     }
     logout();
     navigate('/login');
+  };
+
+  useEffect(() => {
+    setCustomAvatarUrl(toAbsoluteAssetUrl(user?.avatarUrl));
+  }, [user?.userId]);
+
+  const openPicker = async () => {
+    setPickerOpen(true);
+    setPickerLoading(true);
+    try {
+      const res = await api.get<Array<{ filename: string; url: string; size: string }>>('/users/avatars');
+      setAvailableAvatars(Array.isArray(res.data) ? res.data : []);
+    } catch (e) {
+      console.error('Failed to load avatars', e);
+      setAvailableAvatars([]);
+    } finally {
+      setPickerLoading(false);
+    }
+  };
+
+  const selectFromPicker = async (item: { filename: string; url: string }) => {
+    try {
+      const res = await api.put<{ avatarUrl: string }>('/users/myInfo', { avatarUrl: item.url });
+      const absolute = toAbsoluteAssetUrl(res.data?.avatarUrl || item.url);
+      if (absolute) {
+        setCustomAvatarUrl(absolute);
+        updateUser({ avatarUrl: absolute });
+      }
+      setPickerOpen(false);
+    } catch (e) {
+      console.error('Failed to set avatar', e);
+      alert('Không thể cập nhật avatar');
+    }
   };
 
   const handleNavigate = (key: string) => {
@@ -728,27 +752,21 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
               </div>
 
               <button
-                onClick={() => fileInputRef.current?.click()}
+                onClick={openPicker}
+                title="Chọn từ thư viện"
                 style={{
                   position: 'absolute', bottom: 0, right: 0, width: 26, height: 26, borderRadius: '50%',
                   background: '#fff', border: '1px solid #e2e8f0', boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
                   color: '#475569', transition: 'all 0.2s', padding: 0
                 }}
-                onMouseOver={(e) => { e.currentTarget.style.color = '#ea580c'; e.currentTarget.style.borderColor = '#ea580c'; }}
-                onFocus={(e) => { e.currentTarget.style.color = '#ea580c'; e.currentTarget.style.borderColor = '#ea580c'; }}
+                onMouseOver={(e) => { e.currentTarget.style.color = '#0ea5e9'; e.currentTarget.style.borderColor = '#0ea5e9'; }}
+                onFocus={(e) => { e.currentTarget.style.color = '#0ea5e9'; e.currentTarget.style.borderColor = '#0ea5e9'; }}
                 onMouseOut={(e) => { e.currentTarget.style.color = '#475569'; e.currentTarget.style.borderColor = '#e2e8f0'; }}
                 onBlur={(e) => { e.currentTarget.style.color = '#475569'; e.currentTarget.style.borderColor = '#e2e8f0'; }}
               >
-                <Camera size={12} strokeWidth={2.5} />
+                <ImageDown size={12} strokeWidth={2.5} />
               </button>
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleAvatarChange}
-                accept="image/*"
-                style={{ display: 'none' }}
-              />
             </div>
 
             {/* Name & Role */}
@@ -933,16 +951,90 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
         </Form>
       </Modal>
 
-      <CropAvatarModal
-        open={cropModalOpen}
-        tempImageUrl={tempImageUrl}
-        onCancel={() => setCropModalOpen(false)}
-        onSave={(url) => {
-          setCustomAvatarUrl(url);
-          localStorage.setItem('ueims_custom_avatar', url);
-          setCropModalOpen(false);
-        }}
-      />
+      {pickerOpen && (
+        <div
+          onClick={() => setPickerOpen(false)}
+          style={{
+            position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1100,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: '#fff', borderRadius: 16, width: '100%', maxWidth: 720, maxHeight: '80vh',
+              display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
+            }}
+          >
+            <div style={{ padding: '20px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: '#0f172a' }}>Chọn ảnh từ thư viện</h3>
+                <p style={{ margin: '4px 0 0', fontSize: 13, color: '#64748b' }}>
+                  Thả file ảnh vào thư mục <code style={{ background: '#f1f5f9', padding: '1px 6px', borderRadius: 4 }}>ueims_backend/uploads/avatars/</code> rồi chọn bên dưới
+                </p>
+              </div>
+              <button
+                onClick={() => setPickerOpen(false)}
+                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#64748b', padding: 4 }}
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div style={{ flex: 1, overflowY: 'auto', padding: 20, background: '#f8fafc' }}>
+              {pickerLoading ? (
+                <div style={{ textAlign: 'center', padding: 40, color: '#64748b' }}>Đang tải...</div>
+              ) : availableAvatars.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: 40, color: '#94a3b8' }}>
+                  <Search size={32} style={{ opacity: 0.4, marginBottom: 8 }} />
+                  <p style={{ margin: 0, fontSize: 14 }}>Chưa có ảnh nào trong thư viện</p>
+                </div>
+              ) : (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 12 }}>
+                  {availableAvatars.map((item) => (
+                    <button
+                      key={item.filename}
+                      onClick={() => selectFromPicker(item)}
+                      style={{
+                        padding: 0, border: '2px solid #e2e8f0', borderRadius: 12, overflow: 'hidden',
+                        background: '#fff', cursor: 'pointer', aspectRatio: '1', transition: 'all 0.2s',
+                        position: 'relative'
+                      }}
+                      onMouseOver={(e) => { e.currentTarget.style.borderColor = '#0ea5e9'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                      onMouseOut={(e) => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                    >
+                      <img
+                        src={toAbsoluteAssetUrl(item.url) || ''}
+                        alt={item.filename}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                      />
+                      <div style={{
+                        position: 'absolute', bottom: 0, left: 0, right: 0, padding: '4px 6px',
+                        background: 'linear-gradient(transparent, rgba(0,0,0,0.7))', color: '#fff',
+                        fontSize: 10, textAlign: 'left', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'
+                      }}>
+                        {item.filename}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div style={{ padding: '12px 24px', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => setPickerOpen(false)}
+                style={{
+                  padding: '8px 16px', borderRadius: 8, border: '1px solid #e2e8f0',
+                  background: '#fff', color: '#475569', cursor: 'pointer', fontSize: 14
+                }}
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
