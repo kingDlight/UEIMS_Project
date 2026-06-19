@@ -60,7 +60,7 @@ public class JobPostServiceImpl implements JobPostService {
     @Override
     @Transactional(readOnly = true)
     public JobPost findById(UUID id) {
-        return repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.JOB_POST_NOT_FOUND));
+        return repository.findWithEnterpriseById(id).orElseThrow(() -> new AppException(ErrorCode.JOB_POST_NOT_FOUND));
     }
 
     @Override

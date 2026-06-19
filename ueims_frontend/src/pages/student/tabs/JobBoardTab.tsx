@@ -72,6 +72,7 @@ export const JobBoardTab: React.FC = () => {
   const [confirmApply, setConfirmApply] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [appliedJobIds, setAppliedJobIds] = useState<Set<number>>(new Set());
+  const [detailLoading, setDetailLoading] = useState(false);
   const pageSize = 9;
 
   const { data: profile } = useStudentProfileQuery();
@@ -102,6 +103,22 @@ export const JobBoardTab: React.FC = () => {
       console.error('Failed to fetch jobs', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchJobDetail = async (job: any) => {
+    setDetailLoading(true);
+    setSelectedJob(job);
+    try {
+      const res = await JobPostService.getById(job.jobPostId);
+      const full = res.data?.result ?? res.data;
+      if (full) {
+        setSelectedJob({ ...job, ...full });
+      }
+    } catch {
+      // fallback to card data
+    } finally {
+      setDetailLoading(false);
     }
   };
 
@@ -234,7 +251,7 @@ export const JobBoardTab: React.FC = () => {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 20 }}>
             {paginatedJobs.map((job, index) => (
               <motion.div key={job.jobPostId || index} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: index * 0.05 }}>
-                <NeuSurface style={{ padding: 20, cursor: 'pointer', transition: 'all 0.2s' }} onClick={() => setSelectedJob(job)}>
+                <NeuSurface style={{ padding: 20, cursor: 'pointer', transition: 'all 0.2s' }} onClick={() => fetchJobDetail(job)}>
                   <div style={{ display: 'flex', gap: 12, marginBottom: 14 }}>
                     <div style={{ width: 48, height: 48, borderRadius: cc.radiusMd, background: hexToRgba(cc.primary, 0.08), display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.primary, fontSize: 20, fontWeight: 700, flexShrink: 0 }}>
                       {job.enterpriseName?.charAt(0) || 'E'}
@@ -251,7 +268,7 @@ export const JobBoardTab: React.FC = () => {
                   <p style={{ fontSize: 13, color: cc.textMuted, margin: '0 0 14px', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{job.description || t('jobDescription', 'Job description...')}</p>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 14, borderTop: `1px solid ${cc.borderSubtle}` }}>
                     <SmallBadge label={job.status === 'OPEN' ? 'Open' : 'Closed'} variant={job.status === 'OPEN' ? 'success' : 'neutral'} />
-                    <CTAButton variant="ghost" size="sm" icon={<RightOutlined />} onClick={(e) => { e?.stopPropagation(); setSelectedJob(job); }}>{t('viewDetails', 'View details')}</CTAButton>
+                    <CTAButton variant="ghost" size="sm" icon={<RightOutlined />} onClick={(e) => { e?.stopPropagation(); fetchJobDetail(job); }}>{t('viewDetails', 'View details')}</CTAButton>
                   </div>
                 </NeuSurface>
               </motion.div>
@@ -272,52 +289,128 @@ export const JobBoardTab: React.FC = () => {
 
       {/* Job Detail Drawer */}
       {selectedJob && (
-        <div onClick={() => setSelectedJob(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
-          <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', damping: 25, stiffness: 300 }} onClick={(e) => e.stopPropagation()} style={{ background: cc.surface, borderRadius: '24px 24px 0 0', maxWidth: 600, width: '100%', maxHeight: '85vh', overflow: 'auto', padding: 28 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
-              <div style={{ display: 'flex', gap: 16 }}>
-                <div style={{ width: 64, height: 64, borderRadius: cc.radiusLg, background: hexToRgba(cc.primary, 0.08), display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.primary, fontSize: 24, fontWeight: 700, flexShrink: 0 }}>{selectedJob.enterpriseName?.charAt(0) || 'E'}</div>
-                <div>
-                  <h2 style={{ fontSize: 18, fontWeight: 700, color: cc.textPrimary, margin: '0 0 4px' }}>{selectedJob.title}</h2>
-                  <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}>{selectedJob.enterpriseName}</p>
+        <div onClick={() => { setSelectedJob(null); setDetailLoading(false); }} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+          <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', damping: 25, stiffness: 300 }} onClick={(e) => e.stopPropagation()} style={{ background: cc.surface, borderRadius: '24px 24px 0 0', maxWidth: 680, width: '100%', maxHeight: '92vh', overflow: 'auto' }}>
+
+            {/* Header Banner */}
+            <div style={{ padding: '24px 28px 20px', background: `linear-gradient(135deg, ${hexToRgba(cc.primary, 0.06)} 0%, ${hexToRgba(cc.primary, 0.02)} 100%)`, borderBottom: `1px solid ${cc.borderSubtle}` }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+                <div style={{ display: 'flex', gap: 16 }}>
+                  <div style={{ width: 64, height: 64, borderRadius: cc.radiusLg, background: cc.primaryMuted, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.primary, fontSize: 24, fontWeight: 700, flexShrink: 0 }}>
+                    {selectedJob.enterprise?.companyName?.charAt(0) || selectedJob.enterpriseName?.charAt(0) || 'E'}
+                  </div>
+                  <div>
+                    <h2 style={{ fontSize: 20, fontWeight: 800, color: cc.textPrimary, margin: '0 0 4px', letterSpacing: '-0.01em' }}>{selectedJob.title}</h2>
+                    <p style={{ fontSize: 14, color: cc.textMuted, margin: 0, fontWeight: 500 }}>{selectedJob.enterprise?.companyName || selectedJob.enterpriseName}</p>
+                  </div>
                 </div>
+                <CTAButton variant="ghost" size="sm" icon={<CloseCircleOutlined />} onClick={() => { setSelectedJob(null); setDetailLoading(false); }}>{t('close', 'Close')}</CTAButton>
               </div>
-              <CTAButton variant="ghost" size="sm" icon={<CloseCircleOutlined />} onClick={() => setSelectedJob(null)}>{t('close', 'Close')}</CTAButton>
+
+              {/* Quick meta chips */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+                {selectedJob.enterprise?.address && <span style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', borderRadius: cc.radiusFull, background: '#fff', border: `1px solid ${cc.border}`, fontSize: 12, color: cc.textSecondary, fontWeight: 500 }}><EnvironmentOutlined style={{ fontSize: 12 }} />{selectedJob.enterprise.address}</span>}
+                {selectedJob.maxPositions && <span style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', borderRadius: cc.radiusFull, background: '#fff', border: `1px solid ${cc.border}`, fontSize: 12, color: cc.textSecondary, fontWeight: 500 }}><TeamOutlined style={{ fontSize: 12 }} />{selectedJob.maxPositions} positions</span>}
+                {selectedJob.requiredSkills && (() => {
+                  try {
+                    const skills = JSON.parse(selectedJob.requiredSkills);
+                    return Array.isArray(skills) ? skills.slice(0, 3).map((s: string) => (
+                      <span key={s} style={{ padding: '6px 12px', borderRadius: cc.radiusFull, background: cc.primaryMuted, border: `1px solid ${cc.primary}30`, fontSize: 12, color: cc.primary, fontWeight: 600 }}>{s}</span>
+                    )) : null;
+                  } catch { return null; }
+                })()}
+              </div>
             </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginBottom: 20 }}>
-              {selectedJob.location && <span style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 12px', borderRadius: cc.radiusMd, background: cc.neutralBg, fontSize: 13, color: cc.textSecondary }}><EnvironmentOutlined style={{ fontSize: 14 }} />{selectedJob.location}</span>}
-              {selectedJob.maxPositions && <span style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 12px', borderRadius: cc.radiusMd, background: cc.neutralBg, fontSize: 13, color: cc.textSecondary }}><TeamOutlined style={{ fontSize: 14 }} />{selectedJob.maxPositions} positions</span>}
+
+            {/* Body */}
+            <div style={{ padding: '20px 28px 28px' }}>
+
+              {/* Company Info Card */}
+              {detailLoading ? (
+                <div style={{ display: 'flex', justifyContent: 'center', padding: 24 }}><Spin /></div>
+              ) : selectedJob.enterprise ? (
+                <div style={{ padding: 16, borderRadius: cc.radiusLg, background: cc.neutralBg, marginBottom: 20, border: `1px solid ${cc.borderSubtle}` }}>
+                  <h3 style={{ fontSize: 13, fontWeight: 700, color: cc.textPrimary, margin: '0 0 12px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{t('companyDetails', 'Company Details')}</h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                    {selectedJob.enterprise.industry && <div><p style={{ fontSize: 11, color: cc.textMuted, margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('industry', 'Industry')}</p><p style={{ fontSize: 13, color: cc.textPrimary, margin: 0, fontWeight: 600 }}>{selectedJob.enterprise.industry}</p></div>}
+                    {selectedJob.enterprise.address && <div><p style={{ fontSize: 11, color: cc.textMuted, margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('address', 'Address')}</p><p style={{ fontSize: 13, color: cc.textPrimary, margin: 0, fontWeight: 600 }}>{selectedJob.enterprise.address}</p></div>}
+                    {selectedJob.enterprise.contactPerson && <div><p style={{ fontSize: 11, color: cc.textMuted, margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('contact', 'Contact')}</p><p style={{ fontSize: 13, color: cc.textPrimary, margin: 0, fontWeight: 600 }}>{selectedJob.enterprise.contactPerson}</p></div>}
+                    {selectedJob.enterprise.contactEmail && <div><p style={{ fontSize: 11, color: cc.textMuted, margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('email', 'Email')}</p><p style={{ fontSize: 13, color: cc.textPrimary, margin: 0, fontWeight: 600 }}>{selectedJob.enterprise.contactEmail}</p></div>}
+                  </div>
+                  {selectedJob.enterprise.description && (
+                    <div style={{ marginTop: 12, paddingTop: 12, borderTop: `1px solid ${cc.borderSubtle}` }}>
+                      <p style={{ fontSize: 13, color: cc.textSecondary, lineHeight: 1.6, margin: 0 }}>{selectedJob.enterprise.description}</p>
+                    </div>
+                  )}
+                </div>
+              ) : null}
+
+              {/* Deadline banner */}
+              {selectedJob.applicationDeadline && (
+                <div style={{ padding: 14, borderRadius: cc.radiusMd, background: cc.warningMuted, marginBottom: 20, display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <ClockCircleOutlined style={{ fontSize: 18, color: cc.warning }} />
+                  <div>
+                    <p style={{ fontSize: 11, color: cc.warningText, margin: 0, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('applicationDeadline', 'Application Deadline')}</p>
+                    <p style={{ fontSize: 14, color: cc.warningText, margin: '2px 0 0', fontWeight: 700 }}>{new Date(selectedJob.applicationDeadline).toLocaleDateString('vi-VN', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Description */}
+              {selectedJob.description && (
+                <div style={{ marginBottom: 20 }}>
+                  <h3 style={{ fontSize: 14, fontWeight: 700, color: cc.textPrimary, margin: '0 0 10px', paddingBottom: 8, borderBottom: `2px solid ${cc.borderSubtle}` }}>{t('jobDescription', 'Job Description')}</h3>
+                  <p style={{ fontSize: 14, color: cc.textSecondary, lineHeight: 1.75, margin: 0, whiteSpace: 'pre-wrap' }}>{selectedJob.description}</p>
+                </div>
+              )}
+
+              {/* Requirements */}
+              {selectedJob.requirements && (
+                <div style={{ marginBottom: 20 }}>
+                  <h3 style={{ fontSize: 14, fontWeight: 700, color: cc.textPrimary, margin: '0 0 10px', paddingBottom: 8, borderBottom: `2px solid ${cc.borderSubtle}` }}>{t('requirements', 'Requirements')}</h3>
+                  <p style={{ fontSize: 14, color: cc.textSecondary, lineHeight: 1.75, margin: 0, whiteSpace: 'pre-wrap' }}>{selectedJob.requirements}</p>
+                </div>
+              )}
+
+              {/* Benefits */}
+              {selectedJob.benefits && (
+                <div style={{ marginBottom: 20 }}>
+                  <h3 style={{ fontSize: 14, fontWeight: 700, color: cc.textPrimary, margin: '0 0 10px', paddingBottom: 8, borderBottom: `2px solid ${cc.borderSubtle}` }}>{t('benefits', 'Benefits')}</h3>
+                  <p style={{ fontSize: 14, color: cc.textSecondary, lineHeight: 1.75, margin: 0, whiteSpace: 'pre-wrap' }}>{selectedJob.benefits}</p>
+                </div>
+              )}
+
+              {/* Warnings */}
+              {currentSemester < 5 && (
+                <div style={{ padding: 12, borderRadius: cc.radiusMd, background: cc.warningMuted, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <WarningOutlined style={{ color: cc.warning }} />
+                  <span style={{ fontSize: 13, color: cc.warningText }}>{t('browseOnlySemester', 'Browse only mode — Applications open in Semester 5 (Current: Semester {{sem}})', { sem: currentSemester })}</span>
+                </div>
+              )}
+              {!hasCv && currentSemester >= 5 && (
+                <div style={{ padding: 12, borderRadius: cc.radiusMd, background: cc.dangerMuted, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <WarningOutlined style={{ color: cc.danger }} />
+                  <span style={{ fontSize: 13, color: cc.dangerText }}>{t('pleaseUploadCv', 'Please upload your CV in Profile before applying.')}</span>
+                </div>
+              )}
+
+              {/* Apply Button */}
+              <CTAButton variant="primary" size="lg" fullWidth icon={appliedJobIds.has(selectedJob.jobPostId) ? null : <SendOutlined />} onClick={() => {
+                if (appliedJobIds.has(selectedJob.jobPostId)) {
+                  message.info(t('alreadyAppliedMsg', 'You have already applied for this position.'));
+                } else if (currentSemester < 5) {
+                  message.warning('Browse only mode enabled for your semester.');
+                } else if (selectedJob.applicationDeadline && new Date(selectedJob.applicationDeadline) < new Date()) {
+                  message.error('This job posting has reached its deadline.');
+                } else if (!hasCv) {
+                  message.warning('Please upload your CV in Profile before applying.');
+                } else {
+                  setConfirmApply(selectedJob);
+                }
+              }} disabled={appliedJobIds.has(selectedJob.jobPostId) || selectedJob.status !== 'OPEN' || !hasCv || currentSemester < 5} loading={applying}>
+                {appliedJobIds.has(selectedJob.jobPostId) ? t('applied', 'Applied') : (selectedJob.status === 'OPEN' ? (currentSemester < 5 ? t('browseOnly', 'Browse Only') : (hasCv ? t('applyNow', 'Apply Now') : t('cvRequired', 'CV Required'))) : t('applicationsClosed', 'Applications Closed'))}
+              </CTAButton>
             </div>
-            {selectedJob.description && <div style={{ marginBottom: 18 }}><h3 style={{ fontSize: 13, fontWeight: 600, color: cc.textPrimary, margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('description', 'Description')}</h3><p style={{ fontSize: 13, color: cc.textSecondary, lineHeight: 1.6, margin: 0 }}>{selectedJob.description}</p></div>}
-            {selectedJob.requirements && <div style={{ marginBottom: 18 }}><h3 style={{ fontSize: 13, fontWeight: 600, color: cc.textPrimary, margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('requirements', 'Requirements')}</h3><p style={{ fontSize: 13, color: cc.textSecondary, lineHeight: 1.6, margin: 0 }}>{selectedJob.requirements}</p></div>}
-            {selectedJob.applicationDeadline && <div style={{ padding: 16, borderRadius: cc.radiusMd, background: cc.warningMuted, marginBottom: 20, display: 'flex', alignItems: 'center', gap: 12 }}><ClockCircleOutlined style={{ fontSize: 20, color: cc.warning }} /><div><p style={{ fontSize: 11, color: cc.warningText, margin: 0, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('applicationDeadline', 'Application Deadline')}</p><p style={{ fontSize: 14, color: cc.warningText, margin: '2px 0 0', fontWeight: 600 }}>{new Date(selectedJob.applicationDeadline).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p></div></div>}
-            {currentSemester < 5 && (
-              <div style={{ padding: 12, borderRadius: cc.radiusMd, background: cc.warningMuted, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
-                <WarningOutlined style={{ color: cc.warning }} />
-                <span style={{ fontSize: 12, color: cc.warningText }}>{t('browseOnlySemester', 'Browse only mode — Applications open in Semester 5 (Current: Semester {{sem}})', { sem: currentSemester })}</span>
-              </div>
-            )}
-            {!hasCv && currentSemester >= 5 && (
-              <div style={{ padding: 12, borderRadius: cc.radiusMd, background: cc.dangerMuted, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
-                <WarningOutlined style={{ color: cc.danger }} />
-                <span style={{ fontSize: 12, color: cc.dangerText }}>{t('pleaseUploadCv', 'Please upload your CV in Profile before applying.')}</span>
-              </div>
-            )}
-            <CTAButton variant="primary" size="lg" fullWidth icon={<SendOutlined />} onClick={() => {
-              if (appliedJobIds.has(selectedJob.jobPostId)) {
-                message.info(t('alreadyAppliedMsg', 'You have already applied for this position.'));
-              } else if (currentSemester < 5) {
-                message.warning('Browse only mode enabled for your semester.');
-              } else if (selectedJob.applicationDeadline && new Date(selectedJob.applicationDeadline) < new Date()) {
-                message.error('This job posting has reached its deadline.');
-              } else if (!hasCv) {
-                message.warning('Please upload your CV in Profile before applying.');
-              } else {
-                setConfirmApply(selectedJob);
-              }
-            }} disabled={appliedJobIds.has(selectedJob.jobPostId) || selectedJob.status !== 'OPEN' || !hasCv || currentSemester < 5} loading={applying}>
-              {appliedJobIds.has(selectedJob.jobPostId) ? t('applied', 'Applied') : (selectedJob.status === 'OPEN' ? (currentSemester < 5 ? t('browseOnly', 'Browse Only') : (hasCv ? t('applyNow', 'Apply Now') : t('cvRequired', 'CV Required'))) : t('applicationsClosed', 'Applications Closed'))}
-            </CTAButton>
           </motion.div>
         </div>
       )}
