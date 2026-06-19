@@ -59,9 +59,9 @@ export function PasswordStrengthMeter({ password }: { readonly password: string 
         ))}
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{ fontSize: 10, fontWeight: 700, color: strength.color }}>Do manh: {strength.label}</span>
+        <span style={{ fontSize: 10, fontWeight: 700, color: strength.color }}>Password strength: {strength.label}</span>
         {strength.level < 4 && hints.length > 0 && (
-          <span style={{ fontSize: 9, color: AUTH_TEXT_GRAY }}>Can: {hints[0]}</span>
+          <span style={{ fontSize: 9, color: AUTH_TEXT_GRAY }}>Password must contain: {hints[0]}</span>
         )}
       </div>
     </div>
