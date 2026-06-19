@@ -67,6 +67,7 @@ CREATE TABLE users (
     must_change_password    BOOLEAN NOT NULL DEFAULT TRUE,            -- BR-04: Force change on first login
     password_changed_at     TIMESTAMP,                               -- UC-05: Track password change time
     enterprise_id           UUID,                                    -- FK set later (for ENTERPRISE roles)
+    last_login_at           TIMESTAMP,                               -- Track last successful login
     created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at      TIMESTAMP                                        -- Soft delete

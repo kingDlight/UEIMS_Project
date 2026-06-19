@@ -168,6 +168,9 @@ public class AuthenticationService {
         saveAuthSessions(user, token, refreshToken, deviceId);
         auditLoginSuccess(user);
 
+        user.setLastLoginAt(LocalDateTime.now());
+        userRepository.save(user);
+
         return AuthenticationResponse.builder()
                 .accessToken(token)
                 .refreshToken(refreshToken)

@@ -216,11 +216,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private UserDetailResponse toDetailResponse(User user) {
-        var sessions = userSessionRepository.findByEmail(user.getEmail());
-        var lastLogin = sessions.stream()
-                .map(s -> s.getLastActivity())
-                .max(java.time.LocalDateTime::compareTo)
-                .orElse(null);
+        var lastLogin = user.getLastLoginAt();
 
         Set<String> roleNames = user.getRoles() == null
                 ? Set.of()

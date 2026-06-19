@@ -67,6 +67,9 @@ public class User extends BaseEntity {
     @Column(name = "password_changed_at")
     private LocalDateTime passwordChangedAt;
 
+    @Column(name = "last_login_at")
+    private LocalDateTime lastLoginAt;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "enterprise_id")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
