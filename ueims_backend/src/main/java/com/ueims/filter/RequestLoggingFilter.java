@@ -167,7 +167,8 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
 
     private String extractUserId(Authentication auth) {
         if (auth != null && auth.getPrincipal() instanceof Jwt jwt) {
-            return jwt.getSubject();
+            String userId = jwt.getClaim("userId");
+            return userId != null ? userId : jwt.getSubject();
         }
         return null;
     }
@@ -175,7 +176,8 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
     private UUID extractUserIdParsed(Authentication auth) {
         if (auth != null && auth.getPrincipal() instanceof Jwt jwt) {
             try {
-                return UUID.fromString(jwt.getSubject());
+                String userIdStr = jwt.getClaim("userId");
+                return userIdStr != null ? UUID.fromString(userIdStr) : null;
             } catch (Exception e) {
                 return null;
             }
