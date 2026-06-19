@@ -24,7 +24,7 @@ public class Application extends BaseEntity {
     @Column(name = "application_id")
     private java.util.UUID applicationId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "job_post_id", nullable = false)
     @NotFound(action = NotFoundAction.IGNORE)
     private JobPost jobPost;
