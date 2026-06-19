@@ -155,8 +155,7 @@ public class ApplicationServiceImpl implements ApplicationService {
             throw new AppException(ErrorCode.DUPLICATE_APPLICATION);
         }
 
-        long activeCount = repository.countByStudent_UserIdAndStatusNotAndDeletedAtIsNull(
-                student.getUserId(), ApplicationStatus.WITHDRAWN);
+        long activeCount = repository.countActiveApplications(student.getUserId());
         if (activeCount >= 3) {
             throw new AppException(ErrorCode.MAX_APPLICATIONS_LIMIT_REACHED);
         }

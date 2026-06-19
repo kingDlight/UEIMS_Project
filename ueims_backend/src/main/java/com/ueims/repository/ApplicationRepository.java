@@ -30,6 +30,18 @@ public interface ApplicationRepository extends JpaRepository<Application, UUID> 
 
     long countByStudent_UserIdAndStatusNotAndDeletedAtIsNull(UUID studentId, ApplicationStatus status);
 
+    /**
+     * Counts only active (non-terminal) applications for a student.
+     * Active = PENDING, SCREENING_PASSED, INTERVIEW_SCHEDULED, ACCEPTED
+     * Excludes terminal statuses: REJECTED, SCREENING_REJECTED, WITHDRAWN
+     */
+    @org.springframework.data.jpa.repository.Query(
+            "SELECT COUNT(a) FROM Application a " +
+            "WHERE a.student.userId = :studentId " +
+            "AND a.deletedAt IS NULL " +
+            "AND a.status NOT IN ('REJECTED', 'SCREENING_REJECTED', 'WITHDRAWN')")
+    long countActiveApplications(@org.springframework.data.repository.query.Param("studentId") UUID studentId);
+
     void deleteByJobPost_Enterprise_EnterpriseId(UUID enterpriseId);
 
     @org.springframework.data.jpa.repository.Modifying
