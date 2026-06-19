@@ -21,5 +21,5 @@ public interface JobPostRepository extends JpaRepository<JobPost, UUID> {
     void deleteByEnterprise_EnterpriseId(UUID enterpriseId);
 
     @EntityGraph(attributePaths = {"enterprise"})
-    Optional<JobPost> findWithEnterpriseById(UUID id);
+    Optional<JobPost> findWithEnterpriseByJobPostId(UUID id);
 }
