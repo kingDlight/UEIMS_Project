@@ -123,6 +123,8 @@ public enum ErrorCode {
             1072, "Interview must be in COMPLETED status before recording a result", HttpStatus.BAD_REQUEST),
 
     // Account related
+    USER_PERMANENTLY_LOCKED(
+            2007, "Tài khoản của bạn đã bị khóa vĩnh viễn. Vui lòng liên hệ quản trị viên.", HttpStatus.FORBIDDEN),
     USER_BANNED(2001, "Tài khoản của bạn đã bị khóa do nhập sai mật khẩu quá 5 lần", HttpStatus.FORBIDDEN),
     WRONG_OLD_PASSWORD(2002, "Mật khẩu cũ không chính xác", HttpStatus.BAD_REQUEST),
     PASSWORDS_NOT_MATCH(2003, "Mật khẩu mới và xác nhận không khớp", HttpStatus.BAD_REQUEST),

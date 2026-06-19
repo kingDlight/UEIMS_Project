@@ -154,9 +154,9 @@ public class MailService {
     public void sendIncidentReported(Incident incident) {
         try {
             // Notify reporter + all training managers
-            String reporterEmail = incident.getReportedBy() != null ? incident.getReportedBy().getEmail() : null;
-            if (reporterEmail == null)
-                return;
+            String reporterEmail =
+                    incident.getReportedBy() != null ? incident.getReportedBy().getEmail() : null;
+            if (reporterEmail == null) return;
             Context ctx = new Context();
             ctx.setVariable(VAR_FULL_NAME, incident.getReportedBy().getFullName());
             ctx.setVariable(VAR_SUBJECT, "Sự cố đã được ghi nhận — UEIMS");
@@ -169,13 +169,12 @@ public class MailService {
         }
     }
 
-    private void sendInterviewEmail(
-            Interview interview, String template, String subject, String extra) {
+    private void sendInterviewEmail(Interview interview, String template, String subject, String extra) {
         try {
             String to = interview.getApplication() != null
-                    && interview.getApplication().getStudent() != null
-                            ? interview.getApplication().getStudent().getEmail()
-                            : null;
+                            && interview.getApplication().getStudent() != null
+                    ? interview.getApplication().getStudent().getEmail()
+                    : null;
             if (to == null) {
                 log.warn("[InterviewEmail] No recipient email for interview {}", interview.getInterviewId());
                 return;
@@ -212,8 +211,7 @@ public class MailService {
             helper.setSubject(subject);
             helper.setText(htmlBody, true);
 
-            ClassPathResource logoFile = new ClassPathResource(
-                    "logo_ueims.png");
+            ClassPathResource logoFile = new ClassPathResource("logo_ueims.png");
             helper.addInline("logoImage", logoFile);
 
             javaMailSender.send(message);

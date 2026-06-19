@@ -78,7 +78,9 @@ export const LoginPage: React.FC = () => {
       const code = error.response?.data?.code;
       const errorMsg = error.response?.data?.message;
 
-      if (code === 2001) {
+      if (code === 2007) {
+        message.error(t('auth.accountPermanentlyLocked', 'Your account is permanently locked. Please contact the administrator.'));
+      } else if (code === 2001) {
         message.error(t('auth.accountLocked', 'Account locked due to 5 failed password attempts. Please try again after 30 minutes.'));
       } else if (code === 1006) {
         form.setFields([{ name: 'password', errors: [t('auth.authFailed', 'Authentication failed. Please check your login information.')] }]);
@@ -113,8 +115,14 @@ export const LoginPage: React.FC = () => {
       const redirectPath = getRedirectPath(payload?.roles || []);
       navigate(redirectPath);
     } catch (error: any) {
+      const code = error.response?.data?.code;
       const errorMsg = error.response?.data?.message;
-      if (errorMsg) {
+      
+      if (code === 2007) {
+        message.error(t('auth.accountPermanentlyLocked', 'Your account is permanently locked. Please contact the administrator.'));
+      } else if (code === 2001) {
+        message.error(t('auth.accountLocked', 'Account locked due to 5 failed password attempts. Please try again after 30 minutes.'));
+      } else if (errorMsg) {
         message.error(errorMsg);
       } else {
         message.error(t('auth.googleLoginFail', 'Login with Google failed. Please try again!'));

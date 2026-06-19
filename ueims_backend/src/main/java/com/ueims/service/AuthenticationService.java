@@ -131,7 +131,7 @@ public class AuthenticationService {
 
     private void checkAndResetLockStatus(User user) {
         if ("LOCKED".equals(user.getStatus())) {
-            throw new AppException(ErrorCode.USER_BANNED);
+            throw new AppException(ErrorCode.USER_PERMANENTLY_LOCKED);
         }
 
         if (user.getLockedUntil() != null) {
