@@ -3,11 +3,16 @@ package com.ueims.service;
 import jakarta.mail.internet.MimeMessage;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
+
+import com.ueims.model.entity.Incident;
+import com.ueims.model.entity.Interview;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +39,7 @@ public class MailService {
     String appBaseUrl;
 
     // ===== Password Reset (VI) =====
-    @org.springframework.scheduling.annotation.Async("mailTaskExecutor")
+    @Async("mailTaskExecutor")
     public void sendPasswordResetMail(String to, String fullName, String token) {
         String resetUrl = appBaseUrl + "/reset-password?token=" + token;
         String subject = "Yêu cầu đặt lại mật khẩu — UEIMS";
@@ -51,6 +56,7 @@ public class MailService {
     }
 
     // ===== Welcome Email (VI) =====
+    @Async("mailTaskExecutor")
     public void sendWelcomeMail(String to, String fullName, String tempPassword) {
         String loginUrl = appBaseUrl + PATH_LOGIN;
         String subject = "Chào mừng bạn đến với UEIMS";
@@ -69,7 +75,7 @@ public class MailService {
     }
 
     // ===== Password Changed (VI) =====
-    @org.springframework.scheduling.annotation.Async("mailTaskExecutor")
+    @Async("mailTaskExecutor")
     public void sendPasswordChangedMail(String to, String fullName, String changedAt) {
         String loginUrl = appBaseUrl + PATH_LOGIN;
         String subject = "Mật khẩu đã được thay đổi — UEIMS";
@@ -87,7 +93,7 @@ public class MailService {
     }
 
     // ===== Late Report Warning (VI) =====
-    @org.springframework.scheduling.annotation.Async("mailTaskExecutor")
+    @Async("mailTaskExecutor")
     public void sendLateReportWarningMail(String to, String fullName, Integer weekNumber) {
         String loginUrl = appBaseUrl + PATH_LOGIN;
         String subject = "Cảnh báo: Trễ hạn nộp báo cáo tuần " + weekNumber + " — UEIMS";
@@ -105,7 +111,7 @@ public class MailService {
     }
 
     // ===== Enterprise Status Notification (UC-19) =====
-    @org.springframework.scheduling.annotation.Async("mailTaskExecutor")
+    @Async("mailTaskExecutor")
     public void sendEnterpriseStatusNotification(String to, String contactPerson, String status, String reason) {
         String subject = "Thông báo kết quả duyệt hồ sơ doanh nghiệp — UEIMS";
         String loginUrl = appBaseUrl + PATH_LOGIN;
@@ -125,19 +131,19 @@ public class MailService {
     }
 
     // ===== Interview notifications (UC-43 / UC-44) =====
-    public void sendInterviewScheduled(com.ueims.model.entity.Interview interview) {
+    public void sendInterviewScheduled(Interview interview) {
         sendInterviewEmail(interview, "interview-scheduled", "Lịch phỏng vấn mới — UEIMS", null);
     }
 
-    public void sendInterviewRescheduled(com.ueims.model.entity.Interview interview) {
+    public void sendInterviewRescheduled(Interview interview) {
         sendInterviewEmail(interview, "interview-rescheduled", "Lịch phỏng vấn đã được dời — UEIMS", null);
     }
 
-    public void sendInterviewCanceled(com.ueims.model.entity.Interview interview, String reason) {
+    public void sendInterviewCanceled(Interview interview, String reason) {
         sendInterviewEmail(interview, "interview-canceled", "Lịch phỏng vấn đã bị hủy — UEIMS", reason);
     }
 
-    public void sendInterviewResult(com.ueims.model.entity.Interview interview, String result, String notes) {
+    public void sendInterviewResult(Interview interview, String result, String notes) {
         sendInterviewEmail(
                 interview,
                 "PASS".equalsIgnoreCase(result) ? "interview-result-pass" : "interview-result-fail",
@@ -145,12 +151,12 @@ public class MailService {
                 notes);
     }
 
-    public void sendIncidentReported(com.ueims.model.entity.Incident incident) {
+    public void sendIncidentReported(Incident incident) {
         try {
             // Notify reporter + all training managers
-            String reporterEmail =
-                    incident.getReportedBy() != null ? incident.getReportedBy().getEmail() : null;
-            if (reporterEmail == null) return;
+            String reporterEmail = incident.getReportedBy() != null ? incident.getReportedBy().getEmail() : null;
+            if (reporterEmail == null)
+                return;
             Context ctx = new Context();
             ctx.setVariable(VAR_FULL_NAME, incident.getReportedBy().getFullName());
             ctx.setVariable(VAR_SUBJECT, "Sự cố đã được ghi nhận — UEIMS");
@@ -164,12 +170,12 @@ public class MailService {
     }
 
     private void sendInterviewEmail(
-            com.ueims.model.entity.Interview interview, String template, String subject, String extra) {
+            Interview interview, String template, String subject, String extra) {
         try {
             String to = interview.getApplication() != null
-                            && interview.getApplication().getStudent() != null
-                    ? interview.getApplication().getStudent().getEmail()
-                    : null;
+                    && interview.getApplication().getStudent() != null
+                            ? interview.getApplication().getStudent().getEmail()
+                            : null;
             if (to == null) {
                 log.warn("[InterviewEmail] No recipient email for interview {}", interview.getInterviewId());
                 return;
@@ -206,8 +212,8 @@ public class MailService {
             helper.setSubject(subject);
             helper.setText(htmlBody, true);
 
-            org.springframework.core.io.ClassPathResource logoFile =
-                    new org.springframework.core.io.ClassPathResource("logo_ueims.png");
+            ClassPathResource logoFile = new ClassPathResource(
+                    "logo_ueims.png");
             helper.addInline("logoImage", logoFile);
 
             javaMailSender.send(message);

@@ -41,7 +41,7 @@ TABLE eligible_student_status_history:
   Foreign Keys: (eligible_id) -> eligible_students(eligible_id), (changed_by) -> users(user_id)
 
 TABLE system_announcements:
-  Columns: announcement_id UUID [PK], semester_id UUID, title VARCHAR(500) NOT NULL, content TEXT NOT NULL, status VARCHAR(20) NOT NULL, created_by UUID NOT NULL, published_at TIMESTAMP, created_at TIMESTAMP NOT NULL, updated_at TIMESTAMP NOT NULL, deleted_at TIMESTAMP, type VARCHAR(30), audience VARCHAR(30), target_role VARCHAR(30)
+  Columns: announcement_id UUID [PK], semester_id UUID, title VARCHAR(500) NOT NULL, content TEXT NOT NULL, status VARCHAR(20) NOT NULL, created_by UUID NOT NULL, published_at TIMESTAMP, created_at TIMESTAMP NOT NULL, updated_at TIMESTAMP NOT NULL, deleted_at TIMESTAMP, audience VARCHAR(30), target_role VARCHAR(30)
   Foreign Keys: (semester_id) -> semesters(semester_id), (created_by) -> users(user_id)
 
 TABLE enterprises:
@@ -113,7 +113,7 @@ TABLE final_grades:
   Foreign Keys: (student_id) -> users(user_id), (tm_id) -> users(user_id), (semester_id) -> semesters(semester_id), (cancelled_by) -> users(user_id)
 
 TABLE notifications:
-  Columns: notification_id UUID [PK], recipient_id UUID NOT NULL, title VARCHAR(500) NOT NULL, message TEXT NOT NULL, type VARCHAR(30) NOT NULL, reference_entity VARCHAR(100), reference_id UUID, is_read BOOLEAN NOT NULL, created_at TIMESTAMP NOT NULL
+  Columns: notification_id UUID [PK], recipient_id UUID NOT NULL, title VARCHAR(500) NOT NULL, message TEXT NOT NULL, varchar(30) UNKNOWN NOT NULL, reference_entity VARCHAR(100), reference_id UUID, is_read BOOLEAN NOT NULL, created_at TIMESTAMP NOT NULL
   Foreign Keys: (recipient_id) -> users(user_id)
 
 TABLE student_enterprise_feedbacks:
@@ -121,10 +121,10 @@ TABLE student_enterprise_feedbacks:
   Foreign Keys: (student_id) -> users(user_id), (enterprise_id) -> enterprises(enterprise_id), (semester_id) -> semesters(semester_id)
 
 VIEW v_semester_statistics:
-  Depends on: job_posts, semesters, eligible_students, final_grades, applications, interviews
+  Depends on: applications, semesters, eligible_students, final_grades, interviews, job_posts
 
 VIEW v_at_risk_students:
-  Depends on: weekly_reports, semesters, enterprise_assignments, student_profiles, enterprises, users
+  Depends on: weekly_reports, enterprises, enterprise_assignments, semesters, users, student_profiles
 
 TABLE user_sessions:
   Columns: token_id VARCHAR(36) [PK], email VARCHAR(100) NOT NULL, last_activity TIMESTAMP, expires_at TIMESTAMP NOT NULL

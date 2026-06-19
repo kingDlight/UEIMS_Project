@@ -66,6 +66,17 @@ public class StudentEnterpriseFeedbackServiceImpl implements StudentEnterpriseFe
     public StudentEnterpriseFeedback save(StudentEnterpriseFeedback entity) {
         User currentUser = getCurrentUser();
 
+        if (entity.getStudent() == null) {
+            entity.setStudent(currentUser);
+        }
+
+        if (entity.getSemester() == null || entity.getSemester().getSemesterId() == null) {
+            throw new AppException(ErrorCode.SEMESTER_ID_REQUIRED);
+        }
+        if (entity.getEnterprise() == null || entity.getEnterprise().getEnterpriseId() == null) {
+            throw new AppException(ErrorCode.FIELD_REQUIRED);
+        }
+
         // Check if student is eligible
         com.ueims.model.entity.EligibleStudent eligibleStudent = eligibleStudentRepository
                 .findByUser_UserIdAndSemester_SemesterId(

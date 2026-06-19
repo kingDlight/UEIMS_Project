@@ -75,8 +75,8 @@
           }
         },
         "primary_keys": [
-          "permission_name",
-          "role_name"
+          "role_name",
+          "permission_name"
         ],
         "unique_keys": []
       }
@@ -427,8 +427,8 @@
           "eligible_id"
         ],
         "unique_keys": [
-          "student_code",
-          "semester_id"
+          "semester_id",
+          "student_code"
         ]
       }
     },
@@ -515,10 +515,6 @@
           },
           "deleted_at": {
             "type": "TIMESTAMP",
-            "nullable": true
-          },
-          "type": {
-            "type": "VARCHAR(30)",
             "nullable": true
           },
           "audience": {
@@ -874,9 +870,9 @@
         ],
         "unique_keys": [
           "replaces_application_id",
+          "student_id",
           "semester_id",
-          "enterprise_id",
-          "student_id"
+          "enterprise_id"
         ]
       }
     },
@@ -1112,8 +1108,8 @@
           "assignment_id"
         ],
         "unique_keys": [
-          "semester_id",
-          "student_id"
+          "student_id",
+          "semester_id"
         ]
       }
     },
@@ -1576,8 +1572,8 @@
           "grade_id"
         ],
         "unique_keys": [
-          "semester_id",
-          "student_id"
+          "student_id",
+          "semester_id"
         ]
       }
     },
@@ -1602,8 +1598,8 @@
             "type": "TEXT",
             "nullable": false
           },
-          "type": {
-            "type": "VARCHAR(30)",
+          "varchar(30)": {
+            "type": "UNKNOWN",
             "nullable": false
           },
           "reference_entity": {
@@ -1687,9 +1683,9 @@
           "feedback_id"
         ],
         "unique_keys": [
+          "student_id",
           "semester_id",
-          "enterprise_id",
-          "student_id"
+          "enterprise_id"
         ]
       }
     },
@@ -1698,12 +1694,12 @@
       "type": "VIEW",
       "attributes": {
         "depends_on": [
-          "job_posts",
+          "applications",
           "semesters",
           "eligible_students",
           "final_grades",
-          "applications",
-          "interviews"
+          "interviews",
+          "job_posts"
         ]
       }
     },
@@ -1713,11 +1709,11 @@
       "attributes": {
         "depends_on": [
           "weekly_reports",
-          "semesters",
-          "enterprise_assignments",
-          "student_profiles",
           "enterprises",
-          "users"
+          "enterprise_assignments",
+          "semesters",
+          "users",
+          "student_profiles"
         ]
       }
     },
@@ -2663,7 +2659,7 @@
     },
     {
       "source": "v_semester_statistics",
-      "target": "job_posts",
+      "target": "applications",
       "type": "DEPENDS_ON",
       "attributes": {
         "metadata": "VIEW_SELECT"
@@ -2695,7 +2691,7 @@
     },
     {
       "source": "v_semester_statistics",
-      "target": "applications",
+      "target": "interviews",
       "type": "DEPENDS_ON",
       "attributes": {
         "metadata": "VIEW_SELECT"
@@ -2703,7 +2699,7 @@
     },
     {
       "source": "v_semester_statistics",
-      "target": "interviews",
+      "target": "job_posts",
       "type": "DEPENDS_ON",
       "attributes": {
         "metadata": "VIEW_SELECT"
@@ -2719,7 +2715,7 @@
     },
     {
       "source": "v_at_risk_students",
-      "target": "semesters",
+      "target": "enterprises",
       "type": "DEPENDS_ON",
       "attributes": {
         "metadata": "VIEW_SELECT"
@@ -2735,15 +2731,7 @@
     },
     {
       "source": "v_at_risk_students",
-      "target": "student_profiles",
-      "type": "DEPENDS_ON",
-      "attributes": {
-        "metadata": "VIEW_SELECT"
-      }
-    },
-    {
-      "source": "v_at_risk_students",
-      "target": "enterprises",
+      "target": "semesters",
       "type": "DEPENDS_ON",
       "attributes": {
         "metadata": "VIEW_SELECT"
@@ -2752,6 +2740,14 @@
     {
       "source": "v_at_risk_students",
       "target": "users",
+      "type": "DEPENDS_ON",
+      "attributes": {
+        "metadata": "VIEW_SELECT"
+      }
+    },
+    {
+      "source": "v_at_risk_students",
+      "target": "student_profiles",
       "type": "DEPENDS_ON",
       "attributes": {
         "metadata": "VIEW_SELECT"
