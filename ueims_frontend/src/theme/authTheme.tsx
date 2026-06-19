@@ -16,11 +16,11 @@ export const AUTH_FONT = "'Inter', system-ui, Avenir, Helvetica, Arial, sans-ser
 
 export function validatePassword(password: string): { valid: boolean; hints: string[] } {
   const hints: string[] = [];
-  if (password.length < 8) hints.push('It nht 8 ky tu');
-  if (!/[A-Z]/.test(password)) hints.push('It nht 1 chu hoa (A-Z)');
-  if (!/[a-z]/.test(password)) hints.push('It nht 1 chu thuong (a-z)');
-  if (!/\d/.test(password)) hints.push('It nht 1 chu so (0-9)');
-  if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) hints.push('It nht 1 ky tu dbc (!@#$...)');
+  if (password.length < 8) hints.push('At least 8 characters');
+  if (!/[A-Z]/.test(password)) hints.push('At least 1 uppercase letter (A-Z)');
+  if (!/[a-z]/.test(password)) hints.push('At least 1 lowercase letter (a-z)');
+  if (!/\d/.test(password)) hints.push('At least 1 number (0-9)');
+  if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) hints.push('At least 1 special character (!@#$...)');
   return { valid: hints.length === 0, hints };
 }
 
@@ -32,10 +32,10 @@ export function getPasswordStrength(password: string): { level: number; color: s
   if (/[A-Z]/.test(password) && /[a-z]/.test(password)) score++;
   if (/\d/.test(password)) score++;
   if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) score++;
-  if (score <= 1) return { level: 1, color: AUTH_DANGER, label: 'Yeu' };
-  if (score <= 2) return { level: 2, color: AUTH_STRENGTH_ORANGE, label: 'Trung binh' };
-  if (score <= 3) return { level: 3, color: AUTH_STRENGTH_YELLOW, label: 'Kha' };
-  return { level: 4, color: AUTH_STRENGTH_GREEN, label: 'Manh' };
+  if (score <= 1) return { level: 1, color: AUTH_DANGER, label: 'Weak' };
+  if (score <= 2) return { level: 2, color: AUTH_STRENGTH_ORANGE, label: 'Medium' };
+  if (score <= 3) return { level: 3, color: AUTH_STRENGTH_YELLOW, label: 'Good' };
+  return { level: 4, color: AUTH_STRENGTH_GREEN, label: 'Strong' };
 }
 
 export function PasswordStrengthMeter({ password }: { readonly password: string }) {
