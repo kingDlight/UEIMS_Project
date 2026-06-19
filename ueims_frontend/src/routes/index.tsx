@@ -17,6 +17,7 @@ const TrainingManagerDashboard = React.lazy(() => import('@/pages/TrainingManage
 const StudentDashboard = React.lazy(() => import('@/pages/student/StudentDashboard').then(m => ({ default: m.StudentDashboard })));
 const EnterpriseDashboard = React.lazy(() => import('@/pages/enterprise/EnterpriseDashboard').then(m => ({ default: m.EnterpriseDashboard })));
 const AdminDashboard = React.lazy(() => import('@/pages/admin/AdminDashboard').then(m => ({ default: m.AdminDashboard })));
+const JobDetailPage = React.lazy(() => import('@/pages/student/JobDetailPage').then(m => ({ default: m.JobDetailPage })));
 
 const PageLoader = () => (
   <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', width: '100%' }}>
@@ -107,6 +108,14 @@ export const router = createBrowserRouter([
     element: (
       <Suspense fallback={<PageLoader />}>
         <AdminDashboard />
+      </Suspense>
+    ),
+  },
+  {
+    path: '/job/:id',
+    element: (
+      <Suspense fallback={<PageLoader />}>
+        <JobDetailPage />
       </Suspense>
     ),
   },
