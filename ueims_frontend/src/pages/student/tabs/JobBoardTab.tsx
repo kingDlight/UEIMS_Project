@@ -71,6 +71,7 @@ export const JobBoardTab: React.FC = () => {
   const [techFilter, setTechFilter] = useState<string[]>([]);
   const [confirmApply, setConfirmApply] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [appliedJobIds, setAppliedJobIds] = useState<Set<number>>(new Set());
   const pageSize = 9;
 
   const { data: profile } = useStudentProfileQuery();
@@ -79,12 +80,24 @@ export const JobBoardTab: React.FC = () => {
 
   useEffect(() => { fetchJobs(); }, []);
 
+  const fetchAppliedJobIds = async () => {
+    try {
+      const res = await ApplicationService.getMyApplications();
+      const applications = res.data?.result ?? res.data ?? [];
+      const ids = new Set<number>(applications.map((a: any) => a.jobPostId));
+      setAppliedJobIds(ids);
+    } catch {
+      // non-fatal
+    }
+  };
+
   const fetchJobs = async () => {
     try {
       setLoading(true);
       const res = await JobPostService.getActive();
       const jobs = res.data?.result ?? res.data ?? [];
       setJobs(Array.isArray(jobs) ? jobs : []);
+      await fetchAppliedJobIds();
     } catch (err) {
       console.error('Failed to fetch jobs', err);
     } finally {
@@ -105,6 +118,7 @@ export const JobBoardTab: React.FC = () => {
       setApplying(true);
       await ApplicationService.create({ jobPostId: confirmApply.jobPostId });
       message.success(t('applicationSuccess', 'Application submitted successfully!'));
+      setAppliedJobIds(prev => new Set([...prev, confirmApply.jobPostId]));
       setConfirmApply(null);
       setSelectedJob(null);
       fetchJobs();
@@ -290,7 +304,9 @@ export const JobBoardTab: React.FC = () => {
               </div>
             )}
             <CTAButton variant="primary" size="lg" fullWidth icon={<SendOutlined />} onClick={() => {
-              if (currentSemester < 5) {
+              if (appliedJobIds.has(selectedJob.jobPostId)) {
+                message.info(t('alreadyAppliedMsg', 'You have already applied for this position.'));
+              } else if (currentSemester < 5) {
                 message.warning('Browse only mode enabled for your semester.');
               } else if (selectedJob.applicationDeadline && new Date(selectedJob.applicationDeadline) < new Date()) {
                 message.error('This job posting has reached its deadline.');
@@ -299,8 +315,8 @@ export const JobBoardTab: React.FC = () => {
               } else {
                 setConfirmApply(selectedJob);
               }
-            }} disabled={selectedJob.status !== 'OPEN' || !hasCv || currentSemester < 5} loading={applying}>
-              {selectedJob.status === 'OPEN' ? (currentSemester < 5 ? t('browseOnly', 'Browse Only') : (hasCv ? t('applyNow', 'Apply Now') : t('cvRequired', 'CV Required'))) : t('applicationsClosed', 'Applications Closed')}
+            }} disabled={appliedJobIds.has(selectedJob.jobPostId) || selectedJob.status !== 'OPEN' || !hasCv || currentSemester < 5} loading={applying}>
+              {appliedJobIds.has(selectedJob.jobPostId) ? t('applied', 'Applied') : (selectedJob.status === 'OPEN' ? (currentSemester < 5 ? t('browseOnly', 'Browse Only') : (hasCv ? t('applyNow', 'Apply Now') : t('cvRequired', 'CV Required'))) : t('applicationsClosed', 'Applications Closed'))}
             </CTAButton>
           </motion.div>
         </div>
