@@ -19,7 +19,7 @@ public class EnterpriseRequest {
     private String taxCode;
 
     @Size(max = 255, message = "Website URL must not exceed 255 characters")
-    @Pattern(regexp = "^(https?://)?[\\w.-]+\\.[a-zA-Z]{2,}.*$", message = "Website must be a valid URL")
+    @Pattern(regexp = "^$|^(https?://)?[\\w.-]+\\.[a-zA-Z]{2,}.*$", message = "Website must be a valid URL")
     private String website;
 
     @Size(max = 100, message = "Industry must not exceed 100 characters")
