@@ -690,7 +690,7 @@ export const ReportsTab: React.FC = () => {
       </div>
 
       {/* ── Custom Report Modal ──────────────────────────── */}
-      <App.App>
+      <App>
         <div style={{ display: customModalOpen ? 'block' : 'none', position: 'fixed', inset: 0, zIndex: 1000 }}>
           <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)' }} onClick={() => setCustomModalOpen(false)} />
           <div style={{
@@ -751,7 +751,7 @@ export const ReportsTab: React.FC = () => {
             </div>
           </div>
         </div>
-      </App.App>
+      </App>
     </div>
   );
 };
