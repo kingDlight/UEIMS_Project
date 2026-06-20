@@ -9,6 +9,7 @@ import {
   ChevronDown,
   XCircle,
   Send,
+  Download,
 } from 'lucide-react';
 import {
   PlacementApplicationService,
@@ -799,6 +800,30 @@ export const OJTTab: React.FC = () => {
                 {pendingCount}
               </span>
             )}
+          </button>
+
+          <button
+            onClick={() => {
+              void message.info('Export functionality will be available in the next release.');
+            }}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              padding: '7px 14px', borderRadius: cc.radiusMd,
+              border: `1.5px solid ${cc.brand}`, background: 'transparent', color: cc.brand,
+              fontSize: 12.5, fontWeight: 700, fontFamily: 'Inter, sans-serif',
+              cursor: 'pointer', transition: 'all 0.18s ease',
+            }}
+            onMouseEnter={(e) => {
+              const b = e.currentTarget as HTMLButtonElement;
+              b.style.background = cc.brand; b.style.color = '#fff';
+            }}
+            onMouseLeave={(e) => {
+              const b = e.currentTarget as HTMLButtonElement;
+              b.style.background = 'transparent'; b.style.color = cc.brand;
+            }}
+          >
+            <Download size={13} strokeWidth={2.5} />
+            Export
           </button>
 
           {/* Summary — mono-tint pill chips */}
