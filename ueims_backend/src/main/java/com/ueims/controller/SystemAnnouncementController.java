@@ -10,7 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.ueims.dto.request.AnnouncementCreationRequest;
-import com.ueims.model.entity.SystemAnnouncement;
+import com.ueims.dto.response.SystemAnnouncementDTO;
 import com.ueims.service.SystemAnnouncementService;
 
 import lombok.AccessLevel;
@@ -26,42 +26,42 @@ public class SystemAnnouncementController {
 
     @GetMapping
     @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')")
-    public ResponseEntity<List<SystemAnnouncement>> getAll() {
+    public ResponseEntity<List<SystemAnnouncementDTO>> getAll() {
         return ResponseEntity.ok(service.findAll());
     }
 
     @GetMapping("/active")
-    public ResponseEntity<List<SystemAnnouncement>> getActiveAnnouncements() {
+    public ResponseEntity<List<SystemAnnouncementDTO>> getActiveAnnouncements() {
         return ResponseEntity.ok(service.findActiveAnnouncements());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<SystemAnnouncement> getById(@PathVariable UUID id) {
+    public ResponseEntity<SystemAnnouncementDTO> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(service.findById(id));
     }
 
     @PostMapping
     @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')")
-    public ResponseEntity<SystemAnnouncement> create(@Valid @RequestBody AnnouncementCreationRequest request) {
+    public ResponseEntity<SystemAnnouncementDTO> create(@Valid @RequestBody AnnouncementCreationRequest request) {
         return ResponseEntity.ok(service.createAnnouncement(request));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')")
-    public ResponseEntity<SystemAnnouncement> update(
+    public ResponseEntity<SystemAnnouncementDTO> update(
             @PathVariable UUID id, @Valid @RequestBody AnnouncementCreationRequest request) {
         return ResponseEntity.ok(service.updateAnnouncement(id, request));
     }
 
     @PutMapping("/{id}/publish")
     @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')")
-    public ResponseEntity<SystemAnnouncement> publish(@PathVariable UUID id) {
+    public ResponseEntity<SystemAnnouncementDTO> publish(@PathVariable UUID id) {
         return ResponseEntity.ok(service.updateStatus(id, "PUBLISHED"));
     }
 
     @PutMapping("/{id}/archive")
     @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')")
-    public ResponseEntity<SystemAnnouncement> archive(@PathVariable UUID id) {
+    public ResponseEntity<SystemAnnouncementDTO> archive(@PathVariable UUID id) {
         return ResponseEntity.ok(service.updateStatus(id, "ARCHIVED"));
     }
 

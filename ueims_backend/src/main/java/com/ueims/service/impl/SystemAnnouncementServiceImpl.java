@@ -3,6 +3,7 @@ package com.ueims.service.impl;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -10,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ueims.dto.request.AnnouncementCreationRequest;
 import com.ueims.dto.request.BroadcastNotificationRequest;
+import com.ueims.dto.response.SystemAnnouncementDTO;
 import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
 import com.ueims.model.entity.Semester;
@@ -39,23 +41,29 @@ public class SystemAnnouncementServiceImpl implements SystemAnnouncementService 
     NotificationService notificationService;
 
     @Override
-    public List<SystemAnnouncement> findAll() {
-        return repository.findAll();
+    @Transactional(readOnly = true)
+    public List<SystemAnnouncementDTO> findAll() {
+        return repository.findAll().stream().map(SystemAnnouncementDTO::from).collect(Collectors.toList());
     }
 
     @Override
-    public List<SystemAnnouncement> findActiveAnnouncements() {
-        return repository.findByStatusOrderByCreatedAtDesc("PUBLISHED");
+    @Transactional(readOnly = true)
+    public List<SystemAnnouncementDTO> findActiveAnnouncements() {
+        return repository.findByStatusOrderByCreatedAtDesc("PUBLISHED").stream()
+                .map(SystemAnnouncementDTO::from)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public SystemAnnouncement findById(UUID id) {
-        return repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION));
+    @Transactional(readOnly = true)
+    public SystemAnnouncementDTO findById(UUID id) {
+        return SystemAnnouncementDTO.from(
+                repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION)));
     }
 
     @Override
     @Transactional
-    public SystemAnnouncement createAnnouncement(AnnouncementCreationRequest request) {
+    public SystemAnnouncementDTO createAnnouncement(AnnouncementCreationRequest request) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User currentUser =
                 userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
@@ -78,13 +86,14 @@ public class SystemAnnouncementServiceImpl implements SystemAnnouncementService 
 
         SystemAnnouncement saved = repository.save(announcement);
         broadcaster.broadcastCreated(saved);
-        return saved;
+        return SystemAnnouncementDTO.from(saved);
     }
 
     @Override
     @Transactional
-    public SystemAnnouncement updateAnnouncement(UUID id, AnnouncementCreationRequest request) {
-        SystemAnnouncement announcement = findById(id);
+    public SystemAnnouncementDTO updateAnnouncement(UUID id, AnnouncementCreationRequest request) {
+        SystemAnnouncement announcement =
+                repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION));
 
         announcement.setTitle(request.getTitle());
         announcement.setContent(request.getContent());
@@ -99,13 +108,14 @@ public class SystemAnnouncementServiceImpl implements SystemAnnouncementService 
 
         SystemAnnouncement saved = repository.save(announcement);
         broadcaster.broadcastUpdated(saved);
-        return saved;
+        return SystemAnnouncementDTO.from(saved);
     }
 
     @Override
     @Transactional
-    public SystemAnnouncement updateStatus(UUID id, String status) {
-        SystemAnnouncement announcement = findById(id);
+    public SystemAnnouncementDTO updateStatus(UUID id, String status) {
+        SystemAnnouncement announcement =
+                repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION));
         boolean wasPublished = "PUBLISHED".equalsIgnoreCase(announcement.getStatus());
         announcement.setStatus(status);
         if ("PUBLISHED".equals(status)) {
@@ -146,7 +156,7 @@ public class SystemAnnouncementServiceImpl implements SystemAnnouncementService 
         } else {
             broadcaster.broadcastUpdated(saved);
         }
-        return saved;
+        return SystemAnnouncementDTO.from(saved);
     }
 
     @Override
