@@ -7,6 +7,7 @@ import {
   Clock,
   Pencil,
   Star,
+  Power,
 } from 'lucide-react';
 import dayjs from 'dayjs';
 import { SemesterService } from '@/services/SemesterService';
@@ -231,6 +232,19 @@ export const SemesterTab: React.FC = () => {
       console.error(err);
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
         ?? 'Failed to set current semester';
+      message.error(msg);
+    }
+  }, [fetchSemesters]);
+
+  const handleCloseSemester = useCallback(async (record: SemesterRecord) => {
+    try {
+      await SemesterService.closeSemester(record.id);
+      message.success({ content: `"${record.name}" has been closed.`, duration: 2.5 });
+      void fetchSemesters();
+    } catch (err) {
+      console.error(err);
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
+        ?? 'Failed to close semester';
       message.error(msg);
     }
   }, [fetchSemesters]);
@@ -546,24 +560,49 @@ export const SemesterTab: React.FC = () => {
           )}
 
           {record.status === 'Current' && (
-            <span
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 5,
-                padding: '5px 11px',
-                color: cc.textMuted,
-                fontSize: 11.5,
-                fontWeight: 600,
-                fontFamily: 'Inter, sans-serif',
-                cursor: 'not-allowed',
-                opacity: 0.5,
-                whiteSpace: 'nowrap',
-              }}
+            <Popconfirm
+              title={`Close "${record.name}"?`}
+              description="This will close the semester and stop all active processes."
+              onConfirm={() => handleCloseSemester(record)}
+              okText="Close Semester"
+              cancelText="Cancel"
+              okButtonProps={{ danger: true, style: { borderRadius: cc.radiusMd, fontWeight: 600 } }}
+              cancelButtonProps={{ style: { borderRadius: cc.radiusMd } }}
             >
-              <Star size={11} />
-              Active
-            </span>
+              <button
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 5,
+                  padding: '5px 11px',
+                  borderRadius: cc.radiusMd,
+                  border: `1.5px solid ${cc.error}`,
+                  background: 'transparent',
+                  color: cc.error,
+                  fontSize: 11.5,
+                  fontWeight: 600,
+                  fontFamily: 'Inter, sans-serif',
+                  cursor: 'pointer',
+                  transition: 'all 0.18s ease',
+                  whiteSpace: 'nowrap',
+                }}
+                onMouseEnter={(e) => {
+                  const b = e.currentTarget as HTMLButtonElement;
+                  b.style.color = '#fff';
+                  b.style.background = cc.error;
+                  b.style.transform = 'translateY(-1px)';
+                }}
+                onMouseLeave={(e) => {
+                  const b = e.currentTarget as HTMLButtonElement;
+                  b.style.color = cc.error;
+                  b.style.background = 'transparent';
+                  b.style.transform = 'translateY(0)';
+                }}
+              >
+                <Power size={11} />
+                Close
+              </button>
+            </Popconfirm>
           )}
         </div>
       ),
