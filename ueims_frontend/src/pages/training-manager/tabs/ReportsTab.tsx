@@ -277,6 +277,15 @@ export const ReportsTab: React.FC = () => {
 
   const handleDownload = (record: ReportHistoryItem) => {
     void message.success({ content: `Downloading "${record.name}"...`, duration: 2 });
+    const blob = new Blob([`Mock report content for ${record.name}\nGenerated on: ${record.date}`], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${record.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   const handleDelete = (record: ReportHistoryItem) => {
