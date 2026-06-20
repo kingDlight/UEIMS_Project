@@ -55,7 +55,7 @@ class JobPostServiceImplTest {
     void setUp() {
         enterprise = new Enterprise();
         enterprise.setEnterpriseId(UUID.randomUUID());
-        enterprise.setStatus("ACTIVE");
+        enterprise.setStatus("APPROVED");
 
         currentUser = new User();
         currentUser.setUserId(UUID.randomUUID());
@@ -94,7 +94,7 @@ class JobPostServiceImplTest {
 
     @Test
     void findById_whenExists_returnsJobPost() {
-        when(repository.findById(jobPostId)).thenReturn(Optional.of(jobPost));
+        when(repository.findWithEnterpriseByJobPostId(jobPostId)).thenReturn(Optional.of(jobPost));
         JobPost result = service.findById(jobPostId);
         assertNotNull(result);
         assertEquals(jobPostId, result.getJobPostId());
@@ -102,7 +102,7 @@ class JobPostServiceImplTest {
 
     @Test
     void findById_whenNotExists_throwsException() {
-        when(repository.findById(any())).thenReturn(Optional.empty());
+        when(repository.findWithEnterpriseByJobPostId(any())).thenReturn(Optional.empty());
         UUID randomId = UUID.randomUUID();
         AppException e = assertThrows(AppException.class, () -> service.findById(randomId));
         assertEquals(ErrorCode.JOB_POST_NOT_FOUND, e.getErrorCode());
@@ -199,7 +199,8 @@ class JobPostServiceImplTest {
     @Test
     void update_success() {
         mockSecurityContext(currentUser);
-        when(repository.findById(jobPostId)).thenReturn(Optional.of(jobPost));
+        jobPost.setCreatedBy(currentUser);
+        when(repository.findWithEnterpriseByJobPostId(jobPostId)).thenReturn(Optional.of(jobPost));
         when(repository.save(any(JobPost.class))).thenAnswer(i -> i.getArgument(0));
 
         JobPostRequest request = new JobPostRequest();
@@ -222,7 +223,7 @@ class JobPostServiceImplTest {
         otherUser.setEnterprise(otherEnterprise);
 
         mockSecurityContext(otherUser);
-        when(repository.findById(jobPostId)).thenReturn(Optional.of(jobPost));
+        when(repository.findWithEnterpriseByJobPostId(jobPostId)).thenReturn(Optional.of(jobPost));
 
         JobPostRequest request = new JobPostRequest();
 
@@ -233,7 +234,8 @@ class JobPostServiceImplTest {
     @Test
     void deleteById_success() {
         mockSecurityContext(currentUser);
-        when(repository.findById(jobPostId)).thenReturn(Optional.of(jobPost));
+        jobPost.setCreatedBy(currentUser);
+        when(repository.findWithEnterpriseByJobPostId(jobPostId)).thenReturn(Optional.of(jobPost));
 
         service.deleteById(jobPostId);
 

@@ -96,6 +96,7 @@ public class JobPostServiceImpl implements JobPostService {
                 .positionsCount(request.getPositionsCount())
                 .applicationDeadline(request.getApplicationDeadline())
                 .status(request.getStatus() != null ? request.getStatus() : "OPEN")
+                .createdBy(currentUser)
                 .build();
 
         return repository.save(entity);
@@ -163,6 +164,12 @@ public class JobPostServiceImpl implements JobPostService {
 
         if (!ownerId.equals(currentEnterpriseId)) {
             // Ném lỗi Unauthorized (tương đương AccessDenied trong logic của project)
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        // Kiểm tra quyền sở hữu (creatorId) của bài đăng
+        if (jobPost.getCreatedBy() != null
+                && !jobPost.getCreatedBy().getUserId().equals(currentUser.getUserId())) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
     }
