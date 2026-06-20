@@ -9,7 +9,6 @@ import {
   ChevronDown,
   XCircle,
   Send,
-  Download,
 } from 'lucide-react';
 import {
   PlacementApplicationService,
@@ -852,7 +851,6 @@ export const OJTTab: React.FC = () => {
             {exporting ? <Spin size="small" /> : <Download size={13} strokeWidth={2.5} />}
             {exporting ? 'Exporting...' : 'Export'}
           </button>
-
           {/* Summary — mono-tint pill chips */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 4, paddingLeft: 8, borderLeft: `1px solid ${cc.border}`, marginLeft: 4, flexWrap: 'wrap' }}>
             {([

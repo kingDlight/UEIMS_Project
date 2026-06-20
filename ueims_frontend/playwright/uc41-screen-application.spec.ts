@@ -1,11 +1,10 @@
 import { test, expect } from '@playwright/test';
-import { loginAsEnterprise } from '../fixtures/auth';
+import { loginAsEnterprise } from './fixtures/auth';
 
 test.describe('UC-41: Screen Application', () => {
   test('Reject without reason shows warning; Reject with reason succeeds', async ({ page }) => {
     await loginAsEnterprise(page);
-    await page.getByRole('menuitem', { name: /applicants/i }).first().click();
-    await page.waitForURL(/applicants$/);
+    await page.goto('/enterprise-dashboard/applicants');
 
     // Open any PENDING applicant
     const pendingColumn = page.locator('text=/pending/i').first();

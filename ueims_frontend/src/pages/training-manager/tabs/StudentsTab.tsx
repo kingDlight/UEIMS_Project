@@ -685,7 +685,7 @@ const EditStudentModal: React.FC<{
             <InputNumber
               size="large"
               min={0}
-              max={10}
+              max={4}
               step={0.01}
               style={{ width: '100%' }}
               placeholder="0.00 – 10.00"

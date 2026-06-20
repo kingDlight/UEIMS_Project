@@ -1,11 +1,10 @@
 import { test, expect } from '@playwright/test';
-import { loginAsEnterprise } from '../fixtures/auth';
+import { loginAsEnterprise } from './fixtures/auth';
 
 test.describe('UC-44: Record Interview Result', () => {
   test('Fail without notes shows warning; Fail with notes succeeds (44.0.E1)', async ({ page }) => {
     await loginAsEnterprise(page);
-    await page.getByRole('menuitem', { name: /results/i }).first().click();
-    await page.waitForURL(/results$/);
+    await page.goto('/enterprise-dashboard/results');
 
     // Look for the first Fail button
     const failBtn = page.getByRole('button', { name: /^fail$/i }).first();
@@ -28,3 +27,4 @@ test.describe('UC-44: Record Interview Result', () => {
     await expect(page.getByText(/recruitment results saved/i).first()).toBeVisible({ timeout: 5000 });
   });
 });
+

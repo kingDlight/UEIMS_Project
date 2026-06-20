@@ -1,11 +1,10 @@
 import { test, expect } from '@playwright/test';
-import { loginAsEnterprise } from '../fixtures/auth';
+import { loginAsEnterprise } from './fixtures/auth';
 
 test.describe('UC-46: Manage Internship Plan (BR-38, BR-39)', () => {
   test('Saving plan with empty task description shows error', async ({ page }) => {
     await loginAsEnterprise(page);
-    await page.getByRole('menuitem', { name: /training plans/i }).first().click();
-    await page.waitForURL(/plans$/);
+    await page.goto('/enterprise-dashboard/plans');
 
     // Click first student in the sidebar
     const firstStudent = page.locator('aside div').filter({ hasText: /student|sv|nv/i }).first();

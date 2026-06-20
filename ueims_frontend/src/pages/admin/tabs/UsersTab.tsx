@@ -248,7 +248,7 @@ export const UsersTab: React.FC = () => {
 
   // ========== STATUS (UC-10) ==========
   const requestStatusChange = (user: UserDetail) => {
-    const next = user.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
+    const next = user.status === 'ACTIVE' ? 'LOCKED' : 'ACTIVE';
     setStatusModal({ open: true, user, nextStatus: next });
   };
 
@@ -256,8 +256,16 @@ export const UsersTab: React.FC = () => {
     if (!statusModal.user) return;
     setSavingStatus(true);
     try {
-      await AdminService.updateUserStatus(statusModal.user.userId, statusModal.nextStatus);
-      message.success('User status updated.');
+      if (statusModal.nextStatus === 'LOCKED') {
+        await AdminService.lockUser(statusModal.user.userId);
+        message.success('User account has been locked.');
+      } else if (statusModal.nextStatus === 'ACTIVE') {
+        await AdminService.unlockUser(statusModal.user.userId);
+        message.success('User account has been unlocked.');
+      } else {
+        await AdminService.updateUserStatus(statusModal.user.userId, statusModal.nextStatus);
+        message.success('User status updated.');
+      }
       setStatusModal({ open: false, user: null, nextStatus: 'ACTIVE' });
       await fetchUsers();
     } catch (err: any) {
@@ -390,7 +398,6 @@ export const UsersTab: React.FC = () => {
                 { value: 'ALL', label: 'All statuses' },
                 { value: 'ACTIVE', label: 'Active' },
                 { value: 'INACTIVE', label: 'Inactive' },
-                { value: 'LOCKED', label: 'Locked' },
               ]}
             />
             <span style={{ fontSize: 12, color: c.textMuted, whiteSpace: 'nowrap' }}>

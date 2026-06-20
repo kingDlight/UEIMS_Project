@@ -1,11 +1,10 @@
 import { test, expect } from '@playwright/test';
-import { loginAsEnterprise } from '../fixtures/auth';
+import { loginAsEnterprise } from './fixtures/auth';
 
 test.describe('UC-48: Review Weekly Report (BR-40)', () => {
   test('Reject without feedback shows warning (48.1.E1)', async ({ page }) => {
     await loginAsEnterprise(page);
-    await page.getByRole('menuitem', { name: /weekly reports/i }).first().click();
-    await page.waitForURL(/reports$/);
+    await page.goto('/enterprise-dashboard/reports');
 
     // Click first report card
     const firstCard = page.locator('div').filter({ hasText: /week/i }).first();
