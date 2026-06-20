@@ -804,10 +804,10 @@ export const OJTTab: React.FC = () => {
           {/* Summary — mono-tint pill chips */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 4, paddingLeft: 8, borderLeft: `1px solid ${cc.border}`, marginLeft: 4, flexWrap: 'wrap' }}>
             {([
-              { label: 'Unplaced',  n: filteredData.filter((p) => p.workflowStatus === 'UNPLACED').length },
-              { label: 'Pending',   n: filteredData.filter((p) => p.workflowStatus === 'PENDING_APPROVAL').length },
-              { label: 'Placed',    n: filteredData.filter((p) => p.workflowStatus === 'PLACED').length },
-              { label: 'Completed', n: filteredData.filter((p) => p.workflowStatus === 'COMPLETED').length },
+              { label: 'Unplaced',  n: placementData.filter((p) => p.workflowStatus === 'UNPLACED').length },
+              { label: 'Pending',   n: placementData.filter((p) => p.workflowStatus === 'PENDING_APPROVAL').length },
+              { label: 'Placed',    n: placementData.filter((p) => p.workflowStatus === 'PLACED').length },
+              { label: 'Completed', n: placementData.filter((p) => p.workflowStatus === 'COMPLETED').length },
             ] as const).map(({ label, n }) => (
               <div key={label} style={{
                 display: 'flex', alignItems: 'center', gap: 4,
