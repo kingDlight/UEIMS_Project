@@ -75,7 +75,7 @@ public class EnterpriseRegistrationServiceImpl implements EnterpriseRegistration
                 .password(passwordEncoder.encode(request.getPassword()))
                 .fullName(request.getContactPerson())
                 .status("ACTIVE")
-                .mustChangePassword(true)
+                .mustChangePassword(false)
                 .enterprise(enterprise)
                 .build();
         user = userRepository.save(user);
