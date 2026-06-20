@@ -4,20 +4,20 @@ import java.util.List;
 import java.util.UUID;
 
 import com.ueims.dto.request.AnnouncementCreationRequest;
-import com.ueims.model.entity.SystemAnnouncement;
+import com.ueims.dto.response.SystemAnnouncementDTO;
 
 public interface SystemAnnouncementService {
-    List<SystemAnnouncement> findAll();
+    List<SystemAnnouncementDTO> findAll();
 
-    List<SystemAnnouncement> findActiveAnnouncements();
+    List<SystemAnnouncementDTO> findActiveAnnouncements();
 
-    SystemAnnouncement findById(UUID id);
+    SystemAnnouncementDTO findById(UUID id);
 
-    SystemAnnouncement createAnnouncement(AnnouncementCreationRequest request);
+    SystemAnnouncementDTO createAnnouncement(AnnouncementCreationRequest request);
 
-    SystemAnnouncement updateAnnouncement(UUID id, AnnouncementCreationRequest request);
+    SystemAnnouncementDTO updateAnnouncement(UUID id, AnnouncementCreationRequest request);
 
-    SystemAnnouncement updateStatus(UUID id, String status);
+    SystemAnnouncementDTO updateStatus(UUID id, String status);
 
     void deleteById(UUID id);
 }
