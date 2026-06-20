@@ -1,4 +1,4 @@
-import api from './api';
+import{ api} from './api';
 import type { AtRiskStudent } from '@/pages/training-manager/types';
 
 export const AtRiskStudentService = {

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import com.ueims.dto.request.PlacementApplicationRequest;
 import com.ueims.dto.request.RejectApplicationRequest;
 import com.ueims.dto.response.PlacementApplicationResponseDTO;
+import com.ueims.service.ExcelExportService;
 import com.ueims.service.PlacementApplicationService;
 import com.ueims.service.UserService;
 
@@ -27,6 +28,7 @@ public class PlacementApplicationController {
 
     PlacementApplicationService service;
     UserService userService;
+    ExcelExportService excelExportService;
 
     /**
      * SV submit application vào 1 DN.
@@ -93,5 +95,15 @@ public class PlacementApplicationController {
     public ResponseEntity<PlacementApplicationResponseDTO> withdraw(@PathVariable UUID id) {
         UUID studentId = userService.getCurrentUserId();
         return ResponseEntity.ok(service.withdraw(id, studentId));
+    }
+
+    /**
+     * TM export OJT placements for a semester.
+     * GET /api/placement-applications/export?semesterId={id}
+     */
+    @GetMapping("/export")
+    @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
+    public ResponseEntity<byte[]> exportOjtPlacements(@RequestParam UUID semesterId) {
+        return excelExportService.exportOjtPlacements(semesterId);
     }
 }

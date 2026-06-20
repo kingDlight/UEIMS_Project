@@ -223,6 +223,7 @@ export const OJTTab: React.FC = () => {
   const [autoMatchResult, setAutoMatchResult] = useState<AutoMatchResult | null>(null);
   const [autoMatchModalOpen, setAutoMatchModalOpen] = useState(false);
   const [manualMatchLoading, setManualMatchLoading] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   const fetchOjtView = useCallback(async () => {
     try {
@@ -803,27 +804,53 @@ export const OJTTab: React.FC = () => {
           </button>
 
           <button
-            onClick={() => {
-              void message.info('Export functionality will be available in the next release.');
+            onClick={async () => {
+              if (placementData.length === 0) {
+                void message.warning('No data to export.');
+                return;
+              }
+              const semesterId = placementData[0].semesterId;
+              setExporting(true);
+              try {
+                const response = await PlacementApplicationService.exportOjtPlacements(semesterId);
+                const url = window.URL.createObjectURL(new Blob([response.data as BlobPart]));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', 'ojt_placements.xlsx');
+                document.body.appendChild(link);
+                link.click();
+                if (link.parentNode) link.parentNode.removeChild(link);
+                window.URL.revokeObjectURL(url);
+                void message.success('Export successful!');
+              } catch (err) {
+                console.error(err);
+                void message.error('Failed to export OJT placements');
+              } finally {
+                setExporting(false);
+              }
             }}
+            disabled={exporting}
             style={{
               display: 'inline-flex', alignItems: 'center', gap: 6,
               padding: '7px 14px', borderRadius: cc.radiusMd,
               border: `1.5px solid ${cc.brand}`, background: 'transparent', color: cc.brand,
               fontSize: 12.5, fontWeight: 700, fontFamily: 'Inter, sans-serif',
-              cursor: 'pointer', transition: 'all 0.18s ease',
+              cursor: exporting ? 'not-allowed' : 'pointer', transition: 'all 0.18s ease',
+              opacity: exporting ? 0.7 : 1,
             }}
             onMouseEnter={(e) => {
+              if (exporting) return;
               const b = e.currentTarget as HTMLButtonElement;
               b.style.background = cc.brand; b.style.color = '#fff';
             }}
             onMouseLeave={(e) => {
+              if (exporting) return;
               const b = e.currentTarget as HTMLButtonElement;
               b.style.background = 'transparent'; b.style.color = cc.brand;
             }}
           >
-            <Download size={13} strokeWidth={2.5} />
-            Export
+            {exporting ? <Spin size="small" /> : <Download size={13} strokeWidth={2.5} />}
+            {exporting ? 'Exporting...' : 'Export'}
           </button>
 
           {/* Summary — mono-tint pill chips */}
