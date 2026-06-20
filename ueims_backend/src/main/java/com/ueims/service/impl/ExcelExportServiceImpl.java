@@ -83,6 +83,56 @@ public class ExcelExportServiceImpl implements ExcelExportService {
     }
 
     @Override
+    public ResponseEntity<byte[]> exportOjtPlacements(UUID semesterId, String major, String status) {
+        List<Object[]> applications = placementApplicationRepository.findOjtPlacementView();
+
+        List<Object[]> filtered = applications.stream()
+                .filter(row -> {
+                    boolean matchMajor = major == null || major.isEmpty() || major.equals(row[3]);
+                    boolean matchStatus = status == null || status.isEmpty() || status.equals(row[6]);
+                    boolean matchSemester =
+                            semesterId == null || semesterId.toString().equals(row[4].toString());
+                    return matchMajor && matchStatus && matchSemester;
+                })
+                .toList();
+
+        try (Workbook workbook = new XSSFWorkbook()) {
+            Sheet sheet = workbook.createSheet("OJT Placements");
+
+            // Create Header
+            Row headerRow = sheet.createRow(0);
+            String[] columns = {"Student Code", "Student Name", "Enterprise Name", "Status", "Major"};
+            for (int i = 0; i < columns.length; i++) {
+                Cell cell = headerRow.createCell(i);
+                cell.setCellValue(columns[i]);
+            }
+
+            // Fill Data
+            int rowNum = 1;
+            for (Object[] app : filtered) {
+                Row row = sheet.createRow(rowNum++);
+                row.createCell(0).setCellValue(app[2] != null ? app[2].toString() : ""); // student_code
+                row.createCell(1).setCellValue(app[1] != null ? app[1].toString() : ""); // student_name
+                row.createCell(2).setCellValue(app[9] != null ? app[9].toString() : ""); // enterprise_name
+                row.createCell(3).setCellValue(app[6] != null ? app[6].toString() : ""); // workflow_status
+                row.createCell(4).setCellValue(app[3] != null ? app[3].toString() : ""); // major
+            }
+
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            workbook.write(outputStream);
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=ojt_placements.xlsx")
+                    .body(outputStream.toByteArray());
+
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @Override
     public ResponseEntity<byte[]> exportFinalGrades() {
         List<FinalGrade> grades =
                 finalGradeRepository.findAll(PageRequest.of(0, 10000)).getContent();

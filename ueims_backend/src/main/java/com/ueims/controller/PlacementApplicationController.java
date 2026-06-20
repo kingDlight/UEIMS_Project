@@ -96,4 +96,17 @@ public class PlacementApplicationController {
         UUID studentId = userService.getCurrentUserId();
         return ResponseEntity.ok(service.withdraw(id, studentId));
     }
+
+    /**
+     * TM export OJT placements for a semester.
+     * GET /api/placement-applications/export?semesterId={id}
+     */
+    @GetMapping("/export")
+    @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
+    public ResponseEntity<byte[]> exportOjtPlacements(
+            @RequestParam UUID semesterId,
+            @RequestParam(required = false) String major,
+            @RequestParam(required = false) String status) {
+        return excelExportService.exportOjtPlacements(semesterId, major, status);
+    }
 }
