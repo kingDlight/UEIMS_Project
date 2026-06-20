@@ -2,12 +2,10 @@ package com.ueims.config.security;
 
 import java.text.ParseException;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.Objects;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.BadJwtException;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -16,7 +14,6 @@ import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.stereotype.Component;
 
-import com.nimbusds.jwt.SignedJWT;
 import com.ueims.model.entity.InvalidatedToken;
 import com.ueims.model.entity.UserSession;
 import com.ueims.repository.InvalidatedTokenRepository;
@@ -44,7 +41,7 @@ public class CustomJwtDecoder implements JwtDecoder {
     @Override
     public Jwt decode(String token) throws JwtException {
         try {
-            SignedJWT signedJWT = SignedJWT.parse(token);
+            com.nimbusds.jwt.SignedJWT signedJWT = com.nimbusds.jwt.SignedJWT.parse(token);
 
             String tokenType = signedJWT.getJWTClaimsSet().getStringClaim("token_type");
             if (!"ACCESS".equals(tokenType)) {
@@ -65,12 +62,12 @@ public class CustomJwtDecoder implements JwtDecoder {
                 UserSession session = sessionOpt.get();
 
                 if (session.getLastActivity() != null
-                        && session.getLastActivity().plusMinutes(15).isBefore(LocalDateTime.now(ZoneOffset.UTC))) {
+                        && session.getLastActivity().plusMinutes(15).isBefore(LocalDateTime.now())) {
                     invalidateSessionToken(session);
                     throw new BadJwtException("Session expired due to inactivity");
                 }
 
-                session.setLastActivity(LocalDateTime.now(ZoneOffset.UTC));
+                session.setLastActivity(LocalDateTime.now());
                 userSessionRepository.save(session);
             }
 
@@ -95,9 +92,8 @@ public class CustomJwtDecoder implements JwtDecoder {
                     .expiresAt(session.getExpiresAt())
                     .build());
             userSessionRepository.delete(session);
-        } catch (DataIntegrityViolationException e) {
-            // Concurrent requests might try to invalidate the same token, ignore duplicate
-            // key error
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            // Concurrent requests might try to invalidate the same token, ignore duplicate key error
         }
     }
 }

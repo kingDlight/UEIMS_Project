@@ -1,13 +1,12 @@
 import { test, expect } from '@playwright/test';
-import { loginAsEnterprise } from '../fixtures/auth';
+import { loginAsEnterprise } from './fixtures/auth';
 
 test.describe('UC-40: Download Applicant CV', () => {
   test('Enterprise can download an applicant CV (force download, not new tab)', async ({ page }) => {
     await loginAsEnterprise(page);
 
     // Navigate to Applicants tab
-    await page.getByRole('menuitem', { name: /applicants/i }).first().click();
-    await page.waitForURL(/applicants$/);
+    await page.goto('/enterprise-dashboard/applicants');
 
     // Open the first applicant card detail modal
     const firstCard = page.locator('[role="button"], .ant-card, div').filter({ hasText: /student/i }).first();

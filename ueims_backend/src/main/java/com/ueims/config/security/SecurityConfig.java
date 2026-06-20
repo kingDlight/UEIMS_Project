@@ -40,7 +40,8 @@ public class SecurityConfig {
         "/api/auth/reset-password",
         "/api/auth/register-enterprise",
         "/api/auth/google",
-        "/api/test/**"
+        "/api/test/**",
+        "/api/public/**"
     };
 
     private static final String[] PUBLIC_GET_ENDPOINTS = {
@@ -90,6 +91,7 @@ public class SecurityConfig {
         // SonarQube S4502: acknowledged — CSRF does not apply to Bearer-token-based REST APIs.
         httpSecurity.csrf(AbstractHttpConfigurer::disable);
         httpSecurity.cors(cors -> {});
+        httpSecurity.httpBasic(AbstractHttpConfigurer::disable);
 
         // Security headers on every response
         httpSecurity.addFilterBefore(securityHeadersFilter, UsernamePasswordAuthenticationFilter.class);

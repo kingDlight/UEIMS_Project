@@ -57,7 +57,6 @@
     "mustChangePassword": "You must change your password before continuing!",
     "loginSuccess": "Login successful!",
     "loginFailed": "Login failed. Please try again!",
-    "accountPermanentlyLocked": "Your account is permanently locked. Please contact the administrator.",
     "accountLocked": "Account locked due to 5 failed password attempts. Please try again after 30 minutes.",
     "authFailed": "Authentication failed. Please check your login information.",
     "accountNotFound": "Account does not exist in the system.",

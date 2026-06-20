@@ -1,11 +1,10 @@
 import { test, expect } from '@playwright/test';
-import { loginAsEnterprise } from '../fixtures/auth';
+import { loginAsEnterprise } from './fixtures/auth';
 
 test.describe('UC-49: Report Critical Incident (BR-41)', () => {
   test('Submitting without category + description shows error', async ({ page }) => {
     await loginAsEnterprise(page);
-    await page.getByRole('menuitem', { name: /incidents/i }).first().click();
-    await page.waitForURL(/incidents$/);
+    await page.goto('/enterprise-dashboard/incidents');
 
     // Open report modal
     await page.getByRole('button', { name: /report incident/i }).first().click();
@@ -21,8 +20,7 @@ test.describe('UC-49: Report Critical Incident (BR-41)', () => {
 
   test('Submitting valid incident succeeds', async ({ page }) => {
     await loginAsEnterprise(page);
-    await page.getByRole('menuitem', { name: /incidents/i }).first().click();
-    await page.waitForURL(/incidents$/);
+    await page.goto('/enterprise-dashboard/incidents');
 
     await page.getByRole('button', { name: /report incident/i }).first().click();
 

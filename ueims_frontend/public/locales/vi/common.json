@@ -57,7 +57,6 @@
     "mustChangePassword": "Bạn cần đổi mật khẩu trước khi tiếp tục!",
     "loginSuccess": "Đăng nhập thành công!",
     "loginFailed": "Đăng nhập thất bại. Vui lòng thử lại!",
-    "accountPermanentlyLocked": "Tài khoản của bạn đã bị khóa vĩnh viễn. Vui lòng liên hệ quản trị viên.",
     "accountLocked": "Tài khoản bị khóa do nhập sai mật khẩu 5 lần. Vui lòng thử lại sau 30 phút.",
     "authFailed": "Xác thực thất bại. Vui lòng kiểm tra lại thông tin đăng nhập.",
     "accountNotFound": "Tài khoản không tồn tại trong hệ thống.",

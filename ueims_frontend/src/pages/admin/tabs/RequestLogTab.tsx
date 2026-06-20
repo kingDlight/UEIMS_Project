@@ -13,6 +13,7 @@ import {
   Table,
   Tag,
   Tooltip,
+  Radio,
 } from 'antd';
 import {
   ApiOutlined,
@@ -90,6 +91,9 @@ export const RequestLogTab: React.FC = () => {
   const [exporting, setExporting] = useState(false);
   const [clearing, setClearing] = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
+
+  const [viewMode, setViewMode] = useState<'paginated' | 'recent'>('paginated');
+  
   const [investigateModal, setInvestigateModal] = useState(false);
   const [investigateUserId, setInvestigateUserId] = useState<string | null>(null);
   const [investigateLogs, setInvestigateLogs] = useState<RequestLogEntry[]>([]);
@@ -130,21 +134,32 @@ export const RequestLogTab: React.FC = () => {
   const fetchLogs = async (page = currentPage) => {
     setLoading(true);
     try {
-      const data: any = await RequestLogService.getLogs({
-        endpoint: searchTerm || undefined,
-        method: (methodFilter as HttpMethod) || undefined,
-        startDate: dateRange[0] ?? undefined,
-        endDate: dateRange[1] ?? undefined,
-        page: page - 1,
-        size: pageSize,
-      });
+      if (viewMode === 'recent') {
+        const data: any = await RequestLogService.getRecentLogs(0, 100);
+        if (data?.content) {
+          setLogs(data.content);
+          setTotal(data.content.length);
+        } else if (Array.isArray(data)) {
+          setLogs(data);
+          setTotal(data.length);
+        }
+      } else {
+        const data: any = await RequestLogService.getLogs({
+          endpoint: searchTerm || undefined,
+          method: (methodFilter as HttpMethod) || undefined,
+          startDate: dateRange[0] ?? undefined,
+          endDate: dateRange[1] ?? undefined,
+          page: page - 1,
+          size: pageSize,
+        });
 
-      if (data?.content) {
-        setLogs(data.content);
-        setTotal(data.totalElements ?? 0);
-      } else if (Array.isArray(data)) {
-        setLogs(data);
-        setTotal(data.length);
+        if (data?.content) {
+          setLogs(data.content);
+          setTotal(data.totalElements ?? 0);
+        } else if (Array.isArray(data)) {
+          setLogs(data);
+          setTotal(data.length);
+        }
       }
     } catch (err: any) {
       message.error(err.response?.data?.message || 'Failed to load request logs.');
@@ -153,7 +168,7 @@ export const RequestLogTab: React.FC = () => {
     }
   };
 
-  useEffect(() => { fetchLogs(); }, [currentPage, pageSize, searchTerm, methodFilter, dateRange]);
+  useEffect(() => { fetchLogs(); }, [currentPage, pageSize, searchTerm, methodFilter, dateRange, viewMode]);
 
   // Whenever the visible query changes, drain the "new logs" backlog so it
   // doesn't linger after the user has already navigated.
@@ -365,13 +380,7 @@ export const RequestLogTab: React.FC = () => {
     ['timestamp', 'method', 'endpoint', 'statusCode', 'responseTimeMs'].includes(col.key as string)
   );
 
-  if (loading && logs.length === 0) {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}>
-        <Spin size="large" />
-      </div>
-    );
-  }
+
 
   return (
     <div style={{ padding: '0 0 40px', fontFamily: 'Inter, sans-serif' }}>
@@ -398,7 +407,27 @@ export const RequestLogTab: React.FC = () => {
               HTTP request activity — auto-purged after 7 days
             </p>
           </div>
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <Radio.Group 
+              value={viewMode} 
+              onChange={e => {
+                const val = e.target.value;
+                React.startTransition(() => {
+                  setViewMode(val);
+                  if (val === 'recent') {
+                    setCurrentPage(1);
+                    setSearchTerm('');
+                    setMethodFilter('');
+                    setDateRange([null, null]);
+                  }
+                });
+              }}
+              buttonStyle="solid"
+              style={{ marginRight: 8 }}
+            >
+              <Radio.Button value="paginated">All Logs</Radio.Button>
+              <Radio.Button value="recent">Recent 100</Radio.Button>
+            </Radio.Group>
             <Button
               icon={<ReloadOutlined />}
               onClick={() => fetchLogs()}
@@ -432,6 +461,7 @@ export const RequestLogTab: React.FC = () => {
         </motion.div>
 
         {/* FILTER BAR */}
+        {viewMode === 'paginated' && (
         <div style={{
           display: 'flex', gap: 12, marginBottom: 20, alignItems: 'center',
           background: c.surface, padding: 12, borderRadius: c.radiusMd,
@@ -479,51 +509,50 @@ export const RequestLogTab: React.FC = () => {
             {total.toLocaleString()} entries
           </span>
         </div>
+        )}
 
         {/* TABLE */}
-        {logs.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-            style={{
-              background: c.surface, borderRadius: c.radiusLg,
-              border: `1px solid ${c.border}`, padding: 60,
-            }}
-          >
-            <Empty
-              image={<ApiOutlined style={{ fontSize: 48, color: c.textMuted }} />}
-              description={
-                <div>
-                  <div style={{ fontSize: 15, fontWeight: 600, color: c.text, marginBottom: 4 }}>
-                    No request logs yet
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <div style={{
+            background: c.surface, borderRadius: c.radiusLg,
+            border: `1px solid ${c.border}`, overflow: 'hidden',
+          }}>
+            <Table
+              dataSource={logs}
+              columns={columns}
+              rowKey="id"
+              pagination={false}
+              size="middle"
+              scroll={{ x: 900 }}
+              style={{ fontSize: 13 }}
+              loading={loading}
+              locale={{
+                emptyText: (
+                  <div style={{ padding: 60 }}>
+                    <Empty
+                      image={<ApiOutlined style={{ fontSize: 48, color: c.textMuted }} />}
+                      description={
+                        <div>
+                          <div style={{ fontSize: 15, fontWeight: 600, color: c.text, marginBottom: 4 }}>
+                            No request logs yet
+                          </div>
+                          <div style={{ fontSize: 13, color: c.textMuted }}>
+                            HTTP activity will appear here once users interact with the system
+                          </div>
+                        </div>
+                      }
+                    />
                   </div>
-                  <div style={{ fontSize: 13, color: c.textMuted }}>
-                    HTTP activity will appear here once users interact with the system
-                  </div>
-                </div>
-              }
+                )
+              }}
             />
-          </motion.div>
-        ) : (
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <div style={{
-              background: c.surface, borderRadius: c.radiusLg,
-              border: `1px solid ${c.border}`, overflow: 'hidden',
-            }}>
-              <Table
-                dataSource={logs}
-                columns={columns}
-                rowKey="id"
-                pagination={false}
-                size="middle"
-                scroll={{ x: 900 }}
-                style={{ fontSize: 13 }}
-              />
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'center', marginTop: 20 }}>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 20 }}>
+              {viewMode === 'paginated' && (
               <Pagination
                 current={currentPage}
                 pageSize={pageSize}
@@ -536,9 +565,9 @@ export const RequestLogTab: React.FC = () => {
                 showTotal={(t, range) => `${range[0]}-${range[1]} of ${t.toLocaleString()}`}
                 pageSizeOptions={['10', '20', '50', '100']}
               />
+              )}
             </div>
           </motion.div>
-        )}
 
         {/* INVESTIGATE MODAL */}
         <Modal
