@@ -184,6 +184,7 @@ public enum ErrorCode {
             1089, "No APPROVED enterprise is available to match this student", HttpStatus.BAD_REQUEST),
     GPA_BELOW_AUTO_MATCH_THRESHOLD(1090, "Student GPA is below the auto-match threshold (7.0)", HttpStatus.BAD_REQUEST),
     SEMESTER_NAME_INVALID(1091, "Semester name must be at least {min} characters", HttpStatus.BAD_REQUEST),
+    SEMESTER_NAME_TOO_LONG(1092, "Tên học kỳ không được vượt quá 255 ký tự", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
