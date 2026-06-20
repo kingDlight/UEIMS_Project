@@ -74,7 +74,7 @@ public class EnterpriseRegistrationServiceImpl implements EnterpriseRegistration
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .fullName(request.getContactPerson())
-                .status("ACTIVE")
+                .status("INACTIVE") // Prevent login until Enterprise is approved
                 .mustChangePassword(false)
                 .enterprise(enterprise)
                 .build();

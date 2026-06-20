@@ -58,6 +58,8 @@ CREATE TABLE users (
     email           VARCHAR(255) NOT NULL UNIQUE,                    -- BR-05: Unique email
     password_hash   VARCHAR(255) NOT NULL,
     full_name       VARCHAR(255) NOT NULL,
+    avatar_url      VARCHAR(1000),
+    auth_provider   VARCHAR(20) NOT NULL DEFAULT 'LOCAL',
     phone           VARCHAR(20),
     status          VARCHAR(20) NOT NULL DEFAULT 'ACTIVE'
                     CHECK (status IN ('ACTIVE', 'INACTIVE', 'LOCKED')),
