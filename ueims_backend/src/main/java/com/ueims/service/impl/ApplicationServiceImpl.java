@@ -347,6 +347,17 @@ public class ApplicationServiceImpl implements ApplicationService {
             throw new AppException(ErrorCode.FILE_NOT_FOUND);
         }
 
+        // Handle external URLs (http/https)
+        if (cvUrl.startsWith("http://") || cvUrl.startsWith("https://")) {
+            try {
+                org.springframework.core.io.Resource resource = new org.springframework.core.io.UrlResource(cvUrl);
+                repository.incrementDownloadCount(applicationId);
+                return resource;
+            } catch (java.net.MalformedURLException e) {
+                throw new AppException(ErrorCode.FILE_NOT_FOUND);
+            }
+        }
+
         // Convert /uploads/cv/xxx.pdf -> user.dir/uploads/cv/xxx.pdf
         java.nio.file.Path filePath =
                 java.nio.file.Paths.get(System.getProperty("user.dir"), cvUrl.replace("/uploads/", "uploads/"));
