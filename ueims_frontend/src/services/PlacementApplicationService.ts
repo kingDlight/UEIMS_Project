@@ -87,7 +87,6 @@ export const PlacementApplicationService = {
     approve: (id: string) => api.put(`${API_URL}/${id}/approve`),
     reject: (id: string, data: RejectApplicationRequest) => api.put(`${API_URL}/${id}/reject`, data),
     withdraw: (id: string) => api.put(`${API_URL}/${id}/withdraw`),
-    exportOjtPlacements: (semesterId: string) => api.get(`${API_URL}/export?semesterId=${semesterId}`, { responseType: 'blob' }),
     getOjtPlacementView: () => api.get('/ojt-placements/view'),
     manualMatch: (data: ManualMatchRequest) => api.post('/ojt-placements/manual-match', data),
     autoMatch: () => api.post('/ojt-placements/auto-match'),

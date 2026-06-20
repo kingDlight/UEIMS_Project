@@ -23,7 +23,6 @@ import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 import com.ueims.model.entity.AtRiskStudent;
 import com.ueims.model.entity.FinalGrade;
-import com.ueims.model.entity.PlacementApplication;
 import com.ueims.repository.AtRiskStudentRepository;
 import com.ueims.repository.FinalGradeRepository;
 import com.ueims.repository.PlacementApplicationRepository;
@@ -76,49 +75,6 @@ public class ExcelExportServiceImpl implements ExcelExportService {
                     .contentType(MediaType.parseMediaType(
                             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=at_risk_students.xlsx")
-                    .body(outputStream.toByteArray());
-
-        } catch (IOException e) {
-            return ResponseEntity.internalServerError().build();
-        }
-    }
-
-    @Override
-    public ResponseEntity<byte[]> exportOjtPlacements(UUID semesterId) {
-        List<PlacementApplication> applications = placementApplicationRepository
-                .findBySemester_SemesterId(semesterId, PageRequest.of(0, 10000))
-                .getContent();
-
-        try (Workbook workbook = new XSSFWorkbook()) {
-            Sheet sheet = workbook.createSheet("OJT Placements");
-
-            // Create Header
-            Row headerRow = sheet.createRow(0);
-            String[] columns = {"Student Code", "Student Name", "Enterprise Name", "Status", "Is Replacement", "Rejection Reason"};
-            for (int i = 0; i < columns.length; i++) {
-                Cell cell = headerRow.createCell(i);
-                cell.setCellValue(columns[i]);
-            }
-
-            // Fill Data
-            int rowNum = 1;
-            for (PlacementApplication app : applications) {
-                Row row = sheet.createRow(rowNum++);
-                row.createCell(0).setCellValue(app.getStudent() != null ? app.getStudent().getStudentCode() : "");
-                row.createCell(1).setCellValue(app.getStudent() != null ? app.getStudent().getFullName() : "");
-                row.createCell(2).setCellValue(app.getEnterprise() != null ? app.getEnterprise().getCompanyName() : "");
-                row.createCell(3).setCellValue(app.getStatus());
-                row.createCell(4).setCellValue(Boolean.TRUE.equals(app.getIsReplacement()) ? "Yes" : "No");
-                row.createCell(5).setCellValue(app.getRejectionReason() != null ? app.getRejectionReason() : "");
-            }
-
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            workbook.write(outputStream);
-
-            return ResponseEntity.ok()
-                    .contentType(MediaType.parseMediaType(
-                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=ojt_placements.xlsx")
                     .body(outputStream.toByteArray());
 
         } catch (IOException e) {
