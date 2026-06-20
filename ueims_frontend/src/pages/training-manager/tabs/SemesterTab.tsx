@@ -73,6 +73,7 @@ interface SemesterRecord {
   endDate: string;
   durationWeeks: number;
   status: SemesterStatus;
+  originalStatus: string;
 }
 
 // ============================================================
@@ -196,6 +197,7 @@ export const SemesterTab: React.FC = () => {
           endDate: s.endDate,
           durationWeeks: Math.max(1, durationWeeks),
           status,
+          originalStatus: s.status,
         };
       });
       setSemesters(mapped);
@@ -474,9 +476,12 @@ export const SemesterTab: React.FC = () => {
       width: 210,
       render: (_: unknown, record: SemesterRecord) => (
         <div style={{ ...row, justifyContent: 'flex-end', gap: 8 }}>
-          {/* Edit Timeline — always visible */}
+          {/* Edit Timeline — always visible unless LOCKED */}
           <button
-            onClick={() => handleEditTimeline(record)}
+            onClick={() => {
+              if (record.originalStatus !== 'LOCKED') handleEditTimeline(record);
+            }}
+            disabled={record.originalStatus === 'LOCKED'}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
@@ -484,16 +489,18 @@ export const SemesterTab: React.FC = () => {
               padding: '5px 11px',
               borderRadius: cc.radiusMd,
               border: `1.5px solid ${cc.border}`,
-              background: 'transparent',
-              color: cc.textSecondary,
+              background: record.originalStatus === 'LOCKED' ? cc.neutralMuted : 'transparent',
+              color: record.originalStatus === 'LOCKED' ? cc.textMuted : cc.textSecondary,
               fontSize: 11.5,
               fontWeight: 600,
               fontFamily: 'Inter, sans-serif',
-              cursor: 'pointer',
+              cursor: record.originalStatus === 'LOCKED' ? 'not-allowed' : 'pointer',
               transition: 'all 0.18s ease',
               whiteSpace: 'nowrap',
+              opacity: record.originalStatus === 'LOCKED' ? 0.6 : 1,
             }}
             onMouseEnter={(e) => {
+              if (record.originalStatus === 'LOCKED') return;
               const b = e.currentTarget as HTMLButtonElement;
               b.style.borderColor = cc.brand;
               b.style.color = cc.brand;
@@ -501,6 +508,7 @@ export const SemesterTab: React.FC = () => {
               b.style.transform = 'translateY(-1px)';
             }}
             onMouseLeave={(e) => {
+              if (record.originalStatus === 'LOCKED') return;
               const b = e.currentTarget as HTMLButtonElement;
               b.style.borderColor = cc.border;
               b.style.color = cc.textSecondary;
