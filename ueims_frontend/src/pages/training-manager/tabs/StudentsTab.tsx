@@ -1321,26 +1321,6 @@ export const StudentsTab: React.FC = () => {
               Upload Excel file to bulk-import eligible students
             </p>
           </div>
-          <button
-            onClick={() => {
-              setImportModalOpen(false);
-              setUploadedFile(null);
-            }}
-            style={{
-              width: 28,
-              height: 28,
-              borderRadius: st.radiusMd,
-              background: st.neutralBg,
-              border: 'none',
-              cursor: 'pointer',
-              color: st.textSecondary,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <X size={14} />
-          </button>
         </div>
         <div className="import-dragger" style={{ marginBottom: 14 }}>
           <Upload.Dragger
