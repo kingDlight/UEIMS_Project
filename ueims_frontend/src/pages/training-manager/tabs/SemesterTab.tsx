@@ -182,7 +182,7 @@ export const SemesterTab: React.FC = () => {
       const mapped: SemesterRecord[] = data.map((s) => {
         const start = dayjs(s.startDate);
         const end = dayjs(s.endDate);
-        const durationWeeks = end.diff(start, 'week');
+        const durationWeeks = Math.round(end.diff(start, 'day', true) / 7);
         
         let status: SemesterStatus = 'Completed';
         if (s.status === 'ACTIVE') status = 'Current';
