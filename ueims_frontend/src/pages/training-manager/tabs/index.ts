@@ -8,3 +8,4 @@ export { ReportsTab } from './ReportsTab';
 export { SemesterTab } from './SemesterTab';
 export { NoticesTab } from './NoticesTab';
 export { WeeklyReportsTab } from './WeeklyReportsTab';
+export { AtRiskStudentsTab } from './AtRiskStudentsTab';

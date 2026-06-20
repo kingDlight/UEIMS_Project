@@ -16,6 +16,7 @@ const ReportsTab = React.lazy(() => import('./training-manager/tabs/ReportsTab')
 const SemesterTab = React.lazy(() => import('./training-manager/tabs/SemesterTab').then(m => ({ default: m.SemesterTab })));
 const NoticesTab = React.lazy(() => import('./training-manager/tabs/NoticesTab').then(m => ({ default: m.NoticesTab })));
 const WeeklyReportsTab = React.lazy(() => import('./training-manager/tabs/WeeklyReportsTab').then(m => ({ default: m.WeeklyReportsTab })));
+const AtRiskStudentsTab = React.lazy(() => import('./training-manager/tabs/AtRiskStudentsTab').then(m => ({ default: m.AtRiskStudentsTab })));
 
 import { extractUserFromToken } from '@/utils/jwt';
 
@@ -53,6 +54,7 @@ export const TrainingManagerDashboard: React.FC = () => {
     'weekly-reports': <WeeklyReportsTab />,
     calendar: <SemesterTab />,
     notifications: <NoticesTab />,
+    'at-risk': <AtRiskStudentsTab />,
   };
 
   const allowedItem = navItems.find((item) => item.key === currentTab);

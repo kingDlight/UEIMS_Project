@@ -10,7 +10,8 @@ export type PageKey =
   | 'system-reports'
   | 'weekly-reports'
   | 'calendar'
-  | 'notifications';
+  | 'notifications'
+  | 'at-risk';
 
 export type ThemeColors = {
   bg: string;
@@ -168,4 +169,17 @@ export type SystemAnnouncement = {
   };
   createdById?: string;
   createdByFullName?: string;
+};
+
+export type AtRiskStudent = {
+  assignmentId: string;
+  studentId: string;
+  studentName: string;
+  studentCode: string;
+  semesterId: string;
+  semesterCode: string;
+  supervisorName?: string;
+  companyName?: string;
+  missedReports?: number;
+  rejectedReports?: number;
 };
