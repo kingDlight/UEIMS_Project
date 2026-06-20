@@ -159,9 +159,16 @@ public class ApplicationServiceImpl implements ApplicationService {
             throw new AppException(ErrorCode.STUDENT_NOT_ELIGIBLE);
         }
 
+        // [FIX A-01] Kiểm tra duplicate đúng: chỉ chặn nếu có application chưa kết thúc
+        // Terminal statuses: WITHDRAWN, REJECTED, SCREENING_REJECTED
         boolean hasActiveApplication =
-                repository.existsByJobPost_JobPostIdAndStudent_UserIdAndStatusNotAndDeletedAtIsNull(
-                        jobPost.getJobPostId(), student.getUserId(), ApplicationStatus.WITHDRAWN);
+                repository.existsByJobPost_JobPostIdAndStudent_UserIdAndStatusNotInAndDeletedAtIsNull(
+                        jobPost.getJobPostId(),
+                        student.getUserId(),
+                        java.util.List.of(
+                                ApplicationStatus.WITHDRAWN,
+                                ApplicationStatus.REJECTED,
+                                ApplicationStatus.SCREENING_REJECTED));
         if (hasActiveApplication) {
             throw new AppException(ErrorCode.DUPLICATE_APPLICATION);
         }
@@ -222,8 +229,9 @@ public class ApplicationServiceImpl implements ApplicationService {
             throw new AppException(ErrorCode.APPLICATION_DEADLINE_EXPIRED);
         }
 
-        // 3. E2: Check if application status is still PENDING
-        if (application.getStatus() != ApplicationStatus.PENDING) {
+        // 3. E2: [FIX A-04] Cho phép withdraw khi PENDING hoặc SCREENING_PASSED (trước deadline)
+        if (application.getStatus() != ApplicationStatus.PENDING
+                && application.getStatus() != ApplicationStatus.SCREENING_PASSED) {
             throw new AppException(ErrorCode.APPLICATION_STATUS_CHANGED);
         }
 
@@ -248,6 +256,8 @@ public class ApplicationServiceImpl implements ApplicationService {
         // Kiểm tra quyền: Chỉ Enterprise sở hữu JobPost này mới được lọc CV
         User currentUser = getCurrentUser();
         if (currentUser.getEnterprise() == null
+                || application.getJobPost() == null
+                || application.getJobPost().getEnterprise() == null
                 || !application
                         .getJobPost()
                         .getEnterprise()
@@ -301,7 +311,13 @@ public class ApplicationServiceImpl implements ApplicationService {
 
         application.setStatus(request.getStatus());
         if (request.getInterviewDate() != null && !request.getInterviewDate().isEmpty()) {
-            application.setInterviewDate(java.time.LocalDateTime.parse(request.getInterviewDate()));
+            // [FIX A-05] Catch DateTimeParseException thay vì để HTTP 500
+            try {
+                application.setInterviewDate(java.time.LocalDateTime.parse(
+                        request.getInterviewDate(), java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+            } catch (java.time.format.DateTimeParseException e) {
+                throw new AppException(ErrorCode.INVALID_PARAMETER_FORMAT);
+            }
         }
         if (request.getInterviewLink() != null) {
             application.setInterviewLink(request.getInterviewLink());

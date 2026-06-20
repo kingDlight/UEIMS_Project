@@ -5,8 +5,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 
-import jakarta.transaction.Transactional;
-
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -48,6 +46,7 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public List<WeeklyReport> findAll() {
         return repository.findAll();
     }
@@ -59,6 +58,7 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public List<WeeklyReport> findByEnterprise() {
         User currentUser = getCurrentUser();
         if (currentUser.getEnterprise() == null) return List.of();
@@ -73,11 +73,9 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public WeeklyReport findById(UUID id) {
-        WeeklyReport report = repository.findById(id).orElse(null);
-        if (report == null) {
-            return null;
-        }
+        WeeklyReport report = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.FIELD_REQUIRED));
 
         User currentUser = getCurrentUser();
         boolean isStaff = currentUser.getRoles().stream()
@@ -90,17 +88,23 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
 
         // If it's an Enterprise user, check if they are the supervisor assigned to this student
         if (currentUser.getEnterprise() != null) {
-            if (!report.getAssignment()
-                    .getEnterprise()
-                    .getEnterpriseId()
-                    .equals(currentUser.getEnterprise().getEnterpriseId())) {
+            // [FIX W-01] null-guard trước khi gọi chuỗi getEnterprise().getEnterpriseId()
+            if (report.getAssignment() == null
+                    || report.getAssignment().getEnterprise() == null
+                    || !report.getAssignment()
+                            .getEnterprise()
+                            .getEnterpriseId()
+                            .equals(currentUser.getEnterprise().getEnterpriseId())) {
                 throw new AppException(ErrorCode.UNAUTHORIZED);
             }
             return report;
         }
 
         // If it's a Student, check if they are the owner
-        if (!report.getAssignment().getStudent().getUserId().equals(currentUser.getUserId())) {
+        // [FIX W-02] null-guard trước khi gọi getStudent().getUserId()
+        if (report.getAssignment() == null
+                || report.getAssignment().getStudent() == null
+                || !report.getAssignment().getStudent().getUserId().equals(currentUser.getUserId())) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
@@ -205,7 +209,7 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
     }
 
     @Override
-    @Transactional
+    @org.springframework.transaction.annotation.Transactional
     public WeeklyReport approveReport(UUID id, String feedback) {
         WeeklyReport existing = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.FIELD_REQUIRED));
         User currentUser = getCurrentUser();

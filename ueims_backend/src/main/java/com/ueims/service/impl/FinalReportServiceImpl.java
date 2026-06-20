@@ -63,17 +63,23 @@ public class FinalReportServiceImpl implements FinalReportService {
 
         // If it's an Enterprise, check assignment
         if (currentUser.getEnterprise() != null) {
-            if (!report.getAssignment()
-                    .getEnterprise()
-                    .getEnterpriseId()
-                    .equals(currentUser.getEnterprise().getEnterpriseId())) {
+            // [FIX F-01] null-guard trước khi gọi getEnterprise().getEnterpriseId()
+            if (report.getAssignment() == null
+                    || report.getAssignment().getEnterprise() == null
+                    || !report.getAssignment()
+                            .getEnterprise()
+                            .getEnterpriseId()
+                            .equals(currentUser.getEnterprise().getEnterpriseId())) {
                 throw new AppException(ErrorCode.UNAUTHORIZED);
             }
             return report;
         }
 
         // If it's a Student, check ownership
-        if (!report.getAssignment().getStudent().getUserId().equals(currentUser.getUserId())) {
+        // [FIX F-02] null-guard trước khi gọi getStudent().getUserId()
+        if (report.getAssignment() == null
+                || report.getAssignment().getStudent() == null
+                || !report.getAssignment().getStudent().getUserId().equals(currentUser.getUserId())) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
         return report;
@@ -100,7 +106,7 @@ public class FinalReportServiceImpl implements FinalReportService {
             throw new AppException(ErrorCode.FINAL_REPORT_INVALID_FORMAT);
         }
 
-        if (file.getSize() > 5 * 1024 * 1024) {
+        if (file.getSize() > 20 * 1024 * 1024) {
             throw new AppException(ErrorCode.FINAL_REPORT_SIZE_EXCEEDED);
         }
 
@@ -136,7 +142,8 @@ public class FinalReportServiceImpl implements FinalReportService {
             return repository.save(report);
         } catch (IOException e) {
             log.error("File upload error: {}", e.getMessage(), e);
-            throw new AppException(ErrorCode.FIELD_REQUIRED);
+            // [FIX F-03] Dùng ErrorCode đúng cho lỗi IO
+            throw new AppException(ErrorCode.FILE_DOWNLOAD_ERROR);
         }
     }
 

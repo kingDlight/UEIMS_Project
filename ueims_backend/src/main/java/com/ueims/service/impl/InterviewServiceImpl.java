@@ -95,6 +95,8 @@ public class InterviewServiceImpl implements InterviewService {
         // BR-34: Kiểm tra quyền sở hữu (Enterprise chỉ được lên lịch cho Job Post của mình)
         User currentUser = getCurrentUser();
         if (currentUser.getEnterprise() == null
+                || application.getJobPost() == null
+                || application.getJobPost().getEnterprise() == null
                 || !application
                         .getJobPost()
                         .getEnterprise()
@@ -205,9 +207,13 @@ public class InterviewServiceImpl implements InterviewService {
         Interview interview =
                 repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.INTERVIEW_NOT_FOUND));
 
-        // BR-49: Không thể thay đổi nếu đã được xử lý trước đó (Decline)
-        if (Boolean.FALSE.equals(interview.getStudentConfirmed())) {
+        // BR-49: Không thể xác nhận nếu phỏng vấn đã bị hủy (CANCELLED/CANCELED)
+        if ("CANCELLED".equalsIgnoreCase(interview.getStatus()) || "CANCELED".equalsIgnoreCase(interview.getStatus())) {
             throw new AppException(ErrorCode.APPLICATION_STATUS_CHANGED);
+        }
+        // Không cho xác nhận lại nếu đã xác nhận rồi
+        if (Boolean.TRUE.equals(interview.getStudentConfirmed())) {
+            throw new AppException(ErrorCode.INTERVIEW_ALREADY_CONFIRMED);
         }
 
         interview.setStudentConfirmed(Boolean.TRUE);
@@ -316,7 +322,14 @@ public class InterviewServiceImpl implements InterviewService {
             throw new AppException(ErrorCode.FIELD_REQUIRED);
         }
 
-        String upper = result == null ? "PASS" : result.toUpperCase();
+        // [FIX I-03] Validate result không được null và phải là PASS hoặc FAIL
+        if (result == null || result.isBlank()) {
+            throw new AppException(ErrorCode.FIELD_REQUIRED);
+        }
+        String upper = result.toUpperCase();
+        if (!upper.equals("PASS") && !upper.equals("FAIL")) {
+            throw new AppException(ErrorCode.INVALID_PARAMETER_FORMAT);
+        }
         existing.setResult(upper);
         existing.setFeedback(notes);
         existing.setStatus("COMPLETED");
@@ -465,6 +478,7 @@ public class InterviewServiceImpl implements InterviewService {
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public List<LocalDateTime> proposeSlots(UUID applicationId) {
         // 43.1: suggest 3 open slots in the next 7 business days (9-12, 14-17) that don't overlap.
         Application application = applicationRepository

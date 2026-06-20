@@ -91,16 +91,22 @@ public class EnterpriseEvaluationServiceImpl implements EnterpriseEvaluationServ
                 .findById(entity.getAssignment().getAssignmentId())
                 .orElseThrow(() -> new AppException(ErrorCode.ASSIGNMENT_NOT_FOUND));
 
-        // BR-14: Kiểm tra trạng thái học kỳ. Không cho phép đánh giá nếu học kỳ đã LOCKED hoặc CLOSED
+        // BR-14: Kiểm tra trạng thái học kỳ. [FIX EE-03] Chỉ cho đánh giá khi học kỳ ACTIVE
         String semesterStatus = assignment.getSemester().getStatus();
-        if ("LOCKED".equals(semesterStatus) || "CLOSED".equals(semesterStatus)) {
+        if (!"ACTIVE".equals(semesterStatus)) {
             throw new AppException(ErrorCode.SEMESTER_LOCKED_DATE);
         }
 
         // Kiểm tra trạng thái sinh viên: Chỉ cho phép đánh giá nếu sinh viên đang trong trạng thái OJT
-        // Dựa trên logic UC-23 và UC-25
-        String studentStatus = assignment.getStudent().getStatus();
-        if (!"OJT".equals(studentStatus)) {
+        // NOTE: OJT status nằm trong eligible_students, không phải users.status
+        com.ueims.model.entity.EligibleStudent eligibleStudent = eligibleStudentRepository
+                .findByUser_UserIdAndSemester_SemesterId(
+                        assignment.getStudent().getUserId(),
+                        assignment.getSemester().getSemesterId())
+                .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_ELIGIBLE));
+        if (!"OJT".equals(eligibleStudent.getStatus())
+                && !"MATCHED".equals(eligibleStudent.getStatus())
+                && !"ACCEPTED".equals(eligibleStudent.getStatus())) {
             throw new AppException(ErrorCode.INVALID_STATUS_FOR_OJT);
         }
 
@@ -208,6 +214,20 @@ public class EnterpriseEvaluationServiceImpl implements EnterpriseEvaluationServ
         existing.setSoftSkillsScore(dto.getSoftSkillsScore());
         existing.setProgressScore(dto.getProgressScore());
         existing.setOverallComments(dto.getOverallComments());
+
+        // [FIX EE-02] Validate null scores trước khi gọi .multiply()
+        if (dto.getAttitudeScore() == null
+                || dto.getProfessionalismScore() == null
+                || dto.getSoftSkillsScore() == null
+                || dto.getProgressScore() == null) {
+            throw new AppException(ErrorCode.MISSING_EVALUATION_CRITERIA);
+        }
+        if (isInvalidScore(dto.getAttitudeScore())
+                || isInvalidScore(dto.getProfessionalismScore())
+                || isInvalidScore(dto.getSoftSkillsScore())
+                || isInvalidScore(dto.getProgressScore())) {
+            throw new AppException(ErrorCode.INVALID_SCORE_RANGE);
+        }
 
         BigDecimal totalScore = dto.getAttitudeScore()
                 .multiply(WEIGHT_ATTITUDE)

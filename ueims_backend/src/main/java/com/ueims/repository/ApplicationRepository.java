@@ -14,6 +14,9 @@ public interface ApplicationRepository extends JpaRepository<Application, UUID> 
     boolean existsByJobPost_JobPostIdAndStudent_UserIdAndStatusNotAndDeletedAtIsNull(
             UUID jobPostId, UUID studentId, ApplicationStatus status);
 
+    boolean existsByJobPost_JobPostIdAndStudent_UserIdAndStatusNotInAndDeletedAtIsNull(
+            UUID jobPostId, UUID studentId, java.util.Collection<ApplicationStatus> statuses);
+
     long countByStudent_UserIdAndStudent_DeletedAtIsNull(UUID studentId);
 
     @org.springframework.data.jpa.repository.Query("SELECT a FROM Application a " + "LEFT JOIN FETCH a.jobPost jp "
