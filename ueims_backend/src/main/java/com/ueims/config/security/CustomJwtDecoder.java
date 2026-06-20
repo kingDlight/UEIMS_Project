@@ -65,9 +65,7 @@ public class CustomJwtDecoder implements JwtDecoder {
                 UserSession session = sessionOpt.get();
 
                 if (session.getLastActivity() != null
-                        && session.getLastActivity()
-                                .plusMinutes(15)
-                                .isBefore(LocalDateTime.now(ZoneOffset.UTC))) {
+                        && session.getLastActivity().plusMinutes(15).isBefore(LocalDateTime.now(ZoneOffset.UTC))) {
                     invalidateSessionToken(session);
                     throw new BadJwtException("Session expired due to inactivity");
                 }
