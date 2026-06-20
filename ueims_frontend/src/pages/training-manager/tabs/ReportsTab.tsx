@@ -526,7 +526,9 @@ export const ReportsTab: React.FC = () => {
         marginBottom: 20,
       }}>
         {/* Left: Generate button */}
-        <button style={{
+        <button 
+          onClick={() => message.info('Custom Report Generation will be available in the next release.')}
+          style={{
           display: 'inline-flex',
           alignItems: 'center',
           gap: 6,
