@@ -804,18 +804,33 @@ export const OJTTab: React.FC = () => {
 
           <button
             onClick={async () => {
-              if (placementData.length === 0) {
+              if (filteredData.length === 0) {
                 void message.warning('No data to export.');
                 return;
               }
-              const semesterId = placementData[0].semesterId;
               setExporting(true);
               try {
-                const response = await PlacementApplicationService.exportOjtPlacements(semesterId);
-                const url = window.URL.createObjectURL(new Blob([response.data as BlobPart]));
+                // Generate CSV locally from filteredData to respect current filters
+                const rows = [
+                  ['Student Code', 'Student Name', 'Major', 'Target Role', 'Source', 'Enterprise', 'Status']
+                ];
+                filteredData.forEach(p => {
+                  rows.push([
+                    p.studentCode || '',
+                    p.studentName || '',
+                    p.major || '',
+                    p.targetRole || '',
+                    p.source === 'SELF_SOURCED' ? 'Self-Sourced' : 'System-Matched',
+                    p.enterpriseName || '',
+                    p.workflowStatus || ''
+                  ]);
+                });
+                const csvContent = rows.map(r => r.map(cell => `"${(cell || '').replace(/"/g, '""')}"`).join(',')).join('\n');
+                const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvContent], { type: 'text/csv;charset=utf-8;' }); // UTF-8 BOM
+                const url = window.URL.createObjectURL(blob);
                 const link = document.createElement('a');
                 link.href = url;
-                link.setAttribute('download', 'ojt_placements.xlsx');
+                link.setAttribute('download', `ojt_placements_filtered.csv`);
                 document.body.appendChild(link);
                 link.click();
                 if (link.parentNode) link.parentNode.removeChild(link);
