@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useScrollAnimation } from '../../../hooks/useScrollAnimation';
+import { PlacementApplicationService } from '../../../services/PlacementApplicationService';
+import { SemesterService } from '../../../services/SemesterService';
 
 import { Table, Select, App } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
@@ -60,6 +62,7 @@ interface ReportHistoryItem {
   date: string;
   size: string;
   sizeBytes: number;
+  blob?: Blob;
 }
 
 // ============================================================
@@ -277,17 +280,41 @@ export const ReportsTab: React.FC = () => {
     }, 1200);
   };
 
-  const handleDownload = (record: ReportHistoryItem) => {
-    void message.success({ content: `Downloading "${record.name}"...`, duration: 2 });
-    const blob = new Blob([`Mock report content for ${record.name}\nGenerated on: ${record.date}`], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${record.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+  const handleDownload = async (record: ReportHistoryItem) => {
+    // If the report has a real blob stored, use it; otherwise re-export from backend.
+    if (record.blob) {
+      const url = URL.createObjectURL(record.blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${record.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      void message.success({ content: `"${record.name}" downloaded.`, duration: 2 });
+      return;
+    }
+    try {
+      void message.loading({ content: `Preparing download...`, key: 'dl', duration: 0 });
+      const semesters = await SemesterService.getAllSemesters();
+      const activeSemester = semesters.find((s) => s.status === 'ACTIVE') ?? semesters[0];
+      if (!activeSemester) throw new Error('No semester found');
+      const response = await PlacementApplicationService.exportOjtPlacements(activeSemester.semesterId);
+      const blob = new Blob([response.data as ArrayBuffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${record.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      void message.success({ key: 'dl', content: `"${record.name}" downloaded successfully.`, duration: 2.5 });
+    } catch {
+      void message.error({ key: 'dl', content: 'Failed to download report. Please try again.', duration: 3 });
+    }
   };
 
   const handleDelete = (record: ReportHistoryItem) => {
@@ -729,19 +756,42 @@ export const ReportsTab: React.FC = () => {
                 Cancel
               </button>
               <button
-                onClick={() => {
+                onClick={async () => {
+                  if (selectedFields.length === 0) return;
                   setCustomModalOpen(false);
-                  void message.success('Custom report generated successfully!');
-                  const newHistory: ReportHistoryItem = {
-                    key: `h-${Date.now()}`,
-                    name: `Custom Report — ${semester.replace('_', ' ')}`,
-                    category: 'Custom',
-                    categoryColor: st.brand,
-                    date: new Date().toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute:'2-digit' }),
-                    size: '0.8 MB',
-                    sizeBytes: 800000,
-                  };
-                  setReportHistory(prev => [newHistory, ...prev]);
+                  try {
+                    void message.loading({ content: 'Generating custom report...', key: 'gen', duration: 0 });
+                    const semesters = await SemesterService.getAllSemesters();
+                    const activeSemester = semesters.find((s) => s.status === 'ACTIVE') ?? semesters[0];
+                    if (!activeSemester) throw new Error('No semester found');
+                    const response = await PlacementApplicationService.exportOjtPlacements(activeSemester.semesterId);
+                    const blob = new Blob([response.data as ArrayBuffer], {
+                      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    });
+                    const reportName = `Custom Report — ${semester.replace('_', ' ')}`;
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${reportName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.xlsx`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    const newHistory: ReportHistoryItem = {
+                      key: `h-${Date.now()}`,
+                      name: reportName,
+                      category: 'Custom',
+                      categoryColor: st.brand,
+                      date: new Date().toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute:'2-digit' }),
+                      size: `${(blob.size / 1024).toFixed(0)} KB`,
+                      sizeBytes: blob.size,
+                      blob,
+                    };
+                    setReportHistory(prev => [newHistory, ...prev]);
+                    void message.success({ key: 'gen', content: 'Custom report generated and downloaded!', duration: 2.5 });
+                  } catch {
+                    void message.error({ key: 'gen', content: 'Failed to generate report. Please try again.', duration: 3 });
+                  }
                 }}
                 disabled={selectedFields.length === 0}
                 style={{ padding: '8px 16px', borderRadius: st.radiusMd, border: 'none', background: st.brand, color: '#fff', cursor: selectedFields.length === 0 ? 'not-allowed' : 'pointer', fontSize: 13, fontWeight: 600, opacity: selectedFields.length === 0 ? 0.6 : 1 }}

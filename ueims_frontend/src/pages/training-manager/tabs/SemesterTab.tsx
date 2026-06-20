@@ -264,13 +264,31 @@ export const SemesterTab: React.FC = () => {
   const handleEditSave = useCallback(async () => {
     try {
       const values = await editForm.validateFields();
+      const [start, end] = values.dateRange ?? [];
+      if (!start || !end) {
+        message.error('Please pick a start and end date.');
+        return;
+      }
+      if (!selectedSemester) return;
+      await SemesterService.updateSemester(selectedSemester.id, {
+        semesterCode: values.semesterCode,
+        name: values.name,
+        startDate: dayjs(start).format('YYYY-MM-DD'),
+        endDate: dayjs(end).format('YYYY-MM-DD'),
+      });
       message.success({ content: `Timeline for "${values.name}" updated successfully.`, duration: 2.5 });
       setIsEditModalOpen(false);
       editForm.resetFields();
-    } catch {
-      // validation failed
+      void fetchSemesters();
+    } catch (err: unknown) {
+      // Ant Design form validation errors have errorFields — skip toast for those
+      if (err && typeof err === 'object' && 'errorFields' in err) return;
+      const msg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+        'Failed to update semester. The dates may be locked because the semester is Active or Closed.';
+      message.error({ content: msg, duration: 4 });
     }
-  }, [editForm]);
+  }, [editForm, selectedSemester, fetchSemesters]);
 
   const handleCreateSemester = useCallback(async () => {
     try {

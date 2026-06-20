@@ -66,6 +66,29 @@ public class SemesterController {
         return ResponseEntity.ok(SemesterResponse.fromEntity(service.save(entity)));
     }
 
+    @PutMapping("/{id}")
+    @org.springframework.security.access.prepost.PreAuthorize(
+            "hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')")
+    public ResponseEntity<SemesterResponse> update(
+            @PathVariable UUID id, @Valid @RequestBody SemesterCreationRequest request) {
+        Semester existing = service.findById(id);
+        if (existing == null) {
+            throw new AppException(ErrorCode.SEMESTER_NOT_FOUND);
+        }
+        // Only allow editing Name/Code for ACTIVE semesters; dates are still enforced by service.
+        existing.setName(request.getName());
+        existing.setSemesterCode(request.getSemesterCode());
+        existing.setStartDate(request.getStartDate());
+        existing.setEndDate(request.getEndDate());
+        if (request.getWeeklyReportDeadlineDay() != null) {
+            existing.setWeeklyReportDeadlineDay(request.getWeeklyReportDeadlineDay());
+        }
+        if (request.getWeeklyReportDeadlineTime() != null) {
+            existing.setWeeklyReportDeadlineTime(request.getWeeklyReportDeadlineTime());
+        }
+        return ResponseEntity.ok(SemesterResponse.fromEntity(service.save(existing)));
+    }
+
     @DeleteMapping("/{id}")
     @org.springframework.security.access.prepost.PreAuthorize(
             "hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')")

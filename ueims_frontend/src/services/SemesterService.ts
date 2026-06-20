@@ -50,4 +50,17 @@ export const SemesterService = {
     const response = await api.put<SemesterResponse>(`/semesters/${id}/lock`);
     return response.data;
   },
+
+  async updateSemester(
+    id: string,
+    data: {
+      semesterCode: string;
+      name: string;
+      startDate: string;
+      endDate: string;
+    },
+  ): Promise<SemesterResponse> {
+    const response = await api.put<SemesterResponse>(`/semesters/${id}`, data);
+    return response.data;
+  },
 };
