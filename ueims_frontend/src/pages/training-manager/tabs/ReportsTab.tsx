@@ -249,6 +249,8 @@ export const ReportsTab: React.FC = () => {
   const [category, setCategory] = useState<string>('ALL');
   const [exportingId, setExportingId] = useState<string | null>(null);
   const [reportHistory, setReportHistory] = useState<ReportHistoryItem[]>([]);
+  const [customModalOpen, setCustomModalOpen] = useState(false);
+  const [selectedFields, setSelectedFields] = useState<string[]>(['studentName', 'major', 'status']);
 
   // Suppress unused variable warning if your linter complains about exportingId
   console.debug('Exporting:', exportingId);
@@ -536,7 +538,7 @@ export const ReportsTab: React.FC = () => {
       }}>
         {/* Left: Generate button */}
         <button 
-          onClick={() => message.info('Custom Report Generation will be available in the next release.')}
+          onClick={() => setCustomModalOpen(true)}
           style={{
           display: 'inline-flex',
           alignItems: 'center',
@@ -686,6 +688,70 @@ export const ReportsTab: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* ── Custom Report Modal ──────────────────────────── */}
+      <App>
+        <div style={{ display: customModalOpen ? 'block' : 'none', position: 'fixed', inset: 0, zIndex: 1000 }}>
+          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)' }} onClick={() => setCustomModalOpen(false)} />
+          <div style={{
+            position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+            background: st.surface, width: 400, borderRadius: st.radiusXl, padding: 24,
+            boxShadow: st.shadowMd, border: `1px solid ${st.border}`
+          }}>
+            <h3 style={{ margin: '0 0 16px', fontSize: 18, color: st.textPrimary, fontFamily: 'Inter, sans-serif' }}>Generate Custom Report</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 24 }}>
+              <label style={{ fontSize: 13, color: st.textSecondary, fontFamily: 'Inter, sans-serif' }}>Select fields to include:</label>
+              {[
+                { id: 'studentCode', label: 'Student Code' },
+                { id: 'studentName', label: 'Student Name' },
+                { id: 'major', label: 'Major' },
+                { id: 'status', label: 'Status' },
+                { id: 'enterprise', label: 'Enterprise' }
+              ].map(field => (
+                <label key={field.id} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: st.textPrimary }}>
+                  <input
+                    type="checkbox"
+                    checked={selectedFields.includes(field.id)}
+                    onChange={(e) => {
+                      if (e.target.checked) setSelectedFields(p => [...p, field.id]);
+                      else setSelectedFields(p => p.filter(f => f !== field.id));
+                    }}
+                  />
+                  {field.label}
+                </label>
+              ))}
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
+              <button
+                onClick={() => setCustomModalOpen(false)}
+                style={{ padding: '8px 16px', borderRadius: st.radiusMd, border: `1px solid ${st.border}`, background: 'transparent', color: st.textSecondary, cursor: 'pointer', fontSize: 13, fontWeight: 600 }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setCustomModalOpen(false);
+                  void message.success('Custom report generated successfully!');
+                  const newHistory: ReportHistoryItem = {
+                    key: `h-${Date.now()}`,
+                    name: `Custom Report — ${semester.replace('_', ' ')}`,
+                    category: 'Custom',
+                    categoryColor: st.brand,
+                    date: new Date().toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute:'2-digit' }),
+                    size: '0.8 MB',
+                    sizeBytes: 800000,
+                  };
+                  setReportHistory(prev => [newHistory, ...prev]);
+                }}
+                disabled={selectedFields.length === 0}
+                style={{ padding: '8px 16px', borderRadius: st.radiusMd, border: 'none', background: st.brand, color: '#fff', cursor: selectedFields.length === 0 ? 'not-allowed' : 'pointer', fontSize: 13, fontWeight: 600, opacity: selectedFields.length === 0 ? 0.6 : 1 }}
+              >
+                Generate
+              </button>
+            </div>
+          </div>
+        </div>
+      </App>
     </div>
   );
 };

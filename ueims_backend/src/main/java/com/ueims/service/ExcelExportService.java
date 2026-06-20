@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 public interface ExcelExportService {
     ResponseEntity<byte[]> exportAtRiskStudents(UUID semesterId);
 
-    ResponseEntity<byte[]> exportOjtPlacements(UUID semesterId);
+    ResponseEntity<byte[]> exportOjtPlacements(UUID semesterId, String major, String status);
 
     ResponseEntity<byte[]> exportFinalGrades();
 
