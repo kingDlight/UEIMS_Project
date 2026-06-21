@@ -6,6 +6,8 @@ import { FileTextOutlined, CloseCircleOutlined, DownOutlined, UpOutlined } from 
 import { NeuSurface } from '../components/shared/NeuSurface';
 import { SmallBadge } from '../components/shared/SmallBadge';
 import { ApplicationService } from '@/services/ApplicationService';
+import { useMyApplicationsQuery } from '@/hooks/useStudentDashboardQueries';
+import { useQueryClient } from '@tanstack/react-query';
 import { cc, hexToRgba } from '../constants';
 
 const CTAButton: React.FC<{
@@ -57,33 +59,20 @@ const EmptyState: React.FC<{ icon: React.ReactNode; title: string; description: 
 export const ApplicationsTab: React.FC = () => {
   const { message } = App.useApp();
   const { t } = useTranslation(['applications']);
-  const [applications, setApplications] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>('all');
   const [expandedApp, setExpandedApp] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 5;
 
-  useEffect(() => { fetchApplications(); }, []);
-
-  const fetchApplications = async () => {
-    try {
-      setLoading(true);
-      const res = await ApplicationService.getMyApplications();
-      const apps = res.data?.result ?? res.data ?? [];
-      setApplications(Array.isArray(apps) ? apps : []);
-    } catch (err) {
-      console.error('Failed to fetch applications', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const queryClient = useQueryClient();
+  const { data: applications = [], isLoading: loading } = useMyApplicationsQuery();
 
   const handleWithdraw = async (applicationId: string) => {
     try {
       await ApplicationService.withdraw(applicationId);
       message.success(t('applicationWithdrawn', 'Application withdrawn successfully!'));
-      fetchApplications();
+      queryClient.invalidateQueries({ queryKey: ['myApplications'] });
+      queryClient.invalidateQueries({ queryKey: ['myApplicationsIds'] });
     } catch (err: any) {
       message.error(err.response?.data?.message || t('failedWithdraw', 'Failed to withdraw application!'));
     }

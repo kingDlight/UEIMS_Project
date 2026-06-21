@@ -4,12 +4,17 @@ import { api } from '@/services/api';
 import { StudentProfileService } from '@/services/StudentProfileService';
 
 export const useUserInfoQuery = () => {
-  const { token } = useAuthStore();
+  const { token, user } = useAuthStore();
   return useQuery({
     queryKey: ['userInfo'],
     queryFn: async () => {
-      const res = await api.get('/users/myInfo');
-      return res?.data?.result ?? res?.data;
+      if (user) {
+        return {
+          ...user,
+          userId: user.id
+        };
+      }
+      return null;
     },
     enabled: !!token,
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes

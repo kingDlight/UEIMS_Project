@@ -143,7 +143,8 @@ interface ModernLayoutProps {
   navItems: NavItem[];
   children: React.ReactNode;
   defaultRoute?: string;
-  basePath?: string; 
+  basePath?: string;
+  onPrefetch?: (key: string) => void;
 }
 
 const renderProfileModal = (modal: React.ReactNode) => (
@@ -159,7 +160,8 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
   navItems,
   children,
   defaultRoute = 'dashboard',
-  basePath = '/training-manager'
+  basePath = '/training-manager',
+  onPrefetch
 }) => {
   const [accountOpen, setAccountOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
@@ -365,6 +367,9 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
   };
 
   const handleNavigate = (key: string) => {
+    if (onPrefetch) {
+      onPrefetch(key);
+    }
     navigate(`${basePath}/${key}`);
     setDrawerOpen(false);
   };

@@ -6,6 +6,7 @@ import { NeuSurface } from '../components/shared/NeuSurface';
 import { AuthService } from '@/services/AuthService';
 import { api } from '@/services/api';
 import { cc } from '../constants';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 const CTAButton: React.FC<{
   children: React.ReactNode;
@@ -43,15 +44,14 @@ export const SettingsTab: React.FC = () => {
   const [phoneData, setPhoneData] = useState({ phone: '' });
   const [userId, setUserId] = useState<string>('');
 
-  useEffect(() => { fetchUserInfo(); }, []);
+  const { user } = useAuthStore();
 
-  const fetchUserInfo = async () => {
-    try {
-      const res = await api.get('/users/myInfo');
-      setPhoneData({ phone: res.data?.phone || '' });
-      setUserId(res.data?.userId || '');
-    } catch { /* ignore */ }
-  };
+  useEffect(() => {
+    if (user) {
+      setPhoneData({ phone: user.phone || '' });
+      setUserId(user.id || '');
+    }
+  }, [user]);
 
   const handleSavePhone = async () => {
     try {

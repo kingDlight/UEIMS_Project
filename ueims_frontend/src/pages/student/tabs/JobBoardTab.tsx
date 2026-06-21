@@ -9,6 +9,7 @@ import { SmallBadge } from '../components/shared/SmallBadge';
 import { JobPostService } from '@/services/JobPostService';
 import { ApplicationService } from '@/services/ApplicationService';
 import { useStudentProfileQuery } from '@/hooks/useStudentProfile';
+import { useActiveJobsQuery, useMyApplicationsIdsQuery } from '@/hooks/useStudentDashboardQueries';
 import { cc, hexToRgba } from '../constants';
 
 const CTAButton: React.FC<{
@@ -65,44 +66,18 @@ export const JobBoardTab: React.FC = () => {
   const { message } = App.useApp();
   const { t } = useTranslation(['jobs']);
   const navigate = useNavigate();
-  const [jobs, setJobs] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [techFilter, setTechFilter] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [appliedJobIds, setAppliedJobIds] = useState<Set<number>>(new Set());
   const pageSize = 9;
 
   const { data: profile } = useStudentProfileQuery();
   const hasCv = !!profile?.cvUrl;
   const currentSemester = profile?.currentSemester ?? 5;
 
-  useEffect(() => { fetchJobs(); }, []);
-
-  const fetchAppliedJobIds = async () => {
-    try {
-      const res = await ApplicationService.getMyApplications();
-      const applications = res.data?.result ?? res.data ?? [];
-      const ids = new Set<number>(applications.map((a: any) => a.jobPostId));
-      setAppliedJobIds(ids);
-    } catch {
-      // non-fatal
-    }
-  };
-
-  const fetchJobs = async () => {
-    try {
-      setLoading(true);
-      const res = await JobPostService.getActive();
-      const jobs = res.data?.result ?? res.data ?? [];
-      setJobs(Array.isArray(jobs) ? jobs : []);
-      await fetchAppliedJobIds();
-    } catch (err) {
-      console.error('Failed to fetch jobs', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { data: jobs = [], isLoading: jobsLoading } = useActiveJobsQuery();
+  const { data: appliedJobIds = new Set<number>(), isLoading: appsLoading } = useMyApplicationsIdsQuery();
+  const loading = jobsLoading || appsLoading;
 
   const filteredJobs = useMemo(() => {
     return jobs.filter(job => {

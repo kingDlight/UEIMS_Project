@@ -31,12 +31,27 @@ export type StudentPageKey =
 export const studentNavItems = navItems;
 
 import { extractUserFromToken } from '@/utils/jwt';
+import { useQueryClient } from '@tanstack/react-query';
+import { prefetchJobs, prefetchApplications } from '@/hooks/useStudentDashboardQueries';
 
 export const StudentDashboard: React.FC = () => {
   const { tab } = useParams<{ tab: string }>();
   const currentTab = (tab || 'dashboard') as StudentPageKey;
   const { token } = useAuthStore();
   const { data: profile, isLoading: profileLoading } = useStudentProfileQuery();
+  const queryClient = useQueryClient();
+
+  const handlePrefetch = (key: string) => {
+    switch (key) {
+      case 'jobs':
+        prefetchJobs(queryClient);
+        break;
+      case 'applications':
+        prefetchApplications(queryClient);
+        break;
+      // Other tabs can be added here if needed
+    }
+  };
 
   if (!token) {
     return <Navigate to="/login" replace />;
@@ -104,6 +119,7 @@ export const StudentDashboard: React.FC = () => {
       navItems={filteredNavItems} 
       defaultRoute="dashboard" 
       basePath="/student"
+      onPrefetch={handlePrefetch}
     >
       <React.Suspense fallback={
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh', width: '100%' }}>
