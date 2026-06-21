@@ -11,5 +11,5 @@ public interface AuditLogService {
 
     AuditLogResponseDTO findById(UUID id);
 
-    byte[] exportExcel(LocalDate startDate, LocalDate endDate);
+    byte[] exportExcel(LocalDate startDate, LocalDate endDate, String action);
 }
