@@ -47,7 +47,7 @@ export const RegisterEnterprisePage: React.FC = () => {
         confirmPassword: values.confirmPassword,
       });
       message.success(t('auth.registerEnterprise.registerSuccess'));
-      setTimeout(() => navigate('/login'), 2000);
+      setTimeout(() => navigate('/login', { replace: true }), 2000);
     } catch (error: any) {
       const msg = error.response?.data?.message;
       const code = error.response?.data?.code;

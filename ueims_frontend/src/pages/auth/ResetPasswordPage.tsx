@@ -68,7 +68,7 @@ export const ResetPasswordPage: React.FC = () => {
         confirmPassword: values.confirmPassword,
       });
       message.success(t('auth.resetPasswordPage.success'));
-      setTimeout(() => navigate('/login'), 1500);
+      setTimeout(() => navigate('/login', { replace: true }), 1500);
     } catch (error: any) {
       const msg = error.response?.data?.message;
       message.error(msg || t('auth.resetPasswordPage.failed'));
