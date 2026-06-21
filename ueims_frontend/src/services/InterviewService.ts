@@ -14,8 +14,8 @@ export const InterviewService = {
     decline: (id: string, reason: string) => api.post(`${API_URL}/${id}/decline`, null, { params: { reason } }),
     // UC-43
     cancel: (id: string, reason: string) => api.post(`${API_URL}/${id}/cancel`, null, { params: { reason } }),
-    reschedule: (id: string, newTime: string, reason?: string) =>
-        api.post(`${API_URL}/${id}/reschedule`, null, { params: { newTime, reason } }),
+    reschedule: (id: string, newTime: string, reason?: string, meetingLink?: string, location?: string) =>
+        api.post(`${API_URL}/${id}/reschedule`, null, { params: { newTime, reason, meetingLink, location } }),
     proposeSlots: (applicationId: string) =>
         api.get(`${API_URL}/propose-slots`, { params: { applicationId } }),
     // UC-44

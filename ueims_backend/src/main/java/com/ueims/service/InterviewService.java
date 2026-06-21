@@ -1,5 +1,6 @@
 package com.ueims.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -29,7 +30,7 @@ public interface InterviewService {
 
     Interview cancel(UUID id, String reason);
 
-    Interview reschedule(UUID id, java.time.LocalDateTime newTime, String reason);
+    Interview reschedule(UUID id, LocalDateTime newTime, String reason, String meetingLink, String location);
 
     /** Propose 3 open time slots for the next 7 business days that don't overlap existing interviews. */
     List<java.time.LocalDateTime> proposeSlots(UUID applicationId);

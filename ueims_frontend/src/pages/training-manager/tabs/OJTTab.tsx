@@ -9,6 +9,7 @@ import {
   ChevronDown,
   XCircle,
   Send,
+  Download,
 } from 'lucide-react';
 import {
   PlacementApplicationService,
@@ -70,6 +71,7 @@ type WorkflowStatus =
   | 'CANCELLED';
 
 interface PlacementRecord extends OjtPlacementView {
+  targetRole: string;
   key: string;
   avatar: string;
   source: 'SELF_SOURCED' | 'SYSTEM_MATCHED';
