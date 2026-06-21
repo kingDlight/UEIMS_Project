@@ -59,7 +59,7 @@ public class SemesterController {
                 .weeklyReportDeadlineDay(
                         request.getWeeklyReportDeadlineDay() != null ? request.getWeeklyReportDeadlineDay() : "SUNDAY")
                 .weeklyReportDeadlineTime(request.getWeeklyReportDeadlineTime())
-                .status(request.getStatus() != null ? request.getStatus() : "DRAFT")
+                .status("DRAFT") // BR: New semesters must always start as DRAFT
                 .createdBy(user)
                 .build();
 
