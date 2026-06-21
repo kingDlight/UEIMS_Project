@@ -165,6 +165,8 @@ public class NotificationServiceImpl implements NotificationService {
                     .type(type)
                     .title(title)
                     .message(message)
+                    .referenceEntity("INTERVIEW")
+                    .referenceId(interview.getInterviewId())
                     .isRead(false)
                     .build();
             Notification saved = repository.save(n);
