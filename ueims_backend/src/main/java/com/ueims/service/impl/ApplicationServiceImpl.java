@@ -310,6 +310,13 @@ public class ApplicationServiceImpl implements ApplicationService {
         }
 
         application.setStatus(request.getStatus());
+        if (request.getStatus() == ApplicationStatus.REJECTED
+                || request.getStatus() == ApplicationStatus.SCREENING_REJECTED) {
+            application.setRejectionReason(request.getRejectionReason());
+        } else {
+            application.setRejectionReason(null);
+        }
+
         if (request.getInterviewDate() != null && !request.getInterviewDate().isEmpty()) {
             // [FIX A-05] Catch DateTimeParseException thay vì để HTTP 500
             try {
