@@ -12,7 +12,6 @@ import {
 import dayjs from 'dayjs';
 import { IncidentService } from '@/services/IncidentService';
 import { EnterpriseAssignmentService } from '@/services/EnterpriseAssignmentService';
-import { c } from '../constants';
 
 const { TextArea } = Input;
 
@@ -55,19 +54,11 @@ const SEVERITIES = [
   { value: 'CRITICAL', label: 'Critical' },
 ];
 
-function hexToRgba(hex: string, alpha: number): string {
-  const h = hex.replace('#', '');
-  const r = Number.parseInt(h.substring(0, 2), 16);
-  const g = Number.parseInt(h.substring(2, 4), 16);
-  const b = Number.parseInt(h.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-}
-
 const STATUS_META: Record<string, { label: string; color: string; bg: string }> = {
-  OPEN: { label: 'Open', color: c.warning, bg: hexToRgba(c.warning, 0.1) },
-  IN_REVIEW: { label: 'In Review', color: c.info, bg: hexToRgba(c.info, 0.1) },
-  RESOLVED: { label: 'Resolved', color: c.success, bg: hexToRgba(c.success, 0.1) },
-  CLOSED: { label: 'Closed', color: c.textMuted, bg: hexToRgba(c.textMuted, 0.1) },
+  OPEN: { label: 'Open', color: 'text-amber-500', bg: 'bg-amber-50' },
+  IN_REVIEW: { label: 'In Review', color: 'text-blue-500', bg: 'bg-blue-50' },
+  RESOLVED: { label: 'Resolved', color: 'text-emerald-500', bg: 'bg-emerald-50' },
+  CLOSED: { label: 'Closed', color: 'text-slate-500', bg: 'bg-slate-50' },
 };
 
 export const IncidentReportTab: React.FC = () => {
@@ -147,26 +138,26 @@ export const IncidentReportTab: React.FC = () => {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}>
+      <div className="flex justify-center items-center h-[400px]">
         <Spin size="large" />
       </div>
     );
   }
 
   return (
-    <div style={{ padding: '0 0 40px', fontFamily: 'Inter, sans-serif' }}>
-      <div style={{ padding: '0 24px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+    <div className="pb-10 font-sans">
+      <div className="px-6 pb-5 flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 style={{ fontSize: 20, fontWeight: 800, color: c.text, margin: '0 0 4px', letterSpacing: '-0.01em' }}>Critical Incidents</h2>
-          <p style={{ fontSize: 13, color: c.textMuted, margin: 0 }}>Report critical incidents regarding student behavior or performance</p>
+          <h2 className="text-xl font-extrabold text-slate-900 m-0 mb-1 tracking-tight">Critical Incidents</h2>
+          <p className="text-[13px] text-slate-500 m-0">Report critical incidents regarding student behavior or performance</p>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <Button icon={<ReloadOutlined />} onClick={fetchAll}>Refresh</Button>
+        <div className="flex gap-2">
+          <Button icon={<ReloadOutlined />} onClick={fetchAll} className="rounded-xl">Refresh</Button>
           <Button
             type="primary"
             icon={<PlusOutlined />}
             onClick={() => { form.resetFields(); setFormOpen(true); }}
-            style={{ background: c.error, borderColor: c.error }}
+            className="bg-red-500 border-red-500 rounded-xl hover:bg-red-600 hover:border-red-600 font-bold"
           >
             Report Incident
           </Button>
@@ -174,15 +165,15 @@ export const IncidentReportTab: React.FC = () => {
       </div>
 
       {incidents.length === 0 ? (
-        <div style={{ padding: 60, textAlign: 'center', color: c.textMuted, background: c.surface, borderRadius: c.radiusLg, border: `1px solid ${c.border}`, margin: '0 24px' }}>
-          <ExclamationCircleOutlined style={{ fontSize: 48, color: c.textMuted, marginBottom: 12, display: 'block' }} />
-          <div style={{ fontSize: 15, fontWeight: 600, color: c.text, marginBottom: 4 }}>No incidents reported</div>
-          <div style={{ fontSize: 13, color: c.textMuted }}>Use the "Report Incident" button to flag a critical issue to the Training Manager.</div>
+        <div className="p-[60px] text-center text-slate-500 bg-white rounded-2xl border border-slate-200 mx-6">
+          <ExclamationCircleOutlined className="text-[48px] text-slate-400 mb-3 block" />
+          <div className="text-[15px] font-semibold text-slate-900 mb-1">No incidents reported</div>
+          <div className="text-[13px] text-slate-500">Use the "Report Incident" button to flag a critical issue to the Training Manager.</div>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '0 24px' }}>
+        <div className="flex flex-col gap-2 px-6">
           {inProgress.length > 0 && (
-            <div style={{ fontSize: 12, fontWeight: 700, color: c.textMuted, textTransform: 'uppercase', letterSpacing: '0.05em', padding: '4px 0' }}>
+            <div className="text-[12px] font-bold text-slate-500 uppercase tracking-wider py-1">
               Open / In Review ({inProgress.length})
             </div>
           )}
@@ -191,7 +182,7 @@ export const IncidentReportTab: React.FC = () => {
           ))}
           {incidents.length > inProgress.length && (
             <>
-              <div style={{ fontSize: 12, fontWeight: 700, color: c.textMuted, textTransform: 'uppercase', letterSpacing: '0.05em', padding: '12px 0 4px' }}>
+              <div className="text-[12px] font-bold text-slate-500 uppercase tracking-wider pt-3 pb-1">
                 Resolved ({incidents.length - inProgress.length})
               </div>
               {incidents.filter(i => (i.status ?? 'OPEN') === 'RESOLVED').map(inc => (
@@ -203,7 +194,7 @@ export const IncidentReportTab: React.FC = () => {
       )}
 
       <Modal
-        title={<div style={{ fontWeight: 800, color: c.text }}>Report Critical Incident</div>}
+        title={<div className="font-extrabold text-slate-900">Report Critical Incident</div>}
         open={formOpen}
         onCancel={() => { if (!submitting) setFormOpen(false); }}
         footer={null}
@@ -222,7 +213,7 @@ export const IncidentReportTab: React.FC = () => {
               }))}
             />
           </Form.Item>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+          <div className="grid grid-cols-2 gap-2">
             <Form.Item label="Category" name="category" rules={[{ required: true, message: 'Select a category' }]}>
               <Select placeholder="Incident category" options={CATEGORIES} />
             </Form.Item>
@@ -240,19 +231,21 @@ export const IncidentReportTab: React.FC = () => {
               maxLength={1000}
               showCount
               placeholder="Describe what happened, when, and who was involved. Be specific and factual."
+              className="rounded-xl"
             />
           </Form.Item>
           <Form.Item label="Evidence URLs (optional)" name="evidenceUrls">
-            <Input placeholder="Comma-separated links to photos, documents, or chat logs" />
+            <Input placeholder="Comma-separated links to photos, documents, or chat logs" className="rounded-xl" />
           </Form.Item>
-          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-            <Button onClick={() => setFormOpen(false)} disabled={submitting}>Cancel</Button>
+          <div className="flex gap-2 justify-end mt-2">
+            <Button onClick={() => setFormOpen(false)} disabled={submitting} className="rounded-xl">Cancel</Button>
             <Button
               danger
               type="primary"
               icon={<WarningOutlined />}
               loading={submitting}
               onClick={handleSubmit}
+              className="bg-red-500 border-red-500 rounded-xl hover:bg-red-600 hover:border-red-600 font-bold"
             >
               Submit Report
             </Button>
@@ -267,31 +260,24 @@ const IncidentCard: React.FC<{ incident: Incident }> = ({ incident }) => {
   const { message } = App.useApp();
   const meta = STATUS_META[incident.status ?? 'OPEN'] ?? STATUS_META.OPEN;
   return (
-    <div
-      style={{
-        background: c.surface,
-        border: `1px solid ${c.border}`,
-        borderRadius: c.radiusMd,
-        padding: 14,
-      }}
-    >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
+    <div className="bg-white border border-slate-200 rounded-2xl p-3.5 hover:shadow-sm transition-shadow">
+      <div className="flex justify-between items-start mb-2">
         <div>
-          <div style={{ fontSize: 14, fontWeight: 700, color: c.text, marginBottom: 2 }}>
+          <div className="text-[14px] font-bold text-slate-900 mb-0.5">
             {incident.studentName ?? 'Student'} · {incident.category}
           </div>
-          <div style={{ fontSize: 12, color: c.textMuted }}>
+          <div className="text-[12px] text-slate-500">
             {incident.reportedAt ? `Reported ${dayjs(incident.reportedAt).format('MMM D, YYYY HH:mm')}` : '—'}
           </div>
         </div>
-        <span style={{ padding: '4px 10px', borderRadius: c.radiusFull, background: meta.bg, color: meta.color, fontSize: 11, fontWeight: 700 }}>{meta.label}</span>
+        <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold ${meta.bg} ${meta.color}`}>{meta.label}</span>
       </div>
-      <div style={{ fontSize: 13, color: c.text, lineHeight: 1.5, whiteSpace: 'pre-wrap', padding: 10, background: c.bgLight, borderRadius: c.radiusSm }}>
+      <div className="text-[13px] text-slate-900 leading-relaxed whitespace-pre-wrap p-2.5 bg-slate-50 rounded-xl">
         {incident.description}
       </div>
       {incident.resolutionNote && (
-        <div style={{ marginTop: 8, padding: 10, background: c.successMuted, borderRadius: c.radiusSm, fontSize: 12, color: c.text, lineHeight: 1.5 }}>
-          <strong style={{ color: c.success }}>Resolution:</strong> {incident.resolutionNote}
+        <div className="mt-2 p-2.5 bg-emerald-50 rounded-xl text-[12px] text-slate-900 leading-relaxed">
+          <strong className="text-emerald-600 mr-1">Resolution:</strong> {incident.resolutionNote}
         </div>
       )}
     </div>

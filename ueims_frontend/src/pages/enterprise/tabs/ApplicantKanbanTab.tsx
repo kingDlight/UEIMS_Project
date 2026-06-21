@@ -31,18 +31,6 @@ import {
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { ApplicationService } from '@/services/ApplicationService';
-import { c } from '../constants';
-
-// ============================================================
-// DESIGN TOKENS
-// ============================================================
-function hexToRgba(hex: string, alpha: number): string {
-  const h = hex.replace('#', '');
-  const r = Number.parseInt(h.substring(0, 2), 16);
-  const g = Number.parseInt(h.substring(2, 4), 16);
-  const b = Number.parseInt(h.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-}
 
 // ============================================================
 // TYPES — match ApplicationResponse from backend
@@ -69,12 +57,12 @@ interface ApplicantCard {
 // HELPERS
 // ============================================================
 const AVATAR_COLORS = [
-  { bg: '#fff3e6', text: '#E67E22' },
-  { bg: '#dcfce7', text: '#22c55e' },
-  { bg: '#dbeafe', text: '#3b82f6' },
-  { bg: '#fef3c7', text: '#f59e0b' },
-  { bg: '#f3e5f5', text: '#8b5cf6' },
-  { bg: '#fee2e2', text: '#ef4444' },
+  { bg: 'bg-[#fff3e6]', text: 'text-[#E67E22]' },
+  { bg: 'bg-emerald-100', text: 'text-emerald-500' },
+  { bg: 'bg-blue-100', text: 'text-blue-500' },
+  { bg: 'bg-amber-100', text: 'text-amber-500' },
+  { bg: 'bg-purple-100', text: 'text-purple-500' },
+  { bg: 'bg-red-100', text: 'text-red-500' },
 ];
 
 function getAvatarColor(name: string) {
@@ -110,11 +98,11 @@ function mapToApplicantCard(item: any): ApplicantCard {
 // ============================================================
 type KanbanStatus = 'PENDING' | 'INTERVIEW_SCHEDULED' | 'ACCEPTED' | 'REJECTED';
 
-const COLUMNS: { id: KanbanStatus; label: string; color: string; bg: string }[] = [
-  { id: 'PENDING', label: 'Pending', color: c.warning, bg: hexToRgba(c.warning, 0.06) },
-  { id: 'INTERVIEW_SCHEDULED', label: 'Interviewing', color: c.info, bg: hexToRgba(c.info, 0.06) },
-  { id: 'ACCEPTED', label: 'Passed', color: c.success, bg: hexToRgba(c.success, 0.06) },
-  { id: 'REJECTED', label: 'Rejected', color: c.error, bg: hexToRgba(c.error, 0.06) },
+const COLUMNS: { id: KanbanStatus; label: string; colorClass: string; bgClass: string; borderClass: string }[] = [
+  { id: 'PENDING', label: 'Pending', colorClass: 'text-amber-500', bgClass: 'bg-amber-50', borderClass: 'border-amber-500/20' },
+  { id: 'INTERVIEW_SCHEDULED', label: 'Interviewing', colorClass: 'text-blue-500', bgClass: 'bg-blue-50', borderClass: 'border-blue-500/20' },
+  { id: 'ACCEPTED', label: 'Passed', colorClass: 'text-emerald-500', bgClass: 'bg-emerald-50', borderClass: 'border-emerald-500/20' },
+  { id: 'REJECTED', label: 'Rejected', colorClass: 'text-red-500', bgClass: 'bg-red-50', borderClass: 'border-red-500/20' },
 ];
 
 // Map any backend status to a kanban column (so SCREENING_*/WITHDRAWN are visible in PENDING bucket)
@@ -139,27 +127,20 @@ function toKanbanStatus(status: ApplicationStatus): KanbanStatus {
 // ============================================================
 // STATUS BADGE
 // ============================================================
-const STATUS_PALETTE: Record<string, { color: string; bg: string; label: string; icon: React.ReactNode }> = {
-  PENDING: { color: c.warning, bg: hexToRgba(c.warning, 0.1), label: 'Pending', icon: <WarningOutlined style={{ fontSize: 10 }} /> },
-  SCREENING_PASSED: { color: c.info, bg: hexToRgba(c.info, 0.1), label: 'CV Pass', icon: <CheckCircleOutlined style={{ fontSize: 10 }} /> },
-  SCREENING_REJECTED: { color: c.error, bg: hexToRgba(c.error, 0.1), label: 'CV Reject', icon: <CloseCircleOutlined style={{ fontSize: 10 }} /> },
-  INTERVIEW_SCHEDULED: { color: c.info, bg: hexToRgba(c.info, 0.1), label: 'Interviewing', icon: <ClockCircleOutlined style={{ fontSize: 10 }} /> },
-  ACCEPTED: { color: c.success, bg: hexToRgba(c.success, 0.1), label: 'Passed', icon: <CheckCircleOutlined style={{ fontSize: 10 }} /> },
-  REJECTED: { color: c.error, bg: hexToRgba(c.error, 0.1), label: 'Rejected', icon: <CloseCircleOutlined style={{ fontSize: 10 }} /> },
-  WITHDRAWN: { color: c.textMuted, bg: hexToRgba(c.textMuted, 0.1), label: 'Withdrawn', icon: <CloseCircleOutlined style={{ fontSize: 10 }} /> },
+const STATUS_PALETTE: Record<string, { colorClass: string; bgClass: string; borderClass: string; label: string; icon: React.ReactNode }> = {
+  PENDING: { colorClass: 'text-amber-500', bgClass: 'bg-amber-50', borderClass: 'border-amber-500/25', label: 'Pending', icon: <WarningOutlined className="text-[10px]" /> },
+  SCREENING_PASSED: { colorClass: 'text-blue-500', bgClass: 'bg-blue-50', borderClass: 'border-blue-500/25', label: 'CV Pass', icon: <CheckCircleOutlined className="text-[10px]" /> },
+  SCREENING_REJECTED: { colorClass: 'text-red-500', bgClass: 'bg-red-50', borderClass: 'border-red-500/25', label: 'CV Reject', icon: <CloseCircleOutlined className="text-[10px]" /> },
+  INTERVIEW_SCHEDULED: { colorClass: 'text-blue-500', bgClass: 'bg-blue-50', borderClass: 'border-blue-500/25', label: 'Interviewing', icon: <ClockCircleOutlined className="text-[10px]" /> },
+  ACCEPTED: { colorClass: 'text-emerald-500', bgClass: 'bg-emerald-50', borderClass: 'border-emerald-500/25', label: 'Passed', icon: <CheckCircleOutlined className="text-[10px]" /> },
+  REJECTED: { colorClass: 'text-red-500', bgClass: 'bg-red-50', borderClass: 'border-red-500/25', label: 'Rejected', icon: <CloseCircleOutlined className="text-[10px]" /> },
+  WITHDRAWN: { colorClass: 'text-slate-500', bgClass: 'bg-slate-50', borderClass: 'border-slate-500/25', label: 'Withdrawn', icon: <CloseCircleOutlined className="text-[10px]" /> },
 };
 
 const StatusBadge: React.FC<{ status: ApplicationStatus }> = ({ status }) => {
-  const { message } = App.useApp();
   const config = STATUS_PALETTE[status] || STATUS_PALETTE.PENDING;
   return (
-    <span style={{
-      display: 'inline-flex', alignItems: 'center', gap: 4,
-      padding: '4px 10px', borderRadius: c.radiusFull,
-      background: config.bg, border: `1px solid ${hexToRgba(config.color, 0.25)}`,
-      color: config.color, fontSize: 11, fontWeight: 700,
-      textTransform: 'uppercase', letterSpacing: '0.05em',
-    }}>
+    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full ${config.bgClass} border ${config.borderClass} ${config.colorClass} text-[11px] font-bold uppercase tracking-wider`}>
       {config.icon}
       {config.label}
     </span>
@@ -187,50 +168,32 @@ const SortableCard: React.FC<{
     <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
       <motion.div
         onClick={() => onViewDetails(applicant)}
-        whileHover={{ y: -2 }}
-        style={{
-          background: c.surface, borderRadius: c.radiusLg, border: `1px solid ${c.border}`,
-          boxShadow: c.shadowSm, padding: '14px 16px',
-          cursor: 'grab', transition: 'box-shadow 0.2s, transform 0.2s', marginBottom: 10,
-        }}
-        onMouseEnter={(e) => {
-          const el = e.currentTarget as HTMLElement;
-          el.style.boxShadow = c.shadowMd;
-          el.style.transform = 'translateY(-1px)';
-        }}
-        onMouseLeave={(e) => {
-          const el = e.currentTarget as HTMLElement;
-          el.style.boxShadow = c.shadowSm;
-          el.style.transform = 'translateY(0)';
-        }}
+        whileHover={{ y: -1, boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)' }}
+        className="bg-white rounded-2xl border border-slate-200 shadow-sm p-3.5 cursor-grab mb-2.5 transition-all"
       >
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 10 }}>
-          <div style={{
-            width: 42, height: 42, borderRadius: c.radiusMd,
-            background: avatarColor.bg, display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: avatarColor.text, fontSize: 14, fontWeight: 800, flexShrink: 0,
-          }}>
+        <div className="flex items-start gap-2.5 mb-2.5">
+          <div className={`w-[42px] h-[42px] rounded-xl ${avatarColor.bg} ${avatarColor.text} flex items-center justify-center text-[14px] font-extrabold shrink-0`}>
             {initials}
           </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: c.text, marginBottom: 2, lineHeight: 1.2 }}>
+          <div className="flex-1 min-w-0">
+            <div className="text-[13px] font-bold text-slate-900 mb-0.5 leading-[1.2]">
               {applicant.studentName}
             </div>
-            <div style={{ fontSize: 11, color: c.textMuted, marginBottom: 4 }}>{applicant.jobTitle}</div>
+            <div className="text-[11px] text-slate-500 mb-1">{applicant.jobTitle}</div>
             <StatusBadge status={applicant.status} />
           </div>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: c.textMuted }}>
-            <UserOutlined style={{ fontSize: 11, flexShrink: 0 }} />
-            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{applicant.studentCode}</span>
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
+            <UserOutlined className="text-[11px] shrink-0" />
+            <span className="overflow-hidden text-ellipsis whitespace-nowrap">{applicant.studentCode}</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: c.textMuted }}>
-            <MailOutlined style={{ fontSize: 11, flexShrink: 0 }} />
-            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{applicant.studentEmail}</span>
+          <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
+            <MailOutlined className="text-[11px] shrink-0" />
+            <span className="overflow-hidden text-ellipsis whitespace-nowrap">{applicant.studentEmail}</span>
           </div>
         </div>
-        <div style={{ marginTop: 8, fontSize: 10, color: c.textMuted, textAlign: 'right' }}>
+        <div className="mt-2 text-[10px] text-slate-500 text-right">
           {daysSinceApply === 0 ? 'Today' : `${daysSinceApply}d ago`}
         </div>
       </motion.div>
@@ -242,27 +205,17 @@ const SortableCard: React.FC<{
 // DRAG OVERLAY
 // ============================================================
 const DragCard: React.FC<{ applicant: ApplicantCard }> = ({ applicant }) => {
-  const { message } = App.useApp();
   const avatarColor = applicant.avatarColor;
   const initials = (applicant.studentName || 'ST').substring(0, 2).toUpperCase();
   return (
-    <div style={{
-      background: c.surface, borderRadius: c.radiusLg,
-      border: `2px solid ${c.brand}`,
-      boxShadow: '0 20px 50px rgba(230,126,34,0.2)',
-      padding: '14px 16px', cursor: 'grabbing', width: 260,
-    }}>
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-        <div style={{
-          width: 42, height: 42, borderRadius: c.radiusMd, background: avatarColor.bg,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: avatarColor.text, fontSize: 14, fontWeight: 800,
-        }}>
+    <div className="bg-white rounded-2xl border-2 border-[#E67E22] shadow-[0_20px_50px_rgba(230,126,34,0.2)] p-3.5 cursor-grabbing w-[260px]">
+      <div className="flex items-start gap-2.5">
+        <div className={`w-[42px] h-[42px] rounded-xl ${avatarColor.bg} ${avatarColor.text} flex items-center justify-center text-[14px] font-extrabold`}>
           {initials}
         </div>
         <div>
-          <div style={{ fontSize: 13, fontWeight: 700, color: c.text }}>{applicant.studentName}</div>
-          <div style={{ fontSize: 11, color: c.textMuted }}>{applicant.jobTitle}</div>
+          <div className="text-[13px] font-bold text-slate-900">{applicant.studentName}</div>
+          <div className="text-[11px] text-slate-500">{applicant.jobTitle}</div>
         </div>
       </div>
     </div>
@@ -323,7 +276,6 @@ const DetailModal: React.FC<DetailModalProps> = ({ applicant, open, onClose, onS
       onScreenComplete?.(applicant, pendingDecision, pendingDecision === 'SCREENING_REJECTED' ? rejectionReason.trim() : undefined);
     } catch (err: any) {
       const backendMsg = err?.response?.data?.message;
-      // 41.0.E1: state lock conflict (concurrent update)
       if (err?.response?.status === 400 || err?.response?.status === 409) {
         message.warning(backendMsg ?? 'This application status has already been modified. Please refresh the page.');
       } else {
@@ -346,7 +298,6 @@ const DetailModal: React.FC<DetailModalProps> = ({ applicant, open, onClose, onS
       hide();
       const code = err?.response?.data?.code;
       const backendMsg = err?.response?.data?.message;
-      // 40.0.E1: file missing / removed
       if (err?.response?.status === 404 || code === 1073) {
         message.error('The requested CV file is currently unavailable or has been removed by the applicant.');
       } else {
@@ -358,42 +309,42 @@ const DetailModal: React.FC<DetailModalProps> = ({ applicant, open, onClose, onS
   };
   return (
     <Modal
-      title={<div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, color: c.text, fontSize: 16 }}>Applicant Details</div>}
+      title={<div className="font-sans font-bold text-slate-900 text-[16px]">Applicant Details</div>}
       open={open} onCancel={onClose} footer={null} width={480}
-      styles={{ content: { borderRadius: c.radiusLg, padding: '24px 28px' }, header: { borderBottom: 'none', marginBottom: 16, padding: 0 }, body: { padding: 0 } }}
+      styles={{ content: { borderRadius: '1rem', padding: '24px 28px' }, header: { borderBottom: 'none', marginBottom: 16, padding: 0 }, body: { padding: 0 } }}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-          <div style={{ width: 64, height: 64, borderRadius: c.radiusLg, background: avatarColor.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', color: avatarColor.text, fontSize: 22, fontWeight: 800 }}>
+      <div className="flex flex-col gap-5">
+        <div className="flex items-center gap-4">
+          <div className={`w-16 h-16 rounded-2xl ${avatarColor.bg} ${avatarColor.text} flex items-center justify-center text-[22px] font-extrabold`}>
             {initials}
           </div>
           <div>
-            <div style={{ fontSize: 18, fontWeight: 800, color: c.text, marginBottom: 4 }}>{applicant.studentName}</div>
-            <div style={{ fontSize: 13, color: c.textMuted, marginBottom: 8 }}>{applicant.jobTitle}</div>
+            <div className="text-[18px] font-extrabold text-slate-900 mb-1">{applicant.studentName}</div>
+            <div className="text-[13px] text-slate-500 mb-2">{applicant.jobTitle}</div>
             <StatusBadge status={applicant.status} />
           </div>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+        <div className="grid grid-cols-2 gap-3">
           {[
             { label: 'Student ID', value: applicant.studentCode },
             { label: 'Job Post', value: applicant.jobTitle },
             { label: 'Status', value: applicant.status },
             { label: 'Applied', value: dayjs(applicant.appliedAt).format('MMM D, YYYY') },
           ].map(item => (
-            <div key={item.label} style={{ padding: '12px 14px', borderRadius: c.radiusMd, background: c.bgLight, border: `1px solid ${c.border}` }}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: c.textMuted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>{item.label}</div>
-              <div style={{ fontSize: 13, fontWeight: 600, color: c.text, wordBreak: 'break-word' }}>{item.value}</div>
+            <div key={item.label} className="px-3.5 py-3 rounded-xl bg-slate-50 border border-slate-200">
+              <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">{item.label}</div>
+              <div className="text-[13px] font-semibold text-slate-900 break-words">{item.value}</div>
             </div>
           ))}
         </div>
-        <div style={{ padding: '12px 14px', borderRadius: c.radiusMd, background: c.bgLight, border: `1px solid ${c.border}` }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: c.textMuted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Email</div>
-          <div style={{ fontSize: 13, fontWeight: 600, color: c.text }}>{applicant.studentEmail}</div>
+        <div className="px-3.5 py-3 rounded-xl bg-slate-50 border border-slate-200">
+          <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Email</div>
+          <div className="text-[13px] font-semibold text-slate-900">{applicant.studentEmail}</div>
         </div>
         {applicant.coverLetter && (
-          <div style={{ padding: '12px 14px', borderRadius: c.radiusMd, background: c.bgLight, border: `1px solid ${c.border}` }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: c.textMuted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Cover Letter</div>
-            <div style={{ fontSize: 13, color: c.text, lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>{applicant.coverLetter}</div>
+          <div className="px-3.5 py-3 rounded-xl bg-slate-50 border border-slate-200">
+            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Cover Letter</div>
+            <div className="text-[13px] text-slate-900 leading-relaxed whitespace-pre-wrap">{applicant.coverLetter}</div>
           </div>
         )}
         {applicant.cvFileUrl && (
@@ -402,18 +353,18 @@ const DetailModal: React.FC<DetailModalProps> = ({ applicant, open, onClose, onS
             icon={<DownloadOutlined />}
             loading={downloading}
             onClick={handleDownloadCv}
-            style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '10px 16px', borderRadius: c.radiusMd, background: c.brand, borderColor: c.brand, color: '#fff', fontWeight: 700, fontSize: 13, boxShadow: c.shadowBrand }}
+            className="w-full flex items-center justify-center gap-1.5 py-5 rounded-xl bg-[#E67E22] hover:bg-[#D68910] border-none text-white font-bold text-[13px] shadow-[0_8px_22px_rgba(230,126,34,0.22)]"
           >
             Download CV (PDF)
           </Button>
         )}
         {isPending && (
-          <div style={{ display: 'flex', gap: 10, paddingTop: 4, borderTop: `1px solid ${c.borderSubtle}` }}>
+          <div className="flex gap-2.5 pt-1 border-t border-slate-100">
             <Button
               type="primary"
               icon={<CheckCircleOutlined />}
               onClick={() => openConfirm('SCREENING_PASSED')}
-              style={{ flex: 1, background: c.success, borderColor: c.success, fontWeight: 700 }}
+              className="flex-1 bg-emerald-500 hover:bg-emerald-600 border-none font-bold py-4 rounded-xl"
             >
               Pass Screening
             </Button>
@@ -421,28 +372,28 @@ const DetailModal: React.FC<DetailModalProps> = ({ applicant, open, onClose, onS
               danger
               icon={<CloseCircleOutlined />}
               onClick={() => openConfirm('SCREENING_REJECTED')}
-              style={{ flex: 1, fontWeight: 700 }}
+              className="flex-1 font-bold py-4 rounded-xl"
             >
               Reject
             </Button>
           </div>
         )}
         {applicant.rejectionReason && (
-          <div style={{ padding: '12px 14px', borderRadius: c.radiusMd, background: c.errorMuted, border: `1px solid ${hexToRgba(c.error, 0.3)}` }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: c.error, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>Rejection Reason</div>
-            <div style={{ fontSize: 13, color: c.text, lineHeight: 1.5 }}>{applicant.rejectionReason}</div>
+          <div className="px-3.5 py-3 rounded-xl bg-red-50 border border-red-500/30">
+            <div className="text-[10px] font-bold text-red-500 uppercase tracking-wider mb-1">Rejection Reason</div>
+            <div className="text-[13px] text-slate-900 leading-relaxed">{applicant.rejectionReason}</div>
           </div>
         )}
         {alreadyScreened && (
-          <div style={{ fontSize: 12, color: c.textMuted, textAlign: 'center', padding: '8px 12px', background: c.bgLight, borderRadius: c.radiusMd, border: `1px dashed ${c.border}` }}>
-            <LockOutlined style={{ marginRight: 6 }} />
+          <div className="text-[12px] text-slate-500 text-center px-3 py-2 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+            <LockOutlined className="mr-1.5" />
             Evaluation locked — application has been screened.
           </div>
         )}
       </div>
       <Modal
         title={
-          <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, color: c.text, fontSize: 15 }}>
+          <div className="font-sans font-bold text-slate-900 text-[15px]">
             {pendingDecision === 'SCREENING_PASSED' ? 'Confirm Pass Screening' : 'Confirm Rejection'}
           </div>
         }
@@ -451,18 +402,19 @@ const DetailModal: React.FC<DetailModalProps> = ({ applicant, open, onClose, onS
         footer={null}
         width={420}
         destroyOnHidden
+        styles={{ content: { borderRadius: '1rem' } }}
       >
-        <div style={{ fontSize: 13, color: c.text, marginBottom: 12, lineHeight: 1.5 }}>
+        <div className="text-[13px] text-slate-900 mb-3 leading-relaxed">
           Are you sure you want to{' '}
-          <strong style={{ color: pendingDecision === 'SCREENING_PASSED' ? c.success : c.error }}>
+          <strong className={pendingDecision === 'SCREENING_PASSED' ? 'text-emerald-500' : 'text-red-500'}>
             {pendingDecision === 'SCREENING_PASSED' ? 'Pass' : 'Reject'}
           </strong>{' '}
-          <strong>{applicant.studentName}</strong>?
+          <strong>{applicant?.studentName}</strong>?
         </div>
         {pendingDecision === 'SCREENING_REJECTED' && (
-          <div style={{ marginBottom: 12 }}>
-            <div style={{ fontSize: 12, fontWeight: 700, color: c.textMuted, marginBottom: 6 }}>
-              Rejection Reason <span style={{ color: c.error }}>*</span>
+          <div className="mb-3">
+            <div className="text-[12px] font-bold text-slate-500 mb-1.5">
+              Rejection Reason <span className="text-red-500">*</span>
             </div>
             <Input.TextArea
               value={rejectionReason}
@@ -471,21 +423,18 @@ const DetailModal: React.FC<DetailModalProps> = ({ applicant, open, onClose, onS
               placeholder="Briefly explain the reason for rejection (required)"
               maxLength={500}
               showCount
+              className="rounded-xl"
             />
           </div>
         )}
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-          <Button onClick={closeConfirm} disabled={submitting}>Cancel</Button>
+        <div className="flex justify-end gap-2">
+          <Button onClick={closeConfirm} disabled={submitting} className="rounded-xl">Cancel</Button>
           <Button
             type="primary"
             danger={pendingDecision === 'SCREENING_REJECTED'}
             onClick={submitScreen}
             loading={submitting}
-            style={
-              pendingDecision === 'SCREENING_PASSED'
-                ? { background: c.success, borderColor: c.success }
-                : undefined
-            }
+            className={`rounded-xl ${pendingDecision === 'SCREENING_PASSED' ? 'bg-emerald-500 hover:bg-emerald-600 border-none' : ''}`}
           >
             Confirm
           </Button>
@@ -503,18 +452,18 @@ const KanbanColumn: React.FC<{
   applicants: ApplicantCard[];
   onViewDetails: (a: ApplicantCard) => void;
 }> = ({ column, applicants, onViewDetails }) => (
-  <div style={{ flex: '0 0 280px', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-    <div style={{ padding: '12px 14px', borderRadius: c.radiusMd, background: column.bg, border: `1px solid ${hexToRgba(column.color, 0.2)}`, marginBottom: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{ width: 8, height: 8, borderRadius: '50%', background: column.color, display: 'inline-block' }} />
-        <span style={{ fontSize: 13, fontWeight: 700, color: column.color }}>{column.label}</span>
+  <div className="flex-[0_0_280px] flex flex-col min-w-0">
+    <div className={`px-3.5 py-3 rounded-xl ${column.bgClass} border ${column.borderClass} mb-3 flex items-center justify-between`}>
+      <div className="flex items-center gap-2">
+        <span className={`w-2 h-2 rounded-full inline-block bg-current ${column.colorClass}`} />
+        <span className={`text-[13px] font-bold ${column.colorClass}`}>{column.label}</span>
       </div>
-      <span style={{ padding: '2px 8px', borderRadius: c.radiusFull, background: hexToRgba(column.color, 0.15), color: column.color, fontSize: 12, fontWeight: 700 }}>{applicants.length}</span>
+      <span className={`px-2 py-0.5 rounded-full bg-current/10 ${column.colorClass} text-[12px] font-bold`}>{applicants.length}</span>
     </div>
     <SortableContext items={applicants.map(a => a.id)} strategy={verticalListSortingStrategy}>
-      <div style={{ flex: 1, padding: '6px 4px', minHeight: 200, borderRadius: c.radiusMd, background: c.surface, border: `1px dashed ${c.border}`, overflowY: 'auto', maxHeight: 'calc(100vh - 280px)' }}>
+      <div className="flex-1 px-1 py-1.5 min-h-[200px] rounded-xl bg-slate-50 border border-dashed border-slate-200 overflow-y-auto max-h-[calc(100vh-280px)]">
         {applicants.length === 0 ? (
-          <div style={{ padding: '32px 16px', textAlign: 'center', color: c.textMuted, fontSize: 12 }}>Drop here</div>
+          <div className="py-8 px-4 text-center text-slate-500 text-[12px]">Drop here</div>
         ) : (
           <AnimatePresence>
             {applicants.map((applicant) => (
@@ -550,7 +499,6 @@ export const ApplicantKanbanTab: React.FC = () => {
       const data: any[] = res.data?.result ?? res.data ?? [];
       setApplicants(Array.isArray(data) ? data.map(mapToApplicantCard) : []);
     } catch (err: any) {
-      // UC-39 Exception 39.0.E1: Application Data Loading Error
       const msg = err.response?.data?.message || 'Unable to load application details. Please try again.';
       setError(msg);
       message.error(msg);
@@ -590,23 +538,18 @@ export const ApplicantKanbanTab: React.FC = () => {
     await updateStatus(draggedApplicant, targetStatus);
   };
 
-  // UC-39 Step 5-6: Update status, refresh, show error if fails
   const updateStatus = async (applicant: ApplicantCard, newStatus: KanbanStatus) => {
-    // Map kanban status back to actual backend status
     const backendStatus: ApplicationStatus =
       newStatus === 'PENDING' ? 'PENDING' :
       newStatus === 'INTERVIEW_SCHEDULED' ? 'INTERVIEW_SCHEDULED' :
       newStatus === 'ACCEPTED' ? 'ACCEPTED' :
       'REJECTED';
 
-    // Optimistic update (UC-39: E2 handles revert on failure)
     setApplicants(prev => prev.map(a => a.id === applicant.id ? { ...a, status: backendStatus } : a));
     try {
       await ApplicationService.updateStatus(applicant.applicationId, { status: backendStatus });
       message.success(`Moved ${applicant.studentName} to ${COLUMNS.find(c => c.id === newStatus)?.label}`);
     } catch (err: any) {
-      // UC-39 Exception 39.0.E2: Status Update Failure
-      // Revert to previous status
       setApplicants(prev => prev.map(a => a.id === applicant.id ? { ...a, status: applicant.status } : a));
       message.error(err.response?.data?.message || 'Failed to save status change. Please check your connection.');
     }
@@ -614,40 +557,40 @@ export const ApplicantKanbanTab: React.FC = () => {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}>
+      <div className="flex justify-center items-center h-[400px]">
         <Spin size="large" />
       </div>
     );
   }
 
   return (
-    <div style={{ padding: '0 0 40px', fontFamily: 'Inter, sans-serif' }}>
-      <div style={{ padding: '0 24px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+    <div className="pb-10 font-sans">
+      <div className="px-6 pb-5 flex items-center justify-between">
         <div>
-          <h2 style={{ fontSize: 20, fontWeight: 800, color: c.text, margin: '0 0 4px', letterSpacing: '-0.01em' }}>Applicant Kanban</h2>
-          <p style={{ fontSize: 13, color: c.textMuted, margin: 0 }}>Drag &amp; drop to update application status</p>
+          <h2 className="text-xl font-extrabold text-slate-900 m-0 mb-1 tracking-tight">Applicant Kanban</h2>
+          <p className="text-[13px] text-slate-500 m-0">Drag &amp; drop to update application status</p>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ padding: '6px 14px', borderRadius: c.radiusFull, background: c.bgLight, border: `1px solid ${c.border}`, fontSize: 12, fontWeight: 700, color: c.textMuted }}>{applicants.length} Total</span>
-          <Button size="small" icon={<ReloadOutlined />} onClick={fetchApplicants}>Refresh</Button>
+        <div className="flex items-center gap-2">
+          <span className="px-3.5 py-1.5 rounded-full bg-slate-50 border border-slate-200 text-[12px] font-bold text-slate-500">{applicants.length} Total</span>
+          <Button size="small" icon={<ReloadOutlined />} onClick={fetchApplicants} className="rounded-xl h-8 px-3">Refresh</Button>
         </div>
       </div>
 
       {applicants.length === 0 && !error ? (
-        <div style={{ padding: 60, textAlign: 'center', color: c.textMuted, background: c.surface, borderRadius: c.radiusLg, border: `1px solid ${c.border}`, margin: '0 24px' }}>
-          <FileTextOutlined style={{ fontSize: 48, color: c.textMuted, marginBottom: 12, display: 'block' }} />
-          <div style={{ fontSize: 15, fontWeight: 600, color: c.text, marginBottom: 4 }}>No applications yet</div>
-          <div style={{ fontSize: 13, color: c.textMuted }}>Students will appear here once they apply to your job posts</div>
+        <div className="p-[60px] text-center text-slate-500 bg-white rounded-2xl border border-slate-200 mx-6">
+          <FileTextOutlined className="text-[48px] text-slate-400 mb-3 block" />
+          <div className="text-[15px] font-semibold text-slate-900 mb-1">No applications yet</div>
+          <div className="text-[13px] text-slate-500">Students will appear here once they apply to your job posts</div>
         </div>
       ) : applicants.length === 0 && error ? (
-        <div style={{ padding: 60, textAlign: 'center', color: c.error, background: c.surface, borderRadius: c.radiusLg, border: `1px solid ${c.border}`, margin: '0 24px' }}>
-          <WarningOutlined style={{ fontSize: 48, marginBottom: 12, display: 'block' }} />
-          <div style={{ fontSize: 15, fontWeight: 600, color: c.text, marginBottom: 4 }}>Unable to load application details</div>
-          <div style={{ fontSize: 13, color: c.textMuted, marginBottom: 12 }}>{error}</div>
-          <Button type="primary" onClick={fetchApplicants} style={{ background: c.brand, borderColor: c.brand }}>Try Again</Button>
+        <div className="p-[60px] text-center text-red-500 bg-white rounded-2xl border border-slate-200 mx-6">
+          <WarningOutlined className="text-[48px] mb-3 block" />
+          <div className="text-[15px] font-semibold text-slate-900 mb-1">Unable to load application details</div>
+          <div className="text-[13px] text-slate-500 mb-3">{error}</div>
+          <Button type="primary" onClick={fetchApplicants} className="bg-[#E67E22] hover:bg-[#D68910] border-none rounded-xl">Try Again</Button>
         </div>
       ) : (
-        <div style={{ display: 'flex', gap: 16, padding: '0 24px', overflowX: 'auto', alignItems: 'flex-start' }}>
+        <div className="flex gap-4 px-6 overflow-x-auto items-start min-h-[500px]">
           <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
             {COLUMNS.map(column => (
               <KanbanColumn key={column.id} column={column} applicants={applicants.filter(a => toKanbanStatus(a.status) === column.id)} onViewDetails={(a) => setDetailModal({ open: true, applicant: a })} />

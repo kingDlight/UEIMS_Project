@@ -12,7 +12,6 @@ import {
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { EnterpriseAssignmentService } from '@/services/EnterpriseAssignmentService';
-import { c } from '../constants';
 
 interface AssignmentRow {
   assignmentId: string;
@@ -29,19 +28,11 @@ interface AssignmentRow {
   endDate?: string;
 }
 
-function hexToRgba(hex: string, alpha: number): string {
-  const h = hex.replace('#', '');
-  const r = Number.parseInt(h.substring(0, 2), 16);
-  const g = Number.parseInt(h.substring(2, 4), 16);
-  const b = Number.parseInt(h.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-}
-
 const STATUS_META: Record<string, { label: string; color: string; bg: string }> = {
-  ACTIVE: { label: 'In Progress', color: c.info, bg: hexToRgba(c.info, 0.1) },
-  COMPLETED: { label: 'Completed', color: c.success, bg: hexToRgba(c.success, 0.1) },
-  CANCELLED: { label: 'Canceled', color: c.error, bg: hexToRgba(c.error, 0.1) },
-  CANCELED: { label: 'Canceled', color: c.error, bg: hexToRgba(c.error, 0.1) },
+  ACTIVE: { label: 'In Progress', color: 'text-blue-500', bg: 'bg-blue-50' },
+  COMPLETED: { label: 'Completed', color: 'text-emerald-500', bg: 'bg-emerald-50' },
+  CANCELLED: { label: 'Canceled', color: 'text-red-500', bg: 'bg-red-50' },
+  CANCELED: { label: 'Canceled', color: 'text-red-500', bg: 'bg-red-50' },
 };
 
 const PAGE_SIZE = 20;
@@ -92,32 +83,32 @@ export const AssignedStudentsTab: React.FC = () => {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}>
+      <div className="flex justify-center items-center h-[400px]">
         <Spin size="large" />
       </div>
     );
   }
 
   return (
-    <div style={{ padding: '0 0 40px', fontFamily: 'Inter, sans-serif' }}>
-      <div style={{ padding: '0 24px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+    <div className="pb-10 font-sans">
+      <div className="px-6 pb-5 flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 style={{ fontSize: 20, fontWeight: 800, color: c.text, margin: '0 0 4px', letterSpacing: '-0.01em' }}>Assigned Students</h2>
-          <p style={{ fontSize: 13, color: c.textMuted, margin: 0 }}>Track students currently assigned to your enterprise</p>
+          <h2 className="text-xl font-extrabold text-slate-900 m-0 mb-1 tracking-tight">Assigned Students</h2>
+          <p className="text-[13px] text-slate-500 m-0">Track students currently assigned to your enterprise</p>
         </div>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+        <div className="flex gap-2 items-center flex-wrap">
           <Input
             placeholder="Search by name, code, or email"
             prefix={<SearchOutlined />}
             value={search}
             onChange={e => { setSearch(e.target.value); setPage(1); }}
-            style={{ width: 280 }}
+            className="w-[280px] rounded-xl"
             allowClear
           />
           <Select
             value={statusFilter}
             onChange={v => { setStatusFilter(v); setPage(1); }}
-            style={{ width: 160 }}
+            className="w-[160px]"
             options={[
               { value: 'ALL', label: 'All statuses' },
               { value: 'ACTIVE', label: 'In Progress' },
@@ -125,56 +116,40 @@ export const AssignedStudentsTab: React.FC = () => {
               { value: 'CANCELED', label: 'Canceled' },
             ]}
           />
-          <Button icon={<ReloadOutlined />} onClick={fetchRows}>Refresh</Button>
+          <Button icon={<ReloadOutlined />} onClick={fetchRows} className="rounded-xl">Refresh</Button>
         </div>
       </div>
 
       {filtered.length === 0 ? (
-        <div style={{ padding: 60, textAlign: 'center', color: c.textMuted, background: c.surface, borderRadius: c.radiusLg, border: `1px solid ${c.border}`, margin: '0 24px' }}>
-          <TeamOutlined style={{ fontSize: 48, marginBottom: 12, display: 'block' }} />
-          <div style={{ fontSize: 15, fontWeight: 600, color: c.text, marginBottom: 4 }}>There are no students assigned to you at the moment.</div>
-          <div style={{ fontSize: 13, color: c.textMuted }}>Once the Training Manager assigns students to your enterprise, they will appear here.</div>
+        <div className="p-[60px] text-center text-slate-500 bg-white rounded-2xl border border-slate-200 mx-6">
+          <TeamOutlined className="text-[48px] mb-3 block" />
+          <div className="text-[15px] font-semibold text-slate-900 mb-1">There are no students assigned to you at the moment.</div>
+          <div className="text-[13px] text-slate-500">Once the Training Manager assigns students to your enterprise, they will appear here.</div>
         </div>
       ) : (
         <>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 12, padding: '0 24px' }}>
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-3 px-6">
             {paged.map(r => {
               const meta = STATUS_META[(r.status ?? 'ACTIVE').toUpperCase()] ?? STATUS_META.ACTIVE;
               return (
                 <div
                   key={r.assignmentId}
-                  style={{
-                    background: c.surface,
-                    border: `1px solid ${c.border}`,
-                    borderRadius: c.radiusLg,
-                    padding: 18,
-                    boxShadow: c.shadowSm,
-                    transition: 'box-shadow 0.15s',
-                  }}
-                  onMouseEnter={e => (e.currentTarget.style.boxShadow = c.shadowMd)}
-                  onMouseLeave={e => (e.currentTarget.style.boxShadow = c.shadowSm)}
+                  className="bg-white border border-slate-200 rounded-2xl p-4.5 shadow-sm hover:shadow-md transition-shadow"
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
-                    <div
-                      style={{
-                        width: 48, height: 48, borderRadius: c.radiusMd,
-                        background: c.brandMuted, color: c.brand,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: 18, fontWeight: 800,
-                      }}
-                    >
+                  <div className="flex items-center gap-3 mb-3.5">
+                    <div className="w-12 h-12 rounded-xl bg-[#E67E22]/10 text-[#E67E22] flex items-center justify-center text-lg font-extrabold shrink-0">
                       {(r.studentName ?? 'ST').substring(0, 2).toUpperCase()}
                     </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 14, fontWeight: 700, color: c.text, marginBottom: 2 }}>{r.studentName ?? 'Student'}</div>
-                      <div style={{ fontSize: 12, color: c.textMuted, display: 'flex', alignItems: 'center', gap: 4 }}>
-                        <MailOutlined /> <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.studentEmail ?? '—'}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[14px] font-bold text-slate-900 mb-0.5">{r.studentName ?? 'Student'}</div>
+                      <div className="text-[12px] text-slate-500 flex items-center gap-1">
+                        <MailOutlined /> <span className="overflow-hidden text-ellipsis whitespace-nowrap">{r.studentEmail ?? '—'}</span>
                       </div>
                     </div>
-                    <span style={{ padding: '4px 10px', borderRadius: c.radiusFull, background: meta.bg, color: meta.color, fontSize: 11, fontWeight: 700 }}>{meta.label}</span>
+                    <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold ${meta.bg} ${meta.color}`}>{meta.label}</span>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                  <div className="grid grid-cols-2 gap-2">
                     <Field icon={<IdcardOutlined />} label="Student ID" value={r.studentCode ?? '—'} />
                     <Field icon={<BookOutlined />} label="Major" value={r.major ?? '—'} />
                     {r.supervisorName && <Field icon={<UserOutlined />} label="Supervisor" value={r.supervisorName} />}
@@ -192,10 +167,10 @@ export const AssignedStudentsTab: React.FC = () => {
           </div>
 
           {totalPages > 1 && (
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, marginTop: 20 }}>
-              <Button disabled={safePage <= 1} onClick={() => setPage(p => p - 1)}>Prev</Button>
-              <span style={{ fontSize: 12, color: c.textMuted }}>Page {safePage} of {totalPages}</span>
-              <Button disabled={safePage >= totalPages} onClick={() => setPage(p => p + 1)}>Next</Button>
+            <div className="flex justify-center items-center gap-2 mt-5">
+              <Button disabled={safePage <= 1} onClick={() => setPage(p => p - 1)} className="rounded-xl">Prev</Button>
+              <span className="text-[12px] text-slate-500">Page {safePage} of {totalPages}</span>
+              <Button disabled={safePage >= totalPages} onClick={() => setPage(p => p + 1)} className="rounded-xl">Next</Button>
             </div>
           )}
         </>
@@ -205,10 +180,10 @@ export const AssignedStudentsTab: React.FC = () => {
 };
 
 const Field: React.FC<{ icon: React.ReactNode; label: string; value: string }> = ({ icon, label, value }) => (
-  <div style={{ padding: '8px 10px', background: c.bgLight, borderRadius: c.radiusSm }}>
-    <div style={{ fontSize: 10, fontWeight: 700, color: c.textMuted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 4 }}>
+  <div className="px-2.5 py-2 bg-slate-50 rounded-lg">
+    <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 flex items-center gap-1">
       {icon} {label}
     </div>
-    <div style={{ fontSize: 12, fontWeight: 600, color: c.text, wordBreak: 'break-word' }}>{value}</div>
+    <div className="text-[12px] font-semibold text-slate-900 break-words">{value}</div>
   </div>
 );

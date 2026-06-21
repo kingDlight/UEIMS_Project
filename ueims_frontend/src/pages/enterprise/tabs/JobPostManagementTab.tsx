@@ -20,7 +20,6 @@ import {
 import dayjs, { Dayjs } from 'dayjs';
 import { JobPostService } from '@/services/JobPostService';
 import { api } from '@/services/api';
-import { c } from '../constants';
 
 // ============================================================
 // TYPES
@@ -49,33 +48,19 @@ interface JobPost {
 // ============================================================
 // HELPERS
 // ============================================================
-function hexToRgba(hex: string, alpha: number): string {
-  const h = hex.replace('#', '');
-  const r = Number.parseInt(h.substring(0, 2), 16);
-  const g = Number.parseInt(h.substring(2, 4), 16);
-  const b = Number.parseInt(h.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-}
-
-const STATUS_COLORS: Record<string, { color: string; bg: string; label: string }> = {
-  OPEN: { color: c.success, bg: hexToRgba(c.success, 0.1), label: 'Open' },
-  CLOSED: { color: c.error, bg: hexToRgba(c.error, 0.1), label: 'Closed' },
-  PENDING: { color: c.warning, bg: hexToRgba(c.warning, 0.1), label: 'Pending' },
-  DRAFT: { color: c.textMuted, bg: hexToRgba(c.textMuted, 0.1), label: 'Draft' },
+const STATUS_COLORS: Record<string, { color: string; bg: string; borderColor: string; label: string }> = {
+  OPEN: { color: 'text-emerald-600', bg: 'bg-emerald-500/10', borderColor: 'border-emerald-500/30', label: 'Open' },
+  CLOSED: { color: 'text-red-500', bg: 'bg-red-500/10', borderColor: 'border-red-500/30', label: 'Closed' },
+  PENDING: { color: 'text-amber-500', bg: 'bg-amber-500/10', borderColor: 'border-amber-500/30', label: 'Pending' },
+  DRAFT: { color: 'text-slate-500', bg: 'bg-slate-500/10', borderColor: 'border-slate-500/30', label: 'Draft' },
 };
 
 const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
-  const { message } = App.useApp();
   const cfg = STATUS_COLORS[status] || STATUS_COLORS.DRAFT;
   return (
-    <span style={{
-      display: 'inline-flex', alignItems: 'center', gap: 4,
-      padding: '3px 10px', borderRadius: c.radiusFull,
-      background: cfg.bg, color: cfg.color,
-      fontSize: 11, fontWeight: 700,
-      textTransform: 'uppercase', letterSpacing: '0.05em',
-      border: `1px solid ${hexToRgba(cfg.color, 0.25)}`,
-    }}>{cfg.label}</span>
+    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider border ${cfg.bg} ${cfg.color} ${cfg.borderColor}`}>
+      {cfg.label}
+    </span>
   );
 };
 
@@ -235,10 +220,10 @@ export const JobPostManagementTab: React.FC = () => {
 
   const daysUntil = (deadline: string) => {
     const diff = dayjs(deadline).diff(dayjs(), 'day');
-    if (diff < 0) return { text: 'Expired', color: c.error };
-    if (diff === 0) return { text: 'Due today', color: c.warning };
-    if (diff <= 3) return { text: `${diff}d left`, color: c.warning };
-    return { text: `${diff}d left`, color: c.textMuted };
+    if (diff < 0) return { text: 'Expired', color: 'text-red-500', bg: 'bg-red-50' };
+    if (diff === 0) return { text: 'Due today', color: 'text-amber-500', bg: 'bg-amber-50' };
+    if (diff <= 3) return { text: `${diff}d left`, color: 'text-amber-500', bg: 'bg-amber-50' };
+    return { text: `${diff}d left`, color: 'text-slate-500', bg: 'bg-slate-50' };
   };
 
   // ========== FILTER + PAGINATE (client-side, mirrors JobBoardTab) ==========
@@ -261,39 +246,33 @@ export const JobPostManagementTab: React.FC = () => {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}>
+      <div className="flex justify-center items-center h-[400px]">
         <Spin size="large" />
       </div>
     );
   }
 
   return (
-    <div style={{ padding: '0 0 40px', fontFamily: 'Inter, sans-serif' }}>
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px' }}>
+    <div className="pb-10 font-sans">
+      <div className="max-w-[1200px] mx-auto px-6">
         {/* HEADER */}
         <motion.div
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}
+          className="flex items-center justify-between mb-5"
         >
           <div>
-            <h2 style={{ fontSize: 20, fontWeight: 800, color: c.text, margin: '0 0 4px' }}>Recruitment Posts</h2>
-            <p style={{ fontSize: 13, color: c.textMuted, margin: 0 }}>Manage your job postings — create, edit, and toggle visibility</p>
+            <h2 className="text-xl font-extrabold text-slate-900 m-0 mb-1">Recruitment Posts</h2>
+            <p className="text-[13px] text-slate-500 m-0">Manage your job postings — create, edit, and toggle visibility</p>
           </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <Button icon={<ReloadOutlined />} onClick={fetchPosts} style={{ borderRadius: c.radiusMd }}>Refresh</Button>
+          <div className="flex gap-2">
+            <Button icon={<ReloadOutlined />} onClick={fetchPosts} className="rounded-xl">Refresh</Button>
             <motion.button
               whileHover={{ y: -1 }}
               whileTap={{ scale: 0.98 }}
               onClick={openCreate}
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 6,
-                padding: '10px 18px', borderRadius: c.radiusMd,
-                background: c.brand, color: '#fff', fontWeight: 700, fontSize: 13,
-                border: 'none', cursor: 'pointer', boxShadow: c.shadowBrand,
-                fontFamily: 'Inter, sans-serif',
-              }}
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#E67E22] text-white font-bold text-[13px] border-none cursor-pointer shadow-[0_8px_22px_rgba(230,126,34,0.22)] font-sans"
             >
               <PlusOutlined /> Create New Post
             </motion.button>
@@ -302,22 +281,18 @@ export const JobPostManagementTab: React.FC = () => {
 
         {/* SEARCH + STATUS FILTER */}
         {posts.length > 0 && (
-          <div style={{
-            display: 'flex', gap: 12, marginBottom: 20, alignItems: 'center',
-            background: c.surface, padding: 12, borderRadius: c.radiusMd,
-            border: `1px solid ${c.border}`,
-          }}>
+          <div className="flex gap-3 mb-5 items-center bg-white p-3 rounded-xl border border-slate-200">
             <Input
               placeholder="Search by title or description..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               allowClear
-              style={{ flex: 1, borderRadius: c.radiusMd }}
+              className="flex-1 rounded-xl"
             />
             <Select
               value={statusFilter}
               onChange={setStatusFilter}
-              style={{ width: 160 }}
+              className="w-40"
               options={[
                 { value: 'ALL', label: 'All statuses' },
                 { value: 'OPEN', label: 'Open' },
@@ -326,7 +301,7 @@ export const JobPostManagementTab: React.FC = () => {
                 { value: 'DRAFT', label: 'Draft' },
               ]}
             />
-            <span style={{ fontSize: 12, color: c.textMuted, whiteSpace: 'nowrap' }}>
+            <span className="text-xs text-slate-500 whitespace-nowrap">
               {filteredPosts.length} of {posts.length}
             </span>
           </div>
@@ -336,14 +311,14 @@ export const JobPostManagementTab: React.FC = () => {
         {posts.length === 0 ? (
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-            style={{ background: c.surface, borderRadius: c.radiusLg, border: `1px solid ${c.border}`, padding: 60 }}
+            className="bg-white rounded-2xl border border-slate-200 p-16 text-center"
           >
             <Empty
-              image={<FileTextOutlined style={{ fontSize: 48, color: c.textMuted }} />}
+              image={<FileTextOutlined className="text-[48px] text-slate-400" />}
               description={
                 <div>
-                  <div style={{ fontSize: 15, fontWeight: 600, color: c.text, marginBottom: 4 }}>No job posts yet</div>
-                  <div style={{ fontSize: 13, color: c.textMuted }}>Click "Create New Post" to publish your first recruitment</div>
+                  <div className="text-[15px] font-semibold text-slate-900 mb-1">No job posts yet</div>
+                  <div className="text-[13px] text-slate-500">Click "Create New Post" to publish your first recruitment</div>
                 </div>
               }
             />
@@ -351,21 +326,21 @@ export const JobPostManagementTab: React.FC = () => {
         ) : filteredPosts.length === 0 ? (
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-            style={{ background: c.surface, borderRadius: c.radiusLg, border: `1px solid ${c.border}`, padding: 60 }}
+            className="bg-white rounded-2xl border border-slate-200 p-16 text-center"
           >
             <Empty
-              image={<FileTextOutlined style={{ fontSize: 48, color: c.textMuted }} />}
+              image={<FileTextOutlined className="text-[48px] text-slate-400" />}
               description={
                 <div>
-                  <div style={{ fontSize: 15, fontWeight: 600, color: c.text, marginBottom: 4 }}>No matching posts</div>
-                  <div style={{ fontSize: 13, color: c.textMuted }}>Try changing your search or status filter</div>
+                  <div className="text-[15px] font-semibold text-slate-900 mb-1">No matching posts</div>
+                  <div className="text-[13px] text-slate-500">Try changing your search or status filter</div>
                 </div>
               }
             />
           </motion.div>
         ) : (
           <>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: 16 }}>
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(360px,1fr))] gap-4">
               <AnimatePresence>
                 {paginatedPosts.map((post, i) => {
                 const deadline = daysUntil(post.applicationDeadline);
@@ -376,48 +351,44 @@ export const JobPostManagementTab: React.FC = () => {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ duration: 0.3, delay: i * 0.05 }}
-                    style={{
-                      background: c.surface, borderRadius: c.radiusLg,
-                      border: `1px solid ${c.border}`, boxShadow: c.shadowSm,
-                      overflow: 'hidden', display: 'flex', flexDirection: 'column',
-                    }}
+                    className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col"
                   >
                     {/* Card header */}
-                    <div style={{ padding: '16px 18px', borderBottom: `1px solid ${c.border}` }}>
-                      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10, marginBottom: 10 }}>
-                        <h3 style={{ fontSize: 15, fontWeight: 700, color: c.text, margin: 0, lineHeight: 1.3, flex: 1 }}>
+                    <div className="p-4 px-4.5 border-b border-slate-200">
+                      <div className="flex items-start justify-between gap-2.5 mb-2.5">
+                        <h3 className="text-[15px] font-bold text-slate-900 m-0 leading-tight flex-1">
                           {post.title}
                         </h3>
                         <StatusBadge status={post.status} />
                       </div>
-                      <div style={{ fontSize: 12, color: c.textMuted, lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                      <div className="text-xs text-slate-500 leading-relaxed line-clamp-2">
                         {post.description}
                       </div>
                     </div>
 
                     {/* Card meta */}
-                    <div style={{ padding: '12px 18px', display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: c.textSecondary }}>
-                        <TeamOutlined style={{ color: c.brand }} />
+                    <div className="p-3 px-4.5 flex flex-col gap-2 flex-1">
+                      <div className="flex items-center gap-2 text-xs text-slate-600">
+                        <TeamOutlined className="text-[#E67E22]" />
                         <span><strong>{post.positionsCount}</strong> position{post.positionsCount > 1 ? 's' : ''}</span>
                       </div>
                       {post.semester && (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: c.textSecondary }}>
-                          <EnvironmentOutlined style={{ color: c.brand }} />
+                        <div className="flex items-center gap-2 text-xs text-slate-600">
+                          <EnvironmentOutlined className="text-[#E67E22]" />
                           <span>{post.semester.name || post.semester.semesterCode}</span>
                         </div>
                       )}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: c.textSecondary }}>
-                        <CalendarOutlined style={{ color: c.brand }} />
+                      <div className="flex items-center gap-2 text-xs text-slate-600">
+                        <CalendarOutlined className="text-[#E67E22]" />
                         <span>Deadline: {dayjs(post.applicationDeadline).format('MMM D, YYYY')}</span>
-                        <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 700, color: deadline.color, padding: '2px 8px', borderRadius: c.radiusFull, background: hexToRgba(deadline.color, 0.1) }}>
+                        <span className={`ml-auto text-[11px] font-bold px-2 py-0.5 rounded-full ${deadline.color} ${deadline.bg}`}>
                           {deadline.text}
                         </span>
                       </div>
                       {post.requiredSkills && (
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 4 }}>
+                        <div className="flex flex-wrap gap-1 mt-1">
                           {post.requiredSkills.split(',').slice(0, 4).map((s, idx) => (
-                            <span key={idx} style={{ padding: '2px 8px', borderRadius: c.radiusFull, background: c.brandSubtle, color: c.brand, fontSize: 11, fontWeight: 600 }}>
+                            <span key={idx} className="px-2 py-0.5 rounded-full bg-[#E67E22]/5 text-[#E67E22] text-[11px] font-semibold">
                               {s.trim()}
                             </span>
                           ))}
@@ -426,24 +397,22 @@ export const JobPostManagementTab: React.FC = () => {
                     </div>
 
                     {/* Card actions */}
-                    <div style={{ padding: '12px 18px', borderTop: `1px solid ${c.border}`, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                      <Button size="small" icon={<EyeOutlined />} onClick={() => setViewingPost(post)} style={{ borderRadius: c.radiusMd, flex: 1 }}>
+                    <div className="p-3 px-4.5 border-t border-slate-200 flex gap-2 flex-wrap">
+                      <Button size="small" icon={<EyeOutlined />} onClick={() => setViewingPost(post)} className="rounded-xl flex-1">
                         View
                       </Button>
-                      <Button size="small" icon={<EditOutlined />} onClick={() => openEdit(post)} style={{ borderRadius: c.radiusMd, flex: 1 }}>
+                      <Button size="small" icon={<EditOutlined />} onClick={() => openEdit(post)} className="rounded-xl flex-1">
                         Edit
                       </Button>
                       <Button
                         size="small"
                         icon={post.status === 'OPEN' ? <PoweroffOutlined /> : <ReloadOutlined />}
                         onClick={() => requestToggle(post)}
-                        style={{
-                          borderRadius: c.radiusMd, flex: 1,
-                          color: post.status === 'OPEN' ? c.error : c.success,
-                          borderColor: post.status === 'OPEN' ? hexToRgba(c.error, 0.3) : hexToRgba(c.success, 0.3),
-                          background: post.status === 'OPEN' ? c.errorMuted : c.successMuted,
-                          fontWeight: 700,
-                        }}
+                        className={`rounded-xl flex-1 font-bold ${
+                          post.status === 'OPEN'
+                            ? 'text-red-500 border-red-500/30 bg-red-50 hover:bg-red-100 hover:border-red-500/50'
+                            : 'text-emerald-500 border-emerald-500/30 bg-emerald-50 hover:bg-emerald-100 hover:border-emerald-500/50'
+                        }`}
                       >
                         {post.status === 'OPEN' ? 'Close' : 'Reopen'}
                       </Button>
@@ -451,41 +420,41 @@ export const JobPostManagementTab: React.FC = () => {
                   </motion.div>
                 );
               })}
-            </AnimatePresence>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 24 }}>
-            <Pagination
-              current={currentPage}
-              pageSize={pageSize}
-              total={filteredPosts.length}
-              onChange={setCurrentPage}
-              showSizeChanger={false}
-              showTotal={(total, range) => `${range[0]}-${range[1]} of ${total} posts`}
-            />
-          </div>
-        </>
-      )}
+              </AnimatePresence>
+            </div>
+            <div className="flex justify-center mt-6">
+              <Pagination
+                current={currentPage}
+                pageSize={pageSize}
+                total={filteredPosts.length}
+                onChange={setCurrentPage}
+                showSizeChanger={false}
+                showTotal={(total, range) => `${range[0]}-${range[1]} of ${total} posts`}
+              />
+            </div>
+          </>
+        )}
       </div>
 
       {/* CREATE / EDIT MODAL */}
       <Modal
         title={
-          <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, color: c.text, fontSize: 16 }}>
-            {editingPost ? <><EditOutlined style={{ marginRight: 8, color: c.brand }} />Edit Job Post</> : <><PlusOutlined style={{ marginRight: 8, color: c.brand }} />Create New Job Post</>}
+          <div className="font-sans font-bold text-slate-900 text-base flex items-center">
+            {editingPost ? <><EditOutlined className="mr-2 text-[#E67E22]" />Edit Job Post</> : <><PlusOutlined className="mr-2 text-[#E67E22]" />Create New Job Post</>}
           </div>
         }
         open={formOpen}
         onCancel={() => setFormOpen(false)}
         width={720}
         footer={null}
-        styles={{ content: { borderRadius: c.radiusLg, padding: '24px 28px' }, header: { borderBottom: 'none', marginBottom: 16, padding: 0 }, body: { padding: 0 } }}
+        styles={{ content: { borderRadius: 16, padding: '24px 28px' }, header: { borderBottom: 'none', marginBottom: 16, padding: 0 }, body: { padding: 0 } }}
       >
         <Form form={form} layout="vertical" requiredMark="optional">
           <Form.Item name="title" label="Job Title" rules={[{ required: true, message: 'Job title is required' }]}>
             <Input placeholder="Frontend Developer Intern" maxLength={255} />
           </Form.Item>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+          <div className="grid grid-cols-2 gap-3">
             <Form.Item name="semesterId" label="Semester" rules={[{ required: true, message: 'Semester is required' }]}>
               <Select placeholder="Select a semester" disabled={!!editingPost}>
                 {semesters.map(s => (
@@ -496,12 +465,12 @@ export const JobPostManagementTab: React.FC = () => {
               </Select>
             </Form.Item>
             <Form.Item name="positionsCount" label="Positions" rules={[{ required: true, message: 'Number of positions is required' }]}>
-              <InputNumber min={1} max={100} style={{ width: '100%' }} />
+              <InputNumber min={1} max={100} className="w-full" />
             </Form.Item>
-            <div style={{ gridColumn: '1 / -1' }}>
+            <div className="col-span-full">
               <Form.Item name="applicationDeadline" label="Application Deadline" rules={[{ required: true, message: 'Deadline is required' }]}>
                 <DatePicker
-                  style={{ width: '100%' }}
+                  className="w-full"
                   disabledDate={(current) => current && current < dayjs().startOf('day')}
                   format="YYYY-MM-DD"
                 />
@@ -525,13 +494,13 @@ export const JobPostManagementTab: React.FC = () => {
             <Input.TextArea rows={2} placeholder="Stipend, mentorship, certificates..." />
           </Form.Item>
 
-          <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 8, paddingTop: 16, borderTop: `1px solid ${c.border}` }}>
-            <Button onClick={() => setFormOpen(false)} style={{ borderRadius: c.radiusMd }}>Cancel</Button>
+          <div className="flex gap-2.5 justify-end mt-2 pt-4 border-t border-slate-200">
+            <Button onClick={() => setFormOpen(false)} className="rounded-xl">Cancel</Button>
             <Button
               type="primary"
               onClick={handleSave}
               loading={saving}
-              style={{ background: c.brand, borderColor: c.brand, borderRadius: c.radiusMd, fontWeight: 700 }}
+              className="bg-[#E67E22] border-[#E67E22] rounded-xl font-bold hover:bg-[#D35400] hover:border-[#D35400]"
             >
               {editingPost ? 'Save Changes' : 'Submit'}
             </Button>
@@ -541,27 +510,27 @@ export const JobPostManagementTab: React.FC = () => {
 
       {/* VIEW DETAIL MODAL */}
       <Modal
-        title={<div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, color: c.text, fontSize: 16 }}>Job Post Details</div>}
+        title={<div className="font-sans font-bold text-slate-900 text-base">Job Post Details</div>}
         open={!!viewingPost}
         onCancel={() => setViewingPost(null)}
         footer={null}
         width={680}
-        styles={{ content: { borderRadius: c.radiusLg, padding: '24px 28px' }, header: { borderBottom: 'none', marginBottom: 16, padding: 0 }, body: { padding: 0 } }}
+        styles={{ content: { borderRadius: 16, padding: '24px 28px' }, header: { borderBottom: 'none', marginBottom: 16, padding: 0 }, body: { padding: 0 } }}
       >
         {viewingPost && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <h2 style={{ fontSize: 20, fontWeight: 800, color: c.text, margin: 0, flex: 1 }}>{viewingPost.title}</h2>
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-3">
+              <h2 className="text-xl font-extrabold text-slate-900 m-0 flex-1">{viewingPost.title}</h2>
               <StatusBadge status={viewingPost.status} />
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-              <div style={{ padding: '10px 12px', borderRadius: c.radiusMd, background: c.bgLight, border: `1px solid ${c.border}` }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: c.textMuted, textTransform: 'uppercase' }}>Positions</div>
-                <div style={{ fontSize: 14, fontWeight: 600, color: c.text }}>{viewingPost.positionsCount}</div>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Positions</div>
+                <div className="text-[14px] font-semibold text-slate-900">{viewingPost.positionsCount}</div>
               </div>
-              <div style={{ padding: '10px 12px', borderRadius: c.radiusMd, background: c.bgLight, border: `1px solid ${c.border}` }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: c.textMuted, textTransform: 'uppercase' }}>Deadline</div>
-                <div style={{ fontSize: 14, fontWeight: 600, color: c.text }}>{dayjs(viewingPost.applicationDeadline).format('MMM D, YYYY')}</div>
+              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Deadline</div>
+                <div className="text-[14px] font-semibold text-slate-900">{dayjs(viewingPost.applicationDeadline).format('MMM D, YYYY')}</div>
               </div>
             </div>
             {[
@@ -571,8 +540,8 @@ export const JobPostManagementTab: React.FC = () => {
               { label: 'Required Skills', value: viewingPost.requiredSkills },
             ].map(s => s.value && (
               <div key={s.label}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: c.textMuted, textTransform: 'uppercase', marginBottom: 6 }}>{s.label}</div>
-                <div style={{ padding: '12px 14px', borderRadius: c.radiusMd, background: c.bgLight, border: `1px solid ${c.border}`, fontSize: 13, color: c.text, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{s.value}</div>
+                <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">{s.label}</div>
+                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-[13px] text-slate-900 leading-relaxed whitespace-pre-wrap">{s.value}</div>
               </div>
             ))}
           </div>
@@ -586,29 +555,24 @@ export const JobPostManagementTab: React.FC = () => {
         footer={null}
         width={420}
         centered
-        styles={{ content: { borderRadius: c.radiusLg, padding: '24px 28px' }, header: { display: 'none' }, body: { padding: 0 } }}
+        styles={{ content: { borderRadius: 16, padding: '24px 28px' }, header: { display: 'none' }, body: { padding: 0 } }}
       >
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 16 }}>
-          <div style={{
-            width: 64, height: 64, borderRadius: '50%',
-            background: confirmToggle.nextStatus === 'CLOSED' ? c.errorMuted : c.successMuted,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: confirmToggle.nextStatus === 'CLOSED' ? c.error : c.success,
-          }}>
-            <WarningOutlined style={{ fontSize: 28 }} />
+        <div className="flex flex-col items-center text-center gap-4">
+          <div className={`w-16 h-16 rounded-full flex items-center justify-center text-[28px] ${confirmToggle.nextStatus === 'CLOSED' ? 'bg-red-50 text-red-500' : 'bg-emerald-50 text-emerald-500'}`}>
+            <WarningOutlined />
           </div>
           <div>
-            <h3 style={{ fontSize: 17, fontWeight: 700, color: c.text, margin: '0 0 6px' }}>
+            <h3 className="text-[17px] font-bold text-slate-900 m-0 mb-1.5">
               {confirmToggle.nextStatus === 'CLOSED' ? 'Close this job posting?' : 'Reopen this job posting?'}
             </h3>
-            <p style={{ fontSize: 13, color: c.textMuted, margin: 0, lineHeight: 1.5 }}>
+            <p className="text-[13px] text-slate-500 m-0 leading-relaxed">
               {confirmToggle.nextStatus === 'CLOSED'
                 ? 'Once closed, students will no longer see this post and cannot submit new applications.'
                 : 'Reopening will make this post visible to students again and allow new applications.'}
             </p>
           </div>
-          <div style={{ display: 'flex', gap: 10, width: '100%' }}>
-            <Button block onClick={() => setConfirmToggle({ open: false, post: null, nextStatus: 'OPEN' })} style={{ borderRadius: c.radiusMd }}>
+          <div className="flex gap-2.5 w-full">
+            <Button block onClick={() => setConfirmToggle({ open: false, post: null, nextStatus: 'OPEN' })} className="rounded-xl">
               Cancel
             </Button>
             <Button
@@ -617,11 +581,7 @@ export const JobPostManagementTab: React.FC = () => {
               danger={confirmToggle.nextStatus === 'CLOSED'}
               loading={toggling}
               onClick={confirmToggleAction}
-              style={{
-                borderRadius: c.radiusMd, fontWeight: 700,
-                background: confirmToggle.nextStatus === 'CLOSED' ? c.error : c.success,
-                borderColor: confirmToggle.nextStatus === 'CLOSED' ? c.error : c.success,
-              }}
+              className={`rounded-xl font-bold ${confirmToggle.nextStatus === 'CLOSED' ? 'bg-red-500 border-red-500 hover:bg-red-600' : 'bg-emerald-500 border-emerald-500 hover:bg-emerald-600'}`}
             >
               Yes, {confirmToggle.nextStatus === 'CLOSED' ? 'Close' : 'Reopen'}
             </Button>

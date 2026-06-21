@@ -9,7 +9,6 @@ import {
 import { ApplicationService } from '@/services/ApplicationService';
 import { JobPostService } from '@/services/JobPostService';
 import { EnterpriseAssignmentService } from '@/services/EnterpriseAssignmentService';
-import { c } from '../constants';
 
 type Application = {
   applicationId: string;
@@ -35,49 +34,43 @@ type Assignment = {
   status?: string;
 };
 
-const Label: React.FC<{ children: React.ReactNode; style?: React.CSSProperties }> = ({ children, style }) => (
-  <span style={{
-    fontSize: 11, fontWeight: 600, textTransform: 'uppercase',
-    letterSpacing: '0.06em', color: c.textMuted, ...style,
-  }}>
+const Label: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = '' }) => (
+  <span className={`text-[11px] font-semibold uppercase tracking-wider text-slate-500 ${className}`}>
     {children}
   </span>
 );
 
-const Card: React.FC<{ children: React.ReactNode; style?: React.CSSProperties }> = ({ children, style }) => (
-  <div style={{
-    background: '#fff', borderRadius: c.radiusLg, border: `1px solid ${c.border}`,
-    boxShadow: c.shadowSm, padding: 20, ...style,
-  }}>
+const Card: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = '' }) => (
+  <div className={`bg-white rounded-2xl border border-slate-200 shadow-sm p-5 ${className}`}>
     {children}
   </div>
 );
 
-const Bar: React.FC<{ value: number; max: number; color: string; height?: number }> = ({ value, max, color, height = 8 }) => {
+const Bar: React.FC<{ value: number; max: number; colorClass: string; heightClass?: string }> = ({ value, max, colorClass, heightClass = 'h-2' }) => {
   const pct = max === 0 ? 0 : (value / max) * 100;
   return (
-    <div style={{ width: '100%', height, background: c.borderSubtle, borderRadius: c.radiusFull, overflow: 'hidden' }}>
+    <div className={`w-full ${heightClass} bg-slate-100 rounded-full overflow-hidden`}>
       <motion.div
         initial={{ width: 0 }}
         animate={{ width: `${pct}%` }}
         transition={{ duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
-        style={{ height: '100%', background: color, borderRadius: c.radiusFull }}
+        className={`h-full rounded-full ${colorClass}`}
       />
     </div>
   );
 };
 
 const StatusPill: React.FC<{ status: string; count: number }> = ({ status, count }) => {
-  const map: Record<string, { color: string; label: string; icon: React.ReactNode }> = {
-    PENDING: { color: c.warning, label: 'Pending', icon: <Clock size={12} /> },
-    INTERVIEW_SCHEDULED: { color: c.info, label: 'Interviewing', icon: <Calendar size={12} /> },
-    ACCEPTED: { color: c.success, label: 'Accepted', icon: <CheckCircle2 size={12} /> },
-    REJECTED: { color: c.error, label: 'Rejected', icon: <XCircle size={12} /> },
+  const map: Record<string, { colorClass: string; bgClass: string; borderClass: string; label: string; icon: React.ReactNode }> = {
+    PENDING: { colorClass: 'text-amber-500', bgClass: 'bg-amber-50', borderClass: 'border-amber-500/20', label: 'Pending', icon: <Clock size={12} /> },
+    INTERVIEW_SCHEDULED: { colorClass: 'text-blue-500', bgClass: 'bg-blue-50', borderClass: 'border-blue-500/20', label: 'Interviewing', icon: <Calendar size={12} /> },
+    ACCEPTED: { colorClass: 'text-emerald-500', bgClass: 'bg-emerald-50', borderClass: 'border-emerald-500/20', label: 'Accepted', icon: <CheckCircle2 size={12} /> },
+    REJECTED: { colorClass: 'text-red-500', bgClass: 'bg-red-50', borderClass: 'border-red-500/20', label: 'Rejected', icon: <XCircle size={12} /> },
   };
-  const s = map[status] ?? { color: c.textMuted, label: status, icon: <Clock size={12} /> };
+  const s = map[status] ?? { colorClass: 'text-slate-500', bgClass: 'bg-slate-50', borderClass: 'border-slate-500/20', label: status, icon: <Clock size={12} /> };
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '3px 10px', borderRadius: c.radiusFull, background: `${s.color}14`, border: `1px solid ${s.color}33`, color: s.color, fontSize: 11, fontWeight: 700 }}>
-      {s.icon} {s.label}: <span style={{ fontWeight: 800 }}>{count}</span>
+    <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border ${s.bgClass} ${s.borderClass} ${s.colorClass} text-[11px] font-bold`}>
+      {s.icon} {s.label}: <span className="font-extrabold">{count}</span>
     </div>
   );
 };
@@ -179,46 +172,41 @@ const AnalyticsTab: React.FC = () => {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}>
+      <div className="flex justify-center items-center h-[400px]">
         <Spin size="large" />
       </div>
     );
   }
 
   return (
-    <div style={{ maxWidth: 1200, margin: '0 auto', padding: '24px', fontFamily: 'Inter, sans-serif' }}>
+    <div className="max-w-[1200px] mx-auto px-6 py-6 font-sans">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35 }}
-        style={{ marginBottom: 24, display: 'flex', alignItems: 'center', gap: 12 }}
+        className="mb-6 flex items-center gap-3"
       >
-        <div style={{
-          width: 44, height: 44, borderRadius: c.radiusMd,
-          background: `linear-gradient(135deg, ${c.brand}, ${c.brandHover})`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff',
-          boxShadow: c.shadowBrand
-        }}>
+        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#E67E22] to-[#D68910] flex items-center justify-center text-white shadow-[0_8px_22px_rgba(230,126,34,0.22)]">
           <BarChart3 size={20} />
         </div>
         <div>
-          <div style={{ fontSize: 22, fontWeight: 800, color: c.text, lineHeight: 1.1 }}>
+          <div className="text-[22px] font-extrabold text-slate-900 leading-[1.1]">
             {t('analytics.title', 'Recruitment Analytics')}
           </div>
-          <div style={{ fontSize: 12.5, color: c.textMuted, marginTop: 4 }}>
+          <div className="text-[12.5px] text-slate-500 mt-1">
             {t('analytics.subtitle', 'Insights into your hiring pipeline and student engagement')}
           </div>
         </div>
       </motion.div>
 
       {/* KPI Row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 20 }}>
+      <div className="grid grid-cols-4 gap-4 mb-5">
         {[
-          { label: 'Total Applicants', value: stats.total, color: c.info, icon: <Users size={18} /> },
-          { label: 'Active Job Posts', value: stats.activePosts, color: c.brand, icon: <Briefcase size={18} /> },
-          { label: 'Pass Rate', value: `${stats.passRate}%`, color: c.success, icon: <TrendingUp size={18} /> },
-          { label: 'Assigned Students', value: assignments.length, color: '#8B5CF6', icon: <CheckCircle2 size={18} /> },
+          { label: 'Total Applicants', value: stats.total, colorClass: 'text-blue-500', bgClass: 'bg-blue-50', icon: <Users size={18} /> },
+          { label: 'Active Job Posts', value: stats.activePosts, colorClass: 'text-[#E67E22]', bgClass: 'bg-[#E67E22]/10', icon: <Briefcase size={18} /> },
+          { label: 'Pass Rate', value: `${stats.passRate}%`, colorClass: 'text-emerald-500', bgClass: 'bg-emerald-50', icon: <TrendingUp size={18} /> },
+          { label: 'Assigned Students', value: assignments.length, colorClass: 'text-purple-500', bgClass: 'bg-purple-50', icon: <CheckCircle2 size={18} /> },
         ].map((k, i) => (
           <motion.div
             key={k.label}
@@ -227,19 +215,15 @@ const AnalyticsTab: React.FC = () => {
             transition={{ duration: 0.4, delay: i * 0.06 }}
           >
             <Card>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-                <div style={{
-                  width: 40, height: 40, borderRadius: c.radiusMd,
-                  background: `${k.color}14`, color: k.color,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center'
-                }}>
+              <div className="flex items-center justify-between mb-3.5">
+                <div className={`w-10 h-10 rounded-xl ${k.bgClass} ${k.colorClass} flex items-center justify-center`}>
                   {k.icon}
                 </div>
-                <span style={{ fontSize: 10, fontWeight: 700, color: k.color, padding: '2px 8px', borderRadius: c.radiusFull, background: `${k.color}14` }}>
+                <span className={`text-[10px] font-bold ${k.colorClass} px-2 py-0.5 rounded-full ${k.bgClass}`}>
                   {k.label.toUpperCase()}
                 </span>
               </div>
-              <div style={{ fontSize: 30, fontWeight: 800, color: c.text, lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
+              <div className="text-[30px] font-extrabold text-slate-900 leading-none tabular-nums">
                 {k.value}
               </div>
             </Card>
@@ -248,39 +232,39 @@ const AnalyticsTab: React.FC = () => {
       </div>
 
       {/* Charts Row */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: 16, marginBottom: 20 }}>
+      <div className="grid grid-cols-[1.4fr_1fr] gap-4 mb-5">
         {/* Status Distribution */}
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.2 }}>
           <Card>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+            <div className="flex items-center justify-between mb-4">
               <Label>{t('analytics.statusDistribution', 'Status Distribution')}</Label>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, color: c.textMuted }}>
+              <span className="inline-flex items-center gap-1.5 text-[12px] text-slate-500">
                 <PieIcon size={13} /> {stats.total} total
               </span>
             </div>
             {stats.total === 0 ? (
-              <div style={{ padding: '32px 0', textAlign: 'center', color: c.textMuted, fontSize: 13 }}>
+              <div className="py-8 text-center text-slate-500 text-[13px]">
                 {t('analytics.noData', 'No application data yet')}
               </div>
             ) : (
               <>
-                <div style={{ display: 'flex', height: 14, borderRadius: c.radiusFull, overflow: 'hidden', background: c.borderSubtle, gap: 2, marginBottom: 16 }}>
+                <div className="flex h-3.5 rounded-full overflow-hidden bg-slate-100 gap-0.5 mb-4">
                   {[
-                    { label: 'Pending', value: stats.pending, color: c.warning },
-                    { label: 'Interviewing', value: stats.interviewing, color: c.info },
-                    { label: 'Accepted', value: stats.accepted, color: c.success },
-                    { label: 'Rejected', value: stats.rejected, color: c.error },
+                    { label: 'Pending', value: stats.pending, bgClass: 'bg-amber-500' },
+                    { label: 'Interviewing', value: stats.interviewing, bgClass: 'bg-blue-500' },
+                    { label: 'Accepted', value: stats.accepted, bgClass: 'bg-emerald-500' },
+                    { label: 'Rejected', value: stats.rejected, bgClass: 'bg-red-500' },
                   ].map((seg) => (
                     <motion.div
                       key={seg.label}
                       initial={{ flex: 0 }}
                       animate={{ flex: seg.value || 0.001 }}
                       transition={{ duration: 0.7, ease: [0.32, 0.72, 0, 1] }}
-                      style={{ background: seg.color, borderRadius: 2 }}
+                      className={`${seg.bgClass} rounded-[2px]`}
                     />
                   ))}
                 </div>
-                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <div className="flex gap-2 flex-wrap">
                   <StatusPill status="PENDING" count={stats.pending} />
                   <StatusPill status="INTERVIEW_SCHEDULED" count={stats.interviewing} />
                   <StatusPill status="ACCEPTED" count={stats.accepted} />
@@ -294,31 +278,27 @@ const AnalyticsTab: React.FC = () => {
         {/* Last 7 Days */}
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.3 }}>
           <Card>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+            <div className="flex items-center justify-between mb-4">
               <Label>{t('analytics.last7Days', 'New Applications (Last 7 Days)')}</Label>
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, color: c.textMuted }}>
+              <span className="inline-flex items-center gap-1.5 text-[12px] text-slate-500">
                 <TrendingUp size={13} /> {last7Days.reduce((s, d) => s + d.count, 0)} total
               </span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10, height: 140, padding: '0 4px' }}>
+            <div className="flex items-end gap-2.5 h-[140px] px-1">
               {last7Days.map((d, i) => {
                 const h = (d.count / last7Max) * 100;
                 return (
-                  <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: c.text }}>{d.count}</div>
-                    <div style={{ width: '100%', height: 110, display: 'flex', alignItems: 'flex-end' }}>
+                  <div key={i} className="flex-1 flex flex-col items-center gap-1.5">
+                    <div className="text-[11px] font-bold text-slate-900">{d.count}</div>
+                    <div className="w-full h-[110px] flex items-end">
                       <motion.div
                         initial={{ height: 0 }}
                         animate={{ height: `${Math.max(h, 3)}%` }}
                         transition={{ duration: 0.5, delay: 0.1 + i * 0.04 }}
-                        style={{
-                          width: '100%',
-                          background: d.count > 0 ? `linear-gradient(180deg, ${c.brand}, ${c.brandHover})` : c.borderSubtle,
-                          borderRadius: '6px 6px 2px 2px',
-                        }}
+                        className={`w-full rounded-t-md rounded-b-sm ${d.count > 0 ? 'bg-gradient-to-b from-[#E67E22] to-[#D68910]' : 'bg-slate-100'}`}
                       />
                     </div>
-                    <div style={{ fontSize: 10, color: c.textMuted, fontWeight: 600 }}>{d.label}</div>
+                    <div className="text-[10px] text-slate-500 font-semibold">{d.label}</div>
                   </div>
                 );
               })}
@@ -330,34 +310,34 @@ const AnalyticsTab: React.FC = () => {
       {/* Top Job Posts */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.4 }}>
         <Card>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <div className="flex items-center justify-between mb-4">
             <Label>{t('analytics.topJobPosts', 'Top Job Posts by Applicants')}</Label>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, color: c.textMuted }}>
+            <span className="inline-flex items-center gap-1.5 text-[12px] text-slate-500">
               <Briefcase size={13} /> {topJobPosts.length} posts
             </span>
           </div>
           {topJobPosts.length === 0 ? (
-            <div style={{ padding: '24px 0', textAlign: 'center', color: c.textMuted, fontSize: 13 }}>
+            <div className="py-6 text-center text-slate-500 text-[13px]">
               {t('analytics.noJobPosts', 'No job post data available yet')}
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div className="flex flex-col gap-3.5">
               {topJobPosts.map((jp, i) => {
                 const max = topJobPosts[0]?.count || 1;
                 return (
-                  <div key={jp.id} style={{ display: 'grid', gridTemplateColumns: '24px 1fr 60px 60px', gap: 12, alignItems: 'center' }}>
-                    <div style={{ fontSize: 12, fontWeight: 800, color: c.brand }}>#{i + 1}</div>
+                  <div key={jp.id} className="grid grid-cols-[24px_1fr_60px_60px] gap-3 items-center">
+                    <div className="text-[12px] font-extrabold text-[#E67E22]">#{i + 1}</div>
                     <div>
-                      <div style={{ fontSize: 13.5, fontWeight: 600, color: c.text, marginBottom: 6 }}>{jp.title}</div>
-                      <Bar value={jp.count} max={max} color={c.brand} />
+                      <div className="text-[13.5px] font-semibold text-slate-900 mb-1.5">{jp.title}</div>
+                      <Bar value={jp.count} max={max} colorClass="bg-[#E67E22]" />
                     </div>
-                    <div style={{ fontSize: 12, textAlign: 'right' }}>
-                      <div style={{ fontWeight: 800, color: c.text }}>{jp.count}</div>
-                      <div style={{ fontSize: 10, color: c.textMuted }}>applicants</div>
+                    <div className="text-[12px] text-right">
+                      <div className="font-extrabold text-slate-900">{jp.count}</div>
+                      <div className="text-[10px] text-slate-500">applicants</div>
                     </div>
-                    <div style={{ fontSize: 12, textAlign: 'right' }}>
-                      <div style={{ fontWeight: 800, color: c.success }}>{jp.accepted}</div>
-                      <div style={{ fontSize: 10, color: c.textMuted }}>accepted</div>
+                    <div className="text-[12px] text-right">
+                      <div className="font-extrabold text-emerald-500">{jp.accepted}</div>
+                      <div className="text-[10px] text-slate-500">accepted</div>
                     </div>
                   </div>
                 );
