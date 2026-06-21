@@ -13,9 +13,9 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(exclude = "user")
+@EqualsAndHashCode(callSuper = true, exclude = "user")
 @ToString(exclude = "user")
-public class PasswordResetToken {
+public class PasswordResetToken extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "token_id")
@@ -34,12 +34,4 @@ public class PasswordResetToken {
     @Column(name = "is_used", nullable = false)
     @Builder.Default
     private Boolean isUsed = false;
-
-    @Column(name = "created_at", updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
-    private LocalDateTime createdAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
 }
