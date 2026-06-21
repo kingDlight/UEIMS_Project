@@ -32,6 +32,11 @@ public class EnterpriseAssignmentResponseDTO {
     LocalDate startDate;
     LocalDate endDate;
 
+    // Supervisor info
+    String supervisorName;
+    String supervisorEmail;
+    String supervisorPhone;
+
     // Audit fields inherited from BaseEntity
     LocalDateTime createdAt;
     LocalDateTime updatedAt;

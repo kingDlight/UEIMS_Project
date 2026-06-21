@@ -96,4 +96,26 @@ export const PlacementApplicationService = {
     getOjtPlacementView: () => api.get('/ojt-placements/view'),
     manualMatch: (data: ManualMatchRequest) => api.post('/ojt-placements/manual-match', data),
     autoMatch: () => api.post('/ojt-placements/auto-match'),
+    getAssignmentById: (assignmentId: string) => api.get(`/enterprise-assignments/${assignmentId}`),
 };
+
+export interface AssignmentDetails {
+    assignmentId: string;
+    studentId: string;
+    studentName: string;
+    studentCode: string;
+    studentEmail: string;
+    major: string;
+    enterpriseId: string;
+    enterpriseName: string;
+    semesterId: string;
+    semesterCode: string;
+    status: string;
+    startDate: string;
+    endDate: string;
+    supervisorName?: string;
+    supervisorEmail?: string;
+    supervisorPhone?: string;
+    createdAt: string;
+    updatedAt: string;
+}

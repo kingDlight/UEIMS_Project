@@ -18,6 +18,9 @@ public interface EnterpriseAssignmentMapper {
     @org.mapstruct.Mapping(source = "student.studentProfile.major", target = "major")
     @org.mapstruct.Mapping(source = "enterprise.companyName", target = "enterpriseName")
     @org.mapstruct.Mapping(source = "semester.semesterCode", target = "semesterCode")
+    @org.mapstruct.Mapping(source = "supervisorName", target = "supervisorName")
+    @org.mapstruct.Mapping(source = "supervisorEmail", target = "supervisorEmail")
+    @org.mapstruct.Mapping(source = "supervisorPhone", target = "supervisorPhone")
     EnterpriseAssignmentResponseDTO toDto(EnterpriseAssignment entity);
 
     EnterpriseAssignment toEntity(EnterpriseAssignmentResponseDTO dto);
