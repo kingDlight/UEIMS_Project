@@ -20,5 +20,9 @@ public interface InterviewRepository extends JpaRepository<Interview, UUID> {
     boolean existsByEnterpriseAndTime(
             @Param("enterpriseId") UUID enterpriseId, @Param("scheduledTime") LocalDateTime scheduledTime);
 
+    @Query(
+            "SELECT i FROM Interview i JOIN i.application a JOIN a.jobPost jp JOIN jp.enterprise e WHERE e.enterpriseId = :enterpriseId")
+    List<Interview> findByEnterpriseId(@Param("enterpriseId") UUID enterpriseId);
+
     List<Interview> findByApplication_Student_UserId(UUID studentId);
 }

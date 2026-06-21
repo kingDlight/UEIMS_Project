@@ -13,7 +13,7 @@ public interface ApplicationService {
 
     List<ApplicationResponse> findMyApplications();
 
-    List<ApplicationResponse> findByEnterpriseId(UUID enterpriseId);
+    List<ApplicationResponse> findByEnterpriseId(UUID enterpriseId, String search);
 
     ApplicationResponse findById(UUID id);
 

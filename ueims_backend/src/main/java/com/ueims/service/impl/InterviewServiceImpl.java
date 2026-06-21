@@ -64,13 +64,7 @@ public class InterviewServiceImpl implements InterviewService {
             return List.of();
         }
         UUID enterpriseId = currentUser.getEnterprise().getEnterpriseId();
-        return repository.findAll().stream()
-                .filter(i -> i.getApplication() != null
-                        && i.getApplication().getJobPost() != null
-                        && i.getApplication().getJobPost().getEnterprise() != null
-                        && enterpriseId.equals(
-                                i.getApplication().getJobPost().getEnterprise().getEnterpriseId()))
-                .toList();
+        return repository.findByEnterpriseId(enterpriseId);
     }
 
     @Override
@@ -430,7 +424,7 @@ public class InterviewServiceImpl implements InterviewService {
 
     @Override
     @Transactional
-    public Interview reschedule(UUID id, LocalDateTime newTime, String reason) {
+    public Interview reschedule(UUID id, LocalDateTime newTime, String reason, String meetingLink, String location) {
         if (newTime == null) {
             throw new AppException(ErrorCode.MISSING_PARAMETER, "newTime is required");
         }
@@ -450,6 +444,8 @@ public class InterviewServiceImpl implements InterviewService {
         existing.setScheduledTime(newTime);
         existing.setStatus("RESCHEDULED");
         existing.setRescheduleReason(reason);
+        if (meetingLink != null) existing.setMeetingLink(meetingLink);
+        if (location != null) existing.setLocation(location);
         existing.setStudentConfirmed(false);
         existing.setUpdatedAt(LocalDateTime.now());
         Interview saved = repository.saveAndFlush(existing);
@@ -480,6 +476,7 @@ public class InterviewServiceImpl implements InterviewService {
                         .equals(currentUser.getEnterprise().getEnterpriseId())) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
+        
         List<LocalDateTime> slots = new ArrayList<>();
         LocalDateTime cursor = LocalDateTime.now().plusDays(1).with(LocalTime.of(9, 0));
         List<Interview> existing = findMyEnterpriseInterviews();

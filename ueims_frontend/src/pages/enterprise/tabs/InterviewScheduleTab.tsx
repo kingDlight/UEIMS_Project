@@ -86,8 +86,10 @@ export const InterviewScheduleTab: React.FC = () => {
   const [proposing, setProposing] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [applications, setApplications] = useState<any[]>([]);
+  const [fetchingOptions, setFetchingOptions] = useState(false);
   const [form] = Form.useForm();
   const [rescheduleForm] = Form.useForm();
+  const searchTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
 
   const fetchInterviews = async () => {
     try {
@@ -107,9 +109,10 @@ export const InterviewScheduleTab: React.FC = () => {
     }
   };
 
-  const fetchApplications = async () => {
+  const fetchApplications = async (search?: string) => {
     try {
-      const res = await ApplicationService.getMyEnterprise();
+      setFetchingOptions(true);
+      const res = await ApplicationService.getMyEnterprise(search);
       const data: any[] = res.data?.result ?? res.data ?? [];
       setApplications(
         (Array.isArray(data) ? data : []).filter(
@@ -118,6 +121,8 @@ export const InterviewScheduleTab: React.FC = () => {
       );
     } catch {
       setApplications([]);
+    } finally {
+      setFetchingOptions(false);
     }
   };
 
@@ -199,7 +204,9 @@ export const InterviewScheduleTab: React.FC = () => {
       await InterviewService.reschedule(
         selected.interviewId,
         (values.newTime as Dayjs).toISOString(),
-        values.reason
+        values.reason,
+        values.meetingLink,
+        values.location
       );
       message.success('Interview rescheduled. The student will be notified.');
       setRescheduleOpen(false);
@@ -370,7 +377,16 @@ export const InterviewScheduleTab: React.FC = () => {
             if (s === 'CANCELED' || s === 'CANCELLED' || s === 'COMPLETED' || s === 'RESULT_RECORDED') return null;
             return (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 20 }}>
-                <Button block icon={<EditOutlined />} onClick={() => { rescheduleForm.resetFields(); setRescheduleOpen(true); }}>
+                <Button block icon={<EditOutlined />} onClick={() => { 
+                  rescheduleForm.resetFields(); 
+                  if (selected) {
+                    rescheduleForm.setFieldsValue({
+                      location: selected.location,
+                      meetingLink: selected.meetingLink,
+                    });
+                  }
+                  setRescheduleOpen(true); 
+                }}>
                   Reschedule
                 </Button>
                 <Button block danger icon={<StopOutlined />} onClick={() => { setCancelReason(''); setCancelOpen(true); }}>
@@ -396,7 +412,16 @@ export const InterviewScheduleTab: React.FC = () => {
             <Select
               placeholder="Select a screened candidate"
               showSearch
-              optionFilterProp="label"
+              filterOption={false}
+              loading={fetchingOptions}
+              onSearch={(value) => {
+                if (searchTimeoutRef.current) {
+                  clearTimeout(searchTimeoutRef.current);
+                }
+                searchTimeoutRef.current = setTimeout(() => {
+                  fetchApplications(value);
+                }, 500);
+              }}
               options={applications.map(a => ({
                 value: a.applicationId ?? a.id,
                 label: `${a.studentName ?? 'Student'} — ${a.jobPostTitle ?? a.jobTitle ?? 'Post'}`,
@@ -476,6 +501,12 @@ export const InterviewScheduleTab: React.FC = () => {
               style={{ width: '100%' }}
               disabledDate={d => d && d.isBefore(dayjs().startOf('day'))}
             />
+          </Form.Item>
+          <Form.Item label="Location" name="location">
+            <Input placeholder="Office address (optional if online)" />
+          </Form.Item>
+          <Form.Item label="Online meeting link" name="meetingLink" rules={[{ type: 'url', message: 'Must be a valid URL', warningOnly: true }]}>
+            <Input placeholder="https://meet..." />
           </Form.Item>
           <Form.Item label="Reason (optional)" name="reason">
             <TextArea rows={2} maxLength={300} placeholder="Why are you rescheduling?" />

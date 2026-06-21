@@ -74,7 +74,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ApplicationResponse> findByEnterpriseId(UUID enterpriseId) {
+    public List<ApplicationResponse> findByEnterpriseId(UUID enterpriseId, String search) {
         User currentUser = getCurrentUser();
         UUID enterpriseUUID = enterpriseId;
         if (enterpriseUUID == null) {
@@ -84,6 +84,12 @@ public class ApplicationServiceImpl implements ApplicationService {
         }
         if (enterpriseUUID == null) {
             return List.of();
+        }
+
+        if (search != null && !search.trim().isEmpty()) {
+            return repository.searchByEnterpriseId(enterpriseUUID, search.trim().toLowerCase()).stream()
+                    .map(this::mapToResponse)
+                    .toList();
         }
         return repository.findByJobPost_Enterprise_EnterpriseIdAndDeletedAtIsNull(enterpriseUUID).stream()
                 .map(this::mapToResponse)

@@ -71,9 +71,10 @@ public class ApplicationController {
      */
     @GetMapping("/my-enterprise")
     @PreAuthorize("hasRole('ENTERPRISE') or hasRole('TRAINING_MANAGER')")
-    public ApiResponse<List<ApplicationResponse>> getMyEnterpriseApplications() {
+    public ApiResponse<List<ApplicationResponse>> getMyEnterpriseApplications(
+            @org.springframework.web.bind.annotation.RequestParam(required = false) String search) {
         return ApiResponse.<List<ApplicationResponse>>builder()
-                .result(service.findByEnterpriseId(null))
+                .result(service.findByEnterpriseId(null, search))
                 .build();
     }
 

@@ -476,7 +476,7 @@ export const EnterpriseProfileTab: React.FC = () => {
         >
           {/* Company Hero */}
           <div style={{
-            background: `linear-gradient(135deg, ${c.brand} 0%, ${c.brandHover} 100%)`,
+            background: `linear-gradient(135deg, rgb(230 126 34 / 43%)  0%, ${c.brandHover} 100%)`,
             padding: '32px 28px', color: '#fff',
             display: 'flex', alignItems: 'center', gap: 20,
           }}>
