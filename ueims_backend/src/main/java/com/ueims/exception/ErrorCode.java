@@ -102,13 +102,13 @@ public enum ErrorCode {
             10523, "Cancellation reason is required when status is set to CANCELLED (BR-23)", HttpStatus.BAD_REQUEST),
     INTERVIEW_DATE_MUST_BE_IN_FUTURE(1053, "Interview date must be in the future", HttpStatus.BAD_REQUEST),
     INTERVIEW_ELIGIBILITY_RULE(
-            1054, "Chỉ những ứng viên đã vượt qua vòng sơ loại mới được lên lịch phỏng vấn", HttpStatus.BAD_REQUEST),
-    INTERVIEW_OVERLAP(1055, "Thời gian phỏng vấn bị trùng với lịch đã có của doanh nghiệp", HttpStatus.BAD_REQUEST),
-    EVALUATION_LOCKED(1056, "Đánh giá đã bị khóa và không thể chỉnh sửa", HttpStatus.BAD_REQUEST),
-    MISSING_EVALUATION_CRITERIA(1057, "Cần phải chấm điểm đầy đủ cả 4 tiêu chí của Rubrics", HttpStatus.BAD_REQUEST),
-    INVALID_SCORE_RANGE(1058, "Điểm các tiêu chí phải nằm trong khoảng từ 0.0 đến 10.0", HttpStatus.BAD_REQUEST),
+            1054, "Only candidates who have passed the screening round can be scheduled for an interview", HttpStatus.BAD_REQUEST),
+    INTERVIEW_OVERLAP(1055, "Interview time overlaps with an existing schedule for the enterprise", HttpStatus.BAD_REQUEST),
+    EVALUATION_LOCKED(1056, "Evaluation is locked and cannot be edited", HttpStatus.BAD_REQUEST),
+    MISSING_EVALUATION_CRITERIA(1057, "All 4 criteria in the Rubrics must be graded", HttpStatus.BAD_REQUEST),
+    INVALID_SCORE_RANGE(1058, "Criteria scores must be between 0.0 and 10.0", HttpStatus.BAD_REQUEST),
     STUDENT_RESULT_ACCESS_DENIED(
-            1059, "Sinh viên chỉ được xem kết quả đánh giá khi ở học kỳ 7 trở đi", HttpStatus.FORBIDDEN),
+            1059, "Students can only view evaluation results from Semester 7 onwards", HttpStatus.FORBIDDEN),
     FEEDBACK_DUPLICATE(
             1060, "You have already submitted feedback for this enterprise in this semester", HttpStatus.BAD_REQUEST),
     FEEDBACK_RATING_INVALID(1061, "Feedback rating scores must be between 1 and 5", HttpStatus.BAD_REQUEST),
@@ -124,18 +124,18 @@ public enum ErrorCode {
 
     // Account related
     USER_PERMANENTLY_LOCKED(
-            2007, "Tài khoản của bạn đã bị khóa vĩnh viễn. Vui lòng liên hệ quản trị viên.", HttpStatus.FORBIDDEN),
-    USER_BANNED(2001, "Tài khoản của bạn đã bị khóa do nhập sai mật khẩu quá 5 lần", HttpStatus.FORBIDDEN),
-    WRONG_OLD_PASSWORD(2002, "Mật khẩu cũ không chính xác", HttpStatus.BAD_REQUEST),
-    PASSWORDS_NOT_MATCH(2003, "Mật khẩu mới và xác nhận không khớp", HttpStatus.BAD_REQUEST),
-    USER_ALREADY_HAS_ROLE(2004, "Người dùng đã có vai trò. Chỉ được gán một vai trò duy nhất.", HttpStatus.BAD_REQUEST),
+            2007, "Your account has been permanently locked. Please contact the administrator.", HttpStatus.FORBIDDEN),
+    USER_BANNED(2001, "Your account has been locked due to entering the wrong password 5 times", HttpStatus.FORBIDDEN),
+    WRONG_OLD_PASSWORD(2002, "Incorrect old password", HttpStatus.BAD_REQUEST),
+    PASSWORDS_NOT_MATCH(2003, "New password and confirmation password do not match", HttpStatus.BAD_REQUEST),
+    USER_ALREADY_HAS_ROLE(2004, "User already has a role. Only one role can be assigned.", HttpStatus.BAD_REQUEST),
     ACCOUNT_COLLISION(
             2005,
-            "Tài khoản Google trùng với tài khoản nội bộ cùng email. Vui lòng đăng nhập bằng email/mật khẩu hoặc liên kết tài khoản.",
+            "Google account collides with an internal account using the same email. Please login with email/password or link your account.",
             HttpStatus.CONFLICT),
     GOOGLE_CLIENT_ID_NOT_CONFIGURED(
             2006,
-            "Google client ID chưa được cấu hình. Vui lòng thiết lập GOOGLE_CLIENT_ID.",
+            "Google client ID is not configured. Please set up GOOGLE_CLIENT_ID.",
             HttpStatus.INTERNAL_SERVER_ERROR),
 
     // JWT / Auth related
@@ -184,7 +184,7 @@ public enum ErrorCode {
             1089, "No APPROVED enterprise is available to match this student", HttpStatus.BAD_REQUEST),
     GPA_BELOW_AUTO_MATCH_THRESHOLD(1090, "Student GPA is below the auto-match threshold (7.0)", HttpStatus.BAD_REQUEST),
     SEMESTER_NAME_INVALID(1091, "Semester name must be at least {min} characters", HttpStatus.BAD_REQUEST),
-    SEMESTER_NAME_TOO_LONG(1092, "Tên học kỳ không được vượt quá {max} ký tự", HttpStatus.BAD_REQUEST),
+    SEMESTER_NAME_TOO_LONG(1092, "Semester name must not exceed {max} characters", HttpStatus.BAD_REQUEST),
     ENTERPRISE_NAME_INVALID_LENGTH(1093, "Enterprise name must not exceed {max} characters", HttpStatus.BAD_REQUEST),
     TAX_CODE_INVALID_LENGTH(1094, "Tax code must not exceed {max} characters", HttpStatus.BAD_REQUEST),
     WEBSITE_INVALID_LENGTH(1095, "Website URL must not exceed {max} characters", HttpStatus.BAD_REQUEST),
