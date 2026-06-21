@@ -49,7 +49,7 @@ export const LoginPage: React.FC = () => {
   useEffect(() => {
     if (isAuthenticated && user) {
       const redirectPath = getRedirectPath(user.roles || []);
-      navigate(redirectPath);
+      navigate(redirectPath, { replace: true });
     }
   }, [isAuthenticated, user, navigate]);
 
@@ -65,7 +65,7 @@ export const LoginPage: React.FC = () => {
       if (result.mustChangePassword) {
         loginWithTokens(result.accessToken, result.refreshToken);
         message.warning(t('auth.mustChangePassword', 'You must change your password before continuing!'));
-        navigate('/change-password');
+        navigate('/change-password', { replace: true });
         return;
       }
 
@@ -73,7 +73,7 @@ export const LoginPage: React.FC = () => {
       message.success(t('auth.loginSuccess', 'Login successful!'));
       const payload = extractUserFromToken(result.accessToken);
       const redirectPath = getRedirectPath(payload?.roles || []);
-      navigate(redirectPath);
+      navigate(redirectPath, { replace: true });
     } catch (error: any) {
       const code = error.response?.data?.code;
       const errorMsg = error.response?.data?.message;
@@ -105,7 +105,7 @@ export const LoginPage: React.FC = () => {
       if (result.mustChangePassword) {
         loginWithTokens(result.accessToken, result.refreshToken);
         message.warning(t('auth.mustChangePassword', 'You must change your password before continuing!'));
-        navigate('/change-password');
+        navigate('/change-password', { replace: true });
         return;
       }
 
@@ -113,7 +113,7 @@ export const LoginPage: React.FC = () => {
       message.success(t('auth.googleLoginSuccess', 'Login with Google successful!'));
       const payload = extractUserFromToken(result.accessToken);
       const redirectPath = getRedirectPath(payload?.roles || []);
-      navigate(redirectPath);
+      navigate(redirectPath, { replace: true });
     } catch (error: any) {
       const code = error.response?.data?.code;
       const errorMsg = error.response?.data?.message;
@@ -179,7 +179,7 @@ export const LoginPage: React.FC = () => {
           <button
             type="button"
             onClick={() => {
-              navigate('/');
+              navigate('/', { replace: true });
             }}
             style={{
               background: 'none',

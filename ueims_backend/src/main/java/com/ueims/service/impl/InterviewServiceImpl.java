@@ -208,8 +208,8 @@ public class InterviewServiceImpl implements InterviewService {
     @Override
     @Transactional
     public Interview confirmAttendance(UUID id) {
-        Interview interview = repository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.INTERVIEW_NOT_FOUND));
+        Interview interview =
+                repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.INTERVIEW_NOT_FOUND));
 
         // BR-49: Không thể xác nhận nếu phỏng vấn đã bị hủy (CANCELLED/CANCELED)
         if ("CANCELLED".equalsIgnoreCase(interview.getStatus()) || "CANCELED".equalsIgnoreCase(interview.getStatus())) {
@@ -229,8 +229,8 @@ public class InterviewServiceImpl implements InterviewService {
     @Override
     @Transactional
     public Interview declineAttendance(UUID id, String reason) {
-        Interview interview = repository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.INTERVIEW_NOT_FOUND));
+        Interview interview =
+                repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.INTERVIEW_NOT_FOUND));
 
         // BR-49: Tính không thể đảo ngược
         if (Boolean.TRUE.equals(interview.getStudentConfirmed())) {
@@ -275,12 +275,9 @@ public class InterviewServiceImpl implements InterviewService {
             }
             existing.setScheduledTime(entity.getScheduledTime());
         }
-        if (entity.getDurationMinutes() != null)
-            existing.setDurationMinutes(entity.getDurationMinutes());
-        if (entity.getMeetingLink() != null)
-            existing.setMeetingLink(entity.getMeetingLink());
-        if (entity.getLocation() != null)
-            existing.setLocation(entity.getLocation());
+        if (entity.getDurationMinutes() != null) existing.setDurationMinutes(entity.getDurationMinutes());
+        if (entity.getMeetingLink() != null) existing.setMeetingLink(entity.getMeetingLink());
+        if (entity.getLocation() != null) existing.setLocation(entity.getLocation());
         if (entity.getStatus() != null) {
             String newStatus = entity.getStatus().toUpperCase();
             if ("COMPLETED".equals(newStatus) && !"COMPLETED".equals(existing.getStatus())) {
@@ -291,8 +288,7 @@ public class InterviewServiceImpl implements InterviewService {
             }
             existing.setStatus(newStatus);
         }
-        if (entity.getFeedback() != null)
-            existing.setFeedback(entity.getFeedback());
+        if (entity.getFeedback() != null) existing.setFeedback(entity.getFeedback());
         existing.setUpdatedAt(LocalDateTime.now());
 
         Interview saved = repository.saveAndFlush(existing);
@@ -348,21 +344,22 @@ public class InterviewServiceImpl implements InterviewService {
             app.setStatus(ApplicationStatus.ACCEPTED);
 
             // BR-22: Create Enterprise Assignment if not exists
-            boolean exists = enterpriseAssignmentRepository
-                    .existsByStudent_UserIdAndEnterprise_EnterpriseIdAndSemester_SemesterId(
-                            app.getStudent().getUserId(),
-                            app.getJobPost().getEnterprise().getEnterpriseId(),
-                            app.getJobPost().getSemester().getSemesterId());
+            boolean exists =
+                    enterpriseAssignmentRepository
+                            .existsByStudent_UserIdAndEnterprise_EnterpriseIdAndSemester_SemesterId(
+                                    app.getStudent().getUserId(),
+                                    app.getJobPost().getEnterprise().getEnterpriseId(),
+                                    app.getJobPost().getSemester().getSemesterId());
 
             if (!exists) {
-                com.ueims.model.entity.EnterpriseAssignment assignment = com.ueims.model.entity.EnterpriseAssignment
-                        .builder()
-                        .student(app.getStudent())
-                        .enterprise(app.getJobPost().getEnterprise())
-                        .semester(app.getJobPost().getSemester())
-                        .status("ACTIVE")
-                        .assignedBy(currentUser)
-                        .build();
+                com.ueims.model.entity.EnterpriseAssignment assignment =
+                        com.ueims.model.entity.EnterpriseAssignment.builder()
+                                .student(app.getStudent())
+                                .enterprise(app.getJobPost().getEnterprise())
+                                .semester(app.getJobPost().getSemester())
+                                .status("ACTIVE")
+                                .assignedBy(currentUser)
+                                .build();
                 enterpriseAssignmentRepository.save(assignment);
 
                 // BR-26: Withdraw other pending applications for this student in the current
@@ -444,7 +441,8 @@ public class InterviewServiceImpl implements InterviewService {
         User currentUser = getCurrentUser();
         checkEnterpriseOwnershipOrTm(existing, currentUser);
         // BR-35: also check overlap
-        UUID enterpriseIdToCheck = existing.getApplication().getJobPost().getEnterprise().getEnterpriseId();
+        UUID enterpriseIdToCheck =
+                existing.getApplication().getJobPost().getEnterprise().getEnterpriseId();
         boolean overlap = repository.existsByEnterpriseAndTime(enterpriseIdToCheck, newTime);
         if (overlap) {
             throw new AppException(ErrorCode.INTERVIEW_OVERLAP);
@@ -502,24 +500,22 @@ public class InterviewServiceImpl implements InterviewService {
 
     private boolean isValidSlot(LocalDateTime candidate, List<Interview> existing) {
         int dow = candidate.getDayOfWeek().getValue();
-        if (dow < 1 || dow > 5)
-            return false;
+        if (dow < 1 || dow > 5) return false;
 
         int hour = candidate.getHour();
-        if ((hour < 9 || hour >= 12) && (hour < 14 || hour >= 17))
-            return false;
+        if ((hour < 9 || hour >= 12) && (hour < 14 || hour >= 17)) return false;
 
         return existing.stream()
                 .noneMatch(i -> i.getScheduledTime() != null
                         && Math.abs(java.time.Duration.between(i.getScheduledTime(), candidate)
-                                .toMinutes()) < 60);
+                                        .toMinutes())
+                                < 60);
     }
 
     private void checkEnterpriseOwnershipOrTm(Interview existing, User currentUser) {
         boolean isTm = currentUser.getRoles().stream()
                 .anyMatch(r -> "TRAINING_MANAGER".equals(r.getRole().getRoleName()));
-        if (isTm)
-            return;
+        if (isTm) return;
         if (currentUser.getEnterprise() == null
                 || existing.getApplication() == null
                 || existing.getApplication().getJobPost() == null
