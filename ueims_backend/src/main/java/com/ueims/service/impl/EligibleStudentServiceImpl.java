@@ -301,13 +301,10 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
                 .findByEmail(actorEmail)
                 .orElseThrow(() -> new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION));
 
-        // Admin-only when cancelling an active OJT (BR-24, mirrors DB trigger trg_locked_student_edit).
-        if ("OJT".equals(student.getStatus())) {
-            boolean isAdmin = authentication.getAuthorities().stream()
-                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-            if (!isAdmin) {
-                throw new AppException(ErrorCode.ADMIN_INTERVENTION_REQUIRED);
-            }
+        // UC-25: Only students with OJT status can have their result cancelled (BR-24).
+        // The controller endpoint is already restricted to ROLE_TRAINING_MANAGER via @PreAuthorize.
+        if (!"OJT".equals(student.getStatus())) {
+            throw new AppException(ErrorCode.INVALID_STATUS_FOR_OJT);
         }
 
         student.setStatus("CANCELLED");
