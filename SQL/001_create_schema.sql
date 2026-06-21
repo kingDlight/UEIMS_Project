@@ -103,7 +103,8 @@ CREATE TABLE password_reset_tokens (
     token_hash      VARCHAR(255) NOT NULL,
     expires_at      TIMESTAMP NOT NULL,
     is_used         BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX idx_prt_user ON password_reset_tokens(user_id);
@@ -1040,6 +1041,7 @@ CREATE TABLE weekly_reports (
     attachment_urls JSONB,
     status          VARCHAR(20) NOT NULL DEFAULT 'NOT_SUBMITTED'
                     CHECK (status IN ('NOT_SUBMITTED', 'SUBMITTED', 'APPROVED', 'REJECTED')),
+    feedback        TEXT,
     submitted_at    TIMESTAMP,
     late_override_by UUID REFERENCES users(user_id),                  -- BR-56: TM override for late/early submissions
     plagiarism_score DECIMAL(5,4),                                    -- BR-58: RBL Jaccard Similarity Score (0.0000 - 1.0000)
