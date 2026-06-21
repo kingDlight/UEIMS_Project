@@ -22,6 +22,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.ueims.dto.request.AnnouncementCreationRequest;
+import com.ueims.dto.response.SystemAnnouncementDTO;
 import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
 import com.ueims.model.entity.Semester;
@@ -83,7 +84,7 @@ class SystemAnnouncementServiceImplTest {
     void findAllSuccess() {
         when(repository.findAll()).thenReturn(List.of(announcement));
 
-        List<SystemAnnouncement> result = service.findAll();
+        List<SystemAnnouncementDTO> result = service.findAll();
 
         assertEquals(1, result.size());
         assertEquals(TEST_TITLE, result.get(0).getTitle());
@@ -93,7 +94,7 @@ class SystemAnnouncementServiceImplTest {
     void findActiveAnnouncementsSuccess() {
         when(repository.findByStatusOrderByCreatedAtDesc(STATUS_PUBLISHED)).thenReturn(List.of(announcement));
 
-        List<SystemAnnouncement> result = service.findActiveAnnouncements();
+        List<SystemAnnouncementDTO> result = service.findActiveAnnouncements();
 
         assertEquals(1, result.size());
     }
@@ -102,7 +103,7 @@ class SystemAnnouncementServiceImplTest {
     void findByIdSuccess() {
         when(repository.findById(announcementId)).thenReturn(Optional.of(announcement));
 
-        SystemAnnouncement result = service.findById(announcementId);
+        SystemAnnouncementDTO result = service.findById(announcementId);
 
         assertNotNull(result);
         assertEquals(TEST_TITLE, result.getTitle());
@@ -131,12 +132,12 @@ class SystemAnnouncementServiceImplTest {
         when(semesterRepository.findById(semesterId)).thenReturn(Optional.of(semester));
         when(repository.save(any(SystemAnnouncement.class))).thenAnswer(i -> i.getArgument(0));
 
-        SystemAnnouncement result = service.createAnnouncement(request);
+        SystemAnnouncementDTO result = service.createAnnouncement(request);
 
         assertNotNull(result);
         assertEquals(NEW_TITLE, result.getTitle());
         assertEquals(STATUS_DRAFT, result.getStatus());
-        assertNotNull(result.getSemester());
+        assertNotNull(result.getSemesterId());
     }
 
     @Test
@@ -151,12 +152,12 @@ class SystemAnnouncementServiceImplTest {
         when(userRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(currentUser));
         when(repository.save(any(SystemAnnouncement.class))).thenAnswer(i -> i.getArgument(0));
 
-        SystemAnnouncement result = service.createAnnouncement(request);
+        SystemAnnouncementDTO result = service.createAnnouncement(request);
 
         assertNotNull(result);
         assertEquals(NEW_TITLE, result.getTitle());
         assertEquals(STATUS_DRAFT, result.getStatus());
-        assertNull(result.getSemester());
+        assertNull(result.getSemesterId());
     }
 
     @Test
@@ -187,11 +188,11 @@ class SystemAnnouncementServiceImplTest {
         when(semesterRepository.findById(semesterId)).thenReturn(Optional.of(semester));
         when(repository.save(any(SystemAnnouncement.class))).thenAnswer(i -> i.getArgument(0));
 
-        SystemAnnouncement result = service.updateAnnouncement(announcementId, request);
+        SystemAnnouncementDTO result = service.updateAnnouncement(announcementId, request);
 
         assertEquals(UPDATED_TITLE, result.getTitle());
         assertEquals(UPDATED_CONTENT, result.getContent());
-        assertNotNull(result.getSemester());
+        assertNotNull(result.getSemesterId());
     }
 
     @Test
@@ -204,10 +205,10 @@ class SystemAnnouncementServiceImplTest {
         when(repository.findById(announcementId)).thenReturn(Optional.of(announcement));
         when(repository.save(any(SystemAnnouncement.class))).thenAnswer(i -> i.getArgument(0));
 
-        SystemAnnouncement result = service.updateAnnouncement(announcementId, request);
+        SystemAnnouncementDTO result = service.updateAnnouncement(announcementId, request);
 
         assertEquals(UPDATED_TITLE, result.getTitle());
-        assertNull(result.getSemester());
+        assertNull(result.getSemesterId());
     }
 
     @Test
@@ -215,7 +216,7 @@ class SystemAnnouncementServiceImplTest {
         when(repository.findById(announcementId)).thenReturn(Optional.of(announcement));
         when(repository.save(any(SystemAnnouncement.class))).thenAnswer(i -> i.getArgument(0));
 
-        SystemAnnouncement result = service.updateStatus(announcementId, STATUS_PUBLISHED);
+        SystemAnnouncementDTO result = service.updateStatus(announcementId, STATUS_PUBLISHED);
 
         assertEquals(STATUS_PUBLISHED, result.getStatus());
         assertNotNull(result.getPublishedAt());
@@ -226,7 +227,7 @@ class SystemAnnouncementServiceImplTest {
         when(repository.findById(announcementId)).thenReturn(Optional.of(announcement));
         when(repository.save(any(SystemAnnouncement.class))).thenAnswer(i -> i.getArgument(0));
 
-        SystemAnnouncement result = service.updateStatus(announcementId, "HIDDEN");
+        SystemAnnouncementDTO result = service.updateStatus(announcementId, "HIDDEN");
 
         assertEquals("HIDDEN", result.getStatus());
     }
