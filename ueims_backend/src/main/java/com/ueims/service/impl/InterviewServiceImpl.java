@@ -264,6 +264,9 @@ public class InterviewServiceImpl implements InterviewService {
             if (entity.getScheduledTime().isBefore(LocalDateTime.now())) {
                 throw new AppException(ErrorCode.INTERVIEW_DATE_MUST_BE_IN_FUTURE);
             }
+            if (!entity.getScheduledTime().equals(existing.getScheduledTime())) {
+                existing.setStudentConfirmed(false);
+            }
             existing.setScheduledTime(entity.getScheduledTime());
         }
         if (entity.getDurationMinutes() != null) existing.setDurationMinutes(entity.getDurationMinutes());
@@ -423,6 +426,7 @@ public class InterviewServiceImpl implements InterviewService {
         existing.setScheduledTime(newTime);
         existing.setStatus("RESCHEDULED");
         existing.setRescheduleReason(reason);
+        existing.setStudentConfirmed(false);
         existing.setUpdatedAt(LocalDateTime.now());
         Interview saved = repository.saveAndFlush(existing);
         try {
