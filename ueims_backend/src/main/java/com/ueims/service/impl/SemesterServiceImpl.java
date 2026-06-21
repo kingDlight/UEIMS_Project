@@ -5,6 +5,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
@@ -64,7 +65,8 @@ public class SemesterServiceImpl implements SemesterService {
         if (entity.getStartDate() != null && entity.getEndDate() != null) {
             List<Semester> existingSemesters = repository.findAll();
             for (Semester s : existingSemesters) {
-                if (entity.getSemesterId() != null && entity.getSemesterId().equals(s.getSemesterId())) continue;
+                if (entity.getSemesterId() != null && entity.getSemesterId().equals(s.getSemesterId()))
+                    continue;
                 if (s.getStartDate() != null && s.getEndDate() != null) {
                     if (entity.getStartDate().isBefore(s.getEndDate())
                             && entity.getEndDate().isAfter(s.getStartDate())) {
@@ -110,11 +112,19 @@ public class SemesterServiceImpl implements SemesterService {
     }
 
     @Override
+    @Transactional
     public Semester activeSemester(UUID id) {
         Semester semester = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.SEMESTER_NOT_FOUND));
         if (!STATUS_OPEN.equals(semester.getStatus())) {
             throw new AppException(ErrorCode.SEMESTER_INVALID_TRANSITION);
         }
+
+        List<Semester> activeSemesters = repository.findByStatus(STATUS_ACTIVE);
+        for (Semester active : activeSemesters) {
+            active.setStatus(STATUS_CLOSED);
+            repository.save(active);
+        }
+
         semester.setStatus(STATUS_ACTIVE);
         return repository.save(semester);
     }
