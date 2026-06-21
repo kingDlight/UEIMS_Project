@@ -186,7 +186,9 @@ export const SemesterTab: React.FC = () => {
         
         let status: SemesterStatus = 'Completed';
         if (s.status === 'ACTIVE') status = 'Current';
-        else if (s.status === 'DRAFT' || s.status === 'OPEN') status = 'Upcoming';
+        else if (s.status === 'DRAFT' || s.status === 'OPEN') {
+           status = dayjs(s.endDate).isBefore(dayjs(), 'day') ? 'Completed' : 'Upcoming';
+        }
         else if (s.status === 'LOCKED' || s.status === 'CLOSED') status = 'Completed';
         
         return {

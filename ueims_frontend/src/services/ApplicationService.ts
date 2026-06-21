@@ -26,13 +26,15 @@ export const ApplicationService = {
         const safeName = (studentName ?? 'applicant').replace(/[^a-z0-9_-]+/gi, '_');
         const filename = `CV_${safeName}.pdf`;
         const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+        window.open(url, '_blank'); // Explicitly open in a new tab (TC-ENT-020 requirement)
         const link = document.createElement('a');
         link.href = url;
         link.setAttribute('download', filename);
         document.body.appendChild(link);
         link.click();
         link.remove();
-        window.URL.revokeObjectURL(url);
+        // Delay revoke to allow new tab to read the blob
+        setTimeout(() => window.URL.revokeObjectURL(url), 10000);
         return filename;
     },
 };
