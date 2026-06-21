@@ -46,13 +46,13 @@ public class AuditLogServiceImpl implements AuditLogService {
 
     @Override
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
-    public byte[] exportExcel(LocalDate startDate, LocalDate endDate) {
+    public byte[] exportExcel(LocalDate startDate, LocalDate endDate, String action) {
         LocalDateTime startDateTime =
                 (startDate != null) ? startDate.atStartOfDay() : LocalDateTime.of(2000, 1, 1, 0, 0);
         LocalDateTime endDateTime =
                 (endDate != null) ? endDate.atTime(LocalTime.MAX) : LocalDateTime.of(2099, 12, 31, 23, 59);
 
-        List<AuditLog> logs = repository.findByDateRange(startDateTime, endDateTime);
+        List<AuditLog> logs = repository.findByDateRangeAndAction(startDateTime, endDateTime, action);
 
         // UC-13 Other Information: The export threshold for System Logs is set at 50,000 records
         if (logs.size() > 50000) {
