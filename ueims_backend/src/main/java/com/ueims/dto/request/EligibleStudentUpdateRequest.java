@@ -47,6 +47,6 @@ public class EligibleStudentUpdateRequest {
             message = "Status must be one of: ELIGIBLE, PENDING, ACCEPTED, MATCHED, OJT, CANCELLED")
     private String status;
 
-    @Size(max = 1000, message = "Cancellation reason must not exceed {max} characters")
-    private String cancelReason;
+    @Size(max = 1000, message = "CANCEL_REASON_INVALID_LENGTH")
+    private String cancelledReason;
 }

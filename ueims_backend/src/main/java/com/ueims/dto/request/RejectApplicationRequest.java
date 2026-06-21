@@ -13,7 +13,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class RejectApplicationRequest {
 
-    @NotBlank(message = "Rejection reason is required")
-    @Size(min = 5, max = 1000, message = "Rejection reason must be between {min} and {max} characters")
+    @NotBlank(message = "FIELD_REQUIRED")
+    @Size(min = 5, max = 1000, message = "REJECTION_REASON_INVALID_LENGTH")
     String rejectionReason;
 }

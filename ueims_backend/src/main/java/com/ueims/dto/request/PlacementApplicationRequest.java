@@ -19,6 +19,6 @@ public class PlacementApplicationRequest {
     UUID enterpriseId;
 
     /** Lý do SV muốn apply (optional nhưng nên có). */
-    @Size(max = 2000, message = "Cover letter must be <= {max} characters")
+    @Size(max = 2000, message = "COVER_LETTER_INVALID_LENGTH")
     String coverLetter;
 }
