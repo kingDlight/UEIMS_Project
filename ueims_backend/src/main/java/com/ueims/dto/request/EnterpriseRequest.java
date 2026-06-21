@@ -33,6 +33,10 @@ public class EnterpriseRequest {
     private String address;
 
     @Size(max = 500, message = "LOGO_URL_INVALID_LENGTH")
+    @Pattern(
+            regexp = "^$|^(https?://.*|data:image/(png|jpeg|jpg|gif|webp);base64,.*|/api/users/avatars/.*)$",
+            message =
+                    "Logo must be a valid HTTP URL, a local avatar path, or a valid image Data URI (png, jpg, jpeg, gif, webp)")
     private String logoUrl;
 
     @NotBlank(message = "FIELD_REQUIRED")
