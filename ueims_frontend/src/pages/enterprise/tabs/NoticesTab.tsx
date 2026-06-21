@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { Spin, Tag, Empty, App } from 'antd';
 import { BellOutlined, CalendarOutlined, BookOutlined, ReadOutlined } from '@ant-design/icons';
 import { SystemAnnouncementService } from '@/services/SystemAnnouncementService';
-import { c } from '../constants';
 
 type Announcement = {
   announcementId: string;
@@ -55,43 +54,38 @@ const NoticesTab: React.FC = () => {
       }
     };
     fetch();
-  }, []);
+  }, [message, t]);
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}>
+      <div className="flex justify-center items-center h-[400px]">
         <Spin size="large" />
       </div>
     );
   }
 
   return (
-    <div style={{ maxWidth: 1200, margin: '0 auto', padding: '24px', fontFamily: 'Inter, sans-serif' }}>
+    <div className="max-w-[1200px] mx-auto px-6 py-6 font-sans">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35 }}
-        style={{ marginBottom: 24, display: 'flex', alignItems: 'center', gap: 12 }}
+        className="mb-6 flex items-center gap-3"
       >
-        <div style={{
-          width: 44, height: 44, borderRadius: c.radiusMd,
-          background: `linear-gradient(135deg, ${c.brand}, ${c.brandHover})`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff',
-          boxShadow: c.shadowBrand
-        }}>
-          <BellOutlined style={{ fontSize: 20 }} />
+        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#E67E22] to-[#D35400] flex items-center justify-center text-white shadow-[0_8px_22px_rgba(230,126,34,0.22)]">
+          <BellOutlined className="text-xl" />
         </div>
         <div>
-          <div style={{ fontSize: 22, fontWeight: 800, color: c.text, lineHeight: 1.1 }}>
+          <div className="text-[22px] font-extrabold text-slate-900 leading-[1.1]">
             {t('notices.title', 'Notices')}
           </div>
-          <div style={{ fontSize: 12.5, color: c.textMuted, marginTop: 4 }}>
+          <div className="text-[12.5px] text-slate-500 mt-1">
             {t('notices.subtitle', 'Latest system announcements from the Training Manager')}
           </div>
         </div>
-        <div style={{ marginLeft: 'auto' }}>
-          <Tag color="orange" style={{ borderRadius: c.radiusFull, fontWeight: 600, padding: '4px 12px' }}>
+        <div className="ml-auto">
+          <Tag color="orange" className="rounded-full font-semibold px-3 py-1">
             {announcements.length} {t('notices.count', 'active')}
           </Tag>
         </div>
@@ -102,12 +96,12 @@ const NoticesTab: React.FC = () => {
         <Empty
           image={Empty.PRESENTED_IMAGE_SIMPLE}
           description={t('notices.empty', 'No active notices at the moment.')}
-          style={{ padding: '60px 0', background: '#fff', borderRadius: c.radiusLg, border: `1px solid ${c.border}` }}
+          className="py-[60px] bg-white rounded-2xl border border-slate-200"
         />
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: '340px 1fr', gap: 20 }}>
+        <div className="grid grid-cols-[340px_1fr] gap-5">
           {/* List */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div className="flex flex-col gap-2.5">
             {announcements.map((a) => {
               const isActive = selected?.announcementId === a.announcementId;
               return (
@@ -117,34 +111,20 @@ const NoticesTab: React.FC = () => {
                   whileHover={{ y: -2 }}
                   whileTap={{ scale: 0.99 }}
                   onClick={() => setSelected(a)}
-                  style={{
-                    textAlign: 'left',
-                    background: isActive ? c.brandMuted : '#fff',
-                    border: `1px solid ${isActive ? c.brand : c.border}`,
-                    borderLeft: isActive ? `4px solid ${c.brand}` : `4px solid transparent`,
-                    borderRadius: c.radiusMd,
-                    padding: '14px 14px',
-                    cursor: 'pointer',
-                    boxShadow: isActive ? c.shadowBrand : c.shadowSm,
-                    transition: 'all 0.15s',
-                    fontFamily: 'inherit',
-                  }}
+                  className={`text-left rounded-xl p-3.5 cursor-pointer transition-all font-sans
+                    ${isActive 
+                      ? 'bg-[#E67E22]/10 border-[#E67E22] border-l-4 shadow-[0_8px_22px_rgba(230,126,34,0.22)] border-y border-r' 
+                      : 'bg-white border border-slate-200 border-l-4 border-l-transparent shadow-sm'
+                    }`}
                 >
-                  <div style={{
-                    fontSize: 13.5, fontWeight: 700, color: c.text,
-                    display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden', marginBottom: 6, lineHeight: 1.35
-                  }}>
+                  <div className="text-[13.5px] font-bold text-slate-900 line-clamp-2 overflow-hidden mb-1.5 leading-[1.35]">
                     {a.title}
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, color: c.textMuted }}>
+                  <div className="flex items-center gap-2 text-[11px] text-slate-500">
                     <CalendarOutlined />
                     <span>{formatDate(a.publishedAt || a.createdAt)}</span>
                     {a.semester && (
-                      <span style={{
-                        padding: '1px 6px', borderRadius: c.radiusFull,
-                        background: c.infoMuted, color: c.info, fontWeight: 600, fontSize: 10
-                      }}>
+                      <span className="px-1.5 py-[1px] rounded-full bg-blue-50 text-blue-500 font-semibold text-[10px]">
                         {a.semester.semesterCode}
                       </span>
                     )}
@@ -160,41 +140,27 @@ const NoticesTab: React.FC = () => {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.25 }}
-            style={{
-              background: '#fff', borderRadius: c.radiusLg, border: `1px solid ${c.border}`,
-              padding: 28, boxShadow: c.shadowSm, minHeight: 360
-            }}
+            className="bg-white rounded-2xl border border-slate-200 p-7 shadow-sm min-h-[360px]"
           >
             {selected && (
               <>
-                <div style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 6,
-                  padding: '4px 10px', borderRadius: c.radiusFull,
-                  background: c.successMuted, color: c.success,
-                  fontSize: 11, fontWeight: 700, marginBottom: 14
-                }}>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600 text-[11px] font-bold mb-3.5">
                   <ReadOutlined /> {t('notices.published', 'PUBLISHED')}
                 </div>
-                <h1 style={{
-                  fontSize: 26, fontWeight: 800, color: c.text, margin: '0 0 14px',
-                  lineHeight: 1.25, letterSpacing: '-0.01em'
-                }}>
+                <h1 className="text-[26px] font-extrabold text-slate-900 m-0 mb-3.5 leading-[1.25] tracking-tight">
                   {selected.title}
                 </h1>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 14, color: c.textMuted, fontSize: 12.5, marginBottom: 20 }}>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                <div className="flex items-center gap-3.5 text-slate-500 text-[12.5px] mb-5">
+                  <span className="inline-flex items-center gap-1.5">
                     <CalendarOutlined /> {formatDate(selected.publishedAt || selected.createdAt)}
                   </span>
                   {selected.semester && (
-                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                    <span className="inline-flex items-center gap-1.5">
                       <BookOutlined /> {selected.semester.semesterCode}
                     </span>
                   )}
                 </div>
-                <div style={{
-                  fontSize: 14.5, color: c.textSecondary, lineHeight: 1.7,
-                  whiteSpace: 'pre-wrap', borderTop: `1px solid ${c.borderSubtle}`, paddingTop: 20
-                }}>
+                <div className="text-[14.5px] text-slate-600 leading-relaxed whitespace-pre-wrap border-t border-slate-100 pt-5">
                   {selected.content}
                 </div>
               </>

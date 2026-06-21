@@ -13,7 +13,6 @@ import dayjs, { Dayjs } from 'dayjs';
 import { EnterpriseAssignmentService } from '@/services/EnterpriseAssignmentService';
 import { InternshipPlanService } from '@/services/InternshipPlanService';
 import { InternshipPlanItemService } from '@/services/InternshipPlanItemService';
-import { c } from '../constants';
 
 const { TextArea } = Input;
 
@@ -42,14 +41,6 @@ interface PlanState {
   overallGoal?: string;
   isLocked?: boolean;
   items: PlanItem[];
-}
-
-function hexToRgba(hex: string, alpha: number): string {
-  const h = hex.replace('#', '');
-  const r = Number.parseInt(h.substring(0, 2), 16);
-  const g = Number.parseInt(h.substring(2, 4), 16);
-  const b = Number.parseInt(h.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
 export const InternshipPlanTab: React.FC = () => {
@@ -246,18 +237,18 @@ export const InternshipPlanTab: React.FC = () => {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}>
+      <div className="flex justify-center items-center h-[400px]">
         <Spin size="large" />
       </div>
     );
   }
 
   return (
-    <div style={{ fontFamily: 'Inter, sans-serif', display: 'grid', gridTemplateColumns: '280px 1fr', gap: 16, padding: '0 24px 40px' }}>
-      <aside style={{ background: c.surface, border: `1px solid ${c.border}`, borderRadius: c.radiusLg, padding: 12, height: 'fit-content' }}>
-        <div style={{ fontSize: 12, fontWeight: 700, color: c.textMuted, textTransform: 'uppercase', letterSpacing: '0.05em', padding: '4px 8px 8px' }}>My Students</div>
+    <div className="font-sans grid grid-cols-[280px_1fr] gap-4 px-6 pb-10">
+      <aside className="bg-white border border-slate-200 rounded-2xl p-3 h-fit">
+        <div className="text-[12px] font-bold text-slate-500 uppercase tracking-wider px-2 pt-1 pb-2">My Students</div>
         {assignments.length === 0 ? (
-          <div style={{ padding: 16, color: c.textMuted, fontSize: 12 }}>No students assigned yet.</div>
+          <div className="p-4 text-slate-500 text-xs">No students assigned yet.</div>
         ) : (
           assignments.map(a => (
             <div
@@ -266,17 +257,14 @@ export const InternshipPlanTab: React.FC = () => {
                 setSelectedAssignment(a);
                 fetchPlanForStudent(a.assignmentId);
               }}
-              style={{
-                padding: '10px 12px',
-                borderRadius: c.radiusSm,
-                cursor: 'pointer',
-                background: selectedAssignment?.assignmentId === a.assignmentId ? c.brandMuted : 'transparent',
-                border: selectedAssignment?.assignmentId === a.assignmentId ? `1px solid ${c.brand}` : '1px solid transparent',
-                marginBottom: 4,
-              }}
+              className={`px-3 py-2.5 rounded-xl cursor-pointer mb-1 transition-colors ${
+                selectedAssignment?.assignmentId === a.assignmentId
+                  ? 'bg-[#E67E22]/10 border border-[#E67E22]'
+                  : 'bg-transparent border border-transparent hover:bg-slate-50'
+              }`}
             >
-              <div style={{ fontSize: 13, fontWeight: 600, color: c.text }}>{a.studentName ?? '—'}</div>
-              <div style={{ fontSize: 11, color: c.textMuted }}>{a.studentCode ?? ''}</div>
+              <div className="text-[13px] font-semibold text-slate-900">{a.studentName ?? '—'}</div>
+              <div className="text-[11px] text-slate-500">{a.studentCode ?? ''}</div>
             </div>
           ))
         )}
@@ -284,28 +272,28 @@ export const InternshipPlanTab: React.FC = () => {
 
       <main>
         {!selectedAssignment ? (
-          <div style={{ padding: 60, textAlign: 'center', color: c.textMuted, background: c.surface, borderRadius: c.radiusLg, border: `1px solid ${c.border}` }}>
-            <ProjectOutlined style={{ fontSize: 48, marginBottom: 12, display: 'block' }} />
-            <div style={{ fontSize: 15, fontWeight: 600, color: c.text, marginBottom: 4 }}>Select a student to manage their training plan</div>
-            <div style={{ fontSize: 13, color: c.textMuted }}>Pick a student from the list on the left to get started.</div>
+          <div className="p-[60px] text-center text-slate-500 bg-white rounded-2xl border border-slate-200">
+            <ProjectOutlined className="text-[48px] mb-3 block" />
+            <div className="text-[15px] font-semibold text-slate-900 mb-1">Select a student to manage their training plan</div>
+            <div className="text-[13px] text-slate-500">Pick a student from the list on the left to get started.</div>
           </div>
         ) : (
-          <div style={{ background: c.surface, border: `1px solid ${c.border}`, borderRadius: c.radiusLg, padding: 20 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
+          <div className="bg-white border border-slate-200 rounded-2xl p-5">
+            <div className="flex justify-between items-center mb-4 flex-wrap gap-3">
               <div>
-                <div style={{ fontSize: 16, fontWeight: 800, color: c.text }}>{selectedAssignment.studentName}</div>
-                <div style={{ fontSize: 12, color: c.textMuted }}>{selectedAssignment.studentCode} · {selectedAssignment.studentEmail}</div>
+                <div className="text-[16px] font-extrabold text-slate-900">{selectedAssignment.studentName}</div>
+                <div className="text-[12px] text-slate-500">{selectedAssignment.studentCode} · {selectedAssignment.studentEmail}</div>
               </div>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <Button icon={<FilePdfOutlined />} onClick={handleExportPdf}>Export PDF</Button>
-                <Button icon={<ReloadOutlined />} onClick={() => selectedAssignment && fetchPlanForStudent(selectedAssignment.assignmentId)}>Refresh</Button>
+              <div className="flex gap-2">
+                <Button icon={<FilePdfOutlined />} onClick={handleExportPdf} className="rounded-xl">Export PDF</Button>
+                <Button icon={<ReloadOutlined />} onClick={() => selectedAssignment && fetchPlanForStudent(selectedAssignment.assignmentId)} className="rounded-xl">Refresh</Button>
                 <Button
                   type="primary"
                   icon={<SaveOutlined />}
                   loading={saving}
                   onClick={handleSave}
                   disabled={isReadOnly}
-                  style={{ background: c.brand, borderColor: c.brand }}
+                  className="bg-[#E67E22] border-[#E67E22] rounded-xl font-bold hover:bg-[#D35400] hover:border-[#D35400]"
                 >
                   Save Plan
                 </Button>
@@ -313,13 +301,13 @@ export const InternshipPlanTab: React.FC = () => {
             </div>
 
             {isReadOnly && (
-              <div style={{ marginBottom: 12, padding: '10px 14px', background: hexToRgba(c.warning, 0.1), border: `1px solid ${hexToRgba(c.warning, 0.3)}`, borderRadius: c.radiusMd, fontSize: 12, color: c.warning, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div className="mb-3 px-3.5 py-2.5 bg-amber-50 border border-amber-500/30 rounded-xl text-[12px] text-amber-600 flex items-center gap-2">
                 <LockOutlined /> This plan is read-only because the internship is finished or canceled.
               </div>
             )}
 
             <Form layout="vertical" disabled={isReadOnly}>
-              <Form.Item label="Overall Goal" style={{ marginBottom: 16 }}>
+              <Form.Item label="Overall Goal" className="mb-4">
                 <TextArea
                   value={plan.overallGoal ?? ''}
                   onChange={e => setPlan(p => ({ ...p, overallGoal: e.target.value }))}
@@ -327,12 +315,13 @@ export const InternshipPlanTab: React.FC = () => {
                   maxLength={500}
                   showCount
                   placeholder="Outline the main goal of the internship (optional)"
+                  className="rounded-xl"
                 />
               </Form.Item>
 
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: c.text }}>Weekly Plan</div>
-                <Button size="small" icon={<PlusOutlined />} onClick={addItem} disabled={isReadOnly}>
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-[13px] font-bold text-slate-900">Weekly Plan</div>
+                <Button size="small" icon={<PlusOutlined />} onClick={addItem} disabled={isReadOnly} className="rounded-xl">
                   Add Week
                 </Button>
               </div>
@@ -340,33 +329,25 @@ export const InternshipPlanTab: React.FC = () => {
               {plan.items.length === 0 ? (
                 <Empty description="No weekly items yet. Click 'Add Week' to start." image={Empty.PRESENTED_IMAGE_SIMPLE} />
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div className="flex flex-col gap-2">
                   {plan.items.map((it, idx) => (
                     <div
                       key={idx}
-                      style={{
-                        display: 'grid',
-                        gridTemplateColumns: '60px 1fr 180px 40px',
-                        gap: 8,
-                        alignItems: 'center',
-                        padding: 12,
-                        background: c.bgLight,
-                        borderRadius: c.radiusMd,
-                        border: `1px solid ${c.borderSubtle}`,
-                      }}
+                      className="grid grid-cols-[60px_1fr_180px_40px] gap-2 items-center p-3 bg-slate-50 rounded-xl border border-slate-200"
                     >
-                      <div style={{ fontSize: 12, fontWeight: 700, color: c.textMuted }}>Week {it.weekNumber}</div>
+                      <div className="text-[12px] font-bold text-slate-500">Week {it.weekNumber}</div>
                       <Input
                         value={it.taskDescription}
                         onChange={e => updateItem(idx, { taskDescription: e.target.value })}
                         placeholder="Task description (required)"
                         maxLength={300}
+                        className="rounded-lg"
                       />
                       <DatePicker
                         value={it.targetDate ? dayjs(it.targetDate) : null}
                         onChange={(d: Dayjs | null) => updateItem(idx, { targetDate: d ? d.format('YYYY-MM-DD') : null })}
                         format="YYYY-MM-DD"
-                        style={{ width: '100%' }}
+                        className="w-full rounded-lg"
                         disabledDate={d => {
                           if (!d) return false;
                           if (d.isBefore(dayjs().startOf('day'))) return true;
@@ -382,7 +363,7 @@ export const InternshipPlanTab: React.FC = () => {
                         cancelText="Cancel"
                         disabled={isReadOnly}
                       >
-                        <Button danger type="text" icon={<DeleteOutlined />} disabled={isReadOnly} />
+                        <Button danger type="text" icon={<DeleteOutlined />} disabled={isReadOnly} className="rounded-lg" />
                       </Popconfirm>
                     </div>
                   ))}

@@ -2,10 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Spin, App } from 'antd';
 import { motion } from 'framer-motion';
 import { StarOutlined, LockOutlined, CheckCircleOutlined } from '@ant-design/icons';
-import { ApplicationService } from '@/services/ApplicationService';
 import { EnterpriseEvaluationService } from '@/services/EnterpriseEvaluationService';
 import { EnterpriseAssignmentService } from '@/services/EnterpriseAssignmentService';
-import { c } from '../constants';
 
 // ============================================================
 // TYPES
@@ -43,17 +41,6 @@ interface ExistingEvaluation {
 }
 
 // ============================================================
-// HELPERS
-// ============================================================
-function hexToRgba(hex: string, alpha: number): string {
-  const h = hex.replace('#', '');
-  const r = Number.parseInt(h.substring(0, 2), 16);
-  const g = Number.parseInt(h.substring(2, 4), 16);
-  const b = Number.parseInt(h.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-}
-
-// ============================================================
 // RUBRIC LABELS
 // ============================================================
 const RUBRICS: EvaluationRubric[] = [
@@ -63,54 +50,12 @@ const RUBRICS: EvaluationRubric[] = [
   { id: 'progress',      label: 'Progress',             description: 'Learning speed, improvement over time', weight: 20, score: 0 },
 ];
 
-const RUBRIC_COLORS: Record<string, string> = {
-  attitude:         '#3b82f6',
-  professionalism: '#e67e22',
-  softSkills:      '#22c55e',
-  progress:         '#f59e0b',
+const RUBRIC_COLORS: Record<string, { bg: string, border: string, text: string, bar: string }> = {
+  attitude:         { text: 'text-blue-500', border: 'border-blue-500/20', bg: 'bg-blue-50', bar: 'bg-blue-500' },
+  professionalism: { text: 'text-[#E67E22]', border: 'border-[#E67E22]/20', bg: 'bg-[#E67E22]/5', bar: 'bg-[#E67E22]' },
+  softSkills:      { text: 'text-emerald-500', border: 'border-emerald-500/20', bg: 'bg-emerald-50', bar: 'bg-emerald-500' },
+  progress:         { text: 'text-amber-500', border: 'border-amber-500/20', bg: 'bg-amber-50', bar: 'bg-amber-500' },
 };
-
-// ============================================================
-// STAR RATING INPUT
-// ============================================================
-const StarRating: React.FC<{
-  value: number;
-  onChange: (v: number) => void;
-  color: string;
-  readonly?: boolean;
-}> = ({ value, onChange, color, readonly = false }) => (
-  <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-    {[1, 2, 3, 4, 5].map((star) => (
-      <motion.button
-        key={star}
-        whileHover={readonly ? {} : { scale: 1.15 }}
-        whileTap={readonly ? {} : { scale: 0.9 }}
-        onClick={() => !readonly && onChange(star)}
-        style={{
-          background: 'none',
-          border: 'none',
-          cursor: readonly ? 'default' : 'pointer',
-          fontSize: 28,
-          padding: '2px',
-          lineHeight: 1,
-          color: star <= value ? color : c.border,
-          transition: 'color 0.15s',
-        }}
-      >
-        <StarOutlined />
-      </motion.button>
-    ))}
-    <span style={{
-      marginLeft: 6,
-      fontSize: 13,
-      fontWeight: 700,
-      color: value > 0 ? color : c.textMuted,
-      minWidth: 28,
-    }}>
-      {value > 0 ? `${value}/5` : '—'}
-    </span>
-  </div>
-);
 
 // ============================================================
 // SLIDER INPUT (alternative UI)
@@ -118,36 +63,24 @@ const StarRating: React.FC<{
 const SliderRating: React.FC<{
   value: number;
   onChange: (v: number) => void;
-  color: string;
+  colorClasses: { bg: string, border: string, text: string, bar: string };
   readonly?: boolean;
-}> = ({ value, onChange, color, readonly = false }) => (
-  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-      <span style={{ fontSize: 12, color: c.textMuted, fontWeight: 600 }}>1 — Poor</span>
-      <span style={{ fontSize: 12, color: c.textMuted, fontWeight: 600 }}>5 — Excellent</span>
+}> = ({ value, onChange, colorClasses, readonly = false }) => (
+  <div className="flex flex-col gap-2">
+    <div className="flex justify-between items-center">
+      <span className="text-[12px] text-slate-500 font-semibold">1 — Poor</span>
+      <span className="text-[12px] text-slate-500 font-semibold">5 — Excellent</span>
     </div>
-    <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+    <div className="relative flex items-center">
       {[1, 2, 3, 4, 5].map((n) => (
         <motion.div
           key={n}
           whileHover={readonly ? {} : { scale: 1.1 }}
           onClick={() => !readonly && onChange(n)}
-          style={{
-            flex: 1,
-            height: 36,
-            borderRadius: 8,
-            cursor: readonly ? 'default' : 'pointer',
-            background: n <= value ? hexToRgba(color, 0.15 + n * 0.04) : c.borderSubtle,
-            border: `2px solid ${n <= value ? color : 'transparent'}`,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontWeight: 700,
-            fontSize: 13,
-            color: n <= value ? color : c.textMuted,
-            transition: 'all 0.15s',
-            marginRight: n < 5 ? 6 : 0,
-          }}
+          className={`flex-1 h-9 rounded-lg flex items-center justify-center font-bold text-[13px] transition-all mr-1.5 last:mr-0
+            ${readonly ? 'cursor-default' : 'cursor-pointer'}
+            ${n <= value ? `${colorClasses.bg} border-2 ${colorClasses.border.replace('/20', '')} ${colorClasses.text}` : 'bg-slate-100 border-2 border-transparent text-slate-400'}
+          `}
         >
           {n}
         </motion.div>
@@ -166,96 +99,59 @@ const RubricCard: React.FC<{
   readonly?: boolean;
   delay?: number;
 }> = ({ rubric, score, onChange, readonly = false, delay = 0 }) => {
-  const color = RUBRIC_COLORS[rubric.id] || c.brand;
+  const colors = RUBRIC_COLORS[rubric.id] || RUBRIC_COLORS.professionalism;
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: delay / 1000, ease: [0.32, 0.72, 0, 1] }}
-      style={{
-        background: '#fff',
-        borderRadius: 16,
-        border: `1px solid ${c.borderSubtle}`,
-        boxShadow: '0 4px 16px rgba(15,23,42,0.04)',
-        padding: '20px 24px',
-        position: 'relative',
-        overflow: 'hidden',
-        opacity: readonly ? 0.75 : 1,
-      }}
+      className={`bg-white rounded-2xl border border-slate-200 shadow-[0_4px_16px_rgba(15,23,42,0.04)] p-5 px-6 relative overflow-hidden ${readonly ? 'opacity-75' : 'opacity-100'}`}
     >
       {/* Brand accent bar */}
-      <div style={{
-        position: 'absolute',
-        left: 0,
-        top: 0,
-        bottom: 0,
-        width: 4,
-        background: color,
-        borderRadius: '16px 0 0 16px',
-      }} />
+      <div className={`absolute left-0 top-0 bottom-0 w-1 ${colors.bar} rounded-l-2xl`} />
 
-      <div style={{ paddingLeft: 16 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
+      <div className="pl-4">
+        <div className="flex justify-between items-start mb-3">
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-              <span style={{
-                padding: '3px 10px',
-                borderRadius: 999,
-                background: hexToRgba(color, 0.1),
-                border: `1px solid ${hexToRgba(color, 0.2)}`,
-                color: color,
-                fontSize: 11,
-                fontWeight: 700,
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-              }}>
+            <div className="flex items-center gap-2 mb-1">
+              <span className={`px-2.5 py-0.5 rounded-full ${colors.bg} border ${colors.border} ${colors.text} text-[11px] font-bold uppercase tracking-wider`}>
                 {rubric.weight}%
               </span>
             </div>
-            <h3 style={{ fontSize: 16, fontWeight: 700, color: c.text, margin: 0 }}>{rubric.label}</h3>
-            <p style={{ fontSize: 12, color: c.textMuted, margin: '4px 0 0' }}>{rubric.description}</p>
+            <h3 className="text-[16px] font-bold text-slate-900 m-0">{rubric.label}</h3>
+            <p className="text-[12px] text-slate-500 m-0 mt-1">{rubric.description}</p>
           </div>
 
           {/* Read-only badge */}
           {readonly && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', borderRadius: 999, background: hexToRgba(color, 0.08), border: `1px solid ${hexToRgba(color, 0.2)}` }}>
-              <LockOutlined style={{ fontSize: 10, color }} />
-              <span style={{ fontSize: 10, fontWeight: 700, color }}>LOCKED</span>
+            <div className={`flex items-center gap-1 px-2.5 py-1 rounded-full ${colors.bg} border ${colors.border}`}>
+              <LockOutlined className={`text-[10px] ${colors.text}`} />
+              <span className={`text-[10px] font-bold ${colors.text}`}>LOCKED</span>
             </div>
           )}
         </div>
 
         {/* Score display */}
-        <div style={{
-          padding: '14px 16px',
-          borderRadius: 12,
-          background: hexToRgba(color, 0.04),
-          border: `1px solid ${hexToRgba(color, 0.12)}`,
-          marginBottom: 16,
-        }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: c.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>
+        <div className={`px-4 py-3.5 rounded-xl ${colors.bg} border ${colors.border} mb-4`}>
+          <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2.5">
             Rating
           </div>
-          <SliderRating value={score} onChange={onChange} color={color} readonly={readonly} />
+          <SliderRating value={score} onChange={onChange} colorClasses={colors} readonly={readonly} />
         </div>
 
         {/* Score breakdown bar */}
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-            <span style={{ fontSize: 11, color: c.textMuted }}>Score</span>
-            <span style={{ fontSize: 13, fontWeight: 700, color }}>{score > 0 ? `${score}/5` : '—'}</span>
+          <div className="flex justify-between mb-1.5">
+            <span className="text-[11px] text-slate-500">Score</span>
+            <span className={`text-[13px] font-bold ${colors.text}`}>{score > 0 ? `${score}/5` : '—'}</span>
           </div>
-          <div style={{ height: 6, borderRadius: 999, background: c.borderSubtle, overflow: 'hidden' }}>
+          <div className="h-1.5 rounded-full bg-slate-200 overflow-hidden">
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: score > 0 ? `${(score / 5) * 100}%` : '0%' }}
               transition={{ duration: 0.5, ease: [0.32, 0.72, 0, 1] }}
-              style={{
-                height: '100%',
-                background: color,
-                borderRadius: 999,
-              }}
+              className={`h-full rounded-full ${colors.bar}`}
             />
           </div>
         </div>
@@ -277,59 +173,34 @@ const EvaluationSummary: React.FC<{
   }, 0);
 
   const grade = total >= 90 ? 'A' : total >= 80 ? 'B' : total >= 70 ? 'C' : total >= 60 ? 'D' : 'F';
-  const gradeColor = total >= 90 ? c.success : total >= 70 ? c.brand : total >= 60 ? c.warning : c.error;
+  const gradeColorClass = total >= 90 ? 'text-emerald-500 border-emerald-500 bg-emerald-50' : total >= 70 ? 'text-[#E67E22] border-[#E67E22] bg-[#E67E22]/10' : total >= 60 ? 'text-amber-500 border-amber-500 bg-amber-50' : 'text-red-500 border-red-500 bg-red-50';
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.5, ease: [0.32, 0.72, 0, 1] }}
-      style={{
-        background: '#fff',
-        borderRadius: 16,
-        border: `1px solid ${c.borderSubtle}`,
-        boxShadow: '0 4px 16px rgba(15,23,42,0.04)',
-        padding: '20px 24px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: 20,
-      }}
+      className="bg-white rounded-2xl border border-slate-200 shadow-[0_4px_16px_rgba(15,23,42,0.04)] p-5 px-6 flex items-center gap-5"
     >
       {/* Grade circle */}
-      <div style={{
-        width: 80,
-        height: 80,
-        borderRadius: 20,
-        background: hexToRgba(gradeColor, 0.08),
-        border: `3px solid ${gradeColor}`,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexShrink: 0,
-      }}>
-        <span style={{ fontSize: 28, fontWeight: 900, color: gradeColor, lineHeight: 1 }}>{grade}</span>
-        <span style={{ fontSize: 10, fontWeight: 700, color: gradeColor, marginTop: 2 }}>{Math.round(total)}%</span>
+      <div className={`w-20 h-20 rounded-2xl border-4 flex flex-col items-center justify-center shrink-0 ${gradeColorClass}`}>
+        <span className="text-[28px] font-black leading-none">{grade}</span>
+        <span className="text-[10px] font-bold mt-1">{Math.round(total)}%</span>
       </div>
 
-      <div style={{ flex: 1 }}>
-        <div style={{ fontSize: 14, fontWeight: 700, color: c.text, marginBottom: 10 }}>Projected Grade</div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          {RUBRICS.map(r => (
-            <div key={r.id} style={{
-              flex: 1,
-              padding: '8px 10px',
-              borderRadius: 10,
-              background: hexToRgba(RUBRIC_COLORS[r.id], 0.06),
-              border: `1px solid ${hexToRgba(RUBRIC_COLORS[r.id], 0.15)}`,
-              textAlign: 'center',
-            }}>
-              <div style={{ fontSize: 14, fontWeight: 800, color: RUBRIC_COLORS[r.id] }}>
+      <div className="flex-1">
+        <div className="text-[14px] font-bold text-slate-900 mb-2.5">Projected Grade</div>
+        <div className="flex gap-2">
+          {RUBRICS.map(r => {
+             const c = RUBRIC_COLORS[r.id] || RUBRIC_COLORS.professionalism;
+             return (
+            <div key={r.id} className={`flex-1 py-2 px-2.5 rounded-xl text-center ${c.bg} border ${c.border}`}>
+              <div className={`text-[14px] font-extrabold ${c.text}`}>
                 {scores[r.id] > 0 ? `${scores[r.id]}/5` : '—'}
               </div>
-              <div style={{ fontSize: 9, color: RUBRIC_COLORS[r.id], opacity: 0.7, marginTop: 2 }}>{r.weight}%</div>
+              <div className={`text-[9px] ${c.text} opacity-70 mt-0.5`}>{r.weight}%</div>
             </div>
-          ))}
+          )})}
         </div>
       </div>
     </motion.div>
@@ -483,7 +354,7 @@ export const EvaluationTab: React.FC = () => {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}>
+      <div className="flex justify-center items-center h-[400px]">
         <Spin size="large" />
       </div>
     );
@@ -491,49 +362,41 @@ export const EvaluationTab: React.FC = () => {
 
   if (students.length === 0) {
     return (
-      <div style={{ padding: '40px 24px', fontFamily: 'Inter, sans-serif', textAlign: 'center' }}>
-        <div style={{ width: 72, height: 72, borderRadius: '50%', background: c.bgLight, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', color: c.textMuted }}>
-          <StarOutlined style={{ fontSize: 28 }} />
+      <div className="py-10 px-6 font-sans text-center">
+        <div className="w-[72px] h-[72px] rounded-full bg-slate-50 flex items-center justify-center mx-auto mb-4 text-slate-400">
+          <StarOutlined className="text-[28px]" />
         </div>
-        <h3 style={{ fontSize: 16, fontWeight: 600, color: c.text, margin: '0 0 6px' }}>No students to evaluate</h3>
-        <p style={{ fontSize: 13, color: c.textMuted, margin: 0 }}>Students will appear here once placed.</p>
+        <h3 className="text-[16px] font-semibold text-slate-900 m-0 mb-1.5">No students to evaluate</h3>
+        <p className="text-[13px] text-slate-500 m-0">Students will appear here once placed.</p>
       </div>
     );
   }
 
   return (
-    <div style={{ padding: '0 0 40px', fontFamily: 'Inter, sans-serif' }}>
+    <div className="pb-10 font-sans">
       {/* Header */}
-      <div style={{ padding: '0 24px 20px' }}>
-        <h2 style={{ fontSize: 20, fontWeight: 800, color: c.text, margin: '0 0 4px', letterSpacing: '-0.01em' }}>
+      <div className="px-6 pb-5">
+        <h2 className="text-xl font-extrabold text-slate-900 m-0 mb-1 tracking-tight">
           Final Evaluation
         </h2>
-        <p style={{ fontSize: 13, color: c.textMuted, margin: 0 }}>
+        <p className="text-[13px] text-slate-500 m-0">
           Rate each criterion on a scale of 1–5. Grades are weighted per rubric.
         </p>
       </div>
 
       {/* Student selector */}
-      <div style={{ padding: '0 24px 20px', display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+      <div className="px-6 pb-5 flex gap-3 flex-wrap">
         {students.map((student) => (
           <motion.button
             key={student.assignmentId}
             whileHover={{ y: -2 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setSelectedStudent(student)}
-            style={{
-              padding: '10px 16px',
-              borderRadius: 14,
-              border: `2px solid ${selectedStudent?.assignmentId === student.assignmentId ? c.brand : c.border}`,
-              background: selectedStudent?.assignmentId === student.assignmentId ? hexToRgba(c.brand, 0.06) : '#fff',
-              color: selectedStudent?.assignmentId === student.assignmentId ? c.brand : c.text,
-              fontWeight: selectedStudent?.assignmentId === student.assignmentId ? 700 : 500,
-              fontSize: 13,
-              cursor: 'pointer',
-              fontFamily: 'Inter, sans-serif',
-              boxShadow: selectedStudent?.assignmentId === student.assignmentId ? `0 4px 12px ${hexToRgba(c.brand, 0.2)}` : 'none',
-              transition: 'all 0.15s',
-            }}
+            className={`px-4 py-2.5 rounded-2xl border-2 cursor-pointer font-sans shadow-sm transition-all text-[13px] ${
+              selectedStudent?.assignmentId === student.assignmentId
+                ? 'border-[#E67E22] bg-[#E67E22]/10 text-[#E67E22] font-bold shadow-[0_4px_12px_rgba(230,126,34,0.2)]'
+                : 'border-slate-200 bg-white text-slate-900 font-medium'
+            }`}
           >
             {student.studentName}
           </motion.button>
@@ -543,35 +406,26 @@ export const EvaluationTab: React.FC = () => {
       {selectedStudent && (
         <>
           {/* Selected student header */}
-          <div style={{ padding: '0 24px 20px' }}>
-            <div style={{
-              padding: '16px 20px',
-              borderRadius: 16,
-              background: '#fff',
-              border: `1px solid ${c.borderSubtle}`,
-              boxShadow: '0 4px 16px rgba(15,23,42,0.04)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-            }}>
+          <div className="px-6 pb-5">
+            <div className="px-5 py-4 rounded-2xl bg-white border border-slate-200 shadow-[0_4px_16px_rgba(15,23,42,0.04)] flex items-center justify-between">
               <div>
-                <div style={{ fontSize: 16, fontWeight: 700, color: c.text, marginBottom: 4 }}>{selectedStudent.studentName}</div>
-                <div style={{ fontSize: 12, color: c.textMuted }}>
+                <div className="text-[16px] font-bold text-slate-900 mb-1">{selectedStudent.studentName}</div>
+                <div className="text-[12px] text-slate-500">
                   {selectedStudent.studentCode} · {selectedStudent.major} · GPA {selectedStudent.gpa}
                 </div>
-                <div style={{ fontSize: 12, color: c.textMuted, marginTop: 2 }}>{selectedStudent.jobTitle}</div>
+                <div className="text-[12px] text-slate-500 mt-0.5">{selectedStudent.jobTitle}</div>
               </div>
               {isReadOnly && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 999, background: hexToRgba(c.success, 0.08), border: `1px solid ${hexToRgba(c.success, 0.2)}` }}>
-                  <CheckCircleOutlined style={{ color: c.success }} />
-                  <span style={{ fontSize: 12, fontWeight: 700, color: c.success }}>Submitted</span>
+                <div className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-emerald-50 border border-emerald-500/20">
+                  <CheckCircleOutlined className="text-emerald-500" />
+                  <span className="text-[12px] font-bold text-emerald-500">Submitted</span>
                 </div>
               )}
             </div>
           </div>
 
           {/* Rubric Cards */}
-          <div style={{ padding: '0 24px', display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16, marginBottom: 16 }}>
+          <div className="px-6 grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             {RUBRICS.map((rubric, i) => (
               <RubricCard
                 key={rubric.id}
@@ -585,22 +439,16 @@ export const EvaluationTab: React.FC = () => {
           </div>
 
           {/* Summary */}
-          <div style={{ padding: '0 24px', marginBottom: 16 }}>
+          <div className="px-6 mb-4">
             <EvaluationSummary scores={scores} comments={comments} />
           </div>
 
           {/* Comments */}
-          <div style={{ padding: '0 24px', marginBottom: 24 }}>
-            <div style={{
-              background: '#fff',
-              borderRadius: 16,
-              border: `1px solid ${c.borderSubtle}`,
-              boxShadow: '0 4px 16px rgba(15,23,42,0.04)',
-              padding: '20px 24px',
-            }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: c.text, marginBottom: 12 }}>Overall Comments</div>
+          <div className="px-6 mb-6">
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-[0_4px_16px_rgba(15,23,42,0.04)] p-5 px-6">
+              <div className="text-[14px] font-bold text-slate-900 mb-3">Overall Comments</div>
               {isReadOnly ? (
-                <div style={{ fontSize: 13, color: c.textMuted, lineHeight: 1.7, padding: '12px 16px', background: c.bgLight, borderRadius: 12 }}>
+                <div className="text-[13px] text-slate-500 leading-relaxed px-4 py-3 bg-slate-50 rounded-xl">
                   {comments || 'No comments provided.'}
                 </div>
               ) : (
@@ -609,17 +457,7 @@ export const EvaluationTab: React.FC = () => {
                   onChange={(e) => setComments(e.target.value)}
                   placeholder="Provide overall feedback on the intern's performance..."
                   rows={4}
-                  style={{
-                    width: '100%',
-                    padding: '12px 16px',
-                    borderRadius: 12,
-                    border: `1px solid ${c.border}`,
-                    fontSize: 13,
-                    fontFamily: 'Inter, sans-serif',
-                    resize: 'vertical',
-                    outline: 'none',
-                    lineHeight: 1.7,
-                  }}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 text-[13px] font-sans resize-y outline-none leading-relaxed focus:border-[#E67E22] focus:ring-1 focus:ring-[#E67E22]"
                 />
               )}
             </div>
@@ -627,25 +465,17 @@ export const EvaluationTab: React.FC = () => {
 
           {/* Submit */}
           {!isReadOnly && (
-            <div style={{ padding: '0 24px', display: 'flex', justifyContent: 'flex-end' }}>
+            <div className="px-6 flex justify-end">
               <motion.button
-                whileHover={{ y: -2, boxShadow: '0 12px 28px rgba(230,126,34,0.22)' }}
-                whileTap={{ scale: 0.98 }}
+                whileHover={Object.values(scores).some(s => s === 0) || submitting ? {} : { y: -2, boxShadow: '0 12px 28px rgba(230,126,34,0.22)' }}
+                whileTap={Object.values(scores).some(s => s === 0) || submitting ? {} : { scale: 0.98 }}
                 onClick={handleSubmit}
                 disabled={submitting || Object.values(scores).some(s => s === 0)}
-                style={{
-                  padding: '12px 28px',
-                  borderRadius: 14,
-                  border: 'none',
-                  background: Object.values(scores).some(s => s === 0) ? c.border : `linear-gradient(135deg, ${c.brand}, ${c.brandHover})`,
-                  color: '#fff',
-                  fontWeight: 700,
-                  fontSize: 14,
-                  cursor: submitting || Object.values(scores).some(s => s === 0) ? 'not-allowed' : 'pointer',
-                  opacity: submitting || Object.values(scores).some(s => s === 0) ? 0.7 : 1,
-                  boxShadow: Object.values(scores).some(s => s === 0) ? 'none' : `0 8px 22px rgba(230,126,34,0.22)`,
-                  fontFamily: 'Inter, sans-serif',
-                }}
+                className={`px-7 py-3 rounded-2xl border-none font-bold text-[14px] font-sans transition-all cursor-pointer ${
+                  submitting || Object.values(scores).some(s => s === 0)
+                    ? 'bg-slate-200 text-slate-400 opacity-70 cursor-not-allowed'
+                    : 'bg-gradient-to-br from-[#E67E22] to-[#D35400] text-white shadow-[0_8px_22px_rgba(230,126,34,0.22)]'
+                }`}
               >
                 {submitting ? 'Submitting...' : 'Submit Evaluation'}
               </motion.button>
@@ -653,14 +483,6 @@ export const EvaluationTab: React.FC = () => {
           )}
         </>
       )}
-
-      <style>{`
-        @media (max-width: 768px) {
-          div[style*="grid-template-columns: repeat(2, 1fr)"] {
-            grid-template-columns: 1fr !important;
-          }
-        }
-      `}</style>
     </div>
   );
 };

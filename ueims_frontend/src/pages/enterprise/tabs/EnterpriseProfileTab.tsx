@@ -20,7 +20,6 @@ import {
   ExclamationCircleOutlined,
 } from '@ant-design/icons';
 import { api } from '@/services/api';
-import { c } from '../constants';
 
 // ============================================================
 // TYPES
@@ -48,54 +47,34 @@ const MAX_LOGO_DATA_URL_LENGTH = 500; // matches enterprises.logo_url length
 // ============================================================
 // HELPERS
 // ============================================================
-function hexToRgba(hex: string, alpha: number): string {
-  const h = hex.replace('#', '');
-  const r = Number.parseInt(h.substring(0, 2), 16);
-  const g = Number.parseInt(h.substring(2, 4), 16);
-  const b = Number.parseInt(h.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-}
 
 const StatusBadge: React.FC<{ status?: string }> = ({ status }) => {
-  const map: Record<string, { color: string; bg: string; label: string; icon: React.ReactNode }> = {
-    ACTIVE: { color: c.success, bg: hexToRgba(c.success, 0.1), label: 'Active', icon: <CheckCircleOutlined /> },
-    APPROVED: { color: c.success, bg: hexToRgba(c.success, 0.1), label: 'Approved', icon: <CheckCircleOutlined /> },
-    PENDING: { color: c.warning, bg: hexToRgba(c.warning, 0.1), label: 'Pending', icon: <ClockCircleOutlined /> },
-    REJECTED: { color: c.error, bg: hexToRgba(c.error, 0.1), label: 'Rejected', icon: <CloseCircleOutlined /> },
-    SUSPENDED: { color: c.error, bg: hexToRgba(c.error, 0.1), label: 'Suspended', icon: <CloseCircleOutlined /> },
+  const map: Record<string, { color: string; bg: string; borderColor: string; label: string; icon: React.ReactNode }> = {
+    ACTIVE: { color: 'text-emerald-600', bg: 'bg-emerald-500/10', borderColor: 'border-emerald-500/30', label: 'Active', icon: <CheckCircleOutlined /> },
+    APPROVED: { color: 'text-emerald-600', bg: 'bg-emerald-500/10', borderColor: 'border-emerald-500/30', label: 'Approved', icon: <CheckCircleOutlined /> },
+    PENDING: { color: 'text-amber-500', bg: 'bg-amber-500/10', borderColor: 'border-amber-500/30', label: 'Pending', icon: <ClockCircleOutlined /> },
+    REJECTED: { color: 'text-red-500', bg: 'bg-red-500/10', borderColor: 'border-red-500/30', label: 'Rejected', icon: <CloseCircleOutlined /> },
+    SUSPENDED: { color: 'text-red-500', bg: 'bg-red-500/10', borderColor: 'border-red-500/30', label: 'Suspended', icon: <CloseCircleOutlined /> },
   };
   const cfg = map[status ?? 'PENDING'] || map.PENDING;
   return (
-    <span style={{
-      display: 'inline-flex', alignItems: 'center', gap: 6,
-      padding: '4px 12px', borderRadius: c.radiusFull,
-      background: cfg.bg, color: cfg.color,
-      fontSize: 12, fontWeight: 700,
-      textTransform: 'uppercase', letterSpacing: '0.05em',
-      border: `1px solid ${hexToRgba(cfg.color, 0.3)}`,
-    }}>
+    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border ${cfg.bg} ${cfg.color} ${cfg.borderColor}`}>
       {cfg.icon} {cfg.label}
     </span>
   );
 };
 
 const InfoRow: React.FC<{ icon: React.ReactNode; label: string; value?: string }> = ({ icon, label, value }) => (
-  <div style={{
-    display: 'flex', alignItems: 'flex-start', gap: 12,
-    padding: '14px 16px', borderRadius: c.radiusMd,
-    background: c.bgLight, border: `1px solid ${c.border}`,
-  }}>
-    <div style={{
-      width: 36, height: 36, borderRadius: c.radiusMd,
-      background: c.brandSubtle, color: c.brand,
-      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-    }}>{icon}</div>
-    <div style={{ flex: 1, minWidth: 0 }}>
-      <div style={{ fontSize: 10, fontWeight: 700, color: c.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>
+  <div className="flex items-start gap-3 p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+    <div className="w-9 h-9 rounded-xl bg-[#E67E22]/5 text-[#E67E22] flex items-center justify-center shrink-0">
+      {icon}
+    </div>
+    <div className="flex-1 min-w-0">
+      <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
         {label}
       </div>
-      <div style={{ fontSize: 14, fontWeight: 600, color: c.text, wordBreak: 'break-word' }}>
-        {value || <span style={{ color: c.textMuted, fontStyle: 'italic' }}>Not provided</span>}
+      <div className="text-sm font-semibold text-slate-900 break-words">
+        {value || <span className="text-slate-500 italic">Not provided</span>}
       </div>
     </div>
   </div>
@@ -149,7 +128,7 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({
     if (dirty) {
       Modal.confirm({
         title: 'Discard unsaved changes?',
-        icon: <ExclamationCircleOutlined style={{ color: c.warning }} />,
+        icon: <ExclamationCircleOutlined className="text-amber-500" />,
         content: 'You have unsaved changes in the edit form. Closing now will discard them.',
         okText: 'Discard',
         cancelText: 'Keep editing',
@@ -177,7 +156,7 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({
       requiredMark="optional"
       onValuesChange={() => setDirty(true)}
     >
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+      <div className="grid grid-cols-2 gap-3">
         <Form.Item
           name="companyName"
           label="Enterprise Name"
@@ -203,7 +182,7 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({
         >
           <Input placeholder="https://example.com" maxLength={255} />
         </Form.Item>
-        <div style={{ gridColumn: '1 / -1' }}>
+        <div className="col-span-full">
           <Form.Item
             name="address"
             label="Address"
@@ -229,7 +208,7 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({
         >
           <Input placeholder="+84 xxx xxx xxx" maxLength={20} />
         </Form.Item>
-        <div style={{ gridColumn: '1 / -1' }}>
+        <div className="col-span-full">
           <Form.Item
             name="contactEmail"
             label="Contact Email"
@@ -241,7 +220,7 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({
             <Input placeholder="contact@company.com" maxLength={255} />
           </Form.Item>
         </div>
-        <div style={{ gridColumn: '1 / -1' }}>
+        <div className="col-span-full">
           <Form.Item
             name="logoUrl"
             label="Logo (URL or upload)"
@@ -254,20 +233,16 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({
               onChange={(e) => setLogoPreview((e.target.value as string) || null)}
             />
           </Form.Item>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: -8 }}>
+          <div className="flex items-center gap-3 -mt-2">
             <Upload beforeUpload={handleLogoUpload} showUploadList={false} accept="image/*">
               <Button icon={<UploadOutlined />}>Upload Logo (max 500KB)</Button>
             </Upload>
             {logoPreview && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div className="flex items-center gap-2">
                 <img
                   src={logoPreview}
                   alt="logo preview"
-                  style={{
-                    width: 40, height: 40, borderRadius: c.radiusSm,
-                    objectFit: 'contain', background: c.bgLight, border: `1px solid ${c.border}`,
-                    padding: 2,
-                  }}
+                  className="w-10 h-10 rounded-lg object-contain bg-slate-50 border border-slate-200 p-0.5"
                 />
                 <Button type="text" size="small" icon={<CloseOutlined />} onClick={handleClearLogo}>
                   Remove
@@ -276,7 +251,7 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({
             )}
           </div>
         </div>
-        <div style={{ gridColumn: '1 / -1' }}>
+        <div className="col-span-full">
           <Form.Item
             name="description"
             label="Company Description"
@@ -292,11 +267,11 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({
         </div>
       </div>
 
-      <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 8, paddingTop: 16, borderTop: `1px solid ${c.border}` }}>
+      <div className="flex gap-2.5 justify-end mt-2 pt-4 border-t border-slate-200">
         <Button
           onClick={handleCancel}
           icon={<CloseOutlined />}
-          style={{ borderRadius: c.radiusMd }}
+          className="rounded-xl"
         >
           Cancel
         </Button>
@@ -305,7 +280,7 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({
           onClick={handleSave}
           loading={saving}
           icon={<SaveOutlined />}
-          style={{ background: c.brand, borderColor: c.brand, borderRadius: c.radiusMd, fontWeight: 700 }}
+          className="bg-[#E67E22] border-[#E67E22] rounded-xl font-bold hover:bg-[#D35400] hover:border-[#D35400]"
         >
           Save
         </Button>
@@ -385,16 +360,11 @@ export const EnterpriseProfileTab: React.FC = () => {
     }
   };
 
-  // ============================================================
-  // UC-36 Normal Flow step 3-4: Save (now lives inside EditProfileForm)
-  // ============================================================
-  // (old handleSave / handleLogoUpload / handleClearLogo removed — moved to EditProfileForm)
-
   const isSuspended = useMemo(() => profile?.status === 'SUSPENDED', [profile]);
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}>
+      <div className="flex justify-center items-center h-[400px]">
         <Spin size="large" />
       </div>
     );
@@ -402,7 +372,7 @@ export const EnterpriseProfileTab: React.FC = () => {
 
   if (!profile) {
     return (
-      <div style={{ padding: 40, textAlign: 'center', color: c.textMuted }}>
+      <div className="p-10 text-center text-slate-500">
         No profile data found.
       </div>
     );
@@ -411,18 +381,18 @@ export const EnterpriseProfileTab: React.FC = () => {
   const initials = (profile.companyName || 'EN').substring(0, 2).toUpperCase();
 
   return (
-    <div style={{ padding: '0 0 40px', fontFamily: 'Inter, sans-serif' }}>
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px' }}>
+    <div className="pb-10 font-sans">
+      <div className="max-w-[1200px] mx-auto px-6">
         {/* HEADER */}
         <motion.div
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}
+          className="flex items-center justify-between mb-5"
         >
           <div>
-            <h2 style={{ fontSize: 20, fontWeight: 800, color: c.text, margin: '0 0 4px' }}>Enterprise Profile</h2>
-            <p style={{ fontSize: 13, color: c.textMuted, margin: 0 }}>View and manage your company information</p>
+            <h2 className="text-xl font-extrabold text-slate-900 m-0 mb-1">Enterprise Profile</h2>
+            <p className="text-sm text-slate-500 m-0">View and manage your company information</p>
           </div>
           {!editOpen && (
             <Popconfirm
@@ -437,16 +407,8 @@ export const EnterpriseProfileTab: React.FC = () => {
                 whileHover={isSuspended ? undefined : { y: -1 }}
                 whileTap={isSuspended ? undefined : { scale: 0.98 }}
                 disabled={isSuspended}
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 6,
-                  padding: '10px 18px', borderRadius: c.radiusMd,
-                  background: isSuspended ? c.textMuted : c.brand,
-                  color: '#fff', fontWeight: 700, fontSize: 13,
-                  border: 'none', cursor: isSuspended ? 'not-allowed' : 'pointer',
-                  opacity: isSuspended ? 0.6 : 1,
-                  boxShadow: isSuspended ? 'none' : c.shadowBrand,
-                  fontFamily: 'Inter, sans-serif',
-                }}
+                className={`inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-bold text-sm text-white border-none transition-shadow
+                  ${isSuspended ? 'bg-slate-500 cursor-not-allowed opacity-60' : 'bg-[#E67E22] cursor-pointer hover:shadow-[0_8px_22px_rgba(230,126,34,0.22)]'}`}
               >
                 <EditOutlined /> Edit Profile
               </motion.button>
@@ -458,7 +420,7 @@ export const EnterpriseProfileTab: React.FC = () => {
           <Alert
             type="error"
             showIcon
-            style={{ marginBottom: 16, borderRadius: c.radiusMd }}
+            className="mb-4 rounded-xl"
             message="Your account is suspended. Editing is disabled until the issue is resolved."
           />
         )}
@@ -468,41 +430,29 @@ export const EnterpriseProfileTab: React.FC = () => {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.05 }}
-          style={{
-            background: c.surface, borderRadius: c.radiusLg,
-            border: `1px solid ${c.border}`, boxShadow: c.shadowSm,
-            overflow: 'hidden', marginBottom: 20,
-          }}
+          className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mb-5"
         >
           {/* Company Hero */}
-          <div style={{
-            background: `linear-gradient(135deg, rgb(230 126 34 / 43%)  0%, ${c.brandHover} 100%)`,
-            padding: '32px 28px', color: '#fff',
-            display: 'flex', alignItems: 'center', gap: 20,
-          }}>
+          <div className="bg-gradient-to-br from-[#E67E22]/40 to-[#D35400] px-7 py-8 text-white flex items-center gap-5">
             {profile.logoUrl ? (
               <img src={profile.logoUrl} alt="logo"
-                style={{ width: 84, height: 84, borderRadius: c.radiusLg, background: '#fff', objectFit: 'contain', padding: 8, boxShadow: c.shadowMd }} />
+                className="w-[84px] h-[84px] rounded-2xl bg-white object-contain p-2 shadow-md" />
             ) : (
-              <div style={{
-                width: 84, height: 84, borderRadius: c.radiusLg,
-                background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 28, fontWeight: 800, color: '#fff',
-                border: '2px solid rgba(255,255,255,0.3)',
-              }}>{initials}</div>
+              <div className="w-[84px] h-[84px] rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-2xl font-extrabold text-white border-2 border-white/30">
+                {initials}
+              </div>
             )}
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <h1 style={{ fontSize: 24, fontWeight: 800, margin: '0 0 6px', letterSpacing: '-0.01em' }}>{profile.companyName}</h1>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+            <div className="flex-1 min-w-0">
+              <h1 className="text-2xl font-extrabold m-0 mb-1.5 tracking-tight">{profile.companyName}</h1>
+              <div className="flex items-center gap-2.5 flex-wrap">
                 {profile.industry && (
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 13, opacity: 0.9 }}>
+                  <span className="inline-flex items-center gap-1 text-sm opacity-90">
                     <BankOutlined /> {profile.industry}
                   </span>
                 )}
                 {profile.website && (
                   <a href={profile.website} target="_blank" rel="noopener noreferrer"
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 13, color: '#fff', textDecoration: 'underline', opacity: 0.9 }}>
+                    className="inline-flex items-center gap-1 text-sm text-white underline opacity-90 hover:opacity-100">
                     <GlobalOutlined /> {profile.website}
                   </a>
                 )}
@@ -513,27 +463,27 @@ export const EnterpriseProfileTab: React.FC = () => {
 
           {/* Rejection reason warning (if any) */}
           {profile.status === 'REJECTED' && profile.rejectionReason && (
-            <div style={{ margin: '16px 24px', padding: '12px 16px', borderRadius: c.radiusMd, background: c.errorMuted, border: `1px solid ${hexToRgba(c.error, 0.3)}`, color: c.error, fontSize: 13 }}>
+            <div className="mx-6 my-4 px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-500 text-sm">
               <strong>Rejection reason:</strong> {profile.rejectionReason}
             </div>
           )}
 
           {/* Info grid */}
-          <div style={{ padding: 24, display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }}>
+          <div className="p-6 grid grid-cols-2 gap-3">
             <InfoRow icon={<IdcardOutlined />} label="Tax Code" value={profile.taxCode} />
             <InfoRow icon={<BankOutlined />} label="Industry / Field" value={profile.industry} />
             <InfoRow icon={<EnvironmentOutlined />} label="Address" value={profile.address} />
             <InfoRow icon={<GlobalOutlined />} label="Website" value={profile.website} />
             <InfoRow icon={<UserOutlined />} label="Contact Person" value={profile.contactPerson} />
             <InfoRow icon={<PhoneOutlined />} label="Contact Phone" value={profile.contactPhone} />
-            <div style={{ gridColumn: '1 / -1' }}>
+            <div className="col-span-full">
               <InfoRow icon={<MailOutlined />} label="Contact Email" value={profile.contactEmail} />
             </div>
-            <div style={{ gridColumn: '1 / -1' }}>
+            <div className="col-span-full">
               <InfoRow icon={<FileTextOutlined />} label="Company Description" value={profile.description} />
             </div>
             {profile.updatedAt && (
-              <div style={{ gridColumn: '1 / -1', fontSize: 12, color: c.textMuted, textAlign: 'right' }}>
+              <div className="col-span-full text-xs text-slate-500 text-right">
                 Last updated: {new Date(profile.updatedAt).toLocaleString()}
               </div>
             )}
@@ -544,8 +494,8 @@ export const EnterpriseProfileTab: React.FC = () => {
       {/* EDIT MODAL (UC-36) */}
       <Modal
         title={
-          <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, color: c.text, fontSize: 16 }}>
-            <EditOutlined style={{ marginRight: 8, color: c.brand }} />
+          <div className="font-sans font-bold text-slate-900 text-base flex items-center">
+            <EditOutlined className="mr-2 text-[#E67E22]" />
             Edit Enterprise Profile
           </div>
         }
@@ -555,7 +505,7 @@ export const EnterpriseProfileTab: React.FC = () => {
         footer={null}
         maskClosable={false}
         destroyOnHidden
-        styles={{ content: { borderRadius: c.radiusLg, padding: '24px 28px' }, header: { borderBottom: 'none', marginBottom: 16, padding: 0 }, body: { padding: 0 } }}
+        styles={{ content: { borderRadius: 16, padding: '24px 28px' }, header: { borderBottom: 'none', marginBottom: 16, padding: 0 }, body: { padding: 0 } }}
       >
         {editOpen && (
           <EditProfileForm

@@ -16,7 +16,6 @@ import {
 import dayjs, { Dayjs } from 'dayjs';
 import { InterviewService } from '@/services/InterviewService';
 import { ApplicationService } from '@/services/ApplicationService';
-import { c } from '../constants';
 
 const { TextArea } = Input;
 
@@ -37,22 +36,14 @@ interface InterviewRow {
   result?: string;
 }
 
-function hexToRgba(hex: string, alpha: number): string {
-  const h = hex.replace('#', '');
-  const r = Number.parseInt(h.substring(0, 2), 16);
-  const g = Number.parseInt(h.substring(2, 4), 16);
-  const b = Number.parseInt(h.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-}
-
 const STATUS_META: Record<string, { label: string; color: string; bg: string }> = {
-  SCHEDULED: { label: 'Scheduled', color: c.info, bg: hexToRgba(c.info, 0.1) },
-  CONFIRMED: { label: 'Confirmed', color: c.success, bg: hexToRgba(c.success, 0.1) },
-  RESCHEDULED: { label: 'Rescheduled', color: c.warning, bg: hexToRgba(c.warning, 0.1) },
-  CANCELED: { label: 'Canceled', color: c.error, bg: hexToRgba(c.error, 0.1) },
-  CANCELLED: { label: 'Canceled', color: c.error, bg: hexToRgba(c.error, 0.1) },
-  COMPLETED: { label: 'Completed', color: c.textSecondary, bg: hexToRgba(c.textSecondary, 0.1) },
-  RESULT_RECORDED: { label: 'Result recorded', color: c.success, bg: hexToRgba(c.success, 0.1) },
+  SCHEDULED: { label: 'Scheduled', color: 'text-blue-500', bg: 'bg-blue-50' },
+  CONFIRMED: { label: 'Confirmed', color: 'text-emerald-500', bg: 'bg-emerald-50' },
+  RESCHEDULED: { label: 'Rescheduled', color: 'text-amber-500', bg: 'bg-amber-50' },
+  CANCELED: { label: 'Canceled', color: 'text-red-500', bg: 'bg-red-50' },
+  CANCELLED: { label: 'Canceled', color: 'text-red-500', bg: 'bg-red-50' },
+  COMPLETED: { label: 'Completed', color: 'text-slate-600', bg: 'bg-slate-100' },
+  RESULT_RECORDED: { label: 'Result recorded', color: 'text-emerald-600', bg: 'bg-emerald-50' },
 };
 
 function statusOf(i: InterviewRow): InterviewStatus {
@@ -243,32 +234,32 @@ export const InterviewScheduleTab: React.FC = () => {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}>
+      <div className="flex justify-center items-center h-[400px]">
         <Spin size="large" />
       </div>
     );
   }
 
   return (
-    <div style={{ padding: '0 0 40px', fontFamily: 'Inter, sans-serif' }}>
-      <div style={{ padding: '0 24px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+    <div className="pb-10 font-sans">
+      <div className="px-6 pb-5 flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 style={{ fontSize: 20, fontWeight: 800, color: c.text, margin: '0 0 4px', letterSpacing: '-0.01em' }}>Interview Schedule</h2>
-          <p style={{ fontSize: 13, color: c.textMuted, margin: 0 }}>Manage all upcoming and past interview appointments</p>
+          <h2 className="text-xl font-extrabold text-slate-900 m-0 mb-1 tracking-tight">Interview Schedule</h2>
+          <p className="text-[13px] text-slate-500 m-0">Manage all upcoming and past interview appointments</p>
         </div>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+        <div className="flex gap-2 items-center flex-wrap">
           <Input
             placeholder="Search by student or job"
             prefix={<SearchOutlined />}
             value={search}
             onChange={e => setSearch(e.target.value)}
-            style={{ width: 240 }}
+            className="w-60"
             allowClear
           />
           <Select
             value={filter}
             onChange={(v: StatusFilter) => setFilter(v)}
-            style={{ width: 140 }}
+            className="w-36"
             options={[
               { value: 'ALL', label: 'All' },
               { value: 'UPCOMING', label: 'Upcoming' },
@@ -285,7 +276,7 @@ export const InterviewScheduleTab: React.FC = () => {
               setProposedSlots([]);
               setScheduleOpen(true);
             }}
-            style={{ background: c.brand, borderColor: c.brand }}
+            className="bg-[#E67E22] border-[#E67E22] hover:bg-[#D35400] hover:border-[#D35400]"
           >
             Schedule Interview
           </Button>
@@ -293,58 +284,50 @@ export const InterviewScheduleTab: React.FC = () => {
       </div>
 
       {error && interviews.length === 0 ? (
-        <div style={{ padding: 60, textAlign: 'center', color: c.error, background: c.surface, borderRadius: c.radiusLg, border: `1px solid ${c.border}`, margin: '0 24px' }}>
-          <CalendarOutlined style={{ fontSize: 48, marginBottom: 12, display: 'block' }} />
-          <div style={{ fontSize: 15, fontWeight: 600, color: c.text, marginBottom: 4 }}>Unable to sync calendar schedules</div>
-          <div style={{ fontSize: 13, color: c.textMuted, marginBottom: 12 }}>{error}</div>
-          <Button type="primary" onClick={fetchInterviews} style={{ background: c.brand, borderColor: c.brand }}>Try Again</Button>
+        <div className="p-[60px] text-center text-red-500 bg-white rounded-2xl border border-slate-200 mx-6">
+          <CalendarOutlined className="text-[48px] mb-3 block" />
+          <div className="text-[15px] font-semibold text-slate-900 mb-1">Unable to sync calendar schedules</div>
+          <div className="text-[13px] text-slate-500 mb-3">{error}</div>
+          <Button type="primary" onClick={fetchInterviews} className="bg-[#E67E22] border-[#E67E22]">Try Again</Button>
         </div>
       ) : filtered.length === 0 ? (
-        <div style={{ padding: 60, textAlign: 'center', color: c.textMuted, background: c.surface, borderRadius: c.radiusLg, border: `1px solid ${c.border}`, margin: '0 24px' }}>
-          <CalendarOutlined style={{ fontSize: 48, marginBottom: 12, display: 'block' }} />
-          <div style={{ fontSize: 15, fontWeight: 600, color: c.text, marginBottom: 4 }}>No interviews match your filter</div>
-          <div style={{ fontSize: 13, color: c.textMuted }}>Try changing the filter or schedule a new interview above.</div>
+        <div className="p-[60px] text-center text-slate-500 bg-white rounded-2xl border border-slate-200 mx-6">
+          <CalendarOutlined className="text-[48px] mb-3 block" />
+          <div className="text-[15px] font-semibold text-slate-900 mb-1">No interviews match your filter</div>
+          <div className="text-[13px] text-slate-500">Try changing the filter or schedule a new interview above.</div>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, padding: '0 24px' }}>
+        <div className="grid grid-cols-2 gap-3 px-6">
           {filtered.map(i => {
             const meta = STATUS_META[statusOf(i)] ?? STATUS_META.SCHEDULED;
             return (
               <div
                 key={i.interviewId}
                 onClick={() => setSelected(i)}
-                style={{
-                  background: c.surface,
-                  border: `1px solid ${c.border}`,
-                  borderRadius: c.radiusLg,
-                  padding: 16,
-                  cursor: 'pointer',
-                  transition: 'all 0.15s',
-                  boxShadow: selected?.interviewId === i.interviewId ? c.shadowMd : c.shadowSm,
-                }}
-                onMouseEnter={e => (e.currentTarget.style.boxShadow = c.shadowMd)}
-                onMouseLeave={e => (e.currentTarget.style.boxShadow = selected?.interviewId === i.interviewId ? c.shadowMd : c.shadowSm)}
+                className={`bg-white border rounded-2xl p-4 cursor-pointer transition-all
+                  ${selected?.interviewId === i.interviewId ? 'border-slate-300 shadow-md' : 'border-slate-200 shadow-sm hover:shadow-md'}
+                `}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
+                <div className="flex justify-between items-start mb-3">
                   <div>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: c.text }}>{i.studentName ?? 'Student'}</div>
-                    <div style={{ fontSize: 12, color: c.textMuted }}>{i.jobTitle ?? '—'}</div>
+                    <div className="text-[14px] font-bold text-slate-900">{i.studentName ?? 'Student'}</div>
+                    <div className="text-[12px] text-slate-500">{i.jobTitle ?? '—'}</div>
                   </div>
-                  <span style={{ padding: '4px 10px', borderRadius: c.radiusFull, background: meta.bg, color: meta.color, fontSize: 11, fontWeight: 700 }}>{meta.label}</span>
+                  <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold ${meta.bg} ${meta.color}`}>{meta.label}</span>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, fontSize: 12, color: c.textSecondary }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <CalendarOutlined style={{ color: c.textMuted }} />
+                <div className="flex flex-col gap-1.5 text-[12px] text-slate-600">
+                  <div className="flex items-center gap-1.5">
+                    <CalendarOutlined className="text-slate-400" />
                     {i.scheduledTime ? dayjs(i.scheduledTime).format('ddd, MMM D YYYY · HH:mm') : '—'}
                   </div>
                   {i.location && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <EnvironmentOutlined style={{ color: c.textMuted }} /> {i.location}
+                    <div className="flex items-center gap-1.5">
+                      <EnvironmentOutlined className="text-slate-400" /> {i.location}
                     </div>
                   )}
                   {i.meetingLink && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <LinkOutlined style={{ color: c.textMuted }} /> <a href={i.meetingLink} target="_blank" rel="noreferrer">Open meeting</a>
+                    <div className="flex items-center gap-1.5">
+                      <LinkOutlined className="text-slate-400" /> <a href={i.meetingLink} target="_blank" rel="noreferrer" className="text-blue-500 hover:underline">Open meeting</a>
                     </div>
                   )}
                 </div>
@@ -356,12 +339,12 @@ export const InterviewScheduleTab: React.FC = () => {
 
       {/* Detail panel */}
       {selected && (
-        <div style={{ position: 'fixed', right: 0, top: 64, bottom: 0, width: 360, background: c.surface, borderLeft: `1px solid ${c.border}`, padding: 20, overflowY: 'auto', boxShadow: '-8px 0 24px rgba(15,23,42,0.08)', zIndex: 50 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-            <div style={{ fontSize: 16, fontWeight: 800, color: c.text }}>Interview Details</div>
+        <div className="fixed right-0 top-16 bottom-0 w-[360px] bg-white border-l border-slate-200 p-5 overflow-y-auto shadow-[-8px_0_24px_rgba(15,23,42,0.08)] z-50">
+          <div className="flex justify-between items-center mb-4">
+            <div className="text-[16px] font-extrabold text-slate-900">Interview Details</div>
             <Button size="small" onClick={() => setSelected(null)}>Close</Button>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, fontSize: 13 }}>
+          <div className="flex flex-col gap-2.5 text-[13px]">
             <Row label="Student" value={selected.studentName ?? '—'} />
             <Row label="Job post" value={selected.jobTitle ?? '—'} />
             <Row label="Enterprise" value={selected.enterpriseName ?? '—'} />
@@ -376,7 +359,7 @@ export const InterviewScheduleTab: React.FC = () => {
             const s = statusOf(selected);
             if (s === 'CANCELED' || s === 'CANCELLED' || s === 'COMPLETED' || s === 'RESULT_RECORDED') return null;
             return (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 20 }}>
+              <div className="flex flex-col gap-2 mt-5">
                 <Button block icon={<EditOutlined />} onClick={() => { 
                   rescheduleForm.resetFields(); 
                   if (selected) {
@@ -400,7 +383,7 @@ export const InterviewScheduleTab: React.FC = () => {
 
       {/* Schedule new modal */}
       <Modal
-        title={<div style={{ fontWeight: 800, color: c.text }}>Schedule Interview</div>}
+        title={<div className="font-extrabold text-slate-900">Schedule Interview</div>}
         open={scheduleOpen}
         onCancel={() => { if (!submitting) { setScheduleOpen(false); setProposedSlots([]); } }}
         footer={null}
@@ -432,12 +415,12 @@ export const InterviewScheduleTab: React.FC = () => {
             <DatePicker
               showTime={{ format: 'HH:mm', minuteStep: 15 }}
               format="YYYY-MM-DD HH:mm"
-              style={{ width: '100%' }}
+              className="w-full"
               disabledDate={d => d && d.isBefore(dayjs().startOf('day'))}
             />
           </Form.Item>
           <Form.Item label="Duration (minutes)" name="durationMinutes" initialValue={60}>
-            <InputNumber min={15} max={240} step={15} style={{ width: '100%' }} />
+            <InputNumber min={15} max={240} step={15} className="w-full" />
           </Form.Item>
           <Form.Item label="Location" name="location">
             <Input placeholder="Office address (optional if online)" />
@@ -445,7 +428,7 @@ export const InterviewScheduleTab: React.FC = () => {
           <Form.Item label="Online meeting link" name="meetingLink" rules={[{ type: 'url', message: 'Must be a valid URL', warningOnly: true }]}>
             <Input placeholder="https://meet..." />
           </Form.Item>
-          <div style={{ marginBottom: 12 }}>
+          <div className="mb-3">
             <Button
               size="small"
               loading={proposing}
@@ -461,13 +444,13 @@ export const InterviewScheduleTab: React.FC = () => {
               Propose open slots
             </Button>
             {proposedSlots.length > 0 && (
-              <div style={{ marginTop: 8, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              <div className="mt-2 flex flex-wrap gap-1.5">
                 {proposedSlots.map(s => (
                   <Button
                     key={s}
                     size="small"
                     onClick={() => form.setFieldsValue({ scheduledTime: dayjs(s) })}
-                    style={{ borderColor: c.brand, color: c.brand }}
+                    className="border-[#E67E22] text-[#E67E22] hover:bg-[#E67E22]/10"
                   >
                     {dayjs(s).format('MMM D · HH:mm')}
                   </Button>
@@ -475,9 +458,9 @@ export const InterviewScheduleTab: React.FC = () => {
               </div>
             )}
           </div>
-          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+          <div className="flex gap-2 justify-end">
             <Button onClick={() => setScheduleOpen(false)} disabled={submitting}>Cancel</Button>
-            <Button type="primary" loading={submitting} onClick={handleSubmitSchedule} style={{ background: c.brand, borderColor: c.brand }}>
+            <Button type="primary" loading={submitting} onClick={handleSubmitSchedule} className="bg-[#E67E22] border-[#E67E22]">
               Save Schedule
             </Button>
           </div>
@@ -486,7 +469,7 @@ export const InterviewScheduleTab: React.FC = () => {
 
       {/* Reschedule modal */}
       <Modal
-        title={<div style={{ fontWeight: 800, color: c.text }}>Reschedule Interview</div>}
+        title={<div className="font-extrabold text-slate-900">Reschedule Interview</div>}
         open={rescheduleOpen}
         onCancel={() => { if (!submitting) setRescheduleOpen(false); }}
         footer={null}
@@ -498,7 +481,7 @@ export const InterviewScheduleTab: React.FC = () => {
             <DatePicker
               showTime={{ format: 'HH:mm', minuteStep: 15 }}
               format="YYYY-MM-DD HH:mm"
-              style={{ width: '100%' }}
+              className="w-full"
               disabledDate={d => d && d.isBefore(dayjs().startOf('day'))}
             />
           </Form.Item>
@@ -511,9 +494,9 @@ export const InterviewScheduleTab: React.FC = () => {
           <Form.Item label="Reason (optional)" name="reason">
             <TextArea rows={2} maxLength={300} placeholder="Why are you rescheduling?" />
           </Form.Item>
-          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+          <div className="flex gap-2 justify-end">
             <Button onClick={() => setRescheduleOpen(false)} disabled={submitting}>Cancel</Button>
-            <Button type="primary" loading={submitting} onClick={handleReschedule} style={{ background: c.brand, borderColor: c.brand }}>
+            <Button type="primary" loading={submitting} onClick={handleReschedule} className="bg-[#E67E22] border-[#E67E22]">
               Update
             </Button>
           </div>
@@ -522,14 +505,14 @@ export const InterviewScheduleTab: React.FC = () => {
 
       {/* Cancel modal */}
       <Modal
-        title={<div style={{ fontWeight: 800, color: c.text }}>Cancel Interview</div>}
+        title={<div className="font-extrabold text-slate-900">Cancel Interview</div>}
         open={cancelOpen}
         onCancel={() => { if (!submitting) setCancelOpen(false); }}
         footer={null}
         width={460}
         destroyOnHidden
       >
-        <p style={{ fontSize: 13, color: c.textSecondary, marginBottom: 8 }}>
+        <p className="text-[13px] text-slate-600 mb-2">
           Please provide a reason. The student will be notified via email.
         </p>
         <TextArea
@@ -540,7 +523,7 @@ export const InterviewScheduleTab: React.FC = () => {
           onChange={e => setCancelReason(e.target.value)}
           placeholder="Reason for cancellation"
         />
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 12 }}>
+        <div className="flex gap-2 justify-end mt-3">
           <Button onClick={() => setCancelOpen(false)} disabled={submitting}>Back</Button>
           <Button danger loading={submitting} onClick={handleCancel}>Confirm cancellation</Button>
         </div>
@@ -550,8 +533,8 @@ export const InterviewScheduleTab: React.FC = () => {
 };
 
 const Row: React.FC<{ label: string; value: string }> = ({ label, value }) => (
-  <div style={{ display: 'flex', flexDirection: 'column', gap: 2, padding: '8px 12px', background: c.bgLight, borderRadius: c.radiusSm }}>
-    <div style={{ fontSize: 10, fontWeight: 700, color: c.textMuted, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</div>
-    <div style={{ fontSize: 13, color: c.text, wordBreak: 'break-word' }}>{value}</div>
+  <div className="flex flex-col gap-0.5 p-2 px-3 bg-slate-50 rounded-lg">
+    <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{label}</div>
+    <div className="text-[13px] text-slate-900 break-words">{value}</div>
   </div>
 );

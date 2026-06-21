@@ -9,7 +9,6 @@ import {
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { InterviewService } from '@/services/InterviewService';
-import { c } from '../constants';
 
 const { TextArea } = Input;
 
@@ -22,14 +21,6 @@ interface InterviewRow {
   status?: string;
   result?: string;
   feedback?: string;
-}
-
-function hexToRgba(hex: string, alpha: number): string {
-  const h = hex.replace('#', '');
-  const r = Number.parseInt(h.substring(0, 2), 16);
-  const g = Number.parseInt(h.substring(2, 4), 16);
-  const b = Number.parseInt(h.substring(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
 export const InterviewResultTab: React.FC = () => {
@@ -96,59 +87,50 @@ export const InterviewResultTab: React.FC = () => {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 400 }}>
+      <div className="flex justify-center items-center h-[400px]">
         <Spin size="large" />
       </div>
     );
   }
 
   return (
-    <div style={{ padding: '0 0 40px', fontFamily: 'Inter, sans-serif' }}>
-      <div style={{ padding: '0 24px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+    <div className="pb-10 font-sans">
+      <div className="px-6 pb-5 flex items-center justify-between">
         <div>
-          <h2 style={{ fontSize: 20, fontWeight: 800, color: c.text, margin: '0 0 4px', letterSpacing: '-0.01em' }}>Interview Results</h2>
-          <p style={{ fontSize: 13, color: c.textMuted, margin: 0 }}>Record Pass / Fail for candidates who have completed their interview</p>
+          <h2 className="text-xl font-extrabold text-slate-900 m-0 mb-1 tracking-tight">Interview Results</h2>
+          <p className="text-[13px] text-slate-500 m-0">Record Pass / Fail for candidates who have completed their interview</p>
         </div>
-        <Button icon={<ReloadOutlined />} onClick={fetchRows}>Refresh</Button>
+        <Button icon={<ReloadOutlined />} onClick={fetchRows} className="rounded-xl">Refresh</Button>
       </div>
 
       {sorted.length === 0 ? (
-        <div style={{ padding: 60, textAlign: 'center', color: c.textMuted, background: c.surface, borderRadius: c.radiusLg, border: `1px solid ${c.border}`, margin: '0 24px' }}>
-          <TrophyOutlined style={{ fontSize: 48, marginBottom: 12, display: 'block' }} />
-          <div style={{ fontSize: 15, fontWeight: 600, color: c.text, marginBottom: 4 }}>No completed interviews to grade</div>
-          <div style={{ fontSize: 13, color: c.textMuted }}>Once a candidate completes an interview, they will appear here for final evaluation.</div>
+        <div className="p-[60px] text-center text-slate-500 bg-white rounded-2xl border border-slate-200 mx-6">
+          <TrophyOutlined className="text-[48px] mb-3 block" />
+          <div className="text-[15px] font-semibold text-slate-900 mb-1">No completed interviews to grade</div>
+          <div className="text-[13px] text-slate-500">Once a candidate completes an interview, they will appear here for final evaluation.</div>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '0 24px' }}>
+        <div className="flex flex-col gap-2 px-6">
           {sorted.map(r => (
             <div
               key={r.interviewId}
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr auto',
-                gap: 12,
-                alignItems: 'center',
-                background: c.surface,
-                border: `1px solid ${c.border}`,
-                borderRadius: c.radiusMd,
-                padding: '14px 18px',
-              }}
+              className="grid grid-cols-[1fr_auto] gap-3 items-center bg-white border border-slate-200 rounded-xl px-4.5 py-3.5 hover:shadow-sm transition-shadow"
             >
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                  <span style={{ fontSize: 14, fontWeight: 700, color: c.text }}>{r.studentName ?? 'Student'}</span>
-                  <span style={{ fontSize: 12, color: c.textMuted }}>· {r.jobTitle ?? '—'}</span>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[14px] font-bold text-slate-900">{r.studentName ?? 'Student'}</span>
+                  <span className="text-[12px] text-slate-500">· {r.jobTitle ?? '—'}</span>
                 </div>
-                <div style={{ fontSize: 12, color: c.textMuted, display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <CalendarOutlined /> {r.scheduledTime ? dayjs(r.scheduledTime).format('ddd, MMM D YYYY · HH:mm') : '—'}
+                <div className="text-[12px] text-slate-500 flex items-center gap-1.5">
+                  <CalendarOutlined className="text-slate-400" /> {r.scheduledTime ? dayjs(r.scheduledTime).format('ddd, MMM D YYYY · HH:mm') : '—'}
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: 8 }}>
+              <div className="flex gap-2">
                 <Button
                   type="primary"
                   icon={<CheckCircleOutlined />}
                   onClick={() => { setDecisionOpen({ row: r, decision: 'PASS' }); setNotes(''); }}
-                  style={{ background: c.success, borderColor: c.success }}
+                  className="bg-emerald-500 border-emerald-500 rounded-xl font-bold"
                 >
                   Pass
                 </Button>
@@ -156,6 +138,7 @@ export const InterviewResultTab: React.FC = () => {
                   danger
                   icon={<CloseCircleOutlined />}
                   onClick={() => { setDecisionOpen({ row: r, decision: 'FAIL' }); setNotes(''); }}
+                  className="rounded-xl font-bold"
                 >
                   Fail
                 </Button>
@@ -167,7 +150,7 @@ export const InterviewResultTab: React.FC = () => {
 
       <Modal
         title={
-          <div style={{ fontWeight: 800, color: c.text }}>
+          <div className="font-extrabold text-slate-900 font-sans">
             Confirm {decisionOpen?.decision === 'PASS' ? 'Pass' : 'Fail'}
           </div>
         }
@@ -177,14 +160,14 @@ export const InterviewResultTab: React.FC = () => {
         width={460}
         destroyOnHidden
       >
-        <p style={{ fontSize: 13, color: c.textSecondary, marginBottom: 12 }}>
+        <p className="text-[13px] text-slate-600 mb-3">
           Are you sure you want to record <strong>{decisionOpen?.decision}</strong> for{' '}
           <strong>{decisionOpen?.row.studentName}</strong>?
         </p>
         {decisionOpen?.decision === 'FAIL' && (
-          <div style={{ marginBottom: 12 }}>
-            <div style={{ fontSize: 12, fontWeight: 700, color: c.textMuted, marginBottom: 6 }}>
-              Evaluation Notes / Feedback <span style={{ color: c.error }}>*</span>
+          <div className="mb-3">
+            <div className="text-[12px] font-bold text-slate-500 mb-1.5">
+              Evaluation Notes / Feedback <span className="text-red-500">*</span>
             </div>
             <TextArea
               rows={3}
@@ -193,25 +176,26 @@ export const InterviewResultTab: React.FC = () => {
               maxLength={500}
               showCount
               placeholder="Required: explain why this candidate is being failed"
+              className="rounded-xl"
             />
           </div>
         )}
         {decisionOpen?.decision === 'PASS' && (
-          <div style={{ marginBottom: 12 }}>
-            <div style={{ fontSize: 12, fontWeight: 700, color: c.textMuted, marginBottom: 6 }}>
+          <div className="mb-3">
+            <div className="text-[12px] font-bold text-slate-500 mb-1.5">
               Notes (optional)
             </div>
-            <TextArea rows={2} value={notes} onChange={e => setNotes(e.target.value)} maxLength={500} />
+            <TextArea rows={2} value={notes} onChange={e => setNotes(e.target.value)} maxLength={500} className="rounded-xl" />
           </div>
         )}
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-          <Button onClick={() => { setDecisionOpen(null); setNotes(''); }} disabled={submitting}>Cancel</Button>
+        <div className="flex gap-2 justify-end mt-2">
+          <Button onClick={() => { setDecisionOpen(null); setNotes(''); }} disabled={submitting} className="rounded-xl">Cancel</Button>
           <Button
             danger={decisionOpen?.decision === 'FAIL'}
             type="primary"
             loading={submitting}
             onClick={handleConfirm}
-            style={decisionOpen?.decision === 'PASS' ? { background: c.success, borderColor: c.success } : undefined}
+            className={decisionOpen?.decision === 'PASS' ? "bg-emerald-500 border-emerald-500 rounded-xl font-bold" : "rounded-xl font-bold"}
           >
             Confirm
           </Button>
