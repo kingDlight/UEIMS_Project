@@ -54,17 +54,28 @@ public class ExcelImportUtil {
         return student;
     }
 
+    private static final org.apache.poi.ss.usermodel.DataFormatter formatter =
+            new org.apache.poi.ss.usermodel.DataFormatter();
+
     private static String getRequiredStringCellValue(Row row, int cellIndex) {
         Cell cell = row.getCell(cellIndex, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
         if (cell == null) {
             throw new AppException(ErrorCode.INVALID_EXCEL_FORMAT);
         }
-        return cell.getStringCellValue();
+        String val = formatter.formatCellValue(cell).trim();
+        if (val.isEmpty()) {
+            throw new AppException(ErrorCode.INVALID_EXCEL_FORMAT);
+        }
+        return val;
     }
 
     private static String getOptionalStringCellValue(Row row, int cellIndex) {
         Cell cell = row.getCell(cellIndex, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
-        return cell != null ? cell.getStringCellValue() : null;
+        if (cell == null) {
+            return null;
+        }
+        String val = formatter.formatCellValue(cell).trim();
+        return val.isEmpty() ? null : val;
     }
 
     private static BigDecimal getRequiredGpaValue(Row row, int cellIndex) {
@@ -72,11 +83,16 @@ public class ExcelImportUtil {
         if (cell == null) {
             throw new AppException(ErrorCode.INVALID_EXCEL_FORMAT);
         }
-        BigDecimal gpa = new BigDecimal(String.valueOf(cell.getNumericCellValue()));
-        if (gpa.compareTo(BigDecimal.ZERO) < 0 || gpa.compareTo(new BigDecimal("10.0")) > 0) {
+        try {
+            String strVal = formatter.formatCellValue(cell).trim();
+            BigDecimal gpa = new BigDecimal(strVal);
+            if (gpa.compareTo(BigDecimal.ZERO) < 0 || gpa.compareTo(new BigDecimal("10.0")) > 0) {
+                throw new AppException(ErrorCode.INVALID_EXCEL_FORMAT);
+            }
+            return gpa;
+        } catch (NumberFormatException e) {
             throw new AppException(ErrorCode.INVALID_EXCEL_FORMAT);
         }
-        return gpa;
     }
 
     private static int getRequiredIntCellValue(Row row, int cellIndex) {
@@ -84,6 +100,11 @@ public class ExcelImportUtil {
         if (cell == null) {
             throw new AppException(ErrorCode.INVALID_EXCEL_FORMAT);
         }
-        return (int) cell.getNumericCellValue();
+        try {
+            String strVal = formatter.formatCellValue(cell).trim();
+            return Integer.parseInt(strVal);
+        } catch (NumberFormatException e) {
+            throw new AppException(ErrorCode.INVALID_EXCEL_FORMAT);
+        }
     }
 }
