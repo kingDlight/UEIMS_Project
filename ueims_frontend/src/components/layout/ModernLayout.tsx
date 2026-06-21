@@ -205,7 +205,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
       // Force user to log out and log back in to get a fresh token with mustChangePassword=false
       if (mustChangePassword) {
         logout();
-        navigate('/login');
+        navigate('/login', { replace: true });
       }
     } catch (error: any) {
       const code = error.response?.data?.code;
@@ -328,7 +328,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
       }
     }
     logout();
-    navigate('/login');
+    navigate('/login', { replace: true });
   };
 
   useEffect(() => {

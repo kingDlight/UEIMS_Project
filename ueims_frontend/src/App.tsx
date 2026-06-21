@@ -13,7 +13,7 @@ const queryClient = new QueryClient();
 function App() {
   useEffect(() => {
     const handleLogout = () => {
-      router.navigate('/login');
+      router.navigate('/login', { replace: true });
     };
     globalThis.addEventListener('auth:logout', handleLogout);
     return () => globalThis.removeEventListener('auth:logout', handleLogout);

@@ -20,7 +20,7 @@ export const NoRolePage: React.FC = () => {
       }
     }
     logout();
-    navigate('/login');
+    navigate('/login', { replace: true });
   };
 
   return (

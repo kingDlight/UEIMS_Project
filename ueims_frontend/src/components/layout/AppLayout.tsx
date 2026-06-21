@@ -41,7 +41,7 @@ export const AppLayout: React.FC = () => {
       // Vẫn tiếp tục logout local dù API lỗi
     } finally {
       logout();
-      navigate('/login');
+      navigate('/login', { replace: true });
     }
   };
 
@@ -62,7 +62,7 @@ export const AppLayout: React.FC = () => {
       setChangePasswordVisible(false);
       if (mustChangePassword) {
         logout();
-        navigate('/login');
+        navigate('/login', { replace: true });
       }
     } catch (error: any) {
       const code = error.response?.data?.code;
