@@ -89,10 +89,10 @@ class AuditLogServiceImplTest {
         AuditLog nullValuesLog = new AuditLog();
         nullValuesLog.setLogId(UUID.randomUUID());
 
-        when(repository.findByDateRange(any(LocalDateTime.class), any(LocalDateTime.class)))
+        when(repository.findByDateRangeAndAction(any(LocalDateTime.class), any(LocalDateTime.class), any()))
                 .thenReturn(List.of(auditLog, nullValuesLog));
 
-        byte[] result = service.exportExcel(LocalDate.now().minusDays(1), LocalDate.now());
+        byte[] result = service.exportExcel(LocalDate.now().minusDays(1), LocalDate.now(), null);
 
         assertNotNull(result);
         assertTrue(result.length > 0);
@@ -100,10 +100,10 @@ class AuditLogServiceImplTest {
 
     @Test
     void exportExcel_withNullDates_success() {
-        when(repository.findByDateRange(any(LocalDateTime.class), any(LocalDateTime.class)))
+        when(repository.findByDateRangeAndAction(any(LocalDateTime.class), any(LocalDateTime.class), any()))
                 .thenReturn(List.of(auditLog));
 
-        byte[] result = service.exportExcel(null, null);
+        byte[] result = service.exportExcel(null, null, null);
 
         assertNotNull(result);
         assertTrue(result.length > 0);
@@ -119,11 +119,11 @@ class AuditLogServiceImplTest {
             }
         };
 
-        when(repository.findByDateRange(any(LocalDateTime.class), any(LocalDateTime.class)))
+        when(repository.findByDateRangeAndAction(any(LocalDateTime.class), any(LocalDateTime.class), any()))
                 .thenReturn(largeList);
 
         LocalDate date = LocalDate.now();
-        AppException exception = assertThrows(AppException.class, () -> service.exportExcel(date, date));
+        AppException exception = assertThrows(AppException.class, () -> service.exportExcel(date, date, null));
 
         assertEquals(ErrorCode.EXPORT_LOG_EXCEED_LIMIT, exception.getErrorCode());
     }
