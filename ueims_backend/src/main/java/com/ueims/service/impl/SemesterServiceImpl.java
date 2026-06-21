@@ -65,8 +65,7 @@ public class SemesterServiceImpl implements SemesterService {
         if (entity.getStartDate() != null && entity.getEndDate() != null) {
             List<Semester> existingSemesters = repository.findAll();
             for (Semester s : existingSemesters) {
-                if (entity.getSemesterId() != null && entity.getSemesterId().equals(s.getSemesterId()))
-                    continue;
+                if (entity.getSemesterId() != null && entity.getSemesterId().equals(s.getSemesterId())) continue;
                 if (s.getStartDate() != null && s.getEndDate() != null) {
                     if (entity.getStartDate().isBefore(s.getEndDate())
                             && entity.getEndDate().isAfter(s.getStartDate())) {
