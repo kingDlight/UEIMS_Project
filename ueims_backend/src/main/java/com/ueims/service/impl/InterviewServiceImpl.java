@@ -260,12 +260,14 @@ public class InterviewServiceImpl implements InterviewService {
         checkEnterpriseOwnershipOrTm(existing, currentUser);
 
         // BR-35: future time required when rescheduling
+        boolean timeChanged = false;
         if (entity.getScheduledTime() != null) {
             if (entity.getScheduledTime().isBefore(LocalDateTime.now())) {
                 throw new AppException(ErrorCode.INTERVIEW_DATE_MUST_BE_IN_FUTURE);
             }
             if (!entity.getScheduledTime().equals(existing.getScheduledTime())) {
                 existing.setStudentConfirmed(false);
+                timeChanged = true;
             }
             existing.setScheduledTime(entity.getScheduledTime());
         }
@@ -277,12 +279,15 @@ public class InterviewServiceImpl implements InterviewService {
         existing.setUpdatedAt(LocalDateTime.now());
 
         Interview saved = repository.saveAndFlush(existing);
-        // 43.2: send reschedule email to student
-        try {
-            mailService.sendInterviewRescheduled(saved);
-            notificationService.notifyInterviewRescheduled(saved);
-        } catch (Exception ex) {
-            log.warn("[UC-43 43.2] Reschedule notification failed: {}", ex.getMessage());
+        
+        if (timeChanged) {
+            // 43.2: send reschedule email to student
+            try {
+                mailService.sendInterviewRescheduled(saved);
+                notificationService.notifyInterviewRescheduled(saved);
+            } catch (Exception ex) {
+                log.warn("[UC-43 43.2] Reschedule notification failed: {}", ex.getMessage());
+            }
         }
         return saved;
     }

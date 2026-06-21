@@ -131,18 +131,22 @@ public class MailService {
     }
 
     // ===== Interview notifications (UC-43 / UC-44) =====
+    @Async("mailTaskExecutor")
     public void sendInterviewScheduled(Interview interview) {
         sendInterviewEmail(interview, "interview-scheduled", "Lịch phỏng vấn mới — UEIMS", null);
     }
 
+    @Async("mailTaskExecutor")
     public void sendInterviewRescheduled(Interview interview) {
         sendInterviewEmail(interview, "interview-rescheduled", "Lịch phỏng vấn đã được dời — UEIMS", null);
     }
 
+    @Async("mailTaskExecutor")
     public void sendInterviewCanceled(Interview interview, String reason) {
         sendInterviewEmail(interview, "interview-canceled", "Lịch phỏng vấn đã bị hủy — UEIMS", reason);
     }
 
+    @Async("mailTaskExecutor")
     public void sendInterviewResult(Interview interview, String result, String notes) {
         sendInterviewEmail(
                 interview,
