@@ -103,7 +103,7 @@ public enum ErrorCode {
     INTERVIEW_DATE_MUST_BE_IN_FUTURE(1053, "Interview date must be in the future", HttpStatus.BAD_REQUEST),
     INTERVIEW_ELIGIBILITY_RULE(
             1054,
-            "Only candidates who have passed the screening round can be scheduled for an interview",
+            "Only candidates who are Pending or have passed the screening round can be scheduled for an interview",
             HttpStatus.BAD_REQUEST),
     INTERVIEW_OVERLAP(
             1055, "Interview time overlaps with an existing schedule for the enterprise", HttpStatus.BAD_REQUEST),
