@@ -61,6 +61,19 @@ public class SemesterServiceImpl implements SemesterService {
                 && !entity.getStartDate().isBefore(entity.getEndDate())) {
             throw new AppException(ErrorCode.SEMESTER_INVALID_DATE);
         }
+        if (entity.getStartDate() != null && entity.getEndDate() != null) {
+            List<Semester> existingSemesters = repository.findAll();
+            for (Semester s : existingSemesters) {
+                if (entity.getSemesterId() != null && entity.getSemesterId().equals(s.getSemesterId())) continue;
+                if (s.getStartDate() != null && s.getEndDate() != null) {
+                    if (entity.getStartDate().isBefore(s.getEndDate())
+                            && entity.getEndDate().isAfter(s.getStartDate())) {
+                        throw new AppException(
+                                ErrorCode.SEMESTER_INVALID_DATE, "Semester dates overlap with another semester");
+                    }
+                }
+            }
+        }
     }
 
     private void validateForCreate(Semester entity) {

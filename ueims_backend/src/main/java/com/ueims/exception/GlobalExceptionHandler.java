@@ -65,10 +65,16 @@ public class GlobalExceptionHandler {
         String message = exception.getMostSpecificCause().getMessage();
         log.warn("Data integrity violation: {}", message);
         ErrorCode errorCode = ErrorCode.DATA_INTEGRITY_VIOLATION;
-        String userMessage = message != null && message.contains(ERROR_PREFIX)
-                ? message.substring(message.indexOf(ERROR_PREFIX) + ERROR_PREFIX.length())
-                        .split("\n")[0]
-                : errorCode.getMessage();
+        String userMessage;
+        if (message != null && message.contains("users_roles_pkey")) {
+            errorCode = ErrorCode.USER_ALREADY_HAS_ROLE;
+            userMessage = errorCode.getMessage();
+        } else {
+            userMessage = message != null && message.contains(ERROR_PREFIX)
+                    ? message.substring(message.indexOf(ERROR_PREFIX) + ERROR_PREFIX.length())
+                            .split("\n")[0]
+                    : errorCode.getMessage();
+        }
         return ResponseEntity.status(errorCode.getStatusCode())
                 .body(ApiResponse.<Void>builder()
                         .code(errorCode.getCode())

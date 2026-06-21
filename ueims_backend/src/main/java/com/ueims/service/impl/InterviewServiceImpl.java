@@ -257,19 +257,7 @@ public class InterviewServiceImpl implements InterviewService {
     public Interview update(UUID id, Interview entity) {
         Interview existing = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.INTERVIEW_NOT_FOUND));
         User currentUser = getCurrentUser();
-
-        // Ownership check
-        if (currentUser.getEnterprise() == null
-                || existing.getApplication() == null
-                || existing.getApplication().getJobPost() == null
-                || existing.getApplication().getJobPost().getEnterprise() == null
-                || !existing.getApplication()
-                        .getJobPost()
-                        .getEnterprise()
-                        .getEnterpriseId()
-                        .equals(currentUser.getEnterprise().getEnterpriseId())) {
-            throw new AppException(ErrorCode.UNAUTHORIZED);
-        }
+        checkEnterpriseOwnershipOrTm(existing, currentUser);
 
         // BR-35: future time required when rescheduling
         if (entity.getScheduledTime() != null) {
@@ -301,19 +289,7 @@ public class InterviewServiceImpl implements InterviewService {
     public Interview recordResult(UUID id, String result, String notes) {
         Interview existing = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.INTERVIEW_NOT_FOUND));
         User currentUser = getCurrentUser();
-
-        // Ownership check
-        if (currentUser.getEnterprise() == null
-                || existing.getApplication() == null
-                || existing.getApplication().getJobPost() == null
-                || existing.getApplication().getJobPost().getEnterprise() == null
-                || !existing.getApplication()
-                        .getJobPost()
-                        .getEnterprise()
-                        .getEnterpriseId()
-                        .equals(currentUser.getEnterprise().getEnterpriseId())) {
-            throw new AppException(ErrorCode.UNAUTHORIZED);
-        }
+        checkEnterpriseOwnershipOrTm(existing, currentUser);
 
         // Removed BR-37 check to allow recording result without explicitly marking COMPLETED first
 
@@ -408,18 +384,8 @@ public class InterviewServiceImpl implements InterviewService {
         }
         Interview existing = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.INTERVIEW_NOT_FOUND));
         User currentUser = getCurrentUser();
-        if (currentUser.getEnterprise() == null
-                || existing.getApplication() == null
-                || existing.getApplication().getJobPost() == null
-                || existing.getApplication().getJobPost().getEnterprise() == null
-                || !existing.getApplication()
-                        .getJobPost()
-                        .getEnterprise()
-                        .getEnterpriseId()
-                        .equals(currentUser.getEnterprise().getEnterpriseId())) {
-            throw new AppException(ErrorCode.UNAUTHORIZED);
-        }
-        existing.setStatus("CANCELED");
+        checkEnterpriseOwnershipOrTm(existing, currentUser);
+        existing.setStatus("CANCELLED");
         existing.setCancelReason(reason);
         existing.setCanceledAt(LocalDateTime.now());
         existing.setUpdatedAt(LocalDateTime.now());
@@ -446,20 +412,11 @@ public class InterviewServiceImpl implements InterviewService {
         }
         Interview existing = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.INTERVIEW_NOT_FOUND));
         User currentUser = getCurrentUser();
-        if (currentUser.getEnterprise() == null
-                || existing.getApplication() == null
-                || existing.getApplication().getJobPost() == null
-                || existing.getApplication().getJobPost().getEnterprise() == null
-                || !existing.getApplication()
-                        .getJobPost()
-                        .getEnterprise()
-                        .getEnterpriseId()
-                        .equals(currentUser.getEnterprise().getEnterpriseId())) {
-            throw new AppException(ErrorCode.UNAUTHORIZED);
-        }
+        checkEnterpriseOwnershipOrTm(existing, currentUser);
         // BR-35: also check overlap
-        boolean overlap =
-                repository.existsByEnterpriseAndTime(currentUser.getEnterprise().getEnterpriseId(), newTime);
+        UUID enterpriseIdToCheck =
+                existing.getApplication().getJobPost().getEnterprise().getEnterpriseId();
+        boolean overlap = repository.existsByEnterpriseAndTime(enterpriseIdToCheck, newTime);
         if (overlap) {
             throw new AppException(ErrorCode.INTERVIEW_OVERLAP);
         }
@@ -524,5 +481,22 @@ public class InterviewServiceImpl implements InterviewService {
                         && Math.abs(java.time.Duration.between(i.getScheduledTime(), candidate)
                                         .toMinutes())
                                 < 60);
+    }
+
+    private void checkEnterpriseOwnershipOrTm(Interview existing, User currentUser) {
+        boolean isTm = currentUser.getRoles().stream()
+                .anyMatch(r -> "TRAINING_MANAGER".equals(r.getRole().getRoleName()));
+        if (isTm) return;
+        if (currentUser.getEnterprise() == null
+                || existing.getApplication() == null
+                || existing.getApplication().getJobPost() == null
+                || existing.getApplication().getJobPost().getEnterprise() == null
+                || !existing.getApplication()
+                        .getJobPost()
+                        .getEnterprise()
+                        .getEnterpriseId()
+                        .equals(currentUser.getEnterprise().getEnterpriseId())) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
     }
 }

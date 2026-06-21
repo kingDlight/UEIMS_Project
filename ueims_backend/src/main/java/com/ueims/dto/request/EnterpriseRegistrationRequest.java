@@ -1,6 +1,7 @@
 package com.ueims.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -16,6 +17,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class EnterpriseRegistrationRequest {
     @NotBlank(message = "FIELD_REQUIRED")
+    @Size(max = 255, message = "Enterprise name must not exceed 255 characters")
     String enterpriseName;
 
     @NotBlank(message = "FIELD_REQUIRED")

@@ -12,7 +12,7 @@ public class EnterpriseRequest {
     // UC-36 Normal Flow step 4: validate input data formatting
     // UC-36 Exception 36.0.E1: "Enterprise Name, Address, or Contact Person" are mandatory
     @NotBlank(message = "Enterprise name is required")
-    @Size(max = 500, message = "Enterprise name must not exceed 500 characters")
+    @Size(max = 255, message = "Enterprise name must not exceed 255 characters")
     private String companyName;
 
     @Size(max = 50, message = "Tax code must not exceed 50 characters")
