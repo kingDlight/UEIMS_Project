@@ -26,7 +26,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class GlobalExceptionHandler {
 
-    private static final String MIN_ATTRIBUTE = "min";
     private static final String ERROR_PREFIX = "ERROR: ";
 
     @ExceptionHandler(value = org.springframework.transaction.UnexpectedRollbackException.class)
@@ -244,31 +243,29 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     @SuppressWarnings("unchecked")
     ResponseEntity<ApiResponse<Void>> handlingValidation(MethodArgumentNotValidException exception) {
-        String enumKey = exception.getFieldError().getDefaultMessage();
+        String enumKey =
+                exception.getFieldError() != null ? exception.getFieldError().getDefaultMessage() : null;
 
         ErrorCode errorCode = ErrorCode.INVALID_KEY;
         Map<String, Object> attributes = null;
-        try {
-            errorCode = ErrorCode.valueOf(enumKey);
 
+        try {
             var constraintViolation =
                     exception.getBindingResult().getAllErrors().get(0).unwrap(ConstraintViolation.class);
-
             attributes = constraintViolation.getConstraintDescriptor().getAttributes();
+        } catch (Exception e) {
+            // fallback if unable to unwrap
+        }
 
-            log.info(attributes.toString());
-
+        try {
+            if (enumKey != null) {
+                errorCode = ErrorCode.valueOf(enumKey);
+            }
         } catch (IllegalArgumentException e) {
             // enumKey is not a valid ErrorCode name — fall through; the raw
             // field message will be used as the user-facing message below.
         }
 
-        // UC-36 Exception 36.0.E1: when any mandatory field is left blank,
-        // surface the generic "Please fill in all required fields." message.
-        // Field-level details are still shown to the user via the client-side
-        // form validation (Antd Form rules) for highlighted inputs.
-        String firstFieldMessage =
-                exception.getFieldError() != null ? exception.getFieldError().getDefaultMessage() : null;
         boolean hasBlankOrNullFailure = exception.getBindingResult().getFieldErrors().stream()
                 .anyMatch(fe -> fe.getCode() != null
                         && (fe.getCode().equals("NotBlank")
@@ -282,18 +279,22 @@ public class GlobalExceptionHandler {
             apiResponse.setMessage("Please fill in all required fields.");
         } else {
             apiResponse.setCode(errorCode.getCode());
-            apiResponse.setMessage(
-                    Objects.nonNull(attributes)
-                            ? mapAttribute(errorCode.getMessage(), attributes)
-                            : (firstFieldMessage != null ? firstFieldMessage : errorCode.getMessage()));
+            String baseMessage =
+                    errorCode == ErrorCode.INVALID_KEY && enumKey != null ? enumKey : errorCode.getMessage();
+
+            apiResponse.setMessage(Objects.nonNull(attributes) ? mapAttribute(baseMessage, attributes) : baseMessage);
         }
 
         return ResponseEntity.badRequest().body(apiResponse);
     }
 
     private String mapAttribute(String message, Map<String, Object> attributes) {
-        String minValue = String.valueOf(attributes.get(MIN_ATTRIBUTE));
-
-        return message.replace("{" + MIN_ATTRIBUTE + "}", minValue);
+        if (attributes == null || message == null) return message;
+        for (Map.Entry<String, Object> entry : attributes.entrySet()) {
+            if (entry.getValue() != null) {
+                message = message.replace("{" + entry.getKey() + "}", String.valueOf(entry.getValue()));
+            }
+        }
+        return message;
     }
 }

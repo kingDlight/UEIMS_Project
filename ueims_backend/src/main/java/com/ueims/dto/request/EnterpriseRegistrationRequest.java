@@ -17,7 +17,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class EnterpriseRegistrationRequest {
     @NotBlank(message = "FIELD_REQUIRED")
-    @Size(max = 255, message = "Enterprise name must not exceed 255 characters")
+    @Size(max = 255, message = "Enterprise name must not exceed {max} characters")
     String enterpriseName;
 
     @NotBlank(message = "FIELD_REQUIRED")
