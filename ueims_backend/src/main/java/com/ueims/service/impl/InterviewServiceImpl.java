@@ -274,12 +274,21 @@ public class InterviewServiceImpl implements InterviewService {
         if (entity.getDurationMinutes() != null) existing.setDurationMinutes(entity.getDurationMinutes());
         if (entity.getMeetingLink() != null) existing.setMeetingLink(entity.getMeetingLink());
         if (entity.getLocation() != null) existing.setLocation(entity.getLocation());
-        if (entity.getStatus() != null) existing.setStatus(entity.getStatus().toUpperCase());
+        if (entity.getStatus() != null) {
+            String newStatus = entity.getStatus().toUpperCase();
+            if ("COMPLETED".equals(newStatus) && !"COMPLETED".equals(existing.getStatus())) {
+                if (existing.getScheduledTime() != null
+                        && existing.getScheduledTime().isAfter(LocalDateTime.now())) {
+                    throw new AppException(ErrorCode.INTERVIEW_PREMATURE_COMPLETION);
+                }
+            }
+            existing.setStatus(newStatus);
+        }
         if (entity.getFeedback() != null) existing.setFeedback(entity.getFeedback());
         existing.setUpdatedAt(LocalDateTime.now());
 
         Interview saved = repository.saveAndFlush(existing);
-        
+
         if (timeChanged) {
             // 43.2: send reschedule email to student
             try {
@@ -300,7 +309,10 @@ public class InterviewServiceImpl implements InterviewService {
         checkEnterpriseOwnershipOrTm(existing, currentUser);
 
         // Removed BR-37 check to allow recording result without explicitly marking COMPLETED first
-
+        // TC-ENT-039: Trạng thái COMPLETED chỉ được phép thiết lập sau khi buổi phỏng vấn đã diễn ra thực tế
+        if (existing.getScheduledTime() != null && existing.getScheduledTime().isAfter(LocalDateTime.now())) {
+            throw new AppException(ErrorCode.INTERVIEW_PREMATURE_COMPLETION);
+        }
         // BR-44: rejection requires notes
         if ("FAIL".equalsIgnoreCase(result) && (notes == null || notes.isBlank())) {
             throw new AppException(ErrorCode.FIELD_REQUIRED);

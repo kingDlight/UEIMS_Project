@@ -124,6 +124,10 @@ public enum ErrorCode {
     FEEDBACK_TEXT_REQUIRED(1071, "Feedback text is required when rejecting a report", HttpStatus.BAD_REQUEST),
     INTERVIEW_NOT_COMPLETED(
             1072, "Interview must be in COMPLETED status before recording a result", HttpStatus.BAD_REQUEST),
+    INTERVIEW_PREMATURE_COMPLETION(
+            1106,
+            "Cannot mark interview as COMPLETED before the scheduled time has passed and a result is recorded",
+            HttpStatus.BAD_REQUEST),
 
     // Account related
     USER_PERMANENTLY_LOCKED(
