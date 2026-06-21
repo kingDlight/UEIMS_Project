@@ -151,6 +151,13 @@ public class EnterpriseServiceImpl implements EnterpriseService {
             enterprise.setRejectionReason(reason);
         } else if ("APPROVED".equalsIgnoreCase(status)) {
             enterprise.setRejectionReason(null);
+
+            // Kích hoạt tài khoản User liên kết để doanh nghiệp có thể đăng nhập
+            List<User> users = userRepository.findByEnterprise_EnterpriseId(enterprise.getEnterpriseId());
+            for (User u : users) {
+                u.setStatus("ACTIVE");
+                userRepository.save(u);
+            }
         }
 
         Enterprise saved = repository.save(enterprise);
