@@ -184,7 +184,21 @@ public enum ErrorCode {
             1089, "No APPROVED enterprise is available to match this student", HttpStatus.BAD_REQUEST),
     GPA_BELOW_AUTO_MATCH_THRESHOLD(1090, "Student GPA is below the auto-match threshold (7.0)", HttpStatus.BAD_REQUEST),
     SEMESTER_NAME_INVALID(1091, "Semester name must be at least {min} characters", HttpStatus.BAD_REQUEST),
-    SEMESTER_NAME_TOO_LONG(1092, "Tên học kỳ không được vượt quá 255 ký tự", HttpStatus.BAD_REQUEST),
+    SEMESTER_NAME_TOO_LONG(1092, "Tên học kỳ không được vượt quá {max} ký tự", HttpStatus.BAD_REQUEST),
+    ENTERPRISE_NAME_INVALID_LENGTH(1093, "Enterprise name must not exceed {max} characters", HttpStatus.BAD_REQUEST),
+    TAX_CODE_INVALID_LENGTH(1094, "Tax code must not exceed {max} characters", HttpStatus.BAD_REQUEST),
+    WEBSITE_INVALID_LENGTH(1095, "Website URL must not exceed {max} characters", HttpStatus.BAD_REQUEST),
+    INDUSTRY_INVALID_LENGTH(1096, "Industry must not exceed {max} characters", HttpStatus.BAD_REQUEST),
+    DESCRIPTION_INVALID_LENGTH(1097, "Description must not exceed {max} characters", HttpStatus.BAD_REQUEST),
+    ADDRESS_INVALID_LENGTH(1098, "Address must not exceed {max} characters", HttpStatus.BAD_REQUEST),
+    LOGO_URL_INVALID_LENGTH(1099, "Logo URL must not exceed {max} characters", HttpStatus.BAD_REQUEST),
+    CONTACT_PERSON_INVALID_LENGTH(1100, "Contact person must not exceed {max} characters", HttpStatus.BAD_REQUEST),
+    CONTACT_PHONE_INVALID_LENGTH(1101, "Contact phone must not exceed {max} characters", HttpStatus.BAD_REQUEST),
+    CONTACT_EMAIL_INVALID_LENGTH(1102, "Contact email must not exceed {max} characters", HttpStatus.BAD_REQUEST),
+    REJECTION_REASON_INVALID_LENGTH(
+            1103, "Rejection reason must be between {min} and {max} characters", HttpStatus.BAD_REQUEST),
+    COVER_LETTER_INVALID_LENGTH(1104, "Cover letter must be <= {max} characters", HttpStatus.BAD_REQUEST),
+    CANCEL_REASON_INVALID_LENGTH(1105, "Cancellation reason must not exceed {max} characters", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
