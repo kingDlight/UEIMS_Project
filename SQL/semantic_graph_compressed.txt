@@ -1,0 +1,133 @@
+=== DATABASE SEMANTIC GRAPH (COMPRESSED FOR LLM) ===
+TABLE roles:
+  Columns: role_name VARCHAR(50) [PK], description VARCHAR(500), is_active BOOLEAN NOT NULL, created_at TIMESTAMP NOT NULL, updated_at TIMESTAMP NOT NULL
+
+TABLE permissions:
+  Columns: permission_name VARCHAR(100) [PK], description VARCHAR(500), created_at TIMESTAMP NOT NULL, updated_at TIMESTAMP NOT NULL
+
+TABLE role_permissions:
+  Columns: role_name VARCHAR(50) [PK], permission_name VARCHAR(100) [PK]
+  Foreign Keys: (role_name) -> roles(role_name), (permission_name) -> permissions(permission_name)
+
+TABLE users:
+  Columns: user_id UUID [PK], email VARCHAR(255) NOT NULL [UNIQUE], password_hash VARCHAR(255) NOT NULL, full_name VARCHAR(255) NOT NULL, avatar_url VARCHAR(1000), auth_provider VARCHAR(20) NOT NULL, phone VARCHAR(20), status VARCHAR(20) NOT NULL, failed_login_attempts INT NOT NULL, locked_until TIMESTAMP, must_change_password BOOLEAN NOT NULL, password_changed_at TIMESTAMP, enterprise_id UUID, last_login_at TIMESTAMP, created_at TIMESTAMP NOT NULL, updated_at TIMESTAMP NOT NULL, deleted_at TIMESTAMP
+  Foreign Keys: (enterprise_id) -> enterprises(enterprise_id)
+
+TABLE users_roles:
+  Columns: user_id UUID [PK], role_name VARCHAR(50)
+  Foreign Keys: (user_id) -> users(user_id), (role_name) -> roles(role_name)
+
+TABLE invalidated_tokens:
+  Columns: token_id VARCHAR(255) [PK], expires_at TIMESTAMP NOT NULL, invalidated_at TIMESTAMP NOT NULL
+
+TABLE password_reset_tokens:
+  Columns: token_id UUID [PK], user_id UUID NOT NULL, token_hash VARCHAR(255) NOT NULL, expires_at TIMESTAMP NOT NULL, is_used BOOLEAN NOT NULL, created_at TIMESTAMP NOT NULL, updated_at TIMESTAMP NOT NULL
+  Foreign Keys: (user_id) -> users(user_id)
+
+TABLE audit_logs:
+  Columns: log_id UUID [PK], user_id UUID, action VARCHAR(100) NOT NULL, target_entity VARCHAR(100), target_id UUID, old_value TEXT, new_value TEXT, ip_address VARCHAR(45), user_agent VARCHAR(500), timestamp TIMESTAMP NOT NULL
+  Foreign Keys: (user_id) -> users(user_id)
+
+TABLE semesters:
+  Columns: semester_id UUID [PK], semester_code VARCHAR(20) NOT NULL [UNIQUE], name VARCHAR(255) NOT NULL, start_date DATE NOT NULL, end_date DATE NOT NULL, weekly_report_deadline_day VARCHAR(10), weekly_report_deadline_time TIME, final_report_deadline TIMESTAMP, status VARCHAR(20) NOT NULL, created_by UUID NOT NULL, created_at TIMESTAMP NOT NULL, updated_at TIMESTAMP NOT NULL, deleted_at TIMESTAMP
+  Foreign Keys: (created_by) -> users(user_id)
+
+TABLE eligible_students:
+  Columns: eligible_id UUID [PK], semester_id UUID NOT NULL [UNIQUE], user_id UUID, student_code VARCHAR(20) NOT NULL [UNIQUE], full_name VARCHAR(255) NOT NULL, email VARCHAR(255), major VARCHAR(255) NOT NULL, gpa DECIMAL(4, 2), current_semester INT NOT NULL, status VARCHAR(20) NOT NULL, is_locked BOOLEAN NOT NULL, imported_at TIMESTAMP NOT NULL, approved_at TIMESTAMP, cancelled_reason TEXT, cancelled_by UUID, created_at TIMESTAMP NOT NULL, updated_at TIMESTAMP NOT NULL
+  Foreign Keys: (semester_id) -> semesters(semester_id), (user_id) -> users(user_id), (cancelled_by) -> users(user_id)
+
+TABLE eligible_student_status_history:
+  Columns: history_id UUID [PK], eligible_id UUID NOT NULL, old_status VARCHAR(20), new_status VARCHAR(20) NOT NULL, changed_by UUID, reason TEXT, changed_at TIMESTAMP NOT NULL
+  Foreign Keys: (eligible_id) -> eligible_students(eligible_id), (changed_by) -> users(user_id)
+
+TABLE system_announcements:
+  Columns: announcement_id UUID [PK], semester_id UUID, title VARCHAR(500) NOT NULL, content TEXT NOT NULL, status VARCHAR(20) NOT NULL, created_by UUID NOT NULL, published_at TIMESTAMP, created_at TIMESTAMP NOT NULL, updated_at TIMESTAMP NOT NULL, deleted_at TIMESTAMP, audience VARCHAR(30), target_role VARCHAR(30)
+  Foreign Keys: (semester_id) -> semesters(semester_id), (created_by) -> users(user_id)
+
+TABLE enterprises:
+  Columns: enterprise_id UUID [PK], company_name VARCHAR(500) NOT NULL, tax_code VARCHAR(50), industry VARCHAR(255), company_size VARCHAR(50), description TEXT, address TEXT, logo_url VARCHAR(1000), contact_person_name VARCHAR(255), contact_person_email VARCHAR(255), contact_person_phone VARCHAR(20), approval_status VARCHAR(20) NOT NULL, rejection_reason TEXT, approved_by UUID, approved_at TIMESTAMP, created_at TIMESTAMP NOT NULL, updated_at TIMESTAMP NOT NULL, deleted_at TIMESTAMP
+  Foreign Keys: (approved_by) -> users(user_id)
+
+TABLE semester_enterprises:
+  Columns: semester_enterprise_id UUID [PK], semester_id UUID NOT NULL [UNIQUE], enterprise_id UUID NOT NULL [UNIQUE], registration_status VARCHAR(20) NOT NULL, rejection_reason TEXT, reviewed_by UUID, reviewed_at TIMESTAMP, registered_at TIMESTAMP NOT NULL
+  Foreign Keys: (semester_id) -> semesters(semester_id), (enterprise_id) -> enterprises(enterprise_id), (reviewed_by) -> users(user_id)
+
+TABLE job_posts:
+  Columns: job_post_id UUID [PK], enterprise_id UUID NOT NULL, semester_id UUID NOT NULL, title VARCHAR(500) NOT NULL, description TEXT NOT NULL, requirements TEXT, benefits TEXT, required_technologies TEXT, max_positions INT NOT NULL, application_deadline DATE, status VARCHAR(20) NOT NULL, created_at TIMESTAMP NOT NULL, updated_at TIMESTAMP NOT NULL, deleted_at TIMESTAMP
+  Foreign Keys: (enterprise_id) -> enterprises(enterprise_id), (semester_id) -> semesters(semester_id)
+
+TABLE applications:
+  Columns: application_id UUID [PK], job_post_id UUID NOT NULL, student_id UUID NOT NULL, cv_file_url VARCHAR(1000) NOT NULL, cv_snapshot_url VARCHAR(1000), cv_download_count INT NOT NULL, status VARCHAR(30) NOT NULL, screening_note TEXT, screened_by UUID, screened_at TIMESTAMP, withdrawn_at TIMESTAMP, created_at TIMESTAMP NOT NULL, updated_at TIMESTAMP NOT NULL, deleted_at TIMESTAMP
+  Foreign Keys: (job_post_id) -> job_posts(job_post_id), (student_id) -> users(user_id), (screened_by) -> users(user_id)
+
+TABLE placement_applications:
+  Columns: application_id UUID [PK], student_id UUID NOT NULL [UNIQUE], enterprise_id UUID NOT NULL [UNIQUE], semester_id UUID NOT NULL [UNIQUE], status /* workflow status. pending_approval = chờ tm; approved = đã match với dn; */ /* rejected = tm bác (kèm lý do); withdrawn = sv tự rút. */ VARCHAR(20) NOT NULL, cover_letter /* lý do sv muốn apply (do sv nhập) */ TEXT, reviewed_by /* audit duyệt (do tm) */ UUID, reviewed_at TIMESTAMP, rejection_reason TEXT, created_at /* audit chung (baseentity-style) */ TIMESTAMP NOT NULL, updated_at TIMESTAMP NOT NULL, created_by UUID, updated_by UUID, is_replacement BOOLEAN NOT NULL, replaces_application_id UUID [UNIQUE]
+  Foreign Keys: (student_id) -> users(user_id), (enterprise_id) -> enterprises(enterprise_id), (semester_id) -> semesters(semester_id), (reviewed_by /* audit duyệt (do tm) */) -> users(user_id), (created_by) -> users(user_id), (updated_by) -> users(user_id), (replaces_application_id) -> placement_applications(application_id)
+
+TABLE interviews:
+  Columns: interview_id UUID [PK], application_id UUID NOT NULL, scheduled_datetime TIMESTAMP NOT NULL, duration_minutes INT, location VARCHAR(500), meeting_link VARCHAR(1000), cancel_reason TEXT, canceled_at TIMESTAMP, reschedule_reason TEXT, status VARCHAR(20) NOT NULL, student_confirmed BOOLEAN NOT NULL, confirmed_at TIMESTAMP, student_decline_reason TEXT, result VARCHAR(10), result_note TEXT, decided_by UUID, decided_at TIMESTAMP, created_at TIMESTAMP NOT NULL, updated_at TIMESTAMP NOT NULL
+  Foreign Keys: (application_id) -> applications(application_id), (decided_by) -> users(user_id)
+
+TABLE student_profiles:
+  Columns: profile_id UUID [PK], user_id UUID NOT NULL [UNIQUE], student_code VARCHAR(20), university VARCHAR(255), major VARCHAR(255), gpa DECIMAL(4, 2), skills JSONB, bio TEXT, cv_file_url VARCHAR(1000), cv_file_size INT, created_at TIMESTAMP NOT NULL, updated_at TIMESTAMP NOT NULL, deleted_at TIMESTAMP
+  Foreign Keys: (user_id) -> users(user_id)
+
+TABLE enterprise_assignments:
+  Columns: assignment_id UUID [PK], enterprise_id UUID NOT NULL, student_id UUID NOT NULL [UNIQUE], semester_id UUID NOT NULL [UNIQUE], supervisor_name VARCHAR(255), supervisor_email VARCHAR(255), supervisor_phone VARCHAR(20), assigned_by UUID NOT NULL, status VARCHAR(20) NOT NULL, assigned_at TIMESTAMP NOT NULL, created_at TIMESTAMP NOT NULL, updated_at TIMESTAMP NOT NULL, start_date DATE, end_date DATE, termination_reason TEXT, terminated_at TIMESTAMP, replaced_by_assignment_id UUID
+  Foreign Keys: (enterprise_id) -> enterprises(enterprise_id), (student_id) -> users(user_id), (semester_id) -> semesters(semester_id), (assigned_by) -> users(user_id), (replaced_by_assignment_id) -> enterprise_assignments(assignment_id)
+
+TABLE internship_plans:
+  Columns: plan_id UUID [PK], assignment_id UUID NOT NULL [UNIQUE], created_at TIMESTAMP NOT NULL, updated_at TIMESTAMP NOT NULL, deleted_at TIMESTAMP
+  Foreign Keys: (assignment_id) -> enterprise_assignments(assignment_id)
+
+TABLE internship_plan_items:
+  Columns: plan_item_id UUID [PK], plan_id UUID NOT NULL, week_number INT NOT NULL, task_description TEXT NOT NULL, training_objective TEXT, target_date DATE NOT NULL, status VARCHAR(20) NOT NULL, order_index INT NOT NULL, created_at TIMESTAMP NOT NULL, updated_at TIMESTAMP NOT NULL
+  Foreign Keys: (plan_id) -> internship_plans(plan_id)
+
+TABLE enterprise_evaluations:
+  Columns: evaluation_id UUID [PK], assignment_id UUID NOT NULL [UNIQUE], attitude_score DECIMAL(4, 2) NOT NULL, professionalism_score DECIMAL(4, 2) NOT NULL, soft_skills_score DECIMAL(4, 2) NOT NULL, progress_score DECIMAL(4, 2) NOT NULL, total_score /* br-43: auto-calculated weighted total */ DECIMAL(4, 2), overall_comments TEXT, is_locked BOOLEAN NOT NULL, submitted_at TIMESTAMP NOT NULL, created_at TIMESTAMP NOT NULL
+  Foreign Keys: (assignment_id) -> enterprise_assignments(assignment_id)
+
+TABLE weekly_reports:
+  Columns: report_id UUID [PK], assignment_id UUID NOT NULL [UNIQUE], week_number INT NOT NULL [UNIQUE], tasks_completed TEXT, issues_challenges TEXT, lessons_learned TEXT, plan_next_week TEXT, attachment_urls JSONB, status VARCHAR(20) NOT NULL, feedback TEXT, submitted_at TIMESTAMP, late_override_by UUID, plagiarism_score DECIMAL(5, 4), is_anomaly BOOLEAN NOT NULL, created_at TIMESTAMP NOT NULL, updated_at TIMESTAMP NOT NULL
+  Foreign Keys: (assignment_id) -> enterprise_assignments(assignment_id), (late_override_by) -> users(user_id)
+
+TABLE report_feedbacks:
+  Columns: feedback_id UUID [PK], report_id UUID NOT NULL, reviewer_id UUID NOT NULL, feedback_text TEXT, action VARCHAR(20) NOT NULL, created_at TIMESTAMP NOT NULL
+  Foreign Keys: (report_id) -> weekly_reports(report_id), (reviewer_id) -> users(user_id)
+
+TABLE final_reports:
+  Columns: final_report_id UUID [PK], assignment_id UUID NOT NULL [UNIQUE], file_url VARCHAR(1000) NOT NULL, file_size_bytes INT NOT NULL, submitted_at TIMESTAMP NOT NULL, is_late BOOLEAN NOT NULL, created_at TIMESTAMP NOT NULL
+  Foreign Keys: (assignment_id) -> enterprise_assignments(assignment_id)
+
+TABLE incidents:
+  Columns: incident_id UUID [PK], assignment_id UUID NOT NULL, reported_by UUID NOT NULL, category VARCHAR(50) NOT NULL, description TEXT NOT NULL, evidence_urls JSONB, status VARCHAR(20) NOT NULL, resolution_note TEXT, resolved_by UUID, resolved_at TIMESTAMP, created_at TIMESTAMP NOT NULL, updated_at TIMESTAMP NOT NULL
+  Foreign Keys: (assignment_id) -> enterprise_assignments(assignment_id), (reported_by) -> users(user_id), (resolved_by) -> users(user_id)
+
+TABLE training_warnings:
+  Columns: warning_id UUID [PK], tm_id UUID NOT NULL, student_id UUID NOT NULL, semester_id UUID NOT NULL, week_number INT NOT NULL, warning_message TEXT NOT NULL, sent_at TIMESTAMP NOT NULL
+  Foreign Keys: (tm_id) -> users(user_id), (student_id) -> users(user_id), (semester_id) -> semesters(semester_id)
+
+TABLE final_grades:
+  Columns: grade_id UUID [PK], student_id UUID NOT NULL [UNIQUE], tm_id UUID NOT NULL, semester_id UUID NOT NULL [UNIQUE], enterprise_total_score DECIMAL(4, 2), final_grade DECIMAL(3, 1) NOT NULL, overall_status VARCHAR(20) NOT NULL, is_locked BOOLEAN NOT NULL, cancelled_reason TEXT, cancelled_by UUID, cancelled_at TIMESTAMP, graded_at TIMESTAMP NOT NULL, created_at TIMESTAMP NOT NULL
+  Foreign Keys: (student_id) -> users(user_id), (tm_id) -> users(user_id), (semester_id) -> semesters(semester_id), (cancelled_by) -> users(user_id)
+
+TABLE notifications:
+  Columns: notification_id UUID [PK], recipient_id UUID NOT NULL, title VARCHAR(500) NOT NULL, message TEXT NOT NULL, varchar(30) UNKNOWN NOT NULL, reference_entity VARCHAR(100), reference_id UUID, is_read BOOLEAN NOT NULL, created_at TIMESTAMP NOT NULL
+  Foreign Keys: (recipient_id) -> users(user_id)
+
+TABLE student_enterprise_feedbacks:
+  Columns: feedback_id UUID [PK], student_id UUID NOT NULL [UNIQUE], enterprise_id UUID NOT NULL [UNIQUE], semester_id UUID NOT NULL [UNIQUE], training_quality_score /* br-55: 1 to 5 integer rating */ INT NOT NULL, supervisor_support_score INT NOT NULL, work_environment_score INT NOT NULL, overall_score INT NOT NULL, positive_feedback TEXT, improvement_feedback TEXT, additional_comments TEXT, submitted_at TIMESTAMP NOT NULL
+  Foreign Keys: (student_id) -> users(user_id), (enterprise_id) -> enterprises(enterprise_id), (semester_id) -> semesters(semester_id)
+
+VIEW v_semester_statistics:
+  Depends on: eligible_students, job_posts, final_grades, interviews, semesters, applications
+
+VIEW v_at_risk_students:
+  Depends on: users, enterprises, semesters, weekly_reports, enterprise_assignments, student_profiles
+
+TABLE user_sessions:
+  Columns: token_id VARCHAR(36) [PK], email VARCHAR(100) NOT NULL, last_activity TIMESTAMP, expires_at TIMESTAMP NOT NULL
+
+TABLE request_logs:
+  Columns: id UUID [PK], user_id UUID, user_email VARCHAR(255), session_id VARCHAR(255), http_method VARCHAR(10) NOT NULL, endpoint VARCHAR(500) NOT NULL, status_code INT, ip_address VARCHAR(45), user_agent VARCHAR(500), response_time_ms BIGINT, timestamp TIMESTAMP NOT NULL
