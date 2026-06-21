@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${subject}">Thông báo trạng thái doanh nghiệp</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+    <div style="max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
+        <h2 style="color: #0056b3;">Thông báo trạng thái hồ sơ doanh nghiệp</h2>
+        <p>Kính gửi <strong th:text="${fullName}">Doanh nghiệp</strong>,</p>
+        
+        <p>Hồ sơ đăng ký doanh nghiệp của quý công ty trên hệ thống UEIMS đã được xử lý.</p>
+        <p>Trạng thái hiện tại: <strong th:text="${status}" th:style="${status == 'APPROVED' ? 'font-size: 1.1em; color: #28a745;' : 'font-size: 1.1em; color: #dc3545;'}">APPROVED</strong></p>
+
+        <div th:if="${status == 'REJECTED' || status == 'rejected'}">
+            <p><strong>Lý do từ chối:</strong></p>
+            <blockquote style="border-left: 4px solid #dc3545; padding-left: 10px; color: #555;" th:text="${reason}">
+            </blockquote>
+            <p>Vui lòng đăng nhập vào hệ thống để chỉnh sửa hồ sơ và gửi lại yêu cầu xét duyệt.</p>
+        </div>
+
+        <div th:if="${status == 'APPROVED' || status == 'approved'}">
+            <p>Chúc mừng quý doanh nghiệp! Hồ sơ của quý công ty đã được phê duyệt thành công.</p>
+            <p>Quý công ty đã có thể đăng nhập vào hệ thống để bắt đầu đăng tin tuyển dụng và quản lý thực tập sinh.</p>
+        </div>
+
+        <div style="margin-top: 30px;">
+            <a th:href="${loginUrl}" style="background-color: #0056b3; color: #fff; text-decoration: none; padding: 10px 20px; border-radius: 4px;">Đăng nhập hệ thống</a>
+        </div>
+
+        <p style="margin-top: 40px; font-size: 0.9em; color: #777;">
+            Trân trọng,<br>
+            Ban Quản Lý Thực Tập UEIMS
+        </p>
+    </div>
+</body>
+</html>

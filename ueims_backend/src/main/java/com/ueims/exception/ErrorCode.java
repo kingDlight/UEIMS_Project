@@ -102,8 +102,11 @@ public enum ErrorCode {
             10523, "Cancellation reason is required when status is set to CANCELLED (BR-23)", HttpStatus.BAD_REQUEST),
     INTERVIEW_DATE_MUST_BE_IN_FUTURE(1053, "Interview date must be in the future", HttpStatus.BAD_REQUEST),
     INTERVIEW_ELIGIBILITY_RULE(
-            1054, "Only candidates who have passed the screening round can be scheduled for an interview", HttpStatus.BAD_REQUEST),
-    INTERVIEW_OVERLAP(1055, "Interview time overlaps with an existing schedule for the enterprise", HttpStatus.BAD_REQUEST),
+            1054,
+            "Only candidates who have passed the screening round can be scheduled for an interview",
+            HttpStatus.BAD_REQUEST),
+    INTERVIEW_OVERLAP(
+            1055, "Interview time overlaps with an existing schedule for the enterprise", HttpStatus.BAD_REQUEST),
     EVALUATION_LOCKED(1056, "Evaluation is locked and cannot be edited", HttpStatus.BAD_REQUEST),
     MISSING_EVALUATION_CRITERIA(1057, "All 4 criteria in the Rubrics must be graded", HttpStatus.BAD_REQUEST),
     INVALID_SCORE_RANGE(1058, "Criteria scores must be between 0.0 and 10.0", HttpStatus.BAD_REQUEST),
