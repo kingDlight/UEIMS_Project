@@ -15,6 +15,7 @@ import com.ueims.model.entity.JobPost;
 import com.ueims.model.entity.Semester;
 import com.ueims.model.entity.StudentProfile;
 import com.ueims.model.entity.User;
+import com.ueims.repository.ApplicationRepository;
 import com.ueims.repository.JobPostRepository;
 import com.ueims.repository.SemesterRepository;
 import com.ueims.repository.StudentProfileRepository;
@@ -35,6 +36,7 @@ public class JobPostServiceImpl implements JobPostService {
     SemesterRepository semesterRepository;
     JobRecommenderService recommenderService;
     StudentProfileRepository studentProfileRepository;
+    ApplicationRepository applicationRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -129,6 +131,12 @@ public class JobPostServiceImpl implements JobPostService {
         JobPost existing = findById(id);
         validateOwnership(existing);
         validateSemesterStatus(existing.getSemester()); // BR-30
+
+        // BR-11: Cannot delete job post if it already has applications
+        if (applicationRepository.existsByJobPost_JobPostId(id)) {
+            throw new AppException(ErrorCode.JOB_POST_HAS_APPLICATIONS);
+        }
+
         existing.setDeletedAt(LocalDateTime.now());
         repository.save(existing);
     }
