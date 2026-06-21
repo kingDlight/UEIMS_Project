@@ -88,19 +88,13 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
             throw new AppException(ErrorCode.SEMESTER_INVALID_TRANSITION);
         }
 
-        // BR-21: locked (OJT-approved) students can only change status. Any
-        // edit to other fields will be blocked by the DB trigger — fail fast.
+        // BR-21: locked (OJT-approved) students can only update profile fields (gpa, name, email, major) and status.
+        // studentCode and currentSemester cannot be modified.
         String newStatus = request.getStatus() != null ? request.getStatus() : existing.getStatus();
         if (Boolean.TRUE.equals(existing.getIsLocked())) {
-            boolean onlyStatusChanged = request.getStudentCode().equals(existing.getStudentCode())
-                    && request.getFullName().equals(existing.getFullName())
-                    && java.util.Objects.equals(request.getEmail(), existing.getEmail())
-                    && request.getMajor().equals(existing.getMajor())
-                    && (request.getGpa() == null
-                            ? existing.getGpa() == null
-                            : request.getGpa().compareTo(existing.getGpa()) == 0)
+            boolean validLockedUpdate = request.getStudentCode().equals(existing.getStudentCode())
                     && java.util.Objects.equals(request.getCurrentSemester(), existing.getCurrentSemester());
-            if (!onlyStatusChanged) {
+            if (!validLockedUpdate) {
                 throw new AppException(ErrorCode.SEMESTER_INVALID_TRANSITION);
             }
         }
