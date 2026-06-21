@@ -15,6 +15,7 @@ import {
   type OjtPlacementView,
   type PlacementApplicationResponse,
   type AutoMatchResult,
+  type AssignmentDetails,
 } from '@/services/PlacementApplicationService';
 import { EnterpriseService } from '@/services/EnterpriseService';
 import type { Enterprise } from '@/pages/training-manager/types';
@@ -223,6 +224,9 @@ export const OJTTab: React.FC = () => {
   const [autoMatchModalOpen, setAutoMatchModalOpen] = useState(false);
   const [manualMatchLoading, setManualMatchLoading] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [contractModalOpen, setContractModalOpen] = useState(false);
+  const [contractData, setContractData] = useState<AssignmentDetails | null>(null);
+  const [contractLoading, setContractLoading] = useState(false);
 
   const fetchOjtView = useCallback(async () => {
     try {
@@ -346,12 +350,24 @@ export const OJTTab: React.FC = () => {
     setUpdateModalOpen(true);
   }, []);
 
-  const handleViewContract = useCallback((record: PlacementRecord) => {
-    void message.info({
-      content: `Opening contract for ${record.studentName}${record.enterpriseName ? ' at ' + record.enterpriseName : ''}…`,
-      duration: 2,
-    });
-  }, []);
+  const handleViewContract = useCallback(async (record: PlacementRecord) => {
+    if (!record.assignmentId) {
+      void message.warning({ content: 'No assignment found for this student.', duration: 2 });
+      return;
+    }
+    setContractModalOpen(true);
+    setContractData(null);
+    setContractLoading(true);
+    try {
+      const res = await PlacementApplicationService.getAssignmentById(record.assignmentId);
+      setContractData(res.data as AssignmentDetails);
+    } catch {
+      void message.error({ content: 'Failed to load assignment details.', duration: 3 });
+      setContractModalOpen(false);
+    } finally {
+      setContractLoading(false);
+    }
+  }, [message]);
 
   const handleApprove = useCallback(async (record: PlacementRecord) => {
     if (!record.applicationId) return;
@@ -1430,6 +1446,92 @@ export const OJTTab: React.FC = () => {
             Close
           </button>
         </div>
+      </Modal>
+
+      {/* ── CONTRACT DETAILS MODAL (Issue #156 fix) ───────── */}
+      <Modal
+        open={contractModalOpen}
+        onCancel={() => { setContractModalOpen(false); setContractData(null); }}
+        footer={null}
+        width={520}
+        title={
+          <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, fontWeight: 700, color: cc.textPrimary }}>
+            OJT Assignment Details
+          </div>
+        }
+        styles={{ body: { padding: '20px 24px 24px', fontFamily: 'Inter, sans-serif' } }}
+      >
+        {contractLoading ? (
+          <div style={{ display: 'flex', justifyContent: 'center', padding: 40 }}>
+            <Spin size="default" />
+          </div>
+        ) : contractData ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {/* Student */}
+            <div style={{ background: cc.neutralBg, borderRadius: cc.radiusMd, padding: '12px 16px', border: `1px solid ${cc.border}` }}>
+              <div style={{ fontSize: 10.5, fontWeight: 700, color: cc.textMuted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Student</div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: cc.textPrimary }}>{contractData.studentName}</div>
+              <div style={{ fontSize: 11.5, color: cc.textSecondary, marginTop: 2 }}>{contractData.studentCode} · {contractData.major}</div>
+              {contractData.studentEmail && (
+                <div style={{ fontSize: 11.5, color: cc.textSecondary, marginTop: 1 }}>{contractData.studentEmail}</div>
+              )}
+            </div>
+
+            {/* Enterprise & Semester */}
+            <div style={{ background: cc.neutralBg, borderRadius: cc.radiusMd, padding: '12px 16px', border: `1px solid ${cc.border}` }}>
+              <div style={{ fontSize: 10.5, fontWeight: 700, color: cc.textMuted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Enterprise & Semester</div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: cc.textPrimary }}>{contractData.enterpriseName}</div>
+              <div style={{ fontSize: 11.5, color: cc.textSecondary, marginTop: 2 }}>Semester: {contractData.semesterCode}</div>
+            </div>
+
+            {/* Internship Period */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              <div style={{ background: cc.neutralBg, borderRadius: cc.radiusMd, padding: '12px 16px', border: `1px solid ${cc.border}` }}>
+                <div style={{ fontSize: 10.5, fontWeight: 700, color: cc.textMuted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>Start Date</div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: cc.textPrimary }}>
+                  {contractData.startDate ? new Date(contractData.startDate).toLocaleDateString('en-GB') : '—'}
+                </div>
+              </div>
+              <div style={{ background: cc.neutralBg, borderRadius: cc.radiusMd, padding: '12px 16px', border: `1px solid ${cc.border}` }}>
+                <div style={{ fontSize: 10.5, fontWeight: 700, color: cc.textMuted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>End Date</div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: cc.textPrimary }}>
+                  {contractData.endDate ? new Date(contractData.endDate).toLocaleDateString('en-GB') : '—'}
+                </div>
+              </div>
+            </div>
+
+            {/* Supervisor */}
+            {(contractData.supervisorName || contractData.supervisorEmail || contractData.supervisorPhone) && (
+              <div style={{ background: cc.neutralBg, borderRadius: cc.radiusMd, padding: '12px 16px', border: `1px solid ${cc.border}` }}>
+                <div style={{ fontSize: 10.5, fontWeight: 700, color: cc.textMuted, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Supervisor</div>
+                {contractData.supervisorName && (
+                  <div style={{ fontSize: 13, fontWeight: 600, color: cc.textPrimary }}>{contractData.supervisorName}</div>
+                )}
+                {contractData.supervisorEmail && (
+                  <div style={{ fontSize: 11.5, color: cc.textSecondary, marginTop: 2 }}>{contractData.supervisorEmail}</div>
+                )}
+                {contractData.supervisorPhone && (
+                  <div style={{ fontSize: 11.5, color: cc.textSecondary, marginTop: 1 }}>{contractData.supervisorPhone}</div>
+                )}
+              </div>
+            )}
+
+            {/* Status */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ fontSize: 11.5, color: cc.textMuted, fontFamily: 'Inter, sans-serif' }}>Assignment Status:</div>
+              <span style={{
+                display: 'inline-flex', alignItems: 'center',
+                padding: '2px 9px', borderRadius: 6,
+                backgroundColor: contractData.status === 'ACTIVE' ? hexToRgba(cc.success, 0.08) : hexToRgba(cc.neutral, 0.08),
+                border: `1px solid ${contractData.status === 'ACTIVE' ? hexToRgba(cc.success, 0.3) : hexToRgba(cc.neutral, 0.3)}`,
+                color: contractData.status === 'ACTIVE' ? cc.success : cc.neutral,
+                fontSize: 11, fontWeight: 700,
+              }}>
+                {contractData.status}
+              </span>
+            </div>
+          </div>
+        ) : null}
       </Modal>
     </div>
   );
