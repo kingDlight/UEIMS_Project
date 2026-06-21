@@ -113,7 +113,7 @@ export const InterviewScheduleTab: React.FC = () => {
       const data: any[] = res.data?.result ?? res.data ?? [];
       setApplications(
         (Array.isArray(data) ? data : []).filter(
-          (a: any) => a.status === 'SCREENING_PASSED' || a.status === 'INTERVIEW_SCHEDULED'
+          (a: any) => a.status === 'SCREENING_PASSED' || a.status === 'INTERVIEW_SCHEDULED' || a.status === 'PENDING'
         )
       );
     } catch {
@@ -180,7 +180,7 @@ export const InterviewScheduleTab: React.FC = () => {
       } else if (code === 1055) {
         message.error('This time overlaps an existing appointment. Please pick a different slot.');
       } else if (code === 1054) {
-        message.error('Only applicants who passed the screening phase are eligible for interview scheduling.');
+        message.error('Only applicants in Pending or Screening Passed phase are eligible for interview scheduling.');
       } else if (code === 1072) {
         message.error(msg ?? 'Interview is not in a valid state.');
       } else {
