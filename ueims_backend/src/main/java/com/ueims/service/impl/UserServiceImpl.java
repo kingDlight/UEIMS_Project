@@ -60,18 +60,20 @@ public class UserServiceImpl implements UserService {
             throw new AppException(ErrorCode.INVALID_KEY, "Unsupported image type. Allowed: png, jpg, jpeg, gif, webp");
         }
 
+        String original = file.getOriginalFilename() == null ? "" : file.getOriginalFilename();
+        String ext = original.contains(".")
+                ? original.substring(original.lastIndexOf('.')).toLowerCase()
+                : "";
+        if (!ext.matches("\\.(png|jpg|jpeg|gif|webp)")) {
+            throw new AppException(ErrorCode.INVALID_KEY, "Invalid file extension. Allowed: png, jpg, jpeg, gif, webp");
+        }
+
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User currentUser =
                 repository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         Path uploadDir = Paths.get(System.getProperty("user.dir"), "uploads", "avatars");
         Files.createDirectories(uploadDir);
-
-        String original = file.getOriginalFilename() == null ? "" : file.getOriginalFilename();
-        String ext = original.contains(".")
-                ? original.substring(original.lastIndexOf('.')).toLowerCase()
-                : ".png";
-        if (!ext.matches("\\.(png|jpg|jpeg|gif|webp)")) ext = ".png";
 
         String filename = currentUser.getUserId() + "_" + UUID.randomUUID() + ext;
         Path target = uploadDir.resolve(filename);
@@ -128,7 +130,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public void updateUserStatus(UUID id, String status) {
         User user = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-        // UC-10 PRE-1 + 10.0.E1: Admin cannot change status of their own active session account
+        // UC-10 PRE-1 + 10.0.E1: Admin cannot change status of their own active session
+        // account
         UUID currentUserId = getCurrentUserId();
         if (user.getUserId().equals(currentUserId)) {
             throw new AppException(ErrorCode.ADMIN_INTERVENTION_REQUIRED);
@@ -136,7 +139,8 @@ public class UserServiceImpl implements UserService {
         user.setStatus(status);
         repository.save(user);
 
-        // UC-10 Other Information: Force logout active sessions when status becomes INACTIVE/LOCKED
+        // UC-10 Other Information: Force logout active sessions when status becomes
+        // INACTIVE/LOCKED
         if ("INACTIVE".equalsIgnoreCase(status) || "LOCKED".equalsIgnoreCase(status)) {
             forceLogoutUser(user.getEmail());
         }
@@ -204,7 +208,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDetailResponse updateUser(UUID id, com.ueims.dto.request.UserUpdateRequest request) {
         User user = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-        // UC-09 Other Information: Email is read-only; only fullName and phone can be updated via this UC.
+        // UC-09 Other Information: Email is read-only; only fullName and phone can be
+        // updated via this UC.
         // Status is changed through UC-10 (updateUserStatus), not here.
         if (request.getFullName() != null) user.setFullName(request.getFullName());
         if (request.getPhone() != null) user.setPhone(request.getPhone());
