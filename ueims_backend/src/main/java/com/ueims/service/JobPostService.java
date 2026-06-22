@@ -9,6 +9,8 @@ import com.ueims.model.entity.JobPost;
 public interface JobPostService {
     List<JobPost> findAll();
 
+    List<JobPost> findMyPosts();
+
     List<JobPost> findActive();
 
     JobPost findById(UUID id);

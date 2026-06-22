@@ -31,15 +31,13 @@ public class NotificationBroadcaster {
     public static final String USER_DESTINATION = "/queue/notifications";
 
     SimpMessagingTemplate messagingTemplate;
+    com.ueims.mapper.NotificationMapper notificationMapper;
 
     public void pushToUser(String userEmail, Notification notification) {
         if (userEmail == null || notification == null) return;
         try {
-            // NotificationDTO extends Notification; passing the entity through
-            // SimpMessagingTemplate serializes the same fields that the REST
-            // /api/notifications/my endpoint exposes, so frontend code can
-            // reuse the same type.
-            messagingTemplate.convertAndSendToUser(userEmail, USER_DESTINATION, notification);
+            com.ueims.dto.response.NotificationDTO dto = notificationMapper.toDto(notification);
+            messagingTemplate.convertAndSendToUser(userEmail, USER_DESTINATION, dto);
         } catch (Exception e) {
             log.debug("Failed to push notification to user {}: {}", userEmail, e.getMessage());
         }

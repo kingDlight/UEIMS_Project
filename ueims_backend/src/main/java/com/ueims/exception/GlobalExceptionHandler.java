@@ -145,7 +145,11 @@ public class GlobalExceptionHandler {
         ApiResponse<Void> apiResponse = new ApiResponse<>();
 
         apiResponse.setCode(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode());
-        apiResponse.setMessage(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage());
+        StringBuilder sb = new StringBuilder(exception.toString());
+        for (StackTraceElement ste : exception.getStackTrace()) {
+            sb.append("\n\tat ").append(ste.toString());
+        }
+        apiResponse.setMessage(sb.toString());
 
         return ResponseEntity.status(ErrorCode.UNCATEGORIZED_EXCEPTION.getStatusCode())
                 .body(apiResponse);

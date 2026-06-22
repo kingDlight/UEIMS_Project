@@ -22,6 +22,7 @@ import { NeuSurface } from './components/shared/NeuSurface';
 import { SmallBadge } from './components/shared/SmallBadge';
 import { JobPostService } from '@/services/JobPostService';
 import { ApplicationService } from '@/services/ApplicationService';
+import { EnterpriseAssignmentService } from '@/services/EnterpriseAssignmentService';
 import { useStudentProfileQuery } from '@/hooks/useStudentProfile';
 import { ModernLayout } from '@/components/layout/ModernLayout';
 import { navItems, cc, hexToRgba } from './constants';
@@ -80,7 +81,18 @@ export const JobDetailPage: React.FC = () => {
   const hasCv = !!profile?.cvUrl;
   const currentSemester = profile?.currentSemester ?? 5;
 
-  const getFilteredNavItems = (sem: number) => {
+  const [hasActivePlacement, setHasActivePlacement] = useState(false);
+
+  useEffect(() => {
+    EnterpriseAssignmentService.getMyAssignment()
+      .then(res => {
+        const data = res.data?.result ?? res.data;
+        setHasActivePlacement(!!data);
+      })
+      .catch(() => setHasActivePlacement(false));
+  }, []);
+
+  const getFilteredNavItems = (sem: number, hasPlacement: boolean) => {
     if (sem >= 1 && sem <= 4) {
       return navItems.filter(item => ['dashboard', 'profile', 'jobs'].includes(item.key));
     }
@@ -88,7 +100,10 @@ export const JobDetailPage: React.FC = () => {
       return navItems.filter(item => ['dashboard', 'profile', 'jobs', 'applications', 'schedule'].includes(item.key));
     }
     if (sem === 6) {
-      return navItems.filter(item => ['dashboard', 'profile', 'training-plan', 'reports', 'final-report'].includes(item.key));
+      if (hasPlacement) {
+        return navItems.filter(item => ['dashboard', 'profile', 'training-plan', 'reports', 'final-report'].includes(item.key));
+      }
+      return navItems.filter(item => ['dashboard', 'profile', 'jobs', 'applications', 'schedule'].includes(item.key));
     }
     if (sem >= 7 && sem <= 9) {
       return navItems.filter(item => ['dashboard', 'profile', 'feedback', 'evaluation'].includes(item.key));
@@ -198,7 +213,7 @@ export const JobDetailPage: React.FC = () => {
 
   const enterprise = job.enterprise;
 
-  const filteredNavItems = getFilteredNavItems(currentSemester);
+  const filteredNavItems = getFilteredNavItems(currentSemester, hasActivePlacement);
 
   return (
     <ModernLayout navItems={filteredNavItems} defaultRoute="jobs" basePath="/student">

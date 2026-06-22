@@ -109,7 +109,7 @@ export const JobPostManagementTab: React.FC = () => {
       // The /active endpoint only returns OPEN ones, we want all (BR-29: own posts).
       // Backend doesn't have a "by enterprise" filter endpoint, so we filter client-side
       // and rely on the @PreAuthorize ENTERPRISE for create/edit/delete.
-      const res = await api.get('/job-posts');
+      const res = await api.get('/job-posts/my-posts');
       const data: any[] = res.data?.result ?? res.data ?? [];
       setPosts(data);
     } catch (err: any) {
