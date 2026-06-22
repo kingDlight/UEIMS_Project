@@ -10,6 +10,7 @@ import com.ueims.model.entity.InternshipPlan;
         unmappedTargetPolicy = ReportingPolicy.IGNORE,
         builder = @org.mapstruct.Builder(disableBuilder = true))
 public interface InternshipPlanMapper {
+    @Mapping(target = "assignmentId", source = "assignment.assignmentId")
     @Mapping(
             target = "enterpriseName",
             expression =

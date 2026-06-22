@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
+import com.ueims.model.entity.EnterpriseAssignment;
 import com.ueims.model.entity.InternshipPlan;
 import com.ueims.repository.InternshipPlanItemRepository;
 import com.ueims.repository.InternshipPlanRepository;
@@ -26,6 +27,7 @@ public class InternshipPlanServiceImpl implements InternshipPlanService {
     private final InternshipPlanRepository repository;
     private final InternshipPlanItemRepository itemRepository;
     private final UserRepository userRepository;
+    private final com.ueims.repository.EnterpriseAssignmentRepository assignmentRepository;
 
     @Override
     public List<InternshipPlan> findAll() {
@@ -63,6 +65,12 @@ public class InternshipPlanServiceImpl implements InternshipPlanService {
         if (entity.getAssignment() == null || entity.getAssignment().getAssignmentId() == null) {
             throw new AppException(ErrorCode.FIELD_REQUIRED, "Assignment is required");
         }
+
+        EnterpriseAssignment realAssignment = assignmentRepository
+                .findById(entity.getAssignment().getAssignmentId())
+                .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Assignment not found"));
+        entity.setAssignment(realAssignment);
+
         // Ownership: only the enterprise that owns the assignment can save the plan
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         var currentUser = userRepository.findByEmail(email).orElse(null);
