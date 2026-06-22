@@ -84,6 +84,24 @@ public class InternshipPlanServiceImpl implements InternshipPlanService {
                         .equals(currentUser.getEnterprise().getEnterpriseId())) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
+        // Upsert logic to prevent duplicate key violations (internship_plans_assignment_id_key)
+        if (entity.getPlanId() == null) {
+            List<InternshipPlan> existingPlans =
+                    repository.findByAssignment_AssignmentId(realAssignment.getAssignmentId());
+            if (!existingPlans.isEmpty()) {
+                InternshipPlan existingPlan = existingPlans.get(0);
+                existingPlan.setOverallGoal(entity.getOverallGoal());
+                return repository.save(existingPlan);
+            }
+        } else {
+            InternshipPlan existingPlan =
+                    repository.findById(entity.getPlanId()).orElse(null);
+            if (existingPlan != null) {
+                existingPlan.setOverallGoal(entity.getOverallGoal());
+                return repository.save(existingPlan);
+            }
+        }
+
         return repository.save(entity);
     }
 
