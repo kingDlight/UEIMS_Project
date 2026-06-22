@@ -68,7 +68,7 @@ public class InternshipPlanServiceImpl implements InternshipPlanService {
 
         EnterpriseAssignment realAssignment = assignmentRepository
                 .findById(entity.getAssignment().getAssignmentId())
-                .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Assignment not found"));
+                .orElseThrow(() -> new AppException(ErrorCode.ASSIGNMENT_NOT_FOUND, "Assignment not found"));
         entity.setAssignment(realAssignment);
 
         // Ownership: only the enterprise that owns the assignment can save the plan
