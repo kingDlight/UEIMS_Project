@@ -25,6 +25,7 @@ import { OjtStatusBadge } from '../components/OjtStatusBadge';
 
 export interface DashboardTabProps {
   currentSemester: number;
+  hasActivePlacement?: boolean;
 }
 
 // ============================================================
@@ -832,7 +833,7 @@ const EvaluationRow: React.FC<{ onNavigate: (route: string) => void }> = ({ onNa
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
-export const StudentDashboardTab: React.FC<DashboardTabProps> = ({ currentSemester: propSemester }) => {
+export const StudentDashboardTab: React.FC<DashboardTabProps> = ({ currentSemester: propSemester, hasActivePlacement: propPlacement }) => {
   const { t } = useTranslation(['studentDashboard']);
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -855,9 +856,10 @@ export const StudentDashboardTab: React.FC<DashboardTabProps> = ({ currentSemest
   });
   const navigate = useNavigate();
 
-  // Prefer the semester passed from parent (source of truth).
+  // Prefer the semester/placement passed from parent (source of truth).
   // Fall back to stats if not provided (for backward compatibility).
   const currentSemester = propSemester ?? stats.currentSemester ?? 5;
+  const hasActivePlacement = propPlacement ?? stats.hasActivePlacement ?? false;
 
   useEffect(() => {
     const timer = setTimeout(() => setMounted(true), 100);
@@ -894,9 +896,8 @@ export const StudentDashboardTab: React.FC<DashboardTabProps> = ({ currentSemest
   const isSemester5 = currentSemester === 5;
   const isSemester6 = currentSemester === 6;
   const isSemester7to9 = currentSemester >= 7 && currentSemester <= 9;
-  const isSemester6WithoutPlacement = isSemester6 && !stats.hasActivePlacement;
-  const showUpcoming = isSemester5 || (isSemester6 && stats.hasActivePlacement);
-  const showRecentActivity = isSemester5 || (isSemester6 && stats.hasActivePlacement);
+  const showUpcoming = isSemester5 || (isSemester6 && hasActivePlacement);
+  const showRecentActivity = isSemester5 || (isSemester6 && hasActivePlacement);
 
   const quickActions = (() => {
     const actions = [] as Array<{ label: string; description: string; icon: React.ReactNode; route: string }>;
@@ -928,7 +929,7 @@ export const StudentDashboardTab: React.FC<DashboardTabProps> = ({ currentSemest
     }
 
     if (isSemester6) {
-      if (!stats.hasActivePlacement) {
+      if (!hasActivePlacement) {
         actions.push({
           label: t('browseJobs', 'Browse Jobs'),
           description: t('browseJobsDesc', 'Find and apply for internships'),
@@ -1009,8 +1010,8 @@ export const StudentDashboardTab: React.FC<DashboardTabProps> = ({ currentSemest
               {/* PRIMARY SEMESTER CARDS (Full Width) */}
               <div style={{ marginBottom: 24 }}>
                 {isSemester1to4 && <WelcomeCard onNavigate={handleNavigate} />}
-                {(isSemester5 || isSemester6WithoutPlacement) && <UrgencyCardsRow stats={stats} onNavigate={handleNavigate} />}
-                {isSemester6 && !isSemester6WithoutPlacement && <ReportPipelineRow stats={stats} onNavigate={handleNavigate} />}
+                {(isSemester5 || (isSemester6 && !hasActivePlacement)) && <UrgencyCardsRow stats={stats} onNavigate={handleNavigate} />}
+                {isSemester6 && hasActivePlacement && <ReportPipelineRow stats={stats} onNavigate={handleNavigate} />}
                 {isSemester7to9 && <EvaluationRow onNavigate={handleNavigate} />}
 
                 {/* Alert for AT_RISK or BLOCKED — show regardless of placement status */}
