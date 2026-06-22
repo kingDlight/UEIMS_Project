@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ueims.model.entity.AtRiskStudent;
 import com.ueims.service.AtRiskStudentService;
+import com.ueims.service.impl.AtRiskStudentResult;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -26,9 +26,13 @@ public class AtRiskStudentController {
     com.ueims.service.ExcelExportService excelExportService;
 
     @GetMapping
-    public ResponseEntity<List<AtRiskStudent>> getAtRiskStudents(@RequestParam UUID semesterId) {
-        List<AtRiskStudent> atRiskStudents = atRiskStudentService.getAtRiskStudentsBySemester(semesterId);
-        return ResponseEntity.ok(atRiskStudents);
+    public ResponseEntity<List<AtRiskStudentResult>> getAtRiskStudents(
+            @RequestParam UUID semesterId,
+            @RequestParam(required = false) String riskCategory,
+            @RequestParam(required = false) Integer minPriority) {
+        List<AtRiskStudentResult> results = atRiskStudentService
+                .getAtRiskStudentsBySemester(semesterId, riskCategory, minPriority);
+        return ResponseEntity.ok(results);
     }
 
     @GetMapping("/export")

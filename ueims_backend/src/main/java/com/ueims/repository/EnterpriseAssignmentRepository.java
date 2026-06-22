@@ -47,6 +47,8 @@ public interface EnterpriseAssignmentRepository extends JpaRepository<Enterprise
 
     List<EnterpriseAssignment> findByAssignmentIdIn(List<UUID> assignmentIds);
 
+    List<EnterpriseAssignment> findBySemester_SemesterIdAndStatus(UUID semesterId, String status);
+
     void deleteByEnterprise_EnterpriseId(UUID enterpriseId);
 
     long countByStatus(String status);

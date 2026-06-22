@@ -182,4 +182,12 @@ export type AtRiskStudent = {
   companyName?: string;
   missedReports?: number;
   rejectedReports?: number;
+  riskCategory?: string;
+  riskReason?: string;
+  priorityScore?: number;
+  daysAtRisk?: number;
+  applicationCount?: number;
+  reportSubmittedCount?: number;
+  reportApprovedCount?: number;
+  interviewCount?: number;
 };

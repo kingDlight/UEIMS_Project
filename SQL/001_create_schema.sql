@@ -636,7 +636,7 @@ CREATE TABLE IF NOT EXISTS placement_applications (
     created_by         UUID REFERENCES users(user_id),
     updated_by         UUID REFERENCES users(user_id),
     is_replacement     BOOLEAN NOT NULL DEFAULT FALSE,
-    replaces_application_id UUID    REFERENCES placement_applications(application_id) ON DELETE SET NULL
+    replaces_application_id UUID    REFERENCES placement_applications(application_id) ON DELETE SET NULL,
 
     -- 1 SV chỉ được apply 1 lần vào 1 DN trong cùng 1 kỳ
     CONSTRAINT uq_placement_app_per_student_enterprise_semester

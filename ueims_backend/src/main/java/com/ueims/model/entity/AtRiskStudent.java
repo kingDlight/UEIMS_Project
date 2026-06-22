@@ -53,4 +53,28 @@ public class AtRiskStudent {
 
     @Column(name = "rejected_reports")
     private Integer rejectedReports;
+
+    @Column(name = "risk_category")
+    private String riskCategory;
+
+    @Column(name = "risk_reason")
+    private String riskReason;
+
+    @Column(name = "priority_score")
+    private Integer priorityScore;
+
+    @Column(name = "days_at_risk")
+    private Integer daysAtRisk;
+
+    @Column(name = "application_count")
+    private Integer applicationCount;
+
+    @Column(name = "report_submitted_count")
+    private Integer reportSubmittedCount;
+
+    @Column(name = "report_approved_count")
+    private Integer reportApprovedCount;
+
+    @Column(name = "interview_count")
+    private Integer interviewCount;
 }

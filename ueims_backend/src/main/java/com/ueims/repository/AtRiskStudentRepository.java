@@ -15,4 +15,10 @@ public interface AtRiskStudentRepository extends JpaRepository<AtRiskStudent, UU
     List<AtRiskStudent> findBySemesterId(UUID semesterId);
 
     Page<AtRiskStudent> findBySemesterId(UUID semesterId, Pageable pageable);
+
+    List<AtRiskStudent> findBySemesterIdAndRiskCategory(UUID semesterId, String riskCategory);
+
+    Page<AtRiskStudent> findBySemesterIdAndRiskCategory(UUID semesterId, String riskCategory, Pageable pageable);
+
+    List<AtRiskStudent> findBySemesterIdAndPriorityScoreGreaterThanEqual(UUID semesterId, Integer minPriority);
 }

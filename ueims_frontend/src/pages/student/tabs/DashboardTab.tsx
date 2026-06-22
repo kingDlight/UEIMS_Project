@@ -16,9 +16,12 @@ import {
   BookOpen,
   Briefcase,
   Star,
+  Mail,
 } from 'lucide-react';
 import { Spin } from 'antd';
 import { StudentDashboardService, type StudentDashboardStats } from '@/services/StudentDashboardService';
+import { OjtStatusService, type OjtStatusResponse } from '@/services/OjtStatusService';
+import { OjtStatusBadge } from '../components/OjtStatusBadge';
 
 // ============================================================
 // DESIGN TOKENS — Student Command Center (matching TM style)
@@ -247,7 +250,7 @@ const StatChip: React.FC<{ icon: React.ReactNode; label: string; value: number |
 // ============================================================
 // SECTION: SEMESTER CONTEXT BAR
 // ============================================================
-const SemesterContextBar: React.FC<{ stats: StudentDashboardStats }> = ({ stats }) => {
+const SemesterContextBar: React.FC<{ stats: StudentDashboardStats; ojtStatus: OjtStatusResponse | null }> = ({ stats, ojtStatus }) => {
   const { t } = useTranslation(['studentDashboard']);
   return (
     <div style={{
@@ -297,21 +300,30 @@ const SemesterContextBar: React.FC<{ stats: StudentDashboardStats }> = ({ stats 
         style={{ display: 'flex', alignItems: 'center', gap: 10 }}
       >
         <span style={{ fontSize: 11, color: cc.textMuted }}>{t('statusLabel', 'Status')}</span>
-        <span style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 4,
-          padding: '3px 10px',
-          borderRadius: cc.radiusFull,
-          backgroundColor: hexToRgba(cc.brand, 0.06),
-          border: `1px solid ${hexToRgba(cc.brand, 0.25)}`,
-          color: cc.brand,
-          fontSize: 11,
-          fontWeight: 600,
-        }}>
-          <StatusDot color={cc.brand} />
-          {t('ojtInProgress', 'OJT IN PROGRESS')}
-        </span>
+        {ojtStatus ? (
+          <OjtStatusBadge
+            status={ojtStatus.ojtStatus}
+            label={ojtStatus.statusLabel}
+            color={ojtStatus.statusColor}
+            isUrgent={ojtStatus.isUrgent}
+          />
+        ) : (
+          <span style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 4,
+            padding: '3px 10px',
+            borderRadius: cc.radiusFull,
+            backgroundColor: hexToRgba(cc.brand, 0.06),
+            border: `1px solid ${hexToRgba(cc.brand, 0.25)}`,
+            color: cc.brand,
+            fontSize: 11,
+            fontWeight: 600,
+          }}>
+            <StatusDot color={cc.brand} />
+            {t('ojtInProgress', 'OJT IN PROGRESS')}
+          </span>
+        )}
       </motion.div>
     </div>
   );
@@ -349,8 +361,26 @@ const WelcomeCard: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavi
   );
 };
 
-const NoPlacementAlert: React.FC<{ enterpriseName?: string; onNavigate: (route: string) => void }> = ({ enterpriseName, onNavigate }) => {
+const NoPlacementAlert: React.FC<{
+  enterpriseName?: string;
+  onNavigate: (route: string) => void;
+  riskReason?: string | null;
+  contactEmail?: string | null;
+  contactName?: string | null;
+  daysUntilDeadline?: number | null;
+}> = ({ enterpriseName, onNavigate, riskReason, contactEmail, contactName, daysUntilDeadline }) => {
   const { t } = useTranslation(['studentDashboard']);
+  const isUrgent = true;
+
+  const handleContactSupport = () => {
+    if (contactEmail) {
+      const subject = encodeURIComponent('[UEIMS] Yêu cầu hỗ trợ OJT');
+      window.location.href = `mailto:${contactEmail}?subject=${subject}`;
+    } else {
+      window.location.href = 'mailto:training-office@ueims.edu.vn?subject=[UEIMS] Yêu cầu hỗ trợ OJT';
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -358,21 +388,43 @@ const NoPlacementAlert: React.FC<{ enterpriseName?: string; onNavigate: (route: 
       transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
       style={{ marginBottom: 16 }}
     >
-      <CardWrapper style={{ padding: 22, border: `1px solid ${cc.warningMuted}`, background: hexToRgba(cc.warning, 0.06) }}>
+      <CardWrapper style={{
+        padding: 22,
+        border: `1px solid ${cc.warning}`,
+        background: hexToRgba(cc.warning, 0.04),
+      }}>
         <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
           <AlertTriangle size={26} color={cc.warning} />
-          <div>
+          <div style={{ flex: 1 }}>
             <div style={{ fontSize: 18, fontWeight: 700, color: cc.textPrimary, marginBottom: 8 }}>
               {t('noActivePlacementHeading', 'No active placement found')}
             </div>
-            <div style={{ fontSize: 14, color: cc.textSecondary, lineHeight: 1.7, marginBottom: 14 }}>
-              {enterpriseName
-                ? t('noActivePlacementMessageWithEnterprise', 'You are not currently assigned to an internship with {{enterprise}}. Please visit the Job Board to apply.', { enterprise: enterpriseName })
-                : t('noActivePlacementMessage', 'You are not currently assigned to any internship. Please visit the Job Board to apply.')}
+            <div style={{ fontSize: 14, color: cc.textSecondary, lineHeight: 1.7, marginBottom: 10 }}>
+              {riskReason || (
+                enterpriseName
+                  ? t('noActivePlacementMessageWithEnterprise', 'You are not currently assigned to an internship with {{enterprise}}. Please visit the Job Board to apply.', { enterprise: enterpriseName })
+                  : t('noActivePlacementMessage', 'You are not currently assigned to any internship. Please visit the Job Board to apply.')
+              )}
             </div>
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+            {daysUntilDeadline !== null && daysUntilDeadline !== undefined && daysUntilDeadline <= 30 && (
+              <div style={{
+                display: 'inline-flex', alignItems: 'center', gap: 4,
+                fontSize: 12, fontWeight: 600, color: cc.warning,
+                background: hexToRgba(cc.warning, 0.08),
+                border: `1px solid ${hexToRgba(cc.warning, 0.25)}`,
+                padding: '3px 10px', borderRadius: cc.radiusFull,
+                marginBottom: 14,
+              }}>
+                <Clock size={12} />
+                Còn {daysUntilDeadline} ngày đến hạn kết thúc kỳ
+              </div>
+            )}
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               <CTAButton variant="primary" size="md" icon={false} onClick={() => onNavigate('jobs')}>
                 {t('visitJobBoard', 'Visit Job Board')}
+              </CTAButton>
+              <CTAButton variant="ghost" size="md" icon={<Mail size={13} />} onClick={handleContactSupport}>
+                {contactName ? `Liên hệ ${contactName}` : t('contactSupport', 'Contact Support')}
               </CTAButton>
             </div>
           </div>
@@ -780,6 +832,7 @@ export const StudentDashboardTab: React.FC = () => {
   const { t } = useTranslation(['studentDashboard']);
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [ojtStatus, setOjtStatus] = useState<OjtStatusResponse | null>(null);
   const [stats, setStats] = useState<StudentDashboardStats>({
     applications: 0,
     interviews: 0,
@@ -806,8 +859,16 @@ export const StudentDashboardTab: React.FC = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const data = await StudentDashboardService.getStats();
-        setStats(data);
+        const [statsData, ojtStatusData] = await Promise.allSettled([
+          StudentDashboardService.getStats(),
+          OjtStatusService.getMyOjtStatus(),
+        ]);
+        if (statsData.status === 'fulfilled') {
+          setStats(statsData.value);
+        }
+        if (ojtStatusData.status === 'fulfilled') {
+          setOjtStatus(ojtStatusData.value);
+        }
       } catch (e) {
         console.error(e);
       } finally {
@@ -930,14 +991,28 @@ export const StudentDashboardTab: React.FC = () => {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
             >
-              <SemesterContextBar stats={stats} />
+              <SemesterContextBar stats={stats} ojtStatus={ojtStatus} />
 
               {/* PRIMARY SEMESTER CARDS (Full Width) */}
               <div style={{ marginBottom: 24 }}>
                 {isSemester1to4 && <WelcomeCard onNavigate={handleNavigate} />}
-                {isSemester5 && <UrgencyCardsRow stats={stats} onNavigate={handleNavigate} />}
-                {isSemester6 && !isSemester6WithoutPlacement && <ReportPipelineRow stats={stats} onNavigate={handleNavigate} />}
+                {(isSemester5 || (isSemester6 && !stats.hasActivePlacement)) && (
+                  <UrgencyCardsRow stats={stats} onNavigate={handleNavigate} />
+                )}
+                {isSemester6 && stats.hasActivePlacement && <ReportPipelineRow stats={stats} onNavigate={handleNavigate} />}
                 {isSemester7to9 && <EvaluationRow onNavigate={handleNavigate} />}
+
+                {/* Alert for AT_RISK or BLOCKED — show regardless of placement status */}
+                {ojtStatus && (ojtStatus.ojtStatus === 'AT_RISK' || ojtStatus.ojtStatus === 'BLOCKED') && (
+                  <NoPlacementAlert
+                    enterpriseName={stats.enterpriseName}
+                    onNavigate={handleNavigate}
+                    riskReason={ojtStatus.riskReason}
+                    contactEmail={ojtStatus.contactSupportEmail}
+                    contactName={ojtStatus.contactSupportName}
+                    daysUntilDeadline={ojtStatus.daysUntilDeadline}
+                  />
+                )}
               </div>
 
               {/* QUICK ACTIONS ROW (Full Width) */}
@@ -955,7 +1030,6 @@ export const StudentDashboardTab: React.FC = () => {
                 {/* Right Column (Sidebar content) */}
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                   {showUpcoming && <UpcomingCard onNavigate={handleNavigate} />}
-                  {isSemester6WithoutPlacement && <NoPlacementAlert enterpriseName={stats.enterpriseName} onNavigate={handleNavigate} />}
                 </div>
               </div>
             </motion.div>

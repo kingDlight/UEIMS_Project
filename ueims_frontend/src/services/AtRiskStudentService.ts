@@ -2,10 +2,18 @@ import{ api} from './api';
 import type { AtRiskStudent } from '@/pages/training-manager/types';
 
 export const AtRiskStudentService = {
-  getAtRiskStudents: async (semesterId: string): Promise<AtRiskStudent[]> => {
-    const response = await api.get('/at-risk-students', {
-      params: { semesterId },
-    });
+  getAtRiskStudents: async (
+    semesterId: string,
+    filters?: { riskCategory?: string; minPriority?: number }
+  ): Promise<AtRiskStudent[]> => {
+    const params: Record<string, string | number> = { semesterId };
+    if (filters?.riskCategory && filters.riskCategory !== 'ALL') {
+      params.riskCategory = filters.riskCategory;
+    }
+    if (filters?.minPriority != null) {
+      params.minPriority = filters.minPriority;
+    }
+    const response = await api.get('/at-risk-students', { params });
     return response.data;
   },
   exportAtRiskStudents: async (semesterId: string): Promise<Blob> => {
