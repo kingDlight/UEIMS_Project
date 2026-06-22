@@ -266,7 +266,7 @@ public class NotificationServiceImpl implements NotificationService {
                         try {
                             Notification saved = repository.save(Notification.builder()
                                     .recipient(tm)
-                                    .type("INCIDENT_REPORTED")
+                                    .type("INCIDENT")
                                     .title("Sự cố mới từ doanh nghiệp")
                                     .message("Một sự cố mới đã được báo cáo: " + incident.getCategory())
                                     .isRead(false)
