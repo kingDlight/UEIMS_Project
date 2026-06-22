@@ -1573,8 +1573,13 @@ CREATE TABLE user_sessions (
     token_id VARCHAR(36) PRIMARY KEY,
     email VARCHAR(100) NOT NULL,
     last_activity TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    expires_at TIMESTAMP NOT NULL
+    expires_at TIMESTAMP NOT NULL,
+    device_id VARCHAR(255) NOT NULL                          -- single-device login (BR-02 / BR-03)
 );
+
+UPDATE user_sessions
+SET device_id = COALESCE(device_id, 'legacy-unknown-device')
+WHERE device_id IS NULL;
 
 CREATE TABLE IF NOT EXISTS request_logs (
     id                  UUID PRIMARY KEY,
