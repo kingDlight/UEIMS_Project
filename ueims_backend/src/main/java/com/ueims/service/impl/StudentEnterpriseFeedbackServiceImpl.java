@@ -32,7 +32,8 @@ public class StudentEnterpriseFeedbackServiceImpl implements StudentEnterpriseFe
     UserRepository userRepository;
     EligibleStudentRepository eligibleStudentRepository;
 
-    private static final String DEBUG_LOG = "F:/Software Development Project/SWP_Project/UEIMS_Project/debug-feedback.log";
+    private static final String DEBUG_LOG =
+            "F:/Software Development Project/SWP_Project/UEIMS_Project/debug-feedback.log";
 
     private void debugLog(String msg) {
         try {
@@ -41,7 +42,8 @@ public class StudentEnterpriseFeedbackServiceImpl implements StudentEnterpriseFe
             try (PrintWriter pw = new PrintWriter(new FileWriter(p.toFile(), true))) {
                 pw.println(java.time.Instant.now() + " [FeedbackService] " + msg);
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
     }
 
     private User getCurrentUser() {
@@ -58,7 +60,6 @@ public class StudentEnterpriseFeedbackServiceImpl implements StudentEnterpriseFe
     @Override
     public StudentEnterpriseFeedback findById(UUID id) {
         debugLog("findById id=" + id);
-        try {
         StudentEnterpriseFeedback feedback = repository.findById(id).orElse(null);
         if (feedback == null) {
             return null;
@@ -94,8 +95,7 @@ public class StudentEnterpriseFeedbackServiceImpl implements StudentEnterpriseFe
     @Override
     public StudentEnterpriseFeedback save(StudentEnterpriseFeedback entity) {
         debugLog("save called");
-        try {
-            User currentUser = getCurrentUser();
+        User currentUser = getCurrentUser();
 
         if (entity.getStudent() == null) {
             entity.setStudent(currentUser);
