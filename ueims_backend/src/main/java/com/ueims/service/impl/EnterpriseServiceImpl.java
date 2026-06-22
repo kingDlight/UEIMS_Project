@@ -32,8 +32,28 @@ public class EnterpriseServiceImpl implements EnterpriseService {
     MailService mailService;
 
     @Override
-    public List<Enterprise> findAll() {
-        return repository.findAll();
+    public List<Enterprise> findAll(String industry, String status, String sortBy, String sortDirection) {
+        org.springframework.data.jpa.domain.Specification<Enterprise> spec =
+                org.springframework.data.jpa.domain.Specification.where(null);
+
+        if (industry != null && !industry.trim().isEmpty()) {
+            spec = spec.and((root, query, cb) ->
+                    cb.equal(cb.lower(root.get("industry")), industry.trim().toLowerCase()));
+        }
+        if (status != null && !status.trim().isEmpty()) {
+            spec = spec.and((root, query, cb) ->
+                    cb.equal(root.get("status"), status.trim().toUpperCase()));
+        }
+
+        org.springframework.data.domain.Sort sort = org.springframework.data.domain.Sort.unsorted();
+        if (sortBy != null && !sortBy.trim().isEmpty()) {
+            org.springframework.data.domain.Sort.Direction direction = "desc".equalsIgnoreCase(sortDirection)
+                    ? org.springframework.data.domain.Sort.Direction.DESC
+                    : org.springframework.data.domain.Sort.Direction.ASC;
+            sort = org.springframework.data.domain.Sort.by(direction, sortBy);
+        }
+
+        return repository.findAll(spec, sort);
     }
 
     @Override

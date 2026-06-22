@@ -27,9 +27,15 @@ public class EnterpriseController {
 
     @GetMapping
     @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')") // UC-18
-    public ApiResponse<List<EnterpriseDTO>> getAll() {
+    public ApiResponse<List<EnterpriseDTO>> getAll(
+            @RequestParam(required = false) String industry,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false, defaultValue = "asc") String sortDirection) {
         return ApiResponse.<List<EnterpriseDTO>>builder()
-                .result(service.findAll().stream().map(mapper::toDto).toList())
+                .result(service.findAll(industry, status, sortBy, sortDirection).stream()
+                        .map(mapper::toDto)
+                        .toList())
                 .build();
     }
 

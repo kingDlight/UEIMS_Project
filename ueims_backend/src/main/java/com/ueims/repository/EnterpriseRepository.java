@@ -4,12 +4,13 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 import com.ueims.model.entity.*;
 
 @Repository
-public interface EnterpriseRepository extends JpaRepository<Enterprise, UUID> {
+public interface EnterpriseRepository extends JpaRepository<Enterprise, UUID>, JpaSpecificationExecutor<Enterprise> {
     boolean existsByTaxCode(String taxCode);
 
     List<Enterprise> findByStatus(String status);

@@ -7,7 +7,7 @@ import com.ueims.dto.request.EnterpriseRequest;
 import com.ueims.model.entity.Enterprise;
 
 public interface EnterpriseService {
-    List<Enterprise> findAll();
+    List<Enterprise> findAll(String industry, String status, String sortBy, String sortDirection);
 
     Enterprise findById(UUID id);
 

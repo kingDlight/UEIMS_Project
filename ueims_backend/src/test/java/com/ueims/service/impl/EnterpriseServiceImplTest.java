@@ -105,8 +105,11 @@ class EnterpriseServiceImplTest {
 
     @Test
     void findAll_success() {
-        when(repository.findAll()).thenReturn(List.of(enterprise));
-        List<Enterprise> list = service.findAll();
+        when(repository.findAll(
+                        any(org.springframework.data.jpa.domain.Specification.class),
+                        any(org.springframework.data.domain.Sort.class)))
+                .thenReturn(List.of(enterprise));
+        List<Enterprise> list = service.findAll(null, null, null, null);
         assertEquals(1, list.size());
     }
 
