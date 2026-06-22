@@ -15,57 +15,54 @@ import com.ueims.model.entity.ApplicationStatus;
 
 @Repository
 public interface ApplicationRepository extends JpaRepository<Application, UUID> {
-        boolean existsByJobPost_JobPostIdAndStudent_UserIdAndStatusNotAndDeletedAtIsNull(
-                        UUID jobPostId, UUID studentId, ApplicationStatus status);
+    boolean existsByJobPost_JobPostIdAndStudent_UserIdAndStatusNotAndDeletedAtIsNull(
+            UUID jobPostId, UUID studentId, ApplicationStatus status);
 
-        boolean existsByJobPost_JobPostIdAndStudent_UserIdAndStatusNotInAndDeletedAtIsNull(
-                        UUID jobPostId, UUID studentId, Collection<ApplicationStatus> statuses);
+    boolean existsByJobPost_JobPostIdAndStudent_UserIdAndStatusNotInAndDeletedAtIsNull(
+            UUID jobPostId, UUID studentId, Collection<ApplicationStatus> statuses);
 
-        boolean existsByJobPost_JobPostId(UUID jobPostId);
+    boolean existsByJobPost_JobPostId(UUID jobPostId);
 
-        long countByStudent_UserIdAndStudent_DeletedAtIsNull(UUID studentId);
+    long countByStudent_UserIdAndStudent_DeletedAtIsNull(UUID studentId);
 
-        @Query("SELECT a FROM Application a " + "LEFT JOIN FETCH a.jobPost jp "
-                        + "LEFT JOIN FETCH jp.enterprise "
-                        + "WHERE a.student.userId = :studentId")
-        List<Application> findByStudent_UserId(
-                        @Param("studentId") UUID studentId);
+    @Query("SELECT a FROM Application a " + "LEFT JOIN FETCH a.jobPost jp "
+            + "LEFT JOIN FETCH jp.enterprise "
+            + "WHERE a.student.userId = :studentId")
+    List<Application> findByStudent_UserId(@Param("studentId") UUID studentId);
 
-        boolean existsByJobPost_Enterprise_EnterpriseIdAndStudent_UserId(UUID enterpriseId, UUID studentId);
+    boolean existsByJobPost_Enterprise_EnterpriseIdAndStudent_UserId(UUID enterpriseId, UUID studentId);
 
-        List<Application> findByJobPost_Enterprise_EnterpriseId(UUID enterpriseId);
+    List<Application> findByJobPost_Enterprise_EnterpriseId(UUID enterpriseId);
 
-        List<Application> findByJobPost_Enterprise_EnterpriseIdAndDeletedAtIsNull(UUID enterpriseId);
+    List<Application> findByJobPost_Enterprise_EnterpriseIdAndDeletedAtIsNull(UUID enterpriseId);
 
-        @Query("SELECT a FROM Application a " + "LEFT JOIN FETCH a.jobPost jp "
-                        + "LEFT JOIN FETCH jp.enterprise "
-                        + "LEFT JOIN FETCH a.student s "
-                        + "LEFT JOIN s.studentProfile sp "
-                        + "WHERE jp.enterprise.enterpriseId = :enterpriseId "
-                        + "AND a.deletedAt IS NULL "
-                        + "AND (:search IS NULL OR LOWER(s.fullName) LIKE LOWER(CONCAT('%', CAST(:search AS text), '%')) "
-                        + "OR LOWER(sp.studentCode) LIKE LOWER(CONCAT('%', CAST(:search AS text), '%')) "
-                        + "OR LOWER(jp.title) LIKE LOWER(CONCAT('%', CAST(:search AS text), '%')))")
-        List<Application> searchByEnterpriseId(
-                        @Param("enterpriseId") UUID enterpriseId,
-                        @Param("search") String search);
+    @Query("SELECT a FROM Application a " + "LEFT JOIN FETCH a.jobPost jp "
+            + "LEFT JOIN FETCH jp.enterprise "
+            + "LEFT JOIN FETCH a.student s "
+            + "LEFT JOIN s.studentProfile sp "
+            + "WHERE jp.enterprise.enterpriseId = :enterpriseId "
+            + "AND a.deletedAt IS NULL "
+            + "AND (:search IS NULL OR LOWER(s.fullName) LIKE LOWER(CONCAT('%', CAST(:search AS text), '%')) "
+            + "OR LOWER(sp.studentCode) LIKE LOWER(CONCAT('%', CAST(:search AS text), '%')) "
+            + "OR LOWER(jp.title) LIKE LOWER(CONCAT('%', CAST(:search AS text), '%')))")
+    List<Application> searchByEnterpriseId(@Param("enterpriseId") UUID enterpriseId, @Param("search") String search);
 
-        long countByStudent_UserIdAndStatusNotAndDeletedAtIsNull(UUID studentId, ApplicationStatus status);
+    long countByStudent_UserIdAndStatusNotAndDeletedAtIsNull(UUID studentId, ApplicationStatus status);
 
-        /**
-         * Counts only active (non-terminal) applications for a student.
-         * Active = PENDING, SCREENING_PASSED, INTERVIEW_SCHEDULED, ACCEPTED
-         * Excludes terminal statuses: REJECTED, SCREENING_REJECTED, WITHDRAWN
-         */
-        @Query("SELECT COUNT(a) FROM Application a "
-                        + "WHERE a.student.userId = :studentId "
-                        + "AND a.deletedAt IS NULL "
-                        + "AND a.status NOT IN ('REJECTED', 'SCREENING_REJECTED', 'WITHDRAWN')")
-        long countActiveApplications(@Param("studentId") UUID studentId);
+    /**
+     * Counts only active (non-terminal) applications for a student.
+     * Active = PENDING, SCREENING_PASSED, INTERVIEW_SCHEDULED, ACCEPTED
+     * Excludes terminal statuses: REJECTED, SCREENING_REJECTED, WITHDRAWN
+     */
+    @Query("SELECT COUNT(a) FROM Application a "
+            + "WHERE a.student.userId = :studentId "
+            + "AND a.deletedAt IS NULL "
+            + "AND a.status NOT IN ('REJECTED', 'SCREENING_REJECTED', 'WITHDRAWN')")
+    long countActiveApplications(@Param("studentId") UUID studentId);
 
-        void deleteByJobPost_Enterprise_EnterpriseId(UUID enterpriseId);
+    void deleteByJobPost_Enterprise_EnterpriseId(UUID enterpriseId);
 
-        @Modifying
-        @Query("UPDATE Application a SET a.cvDownloadCount = a.cvDownloadCount + 1 WHERE a.applicationId = :id")
-        void incrementDownloadCount(@Param("id") UUID id);
+    @Modifying
+    @Query("UPDATE Application a SET a.cvDownloadCount = a.cvDownloadCount + 1 WHERE a.applicationId = :id")
+    void incrementDownloadCount(@Param("id") UUID id);
 }

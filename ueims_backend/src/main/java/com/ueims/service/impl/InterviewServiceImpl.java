@@ -476,7 +476,7 @@ public class InterviewServiceImpl implements InterviewService {
                         .equals(currentUser.getEnterprise().getEnterpriseId())) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
-        
+
         List<LocalDateTime> slots = new ArrayList<>();
         LocalDateTime cursor = LocalDateTime.now().plusDays(1).with(LocalTime.of(9, 0));
         List<Interview> existing = findMyEnterpriseInterviews();

@@ -5,13 +5,9 @@
   "devDependencies": {
     "@faker-js/faker": "^10.4.0",
     "@playwright/test": "^1.60.0",
-    "@prisma/config": "^7.8.0",
-    "jsonwebtoken": "^9.0.3",
-    "prisma": "^7.8.0"
+    "jsonwebtoken": "^9.0.3"
   },
   "dependencies": {
-    "@prisma/adapter-pg": "^7.8.0",
-    "@prisma/client": "^7.8.0",
     "bcryptjs": "^3.0.3",
     "docx": "^9.7.1",
     "gitnexus": "^1.6.7",
@@ -19,8 +15,5 @@
     "newman": "^6.2.2",
     "pg": "^8.21.0",
     "recharts": "^3.8.1"
-  },
-  "prisma": {
-    "seed": "node prisma/seed.js"
   }
 }

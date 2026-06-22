@@ -127,7 +127,8 @@ public class InterviewController {
             @RequestParam(value = "reason", required = false) String reason,
             @RequestParam(value = "meetingLink", required = false) String meetingLink,
             @RequestParam(value = "location", required = false) String location) {
-        return ResponseEntity.ok(mapper.toDto(service.reschedule(id, LocalDateTime.parse(newTime), reason, meetingLink, location)));
+        return ResponseEntity.ok(
+                mapper.toDto(service.reschedule(id, LocalDateTime.parse(newTime), reason, meetingLink, location)));
     }
 
     // UC-43.1: Propose 3 open slots for a given application
