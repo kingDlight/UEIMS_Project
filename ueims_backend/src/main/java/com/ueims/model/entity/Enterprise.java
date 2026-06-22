@@ -32,7 +32,7 @@ public class Enterprise extends BaseEntity {
     @Column(name = "tax_code", nullable = false, unique = true, length = 50)
     private String taxCode;
 
-    @Transient
+    @Column(name = "website", length = 255)
     private String website;
 
     @Column(name = "industry", length = 100)
