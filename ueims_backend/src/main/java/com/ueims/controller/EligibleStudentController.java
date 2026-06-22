@@ -33,8 +33,10 @@ public class EligibleStudentController {
 
     @GetMapping
     @PreAuthorize("hasRole('TRAINING_MANAGER')")
-    public ResponseEntity<List<EligibleStudentDTO>> getAll() {
-        return ResponseEntity.ok(service.findAll().stream().map(mapper::toDto).toList());
+    public ResponseEntity<List<EligibleStudentDTO>> getAll(@RequestParam(required = false) UUID semesterId) {
+        List<com.ueims.model.entity.EligibleStudent> list =
+                (semesterId != null) ? service.findBySemesterId(semesterId) : service.findAll();
+        return ResponseEntity.ok(list.stream().map(mapper::toDto).toList());
     }
 
     @GetMapping("/{id}")

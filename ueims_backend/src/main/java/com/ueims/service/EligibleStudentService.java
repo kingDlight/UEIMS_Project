@@ -11,6 +11,8 @@ import com.ueims.model.entity.EligibleStudent;
 public interface EligibleStudentService {
     List<EligibleStudent> findAll();
 
+    List<EligibleStudent> findBySemesterId(UUID semesterId);
+
     EligibleStudent findById(UUID id);
 
     EligibleStudent save(EligibleStudent entity);

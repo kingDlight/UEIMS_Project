@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Table, Modal, Form, DatePicker, Input, Button, Popconfirm, App, Select } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
+import type { ColumnsType, TableProps } from 'antd/es/table';
 import {
   Plus,
   CalendarDays,
@@ -175,10 +175,16 @@ export const SemesterTab: React.FC = () => {
   const [editForm] = Form.useForm();
 
   const [isMobile, setIsMobile] = useState(false);
+
+  const [tableParams, setTableParams] = useState<{
+    status?: string;
+    sortBy?: string;
+    sortDir?: string;
+  }>({});
   
-  const fetchSemesters = useCallback(async () => {
+  const fetchSemesters = useCallback(async (params = tableParams) => {
     try {
-      const data = await SemesterService.getAllSemesters();
+      const data = await SemesterService.getAllSemesters(params.status, params.sortBy, params.sortDir);
       const mapped: SemesterRecord[] = data.map((s) => {
         const start = dayjs(s.startDate);
         const end = dayjs(s.endDate);
@@ -210,7 +216,7 @@ export const SemesterTab: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    void fetchSemesters();
+    void fetchSemesters(tableParams);
     const check = () => setIsMobile(window.innerWidth < 768);
     check();
     window.addEventListener('resize', check);
@@ -404,6 +410,7 @@ export const SemesterTab: React.FC = () => {
       title: <HeaderBadge>Start Date</HeaderBadge>,
       dataIndex: 'startDate',
       key: 'startDate',
+      sorter: true,
       align: 'left' as const,
       width: 140,
       render: (date: string) => (
@@ -426,6 +433,7 @@ export const SemesterTab: React.FC = () => {
       title: <HeaderBadge>End Date</HeaderBadge>,
       dataIndex: 'endDate',
       key: 'endDate',
+      sorter: true,
       align: 'left' as const,
       width: 140,
       render: (date: string) => (
@@ -478,13 +486,21 @@ export const SemesterTab: React.FC = () => {
     },
     {
       title: <HeaderBadge align="right">Status</HeaderBadge>,
-      dataIndex: 'status',
+      dataIndex: 'originalStatus',
       key: 'status',
+      filters: [
+        { text: 'DRAFT', value: 'DRAFT' },
+        { text: 'OPEN', value: 'OPEN' },
+        { text: 'ACTIVE', value: 'ACTIVE' },
+        { text: 'CLOSED', value: 'CLOSED' },
+        { text: 'LOCKED', value: 'LOCKED' },
+      ],
+      filterMultiple: false,
       align: 'right' as const,
       width: 115,
-      render: (status: SemesterStatus) => (
+      render: (_: unknown, record: SemesterRecord) => (
         <div style={{ ...row, justifyContent: 'flex-end' }}>
-          <StatusBadge status={status} />
+          <StatusBadge status={record.status} />
         </div>
       ),
     },
@@ -637,6 +653,26 @@ export const SemesterTab: React.FC = () => {
     },
   ];
 
+  const handleTableChange: TableProps<SemesterRecord>['onChange'] = (pagination, filters, sorter) => {
+    const newParams = { ...tableParams };
+
+    if (filters.status && filters.status.length > 0) {
+      newParams.status = filters.status[0] as string;
+    } else {
+      newParams.status = undefined;
+    }
+
+    if (!Array.isArray(sorter) && sorter.order) {
+      newParams.sortBy = sorter.field as string;
+      newParams.sortDir = sorter.order === 'ascend' ? 'asc' : 'desc';
+    } else {
+      newParams.sortBy = undefined;
+      newParams.sortDir = undefined;
+    }
+
+    setTableParams(newParams);
+  };
+
   // ============================================================
   // RENDER
   // ============================================================
@@ -750,6 +786,7 @@ export const SemesterTab: React.FC = () => {
             dataSource={semesters}
             rowKey="id"
             pagination={false}
+            onChange={handleTableChange}
             scroll={{ x: 860 }}
             className="semester-table"
           size="middle"

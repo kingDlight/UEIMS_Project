@@ -347,17 +347,30 @@ const DetailModal: React.FC<DetailModalProps> = ({ applicant, open, onClose, onS
             <div className="text-[13px] text-slate-900 leading-relaxed whitespace-pre-wrap">{applicant.coverLetter}</div>
           </div>
         )}
-        {applicant.applicationId && (
-          <Button
-            type="primary"
-            icon={<DownloadOutlined />}
-            loading={downloading}
-            onClick={handleDownloadCv}
-            className="w-full flex items-center justify-center gap-1.5 py-5 rounded-xl bg-[#E67E22] hover:bg-[#D68910] border-none text-white font-bold text-[13px] shadow-[0_8px_22px_rgba(230,126,34,0.22)]"
-          >
-            Download CV (PDF)
-          </Button>
-        )}
+        <div className="px-3.5 py-3 rounded-xl bg-slate-50 border border-slate-200">
+          <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">CV / Resume</div>
+          <div className="text-[13px] font-semibold text-slate-900">
+            {applicant.cvFileUrl ? (
+              applicant.cvFileUrl.startsWith('http') ? (
+                <a href={applicant.cvFileUrl} target="_blank" rel="noreferrer" className="text-blue-500 hover:underline flex items-center gap-1">
+                  <FileTextOutlined /> View External CV Link
+                </a>
+              ) : (
+                <Button
+                  type="link"
+                  icon={<DownloadOutlined />}
+                  loading={downloading}
+                  onClick={handleDownloadCv}
+                  className="p-0 h-auto text-blue-500 hover:text-blue-600 flex items-center gap-1 text-[13px]"
+                >
+                  Download CV Document (PDF)
+                </Button>
+              )
+            ) : (
+              <span className="text-slate-400 italic">No CV provided</span>
+            )}
+          </div>
+        </div>
         {isPending && (
           <div className="flex gap-2.5 pt-1 border-t border-slate-100">
             <Button

@@ -12,8 +12,13 @@ export interface SemesterResponse {
 }
 
 export const SemesterService = {
-  async getAllSemesters(): Promise<SemesterResponse[]> {
-    const response = await api.get<SemesterResponse[]>('/semesters');
+  async getAllSemesters(status?: string, sortBy?: string, sortDirection?: string): Promise<SemesterResponse[]> {
+    const params = new URLSearchParams();
+    if (status) params.append('status', status);
+    if (sortBy) params.append('sortBy', sortBy);
+    if (sortDirection) params.append('sortDirection', sortDirection);
+    const qs = params.toString();
+    const response = await api.get<SemesterResponse[]>(`/semesters${qs ? `?${qs}` : ''}`);
     return response.data || [];
   },
 

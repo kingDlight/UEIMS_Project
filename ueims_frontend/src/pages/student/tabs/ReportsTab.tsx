@@ -316,6 +316,23 @@ export const ReportsTab: React.FC = () => {
                           <p style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, margin: '0 0 4px' }}>{t('planNextWeekTitle', 'Plan for Next Week')}</p>
                           <p style={{ fontSize: 13, color: cc.textPrimary, margin: 0, whiteSpace: 'pre-wrap' }}>{report.planNextWeek || 'N/A'}</p>
                         </div>
+                        {report.attachmentUrls && (
+                          <div>
+                            <p style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, margin: '0 0 4px' }}>Attachments</p>
+                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                              {(() => {
+                                try {
+                                  const urls = JSON.parse(report.attachmentUrls);
+                                  return Array.isArray(urls) ? urls.map((u: string, i: number) => (
+                                    <a key={i} href={u} target="_blank" rel="noreferrer" style={{ fontSize: 12, color: cc.primary, textDecoration: 'none', background: cc.primaryMuted, padding: '4px 8px', borderRadius: cc.radiusSm }}>Attachment {i + 1}</a>
+                                  )) : <a href={report.attachmentUrls} target="_blank" rel="noreferrer" style={{ fontSize: 12, color: cc.primary, textDecoration: 'none', background: cc.primaryMuted, padding: '4px 8px', borderRadius: cc.radiusSm }}>Download Attachment</a>;
+                                } catch {
+                                  return <a href={report.attachmentUrls} target="_blank" rel="noreferrer" style={{ fontSize: 12, color: cc.primary, textDecoration: 'none', background: cc.primaryMuted, padding: '4px 8px', borderRadius: cc.radiusSm }}>Download Attachment</a>;
+                                }
+                              })()}
+                            </div>
+                          </div>
+                        )}
                         {report.feedback && (
                           <div style={{ padding: 12, borderRadius: cc.radiusMd, background: cc.dangerMuted }}>
                             <p style={{ fontSize: 12, fontWeight: 600, color: cc.dangerText, margin: '0 0 4px' }}>{t('enterpriseFeedbackLabel', 'Enterprise Feedback:')}</p>

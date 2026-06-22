@@ -2,13 +2,14 @@ import { api } from './api';
 import type { EligibleStudent } from '@/pages/training-manager/types';
 
 export const EligibleStudentService = {
-  async getAllEligibleStudents(): Promise<EligibleStudent[]> {
-    const response = await api.get<EligibleStudent[]>('/eligible-students');
+  async getAllEligibleStudents(semesterId?: string): Promise<EligibleStudent[]> {
+    const params = semesterId ? { semesterId } : undefined;
+    const response = await api.get<EligibleStudent[]>('/eligible-students', { params });
     return response.data || [];
   },
 
-  async getAll(): Promise<EligibleStudent[]> {
-    return this.getAllEligibleStudents();
+  async getAll(semesterId?: string): Promise<EligibleStudent[]> {
+    return this.getAllEligibleStudents(semesterId);
   },
 
   async importFromExcel(file: File, semesterId: string): Promise<any> {
@@ -16,11 +17,7 @@ export const EligibleStudentService = {
     formData.append('file', file);
     formData.append('semesterId', semesterId);
 
-    const response = await api.post('/eligible-students/upload', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    const response = await api.post('/eligible-students/upload', formData);
     return response.data;
   },
 
@@ -58,5 +55,14 @@ export const EligibleStudentService = {
   async cancelOjtResult(id: string, reason: string): Promise<EligibleStudent> {
     const response = await api.put(`/eligible-students/${id}/cancel`, { reason });
     return response.data;
+  },
+
+  async createEligibleStudent(payload: Omit<EligibleStudent, 'eligibleId'>): Promise<EligibleStudent> {
+    const response = await api.post<EligibleStudent>('/eligible-students', payload);
+    return response.data;
+  },
+
+  async deleteEligibleStudent(id: string): Promise<void> {
+    await api.delete(`/eligible-students/${id}`);
   }
 };

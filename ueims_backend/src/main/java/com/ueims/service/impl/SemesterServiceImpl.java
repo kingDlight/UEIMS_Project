@@ -36,6 +36,17 @@ public class SemesterServiceImpl implements SemesterService {
     }
 
     @Override
+    public List<Semester> findAll(String status, org.springframework.data.domain.Sort sort) {
+        org.springframework.data.jpa.domain.Specification<Semester> spec =
+                org.springframework.data.jpa.domain.Specification.where(null);
+        if (status != null && !status.trim().isEmpty()) {
+            spec = spec.and((root, query, cb) ->
+                    cb.equal(cb.upper(root.get("status")), status.trim().toUpperCase()));
+        }
+        return repository.findAll(spec, sort);
+    }
+
+    @Override
     public Semester findById(UUID id) {
         return repository.findById(id).orElse(null);
     }

@@ -9,6 +9,7 @@ import {
   WarningOutlined,
   SearchOutlined,
   LockOutlined,
+  PaperClipOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { WeeklyReportService } from '@/services/WeeklyReportService';
@@ -24,6 +25,7 @@ interface WeeklyReport {
   issuesChallenges?: string;
   lessonsLearned?: string;
   planNextWeek?: string;
+  attachmentUrls?: string;
   status?: ReportStatus;
   feedback?: string;
   submittedAt?: string;
@@ -229,6 +231,33 @@ export const WeeklyReportReviewTab: React.FC = () => {
             <Section label="Issues / Challenges" value={selected.issuesChallenges} />
             <Section label="Lessons Learned" value={selected.lessonsLearned} />
             <Section label="Plan for Next Week" value={selected.planNextWeek} />
+            {selected.attachmentUrls && (
+              <div className="mb-2">
+                <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Attachments</div>
+                <div className="flex flex-wrap gap-2">
+                  {(() => {
+                    try {
+                      const urls = JSON.parse(selected.attachmentUrls);
+                      return Array.isArray(urls) ? urls.map((u, i) => (
+                        <a key={i} href={u} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-xs text-blue-500 hover:underline bg-blue-50 px-2 py-1 rounded border border-blue-100">
+                          <PaperClipOutlined /> Attachment {i + 1}
+                        </a>
+                      )) : (
+                        <a href={selected.attachmentUrls} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-xs text-blue-500 hover:underline bg-blue-50 px-2 py-1 rounded border border-blue-100">
+                          <PaperClipOutlined /> Download Attachment
+                        </a>
+                      );
+                    } catch {
+                      return (
+                        <a href={selected.attachmentUrls} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-xs text-blue-500 hover:underline bg-blue-50 px-2 py-1 rounded border border-blue-100">
+                          <PaperClipOutlined /> Download Attachment
+                        </a>
+                      );
+                    }
+                  })()}
+                </div>
+              </div>
+            )}
             {selected.feedback && (
               <div className="p-2.5 bg-slate-50 rounded-lg text-xs text-slate-600">
                 <strong>Previous feedback:</strong> {selected.feedback}

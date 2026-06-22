@@ -46,6 +46,11 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
     }
 
     @Override
+    public List<EligibleStudent> findBySemesterId(UUID semesterId) {
+        return repository.findBySemester_SemesterId(semesterId);
+    }
+
+    @Override
     public EligibleStudent findById(UUID id) {
         return repository.findById(id).orElse(null);
     }

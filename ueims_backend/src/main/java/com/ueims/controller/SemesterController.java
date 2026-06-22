@@ -33,9 +33,20 @@ public class SemesterController {
     UserRepository userRepository;
 
     @GetMapping
-    public ResponseEntity<List<SemesterResponse>> getAll() {
-        return ResponseEntity.ok(
-                service.findAll().stream().map(SemesterResponse::fromEntity).toList());
+    public ResponseEntity<List<SemesterResponse>> getAll(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false, defaultValue = "startDate") String sortBy,
+            @RequestParam(required = false, defaultValue = "desc") String sortDirection) {
+
+        org.springframework.data.domain.Sort.Direction direction = "asc".equalsIgnoreCase(sortDirection)
+                ? org.springframework.data.domain.Sort.Direction.ASC
+                : org.springframework.data.domain.Sort.Direction.DESC;
+        org.springframework.data.domain.Sort sort = org.springframework.data.domain.Sort.by(
+                direction, (sortBy != null && !sortBy.trim().isEmpty()) ? sortBy : "startDate");
+
+        return ResponseEntity.ok(service.findAll(status, sort).stream()
+                .map(SemesterResponse::fromEntity)
+                .toList());
     }
 
     @GetMapping("/{id}")
