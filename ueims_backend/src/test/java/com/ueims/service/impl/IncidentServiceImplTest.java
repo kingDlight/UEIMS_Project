@@ -88,6 +88,9 @@ class IncidentServiceImplTest {
 
     @Test
     void findAll_returnsList() {
+        SecurityContextHolder.getContext()
+                .setAuthentication(new UsernamePasswordAuthenticationToken("admin@test.com", null));
+        when(userRepository.findByEmail("admin@test.com")).thenReturn(Optional.of(resolvedBy));
         when(repository.findAll()).thenReturn(Arrays.asList(incident));
         List<Incident> result = service.findAll();
         assertEquals(1, result.size());
