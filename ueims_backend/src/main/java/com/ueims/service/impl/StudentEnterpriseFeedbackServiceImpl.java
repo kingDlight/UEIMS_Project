@@ -1,5 +1,10 @@
 package com.ueims.service.impl;
 
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,6 +32,18 @@ public class StudentEnterpriseFeedbackServiceImpl implements StudentEnterpriseFe
     UserRepository userRepository;
     EligibleStudentRepository eligibleStudentRepository;
 
+    private static final String DEBUG_LOG = "F:/Software Development Project/SWP_Project/UEIMS_Project/debug-feedback.log";
+
+    private void debugLog(String msg) {
+        try {
+            Path p = Paths.get(DEBUG_LOG);
+            Files.createDirectories(p.getParent());
+            try (PrintWriter pw = new PrintWriter(new FileWriter(p.toFile(), true))) {
+                pw.println(java.time.Instant.now() + " [FeedbackService] " + msg);
+            }
+        } catch (Exception ignored) {}
+    }
+
     private User getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
@@ -34,11 +51,14 @@ public class StudentEnterpriseFeedbackServiceImpl implements StudentEnterpriseFe
 
     @Override
     public List<StudentEnterpriseFeedback> findAll() {
+        debugLog("findAll");
         return repository.findAll();
     }
 
     @Override
     public StudentEnterpriseFeedback findById(UUID id) {
+        debugLog("findById id=" + id);
+        try {
         StudentEnterpriseFeedback feedback = repository.findById(id).orElse(null);
         if (feedback == null) {
             return null;
@@ -59,12 +79,23 @@ public class StudentEnterpriseFeedbackServiceImpl implements StudentEnterpriseFe
 
     @Override
     public List<StudentEnterpriseFeedback> findMyFeedbacks(UUID studentId) {
-        return repository.findByStudent_UserId(studentId);
+        debugLog("findMyFeedbacks studentId=" + studentId);
+        try {
+            List<StudentEnterpriseFeedback> result = repository.findByStudent_UserId(studentId);
+            debugLog("findMyFeedbacks result size=" + result.size());
+            return result;
+        } catch (Exception e) {
+            debugLog("findMyFeedbacks EXCEPTION: " + e.getClass().getName() + " - " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     @Override
     public StudentEnterpriseFeedback save(StudentEnterpriseFeedback entity) {
-        User currentUser = getCurrentUser();
+        debugLog("save called");
+        try {
+            User currentUser = getCurrentUser();
 
         if (entity.getStudent() == null) {
             entity.setStudent(currentUser);

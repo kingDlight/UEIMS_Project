@@ -80,6 +80,22 @@ export const JobDetailPage: React.FC = () => {
   const hasCv = !!profile?.cvUrl;
   const currentSemester = profile?.currentSemester ?? 5;
 
+  const getFilteredNavItems = (sem: number) => {
+    if (sem >= 1 && sem <= 4) {
+      return navItems.filter(item => ['dashboard', 'profile', 'jobs'].includes(item.key));
+    }
+    if (sem === 5) {
+      return navItems.filter(item => ['dashboard', 'profile', 'jobs', 'applications', 'schedule'].includes(item.key));
+    }
+    if (sem === 6) {
+      return navItems.filter(item => ['dashboard', 'profile', 'training-plan', 'reports', 'final-report'].includes(item.key));
+    }
+    if (sem >= 7 && sem <= 9) {
+      return navItems.filter(item => ['dashboard', 'profile', 'feedback', 'evaluation'].includes(item.key));
+    }
+    return navItems;
+  };
+
   useEffect(() => {
     fetchJobDetail();
     fetchAppliedJobIds();
@@ -182,8 +198,10 @@ export const JobDetailPage: React.FC = () => {
 
   const enterprise = job.enterprise;
 
+  const filteredNavItems = getFilteredNavItems(currentSemester);
+
   return (
-    <ModernLayout navItems={navItems} defaultRoute="jobs" basePath="/student">
+    <ModernLayout navItems={filteredNavItems} defaultRoute="jobs" basePath="/student">
       <div style={{ maxWidth: 800, margin: '0 auto', padding: '32px 24px 60px' }}>
 
         {/* Back Button */}
