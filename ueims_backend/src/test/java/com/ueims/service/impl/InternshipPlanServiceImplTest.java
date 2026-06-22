@@ -17,9 +17,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 
+import com.ueims.model.entity.Enterprise;
+import com.ueims.model.entity.EnterpriseAssignment;
 import com.ueims.model.entity.InternshipPlan;
+import com.ueims.repository.EnterpriseAssignmentRepository;
+import com.ueims.repository.InternshipPlanItemRepository;
 import com.ueims.repository.InternshipPlanRepository;
+import com.ueims.repository.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
 class InternshipPlanServiceImplTest {
@@ -28,7 +35,13 @@ class InternshipPlanServiceImplTest {
     private InternshipPlanRepository repository;
 
     @Mock
-    private com.ueims.repository.UserRepository userRepository;
+    private UserRepository userRepository;
+
+    @Mock
+    private EnterpriseAssignmentRepository assignmentRepository;
+
+    @Mock
+    private InternshipPlanItemRepository itemRepository;
 
     @InjectMocks
     private InternshipPlanServiceImpl service;
@@ -39,10 +52,9 @@ class InternshipPlanServiceImplTest {
     @BeforeEach
     void setUp() {
         planId = UUID.randomUUID();
-        com.ueims.model.entity.Enterprise enterprise = com.ueims.model.entity.Enterprise.builder()
-                .enterpriseId(UUID.randomUUID())
-                .build();
-        com.ueims.model.entity.EnterpriseAssignment assignment = com.ueims.model.entity.EnterpriseAssignment.builder()
+        Enterprise enterprise =
+                Enterprise.builder().enterpriseId(UUID.randomUUID()).build();
+        EnterpriseAssignment assignment = EnterpriseAssignment.builder()
                 .assignmentId(UUID.randomUUID())
                 .enterprise(enterprise)
                 .build();
@@ -86,13 +98,14 @@ class InternshipPlanServiceImplTest {
 
     @Test
     void saveSuccess() {
-        org.springframework.security.core.context.SecurityContextHolder.getContext()
-                .setAuthentication(new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
-                        "admin@test.com", null));
+        SecurityContextHolder.getContext()
+                .setAuthentication(new UsernamePasswordAuthenticationToken("admin@test.com", null));
         when(userRepository.findByEmail("admin@test.com"))
                 .thenReturn(Optional.of(com.ueims.model.entity.User.builder()
                         .enterprise(internshipPlan.getAssignment().getEnterprise())
                         .build()));
+        when(assignmentRepository.findById(internshipPlan.getAssignment().getAssignmentId()))
+                .thenReturn(Optional.of(internshipPlan.getAssignment()));
         when(repository.save(any(InternshipPlan.class))).thenReturn(internshipPlan);
 
         InternshipPlan result = service.save(internshipPlan);
