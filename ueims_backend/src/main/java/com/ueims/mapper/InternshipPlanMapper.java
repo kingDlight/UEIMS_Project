@@ -19,7 +19,9 @@ public interface InternshipPlanMapper {
             expression =
                     "java(entity != null && entity.getAssignment() != null && entity.getAssignment().getSemester() != null && entity.getAssignment().getSemester().getStartDate() != null ? entity.getAssignment().getSemester().getStartDate().toString() : null)")
     @Mapping(target = "tasks", source = "items")
+    @Mapping(target = "assignmentId", source = "assignment.assignmentId")
     InternshipPlanDTO toDto(InternshipPlan entity);
 
+    @Mapping(target = "assignment.assignmentId", source = "assignmentId")
     InternshipPlan toEntity(InternshipPlanDTO dto);
 }
