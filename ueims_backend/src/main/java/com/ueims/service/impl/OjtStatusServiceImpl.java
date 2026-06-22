@@ -18,7 +18,6 @@ import com.ueims.dto.response.OjtStatusResponse;
 import com.ueims.model.entity.Application;
 import com.ueims.model.entity.EligibleStudent;
 import com.ueims.model.entity.EnterpriseAssignment;
-import com.ueims.model.entity.Interview;
 import com.ueims.model.entity.OjtStatus;
 import com.ueims.model.entity.Semester;
 import com.ueims.model.entity.SemesterEnterprise;
@@ -56,7 +55,8 @@ public class OjtStatusServiceImpl implements OjtStatusService {
 
     private static final String TRAINING_MANAGER_EMAIL = "training-office@ueims.edu.vn";
     private static final String TRAINING_MANAGER_NAME = "Phòng Đào Tạo";
-    private static final String DEBUG_LOG = "F:/Software Development Project/SWP_Project/UEIMS_Project/debug-192559.log";
+    private static final String DEBUG_LOG =
+            "F:/Software Development Project/SWP_Project/UEIMS_Project/debug-192559.log";
 
     private void debugLog(String msg) {
         try {
@@ -65,7 +65,8 @@ public class OjtStatusServiceImpl implements OjtStatusService {
             try (PrintWriter pw = new PrintWriter(new FileWriter(p.toFile(), true))) {
                 pw.println(java.time.Instant.now() + " [OjtStatusService] " + msg);
             }
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
     }
 
     @Override
@@ -82,118 +83,142 @@ public class OjtStatusServiceImpl implements OjtStatusService {
             User user = userOpt.get();
             debugLog("userId=" + user.getUserId());
 
-        Optional<Semester> activeSemesterOpt = semesterRepository.findByStatus("ACTIVE")
-                .stream().findFirst();
-        if (activeSemesterOpt.isEmpty()) {
-            return buildDefaultResponse();
-        }
-        Semester activeSemester = activeSemesterOpt.get();
+            Optional<Semester> activeSemesterOpt =
+                    semesterRepository.findByStatus("ACTIVE").stream().findFirst();
+            if (activeSemesterOpt.isEmpty()) {
+                return buildDefaultResponse();
+            }
+            Semester activeSemester = activeSemesterOpt.get();
 
-        int currentSemesterNum = 0;
-        UUID activeSemesterId = activeSemesterOpt.get().getSemesterId();
-        debugLog("activeSemesterId=" + activeSemesterId);
-        Optional<EligibleStudent> currentEligible =
-                eligibleStudentRepository.findByUser_UserIdAndSemester_SemesterId(user.getUserId(), activeSemesterId);
-        debugLog("currentEligible.isPresent=" + currentEligible.isPresent());
-        if (currentEligible.isPresent()) {
-            currentSemesterNum = currentEligible.get().getCurrentSemester() != null
-                    ? currentEligible.get().getCurrentSemester() : 0;
-            debugLog("currentSemesterNum=" + currentSemesterNum);
-        }
-
-        // Kỳ 1-4: chưa đến lúc OJT
-        if (currentSemesterNum < 5) {
-            debugLog("path: semester 1-4, currentSem=" + currentSemesterNum);
-            return buildResponse(OjtStatus.NOT_APPLICABLE, false, null, activeSemester);
-        }
-
-        // Kỳ 5: đang chuẩn bị
-        if (currentSemesterNum == 5) {
-            debugLog("path: semester 5");
-            return buildResponse(OjtStatus.PREPARING, false, null, activeSemester);
-        }
-
-        // Kỳ 6+: kiểm tra eligible_students
-        Optional<EligibleStudent> eligibleOpt =
-                eligibleStudentRepository.findByUser_UserIdAndSemester_SemesterId(user.getUserId(), activeSemester.getSemesterId());
-
-        if (eligibleOpt.isEmpty()) {
-            debugLog("path: eligibleOpt empty");
-            return buildResponse(OjtStatus.ELIGIBLE_NO_PLACEMENT, true,
-                    "Bạn chưa được xếp vào danh sách OJT kỳ này. Vui lòng liên hệ phòng Đào tạo.", activeSemester);
-        }
-
-        EligibleStudent eligible = eligibleOpt.get();
-
-        // BLOCKED: cancelled by TM
-        if ("CANCELLED".equalsIgnoreCase(eligible.getStatus())) {
-            String reason = "Tài khoản OJT đã bị hủy bởi phòng Đào tạo"
-                    + (eligible.getCancelledReason() != null ? ": " + eligible.getCancelledReason() : ".");
-            return buildResponse(OjtStatus.BLOCKED, true, reason, activeSemester);
-        }
-
-        // PLACED: đã có assignment active
-        Optional<EnterpriseAssignment> assignmentOpt =
-                enterpriseAssignmentRepository.findByStudent_UserIdAndSemester_Status(user.getUserId(), "ACTIVE");
-
-        if (assignmentOpt.isPresent()) {
-            EnterpriseAssignment assignment = assignmentOpt.get();
-            String enterpriseName = assignment.getEnterprise() != null
-                    ? assignment.getEnterprise().getCompanyName() : null;
-
-            List<WeeklyReport> reports = weeklyReportRepository.findByAssignment_AssignmentId(assignment.getAssignmentId());
-            long missedReports = reports.stream()
-                    .filter(r -> "NOT_SUBMITTED".equals(r.getStatus()))
-                    .count();
-            long rejectedReports = reports.stream()
-                    .filter(r -> "REJECTED".equals(r.getStatus()))
-                    .count();
-
-            // AT_RISK: có assignment nhưng miss nhiều báo cáo
-            if (missedReports > 0 || rejectedReports >= 2) {
-                String reason = String.format("Bạn đã miss %d báo cáo tuần và/hoặc có %d báo cáo bị từ chối.",
-                        missedReports, rejectedReports);
-                return buildResponseWithDetails(OjtStatus.AT_RISK, true, reason, activeSemester,
-                        0, 0, 0, enterpriseName);
+            int currentSemesterNum = 0;
+            UUID activeSemesterId = activeSemesterOpt.get().getSemesterId();
+            debugLog("activeSemesterId=" + activeSemesterId);
+            Optional<EligibleStudent> currentEligible =
+                    eligibleStudentRepository.findByUser_UserIdAndSemester_SemesterId(
+                            user.getUserId(), activeSemesterId);
+            debugLog("currentEligible.isPresent=" + currentEligible.isPresent());
+            if (currentEligible.isPresent()) {
+                currentSemesterNum = currentEligible.get().getCurrentSemester() != null
+                        ? currentEligible.get().getCurrentSemester()
+                        : 0;
+                debugLog("currentSemesterNum=" + currentSemesterNum);
             }
 
-            // PLACED bình thường
-            int appCount = (int) applicationRepository.countActiveApplications(user.getUserId());
-            int interviewCount = interviewRepository.findByApplication_Student_UserId(user.getUserId()).size();
-            int reportCount = (int) reports.stream()
-                    .filter(r -> !"NOT_SUBMITTED".equals(r.getStatus()) && !"DRAFT".equals(r.getStatus()))
+            // Kỳ 1-4: chưa đến lúc OJT
+            if (currentSemesterNum < 5) {
+                debugLog("path: semester 1-4, currentSem=" + currentSemesterNum);
+                return buildResponse(OjtStatus.NOT_APPLICABLE, false, null, activeSemester);
+            }
+
+            // Kỳ 5: đang chuẩn bị
+            if (currentSemesterNum == 5) {
+                debugLog("path: semester 5");
+                return buildResponse(OjtStatus.PREPARING, false, null, activeSemester);
+            }
+
+            // Kỳ 6+: kiểm tra eligible_students
+            Optional<EligibleStudent> eligibleOpt = eligibleStudentRepository.findByUser_UserIdAndSemester_SemesterId(
+                    user.getUserId(), activeSemester.getSemesterId());
+
+            if (eligibleOpt.isEmpty()) {
+                debugLog("path: eligibleOpt empty");
+                return buildResponse(
+                        OjtStatus.ELIGIBLE_NO_PLACEMENT,
+                        true,
+                        "Bạn chưa được xếp vào danh sách OJT kỳ này. Vui lòng liên hệ phòng Đào tạo.",
+                        activeSemester);
+            }
+
+            EligibleStudent eligible = eligibleOpt.get();
+
+            // BLOCKED: cancelled by TM
+            if ("CANCELLED".equalsIgnoreCase(eligible.getStatus())) {
+                String reason = "Tài khoản OJT đã bị hủy bởi phòng Đào tạo"
+                        + (eligible.getCancelledReason() != null ? ": " + eligible.getCancelledReason() : ".");
+                return buildResponse(OjtStatus.BLOCKED, true, reason, activeSemester);
+            }
+
+            // PLACED: đã có assignment active
+            Optional<EnterpriseAssignment> assignmentOpt =
+                    enterpriseAssignmentRepository.findByStudent_UserIdAndSemester_Status(user.getUserId(), "ACTIVE");
+
+            if (assignmentOpt.isPresent()) {
+                EnterpriseAssignment assignment = assignmentOpt.get();
+                String enterpriseName = assignment.getEnterprise() != null
+                        ? assignment.getEnterprise().getCompanyName()
+                        : null;
+
+                List<WeeklyReport> reports =
+                        weeklyReportRepository.findByAssignment_AssignmentId(assignment.getAssignmentId());
+                long missedReports = reports.stream()
+                        .filter(r -> "NOT_SUBMITTED".equals(r.getStatus()))
+                        .count();
+                long rejectedReports = reports.stream()
+                        .filter(r -> "REJECTED".equals(r.getStatus()))
+                        .count();
+
+                // AT_RISK: có assignment nhưng miss nhiều báo cáo
+                if (missedReports > 0 || rejectedReports >= 2) {
+                    String reason = String.format(
+                            "Bạn đã miss %d báo cáo tuần và/hoặc có %d báo cáo bị từ chối.",
+                            missedReports, rejectedReports);
+                    return buildResponseWithDetails(
+                            OjtStatus.AT_RISK, true, reason, activeSemester, 0, 0, 0, enterpriseName);
+                }
+
+                // PLACED bình thường
+                int appCount = (int) applicationRepository.countActiveApplications(user.getUserId());
+                int interviewCount = interviewRepository
+                        .findByApplication_Student_UserId(user.getUserId())
+                        .size();
+                int reportCount = (int) reports.stream()
+                        .filter(r -> !"NOT_SUBMITTED".equals(r.getStatus()) && !"DRAFT".equals(r.getStatus()))
+                        .count();
+
+                return buildResponseWithDetails(
+                        OjtStatus.PLACED,
+                        false,
+                        null,
+                        activeSemester,
+                        appCount,
+                        interviewCount,
+                        reportCount,
+                        enterpriseName);
+            }
+
+            // Chưa placed — kiểm tra applications
+            List<Application> applications = applicationRepository.findByStudent_UserId(user.getUserId());
+            int activeAppCount = (int) applications.stream()
+                    .filter(a -> a.getDeletedAt() == null)
+                    .filter(a -> {
+                        String s = a.getStatus().name();
+                        return !"REJECTED".equals(s) && !"WITHDRAWN".equals(s) && !"SCREENING_REJECTED".equals(s);
+                    })
                     .count();
 
-            return buildResponseWithDetails(OjtStatus.PLACED, false, null, activeSemester,
-                    appCount, interviewCount, reportCount, enterpriseName);
-        }
+            if (activeAppCount > 0) {
+                // Đã apply, chờ DN phản hồi
+                int interviewCount =
+                        (int) interviewRepository.findByApplication_Student_UserId(user.getUserId()).stream()
+                                .filter(i -> i.getCanceledAt() == null)
+                                .filter(i -> "SCHEDULED".equals(i.getStatus()) || "CONFIRMED".equals(i.getStatus()))
+                                .count();
+                return buildResponseWithDetails(
+                        OjtStatus.APPLIED,
+                        false,
+                        "Bạn đã nộp " + activeAppCount + " hồ sơ. Vui lòng chờ phản hồi từ doanh nghiệp.",
+                        activeSemester,
+                        activeAppCount,
+                        interviewCount,
+                        0,
+                        null);
+            }
 
-        // Chưa placed — kiểm tra applications
-        List<Application> applications = applicationRepository.findByStudent_UserId(user.getUserId());
-        int activeAppCount = (int) applications.stream()
-                .filter(a -> a.getDeletedAt() == null)
-                .filter(a -> {
-                    String s = a.getStatus().name();
-                    return !"REJECTED".equals(s) && !"WITHDRAWN".equals(s) && !"SCREENING_REJECTED".equals(s);
-                })
-                .count();
-
-        if (activeAppCount > 0) {
-            // Đã apply, chờ DN phản hồi
-            int interviewCount = (int) interviewRepository.findByApplication_Student_UserId(user.getUserId()).stream()
-                    .filter(i -> i.getCanceledAt() == null)
-                    .filter(i -> "SCHEDULED".equals(i.getStatus()) || "CONFIRMED".equals(i.getStatus()))
-                    .count();
-            return buildResponseWithDetails(OjtStatus.APPLIED, false,
-                    "Bạn đã nộp " + activeAppCount + " hồ sơ. Vui lòng chờ phản hồi từ doanh nghiệp.",
-                    activeSemester, activeAppCount, interviewCount, 0, null);
-        }
-
-        // Chưa có placement, chưa apply
-        String riskReason = "Kỳ OJT đã bắt đầu. Bạn chưa có chỗ thực tập và chưa nộp hồ sơ nào. "
-                + "Vui lòng liên hệ phòng Đào tạo để được hỗ trợ phân bổ.";
-        return buildResponseWithDetails(OjtStatus.ELIGIBLE_NO_PLACEMENT, true, riskReason, activeSemester,
-                0, 0, 0, null);
+            // Chưa có placement, chưa apply
+            String riskReason = "Kỳ OJT đã bắt đầu. Bạn chưa có chỗ thực tập và chưa nộp hồ sơ nào. "
+                    + "Vui lòng liên hệ phòng Đào tạo để được hỗ trợ phân bổ.";
+            return buildResponseWithDetails(
+                    OjtStatus.ELIGIBLE_NO_PLACEMENT, true, riskReason, activeSemester, 0, 0, 0, null);
         } catch (Exception e) {
             debugLog("EXCEPTION: " + e.getClass().getName() + " - " + e.getMessage());
             e.printStackTrace();
@@ -203,10 +228,21 @@ public class OjtStatusServiceImpl implements OjtStatusService {
 
     private OjtStatusResponse buildDefaultResponse() {
         return new OjtStatusResponse(
-                OjtStatus.NOT_APPLICABLE, "Chưa có thông tin", "#9CA3AF",
-                false, null, null, null, null,
-                TRAINING_MANAGER_EMAIL, TRAINING_MANAGER_NAME,
-                0, 0, 0, null, null);
+                OjtStatus.NOT_APPLICABLE,
+                "Chưa có thông tin",
+                "#9CA3AF",
+                false,
+                null,
+                null,
+                null,
+                null,
+                TRAINING_MANAGER_EMAIL,
+                TRAINING_MANAGER_NAME,
+                0,
+                0,
+                0,
+                null,
+                null);
     }
 
     private OjtStatusResponse buildResponse(OjtStatus status, boolean isUrgent, String riskReason, Semester semester) {
@@ -214,8 +250,14 @@ public class OjtStatusServiceImpl implements OjtStatusService {
     }
 
     private OjtStatusResponse buildResponseWithDetails(
-            OjtStatus status, boolean isUrgent, String riskReason, Semester semester,
-            int applicationCount, int interviewCount, int reportCount, String enterpriseName) {
+            OjtStatus status,
+            boolean isUrgent,
+            String riskReason,
+            Semester semester,
+            int applicationCount,
+            int interviewCount,
+            int reportCount,
+            String enterpriseName) {
         debugLog("buildResponseWithDetails: status=" + status + ", semester=" + semester.getName());
         String label = getStatusLabel(status);
         String color = getStatusColor(status);
@@ -248,11 +290,21 @@ public class OjtStatusServiceImpl implements OjtStatusService {
         debugLog("buildResponseWithDetails: supportEmail=" + supportEmail + ", daysUntilDeadline=" + daysUntilDeadline);
 
         return new OjtStatusResponse(
-                status, label, color, isUrgent, riskReason,
-                daysUntilDeadline, deadlineLabel, enterpriseName,
-                supportEmail, supportName,
-                applicationCount, interviewCount, reportCount,
-                semester.getSemesterId(), semester.getName());
+                status,
+                label,
+                color,
+                isUrgent,
+                riskReason,
+                daysUntilDeadline,
+                deadlineLabel,
+                enterpriseName,
+                supportEmail,
+                supportName,
+                applicationCount,
+                interviewCount,
+                reportCount,
+                semester.getSemesterId(),
+                semester.getName());
     }
 
     private String getStatusLabel(OjtStatus status) {
@@ -270,14 +322,14 @@ public class OjtStatusServiceImpl implements OjtStatusService {
 
     private String getStatusColor(OjtStatus status) {
         return switch (status) {
-            case NOT_APPLICABLE -> "#9CA3AF";  // gray
-            case PREPARING -> "#3B82F6";        // blue
+            case NOT_APPLICABLE -> "#9CA3AF"; // gray
+            case PREPARING -> "#3B82F6"; // blue
             case ELIGIBLE_NO_PLACEMENT -> "#F59E0B"; // yellow/warning
-            case APPLIED -> "#8B5CF6";          // purple
+            case APPLIED -> "#8B5CF6"; // purple
             case MATCHING_IN_PROGRESS -> "#E67E22"; // orange/amber
-            case PLACED -> "#10B981";            // green
-            case AT_RISK -> "#EF4444";           // red
-            case BLOCKED -> "#991B1B";           // dark red
+            case PLACED -> "#10B981"; // green
+            case AT_RISK -> "#EF4444"; // red
+            case BLOCKED -> "#991B1B"; // dark red
         };
     }
 }

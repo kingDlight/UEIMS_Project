@@ -30,8 +30,8 @@ public class AtRiskStudentController {
             @RequestParam UUID semesterId,
             @RequestParam(required = false) String riskCategory,
             @RequestParam(required = false) Integer minPriority) {
-        List<AtRiskStudentResult> results = atRiskStudentService
-                .getAtRiskStudentsBySemester(semesterId, riskCategory, minPriority);
+        List<AtRiskStudentResult> results =
+                atRiskStudentService.getAtRiskStudentsBySemester(semesterId, riskCategory, minPriority);
         return ResponseEntity.ok(results);
     }
 

@@ -21,5 +21,6 @@ public interface InternshipPlanMapper {
     @Mapping(target = "tasks", source = "items")
     InternshipPlanDTO toDto(InternshipPlan entity);
 
+    @Mapping(target = "assignment.assignmentId", source = "assignmentId")
     InternshipPlan toEntity(InternshipPlanDTO dto);
 }

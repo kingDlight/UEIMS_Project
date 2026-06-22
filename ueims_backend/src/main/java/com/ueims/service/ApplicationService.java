@@ -35,4 +35,12 @@ public interface ApplicationService {
      * @return a Spring Resource pointing to the CV file on disk
      */
     org.springframework.core.io.Resource downloadCv(UUID applicationId);
+
+    /**
+     * UC-40.1: Bulk Download multiple applicant CV files.
+     * Enforces BR-32 (only enterprise that owns the job post can download).
+     *
+     * @return a Spring Resource pointing to the generated ZIP file
+     */
+    org.springframework.core.io.Resource bulkDownloadCv(List<UUID> applicationIds);
 }

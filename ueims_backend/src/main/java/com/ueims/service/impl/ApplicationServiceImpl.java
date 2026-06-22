@@ -1,11 +1,21 @@
 package com.ueims.service.impl;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -235,7 +245,8 @@ public class ApplicationServiceImpl implements ApplicationService {
             throw new AppException(ErrorCode.APPLICATION_DEADLINE_EXPIRED);
         }
 
-        // 3. E2: [FIX A-04] Cho phép withdraw khi PENDING hoặc SCREENING_PASSED (trước deadline)
+        // 3. E2: [FIX A-04] Cho phép withdraw khi PENDING hoặc SCREENING_PASSED (trước
+        // deadline)
         if (application.getStatus() != ApplicationStatus.PENDING
                 && application.getStatus() != ApplicationStatus.SCREENING_PASSED) {
             throw new AppException(ErrorCode.APPLICATION_STATUS_CHANGED);
@@ -357,7 +368,8 @@ public class ApplicationServiceImpl implements ApplicationService {
         Application application =
                 repository.findById(applicationId).orElseThrow(() -> new AppException(ErrorCode.APPLICATION_NOT_FOUND));
 
-        // BR-32: Enterprises can only download CVs of students who applied to their active posts.
+        // BR-32: Enterprises can only download CVs of students who applied to their
+        // active posts.
         User currentUser = getCurrentUser();
         if (currentUser.getEnterprise() == null
                 || application.getJobPost() == null
@@ -419,6 +431,98 @@ public class ApplicationServiceImpl implements ApplicationService {
         } catch (Exception e) {
             log.error("[DEBUG] mapToResponse failed: {}", e.getMessage(), e);
             throw e;
+        }
+    }
+
+    @Override
+    @Transactional
+    public Resource bulkDownloadCv(List<UUID> applicationIds) {
+        if (applicationIds == null || applicationIds.isEmpty()) {
+            throw new AppException(ErrorCode.INVALID_PARAMETER_FORMAT);
+        }
+
+        User currentUser = getCurrentUser();
+        List<Application> applications = repository.findAllById(applicationIds);
+
+        if (applications.isEmpty() || applications.size() != applicationIds.size()) {
+            throw new AppException(ErrorCode.APPLICATION_NOT_FOUND);
+        }
+
+        // Validate ownership for ALL requested applications
+        for (Application application : applications) {
+            if (currentUser.getEnterprise() == null
+                    || application.getJobPost() == null
+                    || application.getJobPost().getEnterprise() == null
+                    || !application
+                            .getJobPost()
+                            .getEnterprise()
+                            .getEnterpriseId()
+                            .equals(currentUser.getEnterprise().getEnterpriseId())) {
+                throw new AppException(ErrorCode.UNAUTHORIZED);
+            }
+        }
+
+        try {
+            Path zipPath = Files.createTempFile("bulk_cv_", ".zip");
+            try (ZipOutputStream zos = new ZipOutputStream(new java.io.FileOutputStream(zipPath.toFile()))) {
+                for (Application application : applications) {
+                    String cvUrl = application.getCvFileUrl();
+                    if (cvUrl == null || cvUrl.isBlank()) {
+                        continue; // Skip applications without CV
+                    }
+
+                    InputStream is = null;
+                    try {
+                        if (cvUrl.startsWith("http://") || cvUrl.startsWith("https://")) {
+                            is = new URL(cvUrl).openStream();
+                        } else {
+                            Path filePath =
+                                    Paths.get(System.getProperty("user.dir"), cvUrl.replace("/uploads/", "uploads/"));
+                            if (Files.exists(filePath)) {
+                                is = Files.newInputStream(filePath);
+                            }
+                        }
+
+                        if (is != null) {
+                            String studentName = application.getStudent() != null
+                                    ? application.getStudent().getFullName()
+                                    : "Unknown";
+                            if (studentName == null || studentName.trim().isEmpty()) studentName = "Unknown";
+                            String fileName = "CV_" + studentName.replaceAll("[^a-zA-Z0-9.-]", "_") + "_"
+                                    + application.getApplicationId().toString().substring(0, 8) + ".pdf";
+                            ZipEntry zipEntry = new ZipEntry(fileName);
+                            zos.putNextEntry(zipEntry);
+
+                            byte[] buffer = new byte[1024];
+                            int len;
+                            while ((len = is.read(buffer)) > 0) {
+                                zos.write(buffer, 0, len);
+                            }
+                            zos.closeEntry();
+
+                            // Increment download count
+                            repository.incrementDownloadCount(application.getApplicationId());
+                        }
+                    } catch (Exception e) {
+                        log.warn(
+                                "Failed to process CV for application {}: {}",
+                                application.getApplicationId(),
+                                e.getMessage());
+                    } finally {
+                        if (is != null) {
+                            try {
+                                is.close();
+                            } catch (java.io.IOException e) {
+                                log.warn("Failed to close input stream: {}", e.getMessage());
+                            }
+                        }
+                    }
+                }
+            }
+            return new FileSystemResource(zipPath.toFile());
+        } catch (IOException e) {
+            log.error("Error creating zip file for bulk download", e);
+            throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
         }
     }
 }
