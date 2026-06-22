@@ -160,8 +160,12 @@ public class NotificationServiceImpl implements NotificationService {
             return;
         }
         try {
+            User student = userRepository
+                    .findById(interview.getApplication().getStudent().getUserId())
+                    .orElse(null);
+            if (student == null) return;
             Notification n = Notification.builder()
-                    .recipient(interview.getApplication().getStudent())
+                    .recipient(student)
                     .type(type)
                     .title(title)
                     .message(message)
@@ -177,6 +181,8 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional(
+            propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
     public void notifyInterviewScheduled(Interview interview) {
         notifyStudent(
                 interview,
@@ -186,6 +192,8 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional(
+            propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
     public void notifyInterviewRescheduled(Interview interview) {
         notifyStudent(
                 interview,
@@ -195,6 +203,8 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional(
+            propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
     public void notifyInterviewCanceled(Interview interview) {
         notifyStudent(
                 interview,
@@ -204,23 +214,31 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional(
+            propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
     public void notifyInterviewResult(Interview interview) {
-        String result = interview.getResult();
-        String title = "PASS".equalsIgnoreCase(result) ? "Chúc mừng — Bạn đã vượt qua phỏng vấn" : "Kết quả phỏng vấn";
-        String message = "PASS".equalsIgnoreCase(result)
-                ? "Bạn đã được doanh nghiệp lựa chọn. Vui lòng theo dõi các bước tiếp theo."
-                : "Cảm ơn bạn đã tham gia. Hãy tiếp tục tìm kiếm cơ hội khác.";
-        notifyStudent(interview, "INTERVIEW_RESULT", title, message);
+        String result = "PASS".equals(interview.getResult()) ? "ĐẬU" : "RỚT";
+        notifyStudent(
+                interview,
+                "INTERVIEW_RESULT",
+                "Kết quả phỏng vấn: " + result,
+                "Đã có kết quả phỏng vấn. Vui lòng kiểm tra chi tiết trên hệ thống.");
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional(
+            propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
     public void notifyWeeklyReportApproved(WeeklyReport report) {
         if (report == null
                 || report.getAssignment() == null
                 || report.getAssignment().getStudent() == null) return;
         try {
+            User student = userRepository
+                    .findById(report.getAssignment().getStudent().getUserId())
+                    .orElse(null);
+            if (student == null) return;
             Notification saved = repository.save(Notification.builder()
-                    .recipient(report.getAssignment().getStudent())
+                    .recipient(student)
                     .type("WEEKLY_REPORT_APPROVED")
                     .title("Báo cáo tuần đã được duyệt")
                     .message("Báo cáo tuần của bạn đã được doanh nghiệp phê duyệt.")
@@ -228,18 +246,24 @@ public class NotificationServiceImpl implements NotificationService {
                     .build());
             pushCreated(saved);
         } catch (Exception ex) {
-            log.warn("[Notification] weekly report approved save failed: {}", ex.getMessage());
+            log.warn("[Notification] Failed to notify report approved: {}", ex.getMessage());
         }
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional(
+            propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
     public void notifyWeeklyReportRejected(WeeklyReport report, String feedback) {
         if (report == null
                 || report.getAssignment() == null
                 || report.getAssignment().getStudent() == null) return;
         try {
+            User student = userRepository
+                    .findById(report.getAssignment().getStudent().getUserId())
+                    .orElse(null);
+            if (student == null) return;
             Notification saved = repository.save(Notification.builder()
-                    .recipient(report.getAssignment().getStudent())
+                    .recipient(student)
                     .type("WEEKLY_REPORT_REJECTED")
                     .title("Báo cáo tuần cần chỉnh sửa")
                     .message("Báo cáo tuần của bạn đã bị từ chối. Lý do: " + feedback)

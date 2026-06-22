@@ -178,4 +178,18 @@ public class ApplicationController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
                 .body(file);
     }
+
+    /**
+     * UC-40.1: Bulk Download applicants' CVs as a ZIP file.
+     */
+    @GetMapping("/bulk-download-cv")
+    @PreAuthorize("hasRole('ENTERPRISE')")
+    public ResponseEntity<Resource> bulkDownloadCv(
+            @org.springframework.web.bind.annotation.RequestParam("ids") List<UUID> ids) {
+        Resource file = service.bulkDownloadCv(ids);
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType("application/zip"))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"Bulk_CVs.zip\"")
+                .body(file);
+    }
 }

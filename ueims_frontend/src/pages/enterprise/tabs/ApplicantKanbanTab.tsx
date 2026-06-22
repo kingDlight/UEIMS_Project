@@ -347,7 +347,7 @@ const DetailModal: React.FC<DetailModalProps> = ({ applicant, open, onClose, onS
             <div className="text-[13px] text-slate-900 leading-relaxed whitespace-pre-wrap">{applicant.coverLetter}</div>
           </div>
         )}
-        {applicant.cvFileUrl && (
+        {applicant.applicationId && (
           <Button
             type="primary"
             icon={<DownloadOutlined />}

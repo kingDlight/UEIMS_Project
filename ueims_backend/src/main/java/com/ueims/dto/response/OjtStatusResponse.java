@@ -1,8 +1,8 @@
 package com.ueims.dto.response;
 
-import com.ueims.model.entity.OjtStatus;
-
 import java.util.UUID;
+
+import com.ueims.model.entity.OjtStatus;
 
 public record OjtStatusResponse(
         OjtStatus ojtStatus,
@@ -19,5 +19,4 @@ public record OjtStatusResponse(
         Integer interviewCount,
         Integer reportCount,
         UUID semesterId,
-        String semesterName
-) {}
+        String semesterName) {}

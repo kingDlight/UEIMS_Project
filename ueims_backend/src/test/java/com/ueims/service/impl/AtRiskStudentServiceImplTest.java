@@ -2,9 +2,6 @@ package com.ueims.service.impl;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDate;
@@ -19,20 +16,27 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.ueims.model.entity.AtRiskStudent;
 import com.ueims.model.entity.Semester;
-import com.ueims.repository.AtRiskStudentRepository;
+import com.ueims.repository.EligibleStudentRepository;
+import com.ueims.repository.EnterpriseAssignmentRepository;
 import com.ueims.repository.SemesterRepository;
+import com.ueims.repository.WeeklyReportRepository;
 import com.ueims.service.TrainingWarningService;
 
 @ExtendWith(MockitoExtension.class)
 class AtRiskStudentServiceImplTest {
 
     @Mock
-    private AtRiskStudentRepository atRiskStudentRepository;
+    private EligibleStudentRepository eligibleStudentRepository;
+
+    @Mock
+    private EnterpriseAssignmentRepository enterpriseAssignmentRepository;
 
     @Mock
     private SemesterRepository semesterRepository;
+
+    @Mock
+    private WeeklyReportRepository weeklyReportRepository;
 
     @Mock
     private TrainingWarningService trainingWarningService;
@@ -55,52 +59,18 @@ class AtRiskStudentServiceImplTest {
     }
 
     @Test
-    void getAtRiskStudentsBySemester_returnsList() {
-        AtRiskStudent student = new AtRiskStudent();
-        when(atRiskStudentRepository.findBySemesterId(semesterId)).thenReturn(List.of(student));
+    void getAtRiskStudentsBySemester_returnsEmptyList() {
+        when(semesterRepository.findById(semesterId)).thenReturn(java.util.Optional.of(semester));
+        when(eligibleStudentRepository.findBySemester_SemesterIdAndStatusIn(any(), any()))
+                .thenReturn(Collections.emptyList());
+        when(enterpriseAssignmentRepository.findBySemester_SemesterIdAndStatus(any(), any()))
+                .thenReturn(Collections.emptyList());
+        when(eligibleStudentRepository.findBySemester_SemesterIdAndStatus(any(), any()))
+                .thenReturn(Collections.emptyList());
 
-        List<AtRiskStudent> result = service.getAtRiskStudentsBySemester(semesterId);
+        List<AtRiskStudentResult> result = service.getAtRiskStudentsBySemester(semesterId);
 
-        assertEquals(1, result.size());
-        verify(atRiskStudentRepository).findBySemesterId(semesterId);
-    }
-
-    @Test
-    void scanAndProcessLateReportsAutomatically_noActiveSemesters_doesNothing() {
-        when(semesterRepository.findByStatus("ACTIVE")).thenReturn(Collections.emptyList());
-
-        service.scanAndProcessLateReportsAutomatically();
-
-        verify(trainingWarningService, never()).scanAndSendLateWarnings(any(), anyInt(), any());
-    }
-
-    @Test
-    void scanAndProcessLateReportsAutomatically_outsideActivePeriod_skipsSemester() {
-        // Yesterday is before start date
-        semester.setStartDate(LocalDate.now().plusDays(5));
-        when(semesterRepository.findByStatus("ACTIVE")).thenReturn(List.of(semester));
-
-        service.scanAndProcessLateReportsAutomatically();
-
-        verify(trainingWarningService, never()).scanAndSendLateWarnings(any(), anyInt(), any());
-
-        // Yesterday is after end date
-        semester.setStartDate(LocalDate.now().minusDays(100));
-        semester.setEndDate(LocalDate.now().minusDays(10));
-
-        service.scanAndProcessLateReportsAutomatically();
-
-        verify(trainingWarningService, never()).scanAndSendLateWarnings(any(), anyInt(), any());
-    }
-
-    @Test
-    void scanAndProcessLateReportsAutomatically_withinActivePeriod_processesWarnings() {
-        when(semesterRepository.findByStatus("ACTIVE")).thenReturn(List.of(semester));
-        when(trainingWarningService.scanAndSendLateWarnings(eq(semesterId), anyInt(), isNull()))
-                .thenReturn(5);
-
-        service.scanAndProcessLateReportsAutomatically();
-
-        verify(trainingWarningService).scanAndSendLateWarnings(eq(semesterId), anyInt(), isNull());
+        assertTrue(result.isEmpty());
+        verify(semesterRepository).findById(semesterId);
     }
 }

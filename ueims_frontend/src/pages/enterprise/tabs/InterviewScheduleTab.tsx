@@ -413,7 +413,7 @@ export const InterviewScheduleTab: React.FC = () => {
           </Form.Item>
           <Form.Item label="Date & time" name="scheduledTime" rules={[{ required: true, message: 'Required' }]}>
             <DatePicker
-              showTime={{ format: 'HH:mm', minuteStep: 15 }}
+              showTime={{ format: 'HH:mm', minuteStep: 1 }}
               format="YYYY-MM-DD HH:mm"
               className="w-full"
               disabledDate={d => d && d.isBefore(dayjs().startOf('day'))}
@@ -479,7 +479,7 @@ export const InterviewScheduleTab: React.FC = () => {
         <Form form={rescheduleForm} layout="vertical" preserve={false}>
           <Form.Item label="New date & time" name="newTime" rules={[{ required: true }]}>
             <DatePicker
-              showTime={{ format: 'HH:mm', minuteStep: 15 }}
+              showTime={{ format: 'HH:mm', minuteStep: 1 }}
               format="YYYY-MM-DD HH:mm"
               className="w-full"
               disabledDate={d => d && d.isBefore(dayjs().startOf('day'))}

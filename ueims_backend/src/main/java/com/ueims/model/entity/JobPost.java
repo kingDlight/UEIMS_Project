@@ -3,7 +3,6 @@ package com.ueims.model.entity;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -60,7 +59,6 @@ public class JobPost extends BaseEntity {
 
     @Column(name = "application_deadline", nullable = false)
     @NotNull(message = "Application deadline is mandatory")
-    @Future(message = "Application deadline must be in the future")
     private java.time.LocalDate applicationDeadline;
 
     @Column(name = "status", nullable = false, length = 20)

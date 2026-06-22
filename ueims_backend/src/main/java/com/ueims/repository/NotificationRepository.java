@@ -14,11 +14,13 @@ import com.ueims.model.entity.*;
 
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, UUID> {
-    List<Notification> findByRecipient_EmailOrderByCreatedAtDesc(String email);
+    @Query("SELECT n FROM Notification n WHERE n.recipient.email = :email ORDER BY n.createdAt DESC")
+    List<Notification> findByRecipient_EmailOrderByCreatedAtDesc(@Param("email") String email);
 
     Optional<Notification> findByNotificationIdAndRecipient_Email(UUID notificationId, String email);
 
-    long countByRecipient_EmailAndIsReadFalse(String email);
+    @Query("SELECT COUNT(n) FROM Notification n WHERE n.recipient.email = :email AND n.isRead = false")
+    long countByRecipient_EmailAndIsReadFalse(@Param("email") String email);
 
     @Modifying
     @Query("update Notification n set n.isRead = true where n.recipient.email = :email and n.isRead = false")

@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import { Spin } from 'antd';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { ModernLayout } from '@/components/layout/ModernLayout';
 import { navItems } from './constants';
 import { useStudentProfileQuery } from '@/hooks/useStudentProfile';
+import { EnterpriseAssignmentService } from '@/services/EnterpriseAssignmentService';
 const StudentDashboardTab = React.lazy(() => import('./tabs/DashboardTab').then(m => ({ default: m.StudentDashboardTab })));
 const ProfileTab = React.lazy(() => import('./tabs/ProfileTab').then(m => ({ default: m.ProfileTab })));
 const JobBoardTab = React.lazy(() => import('./tabs/JobBoardTab').then(m => ({ default: m.JobBoardTab })));
@@ -39,7 +40,18 @@ export const StudentDashboard: React.FC = () => {
   const currentTab = (tab || 'dashboard') as StudentPageKey;
   const { token } = useAuthStore();
   const { data: profile, isLoading: profileLoading } = useStudentProfileQuery();
+  const [hasActivePlacement, setHasActivePlacement] = useState(false);
   const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (!token) return;
+    EnterpriseAssignmentService.getMyAssignment()
+      .then(res => {
+        const data = res.data?.result ?? res.data;
+        setHasActivePlacement(!!data);
+      })
+      .catch(() => setHasActivePlacement(false));
+  }, [token]);
 
   const handlePrefetch = (key: string) => {
     switch (key) {
@@ -72,9 +84,11 @@ export const StudentDashboard: React.FC = () => {
     return <Navigate to="/no-role" replace />;
   }
 
-  const currentSemester = profile?.currentSemester || 5;
+  // Use the profile's currentSemester as source of truth — never default to 5
+  const currentSemester = profile?.currentSemester;
 
-  const getFilteredNavItems = (sem: number) => {
+  const getFilteredNavItems = (sem: number | undefined | null, hasPlacement: boolean) => {
+    if (sem == null) return studentNavItems;
     // Semester 1-4: browse only -> dashboard, profile, jobs
     if (sem >= 1 && sem <= 4) {
       return studentNavItems.filter(item => ['dashboard', 'profile', 'jobs'].includes(item.key));
@@ -83,9 +97,12 @@ export const StudentDashboard: React.FC = () => {
     if (sem === 5) {
       return studentNavItems.filter(item => ['dashboard', 'profile', 'jobs', 'applications', 'schedule'].includes(item.key));
     }
-    // Semester 6: active internship -> dashboard, profile, training-plan, reports, final-report
+    // Semester 6: PLACED -> weekly reports + final report; NOT PLACED -> job board + applications + interviews
     if (sem === 6) {
-      return studentNavItems.filter(item => ['dashboard', 'profile', 'training-plan', 'reports', 'final-report'].includes(item.key));
+      if (hasPlacement) {
+        return studentNavItems.filter(item => ['dashboard', 'profile', 'training-plan', 'reports', 'final-report'].includes(item.key));
+      }
+      return studentNavItems.filter(item => ['dashboard', 'profile', 'jobs', 'applications', 'schedule'].includes(item.key));
     }
     // Semester 7-9: view results & feedback -> dashboard, profile, feedback, evaluation
     if (sem >= 7 && sem <= 9) {
@@ -94,15 +111,15 @@ export const StudentDashboard: React.FC = () => {
     return studentNavItems;
   };
 
-  const filteredNavItems = getFilteredNavItems(currentSemester);
+  const filteredNavItems = getFilteredNavItems(currentSemester, hasActivePlacement);
   const allowedTabs = filteredNavItems.map(item => item.key);
 
-  if (currentTab !== 'dashboard' && currentTab !== 'profile' && !allowedTabs.includes(currentTab)) {
+  if (currentSemester != null && currentTab !== 'dashboard' && currentTab !== 'profile' && !allowedTabs.includes(currentTab)) {
     return <Navigate to="/student/dashboard" replace />;
   }
 
   const pages: Record<string, React.ReactNode> = {
-    dashboard: <StudentDashboardTab />,
+    dashboard: <StudentDashboardTab currentSemester={currentSemester ?? 5} hasActivePlacement={hasActivePlacement} />,
     profile: <ProfileTab />,
     jobs: <JobBoardTab />,
     applications: <ApplicationsTab />,
