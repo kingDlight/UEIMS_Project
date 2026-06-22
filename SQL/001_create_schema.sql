@@ -237,7 +237,7 @@ CREATE TABLE eligible_students (
     full_name       VARCHAR(255) NOT NULL,                           -- BR-17: Mandatory
     email           VARCHAR(255),                                    -- For auto-creating accounts
     major           VARCHAR(255) NOT NULL,                           -- BR-17: Mandatory
-    gpa             TYPE DECIMAL(4,2),                               -- BR-17, BR-19: >= 2.0
+    gpa             DECIMAL(4,2),                                    -- BR-17, BR-19: >= 2.0
     current_semester INT NOT NULL CHECK (current_semester BETWEEN 1 AND 9), -- BR-54: Semester-based access
     status          VARCHAR(20) NOT NULL DEFAULT 'ELIGIBLE'
                     CHECK (status IN ('ELIGIBLE', 'PENDING', 'ACCEPTED', 'MATCHED', 'OJT', 'CANCELLED')),
@@ -820,7 +820,7 @@ CREATE TABLE student_profiles (
     student_code    VARCHAR(20),
     university      VARCHAR(255),
     major           VARCHAR(255),
-    gpa             TYPE DECIMAL(4,2),
+    gpa             DECIMAL(4,2),
     skills          JSONB,                                           -- e.g., ["Java", "React"]
     bio             TEXT,
     cv_file_url     VARCHAR(1000),                                   -- BR-31: PDF only
