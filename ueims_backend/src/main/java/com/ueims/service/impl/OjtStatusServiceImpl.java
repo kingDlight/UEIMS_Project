@@ -1,5 +1,10 @@
 package com.ueims.service.impl;
 
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -51,15 +56,31 @@ public class OjtStatusServiceImpl implements OjtStatusService {
 
     private static final String TRAINING_MANAGER_EMAIL = "training-office@ueims.edu.vn";
     private static final String TRAINING_MANAGER_NAME = "Phòng Đào Tạo";
+    private static final String DEBUG_LOG = "F:/Software Development Project/SWP_Project/UEIMS_Project/debug-192559.log";
+
+    private void debugLog(String msg) {
+        try {
+            Path p = Paths.get(DEBUG_LOG);
+            Files.createDirectories(p.getParent());
+            try (PrintWriter pw = new PrintWriter(new FileWriter(p.toFile(), true))) {
+                pw.println(java.time.Instant.now() + " [OjtStatusService] " + msg);
+            }
+        } catch (Exception ignored) {}
+    }
 
     @Override
     @Transactional(readOnly = true)
     public OjtStatusResponse getOjtStatusForCurrentUser(String email) {
-        Optional<User> userOpt = userRepository.findByEmail(email);
-        if (userOpt.isEmpty()) {
-            return buildDefaultResponse();
-        }
-        User user = userOpt.get();
+        try {
+            debugLog("START email=" + email);
+            Optional<User> userOpt = userRepository.findByEmail(email);
+            debugLog("userOpt.isPresent=" + userOpt.isPresent());
+            if (userOpt.isEmpty()) {
+                debugLog("user not found, returning default");
+                return buildDefaultResponse();
+            }
+            User user = userOpt.get();
+            debugLog("userId=" + user.getUserId());
 
         Optional<Semester> activeSemesterOpt = semesterRepository.findByStatus("ACTIVE")
                 .stream().findFirst();
@@ -70,20 +91,25 @@ public class OjtStatusServiceImpl implements OjtStatusService {
 
         int currentSemesterNum = 0;
         UUID activeSemesterId = activeSemesterOpt.get().getSemesterId();
+        debugLog("activeSemesterId=" + activeSemesterId);
         Optional<EligibleStudent> currentEligible =
                 eligibleStudentRepository.findByUser_UserIdAndSemester_SemesterId(user.getUserId(), activeSemesterId);
+        debugLog("currentEligible.isPresent=" + currentEligible.isPresent());
         if (currentEligible.isPresent()) {
             currentSemesterNum = currentEligible.get().getCurrentSemester() != null
                     ? currentEligible.get().getCurrentSemester() : 0;
+            debugLog("currentSemesterNum=" + currentSemesterNum);
         }
 
         // Kỳ 1-4: chưa đến lúc OJT
         if (currentSemesterNum < 5) {
+            debugLog("path: semester 1-4, currentSem=" + currentSemesterNum);
             return buildResponse(OjtStatus.NOT_APPLICABLE, false, null, activeSemester);
         }
 
         // Kỳ 5: đang chuẩn bị
         if (currentSemesterNum == 5) {
+            debugLog("path: semester 5");
             return buildResponse(OjtStatus.PREPARING, false, null, activeSemester);
         }
 
@@ -92,6 +118,7 @@ public class OjtStatusServiceImpl implements OjtStatusService {
                 eligibleStudentRepository.findByUser_UserIdAndSemester_SemesterId(user.getUserId(), activeSemester.getSemesterId());
 
         if (eligibleOpt.isEmpty()) {
+            debugLog("path: eligibleOpt empty");
             return buildResponse(OjtStatus.ELIGIBLE_NO_PLACEMENT, true,
                     "Bạn chưa được xếp vào danh sách OJT kỳ này. Vui lòng liên hệ phòng Đào tạo.", activeSemester);
         }
@@ -167,6 +194,11 @@ public class OjtStatusServiceImpl implements OjtStatusService {
                 + "Vui lòng liên hệ phòng Đào tạo để được hỗ trợ phân bổ.";
         return buildResponseWithDetails(OjtStatus.ELIGIBLE_NO_PLACEMENT, true, riskReason, activeSemester,
                 0, 0, 0, null);
+        } catch (Exception e) {
+            debugLog("EXCEPTION: " + e.getClass().getName() + " - " + e.getMessage());
+            e.printStackTrace();
+            return buildDefaultResponse();
+        }
     }
 
     private OjtStatusResponse buildDefaultResponse() {
@@ -184,7 +216,7 @@ public class OjtStatusServiceImpl implements OjtStatusService {
     private OjtStatusResponse buildResponseWithDetails(
             OjtStatus status, boolean isUrgent, String riskReason, Semester semester,
             int applicationCount, int interviewCount, int reportCount, String enterpriseName) {
-
+        debugLog("buildResponseWithDetails: status=" + status + ", semester=" + semester.getName());
         String label = getStatusLabel(status);
         String color = getStatusColor(status);
 
@@ -212,6 +244,8 @@ public class OjtStatusServiceImpl implements OjtStatusService {
                 supportName = tmUser.getFullName();
             }
         }
+
+        debugLog("buildResponseWithDetails: supportEmail=" + supportEmail + ", daysUntilDeadline=" + daysUntilDeadline);
 
         return new OjtStatusResponse(
                 status, label, color, isUrgent, riskReason,
