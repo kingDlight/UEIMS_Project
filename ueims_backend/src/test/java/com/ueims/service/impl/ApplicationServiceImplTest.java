@@ -86,6 +86,7 @@ class ApplicationServiceImplTest {
         eligibleStudent.setUser(currentUser);
         eligibleStudent.setSemester(semester);
         eligibleStudent.setCurrentSemester(5);
+        eligibleStudent.setGpa(new java.math.BigDecimal("6.0"));
 
         application = new Application();
         application.setApplicationId(UUID.randomUUID());
@@ -367,7 +368,7 @@ class ApplicationServiceImplTest {
     @Test
     void withdrawApplication_statusChanged() {
         mockSecurityContext();
-        application.setStatus(ApplicationStatus.SCREENING_PASSED);
+        application.setStatus(ApplicationStatus.SCREENING_REJECTED);
 
         when(repository.findById(application.getApplicationId())).thenReturn(Optional.of(application));
 
@@ -465,5 +466,35 @@ class ApplicationServiceImplTest {
         UUID id = application.getApplicationId();
         AppException e = assertThrows(AppException.class, () -> service.screenApplication(id, req));
         assertEquals(ErrorCode.APPLICATION_STATUS_CHANGED, e.getErrorCode());
+    }
+
+    @Test
+    void bulkDownloadCv_success() {
+        mockSecurityContext();
+        application.setCvFileUrl("http://example.com/test.pdf");
+        when(repository.findAllById(any())).thenReturn(List.of(application));
+
+        org.springframework.core.io.Resource res = service.bulkDownloadCv(List.of(application.getApplicationId()));
+        assertNotNull(res);
+        assertTrue(res.exists());
+    }
+
+    @Test
+    void bulkDownloadCv_unauthorized() {
+        mockSecurityContext();
+        Enterprise otherEnterprise = new Enterprise();
+        otherEnterprise.setEnterpriseId(UUID.randomUUID());
+        jobPost.setEnterprise(otherEnterprise); // different enterprise
+        when(repository.findAllById(any())).thenReturn(List.of(application));
+
+        List<UUID> ids = List.of(application.getApplicationId());
+        AppException e = assertThrows(AppException.class, () -> service.bulkDownloadCv(ids));
+        assertEquals(ErrorCode.UNAUTHORIZED, e.getErrorCode());
+    }
+
+    @Test
+    void bulkDownloadCv_invalidParam() {
+        AppException e = assertThrows(AppException.class, () -> service.bulkDownloadCv(List.of()));
+        assertEquals(ErrorCode.INVALID_PARAMETER_FORMAT, e.getErrorCode());
     }
 }

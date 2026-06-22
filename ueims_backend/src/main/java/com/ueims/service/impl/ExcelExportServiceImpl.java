@@ -26,7 +26,6 @@ import com.ueims.repository.FinalGradeRepository;
 import com.ueims.repository.PlacementApplicationRepository;
 import com.ueims.service.AtRiskStudentService;
 import com.ueims.service.ExcelExportService;
-import com.ueims.service.impl.AtRiskStudentResult;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -42,16 +41,24 @@ public class ExcelExportServiceImpl implements ExcelExportService {
 
     @Override
     public ResponseEntity<byte[]> exportAtRiskStudents(UUID semesterId) {
-        List<AtRiskStudentResult> students = atRiskStudentService
-                .getAtRiskStudentsBySemester(semesterId);
+        List<AtRiskStudentResult> students = atRiskStudentService.getAtRiskStudentsBySemester(semesterId);
 
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("At-Risk Students");
 
             // Create Header
             Row headerRow = sheet.createRow(0);
-            String[] columns = {"Student Code", "Full Name", "Company Name", "Risk Category",
-                    "Priority Score", "Missed Reports", "Rejected Reports", "Risk Reason", "Days at Risk"};
+            String[] columns = {
+                "Student Code",
+                "Full Name",
+                "Company Name",
+                "Risk Category",
+                "Priority Score",
+                "Missed Reports",
+                "Rejected Reports",
+                "Risk Reason",
+                "Days at Risk"
+            };
             for (int i = 0; i < columns.length; i++) {
                 Cell cell = headerRow.createCell(i);
                 cell.setCellValue(columns[i]);

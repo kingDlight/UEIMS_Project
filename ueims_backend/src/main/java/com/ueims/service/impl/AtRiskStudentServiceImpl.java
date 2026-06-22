@@ -49,9 +49,10 @@ public class AtRiskStudentServiceImpl implements AtRiskStudentService {
         results.addAll(findBlockedAtRisk(semester));
 
         return results.stream()
-                .sorted(Comparator
-                        .comparing(AtRiskStudentResult::getPriorityScore).reversed()
-                        .thenComparing(AtRiskStudentResult::getDaysAtRisk).reversed())
+                .sorted(Comparator.comparing(AtRiskStudentResult::getPriorityScore)
+                        .reversed()
+                        .thenComparing(AtRiskStudentResult::getDaysAtRisk)
+                        .reversed())
                 .toList();
     }
 
@@ -63,7 +64,8 @@ public class AtRiskStudentServiceImpl implements AtRiskStudentService {
         List<AtRiskStudentResult> results = getAtRiskStudentsBySemester(semesterId);
 
         return results.stream()
-                .filter(r -> riskCategory == null || "ALL".equalsIgnoreCase(riskCategory)
+                .filter(r -> riskCategory == null
+                        || "ALL".equalsIgnoreCase(riskCategory)
                         || riskCategory.equalsIgnoreCase(r.getRiskCategory()))
                 .filter(r -> minPriority == null || r.getPriorityScore() >= minPriority)
                 .toList();
@@ -75,9 +77,8 @@ public class AtRiskStudentServiceImpl implements AtRiskStudentService {
     private List<AtRiskStudentResult> findUnplacedAtRisk(Semester semester) {
         List<AtRiskStudentResult> results = new ArrayList<>();
 
-        List<EligibleStudent> eligibleList =
-                eligibleStudentRepository.findBySemester_SemesterIdAndStatusIn(
-                        semester.getSemesterId(), List.of("ELIGIBLE", "PENDING"));
+        List<EligibleStudent> eligibleList = eligibleStudentRepository.findBySemester_SemesterIdAndStatusIn(
+                semester.getSemesterId(), List.of("ELIGIBLE", "PENDING"));
 
         for (EligibleStudent es : eligibleList) {
             Optional<EnterpriseAssignment> existingAssignment =
@@ -92,15 +93,13 @@ public class AtRiskStudentServiceImpl implements AtRiskStudentService {
                             .orElse(semester.getStartDate()),
                     LocalDate.now());
 
-            int priorityScore = daysAtRisk >= 14 ? 90
-                    : daysAtRisk >= 7 ? 70
-                    : 50;
+            int priorityScore = daysAtRisk >= 14 ? 90 : daysAtRisk >= 7 ? 70 : 50;
 
             String reason = daysAtRisk >= 14
                     ? "Đã 14+ ngày chưa có placement sau khi được duyệt OJT"
                     : daysAtRisk >= 7
-                    ? "Đã 7+ ngày chưa có placement sau khi được duyệt OJT"
-                    : "Đủ điều kiện OJT nhưng chưa có doanh nghiệp tiếp nhận";
+                            ? "Đã 7+ ngày chưa có placement sau khi được duyệt OJT"
+                            : "Đủ điều kiện OJT nhưng chưa có doanh nghiệp tiếp nhận";
 
             results.add(AtRiskStudentResult.builder()
                     .assignmentId(null)
@@ -134,15 +133,13 @@ public class AtRiskStudentServiceImpl implements AtRiskStudentService {
         List<AtRiskStudentResult> results = new ArrayList<>();
 
         List<EnterpriseAssignment> activeAssignments =
-                enterpriseAssignmentRepository.findBySemester_SemesterIdAndStatus(
-                        semester.getSemesterId(), "ACTIVE");
+                enterpriseAssignmentRepository.findBySemester_SemesterIdAndStatus(semester.getSemesterId(), "ACTIVE");
 
         for (EnterpriseAssignment ea : activeAssignments) {
             UUID assignmentId = ea.getAssignmentId();
             List<WeeklyReport> reports = weeklyReportRepository.findByAssignment_AssignmentId(assignmentId);
 
-            int expectedWeeks = (int) ChronoUnit.WEEKS.between(
-                    semester.getStartDate(), LocalDate.now()) + 1;
+            int expectedWeeks = (int) ChronoUnit.WEEKS.between(semester.getStartDate(), LocalDate.now()) + 1;
             expectedWeeks = Math.max(0, expectedWeeks);
 
             int submitted = (int) reports.stream()
@@ -158,28 +155,28 @@ public class AtRiskStudentServiceImpl implements AtRiskStudentService {
 
             if (missed == 0 && rejected < 2) continue;
 
-            int priorityScore = Math.min(100,
-                    30 + missed * 10 + rejected * 5);
+            int priorityScore = Math.min(100, 30 + missed * 10 + rejected * 5);
 
             String reason = rejected >= 3
                     ? "3+ báo cáo bị từ chối — cần xem xét lại tiến độ"
                     : rejected >= 2
-                    ? "2 báo cáo bị từ chối — vui lòng chỉnh sửa và nộp lại"
-                    : missed >= 3
-                    ? "Missed " + missed + " báo cáo tuần — nguy cơ không đạt OJT"
-                    : "Missed " + missed + " báo cáo tuần gần đây";
+                            ? "2 báo cáo bị từ chối — vui lòng chỉnh sửa và nộp lại"
+                            : missed >= 3
+                                    ? "Missed " + missed + " báo cáo tuần — nguy cơ không đạt OJT"
+                                    : "Missed " + missed + " báo cáo tuần gần đây";
 
             results.add(AtRiskStudentResult.builder()
                     .assignmentId(assignmentId)
                     .studentId(ea.getStudent().getUserId())
                     .studentName(ea.getStudent().getFullName())
-                    .studentCode(ea.getStudent().getStudentProfile() != null
-                            ? ea.getStudent().getStudentProfile().getStudentCode() : "—")
+                    .studentCode(
+                            ea.getStudent().getStudentProfile() != null
+                                    ? ea.getStudent().getStudentProfile().getStudentCode()
+                                    : "—")
                     .semesterId(semester.getSemesterId())
                     .semesterCode(semester.getSemesterCode())
                     .supervisorName(ea.getSupervisorName())
-                    .companyName(ea.getEnterprise() != null
-                            ? ea.getEnterprise().getCompanyName() : null)
+                    .companyName(ea.getEnterprise() != null ? ea.getEnterprise().getCompanyName() : null)
                     .missedReports(missed)
                     .rejectedReports(rejected)
                     .riskCategory(missed >= 3 || rejected >= 3 ? "DEADLINE" : "REPORT")
@@ -203,8 +200,7 @@ public class AtRiskStudentServiceImpl implements AtRiskStudentService {
         List<AtRiskStudentResult> results = new ArrayList<>();
 
         List<EligibleStudent> cancelledList =
-                eligibleStudentRepository.findBySemester_SemesterIdAndStatus(
-                        semester.getSemesterId(), "CANCELLED");
+                eligibleStudentRepository.findBySemester_SemesterIdAndStatus(semester.getSemesterId(), "CANCELLED");
 
         for (EligibleStudent es : cancelledList) {
             results.add(AtRiskStudentResult.builder()
@@ -219,9 +215,11 @@ public class AtRiskStudentServiceImpl implements AtRiskStudentService {
                     .missedReports(0)
                     .rejectedReports(0)
                     .riskCategory("BLOCKED")
-                    .riskReason(es.getCancelledReason() != null && !es.getCancelledReason().isBlank()
-                            ? "Bị hủy OJT: " + es.getCancelledReason()
-                            : "OJT bị hủy bởi phòng Đào tạo")
+                    .riskReason(
+                            es.getCancelledReason() != null
+                                            && !es.getCancelledReason().isBlank()
+                                    ? "Bị hủy OJT: " + es.getCancelledReason()
+                                    : "OJT bị hủy bởi phòng Đào tạo")
                     .priorityScore(100)
                     .daysAtRisk(0)
                     .applicationCount(0)
