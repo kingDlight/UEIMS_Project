@@ -1561,16 +1561,6 @@ CREATE TRIGGER trg_lock_final_grades BEFORE INSERT OR UPDATE OR DELETE ON final_
 CREATE TRIGGER trg_lock_student_enterprise_feedbacks BEFORE INSERT OR UPDATE OR DELETE ON student_enterprise_feedbacks FOR EACH ROW EXECUTE FUNCTION enforce_semester_lock();
 CREATE TRIGGER trg_lock_semester_enterprises BEFORE INSERT OR UPDATE OR DELETE ON semester_enterprises FOR EACH ROW EXECUTE FUNCTION enforce_semester_lock();
 
-
--- ============================================================
--- END OF SCHEMA — VERSION 4.3 CORRECTED & OPTIMIZED
--- ============================================================
--- Summary:
---   Tables:    29
---   Views:      2
---   Triggers:  31
--- ============================================================
-
 -- ============================================================
 -- ADDED FOR OAUTH2 STATEFUL SESSIONS (BR-02 & BR-03)
 -- ============================================================
