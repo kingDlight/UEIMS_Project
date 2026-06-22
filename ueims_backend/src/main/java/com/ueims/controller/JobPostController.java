@@ -28,6 +28,14 @@ public class JobPostController {
         return ApiResponse.<List<JobPost>>builder().result(service.findAll()).build();
     }
 
+    @GetMapping("/my-posts")
+    @PreAuthorize("hasRole('ENTERPRISE')")
+    public ApiResponse<List<JobPost>> getMyPosts() {
+        return ApiResponse.<List<JobPost>>builder()
+                .result(service.findMyPosts())
+                .build();
+    }
+
     @GetMapping("/active")
     public ApiResponse<List<JobPost>> getActive() {
         return ApiResponse.<List<JobPost>>builder().result(service.findActive()).build();

@@ -935,6 +935,12 @@ export const StudentDashboardTab: React.FC<DashboardTabProps> = ({ currentSemest
           icon: <Briefcase size={24} />,
           route: 'jobs',
         });
+        actions.push({
+          label: t('mySchedule', 'My Schedule'),
+          description: t('myScheduleDesc', 'View upcoming interviews'),
+          icon: <Calendar size={24} />,
+          route: 'schedule',
+        });
       } else {
         actions.push({
           label: t('submitReport', 'Submit Report'),
@@ -1003,10 +1009,8 @@ export const StudentDashboardTab: React.FC<DashboardTabProps> = ({ currentSemest
               {/* PRIMARY SEMESTER CARDS (Full Width) */}
               <div style={{ marginBottom: 24 }}>
                 {isSemester1to4 && <WelcomeCard onNavigate={handleNavigate} />}
-                {(isSemester5 || (isSemester6 && !stats.hasActivePlacement)) && (
-                  <UrgencyCardsRow stats={stats} onNavigate={handleNavigate} />
-                )}
-                {isSemester6 && stats.hasActivePlacement && <ReportPipelineRow stats={stats} onNavigate={handleNavigate} />}
+                {(isSemester5 || isSemester6WithoutPlacement) && <UrgencyCardsRow stats={stats} onNavigate={handleNavigate} />}
+                {isSemester6 && !isSemester6WithoutPlacement && <ReportPipelineRow stats={stats} onNavigate={handleNavigate} />}
                 {isSemester7to9 && <EvaluationRow onNavigate={handleNavigate} />}
 
                 {/* Alert for AT_RISK or BLOCKED — show regardless of placement status */}

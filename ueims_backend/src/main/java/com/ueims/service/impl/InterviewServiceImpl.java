@@ -119,6 +119,7 @@ public class InterviewServiceImpl implements InterviewService {
         application.setStatus(ApplicationStatus.INTERVIEW_SCHEDULED);
         applicationRepository.save(application);
 
+        entity.setApplication(application);
         Interview saved = repository.saveAndFlush(entity);
 
         // 43.0: send email + in-app notification to the student (43.0.E2 logged on
@@ -337,46 +338,29 @@ public class InterviewServiceImpl implements InterviewService {
         if ("PASS".equals(upper)) {
             app.setStatus(ApplicationStatus.ACCEPTED);
 
-            // BR-22: Create Enterprise Assignment if not exists
-            boolean exists =
-                    enterpriseAssignmentRepository
-                            .existsByStudent_UserIdAndEnterprise_EnterpriseIdAndSemester_SemesterId(
-                                    app.getStudent().getUserId(),
-                                    app.getJobPost().getEnterprise().getEnterpriseId(),
-                                    app.getJobPost().getSemester().getSemesterId());
+            // Internships (EnterpriseAssignments) are not created during the interview phase.
+            // They will be generated later when the student enters Semester 6 and their status becomes OJT.
 
-            if (!exists) {
-                com.ueims.model.entity.EnterpriseAssignment assignment =
-                        com.ueims.model.entity.EnterpriseAssignment.builder()
-                                .student(app.getStudent())
-                                .enterprise(app.getJobPost().getEnterprise())
-                                .semester(app.getJobPost().getSemester())
-                                .status("ACTIVE")
-                                .assignedBy(currentUser)
-                                .build();
-                enterpriseAssignmentRepository.save(assignment);
+            // BR-26: Withdraw other pending applications for this student in the current
+            // semester
+            java.util.List<Application> otherApps =
+                    applicationRepository.findByStudent_UserId(app.getStudent().getUserId());
+            for (Application otherApp : otherApps) {
+                if (!otherApp.getApplicationId().equals(app.getApplicationId())
+                        && otherApp.getJobPost() != null
+                        && otherApp.getJobPost().getSemester() != null
+                        && otherApp.getJobPost()
+                                .getSemester()
+                                .getSemesterId()
+                                .equals(app.getJobPost().getSemester().getSemesterId())) {
 
-                // BR-26: Withdraw other pending applications for this student in the current
-                // semester
-                java.util.List<Application> otherApps = applicationRepository.findByStudent_UserId(
-                        app.getStudent().getUserId());
-                for (Application otherApp : otherApps) {
-                    if (!otherApp.getApplicationId().equals(app.getApplicationId())
-                            && otherApp.getJobPost() != null
-                            && otherApp.getJobPost().getSemester() != null
-                            && otherApp.getJobPost()
-                                    .getSemester()
-                                    .getSemesterId()
-                                    .equals(app.getJobPost().getSemester().getSemesterId())) {
+                    if (otherApp.getStatus() == ApplicationStatus.PENDING
+                            || otherApp.getStatus() == ApplicationStatus.SCREENING_PASSED
+                            || otherApp.getStatus() == ApplicationStatus.INTERVIEW_SCHEDULED) {
 
-                        if (otherApp.getStatus() == ApplicationStatus.PENDING
-                                || otherApp.getStatus() == ApplicationStatus.SCREENING_PASSED
-                                || otherApp.getStatus() == ApplicationStatus.INTERVIEW_SCHEDULED) {
-
-                            otherApp.setStatus(ApplicationStatus.WITHDRAWN);
-                            otherApp.setUpdatedAt(LocalDateTime.now());
-                            applicationRepository.save(otherApp);
-                        }
+                        otherApp.setStatus(ApplicationStatus.WITHDRAWN);
+                        otherApp.setUpdatedAt(LocalDateTime.now());
+                        applicationRepository.save(otherApp);
                     }
                 }
             }
@@ -476,7 +460,7 @@ public class InterviewServiceImpl implements InterviewService {
                         .equals(currentUser.getEnterprise().getEnterpriseId())) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
-        
+
         List<LocalDateTime> slots = new ArrayList<>();
         LocalDateTime cursor = LocalDateTime.now().plusDays(1).with(LocalTime.of(9, 0));
         List<Interview> existing = findMyEnterpriseInterviews();

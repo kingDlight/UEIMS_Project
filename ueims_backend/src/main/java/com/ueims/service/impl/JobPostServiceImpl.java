@@ -46,6 +46,17 @@ public class JobPostServiceImpl implements JobPostService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<JobPost> findMyPosts() {
+        User currentUser = getCurrentUser();
+        if (currentUser.getEnterprise() == null) {
+            return java.util.Collections.emptyList();
+        }
+        return repository.findByEnterprise_EnterpriseId(
+                currentUser.getEnterprise().getEnterpriseId());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<JobPost> findActive() {
         List<JobPost> activeJobs = repository.findByStatusAndSemester_StatusAndDeletedAtIsNull("OPEN", "ACTIVE");
 
