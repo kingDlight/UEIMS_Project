@@ -1,0 +1,191 @@
+<<Project name>>
+Software Design Specification
+– Hanoi, August 2022 –
+Record of changeS
+Date
+A*M, D
+In charge
+Change Description
+*A - Added M - Modified D - Deleted
+Table of Contents
+I. Overview4
+1. Code Packages4
+2. Database Design4
+a. Database Schema4
+b. Table Description5
+II. Code Designs5
+1. Student & Recruitment (Apply Job)5
+a. Class Diagram6
+b. Class Specifications6
+c. Sequence Diagram(s)7
+d. Database Queries7
+2. Student & Recruitment (Create Interview Schedule)7
+a. Class Diagram8
+b. Class Specifications8
+c. Sequence Diagram(s)9
+d. Database Queries9
+3. Training & OJT Process (Approve Official OJT List)9
+a. Class Diagram9
+b. Class Specifications9
+c. Sequence Diagram(s)10
+d. Database Queries10
+4. Training & OJT Process (Review Weekly Report)10
+a. Class Diagram11
+b. Class Specifications11
+c. Sequence Diagram(s)12
+d. Database Queries12
+5. Training & OJT Process (Export Final Grade Report)12
+a. Class Diagram13
+b. Class Specifications13
+c. Sequence Diagram(s)14
+d. Database Queries14
+I. Overview
+1. Code Packages
+[Provide the package diagram for each sub-system. The content of this section including the overall package diagram, the explanation, package and class naming conventions in each package. Please see the sample & description table format below (please note: package names don’t follow Java package naming convention yet)]
+Package descriptions
+No
+Package
+Description
+01
+omemberauthorityrm
+<Description of the package>
+02
+registration
+<Description of the package>
+03
+fedrpc
+<Description of the package>
+04
+ofed
+<Description of the package>
+05
+mongoDB
+<Description of the package>
+06
+fedtools
+<Description of the package>
+07
+…
+2. Database Design
+a. Database Schema
+[Provide the tables relationship like example below – following MySQL database naming convention]
+b. Table Description
+No
+Table
+Description
+01
+<Table name>
+<Description of the table>
+II. Code Designs
+1. Student & Recruitment (Apply Job)
+This section describes the detailed design for the Apply Job function. This feature allows students to view a list of internship positions and submit their resumes (CVs) online. The system will receive applications, record their status, and notify the companies.
+a. Class Diagram
+b. Class Specifications
+ApplicationController Class
+No
+Method
+Description
+01
+createApplication(ApplicationDTO dto)
+Receive the payload from the student, convert the DTO to Entity, and call the service to submit the application.
+ApplicationServiceImpl Class
+No
+Method
+Description
+01
+save(Application entity)
+Verify validity (deadline, duplicate applications), save the application and CV snapshot, and update the status to PENDING.
+Application Class (Entity)
+No
+Method
+Description
+01
+status
+Simple states (PENDING, ACCEPTED, REJECTED).
+c. Sequence Diagram(s)
+d. Database Queries
+SELECT * FROM applications WHERE student_id = ? AND job_post_id = ?;INSERT INTO applications (student_id, job_post_id, cv_file_url, status, created_at) VALUES (?, ?, ?, ?, ?);
+Student & Recruitment (Create Interview Schedule)
+This section describes the detailed design for the Create Interview Schedule function. Businesses can select potential applications and set interview times and locations. The system will automatically update the application status and send appointment schedules to students.
+a. Class Diagram
+b. Class Specifications
+InterviewController Class
+No
+Method
+Description
+01
+create(InterviewDTO dto)
+Receive the payload for scheduling interviews from the company.
+InterviewServiceImpl Class
+No
+Method
+Description
+01
+save(Interview entity)
+Check for scheduling conflicts, update the Application status to INTERVIEW_SCHEDULED, save the interview, and send the email.
+c. Sequence Diagram(s)
+d. Database Queries
+SELECT count(*) FROM interviews i JOIN applications a ON i.application_id = a.application_id JOIN job_posts j ON a.job_post_id = j.job_post_id WHERE j.enterprise_id = ? AND i.scheduled_datetime = ?;UPDATE applications SET status = 'INTERVIEW_SCHEDULED' WHERE application_id = ?;INSERT INTO interviews (application_id, scheduled_datetime, duration_minutes, location, meeting_link, status, student_confirmed) VALUES (?, ?, ?, ?, ?, ?, ?);
+3. Training & OJT Process (Approve Official OJT List)
+This section describes the detailed design for the Approve Official OJT List function. This function is used by the Training Manager to confirm and finalize the list of students eligible for on-the-job training (OJT) at the company.
+a. Class Diagram
+b. Class Specifications
+OjtPlacementController Class
+No
+Method
+Description
+01
+approvePlacement(UUID id)
+Approve students for inclusion in the official internship program.
+OjtPlacementServiceImpl Class
+No
+Method
+Description
+01
+approve(UUID id)
+Update the placement status to APPROVED in the database.
+c. Sequence Diagram(s)
+d. Database Queries
+UPDATE placement_applications SET status = 'APPROVED', reviewed_by = ?, reviewed_at = CURRENT_TIMESTAMP WHERE application_id = ?;
+4. Training & OJT Process (Review Weekly Report)
+This section describes the detailed design for the Weekly Report Review function. Students submit weekly progress reports, and the Mentor/Supervisor from the company will review, evaluate, and provide feedback.
+a. Class Diagram
+b. Class Specifications
+WeeklyReportController Class
+No
+Method
+Description
+01
+submitFeedback(FeedbackDTO dto)
+Receive feedback from the Mentor on the student's weekly report.
+WeeklyReportServiceImpl Class
+No
+Method
+Description
+01
+updateFeedback(FeedbackDTO dto)
+Save the feedback content and update the report status (REVIEWED).
+c. Sequence Diagram(s)
+d. Database Queries
+INSERT INTO report_feedbacks (report_id, reviewer_id, feedback_text, action, created_at) VALUES (?, ?, ?, 'REVIEW', CURRENT_TIMESTAMP);UPDATE weekly_reports SET status = 'REVIEWED', updated_at = CURRENT_TIMESTAMP WHERE report_id = ?;
+5. Training & OJT Process (Export Final Grade Report)
+This section describes the detailed design for the Export Final Grade Report function. The system compiles all internship results and mentor evaluations and exports them to a PDF file containing a list of students' final grades.
+a. Class Diagram
+b. Class Specifications
+FinalGradeController Class
+No
+Method
+Description
+01
+exportFinalGradesPdf()
+Export the end-of-term report in PDF format.
+ExcelExportServiceImpl Class
+No
+Method
+Description
+01
+exportFinalGradesPdf()
+Retrieve data, create a PDF table using Lowagie iText, and return a ByteArrayOutputStream.
+c. Sequence Diagram(s)
+d. Database Queries
+SELECT fg.grade_id, fg.final_grade, fg.overall_status, u.full_name, sp.student_code FROM final_grades fg JOIN users u ON fg.student_id = u.user_id JOIN student_profiles sp ON u.user_id = sp.user_id ORDER BY u.full_name ASC;
