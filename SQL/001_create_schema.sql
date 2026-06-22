@@ -994,7 +994,8 @@ CREATE TABLE enterprise_evaluations (
     overall_comments    TEXT,
     is_locked       BOOLEAN NOT NULL DEFAULT TRUE,                   -- BR-44: Locked after submission
     submitted_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- TRIGGER: BR-44 — Prevent modification of locked evaluations
@@ -1137,6 +1138,7 @@ CREATE TABLE report_feedbacks (
     action          VARCHAR(20) NOT NULL
                     CHECK (action IN ('APPROVED', 'REJECTED')),
     created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     -- BR-40: Mandatory feedback text when rejecting
     CONSTRAINT chk_rejection_needs_feedback
@@ -1154,6 +1156,7 @@ CREATE TABLE final_reports (
     submitted_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,    -- BR-51
     is_late         BOOLEAN NOT NULL DEFAULT FALSE,
     created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT chk_final_report_format CHECK (file_url ILIKE '%.pdf') -- BR-50
 );
@@ -1279,6 +1282,7 @@ CREATE TABLE final_grades (
     cancelled_at    TIMESTAMP,
     graded_at       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT uq_grade_student_semester UNIQUE (student_id, semester_id)
 );
@@ -1335,7 +1339,8 @@ CREATE TABLE notifications (
     reference_entity VARCHAR(100),
     reference_id    UUID,
     is_read         BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX idx_notifications_recipient ON notifications(recipient_id);
@@ -1365,9 +1370,11 @@ CREATE TABLE student_enterprise_feedbacks (
     additional_comments TEXT,
     
     submitted_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    
+    created_at         TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at         TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
     -- BR-53: Only 1 feedback per enterprise per semester
-    CONSTRAINT uq_student_enterprise_semester_feedback 
+    CONSTRAINT uq_student_enterprise_semester_feedback
         UNIQUE (student_id, enterprise_id, semester_id)
 );
 
