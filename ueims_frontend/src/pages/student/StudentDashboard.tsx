@@ -72,9 +72,11 @@ export const StudentDashboard: React.FC = () => {
     return <Navigate to="/no-role" replace />;
   }
 
-  const currentSemester = profile?.currentSemester || 5;
+  // Use the profile's currentSemester as source of truth — never default to 5
+  const currentSemester = profile?.currentSemester;
 
-  const getFilteredNavItems = (sem: number) => {
+  const getFilteredNavItems = (sem: number | undefined | null) => {
+    if (sem == null) return studentNavItems;
     // Semester 1-4: browse only -> dashboard, profile, jobs
     if (sem >= 1 && sem <= 4) {
       return studentNavItems.filter(item => ['dashboard', 'profile', 'jobs'].includes(item.key));
@@ -97,12 +99,12 @@ export const StudentDashboard: React.FC = () => {
   const filteredNavItems = getFilteredNavItems(currentSemester);
   const allowedTabs = filteredNavItems.map(item => item.key);
 
-  if (currentTab !== 'dashboard' && currentTab !== 'profile' && !allowedTabs.includes(currentTab)) {
+  if (currentSemester != null && currentTab !== 'dashboard' && currentTab !== 'profile' && !allowedTabs.includes(currentTab)) {
     return <Navigate to="/student/dashboard" replace />;
   }
 
   const pages: Record<string, React.ReactNode> = {
-    dashboard: <StudentDashboardTab />,
+    dashboard: <StudentDashboardTab currentSemester={currentSemester ?? 5} />,
     profile: <ProfileTab />,
     jobs: <JobBoardTab />,
     applications: <ApplicationsTab />,

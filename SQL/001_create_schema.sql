@@ -465,6 +465,7 @@ CREATE TABLE semester_enterprises (
     reviewed_by     UUID REFERENCES users(user_id),
     reviewed_at     TIMESTAMP,
     registered_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at      TIMESTAMP,
 
     CONSTRAINT uq_semester_enterprise UNIQUE (semester_id, enterprise_id),
     CONSTRAINT chk_se_rejection_reason CHECK (

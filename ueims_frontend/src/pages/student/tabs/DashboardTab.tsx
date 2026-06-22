@@ -23,6 +23,10 @@ import { StudentDashboardService, type StudentDashboardStats } from '@/services/
 import { OjtStatusService, type OjtStatusResponse } from '@/services/OjtStatusService';
 import { OjtStatusBadge } from '../components/OjtStatusBadge';
 
+export interface DashboardTabProps {
+  currentSemester: number;
+}
+
 // ============================================================
 // DESIGN TOKENS — Student Command Center (matching TM style)
 // ============================================================
@@ -828,7 +832,7 @@ const EvaluationRow: React.FC<{ onNavigate: (route: string) => void }> = ({ onNa
 // ============================================================
 // MAIN COMPONENT
 // ============================================================
-export const StudentDashboardTab: React.FC = () => {
+export const StudentDashboardTab: React.FC<DashboardTabProps> = ({ currentSemester: propSemester }) => {
   const { t } = useTranslation(['studentDashboard']);
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -850,6 +854,10 @@ export const StudentDashboardTab: React.FC = () => {
     recentActivities: [],
   });
   const navigate = useNavigate();
+
+  // Prefer the semester passed from parent (source of truth).
+  // Fall back to stats if not provided (for backward compatibility).
+  const currentSemester = propSemester ?? stats.currentSemester ?? 5;
 
   useEffect(() => {
     const timer = setTimeout(() => setMounted(true), 100);
@@ -882,7 +890,6 @@ export const StudentDashboardTab: React.FC = () => {
     navigate(`/student/${route}`);
   };
 
-  const currentSemester = stats.currentSemester ?? (typeof stats.userProfile?.currentSemester === 'number' ? stats.userProfile.currentSemester : 5);
   const isSemester1to4 = currentSemester >= 1 && currentSemester <= 4;
   const isSemester5 = currentSemester === 5;
   const isSemester6 = currentSemester === 6;
