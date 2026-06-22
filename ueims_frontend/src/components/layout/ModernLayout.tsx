@@ -335,7 +335,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
 
   useEffect(() => {
     setCustomAvatarUrl(toAbsoluteAssetUrl(user?.avatarUrl));
-  }, [user?.userId]);
+  }, [user?.id]);
 
   const openPicker = async () => {
     setPickerOpen(true);

@@ -205,204 +205,6 @@ const ApprovalRow: React.FC<{
 
   return (
     <div
-     
-     
-     
-      style={{
-        background: cc.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
-        border: `1px solid ${cc.border}`,
-        borderRadius: cc.radiusLg,
-        overflow: 'hidden',
-        boxShadow: cc.shadowSm,
-      }}
-     className="scroll-animate">
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px' }}>
-        <div style={{
-          width: 42, height: 42, borderRadius: cc.radiusMd, background: cc.brandMuted,
-const cc = {
-  brand: '#FF7A30',
-  brandHover: '#E86A20',
-  brandMuted: '#FFF3E8',
-  brandSubtle: '#FFF8F0',
-  brandStrong: '#9B4A10',
-  success: '#10B981',
-  successMuted: '#D1FAE5',
-  successText: '#065F46',
-  error: '#EF4444',
-  errorMuted: '#FEE2E2',
-  errorText: '#991B1B',
-  warning: '#F59E0B',
-  warningMuted: '#FEF3C7',
-  warningText: '#92400E',
-  info: '#3B82F6',
-  infoMuted: '#DBEAFE',
-  infoText: '#1E40AF',
-  textPrimary: '#1A1A2E',
-  textSecondary: '#6B7280',
-  textMuted: '#9CA3AF',
-  surface: 'rgba(255, 255, 255, 0.72)',
-  bg: '#FFF3E8',
-  border: '#E5E7EB',
-  borderSubtle: '#F3F4F6',
-  radiusSm: 6,
-  radiusMd: 8,
-  radiusLg: 12,
-  radiusXl: 16,
-  radiusFull: 9999,
-  shadowSm: '0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)',
-  shadowMd: '0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.04)',
-  shadowLg: '0 10px 15px rgba(0,0,0,0.08), 0 4px 6px rgba(0,0,0,0.04)',
-  shadowBrand: '0 4px 12px rgba(255,122,48,0.25)',
-};
-
-const RejectModal: React.FC<{
-  open: boolean;
-  enterprise: Enterprise | null;
-  onClose: () => void;
-  onSubmit: (reason: string) => Promise<void>;
-}> = ({ open, enterprise, onClose, onSubmit }) => {
-  const [reason, setReason] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-  const charCount = reason.trim().length;
-  const isValid = charCount >= 20;
-
-  const handleSubmit = async () => {
-    if (!isValid) return;
-    setSubmitting(true);
-    await onSubmit(reason.trim());
-    setSubmitting(false);
-    setReason('');
-  };
-
-  const handleClose = () => {
-    if (submitting) return;
-    setReason('');
-    onClose();
-  };
-
-  return (
-    <Modal
-      open={open}
-      onCancel={handleClose}
-      footer={null}
-      width={480}
-      centered
-      styles={{
-        mask: { background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(2px)' },
-        content: {
-          borderRadius: 16,
-          boxShadow: cc.shadowLg,
-          border: `1px solid ${cc.border}`,
-          padding: 0,
-          overflow: 'hidden',
-        },
-        header: { display: 'none' },
-        body: { padding: 0 },
-      }}
-    >
-      <div style={{ padding: '20px 24px 0', display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-        <div style={{
-          width: 40, height: 40, borderRadius: cc.radiusMd, background: cc.errorMuted,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-        }}>
-          <XCircle size={20} color={cc.error} />
-        </div>
-        <div style={{ flex: 1 }}>
-          <h3 style={{ fontSize: 16, fontWeight: 700, color: cc.textPrimary, margin: 0, lineHeight: 1.3 }}>
-            Reject Enterprise Registration
-          </h3>
-          {enterprise && (
-            <p style={{ fontSize: 13, color: cc.textSecondary, margin: '4px 0 0' }}>
-              {enterprise.companyName}
-            </p>
-          )}
-        </div>
-      </div>
-
-      <div style={{ padding: '16px 24px 24px' }}>
-        <div style={{
-          display: 'flex', alignItems: 'flex-start', gap: 8, padding: '10px 12px',
-          borderRadius: cc.radiusMd, background: cc.warningMuted, border: `1px solid ${cc.warning}25`, marginBottom: 16,
-        }}>
-          <AlertTriangle size={14} color={cc.warning} style={{ flexShrink: 0, marginTop: 1 }} />
-          <span style={{ fontSize: 12, color: cc.warningText, lineHeight: 1.4 }}>
-            <strong>BR-15:</strong> A minimum of 20 characters is required for the rejection reason. The enterprise will be notified via email.
-          </span>
-        </div>
-
-        <div style={{ marginBottom: 8 }}>
-          <div>
-            Reason for rejection <span style={{ color: cc.error }}>*</span>
-          </div>
-          <Input.TextArea
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-            rows={4}
-            placeholder="Describe the reason for rejecting this enterprise registration..."
-            maxLength={500}
-            showCount
-            style={{
-              borderRadius: cc.radiusMd,
-              borderColor: !isValid && charCount > 0 ? cc.error : cc.border,
-              resize: 'none', fontSize: 13, lineHeight: 1.6,
-            }}
-          />
-        </div>
-
-        {charCount > 0 && charCount < 20 && (
-          <div
-           
-           
-            style={{ fontSize: 11, color: cc.error, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 4 }}
-           className="scroll-animate">
-            <AlertTriangle size={11} />
-            {20 - charCount} more characters required
-          </div>
-        )}
-
-        <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 20 }}>
-          <Button onClick={handleClose} disabled={submitting} style={{
-            borderRadius: cc.radiusMd, borderColor: cc.border, color: cc.textSecondary,
-            fontWeight: 600, fontSize: 13, height: 38,
-          }}>
-            Cancel
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={!isValid}
-            loading={submitting}
-            style={{
-              borderRadius: cc.radiusMd,
-              background: isValid ? cc.error : cc.errorMuted,
-              borderColor: 'transparent',
-              color: isValid ? '#fff' : cc.error,
-              fontWeight: 600, fontSize: 13, height: 38,
-              boxShadow: isValid ? '0 4px 12px rgba(239,68,68,0.25)' : 'none',
-            }}
-          >
-            Submit Rejection
-          </Button>
-        </div>
-      </div>
-    </Modal>
-  );
-};
-
-const ApprovalRow: React.FC<{
-  enterprise: Enterprise;
-  index: number;
-  onApprove: (id: string) => void;
-  onReject: (enterprise: Enterprise) => void;
-  submitting: boolean;
-}> = ({ enterprise, index, onApprove, onReject, submitting }) => {
-  const [expanded, setExpanded] = useState(false);
-  const isApproved = enterprise.status === 'APPROVED';
-
-  return (
-    <div
-     
-     
-     
       style={{
         background: cc.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
         border: `1px solid ${cc.border}`,
@@ -426,12 +228,12 @@ const ApprovalRow: React.FC<{
             <span style={{
               display: 'inline-flex', alignItems: 'center', padding: '2px 8px',
               borderRadius: cc.radiusFull,
-              backgroundColor: isApproved ? hexToRgba(cc.success, 0.06) : enterprise.status === 'REJECTED' ? hexToRgba(cc.error, 0.06) : hexToRgba(cc.warning, 0.06),
-              border: `1px solid ${isApproved ? hexToRgba(cc.success, 0.25) : enterprise.status === 'REJECTED' ? hexToRgba(cc.error, 0.25) : hexToRgba(cc.warning, 0.25)}`,
-              color: isApproved ? cc.success : enterprise.status === 'REJECTED' ? cc.error : cc.warning,
+              backgroundColor: isApproved ? hexToRgba(cc.success, 0.06) : hexToRgba(cc.warning, 0.06),
+              border: `1px solid ${isApproved ? hexToRgba(cc.success, 0.25) : hexToRgba(cc.warning, 0.25)}`,
+              color: isApproved ? cc.success : cc.warning,
               fontSize: 10, fontWeight: 700, fontFamily: 'Inter, sans-serif',
             }}>
-              {isApproved ? 'Approved' : enterprise.status === 'REJECTED' ? 'Rejected' : 'Pending'}
+              {isApproved ? 'Approved' : 'Pending'}
             </span>
           </div>
           <div style={{ fontSize: 12, color: cc.textSecondary, marginTop: 2, display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -554,8 +356,7 @@ const AllEnterprisesTable: React.FC<{ data: Enterprise[] }> = ({ data }) => {
       key: 'status',
       render: (status: string) => {
         const approved = status === 'APPROVED';
-        const rejected = status === 'REJECTED';
-        const color = approved ? cc.success : rejected ? cc.error : cc.warning;
+        const color = approved ? cc.success : cc.warning;
         return (
           <span style={{
             display: 'inline-flex', alignItems: 'center', padding: '3px 9px', borderRadius: 6,
@@ -563,7 +364,7 @@ const AllEnterprisesTable: React.FC<{ data: Enterprise[] }> = ({ data }) => {
             border: `1px solid ${hexToRgba(color, 0.25)}`,
             color, fontSize: 11, fontWeight: 600,
           }}>
-            {approved ? 'Approved' : rejected ? 'Rejected' : 'Pending'}
+            {approved ? 'Approved' : 'Pending'}
           </span>
         );
       },
@@ -587,6 +388,199 @@ const AllEnterprisesTable: React.FC<{ data: Enterprise[] }> = ({ data }) => {
 export const EnterpriseTab: React.FC = () => {
   const { message } = App.useApp();
   useScrollAnimation();
+
+  const [activeView, setActiveView] = useState<'pending' | 'all'>('pending');
+  const [enterprises, setEnterprises] = useState<Enterprise[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [rejectModalOpen, setRejectModalOpen] = useState(false);
+  const [selectedEnterprise, setSelectedEnterprise] = useState<Enterprise | null>(null);
+
+  const pendingCount = useMemo(
+    () => enterprises.filter((e) => e.status === 'PENDING').length,
+    [enterprises]
+  );
+
+  const loadEnterprises = async () => {
+    try {
+      setLoading(true);
+      const data = await EnterpriseService.getAllEnterprises();
+      setEnterprises(Array.isArray(data) ? data : []);
+    } catch {
+      setEnterprises([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { void loadEnterprises(); }, []);
+
+  const handleApprove = async (id: string) => {
+    try {
+      setSubmitting(true);
+      await EnterpriseService.updateEnterpriseStatus(id, 'APPROVED');
+      await loadEnterprises();
+      void message.success('Enterprise approved successfully');
+    } catch {
+      void message.error('Failed to approve enterprise');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const openRejectModal = (enterprise: Enterprise) => {
+    setSelectedEnterprise(enterprise);
+    setRejectModalOpen(true);
+  };
+
+  const handleRejectSubmit = async (reason: string) => {
+    if (!selectedEnterprise) return;
+    try {
+      await EnterpriseService.updateEnterpriseStatus(selectedEnterprise.enterpriseId, 'REJECTED', reason);
+      setRejectModalOpen(false);
+      setSelectedEnterprise(null);
+      await loadEnterprises();
+      void message.success('Enterprise rejected');
+    } catch {
+      void message.error('Failed to reject enterprise');
+    }
+  };
+
+  const pendingEnterprises = enterprises.filter((e) => e.status === 'PENDING');
+
+  const renderPendingContent = () => {
+    if (loading) {
+      return (
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 240 }}>
+          <span style={{ color: cc.textMuted, fontSize: 14 }}>Loading enterprises...</span>
+        </div>
+      );
+    }
+    if (pendingEnterprises.length === 0) {
+      return (
+        <div
+         
+         
+          style={{ textAlign: 'center', padding: '48px 24px', background: cc.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', borderRadius: cc.radiusLg, border: `1px solid ${cc.borderSubtle}` }}
+         className="scroll-animate">
+          <div style={{ width: 48, height: 48, borderRadius: cc.radiusMd, background: cc.successMuted, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
+            <CheckCircle2 size={24} color={cc.success} />
+          </div>
+          <div style={{ fontSize: 15, fontWeight: 700, color: cc.textPrimary }}>All caught up!</div>
+          <div style={{ fontSize: 13, color: cc.textSecondary, marginTop: 4 }}>No pending enterprise registrations at the moment.</div>
+        </div>
+      );
+    }
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {pendingEnterprises.map((enterprise, i) => (
+          <ApprovalRow
+            key={enterprise.enterpriseId}
+            enterprise={enterprise}
+            index={i}
+            onApprove={handleApprove}
+            onReject={openRejectModal}
+            submitting={submitting}
+          />
+        ))}
+      </div>
+    );
+  };
+
+  return (
+    <div className="ent-container" style={{ fontFamily: 'Inter, sans-serif' }}>
+      <style>{`
+        .ent-container { padding-bottom: 40px; }
+        .ent-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+        @media (max-width: 768px) {
+          .ent-container { padding-bottom: 100px !important; }
+          .ent-info-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
+      <div style={{ maxWidth: 1600, margin: '0 auto', padding: '0 24px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div>
+          <h1 style={{ fontSize: 22, fontWeight: 800, color: cc.textPrimary, margin: 0, letterSpacing: '-0.02em' }}>
+            Enterprise Management
+          </h1>
+          <p style={{ fontSize: 13, color: cc.textSecondary, margin: '4px 0 0' }}>
+            Review and manage enterprise registrations for OJT placements
+          </p>
+        </div>
+      </div>
+
+      <div style={{ maxWidth: 1600, margin: '0 auto', padding: '0 24px' }}>
+        <div style={{
+          display: 'inline-flex', alignItems: 'center', gap: 0, background: cc.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+          border: `1px solid ${cc.border}`, borderRadius: cc.radiusMd, padding: 4, marginBottom: 20, boxShadow: cc.shadowSm,
+        }}>
+          {(['pending', 'all'] as const).map((view) => (
+            <button
+              key={view}
+              onClick={() => setActiveView(view)}
+             
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 18px',
+                borderRadius: cc.radiusMd, fontSize: 13,
+                fontWeight: activeView === view ? 700 : 500,
+                color: activeView === view ? '#fff' : cc.textSecondary,
+                background: activeView === view ? cc.brand : 'transparent',
+                border: 'none', cursor: 'pointer', fontFamily: 'Inter, sans-serif',
+                transition: 'all 0.2s', boxShadow: activeView === view ? cc.shadowBrand : 'none',
+              }}
+            >
+              {view === 'pending' ? 'Pending Approval' : 'All Enterprises'}
+              {view === 'pending' && pendingCount > 0 && (
+                <span style={{
+                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                  width: 18, height: 18, borderRadius: '50%',
+                  background: activeView === view ? '#fff' : cc.error,
+                  color: activeView === view ? cc.brand : '#fff',
+                  fontSize: 10, fontWeight: 800,
+                }}>
+                  {pendingCount}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+
+        
+          {activeView === 'pending' && (
+            <div
+              key="pending"
+             
+             
+             
+             
+             className="scroll-animate">
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                <span style={{ fontSize: 12, fontWeight: 600, color: cc.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                  Showing {pendingEnterprises.length} pending registrations
+                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: cc.textSecondary, fontWeight: 500 }}>
+                  Sort: <strong style={{ color: cc.textPrimary }}>Oldest First</strong>
+                </div>
+              </div>
+
+              {renderPendingContent()}
+            </div>
+          )}
+
+          {activeView === 'all' && (
+            <div
+              key="all"
+             
+             
+             
+             
+             className="scroll-animate">
+              <AllEnterprisesTable data={enterprises.filter((e) => e.status === 'APPROVED')} />
+            </div>
+          )}
+        
+      </div>
+
+      <RejectModal
         open={rejectModalOpen}
         enterprise={selectedEnterprise}
         onClose={() => { setRejectModalOpen(false); setSelectedEnterprise(null); }}

@@ -71,7 +71,7 @@ type WorkflowStatus =
   | 'CANCELLED';
 
 interface PlacementRecord extends OjtPlacementView {
-  targetRole: string;
+  targetRole?: string;
   key: string;
   avatar: string;
   source: 'SELF_SOURCED' | 'SYSTEM_MATCHED';

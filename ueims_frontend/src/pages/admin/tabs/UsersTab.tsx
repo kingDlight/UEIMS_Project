@@ -257,10 +257,10 @@ export const UsersTab: React.FC = () => {
     setSavingStatus(true);
     try {
       if (statusModal.nextStatus === 'LOCKED') {
-        await AdminService.lockUser(statusModal.user.userId);
+        await AdminService.updateUserStatus(statusModal.user.userId, 'LOCKED');
         message.success('User account has been locked.');
       } else if (statusModal.nextStatus === 'ACTIVE') {
-        await AdminService.unlockUser(statusModal.user.userId);
+        await AdminService.updateUserStatus(statusModal.user.userId, 'ACTIVE');
         message.success('User account has been unlocked.');
       } else {
         await AdminService.updateUserStatus(statusModal.user.userId, statusModal.nextStatus);

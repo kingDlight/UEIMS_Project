@@ -143,7 +143,7 @@ export const StudentDashboard: React.FC = () => {
           <Spin size="large" />
         </div>
       }>
-        {pages[currentTab] || <StudentDashboardTab />}
+        {pages[currentTab] || <StudentDashboardTab currentSemester={currentSemester ?? 5} hasActivePlacement={hasActivePlacement} />}
       </React.Suspense>
     </ModernLayout>
   );

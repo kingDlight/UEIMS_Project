@@ -295,7 +295,7 @@ export const AtRiskStudentsTab: React.FC = () => {
   ];
 
   const tabCounts = ALL_TABS.map(tab => ({
-    key: tab,
+    value: tab,
     label: tab === 'ALL'
       ? `All (${countByCategory('ALL')})`
       : `${RISK_CATEGORY_LABELS[tab] || tab} (${countByCategory(tab)})`,
