@@ -200,9 +200,9 @@ public class ApplicationServiceImpl implements ApplicationService {
         if (cvUrl == null || cvUrl.trim().isEmpty()) {
             var studentProfile = studentProfileRepository.findByUser_UserId(student.getUserId());
             if (studentProfile != null
-                    && studentProfile.getCvUrl() != null
-                    && !studentProfile.getCvUrl().isEmpty()) {
-                cvUrl = studentProfile.getCvUrl();
+                    && studentProfile.getCvFileUrl() != null
+                    && !studentProfile.getCvFileUrl().isEmpty()) {
+                cvUrl = studentProfile.getCvFileUrl();
             } else {
                 throw new AppException(ErrorCode.CV_NOT_UPLOADED);
             }
@@ -474,7 +474,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                     InputStream is = null;
                     try {
                         if (cvUrl.startsWith("http://") || cvUrl.startsWith("https://")) {
-                            is = new URL(cvUrl).openStream();
+                            is = new java.net.URL(cvUrl).openConnection().getInputStream();
                         } else {
                             Path filePath =
                                     Paths.get(System.getProperty("user.dir"), cvUrl.replace("/uploads/", "uploads/"));

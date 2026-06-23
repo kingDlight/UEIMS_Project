@@ -72,7 +72,7 @@ export const JobBoardTab: React.FC = () => {
   const pageSize = 9;
 
   const { data: profile } = useStudentProfileQuery();
-  const hasCv = !!profile?.cvUrl;
+  const hasCv = !!profile?.cvFileUrl;
   const currentSemester = profile?.currentSemester ?? 5;
 
   const { data: jobs = [], isLoading: jobsLoading } = useActiveJobsQuery();

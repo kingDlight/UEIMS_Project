@@ -158,10 +158,10 @@ public class StudentProfileServiceImpl implements StudentProfileService {
 
         try {
             // Delete existing CV file if present (prevent spam / orphan files)
-            String oldCvUrl = profile.getCvUrl();
-            if (oldCvUrl != null && !oldCvUrl.isBlank()) {
+            String oldCvFileUrl = profile.getCvFileUrl();
+            if (oldCvFileUrl != null && !oldCvFileUrl.isBlank()) {
                 Path oldPath =
-                        Paths.get(System.getProperty(USER_DIR_PROPERTY), oldCvUrl.replace("/uploads/", "uploads/"));
+                        Paths.get(System.getProperty(USER_DIR_PROPERTY), oldCvFileUrl.replace("/uploads/", "uploads/"));
                 Files.deleteIfExists(oldPath);
             }
 
@@ -171,7 +171,7 @@ public class StudentProfileServiceImpl implements StudentProfileService {
                     id.toString() + "_" + System.currentTimeMillis() + "_" + StringUtils.cleanPath(originalFilename);
             Path path = uploadDir.resolve(stored);
             file.transferTo(path.toFile());
-            profile.setCvUrl("/uploads/cv/" + stored);
+            profile.setCvFileUrl("/uploads/cv/" + stored);
             profile.setCvFileName(originalFilename);
             return repository.save(profile);
         } catch (IOException e) {
@@ -190,16 +190,16 @@ public class StudentProfileServiceImpl implements StudentProfileService {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
-        String oldCvUrl = profile.getCvUrl();
-        if (oldCvUrl != null && !oldCvUrl.isBlank()) {
+        String oldCvFileUrl = profile.getCvFileUrl();
+        if (oldCvFileUrl != null && !oldCvFileUrl.isBlank()) {
             try {
                 Path oldPath =
-                        Paths.get(System.getProperty(USER_DIR_PROPERTY), oldCvUrl.replace("/uploads/", "uploads/"));
+                        Paths.get(System.getProperty(USER_DIR_PROPERTY), oldCvFileUrl.replace("/uploads/", "uploads/"));
                 Files.deleteIfExists(oldPath);
             } catch (IOException e) {
                 log.error("[CV Delete] Failed to delete file: {}", e.getMessage(), e);
             }
-            profile.setCvUrl(null);
+            profile.setCvFileUrl(null);
             profile.setCvFileName(null);
         }
         return repository.save(profile);
@@ -246,7 +246,7 @@ public class StudentProfileServiceImpl implements StudentProfileService {
                 .studentCode(profile.getStudentCode())
                 .major(profile.getMajor())
                 .skills(profile.getSkills())
-                .cvUrl(profile.getCvUrl())
+                .cvFileUrl(profile.getCvFileUrl())
                 .cvFileName(profile.getCvFileName())
                 .linkedinUrl(profile.getLinkedinUrl())
                 .githubUrl(profile.getGithubUrl())
