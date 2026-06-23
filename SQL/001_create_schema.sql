@@ -828,7 +828,6 @@ CREATE TABLE student_profiles (
     bio             TEXT,
     cv_file_url     VARCHAR(1000),                                   -- BR-31: PDF only
     cv_file_size    INT,                                             -- BR-45: Max 5MB
-    cv_url          VARCHAR(500),                                    -- legacy alias used by StudentProfile entity
     cv_file_name    VARCHAR(255),                                    -- original CV filename for display
     linkedin_url    VARCHAR(500),
     github_url      VARCHAR(500),
