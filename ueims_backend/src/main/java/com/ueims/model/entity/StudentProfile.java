@@ -3,6 +3,8 @@ package com.ueims.model.entity;
 import jakarta.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import lombok.*;
 
@@ -37,7 +39,8 @@ public class StudentProfile extends BaseEntity {
     @Column(name = "cv_file_name", length = 255)
     private String cvFileName;
 
-    @Column(name = "skills", columnDefinition = "TEXT")
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "skills", columnDefinition = "jsonb")
     private String skills;
 
     @Column(name = "linkedin_url", length = 500)
