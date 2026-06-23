@@ -322,7 +322,8 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
     @Override
     @org.springframework.transaction.annotation.Transactional
     public EligibleStudent deferStudent(UUID eligibleId, String reason) {
-        EligibleStudent student = repository.findById(eligibleId)
+        EligibleStudent student = repository
+                .findById(eligibleId)
                 .orElseThrow(() -> new AppException(ErrorCode.ELIGIBLE_STUDENT_NOT_FOUND));
 
         if (reason == null || reason.isBlank()) {

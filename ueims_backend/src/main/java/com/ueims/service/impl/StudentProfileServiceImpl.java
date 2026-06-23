@@ -159,8 +159,10 @@ public class StudentProfileServiceImpl implements StudentProfileService {
         try {
             // Delete existing CV file if present (prevent spam / orphan files)
             String oldCvFileUrl = profile.getCvFileUrl();
-            if (oldCvFileUrl != null && !oldCvFileUrl.isBlank()
-                    && !oldCvFileUrl.startsWith("http://") && !oldCvFileUrl.startsWith("https://")) {
+            if (oldCvFileUrl != null
+                    && !oldCvFileUrl.isBlank()
+                    && !oldCvFileUrl.startsWith("http://")
+                    && !oldCvFileUrl.startsWith("https://")) {
                 Path oldPath =
                         Paths.get(System.getProperty(USER_DIR_PROPERTY), oldCvFileUrl.replace("/uploads/", "uploads/"));
                 Files.deleteIfExists(oldPath);
@@ -192,8 +194,10 @@ public class StudentProfileServiceImpl implements StudentProfileService {
         }
 
         String oldCvFileUrl = profile.getCvFileUrl();
-        if (oldCvFileUrl != null && !oldCvFileUrl.isBlank()
-                && !oldCvFileUrl.startsWith("http://") && !oldCvFileUrl.startsWith("https://")) {
+        if (oldCvFileUrl != null
+                && !oldCvFileUrl.isBlank()
+                && !oldCvFileUrl.startsWith("http://")
+                && !oldCvFileUrl.startsWith("https://")) {
             try {
                 Path oldPath =
                         Paths.get(System.getProperty(USER_DIR_PROPERTY), oldCvFileUrl.replace("/uploads/", "uploads/"));

@@ -132,7 +132,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
      * On success, the validated JWT is forwarded to the STOMP layer as a
      * native Authorization header.
      */
-    static class JwtHandshakeInterceptor implements HandshakeInterceptor {
+    public static class JwtHandshakeInterceptor implements HandshakeInterceptor {
 
         private final JwtDecoder jwtDecoder;
 
