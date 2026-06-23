@@ -75,8 +75,8 @@
           }
         },
         "primary_keys": [
-          "permission_name",
-          "role_name"
+          "role_name",
+          "permission_name"
         ],
         "unique_keys": []
       }
@@ -430,6 +430,18 @@
             "type": "UUID",
             "nullable": true
           },
+          "deferred_reason": {
+            "type": "TEXT",
+            "nullable": true
+          },
+          "deferred_by": {
+            "type": "UUID",
+            "nullable": true
+          },
+          "deferred_at": {
+            "type": "TIMESTAMP",
+            "nullable": true
+          },
           "created_at": {
             "type": "TIMESTAMP",
             "nullable": false
@@ -624,6 +636,10 @@
           "deleted_at": {
             "type": "TIMESTAMP",
             "nullable": true
+          },
+          "website": {
+            "type": "VARCHAR(255)",
+            "nullable": true
           }
         },
         "primary_keys": [
@@ -668,6 +684,10 @@
           "registered_at": {
             "type": "TIMESTAMP",
             "nullable": false
+          },
+          "created_at": {
+            "type": "TIMESTAMP",
+            "nullable": true
           }
         },
         "primary_keys": [
@@ -738,6 +758,10 @@
           },
           "deleted_at": {
             "type": "TIMESTAMP",
+            "nullable": true
+          },
+          "created_by": {
+            "type": "UUID",
             "nullable": true
           }
         },
@@ -885,10 +909,9 @@
           "application_id"
         ],
         "unique_keys": [
-          "enterprise_id",
           "student_id",
-          "semester_id",
-          "replaces_application_id"
+          "enterprise_id",
+          "semester_id"
         ]
       }
     },
@@ -1023,6 +1046,22 @@
           },
           "cv_file_size": {
             "type": "INT",
+            "nullable": true
+          },
+          "cv_file_name": {
+            "type": "VARCHAR(255)",
+            "nullable": true
+          },
+          "linkedin_url": {
+            "type": "VARCHAR(500)",
+            "nullable": true
+          },
+          "github_url": {
+            "type": "VARCHAR(500)",
+            "nullable": true
+          },
+          "portfolio_url": {
+            "type": "VARCHAR(500)",
             "nullable": true
           },
           "created_at": {
@@ -1263,6 +1302,10 @@
           "created_at": {
             "type": "TIMESTAMP",
             "nullable": false
+          },
+          "updated_at": {
+            "type": "TIMESTAMP",
+            "nullable": false
           }
         },
         "primary_keys": [
@@ -1380,6 +1423,10 @@
           "created_at": {
             "type": "TIMESTAMP",
             "nullable": false
+          },
+          "updated_at": {
+            "type": "TIMESTAMP",
+            "nullable": false
           }
         },
         "primary_keys": [
@@ -1418,6 +1465,10 @@
             "nullable": false
           },
           "created_at": {
+            "type": "TIMESTAMP",
+            "nullable": false
+          },
+          "updated_at": {
             "type": "TIMESTAMP",
             "nullable": false
           }
@@ -1586,6 +1637,10 @@
           "created_at": {
             "type": "TIMESTAMP",
             "nullable": false
+          },
+          "updated_at": {
+            "type": "TIMESTAMP",
+            "nullable": false
           }
         },
         "primary_keys": [
@@ -1635,6 +1690,10 @@
             "nullable": false
           },
           "created_at": {
+            "type": "TIMESTAMP",
+            "nullable": false
+          },
+          "updated_at": {
             "type": "TIMESTAMP",
             "nullable": false
           }
@@ -1697,14 +1756,22 @@
           "submitted_at": {
             "type": "TIMESTAMP",
             "nullable": false
+          },
+          "created_at": {
+            "type": "TIMESTAMP",
+            "nullable": false
+          },
+          "updated_at": {
+            "type": "TIMESTAMP",
+            "nullable": false
           }
         },
         "primary_keys": [
           "feedback_id"
         ],
         "unique_keys": [
-          "enterprise_id",
           "student_id",
+          "enterprise_id",
           "semester_id"
         ]
       }
@@ -1714,12 +1781,12 @@
       "type": "VIEW",
       "attributes": {
         "depends_on": [
-          "eligible_students",
-          "job_posts",
+          "applications",
           "final_grades",
-          "interviews",
+          "job_posts",
           "semesters",
-          "applications"
+          "eligible_students",
+          "interviews"
         ]
       }
     },
@@ -1728,12 +1795,12 @@
       "type": "VIEW",
       "attributes": {
         "depends_on": [
-          "users",
-          "enterprises",
-          "semesters",
           "weekly_reports",
-          "enterprise_assignments",
-          "student_profiles"
+          "student_profiles",
+          "users",
+          "semesters",
+          "enterprises",
+          "enterprise_assignments"
         ]
       }
     },
@@ -1756,6 +1823,10 @@
           },
           "expires_at": {
             "type": "TIMESTAMP",
+            "nullable": false
+          },
+          "device_id": {
+            "type": "VARCHAR(255)",
             "nullable": false
           }
         },
@@ -1964,6 +2035,20 @@
       }
     },
     {
+      "source": "eligible_students",
+      "target": "users",
+      "type": "FOREIGN_KEY",
+      "attributes": {
+        "source_cols": [
+          "deferred_by"
+        ],
+        "target_cols": [
+          "user_id"
+        ],
+        "on_delete": null
+      }
+    },
+    {
       "source": "eligible_student_status_history",
       "target": "eligible_students",
       "type": "FOREIGN_KEY",
@@ -2113,6 +2198,20 @@
         ],
         "target_cols": [
           "semester_id"
+        ],
+        "on_delete": null
+      }
+    },
+    {
+      "source": "job_posts",
+      "target": "users",
+      "type": "FOREIGN_KEY",
+      "attributes": {
+        "source_cols": [
+          "created_by"
+        ],
+        "target_cols": [
+          "user_id"
         ],
         "on_delete": null
       }
@@ -2679,15 +2778,7 @@
     },
     {
       "source": "v_semester_statistics",
-      "target": "eligible_students",
-      "type": "DEPENDS_ON",
-      "attributes": {
-        "metadata": "VIEW_SELECT"
-      }
-    },
-    {
-      "source": "v_semester_statistics",
-      "target": "job_posts",
+      "target": "applications",
       "type": "DEPENDS_ON",
       "attributes": {
         "metadata": "VIEW_SELECT"
@@ -2703,47 +2794,31 @@
     },
     {
       "source": "v_semester_statistics",
+      "target": "job_posts",
+      "type": "DEPENDS_ON",
+      "attributes": {
+        "metadata": "VIEW_SELECT"
+      }
+    },
+    {
+      "source": "v_semester_statistics",
+      "target": "semesters",
+      "type": "DEPENDS_ON",
+      "attributes": {
+        "metadata": "VIEW_SELECT"
+      }
+    },
+    {
+      "source": "v_semester_statistics",
+      "target": "eligible_students",
+      "type": "DEPENDS_ON",
+      "attributes": {
+        "metadata": "VIEW_SELECT"
+      }
+    },
+    {
+      "source": "v_semester_statistics",
       "target": "interviews",
-      "type": "DEPENDS_ON",
-      "attributes": {
-        "metadata": "VIEW_SELECT"
-      }
-    },
-    {
-      "source": "v_semester_statistics",
-      "target": "semesters",
-      "type": "DEPENDS_ON",
-      "attributes": {
-        "metadata": "VIEW_SELECT"
-      }
-    },
-    {
-      "source": "v_semester_statistics",
-      "target": "applications",
-      "type": "DEPENDS_ON",
-      "attributes": {
-        "metadata": "VIEW_SELECT"
-      }
-    },
-    {
-      "source": "v_at_risk_students",
-      "target": "users",
-      "type": "DEPENDS_ON",
-      "attributes": {
-        "metadata": "VIEW_SELECT"
-      }
-    },
-    {
-      "source": "v_at_risk_students",
-      "target": "enterprises",
-      "type": "DEPENDS_ON",
-      "attributes": {
-        "metadata": "VIEW_SELECT"
-      }
-    },
-    {
-      "source": "v_at_risk_students",
-      "target": "semesters",
       "type": "DEPENDS_ON",
       "attributes": {
         "metadata": "VIEW_SELECT"
@@ -2759,7 +2834,7 @@
     },
     {
       "source": "v_at_risk_students",
-      "target": "enterprise_assignments",
+      "target": "student_profiles",
       "type": "DEPENDS_ON",
       "attributes": {
         "metadata": "VIEW_SELECT"
@@ -2767,7 +2842,31 @@
     },
     {
       "source": "v_at_risk_students",
-      "target": "student_profiles",
+      "target": "users",
+      "type": "DEPENDS_ON",
+      "attributes": {
+        "metadata": "VIEW_SELECT"
+      }
+    },
+    {
+      "source": "v_at_risk_students",
+      "target": "semesters",
+      "type": "DEPENDS_ON",
+      "attributes": {
+        "metadata": "VIEW_SELECT"
+      }
+    },
+    {
+      "source": "v_at_risk_students",
+      "target": "enterprises",
+      "type": "DEPENDS_ON",
+      "attributes": {
+        "metadata": "VIEW_SELECT"
+      }
+    },
+    {
+      "source": "v_at_risk_students",
+      "target": "enterprise_assignments",
       "type": "DEPENDS_ON",
       "attributes": {
         "metadata": "VIEW_SELECT"
