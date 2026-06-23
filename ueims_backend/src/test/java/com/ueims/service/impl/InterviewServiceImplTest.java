@@ -166,7 +166,7 @@ class InterviewServiceImplTest {
     @Test
     void save_whenApplicationNotScreeningPassed_throwsException() {
         mockSecurityContext(currentUser);
-        application.setStatus(ApplicationStatus.PENDING);
+        application.setStatus(ApplicationStatus.REJECTED);
 
         when(applicationRepository.findById(application.getApplicationId())).thenReturn(Optional.of(application));
 
@@ -198,6 +198,7 @@ class InterviewServiceImplTest {
     @Test
     void confirmAttendance_whenAlreadyDeclined_throwsException() {
         interview.setStudentConfirmed(false);
+        interview.setStatus("CANCELLED");
         when(repository.findById(interviewId)).thenReturn(Optional.of(interview));
 
         AppException e = assertThrows(AppException.class, () -> service.confirmAttendance(interviewId));
