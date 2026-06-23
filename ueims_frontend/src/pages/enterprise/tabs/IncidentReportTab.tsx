@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Spin, App, Button, Input, Select, Form, Modal, Empty } from 'antd';
+import { Spin, App, Button, Input, Select, Form, Modal, Empty, Upload } from 'antd';
 import {
   PlusOutlined,
   ReloadOutlined,
@@ -8,6 +8,7 @@ import {
   FileTextOutlined,
   StopOutlined,
   CheckCircleOutlined,
+  UploadOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { IncidentService } from '@/services/IncidentService';
@@ -108,10 +109,11 @@ export const IncidentReportTab: React.FC = () => {
     try {
       const values = await form.validateFields();
       setSubmitting(true);
+      const fileNames = values.evidenceFiles?.map((f: any) => f.name).join(', ');
       await IncidentService.report({
         assignmentId: values.assignmentId,
         category: values.category,
-        description: `${values.severity ? `[Severity: ${values.severity}] ` : ''}${values.description}${values.evidenceUrls ? `\n\nEvidence: ${values.evidenceUrls}` : ''}`,
+        description: `${values.severity ? `[Severity: ${values.severity}] ` : ''}${values.description}${fileNames ? `\n\nEvidence files attached: ${fileNames}` : ''}`,
       });
       message.success('Incident reported successfully. Training Manager has been notified.');
       setFormOpen(false);
@@ -234,8 +236,23 @@ export const IncidentReportTab: React.FC = () => {
               className="rounded-xl"
             />
           </Form.Item>
-          <Form.Item label="Evidence URLs (optional)" name="evidenceUrls">
-            <Input placeholder="Comma-separated links to photos, documents, or chat logs" className="rounded-xl" />
+          <Form.Item
+            label="Evidence (Images/Documents)"
+            name="evidenceFiles"
+            valuePropName="fileList"
+            getValueFromEvent={(e) => {
+              if (Array.isArray(e)) return e;
+              return e?.fileList;
+            }}
+          >
+            <Upload
+              listType="picture"
+              beforeUpload={() => false}
+              maxCount={5}
+              multiple
+            >
+              <Button icon={<UploadOutlined />} className="rounded-xl">Upload Files</Button>
+            </Upload>
           </Form.Item>
           <div className="flex gap-2 justify-end mt-2">
             <Button onClick={() => setFormOpen(false)} disabled={submitting} className="rounded-xl">Cancel</Button>
