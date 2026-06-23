@@ -66,7 +66,7 @@ class EnterpriseEvaluationServiceImplTest {
 
         semester = new Semester();
         semester.setSemesterId(UUID.randomUUID());
-        semester.setStatus("IN_PROGRESS");
+        semester.setStatus("ACTIVE");
 
         studentUser = new User();
         studentUser.setUserId(UUID.randomUUID());

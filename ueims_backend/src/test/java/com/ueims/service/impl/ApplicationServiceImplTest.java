@@ -156,12 +156,10 @@ class ApplicationServiceImplTest {
         when(eligibleStudentRepository.findByUser_UserIdAndSemester_SemesterId(
                         currentUser.getUserId(), semester.getSemesterId()))
                 .thenReturn(Optional.of(eligibleStudent));
-        when(repository.existsByJobPost_JobPostIdAndStudent_UserIdAndStatusNotAndDeletedAtIsNull(
-                        jobPost.getJobPostId(), currentUser.getUserId(), ApplicationStatus.WITHDRAWN))
+        when(repository.existsByJobPost_JobPostIdAndStudent_UserIdAndStatusNotInAndDeletedAtIsNull(
+                        eq(jobPost.getJobPostId()), eq(currentUser.getUserId()), anyList()))
                 .thenReturn(false);
-        when(repository.countByStudent_UserIdAndStatusNotAndDeletedAtIsNull(
-                        currentUser.getUserId(), ApplicationStatus.WITHDRAWN))
-                .thenReturn(2L);
+        when(repository.countActiveApplications(currentUser.getUserId())).thenReturn(2L);
         when(repository.save(any(Application.class))).thenReturn(application);
         when(mapper.toApplicationResponse(application)).thenReturn(new ApplicationResponse());
 
@@ -228,8 +226,8 @@ class ApplicationServiceImplTest {
         when(eligibleStudentRepository.findByUser_UserIdAndSemester_SemesterId(
                         currentUser.getUserId(), semester.getSemesterId()))
                 .thenReturn(Optional.of(eligibleStudent));
-        when(repository.existsByJobPost_JobPostIdAndStudent_UserIdAndStatusNotAndDeletedAtIsNull(
-                        jobPost.getJobPostId(), currentUser.getUserId(), ApplicationStatus.WITHDRAWN))
+        when(repository.existsByJobPost_JobPostIdAndStudent_UserIdAndStatusNotInAndDeletedAtIsNull(
+                        eq(jobPost.getJobPostId()), eq(currentUser.getUserId()), anyList()))
                 .thenReturn(true);
 
         AppException e = assertThrows(AppException.class, () -> service.applyForJob(req));
@@ -248,12 +246,10 @@ class ApplicationServiceImplTest {
         when(eligibleStudentRepository.findByUser_UserIdAndSemester_SemesterId(
                         currentUser.getUserId(), semester.getSemesterId()))
                 .thenReturn(Optional.of(eligibleStudent));
-        when(repository.existsByJobPost_JobPostIdAndStudent_UserIdAndStatusNotAndDeletedAtIsNull(
-                        jobPost.getJobPostId(), currentUser.getUserId(), ApplicationStatus.WITHDRAWN))
+        when(repository.existsByJobPost_JobPostIdAndStudent_UserIdAndStatusNotInAndDeletedAtIsNull(
+                        eq(jobPost.getJobPostId()), eq(currentUser.getUserId()), anyList()))
                 .thenReturn(false);
-        when(repository.countByStudent_UserIdAndStatusNotAndDeletedAtIsNull(
-                        currentUser.getUserId(), ApplicationStatus.WITHDRAWN))
-                .thenReturn(3L);
+        when(repository.countActiveApplications(currentUser.getUserId())).thenReturn(3L);
 
         AppException e = assertThrows(AppException.class, () -> service.applyForJob(req));
         assertEquals(ErrorCode.MAX_APPLICATIONS_LIMIT_REACHED, e.getErrorCode());
@@ -272,12 +268,10 @@ class ApplicationServiceImplTest {
         when(eligibleStudentRepository.findByUser_UserIdAndSemester_SemesterId(
                         currentUser.getUserId(), semester.getSemesterId()))
                 .thenReturn(Optional.of(eligibleStudent));
-        when(repository.existsByJobPost_JobPostIdAndStudent_UserIdAndStatusNotAndDeletedAtIsNull(
-                        jobPost.getJobPostId(), currentUser.getUserId(), ApplicationStatus.WITHDRAWN))
+        when(repository.existsByJobPost_JobPostIdAndStudent_UserIdAndStatusNotInAndDeletedAtIsNull(
+                        eq(jobPost.getJobPostId()), eq(currentUser.getUserId()), anyList()))
                 .thenReturn(false);
-        when(repository.countByStudent_UserIdAndStatusNotAndDeletedAtIsNull(
-                        currentUser.getUserId(), ApplicationStatus.WITHDRAWN))
-                .thenReturn(2L);
+        when(repository.countActiveApplications(currentUser.getUserId())).thenReturn(2L);
 
         AppException e = assertThrows(AppException.class, () -> service.applyForJob(req));
         assertEquals(ErrorCode.CV_NOT_UPLOADED, e.getErrorCode());
@@ -296,12 +290,10 @@ class ApplicationServiceImplTest {
         when(eligibleStudentRepository.findByUser_UserIdAndSemester_SemesterId(
                         currentUser.getUserId(), semester.getSemesterId()))
                 .thenReturn(Optional.of(eligibleStudent));
-        when(repository.existsByJobPost_JobPostIdAndStudent_UserIdAndStatusNotAndDeletedAtIsNull(
-                        jobPost.getJobPostId(), currentUser.getUserId(), ApplicationStatus.WITHDRAWN))
+        when(repository.existsByJobPost_JobPostIdAndStudent_UserIdAndStatusNotInAndDeletedAtIsNull(
+                        eq(jobPost.getJobPostId()), eq(currentUser.getUserId()), anyList()))
                 .thenReturn(false);
-        when(repository.countByStudent_UserIdAndStatusNotAndDeletedAtIsNull(
-                        currentUser.getUserId(), ApplicationStatus.WITHDRAWN))
-                .thenReturn(2L);
+        when(repository.countActiveApplications(currentUser.getUserId())).thenReturn(2L);
 
         AppException e = assertThrows(AppException.class, () -> service.applyForJob(req));
         assertEquals(ErrorCode.INVALID_CV_FORMAT, e.getErrorCode());
@@ -321,12 +313,10 @@ class ApplicationServiceImplTest {
         when(eligibleStudentRepository.findByUser_UserIdAndSemester_SemesterId(
                         currentUser.getUserId(), semester.getSemesterId()))
                 .thenReturn(Optional.of(eligibleStudent));
-        when(repository.existsByJobPost_JobPostIdAndStudent_UserIdAndStatusNotAndDeletedAtIsNull(
-                        jobPost.getJobPostId(), currentUser.getUserId(), ApplicationStatus.WITHDRAWN))
+        when(repository.existsByJobPost_JobPostIdAndStudent_UserIdAndStatusNotInAndDeletedAtIsNull(
+                        eq(jobPost.getJobPostId()), eq(currentUser.getUserId()), anyList()))
                 .thenReturn(false);
-        when(repository.countByStudent_UserIdAndStatusNotAndDeletedAtIsNull(
-                        currentUser.getUserId(), ApplicationStatus.WITHDRAWN))
-                .thenReturn(2L);
+        when(repository.countActiveApplications(currentUser.getUserId())).thenReturn(2L);
 
         AppException e = assertThrows(AppException.class, () -> service.applyForJob(req));
         assertEquals(ErrorCode.CV_SIZE_EXCEEDED, e.getErrorCode());

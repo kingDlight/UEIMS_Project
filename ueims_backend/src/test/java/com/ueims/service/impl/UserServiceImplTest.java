@@ -80,7 +80,6 @@ class UserServiceImplTest {
     @Test
     void findAllSuccess() {
         when(repository.findAll()).thenReturn(List.of(user));
-        when(userSessionRepository.findByEmail(TEST_EMAIL)).thenReturn(List.of());
 
         List<com.ueims.dto.response.UserDetailResponse> result = userService.findAll();
 
@@ -91,7 +90,6 @@ class UserServiceImplTest {
     @Test
     void findByIdSuccess() {
         when(repository.findById(userId)).thenReturn(Optional.of(user));
-        when(userSessionRepository.findByEmail(TEST_EMAIL)).thenReturn(List.of());
 
         com.ueims.dto.response.UserDetailResponse result = userService.findById(userId);
 

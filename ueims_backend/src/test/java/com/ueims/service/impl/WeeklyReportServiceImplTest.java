@@ -81,6 +81,7 @@ class WeeklyReportServiceImplTest {
         eligibleStudent.setEligibleId(UUID.randomUUID());
         eligibleStudent.setUser(currentUser);
         eligibleStudent.setSemester(semester);
+        eligibleStudent.setCurrentSemester(6);
 
         reportId = UUID.randomUUID();
         report = new WeeklyReport();
@@ -131,8 +132,8 @@ class WeeklyReportServiceImplTest {
     @Test
     void findByIdNotExistsReturnsNull() {
         when(repository.findById(any())).thenReturn(Optional.empty());
-        WeeklyReport result = service.findById(UUID.randomUUID());
-        assertNull(result);
+        AppException e = assertThrows(AppException.class, () -> service.findById(UUID.randomUUID()));
+        assertEquals(ErrorCode.FIELD_REQUIRED, e.getErrorCode());
     }
 
     @Test

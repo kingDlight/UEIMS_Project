@@ -42,6 +42,9 @@ class EligibleStudentServiceImplTest {
     @Mock
     private SemesterRepository semesterRepository;
 
+    @Mock
+    private com.ueims.repository.UserRepository userRepository;
+
     @InjectMocks
     private EligibleStudentServiceImpl service;
 
@@ -247,6 +250,13 @@ class EligibleStudentServiceImplTest {
 
     @Test
     void cancelOjtResult_updatesStatusAndReason() {
+        SecurityContextHolder.getContext()
+                .setAuthentication(new UsernamePasswordAuthenticationToken(
+                        "admin@test.com", "pass", Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN"))));
+        com.ueims.model.entity.User mockUser = new com.ueims.model.entity.User();
+        mockUser.setEmail("admin@test.com");
+        when(userRepository.findByEmail("admin@test.com")).thenReturn(Optional.of(mockUser));
+
         when(repository.findById(studentId)).thenReturn(Optional.of(student));
         when(repository.save(any())).thenAnswer(i -> i.getArgument(0));
 

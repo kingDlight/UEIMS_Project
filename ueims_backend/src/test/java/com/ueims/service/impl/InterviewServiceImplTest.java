@@ -133,7 +133,7 @@ class InterviewServiceImplTest {
         when(applicationRepository.findById(application.getApplicationId())).thenReturn(Optional.of(application));
         when(repository.existsByEnterpriseAndTime(eq(enterprise.getEnterpriseId()), any()))
                 .thenReturn(false);
-        when(repository.save(any(Interview.class))).thenAnswer(i -> i.getArgument(0));
+        when(repository.saveAndFlush(any(Interview.class))).thenAnswer(i -> i.getArgument(0));
 
         Interview saved = service.save(interview);
 
@@ -188,7 +188,7 @@ class InterviewServiceImplTest {
     @Test
     void confirmAttendance_success() {
         when(repository.findById(interviewId)).thenReturn(Optional.of(interview));
-        when(repository.save(any(Interview.class))).thenAnswer(i -> i.getArgument(0));
+        when(repository.save(any(Interview.class))).thenReturn(interview);
 
         Interview result = service.confirmAttendance(interviewId);
         assertTrue(result.getStudentConfirmed());
@@ -207,7 +207,7 @@ class InterviewServiceImplTest {
     @Test
     void declineAttendance_success() {
         when(repository.findById(interviewId)).thenReturn(Optional.of(interview));
-        when(repository.save(any(Interview.class))).thenAnswer(i -> i.getArgument(0));
+        when(repository.save(any(Interview.class))).thenReturn(interview);
 
         Interview result = service.declineAttendance(interviewId, "Busy schedule");
 
