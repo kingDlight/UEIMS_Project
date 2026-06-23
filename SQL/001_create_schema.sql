@@ -240,7 +240,7 @@ CREATE TABLE eligible_students (
     gpa             DECIMAL(4,2),                                    -- BR-17, BR-19: >= 2.0
     current_semester INT NOT NULL CHECK (current_semester BETWEEN 1 AND 9), -- BR-54: Semester-based access
     status          VARCHAR(20) NOT NULL DEFAULT 'ELIGIBLE'
-                    CHECK (status IN ('ELIGIBLE', 'NOT_ELIGIBLE', 'PENDING', 'ACCEPTED', 'MATCHED', 'OJT', 'CANCELLED')),
+                    CHECK (status IN ('ELIGIBLE','NOT_ELIGIBLE','PENDING','ACCEPTED','MATCHED','OJT','CANCELLED')),
     is_locked       BOOLEAN NOT NULL DEFAULT FALSE,                  -- BR-21
     imported_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     approved_at     TIMESTAMP,
