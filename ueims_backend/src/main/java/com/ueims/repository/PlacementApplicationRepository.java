@@ -90,21 +90,20 @@ public interface PlacementApplicationRepository extends JpaRepository<PlacementA
 			ORDER BY pa5.created_at DESC LIMIT 1) AS cover_letter,
 			(SELECT pa6.is_replacement FROM placement_applications pa6
 			WHERE pa6.student_id = u.user_id AND pa6.semester_id = sem.semester_id
-			ORDER BY pa6.created_at DESC LIMIT 1) AS is_replacement
+			ORDER BY pa6.created_at DESC LIMIT 1) AS is_replacement,
+			es.deferred_reason  AS deferred_reason,
+			(SELECT u2.full_name FROM users u2 WHERE u2.user_id = es.deferred_by) AS deferred_by_name,
+			es.deferred_at      AS deferred_at
 		FROM users u
 		JOIN student_profiles sp ON sp.user_id = u.user_id
 		JOIN users_roles ur      ON ur.user_id = u.user_id
 		JOIN roles r             ON r.role_name = ur.role_name
 		JOIN semesters sem       ON sem.status IN ('OPEN', 'ACTIVE')
+		JOIN eligible_students es ON es.user_id = u.user_id AND es.semester_id = sem.semester_id
 		WHERE r.role_name = 'STUDENT'
 		AND u.status = 'ACTIVE'
 		AND u.deleted_at IS NULL
-		AND EXISTS (
-			SELECT 1 FROM eligible_students es
-			WHERE es.user_id = u.user_id
-				AND es.semester_id = sem.semester_id
-				AND es.status IN ('ACCEPTED', 'OJT', 'MATCHED')
-		)
+		AND es.status IN ('ACCEPTED', 'OJT', 'MATCHED')
 		ORDER BY u.full_name
 		""",
             nativeQuery = true)

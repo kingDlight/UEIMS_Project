@@ -115,9 +115,6 @@ export const StudentDashboardService = {
       userProfile = payload as UserProfileDto;
       if (userProfile && typeof userProfile.currentSemester === 'number') {
         currentSemester = userProfile.currentSemester;
-      // #region DEBUG currentSemester trace
-      fetch('http://127.0.0.1:7689/ingest/85060117-28a9-450a-b776-759dca15ff5a',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'192559'},body:JSON.stringify({sessionId:'192559',location:'StudentDashboardService.ts:getStats_payload',message:'DashboardService currentSemester from API',data:{payload},timestamp:Date.now()})}).catch(()=>{});
-      // #endregion
       }
     }
 
@@ -247,10 +244,6 @@ export const StudentDashboardService = {
     });
 
     recentActivities.sort((a, b) => b.date.getTime() - a.date.getTime());
-
-    // #region DEBUG currentSemester trace
-    fetch('http://127.0.0.1:7689/ingest/85060117-28a9-450a-b776-759dca15ff5a',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'192559'},body:JSON.stringify({sessionId:'192559',location:'StudentDashboardService.ts:getStats_return',message:'DashboardService getStats return',data:{currentSemester,hasActivePlacement,enterpriseName},timestamp:Date.now()})}).catch(()=>{});
-    // #endregion
 
     return {
       applications,

@@ -50,4 +50,9 @@ public class OjtPlacementViewDTO {
 
     // Self-Replace flag: TRUE nếu application mới nhất là replacement request
     Boolean isReplacement;
+
+    // Deferred note: TM ghi chú khi SV chưa được placement
+    String deferredReason;
+    String deferredByName;
+    LocalDateTime deferredAt;
 }

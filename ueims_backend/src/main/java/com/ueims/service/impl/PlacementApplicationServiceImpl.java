@@ -326,7 +326,10 @@ public class PlacementApplicationServiceImpl implements PlacementApplicationServ
                     .applicationId(toUuid(row[10]))
                     .applicationStatus((String) row[11])
                     .coverLetter((String) row[12])
-                    .isReplacement(toBoolean(row[13]));
+                    .isReplacement(toBoolean(row[13]))
+                    .deferredReason((String) row[14])
+                    .deferredByName((String) row[15])
+                    .deferredAt(toLocalDateTime(row[16]));
             result.add(builder.build());
         }
         return result;
@@ -337,6 +340,13 @@ public class PlacementApplicationServiceImpl implements PlacementApplicationServ
         if (o instanceof Boolean b) return b;
         if (o instanceof Number n) return n.intValue() != 0;
         return Boolean.parseBoolean(o.toString());
+    }
+
+    private LocalDateTime toLocalDateTime(Object o) {
+        if (o == null) return null;
+        if (o instanceof LocalDateTime ldt) return ldt;
+        if (o instanceof java.sql.Timestamp ts) return ts.toLocalDateTime();
+        return LocalDateTime.parse(o.toString());
     }
 
     @Override

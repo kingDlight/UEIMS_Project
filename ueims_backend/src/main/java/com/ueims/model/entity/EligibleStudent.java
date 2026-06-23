@@ -77,4 +77,15 @@ public class EligibleStudent extends BaseEntity {
     @JoinColumn(name = "cancelled_by")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "roles", "enterprise"})
     private User cancelledBy;
+
+    @Column(name = "deferred_reason", columnDefinition = "TEXT")
+    private String deferredReason;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "deferred_by")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "roles", "enterprise"})
+    private User deferredBy;
+
+    @Column(name = "deferred_at")
+    private LocalDateTime deferredAt;
 }

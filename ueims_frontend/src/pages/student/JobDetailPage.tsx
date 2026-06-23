@@ -80,9 +80,6 @@ export const JobDetailPage: React.FC = () => {
   const { data: profile } = useStudentProfileQuery();
   const hasCv = !!profile?.cvFileUrl;
   const currentSemester = profile?.currentSemester ?? 5;
-  // #region DEBUG currentSemester trace
-  fetch('http://127.0.0.1:7689/ingest/85060117-28a9-450a-b776-759dca15ff5a',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'192559'},body:JSON.stringify({sessionId:'192559',location:'JobDetailPage.tsx:currentSemester',message:'JobDetailPage currentSemester',data:{profileSemester:profile?.currentSemester,used:currentSemester},timestamp:Date.now()})}).catch(()=>{});
-  // #endregion
 
   const [hasActivePlacement, setHasActivePlacement] = useState(false);
 
