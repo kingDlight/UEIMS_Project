@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '@/stores/useAuthStore';
-import { api } from '@/services/api';
 import { StudentProfileService } from '@/services/StudentProfileService';
 
 export const useUserInfoQuery = () => {

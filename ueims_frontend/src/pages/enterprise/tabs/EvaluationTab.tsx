@@ -282,7 +282,7 @@ export const EvaluationTab: React.FC = () => {
               progress: evalData.progressScore ?? evalData.scores?.progress ?? 0,
             });
             setComments(evalData.overallComments ?? evalData.comments ?? '');
-            setSubmitted(evalData.status === 'SUBMITTED' || evalData.status === 'APPROVED');
+            setSubmitted(['SUBMITTED', 'APPROVED'].includes(evalData.status));
           }
         } else {
           resetForm();

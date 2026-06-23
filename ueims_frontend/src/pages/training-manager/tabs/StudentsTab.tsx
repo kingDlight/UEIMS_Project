@@ -802,6 +802,10 @@ export const StudentsTab: React.FC = () => {
   const pageSize = 10;
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Fetch from real database via API
+  const [students, setStudents] = useState<EligibleStudent[]>([]);
+  const [loading, setLoading] = useState(false);
+
   // Refetch helper (used after edit)
   const refetchStudents = useCallback(async () => {
     try {
@@ -815,10 +819,6 @@ export const StudentsTab: React.FC = () => {
       setLoading(false);
     }
   }, []);
-
-  // Fetch from real database via API
-  const [students, setStudents] = useState<EligibleStudent[]>([]);
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     void refetchStudents();
