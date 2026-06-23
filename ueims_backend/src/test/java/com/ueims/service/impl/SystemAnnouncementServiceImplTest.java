@@ -15,7 +15,6 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -28,9 +27,7 @@ import com.ueims.exception.ErrorCode;
 import com.ueims.model.entity.Semester;
 import com.ueims.model.entity.SystemAnnouncement;
 import com.ueims.model.entity.User;
-import com.ueims.repository.SemesterRepository;
 import com.ueims.repository.SystemAnnouncementRepository;
-import com.ueims.repository.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
 class SystemAnnouncementServiceImplTest {
@@ -48,12 +45,16 @@ class SystemAnnouncementServiceImplTest {
     private SystemAnnouncementRepository repository;
 
     @Mock
-    private UserRepository userRepository;
+    private com.ueims.repository.UserRepository userRepository;
 
     @Mock
-    private SemesterRepository semesterRepository;
+    private com.ueims.repository.SemesterRepository semesterRepository;
 
-    @InjectMocks
+    @Mock
+    private com.ueims.service.NotificationService notificationService;
+
+    private com.ueims.service.websocket.AnnouncementBroadcaster broadcaster;
+
     private SystemAnnouncementServiceImpl service;
 
     private SystemAnnouncement announcement;
@@ -64,6 +65,24 @@ class SystemAnnouncementServiceImplTest {
 
     @BeforeEach
     void setUp() {
+        broadcaster = new com.ueims.service.websocket.AnnouncementBroadcaster(null) {
+            @Override
+            public void broadcastCreated(SystemAnnouncement announcement) {}
+
+            @Override
+            public void broadcastUpdated(SystemAnnouncement announcement) {}
+
+            @Override
+            public void broadcastPublished(SystemAnnouncement announcement) {}
+
+            @Override
+            public void broadcastArchived(SystemAnnouncement announcement) {}
+
+            @Override
+            public void broadcastDeleted(UUID announcementId) {}
+        };
+        service = new SystemAnnouncementServiceImpl(
+                repository, userRepository, semesterRepository, broadcaster, notificationService);
         announcementId = UUID.randomUUID();
         semesterId = UUID.randomUUID();
 

@@ -37,6 +37,9 @@ class JobPostServiceImplTest {
     private JobPostRepository repository;
 
     @Mock
+    private com.ueims.repository.ApplicationRepository applicationRepository;
+
+    @Mock
     private UserRepository userRepository;
 
     @Mock

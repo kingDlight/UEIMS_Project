@@ -16,7 +16,6 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -32,7 +31,11 @@ class NotificationServiceImplTest {
     @Mock
     private NotificationRepository repository;
 
-    @InjectMocks
+    @Mock
+    private com.ueims.repository.UserRepository userRepository;
+
+    private com.ueims.service.websocket.NotificationBroadcaster broadcaster;
+
     private NotificationServiceImpl service;
 
     private Notification notification;
@@ -40,6 +43,14 @@ class NotificationServiceImplTest {
 
     @BeforeEach
     void setUp() {
+        broadcaster = new com.ueims.service.websocket.NotificationBroadcaster(null, null) {
+            @Override
+            public void pushToUser(String userEmail, Notification notification) {}
+
+            @Override
+            public void pushUnreadCountToUser(String userEmail, long unread) {}
+        };
+        service = new NotificationServiceImpl(repository, userRepository, broadcaster);
         notificationId = UUID.randomUUID();
         notification = Notification.builder()
                 .notificationId(notificationId)

@@ -143,7 +143,8 @@ class StudentEnterpriseFeedbackServiceImplTest {
     void saveSuccess() {
         mockSecurityContext();
         when(eligibleStudentRepository.findByUser_UserIdAndSemester_SemesterId(studentId, semesterId))
-                .thenReturn(Optional.of(new EligibleStudent()));
+                .thenReturn(
+                        Optional.of(EligibleStudent.builder().currentSemester(7).build()));
         when(repository.existsByStudent_UserIdAndEnterprise_EnterpriseIdAndSemester_SemesterId(
                         studentId, enterpriseId, semesterId))
                 .thenReturn(false);
@@ -183,7 +184,8 @@ class StudentEnterpriseFeedbackServiceImplTest {
         feedback.setStudent(anotherUser);
 
         when(eligibleStudentRepository.findByUser_UserIdAndSemester_SemesterId(studentId, semesterId))
-                .thenReturn(Optional.of(new EligibleStudent()));
+                .thenReturn(
+                        Optional.of(EligibleStudent.builder().currentSemester(7).build()));
 
         AppException exception = assertThrows(AppException.class, () -> service.save(feedback));
 
@@ -194,7 +196,8 @@ class StudentEnterpriseFeedbackServiceImplTest {
     void saveDuplicateFeedbackThrowsException() {
         mockSecurityContext();
         when(eligibleStudentRepository.findByUser_UserIdAndSemester_SemesterId(studentId, semesterId))
-                .thenReturn(Optional.of(new EligibleStudent()));
+                .thenReturn(
+                        Optional.of(EligibleStudent.builder().currentSemester(7).build()));
         when(repository.existsByStudent_UserIdAndEnterprise_EnterpriseIdAndSemester_SemesterId(
                         studentId, enterpriseId, semesterId))
                 .thenReturn(true);
@@ -208,7 +211,8 @@ class StudentEnterpriseFeedbackServiceImplTest {
     void saveInvalidScoreThrowsException() {
         mockSecurityContext();
         when(eligibleStudentRepository.findByUser_UserIdAndSemester_SemesterId(studentId, semesterId))
-                .thenReturn(Optional.of(new EligibleStudent()));
+                .thenReturn(
+                        Optional.of(EligibleStudent.builder().currentSemester(7).build()));
         when(repository.existsByStudent_UserIdAndEnterprise_EnterpriseIdAndSemester_SemesterId(
                         studentId, enterpriseId, semesterId))
                 .thenReturn(false);
@@ -224,7 +228,8 @@ class StudentEnterpriseFeedbackServiceImplTest {
     void saveNullScoreThrowsException() {
         mockSecurityContext();
         when(eligibleStudentRepository.findByUser_UserIdAndSemester_SemesterId(studentId, semesterId))
-                .thenReturn(Optional.of(new EligibleStudent()));
+                .thenReturn(
+                        Optional.of(EligibleStudent.builder().currentSemester(7).build()));
         when(repository.existsByStudent_UserIdAndEnterprise_EnterpriseIdAndSemester_SemesterId(
                         studentId, enterpriseId, semesterId))
                 .thenReturn(false);
