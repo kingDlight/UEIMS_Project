@@ -86,9 +86,6 @@ export const StudentDashboard: React.FC = () => {
 
   // Use the profile's currentSemester as source of truth — never default to 5
   const currentSemester = profile?.currentSemester;
-  // #region DEBUG currentSemester trace
-  fetch('http://127.0.0.1:7689/ingest/85060117-28a9-450a-b776-759dca15ff5a',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'192559'},body:JSON.stringify({sessionId:'192559',location:'StudentDashboard.tsx:currentSemester',message:'currentSemester value',data:{profile:profile?.currentSemester,raw:currentSemester,hasPlacement:hasActivePlacement},timestamp:Date.now()})}).catch(()=>{});
-  // #endregion
 
   const getFilteredNavItems = (sem: number | undefined | null, hasPlacement: boolean) => {
     if (sem == null) return studentNavItems;
@@ -100,10 +97,10 @@ export const StudentDashboard: React.FC = () => {
     if (sem === 5) {
       return studentNavItems.filter(item => ['dashboard', 'profile', 'jobs', 'applications', 'schedule'].includes(item.key));
     }
-    // Semester 6: PLACED -> weekly reports + final report; NOT PLACED -> job board + applications + interviews
+    // Semester 6: PLACED -> weekly reports + final report + schedule (in case they have past interviews); NOT PLACED -> job board + applications + schedule
     if (sem === 6) {
       if (hasPlacement) {
-        return studentNavItems.filter(item => ['dashboard', 'profile', 'training-plan', 'reports', 'final-report'].includes(item.key));
+        return studentNavItems.filter(item => ['dashboard', 'profile', 'schedule', 'training-plan', 'reports', 'final-report'].includes(item.key));
       }
       return studentNavItems.filter(item => ['dashboard', 'profile', 'jobs', 'applications', 'schedule'].includes(item.key));
     }

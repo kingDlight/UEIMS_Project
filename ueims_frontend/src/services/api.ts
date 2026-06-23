@@ -2,8 +2,11 @@ import axios from 'axios';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { getDeviceId } from '@/utils/device';
 
+// If VITE_API_URL is provided by environment (e.g., prod), use it. Otherwise, use localhost.
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080/api',
+  baseURL: API_URL,
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -78,7 +81,7 @@ api.interceptors.response.use(
 
         // Call the refresh endpoint directly with axios to avoid interceptor loops
         const { data } = await axios.post<{ code: number; result: { accessToken: string; refreshToken: string } }>(
-          `${import.meta.env.VITE_API_URL || 'http://localhost:8080/api'}/auth/refresh`,
+          `${API_URL}/auth/refresh`,
           { token: refreshToken, deviceId: getDeviceId() }
         );
 

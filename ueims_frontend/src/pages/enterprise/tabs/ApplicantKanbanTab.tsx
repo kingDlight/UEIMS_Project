@@ -276,10 +276,11 @@ const DetailModal: React.FC<DetailModalProps> = ({ applicant, open, onClose, onS
       onScreenComplete?.(applicant, pendingDecision, pendingDecision === 'SCREENING_REJECTED' ? rejectionReason.trim() : undefined);
     } catch (err: any) {
       const backendMsg = err?.response?.data?.message;
+      const errorStr = typeof backendMsg === 'string' ? backendMsg : 'Failed to update screening status.';
       if (err?.response?.status === 400 || err?.response?.status === 409) {
-        message.warning(backendMsg ?? 'This application status has already been modified. Please refresh the page.');
+        message.warning(errorStr);
       } else {
-        message.error(backendMsg ?? 'Failed to update screening status.');
+        message.error(errorStr);
       }
     } finally {
       setSubmitting(false);
@@ -301,7 +302,8 @@ const DetailModal: React.FC<DetailModalProps> = ({ applicant, open, onClose, onS
       if (err?.response?.status === 404 || code === 1073) {
         message.error('The requested CV file is currently unavailable or has been removed by the applicant.');
       } else {
-        message.error(backendMsg ?? 'Failed to download CV. Please try again.');
+        const errorStr = typeof backendMsg === 'string' ? backendMsg : 'Failed to download CV. Please try again.';
+        message.error(errorStr);
       }
     } finally {
       setDownloading(false);
@@ -558,13 +560,17 @@ export const ApplicantKanbanTab: React.FC = () => {
       newStatus === 'ACCEPTED' ? 'ACCEPTED' :
       'REJECTED';
 
+    // Optimistic update
     setApplicants(prev => prev.map(a => a.id === applicant.id ? { ...a, status: backendStatus } : a));
     try {
       await ApplicationService.updateStatus(applicant.applicationId, { status: backendStatus });
       message.success(`Moved ${applicant.studentName} to ${COLUMNS.find(c => c.id === newStatus)?.label}`);
     } catch (err: any) {
+      // Revert on error
       setApplicants(prev => prev.map(a => a.id === applicant.id ? { ...a, status: applicant.status } : a));
-      message.error(err.response?.data?.message || 'Failed to save status change. Please check your connection.');
+      const errorMsg = err.response?.data?.message;
+      const errorStr = typeof errorMsg === 'string' ? errorMsg : 'Failed to save status change. Please check your connection.';
+      message.error(errorStr);
     }
   };
 
