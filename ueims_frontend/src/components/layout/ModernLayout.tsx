@@ -1,10 +1,11 @@
-import React, { useEffect, useState, useRef, useMemo } from 'react';
+import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react';
+import Cropper from 'react-easy-crop';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Modal, Dropdown, Drawer, Form, Button, App, Tooltip, Input } from 'antd';
+import { Modal, Dropdown, Drawer, Form, Input, Button, App, Tooltip } from 'antd';
 import type { MenuProps } from 'antd';
 import { BellOutlined, DownOutlined, MenuOutlined } from '@ant-design/icons';
-import { X, Mail, ShieldCheck, CheckCheck, ImageDown, Phone, Activity, Search } from 'lucide-react';
+import { X, Mail, Phone, ShieldCheck, Activity, CheckCheck, ImageDown, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { SmallPill } from '@/pages/training-manager/components/shared/SmallPill';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -15,10 +16,10 @@ const toAbsoluteAssetUrl = (path?: string | null): string | null => {
   if (!path) return null;
   if (path.startsWith('http') || path.startsWith('data:') || path.startsWith('blob:')) return path;
   const base = (import.meta.env.VITE_API_URL || 'http://localhost:8080/api').replace(/\/api\/?$/, '');
-  return base + (path.startsWith('/') ? path : '/' + path);
+  return `${base}${path.startsWith('/') ? path : `/${path}`}`;
 };
 import { useNotificationStore, type NotificationItem } from '@/stores/useNotificationStore';
-
+import { useAnnouncementStore } from '@/stores/useAnnouncementStore';
 import { useNotificationStream } from '@/hooks/useNotificationStream';
 import { useAnnouncementStream } from '@/hooks/useAnnouncementStream';
 import './ModernLayout.css';
@@ -31,9 +32,112 @@ export interface NavItem {
   roles?: string[];
 }
 
+const getCroppedImg = async (imageSrc: string, pixelCrop: any): Promise<string | null> => {
+  const image = new Image();
+  image.src = imageSrc;
+  await new Promise(resolve => { image.onload = resolve; });
 
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return null;
 
+  canvas.width = pixelCrop.width;
+  canvas.height = pixelCrop.height;
 
+  ctx.drawImage(
+    image,
+    pixelCrop.x,
+    pixelCrop.y,
+    pixelCrop.width,
+    pixelCrop.height,
+    0,
+    0,
+    pixelCrop.width,
+    pixelCrop.height
+  );
+
+  return canvas.toDataURL('image/jpeg');
+};
+
+const CropAvatarModal = ({
+  open,
+  tempImageUrl,
+  onCancel,
+  onSave
+}: {
+  open: boolean,
+  tempImageUrl: string | null,
+  onCancel: () => void,
+  onSave: (url: string) => void
+}) => {
+  const { t } = useTranslation();
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
+
+  const onCropComplete = useCallback((_croppedArea: any, croppedAreaPixels: any) => {
+    setCroppedAreaPixels(croppedAreaPixels);
+  }, []);
+
+  const handleSaveCrop = async () => {
+    if (tempImageUrl && croppedAreaPixels) {
+      const croppedImage = await getCroppedImg(tempImageUrl, croppedAreaPixels);
+      if (croppedImage) {
+        onSave(croppedImage);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (open) {
+      setZoom(1);
+      setCrop({ x: 0, y: 0 });
+    }
+  }, [open]);
+
+  return (
+    <Modal
+      title={<div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, color: '#0f172a' }}>{t('layout.avatarCropTitle', 'Crop Photo')}</div>}
+      open={open}
+      onCancel={onCancel}
+      onOk={handleSaveCrop}
+      width={400}
+      okText={t('layout.savePhoto', 'Save Photo')}
+      cancelText={t('layout.cancel', 'Cancel')}
+      okButtonProps={{ style: { background: '#ea580c', borderColor: '#ea580c', fontWeight: 600, fontFamily: 'Inter, sans-serif' } }}
+      cancelButtonProps={{ style: { fontWeight: 600, fontFamily: 'Inter, sans-serif' } }}
+      styles={{ body: { padding: '16px 0' } }}
+    >
+      <div style={{ position: 'relative', width: '100%', height: 300, background: '#f8fafc', borderRadius: 8, overflow: 'hidden' }}>
+        {tempImageUrl && (
+          <Cropper
+            image={tempImageUrl}
+            crop={crop}
+            zoom={zoom}
+            aspect={1}
+            cropShape="round"
+            showGrid={false}
+            onCropChange={setCrop}
+            onCropComplete={onCropComplete}
+            onZoomChange={setZoom}
+          />
+        )}
+      </div>
+      <div style={{ marginTop: 24, display: 'flex', alignItems: 'center', gap: 16, padding: '0 16px' }}>
+        <span style={{ fontSize: 13, color: '#64748b', fontWeight: 600, fontFamily: 'Inter, sans-serif' }}>{t('layout.zoom', 'Zoom')}</span>
+        <input
+          type="range"
+          min={1}
+          max={3}
+          step={0.1}
+          value={zoom}
+          onChange={(e) => setZoom(Number(e.target.value))}
+          style={{ flex: 1, accentColor: '#ea580c' }}
+        />
+      </div>
+    </Modal>
+  );
+};
 
 interface ModernLayoutProps {
   navItems: NavItem[];
@@ -79,7 +183,6 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
 
   useEffect(() => {
     if (mustChangePassword) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setChangePasswordVisible(true);
     }
   }, [mustChangePassword]);
@@ -129,7 +232,6 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
   const [updatingProfile, setUpdatingProfile] = useState(false);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     if ((user as any)?.phone) setPhone((user as any).phone);
   }, [user]);
 
@@ -188,7 +290,6 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
   // Local mirror so the existing JSX keeps working without rewriting it
   // entirely; the store is the source of truth.
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setNotifications(notifItems);
   }, [notifItems]);
 
@@ -197,7 +298,9 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
     else resetNotifications();
   }, [token, fetchNotifications, resetNotifications]);
 
-
+  const markAsRead = async (id: string) => {
+    await markNotificationAsRead(id);
+  };
 
   const handleNotificationClick = async (item: NotificationItem) => {
     if (!item.isRead) await markNotificationAsRead(item.notificationId);
@@ -231,9 +334,8 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
   };
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCustomAvatarUrl(toAbsoluteAssetUrl(user?.avatarUrl));
-  }, [user?.id, user?.avatarUrl]);
+  }, [user?.id]);
 
   const openPicker = async () => {
     setPickerOpen(true);
@@ -427,15 +529,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
                   notifications.map((item: any) => (
                     <div
                       key={item.notificationId}
-                      role="button"
-                      tabIndex={0}
                       onClick={() => handleNotificationClick(item)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          handleNotificationClick(item);
-                        }
-                      }}
                       style={{
                         display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 12px', borderRadius: 16,
                         background: item.isRead ? 'rgba(255,255,255,.78)' : '#fff3ed',

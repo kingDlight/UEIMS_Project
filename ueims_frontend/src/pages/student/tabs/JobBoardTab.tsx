@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { App, Spin, Pagination } from 'antd';
 import { motion } from 'framer-motion';
-import { TrophyOutlined, TeamOutlined, RightOutlined, SearchOutlined, EnvironmentOutlined } from '@ant-design/icons';
+import { TrophyOutlined, CalendarOutlined, TeamOutlined, RightOutlined, SearchOutlined, EnvironmentOutlined } from '@ant-design/icons';
 import { NeuSurface } from '../components/shared/NeuSurface';
 import { SmallBadge } from '../components/shared/SmallBadge';
+import { JobPostService } from '@/services/JobPostService';
+import { ApplicationService } from '@/services/ApplicationService';
 import { useStudentProfileQuery } from '@/hooks/useStudentProfile';
 import { useActiveJobsQuery, useMyApplicationsIdsQuery } from '@/hooks/useStudentDashboardQueries';
 import { cc, hexToRgba } from '../constants';
@@ -61,6 +63,7 @@ const EmptyState: React.FC<{ icon: React.ReactNode; title: string; description: 
 );
 
 export const JobBoardTab: React.FC = () => {
+  const { message } = App.useApp();
   const { t } = useTranslation(['jobs']);
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
@@ -69,6 +72,8 @@ export const JobBoardTab: React.FC = () => {
   const pageSize = 9;
 
   const { data: profile } = useStudentProfileQuery();
+  const hasCv = !!profile?.cvFileUrl;
+  const currentSemester = profile?.currentSemester ?? 5;
 
   const { data: jobs = [], isLoading: jobsLoading } = useActiveJobsQuery();
   const { data: appliedJobIds = new Set<number>(), isLoading: appsLoading } = useMyApplicationsIdsQuery();
@@ -145,7 +150,7 @@ export const JobBoardTab: React.FC = () => {
         <>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 20 }}>
             {paginatedJobs.map((job, index) => (
-              <motion.div key={job.jobPostId} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: index * 0.05 }}>
+              <motion.div key={job.jobPostId || index} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: index * 0.05 }}>
                 <NeuSurface style={{ padding: 20, cursor: 'pointer', transition: 'all 0.2s' }} onClick={() => navigate(`/job/${job.jobPostId}`)}>
                   <div style={{ display: 'flex', gap: 12, marginBottom: 14 }}>
                     <div style={{ width: 48, height: 48, borderRadius: cc.radiusMd, background: hexToRgba(cc.primary, 0.08), display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.primary, fontSize: 20, fontWeight: 700, flexShrink: 0 }}>
