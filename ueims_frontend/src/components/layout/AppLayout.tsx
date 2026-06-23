@@ -61,8 +61,11 @@ export const AppLayout: React.FC = () => {
       form.resetFields();
       setChangePasswordVisible(false);
       if (mustChangePassword) {
-        logout();
-        navigate('/login', { replace: true });
+        // Issue #224: Delay redirect so the success toast is visible before navigating
+        setTimeout(() => {
+          logout();
+          navigate('/login', { replace: true });
+        }, 1500);
       }
     } catch (error: any) {
       const code = error.response?.data?.code;

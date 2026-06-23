@@ -34,11 +34,13 @@ public class AuditLogServiceImpl implements AuditLogService {
     AuditLogMapper mapper;
 
     @Override
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public List<AuditLogResponseDTO> findAll() {
-        return repository.findAll().stream().map(mapper::toDto).toList();
+        return repository.findAllWithUser().stream().map(mapper::toDto).toList();
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public AuditLogResponseDTO findById(UUID id) {
         AuditLog log = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.FILE_NOT_FOUND));
         return mapper.toDto(log);
