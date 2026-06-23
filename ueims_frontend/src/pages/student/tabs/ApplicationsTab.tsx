@@ -152,7 +152,7 @@ export const ApplicationsTab: React.FC = () => {
         <>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {paginatedApps.map((app, index) => (
-              <motion.div key={app.applicationId || index} initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3, delay: index * 0.05 }}>
+              <motion.div key={app.applicationId} initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3, delay: index * 0.05 }}>
                 <NeuSurface style={{ padding: 20 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>

@@ -1,20 +1,18 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Table, Select, Modal, App, Spin, Input } from 'antd';
+import { Table, Modal, App, Spin, Input, Select } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import {
-  Sparkles,
   Inbox,
   CheckCircle2,
-  TrendingUp,
   ChevronDown,
-  XCircle,
-  Send,
   Download,
+  Sparkles,
+  TrendingUp,
+  XCircle,
 } from 'lucide-react';
 import {
   PlacementApplicationService,
   type OjtPlacementView,
-  type PlacementApplicationResponse,
   type AutoMatchResult,
   type AssignmentDetails,
 } from '@/services/PlacementApplicationService';
@@ -139,7 +137,6 @@ function getAvatarColor(name: string) {
 // AVATAR — minimal circle with deterministic brand palette
 // ============================================================
 const Avatar: React.FC<{ initials: string; color?: string; bg?: string }> = ({ initials, color, bg }) => {
-  const { message } = App.useApp();
   const palette = (color || bg) ? null : getAvatarColor(initials);
   return (
     <div style={{
@@ -159,7 +156,6 @@ const Avatar: React.FC<{ initials: string; color?: string; bg?: string }> = ({ i
 // STATUS BADGE — only visual accent in a row
 // ============================================================
 const StatusBadge: React.FC<{ status: WorkflowStatus }> = ({ status }) => {
-  const { message } = App.useApp();
   const cfg = STATUS_CONFIG[status] ?? STATUS_CONFIG.UNPLACED;
   return (
     <span style={{
@@ -188,6 +184,67 @@ const HeaderBadge: React.FC<{ children: React.ReactNode; align?: 'left' | 'right
     {children}
   </div>
 );
+
+const ActionButtons: React.FC<{
+  record: PlacementRecord;
+  onApprove: (record: PlacementRecord) => void;
+  onReject: (record: PlacementRecord) => void;
+  onManualMatch: (record: PlacementRecord) => void;
+  onViewContract: (record: PlacementRecord) => void;
+}> = ({ record, onApprove, onReject, onManualMatch, onViewContract }) => {
+  if (record.workflowStatus === 'PENDING_APPROVAL') {
+    return (
+      <div className="flex items-center w-full h-full justify-end gap-1.5">
+        <button
+          onClick={() => onApprove(record)}
+          className="px-3 py-1.5 rounded-md border-none bg-[#10B981] text-white text-[11.5px] font-bold font-sans cursor-pointer whitespace-nowrap shadow-[0_2px_6px_rgba(16,185,129,0.18)] transition-all duration-150 ease-in-out hover:bg-[#0D9668] hover:-translate-y-[1px] hover:shadow-[0_4px_12px_rgba(16,185,129,0.25)]"
+        >
+          Approve
+        </button>
+        <button
+          onClick={() => onReject(record)}
+          className="px-3 py-1.5 rounded-md border-[1.5px] border-solid border-[#EF4444] bg-transparent text-[#EF4444] text-[11.5px] font-bold font-sans cursor-pointer whitespace-nowrap transition-all duration-150 ease-in-out hover:bg-[#EF4444] hover:text-white hover:-translate-y-[1px]"
+        >
+          Reject
+        </button>
+      </div>
+    );
+  }
+
+  if (record.workflowStatus === 'UNPLACED') {
+    return (
+      <div className="flex items-center w-full h-full justify-end">
+        <button
+          onClick={() => onManualMatch(record)}
+          className="px-3 py-1.5 rounded-md border-[1.5px] border-solid border-[#FF7A30] bg-transparent text-[#FF7A30] text-[11.5px] font-bold font-sans cursor-pointer whitespace-nowrap transition-all duration-150 ease-in-out hover:bg-[#FF7A30] hover:text-white hover:-translate-y-[1px] hover:shadow-[0_3px_10px_rgba(255,122,48,0.22)]"
+        >
+          Match
+        </button>
+      </div>
+    );
+  }
+
+  if (record.workflowStatus === 'PLACED' || record.workflowStatus === 'COMPLETED') {
+    return (
+      <div className="flex items-center w-full h-full justify-end">
+        <button
+          onClick={() => onViewContract(record)}
+          className="px-3 py-1.5 rounded-md border-none bg-transparent text-[#94A3B8] text-[11.5px] font-semibold font-sans cursor-pointer whitespace-nowrap transition-colors duration-150 ease-in-out hover:text-[#64748B]"
+        >
+          View Contract
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center w-full h-full justify-end">
+      <span className="font-sans align-middle text-[11px] text-[#94A3B8] italic">
+        No action
+      </span>
+    </div>
+  );
+};
 
 // ============================================================
 // MAIN COMPONENT
@@ -267,6 +324,7 @@ export const OJTTab: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void fetchOjtView();
     void fetchEnterprises();
   }, [fetchOjtView, fetchEnterprises]);
@@ -275,12 +333,7 @@ export const OJTTab: React.FC = () => {
     (p) => p.workflowStatus === 'PENDING_APPROVAL'
   ).length;
 
-  const ENTERPRISES = [
-    { name: 'FPT Software',    initials: 'FP', ...getEnterpriseColor('FPT Software')     },
-    { name: 'VinBigData',      initials: 'VB', ...getEnterpriseColor('VinBigData')       },
-    { name: 'VNG Corporation', initials: 'VN', ...getEnterpriseColor('VNG Corporation')  },
-    { name: 'NashTech VN',     initials: 'NT', ...getEnterpriseColor('NashTech VN')      },
-  ];
+
 
   const handleAutoMatch = useCallback(async () => {
     setRunning(true);
@@ -304,7 +357,7 @@ export const OJTTab: React.FC = () => {
     } finally {
       setRunning(false);
     }
-  }, [fetchOjtView]);
+  }, [fetchOjtView, message]);
 
   const handleManualMatchSubmit = useCallback(
     async (enterpriseId: string, enterpriseName: string) => {
@@ -328,7 +381,7 @@ export const OJTTab: React.FC = () => {
         setManualMatchLoading(false);
       }
     },
-    [selectedRecord, fetchOjtView]
+    [selectedRecord, fetchOjtView, message]
   );
 
   const openManualMatch = useCallback((record: PlacementRecord) => {
@@ -345,11 +398,6 @@ export const OJTTab: React.FC = () => {
     setSelectedRecord(record);
     setRejectReason('');
     setRejectModalOpen(true);
-  }, []);
-
-  const openUpdate = useCallback((record: PlacementRecord) => {
-    setSelectedRecord(record);
-    setUpdateModalOpen(true);
   }, []);
 
   const handleViewContract = useCallback(async (record: PlacementRecord) => {
@@ -386,7 +434,7 @@ export const OJTTab: React.FC = () => {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
       void message.error({ content: msg ?? 'Approve failed', duration: 3 });
     }
-  }, [fetchOjtView]);
+  }, [fetchOjtView, message]);
 
   const handleReject = useCallback(async () => {
     if (!selectedRecord?.applicationId) return;
@@ -409,7 +457,7 @@ export const OJTTab: React.FC = () => {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
       void message.error({ content: msg ?? 'Reject failed', duration: 3 });
     }
-  }, [selectedRecord, rejectReason, fetchOjtView]);
+  }, [selectedRecord, rejectReason, fetchOjtView, message]);
 
   const filteredData = placementData.filter((p) => {
     if (majorFilter !== 'ALL' && p.major !== majorFilter) return false;
@@ -556,118 +604,15 @@ export const OJTTab: React.FC = () => {
       fixed: isMobile ? undefined : 'right',
       align: 'right' as const,
       width: 200,
-      render: (_: unknown, record: PlacementRecord) => {
-        // PENDING_APPROVAL: TM duyệt hoặc bác
-        if (record.workflowStatus === 'PENDING_APPROVAL') {
-          return (
-            <div style={{ ...row, justifyContent: 'flex-end', gap: 6 }}>
-              <button
-                onClick={() => openApprove(record)}
-                style={{
-                  padding: '5px 12px', borderRadius: cc.radiusMd,
-                  border: 'none', background: cc.success, color: '#fff',
-                  fontSize: 11.5, fontWeight: 700, fontFamily: 'Inter, sans-serif',
-                  cursor: 'pointer', transition: 'all 0.18s ease', whiteSpace: 'nowrap',
-                  boxShadow: '0 2px 6px rgba(16,185,129,.18)',
-                }}
-                onMouseEnter={(e) => {
-                  const b = e.currentTarget as HTMLButtonElement;
-                  b.style.background = '#0D9668'; b.style.transform = 'translateY(-1px)';
-                  b.style.boxShadow = '0 4px 12px rgba(16,185,129,.25)';
-                }}
-                onMouseLeave={(e) => {
-                  const b = e.currentTarget as HTMLButtonElement;
-                  b.style.background = cc.success; b.style.transform = 'translateY(0)';
-                  b.style.boxShadow = '0 2px 6px rgba(16,185,129,.18)';
-                }}
-              >
-                Approve
-              </button>
-              <button
-                onClick={() => openReject(record)}
-                style={{
-                  padding: '5px 12px', borderRadius: cc.radiusMd,
-                  border: `1.5px solid ${cc.error}`, background: 'transparent', color: cc.error,
-                  fontSize: 11.5, fontWeight: 700, fontFamily: 'Inter, sans-serif',
-                  cursor: 'pointer', transition: 'all 0.18s ease', whiteSpace: 'nowrap',
-                }}
-                onMouseEnter={(e) => {
-                  const b = e.currentTarget as HTMLButtonElement;
-                  b.style.background = cc.error; b.style.color = '#fff';
-                  b.style.transform = 'translateY(-1px)';
-                }}
-                onMouseLeave={(e) => {
-                  const b = e.currentTarget as HTMLButtonElement;
-                  b.style.background = 'transparent'; b.style.color = cc.error;
-                  b.style.transform = 'translateY(0)';
-                }}
-              >
-                Reject
-              </button>
-            </div>
-          );
-        }
-
-        // UNPLACED: TM có thể match thủ công (chỉnh sửa placement)
-        if (record.workflowStatus === 'UNPLACED') {
-          return (
-            <div style={{ ...row, justifyContent: 'flex-end' }}>
-              <button
-                onClick={() => openManualMatch(record)}
-                style={{
-                  padding: '5px 12px', borderRadius: cc.radiusMd,
-                  border: `1.5px solid ${cc.brand}`, background: 'transparent', color: cc.brand,
-                  fontSize: 11.5, fontWeight: 700, fontFamily: 'Inter, sans-serif',
-                  cursor: 'pointer', transition: 'all 0.18s ease', whiteSpace: 'nowrap',
-                }}
-                onMouseEnter={(e) => {
-                  const b = e.currentTarget as HTMLButtonElement;
-                  b.style.background = cc.brand; b.style.color = '#fff';
-                  b.style.transform = 'translateY(-1px)';
-                  b.style.boxShadow = '0 3px 10px rgba(255,122,48,.22)';
-                }}
-                onMouseLeave={(e) => {
-                  const b = e.currentTarget as HTMLButtonElement;
-                  b.style.background = 'transparent'; b.style.color = cc.brand;
-                  b.style.transform = 'translateY(0)'; b.style.boxShadow = 'none';
-                }}
-              >
-                Match
-              </button>
-            </div>
-          );
-        }
-
-        // PLACED / COMPLETED: xem hợp đồng
-        if (record.workflowStatus === 'PLACED' || record.workflowStatus === 'COMPLETED') {
-          return (
-            <div style={{ ...row, justifyContent: 'flex-end' }}>
-              <button
-                onClick={() => handleViewContract(record)}
-                style={{
-                  padding: '5px 12px', borderRadius: cc.radiusMd,
-                  border: 'none', background: 'transparent', color: cc.textMuted,
-                  fontSize: 11.5, fontWeight: 600, fontFamily: 'Inter, sans-serif',
-                  cursor: 'pointer', transition: 'color 0.15s ease', whiteSpace: 'nowrap',
-                }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = cc.textSecondary; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = cc.textMuted; }}
-              >
-                View Contract
-              </button>
-            </div>
-          );
-        }
-
-        // REJECTED / WITHDRAWN / CANCELLED: chỉ xem chi tiết (placeholder)
-        return (
-          <div style={{ ...row, justifyContent: 'flex-end' }}>
-            <span style={{ ...cellBase, fontSize: 11, color: cc.textMuted, fontStyle: 'italic' }}>
-              No action
-            </span>
-          </div>
-        );
-      },
+      render: (_: unknown, record: PlacementRecord) => (
+        <ActionButtons 
+          record={record} 
+          onApprove={openApprove} 
+          onReject={openReject} 
+          onManualMatch={openManualMatch} 
+          onViewContract={handleViewContract} 
+        />
+      ),
     },
   ];
 

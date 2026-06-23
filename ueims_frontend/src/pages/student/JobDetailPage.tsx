@@ -26,6 +26,7 @@ import { EnterpriseAssignmentService } from '@/services/EnterpriseAssignmentServ
 import { useStudentProfileQuery } from '@/hooks/useStudentProfile';
 import { ModernLayout } from '@/components/layout/ModernLayout';
 import { navItems, cc, hexToRgba } from './constants';
+import { ApplyJobModal } from './components/ApplyJobModal';
 
 const CTAButton: React.FC<{
   children: React.ReactNode;
@@ -76,6 +77,7 @@ export const JobDetailPage: React.FC = () => {
   const [applying, setApplying] = useState(false);
   const [appliedJobIds, setAppliedJobIds] = useState<Set<number>>(new Set());
   const [applied, setApplied] = useState(false);
+  const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
 
   const { data: profile } = useStudentProfileQuery();
   const hasCv = !!profile?.cvFileUrl;
@@ -143,34 +145,10 @@ export const JobDetailPage: React.FC = () => {
     }
   };
 
-  const handleApply = async () => {
+  const handleApplySuccess = () => {
     if (!job) return;
-
-    if (job.applicationDeadline && new Date(job.applicationDeadline) < new Date()) {
-      message.error('This job posting has reached its deadline.');
-      return;
-    }
-
-    try {
-      setApplying(true);
-      await ApplicationService.create({ jobPostId: job.jobPostId });
-      message.success(t('applicationSuccess', 'Application submitted successfully!'));
-      setAppliedJobIds(prev => new Set([...prev, job.jobPostId]));
-      setApplied(true);
-    } catch (err: any) {
-      const errorMsg = err.response?.data?.message || '';
-      if (errorMsg.includes('already') || errorMsg.includes('duplicate')) {
-        message.error(t('alreadyApplied', 'You have already applied for this position.'));
-      } else if (errorMsg.includes('CV') && errorMsg.includes('upload')) {
-        message.error(t('pleaseUploadCv', 'Please upload your CV in Profile before applying.'));
-      } else if (errorMsg.includes('deadline') || errorMsg.includes('expired')) {
-        message.error(t('jobDeadlineReached', 'This job posting has reached its deadline.'));
-      } else {
-        message.error(errorMsg || t('applicationFailed', 'Application failed!'));
-      }
-    } finally {
-      setApplying(false);
-    }
+    setAppliedJobIds(prev => new Set([...prev, job.jobPostId]));
+    setApplied(true);
   };
 
   const getApplyButtonState = () => {
@@ -196,9 +174,12 @@ export const JobDetailPage: React.FC = () => {
     const state = getApplyButtonState();
     if (state === 'applied') { message.info(t('alreadyAppliedMsg', 'You have already applied for this position.')); return; }
     if (state === 'browse') { message.warning('Browse only mode enabled for your semester.'); return; }
-    if (state === 'nocv') { message.warning('Please upload your CV in Profile before applying.'); return; }
     if (state === 'closed') { message.error('This job posting is no longer accepting applications.'); return; }
-    handleApply();
+    if (job?.applicationDeadline && new Date(job.applicationDeadline) < new Date()) {
+      message.error('This job posting has reached its deadline.');
+      return;
+    }
+    setIsApplyModalOpen(true);
   };
 
   if (loading) {
@@ -219,176 +200,186 @@ export const JobDetailPage: React.FC = () => {
     <ModernLayout navItems={filteredNavItems} defaultRoute="jobs" basePath="/student">
       <div style={{ maxWidth: 800, margin: '0 auto', padding: '32px 24px 60px' }}>
 
-        {/* Back Button */}
-        <button
-          onClick={() => navigate('/student/jobs')}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', color: cc.textMuted, fontSize: 14, fontWeight: 500, padding: '6px 0', marginBottom: 24 }}
-        >
-          <LeftOutlined /> {t('backToJobs', 'Back to Job Board')}
-        </button>
+          {/* Back Button */}
+          <button
+            onClick={() => navigate('/student/jobs')}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', color: cc.textMuted, fontSize: 14, fontWeight: 500, padding: '6px 0', marginBottom: 24 }}
+          >
+            <LeftOutlined /> {t('backToJobs', 'Back to Job Board')}
+          </button>
 
-        {/* Hero Card */}
-        <NeuSurface style={{ padding: 28, marginBottom: 20, borderRadius: cc.radiusLg }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
-            <div style={{ display: 'flex', gap: 16 }}>
-              <div style={{
-                width: 68, height: 68, borderRadius: cc.radiusLg,
-                background: cc.primaryMuted, display: 'flex', alignItems: 'center',
-                justifyContent: 'center', color: cc.primary, fontSize: 28, fontWeight: 800, flexShrink: 0
-              }}>
-                {enterprise?.companyName?.charAt(0) || 'E'}
+          {/* Hero Card */}
+          <NeuSurface style={{ padding: 28, marginBottom: 20, borderRadius: cc.radiusLg }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
+              <div style={{ display: 'flex', gap: 16 }}>
+                <div style={{
+                  width: 68, height: 68, borderRadius: cc.radiusLg,
+                  background: cc.primaryMuted, display: 'flex', alignItems: 'center',
+                  justifyContent: 'center', color: cc.primary, fontSize: 28, fontWeight: 800, flexShrink: 0
+                }}>
+                  {enterprise?.companyName?.charAt(0) || 'E'}
+                </div>
+                <div>
+                  <h1 style={{ fontSize: 22, fontWeight: 800, color: cc.textPrimary, margin: '0 0 4px', letterSpacing: '-0.01em' }}>{job.title}</h1>
+                  <p style={{ fontSize: 15, color: cc.textMuted, margin: 0, fontWeight: 500 }}>{enterprise?.companyName || '—'}</p>
+                </div>
               </div>
-              <div>
-                <h1 style={{ fontSize: 22, fontWeight: 800, color: cc.textPrimary, margin: '0 0 4px', letterSpacing: '-0.01em' }}>{job.title}</h1>
-                <p style={{ fontSize: 15, color: cc.textMuted, margin: 0, fontWeight: 500 }}>{enterprise?.companyName || '—'}</p>
-              </div>
+              <SmallBadge label={job.status === 'OPEN' ? t('open', 'Open') : t('closed', 'Closed')} variant={job.status === 'OPEN' ? 'success' : 'neutral'} />
             </div>
-            <SmallBadge label={job.status === 'OPEN' ? t('open', 'Open') : t('closed', 'Closed')} variant={job.status === 'OPEN' ? 'success' : 'neutral'} />
-          </div>
 
-          {/* Chips */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
-            {enterprise?.address && (
-              <span style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 14px', borderRadius: cc.radiusFull, background: cc.neutralBg, border: `1px solid ${cc.border}`, fontSize: 13, color: cc.textSecondary, fontWeight: 500 }}>
-                <EnvironmentOutlined style={{ fontSize: 12 }} />{enterprise.address}
-              </span>
-            )}
-            {job.maxPositions && (
-              <span style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 14px', borderRadius: cc.radiusFull, background: cc.neutralBg, border: `1px solid ${cc.border}`, fontSize: 13, color: cc.textSecondary, fontWeight: 500 }}>
-                <TeamOutlined style={{ fontSize: 12 }} />{job.maxPositions} {t('positions', 'positions')}
-              </span>
-            )}
-            {job.requiredSkills && (() => {
-              try {
-                const skills = JSON.parse(job.requiredSkills);
-                return Array.isArray(skills) ? skills.slice(0, 4).map((s: string) => (
-                  <span key={s} style={{ padding: '6px 14px', borderRadius: cc.radiusFull, background: cc.primaryMuted, border: `1px solid ${cc.primary}30`, fontSize: 13, color: cc.primary, fontWeight: 600 }}>
-                    {s}
-                  </span>
-                )) : null;
-              } catch { return null; }
-            })()}
-          </div>
-        </NeuSurface>
+            {/* Chips */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+              {enterprise?.address && (
+                <span style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 14px', borderRadius: cc.radiusFull, background: cc.neutralBg, border: `1px solid ${cc.border}`, fontSize: 13, color: cc.textSecondary, fontWeight: 500 }}>
+                  <EnvironmentOutlined style={{ fontSize: 12 }} />{enterprise.address}
+                </span>
+              )}
+              {job.maxPositions && (
+                <span style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 14px', borderRadius: cc.radiusFull, background: cc.neutralBg, border: `1px solid ${cc.border}`, fontSize: 13, color: cc.textSecondary, fontWeight: 500 }}>
+                  <TeamOutlined style={{ fontSize: 12 }} />{job.maxPositions} {t('positions', 'positions')}
+                </span>
+              )}
+              {job.requiredSkills && (() => {
+                try {
+                  const skills = JSON.parse(job.requiredSkills);
+                  return Array.isArray(skills) ? skills.slice(0, 4).map((s: string) => (
+                    <span key={s} style={{ padding: '6px 14px', borderRadius: cc.radiusFull, background: cc.primaryMuted, border: `1px solid ${cc.primary}30`, fontSize: 13, color: cc.primary, fontWeight: 600 }}>
+                      {s}
+                    </span>
+                  )) : null;
+                } catch { return null; }
+              })()}
+            </div>
+          </NeuSurface>
 
-        {/* Company Info */}
-        {enterprise && (
+          {/* Company Info */}
+          {enterprise && (
+            <NeuSurface style={{ padding: 22, marginBottom: 20, borderRadius: cc.radiusLg }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+                <BankOutlined style={{ fontSize: 16, color: cc.primary }} />
+                <h3 style={{ fontSize: 14, fontWeight: 700, color: cc.textPrimary, margin: 0, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                  {t('companyDetails', 'Company Details')}
+                </h3>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                {enterprise.industry && (
+                  <div>
+                    <p style={{ fontSize: 11, color: cc.textMuted, margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>{t('industry', 'Industry')}</p>
+                    <p style={{ fontSize: 14, color: cc.textPrimary, margin: 0, fontWeight: 600 }}>{enterprise.industry}</p>
+                  </div>
+                )}
+                {enterprise.address && (
+                  <div>
+                    <p style={{ fontSize: 11, color: cc.textMuted, margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>{t('address', 'Address')}</p>
+                    <p style={{ fontSize: 14, color: cc.textPrimary, margin: 0, fontWeight: 600 }}>{enterprise.address}</p>
+                  </div>
+                )}
+                {enterprise.contactPerson && (
+                  <div>
+                    <p style={{ fontSize: 11, color: cc.textMuted, margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}><ContactsOutlined style={{ fontSize: 10 }} /> {t('contactPerson', 'Contact Person')}</p>
+                    <p style={{ fontSize: 14, color: cc.textPrimary, margin: 0, fontWeight: 600 }}>{enterprise.contactPerson}</p>
+                  </div>
+                )}
+                {enterprise.contactEmail && (
+                  <div>
+                    <p style={{ fontSize: 11, color: cc.textMuted, margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}><MailOutlined style={{ fontSize: 10 }} /> {t('email', 'Email')}</p>
+                    <p style={{ fontSize: 14, color: cc.primary, margin: 0, fontWeight: 600 }}>{enterprise.contactEmail}</p>
+                  </div>
+                )}
+              </div>
+              {enterprise.description && (
+                <div style={{ marginTop: 14, paddingTop: 14, borderTop: `1px solid ${cc.borderSubtle}` }}>
+                  <p style={{ fontSize: 14, color: cc.textSecondary, lineHeight: 1.7, margin: 0 }}>{enterprise.description}</p>
+                </div>
+              )}
+            </NeuSurface>
+          )}
+
+          {/* Job Content */}
           <NeuSurface style={{ padding: 22, marginBottom: 20, borderRadius: cc.radiusLg }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-              <BankOutlined style={{ fontSize: 16, color: cc.primary }} />
-              <h3 style={{ fontSize: 14, fontWeight: 700, color: cc.textPrimary, margin: 0, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                {t('companyDetails', 'Company Details')}
-              </h3>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-              {enterprise.industry && (
+
+            {/* Deadline */}
+            {job.applicationDeadline && (
+              <div style={{ padding: 14, borderRadius: cc.radiusMd, background: cc.warningMuted, marginBottom: 22, display: 'flex', alignItems: 'center', gap: 12 }}>
+                <ClockCircleOutlined style={{ fontSize: 18, color: cc.warning }} />
                 <div>
-                  <p style={{ fontSize: 11, color: cc.textMuted, margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>{t('industry', 'Industry')}</p>
-                  <p style={{ fontSize: 14, color: cc.textPrimary, margin: 0, fontWeight: 600 }}>{enterprise.industry}</p>
+                  <p style={{ fontSize: 11, color: cc.warningText, margin: 0, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('applicationDeadline', 'Application Deadline')}</p>
+                  <p style={{ fontSize: 15, color: cc.warningText, margin: '2px 0 0', fontWeight: 700 }}>{new Date(job.applicationDeadline).toLocaleDateString('vi-VN', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                 </div>
-              )}
-              {enterprise.address && (
-                <div>
-                  <p style={{ fontSize: 11, color: cc.textMuted, margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>{t('address', 'Address')}</p>
-                  <p style={{ fontSize: 14, color: cc.textPrimary, margin: 0, fontWeight: 600 }}>{enterprise.address}</p>
+              </div>
+            )}
+
+            {/* Job Description */}
+            {job.description && (
+              <div style={{ marginBottom: 24 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                  <FileTextOutlined style={{ fontSize: 15, color: cc.primary }} />
+                  <h3 style={{ fontSize: 15, fontWeight: 700, color: cc.textPrimary, margin: 0 }}>{t('jobDescription', 'Job Description')}</h3>
                 </div>
-              )}
-              {enterprise.contactPerson && (
-                <div>
-                  <p style={{ fontSize: 11, color: cc.textMuted, margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}><ContactsOutlined style={{ fontSize: 10 }} /> {t('contactPerson', 'Contact Person')}</p>
-                  <p style={{ fontSize: 14, color: cc.textPrimary, margin: 0, fontWeight: 600 }}>{enterprise.contactPerson}</p>
+                <p style={{ fontSize: 14, color: cc.textSecondary, lineHeight: 1.8, margin: 0, whiteSpace: 'pre-wrap' }}>{job.description}</p>
+              </div>
+            )}
+
+            {/* Requirements */}
+            {job.requirements && (
+              <div style={{ marginBottom: 24 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                  <ExperimentOutlined style={{ fontSize: 15, color: cc.primary }} />
+                  <h3 style={{ fontSize: 15, fontWeight: 700, color: cc.textPrimary, margin: 0 }}>{t('requirements', 'Requirements')}</h3>
                 </div>
-              )}
-              {enterprise.contactEmail && (
-                <div>
-                  <p style={{ fontSize: 11, color: cc.textMuted, margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}><MailOutlined style={{ fontSize: 10 }} /> {t('email', 'Email')}</p>
-                  <p style={{ fontSize: 14, color: cc.primary, margin: 0, fontWeight: 600 }}>{enterprise.contactEmail}</p>
+                <p style={{ fontSize: 14, color: cc.textSecondary, lineHeight: 1.8, margin: 0, whiteSpace: 'pre-wrap' }}>{job.requirements}</p>
+              </div>
+            )}
+
+            {/* Benefits */}
+            {job.benefits && (
+              <div style={{ marginBottom: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                  <GiftOutlined style={{ fontSize: 15, color: cc.primary }} />
+                  <h3 style={{ fontSize: 15, fontWeight: 700, color: cc.textPrimary, margin: 0 }}>{t('benefits', 'Benefits')}</h3>
                 </div>
-              )}
-            </div>
-            {enterprise.description && (
-              <div style={{ marginTop: 14, paddingTop: 14, borderTop: `1px solid ${cc.borderSubtle}` }}>
-                <p style={{ fontSize: 14, color: cc.textSecondary, lineHeight: 1.7, margin: 0 }}>{enterprise.description}</p>
+                <p style={{ fontSize: 14, color: cc.textSecondary, lineHeight: 1.8, margin: 0, whiteSpace: 'pre-wrap' }}>{job.benefits}</p>
               </div>
             )}
           </NeuSurface>
-        )}
 
-        {/* Job Content */}
-        <NeuSurface style={{ padding: 22, marginBottom: 20, borderRadius: cc.radiusLg }}>
-
-          {/* Deadline */}
-          {job.applicationDeadline && (
-            <div style={{ padding: 14, borderRadius: cc.radiusMd, background: cc.warningMuted, marginBottom: 22, display: 'flex', alignItems: 'center', gap: 12 }}>
-              <ClockCircleOutlined style={{ fontSize: 18, color: cc.warning }} />
-              <div>
-                <p style={{ fontSize: 11, color: cc.warningText, margin: 0, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('applicationDeadline', 'Application Deadline')}</p>
-                <p style={{ fontSize: 15, color: cc.warningText, margin: '2px 0 0', fontWeight: 700 }}>{new Date(job.applicationDeadline).toLocaleDateString('vi-VN', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-              </div>
+          {/* Warnings */}
+          {currentSemester < 5 && (
+            <div style={{ padding: 14, borderRadius: cc.radiusMd, background: cc.warningMuted, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
+              <WarningOutlined style={{ fontSize: 16, color: cc.warning }} />
+              <span style={{ fontSize: 13, color: cc.warningText }}>{t('browseOnlySemester', 'Browse only mode — Applications open in Semester 5 (Current: Semester {{sem}})', { sem: currentSemester })}</span>
+            </div>
+          )}
+          {!hasCv && currentSemester >= 5 && (
+            <div style={{ padding: 14, borderRadius: cc.radiusMd, background: cc.dangerMuted, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
+              <WarningOutlined style={{ fontSize: 16, color: cc.danger }} />
+              <span style={{ fontSize: 13, color: cc.dangerText }}>{t('pleaseUploadCv', 'Please upload your CV in Profile before applying.')}</span>
             </div>
           )}
 
-          {/* Job Description */}
-          {job.description && (
-            <div style={{ marginBottom: 24 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                <FileTextOutlined style={{ fontSize: 15, color: cc.primary }} />
-                <h3 style={{ fontSize: 15, fontWeight: 700, color: cc.textPrimary, margin: 0 }}>{t('jobDescription', 'Job Description')}</h3>
-              </div>
-              <p style={{ fontSize: 14, color: cc.textSecondary, lineHeight: 1.8, margin: 0, whiteSpace: 'pre-wrap' }}>{job.description}</p>
-            </div>
-          )}
+          {/* Apply Button */}
+          <CTAButton
+            variant="primary"
+            size="lg"
+            fullWidth
+            icon={applied || appliedJobIds.has(job.jobPostId) ? null : <SendOutlined />}
+            onClick={getApplyButtonAction}
+            disabled={getApplyButtonState() === 'applied'}
+            loading={applying}
+          >
+            {getApplyButtonLabel()}
+          </CTAButton>
+        </div>
 
-          {/* Requirements */}
-          {job.requirements && (
-            <div style={{ marginBottom: 24 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                <ExperimentOutlined style={{ fontSize: 15, color: cc.primary }} />
-                <h3 style={{ fontSize: 15, fontWeight: 700, color: cc.textPrimary, margin: 0 }}>{t('requirements', 'Requirements')}</h3>
-              </div>
-              <p style={{ fontSize: 14, color: cc.textSecondary, lineHeight: 1.8, margin: 0, whiteSpace: 'pre-wrap' }}>{job.requirements}</p>
-            </div>
-          )}
-
-          {/* Benefits */}
-          {job.benefits && (
-            <div style={{ marginBottom: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                <GiftOutlined style={{ fontSize: 15, color: cc.primary }} />
-                <h3 style={{ fontSize: 15, fontWeight: 700, color: cc.textPrimary, margin: 0 }}>{t('benefits', 'Benefits')}</h3>
-              </div>
-              <p style={{ fontSize: 14, color: cc.textSecondary, lineHeight: 1.8, margin: 0, whiteSpace: 'pre-wrap' }}>{job.benefits}</p>
-            </div>
-          )}
-        </NeuSurface>
-
-        {/* Warnings */}
-        {currentSemester < 5 && (
-          <div style={{ padding: 14, borderRadius: cc.radiusMd, background: cc.warningMuted, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
-            <WarningOutlined style={{ fontSize: 16, color: cc.warning }} />
-            <span style={{ fontSize: 13, color: cc.warningText }}>{t('browseOnlySemester', 'Browse only mode — Applications open in Semester 5 (Current: Semester {{sem}})', { sem: currentSemester })}</span>
-          </div>
-        )}
-        {!hasCv && currentSemester >= 5 && (
-          <div style={{ padding: 14, borderRadius: cc.radiusMd, background: cc.dangerMuted, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
-            <WarningOutlined style={{ fontSize: 16, color: cc.danger }} />
-            <span style={{ fontSize: 13, color: cc.dangerText }}>{t('pleaseUploadCv', 'Please upload your CV in Profile before applying.')}</span>
-          </div>
-        )}
-
-        {/* Apply Button */}
-        <CTAButton
-          variant="primary"
-          size="lg"
-          fullWidth
-          icon={applied || appliedJobIds.has(job.jobPostId) ? null : <SendOutlined />}
-          onClick={getApplyButtonAction}
-          disabled={getApplyButtonState() === 'applied'}
-          loading={applying}
-        >
-          {getApplyButtonLabel()}
-        </CTAButton>
-      </div>
+        <ApplyJobModal
+          open={isApplyModalOpen}
+          onClose={() => setIsApplyModalOpen(false)}
+          jobPostId={job.jobPostId}
+          jobTitle={job.title}
+          hasProfileCv={hasCv}
+          profileCvUrl={profile?.cvFileUrl}
+          onSuccess={handleApplySuccess}
+        />
     </ModernLayout>
   );
 };

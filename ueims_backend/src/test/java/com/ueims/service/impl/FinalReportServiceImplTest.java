@@ -139,7 +139,7 @@ class FinalReportServiceImplTest {
 
     @Test
     void uploadFinalReport_sizeExceeded_throwsException() {
-        byte[] largeContent = new byte[6 * 1024 * 1024]; // 6MB
+        byte[] largeContent = new byte[21 * 1024 * 1024]; // 21MB
         MockMultipartFile file = new MockMultipartFile("file", "test.pdf", "application/pdf", largeContent);
 
         AppException e = assertThrows(AppException.class, () -> service.uploadFinalReport(assignmentId, file));

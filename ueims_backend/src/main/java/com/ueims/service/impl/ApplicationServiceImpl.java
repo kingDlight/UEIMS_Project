@@ -462,7 +462,11 @@ public class ApplicationServiceImpl implements ApplicationService {
         }
 
         try {
-            Path zipPath = Files.createTempFile("bulk_cv_", ".zip");
+            Path tempDir = Paths.get(System.getProperty("user.dir"), "temp");
+            if (!Files.exists(tempDir)) {
+                Files.createDirectories(tempDir);
+            }
+            Path zipPath = Files.createTempFile(tempDir, "bulk_cv_", ".zip");
             try (ZipOutputStream zos = new ZipOutputStream(new java.io.FileOutputStream(zipPath.toFile()))) {
                 for (Application application : applications) {
                     String cvUrl = application.getCvFileUrl();

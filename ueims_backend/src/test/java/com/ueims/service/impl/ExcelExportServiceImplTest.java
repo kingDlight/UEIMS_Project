@@ -38,16 +38,17 @@ class ExcelExportServiceImplTest {
     void exportAtRiskStudents_success() {
         UUID semesterId = UUID.randomUUID();
 
-        AtRiskStudentResult result = org.mockito.Mockito.mock(AtRiskStudentResult.class);
-        org.mockito.Mockito.lenient().when(result.getStudentCode()).thenReturn("HE12345");
-        org.mockito.Mockito.lenient().when(result.getStudentName()).thenReturn("Test Student");
-        org.mockito.Mockito.lenient().when(result.getCompanyName()).thenReturn("Test Company");
-        org.mockito.Mockito.lenient().when(result.getRiskCategory()).thenReturn("HIGH");
-        org.mockito.Mockito.lenient().when(result.getPriorityScore()).thenReturn(80);
-        org.mockito.Mockito.lenient().when(result.getMissedReports()).thenReturn(2);
-        org.mockito.Mockito.lenient().when(result.getRejectedReports()).thenReturn(1);
-        org.mockito.Mockito.lenient().when(result.getRiskReason()).thenReturn("Missed");
-        org.mockito.Mockito.lenient().when(result.getDaysAtRisk()).thenReturn(5);
+        AtRiskStudentResult result = AtRiskStudentResult.builder()
+                .studentCode("HE12345")
+                .studentName("Test Student")
+                .companyName("Test Company")
+                .riskCategory("HIGH")
+                .priorityScore(80)
+                .missedReports(2)
+                .rejectedReports(1)
+                .riskReason("Missed")
+                .daysAtRisk(5)
+                .build();
 
         when(atRiskStudentService.getAtRiskStudentsBySemester(eq(semesterId))).thenReturn(List.of(result));
 

@@ -11,7 +11,7 @@ const toAbsoluteAssetUrl = (path?: string | null): string | null => {
   if (!path) return null;
   if (path.startsWith('http') || path.startsWith('data:') || path.startsWith('blob:')) return path;
   const base = (import.meta.env.VITE_API_URL || 'http://localhost:8080/api').replace(/\/api\/?$/, '');
-  return `${base}${path.startsWith('/') ? path : `/${path}`}`;
+  return base + (path.startsWith('/') ? path : '/' + path);
 };
 
 export const NavBar = ({ isDark, toggleTheme, scrolled, scrollToSection }: { isDark: boolean, toggleTheme: () => void, scrolled: boolean, scrollToSection: (h: string) => void }) => {

@@ -182,9 +182,9 @@ export const SemesterTab: React.FC = () => {
     sortDir?: string;
   }>({});
   
-  const fetchSemesters = useCallback(async (params = tableParams) => {
+  const fetchSemesters = useCallback(async (params?: { status?: string; sortBy?: string; sortDir?: string }) => {
     try {
-      const data = await SemesterService.getAllSemesters(params.status, params.sortBy, params.sortDir);
+      const data = await SemesterService.getAllSemesters(params?.status, params?.sortBy, params?.sortDir);
       const mapped: SemesterRecord[] = data.map((s) => {
         const start = dayjs(s.startDate);
         const end = dayjs(s.endDate);
@@ -213,7 +213,7 @@ export const SemesterTab: React.FC = () => {
       console.error(err);
       message.error('Failed to fetch semesters');
     }
-  }, []);
+  }, [message]);
 
   useEffect(() => {
     void fetchSemesters(tableParams);
@@ -671,6 +671,9 @@ export const SemesterTab: React.FC = () => {
     }
 
     setTableParams(newParams);
+    // Immediately fetch with the new params because setTableParams is async
+    // and the stale tableParams value inside fetchSemesters would not reflect the change yet.
+    void fetchSemesters(newParams);
   };
 
   // ============================================================

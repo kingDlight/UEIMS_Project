@@ -28,7 +28,6 @@ import com.ueims.exception.ErrorCode;
 import com.ueims.model.entity.User;
 import com.ueims.repository.InvalidatedTokenRepository;
 import com.ueims.repository.UserRepository;
-import com.ueims.repository.UserSessionRepository;
 import com.ueims.service.MailService;
 
 @ExtendWith(MockitoExtension.class)
@@ -43,8 +42,7 @@ class UserServiceImplTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
-    @Mock
-    private UserSessionRepository userSessionRepository;
+    private com.ueims.repository.UserSessionRepository userSessionRepository;
 
     @Mock
     private InvalidatedTokenRepository invalidatedTokenRepository;
@@ -57,6 +55,7 @@ class UserServiceImplTest {
 
     @BeforeEach
     void setUp() {
+        userSessionRepository = org.mockito.Mockito.mock(com.ueims.repository.UserSessionRepository.class);
         mailSent = false;
         MailService mailService = new MailService(null, null) {
             @Override

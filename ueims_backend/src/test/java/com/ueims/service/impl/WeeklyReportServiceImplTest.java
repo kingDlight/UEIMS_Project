@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -34,13 +33,11 @@ import com.ueims.model.entity.WeeklyReport;
 import com.ueims.repository.EligibleStudentRepository;
 import com.ueims.repository.EnterpriseAssignmentRepository;
 import com.ueims.repository.UserRepository;
-import com.ueims.repository.WeeklyReportRepository;
 
 @ExtendWith(MockitoExtension.class)
 class WeeklyReportServiceImplTest {
 
-    @Mock
-    private WeeklyReportRepository repository;
+    private com.ueims.repository.WeeklyReportRepository repository;
 
     @Mock
     private UserRepository userRepository;
@@ -51,7 +48,12 @@ class WeeklyReportServiceImplTest {
     @Mock
     private EnterpriseAssignmentRepository enterpriseAssignmentRepository;
 
-    @InjectMocks
+    @Mock
+    private com.ueims.service.NotificationService notificationService;
+
+    @Mock
+    private com.ueims.service.PlagiarismDetectionService plagiarismDetectionService;
+
     private WeeklyReportServiceImpl service;
 
     private User currentUser;
@@ -63,6 +65,14 @@ class WeeklyReportServiceImplTest {
 
     @BeforeEach
     void setUp() {
+        repository = org.mockito.Mockito.mock(com.ueims.repository.WeeklyReportRepository.class);
+        service = new WeeklyReportServiceImpl(
+                repository,
+                userRepository,
+                eligibleStudentRepository,
+                enterpriseAssignmentRepository,
+                notificationService,
+                plagiarismDetectionService);
         currentUser = new User();
         currentUser.setUserId(UUID.randomUUID());
         currentUser.setEmail("student@test.com");

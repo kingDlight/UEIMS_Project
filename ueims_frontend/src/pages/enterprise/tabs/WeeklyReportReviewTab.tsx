@@ -239,7 +239,7 @@ export const WeeklyReportReviewTab: React.FC = () => {
                     try {
                       const urls = JSON.parse(selected.attachmentUrls);
                       return Array.isArray(urls) ? urls.map((u, i) => (
-                        <a key={i} href={u} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-xs text-blue-500 hover:underline bg-blue-50 px-2 py-1 rounded border border-blue-100">
+                        <a key={u} href={u} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-xs text-blue-500 hover:underline bg-blue-50 px-2 py-1 rounded border border-blue-100">
                           <PaperClipOutlined /> Attachment {i + 1}
                         </a>
                       )) : (

@@ -56,7 +56,7 @@ class EnterpriseEvaluationServiceImplTest {
     void setUp() {
         enterprise = new Enterprise();
         enterprise.setEnterpriseId(UUID.randomUUID());
-        enterprise.setStatus("ACTIVE");
+        enterprise.setStatus("APPROVED");
 
         currentUser = new User();
         currentUser.setUserId(UUID.randomUUID());
@@ -87,6 +87,14 @@ class EnterpriseEvaluationServiceImplTest {
         evaluation.setProfessionalismScore(new BigDecimal("8.0"));
         evaluation.setSoftSkillsScore(new BigDecimal("8.0"));
         evaluation.setProgressScore(new BigDecimal("8.0"));
+
+        EligibleStudent eligible = new EligibleStudent();
+        eligible.setCurrentSemester(7);
+        eligible.setStatus("OJT");
+        lenient()
+                .when(eligibleStudentRepository.findByUser_UserIdAndSemester_SemesterId(
+                        studentUser.getUserId(), semester.getSemesterId()))
+                .thenReturn(Optional.of(eligible));
     }
 
     @AfterEach
@@ -254,7 +262,13 @@ class EnterpriseEvaluationServiceImplTest {
 
     @Test
     void save_studentNotOJT() {
-        studentUser.setStatus("FAILED");
+        EligibleStudent notOjt = new EligibleStudent();
+        notOjt.setCurrentSemester(7);
+        notOjt.setStatus("FAILED");
+        when(eligibleStudentRepository.findByUser_UserIdAndSemester_SemesterId(
+                        studentUser.getUserId(), semester.getSemesterId()))
+                .thenReturn(Optional.of(notOjt));
+
         when(assignmentRepository.findById(assignment.getAssignmentId())).thenReturn(Optional.of(assignment));
 
         AppException e = assertThrows(AppException.class, () -> service.save(evaluation));
@@ -268,7 +282,7 @@ class EnterpriseEvaluationServiceImplTest {
         otherEnterpriseUser.setUserId(UUID.randomUUID());
         Enterprise otherEnterprise = new Enterprise();
         otherEnterprise.setEnterpriseId(UUID.randomUUID());
-        otherEnterprise.setStatus("ACTIVE");
+        otherEnterprise.setStatus("APPROVED");
         otherEnterpriseUser.setEnterprise(otherEnterprise);
         otherEnterpriseUser.setRoles(java.util.Collections.emptySet());
 

@@ -1,16 +1,16 @@
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { Table, Modal, Form, Input, Select, Button, Popconfirm, App, Tooltip, Switch } from 'antd';
+import { Table, Modal, Form, Input, Select, Button, Popconfirm, App, Switch } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import {
-  Plus,
   Megaphone,
   Edit3,
   Eye,
   Globe,
   Send,
   XCircle,
-  BellRing,
   Trash2,
+  Plus,
+  BellRing,
 } from 'lucide-react';
 import dayjs from 'dayjs';
 import { SystemAnnouncementService } from '@/services/SystemAnnouncementService';
@@ -106,7 +106,6 @@ interface AudienceBadgeProps {
 }
 
 const AudienceBadge: React.FC<AudienceBadgeProps> = ({ audience, label }) => {
-  const { message } = App.useApp();
   const config: Record<Audience, { bg: string; border: string; color: string; icon: React.ReactNode }> = {
     All: {
       bg: cc.neutralMuted,
@@ -176,7 +175,6 @@ interface StatusBadgeProps {
 }
 
 const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
-  const { message } = App.useApp();
   const cfg = status === 'Published'
     ? { bg: cc.successMuted, border: '#A7F3D0', color: cc.successText, dot: cc.success, label: 'Published' }
     : { bg: cc.warningMuted, border: '#FDE68A', color: cc.warningText, dot: cc.warning, label: 'Draft' };
@@ -228,8 +226,8 @@ export const NoticesTab: React.FC = () => {
       const data: SystemAnnouncement[] = await SystemAnnouncementService.getAll();
       const semesterById = new Map(semesters.map((s) => [s.semesterId, s]));
       const mapped: NoticeRecord[] = data.map(n => {
-        let audience: Audience = 'All';
-        let audienceLabel = 'All Users';
+        let audience: Audience;
+        let audienceLabel: string;
 
         if (n.semesterId) {
           const sem = semesterById.get(n.semesterId);
@@ -280,7 +278,7 @@ export const NoticesTab: React.FC = () => {
       console.error(err);
       message.error('Failed to fetch announcements');
     }
-  }, [semesters]);
+  }, [semesters, message]);
 
   const fetchSemesters = useCallback(async () => {
     setSemestersLoading(true);
@@ -297,14 +295,16 @@ export const NoticesTab: React.FC = () => {
   }, [message]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void fetchSemesters();
     const check = () => setIsMobile(window.innerWidth < 768);
     check();
     window.addEventListener('resize', check);
     return () => window.removeEventListener('resize', check);
-  }, []);
+  }, [fetchSemesters]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void fetchNotices();
   }, [fetchNotices]);
 
@@ -362,20 +362,20 @@ export const NoticesTab: React.FC = () => {
       await SystemAnnouncementService.publish(record.id);
       message.success({ content: `"${record.title}" published successfully.`, duration: 2.5 });
       void fetchNotices();
-    } catch (err) {
+    } catch {
       message.error('Failed to publish announcement');
     }
-  }, [fetchNotices]);
+  }, [fetchNotices, message]);
 
   const handleUnpublish = useCallback(async (record: NoticeRecord) => {
     try {
       await SystemAnnouncementService.archive(record.id);
       message.success({ content: `"${record.title}" unpublished.`, duration: 2.5 });
       void fetchNotices();
-    } catch (err) {
+    } catch {
       message.error('Failed to unpublish announcement');
     }
-  }, [fetchNotices]);
+  }, [fetchNotices, message]);
 
   const handleDelete = useCallback(async (record: NoticeRecord) => {
     try {
@@ -386,7 +386,7 @@ export const NoticesTab: React.FC = () => {
       console.error(err);
       message.error('Failed to delete announcement');
     }
-  }, [fetchNotices]);
+  }, [fetchNotices, message]);
 
   const handleView = useCallback((record: NoticeRecord) => {
     setSelectedNotice(record);
@@ -451,7 +451,7 @@ export const NoticesTab: React.FC = () => {
     } finally {
       setPublishing(false);
     }
-  }, [form, fetchNotices, selectedNotice]);
+  }, [form, fetchNotices, selectedNotice, message]);
 
   const formatDate = (dateStr?: string) => {
     if (!dateStr) return '—';

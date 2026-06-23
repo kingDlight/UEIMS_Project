@@ -180,7 +180,7 @@ export const ScheduleTab: React.FC = () => {
         <>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {paginatedInterviews.map((interview, index) => (
-              <motion.div key={interview.interviewId || index} initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3, delay: index * 0.05 }}>
+              <motion.div key={interview.interviewId} initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3, delay: index * 0.05 }}>
                 <NeuSurface style={{ padding: 20 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div>

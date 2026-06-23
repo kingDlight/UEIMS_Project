@@ -1,15 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Spin, App } from 'antd';
+import { Spin } from 'antd';
 import {
   TeamOutlined,
   BankOutlined,
   AuditOutlined,
-  SafetyCertificateOutlined,
   WarningOutlined,
   CheckCircleOutlined,
   ClockCircleOutlined,
-  KeyOutlined,
   ThunderboltOutlined,
 } from '@ant-design/icons';
 import { AdminService } from '@/services/AdminService';
@@ -58,8 +56,28 @@ const Label: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   </span>
 );
 
+const AuditTrailTable: React.FC<{ logs: any[] }> = ({ logs }) => {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr 120px 160px', gap: 8, padding: '6px 8px', borderBottom: `1px solid ${c.borderSubtle}` }}>
+        <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', color: c.textMuted }}>User</span>
+        <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', color: c.textMuted }}>Action</span>
+        <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', color: c.textMuted }}>Entity</span>
+        <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', color: c.textMuted }}>Timestamp</span>
+      </div>
+      {logs.map((log, idx) => (
+        <div key={log.id ?? idx} style={{ display: 'grid', gridTemplateColumns: '140px 1fr 120px 160px', gap: 8, padding: '10px 8px', borderBottom: idx < logs.length - 1 ? `1px solid ${c.borderSubtle}` : 'none' }}>
+          <span style={{ fontSize: 12, fontWeight: 600, color: c.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{log.userEmail || 'System'}</span>
+          <span style={{ fontSize: 12, color: c.textSecondary, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{log.action}</span>
+          <span style={{ fontSize: 12, color: c.textMuted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{log.entityType}</span>
+          <span style={{ fontSize: 11, color: c.textMuted }}>{new Date(log.timestamp).toLocaleString()}</span>
+        </div>
+      ))}
+    </div>
+  );
+};
+
 export const AdminDashboardTab: React.FC = () => {
-  const { message } = App.useApp();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<any>(null);
   const [recentLogs, setRecentLogs] = useState<any[]>([]);
@@ -281,22 +299,7 @@ export const AdminDashboardTab: React.FC = () => {
             {recentLogs.length === 0 ? (
               <div style={{ textAlign: 'center', padding: 24, color: c.textMuted, fontSize: 13 }}>No audit entries yet</div>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr 120px 160px', gap: 8, padding: '6px 8px', borderBottom: `1px solid ${c.borderSubtle}` }}>
-                  <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', color: c.textMuted }}>User</span>
-                  <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', color: c.textMuted }}>Action</span>
-                  <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', color: c.textMuted }}>Entity</span>
-                  <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', color: c.textMuted }}>Timestamp</span>
-                </div>
-                {recentLogs.map((log, idx) => (
-                  <div key={log.id ?? idx} style={{ display: 'grid', gridTemplateColumns: '140px 1fr 120px 160px', gap: 8, padding: '10px 8px', borderBottom: idx < recentLogs.length - 1 ? `1px solid ${c.borderSubtle}` : 'none' }}>
-                    <span style={{ fontSize: 12, fontWeight: 600, color: c.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{log.userEmail || 'System'}</span>
-                    <span style={{ fontSize: 12, color: c.textSecondary, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{log.action}</span>
-                    <span style={{ fontSize: 12, color: c.textMuted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{log.entityType}</span>
-                    <span style={{ fontSize: 11, color: c.textMuted }}>{new Date(log.timestamp).toLocaleString()}</span>
-                  </div>
-                ))}
-              </div>
+              <AuditTrailTable logs={recentLogs} />
             )}
           </Card>
 
