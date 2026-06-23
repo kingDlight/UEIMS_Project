@@ -246,6 +246,9 @@ CREATE TABLE eligible_students (
     approved_at     TIMESTAMP,
     cancelled_reason TEXT,
     cancelled_by    UUID REFERENCES users(user_id),
+    deferred_reason TEXT,                                             -- TM ghi chú khi SV chưa được placement (sự cố, chờ kì sau...)
+    deferred_by     UUID REFERENCES users(user_id),                 -- Ai ghi chú
+    deferred_at     TIMESTAMP,                                        -- Khi nào ghi chú
     created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -254,7 +257,7 @@ CREATE TABLE eligible_students (
     -- BR-23: Cancelled must have reason + who cancelled
     CONSTRAINT chk_cancel_audit CHECK (
         status != 'CANCELLED' OR (cancelled_reason IS NOT NULL AND cancelled_by IS NOT NULL)
-    )
+    ),
 );
 
 CREATE INDEX idx_eligible_semester ON eligible_students(semester_id);

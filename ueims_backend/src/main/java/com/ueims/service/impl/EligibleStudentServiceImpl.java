@@ -318,4 +318,33 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
 
         return repository.save(student);
     }
+
+    @Override
+    @org.springframework.transaction.annotation.Transactional
+    public EligibleStudent deferStudent(UUID eligibleId, String reason) {
+        EligibleStudent student = repository.findById(eligibleId)
+                .orElseThrow(() -> new AppException(ErrorCode.ELIGIBLE_STUDENT_NOT_FOUND));
+
+        if (reason == null || reason.isBlank()) {
+            throw new AppException(ErrorCode.CANCEL_REASON_REQUIRED);
+        }
+
+        org.springframework.security.core.Authentication authentication =
+                org.springframework.security.core.context.SecurityContextHolder.getContext()
+                        .getAuthentication();
+        if (authentication == null
+                || authentication.getName() == null
+                || "anonymousUser".equals(authentication.getName())) {
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
+        com.ueims.model.entity.User actor = userRepository
+                .findByEmail(authentication.getName())
+                .orElseThrow(() -> new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION));
+
+        student.setDeferredReason(reason);
+        student.setDeferredBy(actor);
+        student.setDeferredAt(LocalDateTime.now());
+
+        return repository.save(student);
+    }
 }

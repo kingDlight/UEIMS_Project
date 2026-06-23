@@ -13,10 +13,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ueims.dto.request.DeferStudentRequest;
 import com.ueims.dto.request.ManualMatchRequest;
 import com.ueims.dto.response.AutoMatchResultDTO;
 import com.ueims.dto.response.OjtPlacementViewDTO;
 import com.ueims.dto.response.PlacementApplicationResponseDTO;
+import com.ueims.model.entity.EligibleStudent;
+import com.ueims.service.EligibleStudentService;
 import com.ueims.service.PlacementApplicationService;
 import com.ueims.service.UserService;
 
@@ -40,6 +43,7 @@ import lombok.experimental.FieldDefaults;
 public class OjtPlacementController {
 
     PlacementApplicationService service;
+    EligibleStudentService eligibleStudentService;
     UserService userService;
 
     @GetMapping("/view")
@@ -60,5 +64,12 @@ public class OjtPlacementController {
     public ResponseEntity<AutoMatchResultDTO> autoMatch() {
         UUID tmId = userService.getCurrentUserId();
         return ResponseEntity.ok(service.autoMatch(tmId));
+    }
+
+    @PostMapping("/defer")
+    @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN')")
+    public ResponseEntity<EligibleStudent> deferStudent(@RequestBody @Valid DeferStudentRequest request) {
+        UUID eligibleId = UUID.fromString(request.eligibleId());
+        return ResponseEntity.ok(eligibleStudentService.deferStudent(eligibleId, request.reason()));
     }
 }

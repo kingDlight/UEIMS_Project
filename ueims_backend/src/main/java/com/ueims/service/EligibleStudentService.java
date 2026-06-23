@@ -28,4 +28,7 @@ public interface EligibleStudentService {
     byte[] exportOjtStudentsToExcel(UUID semesterId);
 
     EligibleStudent cancelOjtResult(UUID id, String reason);
+
+    /** TM ghi chú deferred reason cho SV chưa được placement — lưu lại sự cố để kì sau xử lý. */
+    EligibleStudent deferStudent(UUID eligibleId, String reason);
 }
