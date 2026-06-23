@@ -159,6 +159,7 @@ public class OjtStatusServiceImpl implements OjtStatusService {
 
                 // AT_RISK: có assignment nhưng miss nhiều báo cáo
                 if (missedReports > 0 || rejectedReports >= 2) {
+                    debugLog("AT_RISK: enterpriseName='" + enterpriseName + "', missedReports=" + missedReports + ", rejectedReports=" + rejectedReports);
                     String reason = String.format(
                             "Bạn đã miss %d báo cáo tuần và/hoặc có %d báo cáo bị từ chối.",
                             missedReports, rejectedReports);
