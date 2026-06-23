@@ -200,9 +200,9 @@ public class ApplicationServiceImpl implements ApplicationService {
         if (cvUrl == null || cvUrl.trim().isEmpty()) {
             var studentProfile = studentProfileRepository.findByUser_UserId(student.getUserId());
             if (studentProfile != null
-                    && studentProfile.getCvUrl() != null
-                    && !studentProfile.getCvUrl().isEmpty()) {
-                cvUrl = studentProfile.getCvUrl();
+                    && studentProfile.getCvFileUrl() != null
+                    && !studentProfile.getCvFileUrl().isEmpty()) {
+                cvUrl = studentProfile.getCvFileUrl();
             } else {
                 throw new AppException(ErrorCode.CV_NOT_UPLOADED);
             }

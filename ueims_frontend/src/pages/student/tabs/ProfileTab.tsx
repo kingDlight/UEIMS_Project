@@ -79,7 +79,7 @@ interface MyProfile {
   studentCode?: string;
   major?: string;
   skills?: string;
-  cvUrl?: string;
+  cvFileUrl?: string;
   cvFileName?: string;
   linkedinUrl?: string;
   githubUrl?: string;
@@ -480,7 +480,7 @@ const EditProfileModal: React.FC<{
 };
 
 // ── CV View ───────────────────────────────────────────────────────────────────
-const CvView: React.FC<{ cvUrl?: string; cvFileName?: string; onRefresh: () => void }> = ({ cvUrl, cvFileName, onRefresh }) => {
+const CvView: React.FC<{ cvFileUrl?: string; cvFileName?: string; onRefresh: () => void }> = ({ cvFileUrl, cvFileName, onRefresh }) => {
   const { t } = useTranslation(['profile']);
   const [uploading, setUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
@@ -536,9 +536,9 @@ const CvView: React.FC<{ cvUrl?: string; cvFileName?: string; onRefresh: () => v
     }
   };
 
-  const displayName = cvFileName || (cvUrl ? cvUrl.split('_').slice(2).join('_').replace('/uploads/cv/', '') : t('cvDocument', 'CV Document'));
+  const displayName = cvFileName || (cvFileUrl ? cvFileUrl.split('_').slice(2).join('_').replace('/uploads/cv/', '') : t('cvDocument', 'CV Document'));
 
-  if (!cvUrl && !showUpload) {
+  if (!cvFileUrl && !showUpload) {
     return (
       <NeuSurface style={{ padding: 24 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
@@ -602,7 +602,7 @@ const CvView: React.FC<{ cvUrl?: string; cvFileName?: string; onRefresh: () => v
       </div>
 
       {/* Current CV card */}
-      {cvUrl && !showUpload && (
+      {cvFileUrl && !showUpload && (
         <div style={{ background: cc.surface, border: `1px solid ${cc.border}`, borderRadius: cc.radiusLg, padding: 20, display: 'flex', alignItems: 'center', gap: 16 }}>
           <div style={{ width: 48, height: 48, borderRadius: cc.radiusMd, background: cc.primaryMuted, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.primary, flexShrink: 0 }}>
             <FileTextOutlined style={{ fontSize: 22 }} />
@@ -612,7 +612,7 @@ const CvView: React.FC<{ cvUrl?: string; cvFileName?: string; onRefresh: () => v
             <p style={{ fontSize: 12, color: cc.textMuted, margin: '3px 0 0' }}>{t('uploadedCv', 'Uploaded CV')}</p>
           </div>
           <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-            <CTAButton variant="ghost" size="sm" icon={<EyeOutlined />} onClick={() => window.open(resolveFileUrl(cvUrl), '_blank')}>{t('view', 'View')}</CTAButton>
+            <CTAButton variant="ghost" size="sm" icon={<EyeOutlined />} onClick={() => window.open(resolveFileUrl(cvFileUrl), '_blank')}>{t('view', 'View')}</CTAButton>
             <CTAButton variant="danger" size="sm" icon={<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>} onClick={handleDelete} loading={uploading}>{t('delete', 'Delete')}</CTAButton>
           </div>
         </div>
@@ -669,7 +669,7 @@ const CvView: React.FC<{ cvUrl?: string; cvFileName?: string; onRefresh: () => v
         </div>
       )}
 
-      {cvUrl && !showUpload && (
+      {cvFileUrl && !showUpload && (
         <p style={{ fontSize: 11, color: cc.textMuted, marginTop: 12, textAlign: 'center' }}>
           To replace your CV, click the <strong>{t('upload', 'Upload')}</strong> button above.
         </p>
@@ -711,7 +711,7 @@ export const ProfileTab: React.FC = () => {
         <ProfileInfoView profile={profile} onEdit={() => setEditOpen(true)} />
       ) : (
         <CvView
-          cvUrl={profile.cvUrl}
+          cvFileUrl={profile.cvFileUrl}
           cvFileName={profile.cvFileName}
           onRefresh={handleRefresh}
         />

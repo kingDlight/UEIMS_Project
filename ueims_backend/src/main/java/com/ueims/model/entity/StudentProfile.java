@@ -2,9 +2,10 @@ package com.ueims.model.entity;
 
 import jakarta.persistence.*;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.*;
 
@@ -33,8 +34,8 @@ public class StudentProfile extends BaseEntity {
     @Column(name = "major", nullable = false, length = 255)
     private String major;
 
-    @Column(name = "cv_url", length = 500)
-    private String cvUrl;
+    @Column(name = "cv_file_url", length = 500)
+    private String cvFileUrl;
 
     @Column(name = "cv_file_name", length = 255)
     private String cvFileName;

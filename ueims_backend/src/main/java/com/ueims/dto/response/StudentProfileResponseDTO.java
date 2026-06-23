@@ -16,7 +16,7 @@ public class StudentProfileResponseDTO {
     private UUID profileId;
     private String studentCode;
     private String major;
-    private String cvUrl;
+    private String cvFileUrl;
     private String cvFileName;
     private String skills;
     private String linkedinUrl;

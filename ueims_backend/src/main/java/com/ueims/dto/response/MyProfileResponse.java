@@ -26,7 +26,7 @@ public class MyProfileResponse {
     private String studentCode;
     private String major;
     private String skills;
-    private String cvUrl;
+    private String cvFileUrl;
     private String cvFileName;
     private String linkedinUrl;
     private String githubUrl;
