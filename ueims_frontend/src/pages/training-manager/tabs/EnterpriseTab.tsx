@@ -310,7 +310,7 @@ const ApprovalRow: React.FC<{
   );
 };
 
-const AllEnterprisesTable: React.FC<{ data: Enterprise[] }> = ({ data }) => {
+const AllEnterprisesTable: React.FC<{ data: Enterprise[], onReapprove?: (id: string) => void }> = ({ data, onReapprove }) => {
   const { message } = App.useApp();
   const columns: ColumnsType<Enterprise> = [
     {
@@ -356,7 +356,8 @@ const AllEnterprisesTable: React.FC<{ data: Enterprise[] }> = ({ data }) => {
       key: 'status',
       render: (status: string) => {
         const approved = status === 'APPROVED';
-        const color = approved ? cc.success : cc.warning;
+        const rejected = status === 'REJECTED';
+        const color = approved ? cc.success : rejected ? cc.error : cc.warning;
         return (
           <span style={{
             display: 'inline-flex', alignItems: 'center', padding: '3px 9px', borderRadius: 6,
@@ -364,9 +365,23 @@ const AllEnterprisesTable: React.FC<{ data: Enterprise[] }> = ({ data }) => {
             border: `1px solid ${hexToRgba(color, 0.25)}`,
             color, fontSize: 11, fontWeight: 600,
           }}>
-            {approved ? 'Approved' : 'Pending'}
+            {approved ? 'Approved' : rejected ? 'Rejected' : 'Pending'}
           </span>
         );
+      },
+    },
+    {
+      title: 'Action',
+      key: 'action',
+      render: (_: unknown, record: Enterprise) => {
+        if (record.status === 'REJECTED' && onReapprove) {
+          return (
+            <Button size="small" type="primary" style={{ background: cc.success, borderColor: cc.success }} onClick={() => onReapprove(record.enterpriseId)}>
+              Re-approve
+            </Button>
+          );
+        }
+        return null;
       },
     },
   ];
@@ -574,7 +589,7 @@ export const EnterpriseTab: React.FC = () => {
              
              
              className="scroll-animate">
-              <AllEnterprisesTable data={enterprises.filter((e) => e.status === 'APPROVED')} />
+              <AllEnterprisesTable data={enterprises.filter((e) => e.status !== 'PENDING')} onReapprove={handleApprove} />
             </div>
           )}
         
