@@ -500,7 +500,7 @@ public class PlacementApplicationServiceImpl implements PlacementApplicationServ
                 score += eligible.getGpa().doubleValue() / 10.0 * SCORE_GPA_MAX;
 
                 // Tie-breaker
-                score += Math.random() * SCORE_RANDOM_MAX;
+                score += new java.security.SecureRandom().nextDouble() * SCORE_RANDOM_MAX;
 
                 if (score > bestScore) {
                     bestScore = score;

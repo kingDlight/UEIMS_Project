@@ -221,7 +221,7 @@ public class OjtStatusServiceImpl implements OjtStatusService {
                     OjtStatus.ELIGIBLE_NO_PLACEMENT, true, riskReason, activeSemester, 0, 0, 0, null);
         } catch (Exception e) {
             debugLog("EXCEPTION: " + e.getClass().getName() + " - " + e.getMessage());
-            e.printStackTrace();
+            log.error("Exception getting OJT status", e);
             return buildDefaultResponse();
         }
     }
