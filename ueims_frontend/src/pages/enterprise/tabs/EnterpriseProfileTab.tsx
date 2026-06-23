@@ -42,7 +42,7 @@ interface EnterpriseProfile {
   updatedAt?: string;
 }
 
-const MAX_LOGO_DATA_URL_LENGTH = 500; // matches enterprises.logo_url length
+
 
 // ============================================================
 // HELPERS
