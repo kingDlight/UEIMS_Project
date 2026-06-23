@@ -86,6 +86,9 @@ export const StudentDashboard: React.FC = () => {
 
   // Use the profile's currentSemester as source of truth — never default to 5
   const currentSemester = profile?.currentSemester;
+  // #region DEBUG currentSemester trace
+  fetch('http://127.0.0.1:7689/ingest/85060117-28a9-450a-b776-759dca15ff5a',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'192559'},body:JSON.stringify({sessionId:'192559',location:'StudentDashboard.tsx:currentSemester',message:'currentSemester value',data:{profile:profile?.currentSemester,raw:currentSemester,hasPlacement:hasActivePlacement},timestamp:Date.now()})}).catch(()=>{});
+  // #endregion
 
   const getFilteredNavItems = (sem: number | undefined | null, hasPlacement: boolean) => {
     if (sem == null) return studentNavItems;

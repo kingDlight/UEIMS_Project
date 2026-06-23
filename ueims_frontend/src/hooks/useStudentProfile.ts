@@ -28,6 +28,9 @@ export const useStudentProfileQuery = () => {
     queryKey: ['studentProfile'],
     queryFn: async () => {
       const res = await StudentProfileService.getMyProfile();
+      // #region DEBUG currentSemester trace
+      fetch('http://127.0.0.1:7689/ingest/85060117-28a9-450a-b776-759dca15ff5a',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'192559'},body:JSON.stringify({sessionId:'192559',location:'useStudentProfile.ts:getMyProfile',message:'API raw response',data:{raw:res?.data},timestamp:Date.now()})}).catch(()=>{});
+      // #endregion
       return res?.data?.result ?? res?.data;
     },
     enabled: !!token,
