@@ -9,7 +9,7 @@ import { Page } from '@playwright/test';
 
 export const ENTERPRISE_USER = {
   email: process.env.E2E_ENTERPRISE_EMAIL ?? 'hr@fsoft.com',
-  password: process.env.E2E_ENTERPRISE_PASSWORD ?? 'Password@123',
+  password: process.env.E2E_ENTERPRISE_PASSWORD ?? '',
 };
 
 export async function loginAsEnterprise(page: Page, email = ENTERPRISE_USER.email, password = ENTERPRISE_USER.password) {

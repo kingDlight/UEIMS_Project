@@ -175,7 +175,7 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({
           label="Website"
           rules={[
             {
-              pattern: /^$|^(https?:\/\/)?[\w.-]+\.[a-zA-Z]{2,}.*$/,
+              pattern: /^$|^(https?:\/\/)?([\w.-]+)\.([a-zA-Z]{2,})(\/\S*)?$/,
               message: 'Website must be a valid URL (e.g. https://example.com)',
             },
           ]}
