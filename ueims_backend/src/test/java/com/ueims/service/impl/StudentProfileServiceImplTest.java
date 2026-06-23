@@ -243,8 +243,8 @@ class StudentProfileServiceImplTest {
         doNothing().when(mockFile).transferTo(any(java.io.File.class));
 
         StudentProfile updated = service.uploadCv(profileId, mockFile);
-        assertNotNull(updated.getCvUrl());
-        assertTrue(updated.getCvUrl().contains(".pdf"));
+        assertNotNull(updated.getCvFileUrl());
+        assertTrue(updated.getCvFileUrl().contains(".pdf"));
     }
 
     @Test
