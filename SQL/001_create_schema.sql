@@ -440,6 +440,7 @@ CREATE TABLE enterprises (
     created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at      TIMESTAMP,
+    website         VARCHAR(255),
 
     -- BR-15: Rejection reason is mandatory when status = REJECTED
     CONSTRAINT chk_enterprise_rejection_reason CHECK (
@@ -492,7 +493,8 @@ CREATE TABLE job_posts (
                     CHECK (status IN ('OPEN', 'CLOSED')),            -- BR-30
     created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deleted_at      TIMESTAMP
+    deleted_at      TIMESTAMP,
+    created_by      UUID REFERENCES users(user_id)
 );
 
 CREATE INDEX idx_jobposts_enterprise ON job_posts(enterprise_id);
