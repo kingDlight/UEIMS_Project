@@ -152,7 +152,7 @@ export const InternshipPlanTab: React.FC = () => {
     try {
       // 1. Save the plan shell
       const planPayload: any = {
-        assignment: { assignmentId: selectedAssignment.assignmentId },
+        assignmentId: selectedAssignment.assignmentId,
         overallGoal: plan.overallGoal ?? '',
       };
       if (plan.planId) planPayload.planId = plan.planId;
@@ -168,7 +168,7 @@ export const InternshipPlanTab: React.FC = () => {
       for (let i = 0; i < plan.items.length; i++) {
         const it = plan.items[i];
         await InternshipPlanItemService.create({
-          plan: { planId: newPlanId },
+          planId: newPlanId,
           planItemId: it.planItemId,
           weekNumber: it.weekNumber,
           taskDescription: it.taskDescription,
@@ -244,7 +244,7 @@ export const InternshipPlanTab: React.FC = () => {
   }
 
   return (
-    <div className="font-sans grid grid-cols-[280px_1fr] gap-4 px-6 pb-10">
+    <div className="font-sans grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-4 lg:gap-6 px-4 sm:px-6 pb-10">
       <aside className="bg-white border border-slate-200 rounded-2xl p-3 h-fit">
         <div className="text-[12px] font-bold text-slate-500 uppercase tracking-wider px-2 pt-1 pb-2">My Students</div>
         {assignments.length === 0 ? (

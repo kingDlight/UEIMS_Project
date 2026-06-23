@@ -260,19 +260,19 @@ export const JobPostManagementTab: React.FC = () => {
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="flex items-center justify-between mb-5"
+          className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0 mb-5"
         >
           <div>
             <h2 className="text-xl font-extrabold text-slate-900 m-0 mb-1">Recruitment Posts</h2>
             <p className="text-[13px] text-slate-500 m-0">Manage your job postings — create, edit, and toggle visibility</p>
           </div>
-          <div className="flex gap-2">
-            <Button icon={<ReloadOutlined />} onClick={fetchPosts} className="rounded-xl">Refresh</Button>
+          <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+            <Button icon={<ReloadOutlined />} onClick={fetchPosts} className="rounded-xl flex-1 sm:flex-none">Refresh</Button>
             <motion.button
               whileHover={{ y: -1 }}
               whileTap={{ scale: 0.98 }}
               onClick={openCreate}
-              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#E67E22] text-white font-bold text-[13px] border-none cursor-pointer shadow-[0_8px_22px_rgba(230,126,34,0.22)] font-sans"
+              className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-[#E67E22] text-white font-bold text-[13px] border-none cursor-pointer shadow-[0_8px_22px_rgba(230,126,34,0.22)] font-sans flex-1 sm:flex-none"
             >
               <PlusOutlined /> Create New Post
             </motion.button>
@@ -281,7 +281,7 @@ export const JobPostManagementTab: React.FC = () => {
 
         {/* SEARCH + STATUS FILTER */}
         {posts.length > 0 && (
-          <div className="flex gap-3 mb-5 items-center bg-white p-3 rounded-xl border border-slate-200">
+          <div className="flex flex-col sm:flex-row gap-3 mb-5 items-stretch sm:items-center bg-white p-3 rounded-xl border border-slate-200">
             <Input
               placeholder="Search by title or description..."
               value={searchTerm}

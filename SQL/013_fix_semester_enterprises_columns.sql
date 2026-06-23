@@ -42,9 +42,24 @@ BEGIN
             SELECT 1 FROM information_schema.columns
             WHERE table_schema = 'public' AND table_name = 'semester_enterprises'
               AND column_name = 'registration_status'
+        ) AND NOT EXISTS (
+            SELECT 1 FROM information_schema.columns
+            WHERE table_schema = 'public' AND table_name = 'semester_enterprises'
+              AND column_name = 'status'
         ) THEN
             ALTER TABLE semester_enterprises RENAME COLUMN registration_status TO status;
             RAISE NOTICE 'Renamed registration_status to status';
+        ELSIF EXISTS (
+            SELECT 1 FROM information_schema.columns
+            WHERE table_schema = 'public' AND table_name = 'semester_enterprises'
+              AND column_name = 'registration_status'
+        ) AND EXISTS (
+            SELECT 1 FROM information_schema.columns
+            WHERE table_schema = 'public' AND table_name = 'semester_enterprises'
+              AND column_name = 'status'
+        ) THEN
+            ALTER TABLE semester_enterprises DROP COLUMN registration_status;
+            RAISE NOTICE 'Dropped redundant registration_status column because status already exists';
         END IF;
 
         -- 3. Add updated_at if missing (BaseEntity requirement)
