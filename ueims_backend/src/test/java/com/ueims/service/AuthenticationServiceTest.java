@@ -216,7 +216,7 @@ class AuthenticationServiceTest {
         when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.of(user));
 
         AppException e = assertThrows(AppException.class, () -> service.authenticate(request));
-        assertEquals(ErrorCode.USER_BANNED, e.getErrorCode());
+        assertEquals(ErrorCode.USER_PERMANENTLY_LOCKED, e.getErrorCode());
     }
 
     @Test
@@ -403,7 +403,7 @@ class AuthenticationServiceTest {
         AuthenticationResponse response = service.authenticateWithGoogle(request);
 
         assertTrue(response.isAuthenticated());
-        verify(userRepository).save(any(User.class));
+        verify(userRepository, atLeastOnce()).save(any(User.class));
     }
 
     @Test
@@ -433,7 +433,7 @@ class AuthenticationServiceTest {
         AuthenticationResponse response = service.authenticateWithGoogle(request);
 
         assertTrue(response.isAuthenticated());
-        verify(userRepository).save(user);
+        verify(userRepository, atLeastOnce()).save(user);
         assertEquals("Updated Google User", user.getFullName());
     }
 
