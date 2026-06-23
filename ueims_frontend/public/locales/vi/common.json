@@ -368,6 +368,8 @@
       "notQualifiedDesc": "GPA dưới mức quy định — chưa đủ điều kiện OJT",
       "preRegistration": "Chưa tới kỳ OJT",
       "preRegistrationDesc": "Chưa thể đăng ký OJT — học kỳ dưới mức yêu cầu",
+      "notEligible": "KHÔNG ĐỦ ĐK",
+      "notEligibleDesc": "Sinh viên đã bị đánh dấu thủ công là không đủ điều kiện đi OJT.",
       "eligible": "Đủ điều kiện",
       "eligibleDesc": "Đạt mọi tiêu chí OJT — sẵn sàng đăng ký thực tập",
       "inOjt": "Đang OJT",
