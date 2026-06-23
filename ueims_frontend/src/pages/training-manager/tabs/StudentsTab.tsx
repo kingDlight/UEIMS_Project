@@ -10,6 +10,7 @@ import {
   Edit3,
   Users,
   UserCheck,
+  UserX,
   X,
   AlertCircle,
 } from 'lucide-react';
@@ -127,6 +128,7 @@ const Avatar: React.FC<{ initials: string }> = ({ initials }) => {
 // ============================================================
 type OJT_STATUS_KEY =
   | 'ELIGIBLE'
+  | 'NOT_ELIGIBLE'
   | 'PENDING'
   | 'ACCEPTED'
   | 'MATCHED'
@@ -138,6 +140,7 @@ type OJT_STATUS_KEY =
 
 const OJT_STATUS_VALUES: OJT_STATUS_KEY[] = [
   'ELIGIBLE',
+  'NOT_ELIGIBLE',
   'PENDING',
   'ACCEPTED',
   'MATCHED',
@@ -165,6 +168,9 @@ const OJT_STATUS: Record<string, OJTStatusConfig> = {
   },
   ELIGIBLE: {
     color: st.info,     bg: hexToRgba(st.info,     0.06), borderColor: hexToRgba(st.info,     0.25), semRange: 'Sem. 5', key: 'eligible', descKey: 'eligibleDesc',
+  },
+  NOT_ELIGIBLE: {
+    color: st.error,    bg: hexToRgba(st.error,    0.06), borderColor: hexToRgba(st.error,    0.25), semRange: '',       key: 'notEligible', descKey: 'notEligibleDesc',
   },
   PENDING: {
     color: st.warning,  bg: hexToRgba(st.warning,  0.06), borderColor: hexToRgba(st.warning,  0.25), semRange: '',          key: 'pending',    descKey: 'pendingDesc',
@@ -482,6 +488,7 @@ const StudentDetailModal: React.FC<{
 // ============================================================
 const ALL_STATUS_OPTIONS: { value: OJT_STATUS_KEY; label: string }[] = [
   { value: 'ELIGIBLE',  label: 'Eligible' },
+  { value: 'NOT_ELIGIBLE', label: 'Not Eligible' },
   { value: 'PENDING',   label: 'Pending' },
   { value: 'ACCEPTED',  label: 'Accepted' },
   { value: 'MATCHED',   label: 'Matched' },
@@ -859,6 +866,30 @@ export const StudentsTab: React.FC = () => {
     setDetailModalOpen(false);
     setEditModalOpen(true);
   };
+  const handleToggleEligibility = async (s: EligibleStudent) => {
+    if (s.status !== 'ELIGIBLE' && s.status !== 'NOT_ELIGIBLE') {
+      message.error({ content: 'Cannot toggle eligibility for this status', key: 'toggle' });
+      return;
+    }
+    const newStatus = s.status === 'ELIGIBLE' ? 'NOT_ELIGIBLE' : 'ELIGIBLE';
+    try {
+      const payload = {
+        studentCode: s.studentCode,
+        fullName: s.fullName,
+        email: s.email || undefined,
+        major: s.major,
+        gpa: Number(s.gpa),
+        currentSemester: Number(s.currentSemester),
+        status: newStatus,
+      };
+      const updated = await EligibleStudentService.updateEligibleStudent(s.eligibleId, payload);
+      setStudents((prev) => prev.map((item) => (item.eligibleId === updated.eligibleId ? updated : item)));
+      message.success({ content: `Updated ${updated.fullName} to ${newStatus}`, key: 'toggle' });
+    } catch (err) {
+      console.error('Failed to toggle eligibility', err);
+      message.error({ content: 'Failed to toggle eligibility', key: 'toggle' });
+    }
+  };
   const handleEditSaved = useCallback((updated: EligibleStudent) => {
     setStudents((prev) => prev.map((s) => (s.eligibleId === updated.eligibleId ? updated : s)));
     void refetchStudents();
@@ -990,10 +1021,30 @@ export const StudentsTab: React.FC = () => {
     {
       title: '',
       key: 'actions',
-      width: 90,
+      width: 130,
       align: 'right',
       render: (_: unknown, r: EligibleStudent) => (
         <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
+          {(r.status === 'ELIGIBLE' || r.status === 'NOT_ELIGIBLE') && (
+            <button
+              onClick={() => handleToggleEligibility(r)}
+              title={r.status === 'ELIGIBLE' ? 'Mark as Not Eligible' : 'Mark as Eligible'}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: 28,
+                height: 28,
+                borderRadius: st.radiusMd,
+                background: r.status === 'ELIGIBLE' ? st.errorMuted : st.successMuted,
+                border: 'none',
+                cursor: 'pointer',
+                color: r.status === 'ELIGIBLE' ? st.error : st.success,
+              }}
+            >
+              {r.status === 'ELIGIBLE' ? <UserX size={14} /> : <UserCheck size={14} />}
+            </button>
+          )}
           <button
             onClick={() => openDetail(r)}
             title={t('studentsTab.viewDetails')}
