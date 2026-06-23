@@ -17,6 +17,7 @@ import {
   Briefcase,
   Star,
   Mail,
+  Upload,
 } from 'lucide-react';
 import { Spin } from 'antd';
 import { StudentDashboardService, type StudentDashboardStats } from '@/services/StudentDashboardService';
