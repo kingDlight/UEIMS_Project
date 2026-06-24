@@ -564,6 +564,7 @@ const EditStudentModal: React.FC<{
         status: (student.status as OJT_STATUS_KEY) ?? 'ELIGIBLE',
         cancelledReason: student.cancelledReason ?? '',
       });
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setChosenStatus((student.status as OJT_STATUS_KEY) ?? 'ELIGIBLE');
     }
   }, [open, student, form]);
@@ -800,7 +801,10 @@ export const StudentsTab: React.FC = () => {
   const [importing, setImporting] = useState(false);
   const [page, setPage] = useState(1);
   const pageSize = 10;
-  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Fetch from real database via API
+  const [students, setStudents] = useState<EligibleStudent[]>([]);
+  const [loading, setLoading] = useState(false);
 
   // Refetch helper (used after edit)
   const refetchStudents = useCallback(async () => {
@@ -815,10 +819,6 @@ export const StudentsTab: React.FC = () => {
       setLoading(false);
     }
   }, []);
-
-  // Fetch from real database via API
-  const [students, setStudents] = useState<EligibleStudent[]>([]);
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     void refetchStudents();

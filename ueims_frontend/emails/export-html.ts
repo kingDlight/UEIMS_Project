@@ -76,14 +76,14 @@ async function main() {
 
   await Promise.all(jobs.map((j) => fs.writeFile(path.join(outDir, j.name), j.html, { encoding: 'utf8' })));
 
-  // eslint-disable-next-line no-console
+   
   console.log(`Wrote ${jobs.length} template(s) to: ${outDir}`);
 }
 
 try {
   await main();
 } catch (err) {
-  // eslint-disable-next-line no-console
+   
   console.error(err);
   process.exit(1);
 }
