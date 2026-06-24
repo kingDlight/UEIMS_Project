@@ -159,6 +159,8 @@ public class OjtStatusServiceImpl implements OjtStatusService {
 
                 // AT_RISK: có assignment nhưng miss nhiều báo cáo
                 if (missedReports > 0 || rejectedReports >= 2) {
+                    debugLog("AT_RISK: enterpriseName='" + enterpriseName + "', missedReports=" + missedReports
+                            + ", rejectedReports=" + rejectedReports);
                     String reason = String.format(
                             "Bạn đã miss %d báo cáo tuần và/hoặc có %d báo cáo bị từ chối.",
                             missedReports, rejectedReports);
@@ -221,7 +223,7 @@ public class OjtStatusServiceImpl implements OjtStatusService {
                     OjtStatus.ELIGIBLE_NO_PLACEMENT, true, riskReason, activeSemester, 0, 0, 0, null);
         } catch (Exception e) {
             debugLog("EXCEPTION: " + e.getClass().getName() + " - " + e.getMessage());
-            log.error("Exception getting OJT status", e);
+            e.printStackTrace();
             return buildDefaultResponse();
         }
     }

@@ -87,7 +87,7 @@ public class StudentEnterpriseFeedbackServiceImpl implements StudentEnterpriseFe
             return result;
         } catch (Exception e) {
             debugLog("findMyFeedbacks EXCEPTION: " + e.getClass().getName() + " - " + e.getMessage());
-            // Stack trace removed for security
+            e.printStackTrace();
             throw e;
         }
     }

@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import {
   ArrowRight,
+  Upload,
   FileText,
   Calendar,
   CheckCircle2,
@@ -16,7 +17,6 @@ import {
   Briefcase,
   Star,
   Mail,
-  Upload,
 } from 'lucide-react';
 import { Spin } from 'antd';
 import { StudentDashboardService, type StudentDashboardStats } from '@/services/StudentDashboardService';
@@ -380,9 +380,9 @@ const NoPlacementAlert: React.FC<{
   const handleContactSupport = () => {
     if (contactEmail) {
       const subject = encodeURIComponent('[UEIMS] Yêu cầu hỗ trợ OJT');
-      globalThis.location.href = `mailto:${contactEmail}?subject=${subject}`;
+      window.location.href = `mailto:${contactEmail}?subject=${subject}`;
     } else {
-      globalThis.location.href = 'mailto:training-office@ueims.edu.vn?subject=[UEIMS] Yêu cầu hỗ trợ OJT';
+      window.location.href = 'mailto:training-office@ueims.edu.vn?subject=[UEIMS] Yêu cầu hỗ trợ OJT';
     }
   };
 
@@ -411,7 +411,7 @@ const NoPlacementAlert: React.FC<{
                   : t('noActivePlacementMessage', 'You are not currently assigned to any internship. Please visit the Job Board to apply.')
               )}
             </div>
-            {typeof daysUntilDeadline === 'number' && daysUntilDeadline <= 30 && (
+            {daysUntilDeadline !== null && daysUntilDeadline !== undefined && daysUntilDeadline <= 30 && (
               <div style={{
                 display: 'inline-flex', alignItems: 'center', gap: 4,
                 fontSize: 12, fontWeight: 600, color: cc.warning,

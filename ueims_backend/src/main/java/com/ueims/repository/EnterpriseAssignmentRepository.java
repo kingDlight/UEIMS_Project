@@ -41,6 +41,8 @@ public interface EnterpriseAssignmentRepository extends JpaRepository<Enterprise
     Optional<EnterpriseAssignment> findByStudent_UserId(UUID studentId);
 
     // Lấy phân công hiện tại của sinh viên trong học kỳ ACTIVE
+    @Query(
+            "SELECT ea FROM EnterpriseAssignment ea JOIN FETCH ea.enterprise WHERE ea.student.userId = :studentId AND ea.semester.status = :status")
     Optional<EnterpriseAssignment> findByStudent_UserIdAndSemester_Status(UUID studentId, String status);
 
     boolean existsByStudent_UserIdAndSemester_SemesterIdAndStatus(UUID studentId, UUID semesterId, String status);

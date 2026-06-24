@@ -76,10 +76,6 @@ public class SecurityConfig {
                 .permitAll()
                 .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS)
                 .permitAll()
-                // Audit logs: explicitly restricted to admin roles at the filter chain level
-                // (defense-in-depth alongside @PreAuthorize on the controller)
-                .requestMatchers("/api/audit-logs/**")
-                .hasAnyRole("ADMIN", "SYSTEM_ADMIN", "TRAINING_MANAGER")
                 .anyRequest()
                 .authenticated());
 

@@ -32,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 public class RateLimitFilter extends OncePerRequestFilter {
 
     /** Max requests per IP per window. */
-    private static final int MAX_REQUESTS = 10;
+    private static final int MAX_REQUESTS = 100;
 
     /** Window size in milliseconds (1 minute). */
     private static final long WINDOW_MS = TimeUnit.MINUTES.toMillis(1);
