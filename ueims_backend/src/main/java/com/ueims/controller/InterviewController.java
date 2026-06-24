@@ -127,8 +127,17 @@ public class InterviewController {
             @RequestParam(value = "reason", required = false) String reason,
             @RequestParam(value = "meetingLink", required = false) String meetingLink,
             @RequestParam(value = "location", required = false) String location) {
-        return ResponseEntity.ok(
-                mapper.toDto(service.reschedule(id, LocalDateTime.parse(newTime), reason, meetingLink, location)));
+
+        LocalDateTime parsedTime;
+        if (newTime.endsWith("Z")) {
+            parsedTime = java.time.Instant.parse(newTime)
+                    .atZone(java.time.ZoneId.of("UTC"))
+                    .toLocalDateTime();
+        } else {
+            parsedTime = LocalDateTime.parse(newTime);
+        }
+
+        return ResponseEntity.ok(mapper.toDto(service.reschedule(id, parsedTime, reason, meetingLink, location)));
     }
 
     // UC-43.1: Propose 3 open slots for a given application
