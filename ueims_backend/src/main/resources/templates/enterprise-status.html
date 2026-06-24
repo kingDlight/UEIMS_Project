@@ -8,7 +8,7 @@
   <meta name="x-apple-disable-message-reformatting" />
   <title th:text="${subject}">UEIMS - Enterprise Status</title>
 </head>
-<body style="margin:0; padding:0; background-color:#FFFFFF; font-family:Arial, Helvetica, sans-serif;">
+<body style="margin:0; padding:0; background-color:#FFFFFF; font-family:'Times New Roman', Times, serif;">
   <!-- PREHEADER (Ẩn trên giao diện, chỉ hiện ở Inbox) -->
   <div style="display:none; max-height:0; overflow:hidden; font-size:1px; line-height:1px; color:#ffffff; opacity:0;">
     Thông báo trạng thái hồ sơ doanh nghiệp của bạn trên hệ thống UEIMS.
@@ -32,7 +32,7 @@
                     <img src="cid:logoImage" alt="UEIMS Logo" style="width:34px; height:34px; display:block; border:none;" />
                   </td>
                   <td align="left" style="vertical-align:middle;">
-                    <span style="font-family:Arial, Helvetica, sans-serif; font-size:22px; line-height:26px; font-weight:700; letter-spacing:3px; color:#E96500;">
+                    <span style="font-family:'Times New Roman', Times, serif; font-size:22px; line-height:26px; font-weight:700; letter-spacing:3px; color:#E96500;">
                       UEIMS
                     </span>
                   </td>
@@ -45,11 +45,11 @@
           <tr>
             <td style="padding:0 40px;">
 
-              <h1 style="margin:0; font-family:Arial, Helvetica, sans-serif; font-size:30px; line-height:36px; font-weight:700; color:#111827; text-align:center;">
+              <h1 style="margin:0; font-family:'Times New Roman', Times, serif; font-size:30px; line-height:36px; font-weight:700; color:#111827; text-align:center;">
                 Kính gửi <span th:text="${fullName}">Doanh nghiệp</span>,
               </h1>
 
-              <p style="margin:12px 0 0; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:18px; font-weight:700; color:#111827; text-align:center;">
+              <p style="margin:12px 0 0; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:18px; font-weight:700; color:#111827; text-align:center;">
                 Thông báo trạng thái hồ sơ doanh nghiệp.
               </p>
 
@@ -59,23 +59,23 @@
                 </tr>
               </table>
 
-              <p style="margin:22px 0 0; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:20px; font-weight:400; color:#6B7280; text-align:center;">
+              <p style="margin:22px 0 0; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:20px; font-weight:400; color:#6B7280; text-align:center;">
                 Hồ sơ đăng ký doanh nghiệp của quý công ty trên hệ thống UEIMS đã được xử lý.<br>
                 Trạng thái hiện tại: <strong th:text="${status}" th:style="${status == 'APPROVED' || status == 'approved' ? 'color: #28a745;' : 'color: #dc3545;'}">APPROVED</strong>
               </p>
 
               <div th:if="${status == 'REJECTED' || status == 'rejected'}">
-                <p style="margin:18px 0 0; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:20px; font-weight:700; color:#111827; text-align:center;">
+                <p style="margin:18px 0 0; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:20px; font-weight:700; color:#111827; text-align:center;">
                   Lý do từ chối:
                 </p>
-                <p style="margin:4px 0 0; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:20px; font-weight:400; color:#dc3545; text-align:center;" th:text="${reason}"></p>
-                <p style="margin:18px 0 0; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:20px; font-weight:400; color:#6B7280; text-align:center;">
+                <p style="margin:4px 0 0; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:20px; font-weight:400; color:#dc3545; text-align:center;" th:text="${reason}"></p>
+                <p style="margin:18px 0 0; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:20px; font-weight:400; color:#6B7280; text-align:center;">
                   Vui lòng đăng nhập vào hệ thống để chỉnh sửa hồ sơ và gửi lại yêu cầu xét duyệt.
                 </p>
               </div>
 
               <div th:if="${status == 'APPROVED' || status == 'approved'}">
-                <p style="margin:18px 0 0; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:20px; font-weight:400; color:#6B7280; text-align:center;">
+                <p style="margin:18px 0 0; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:20px; font-weight:400; color:#6B7280; text-align:center;">
                   Chúc mừng quý doanh nghiệp! Hồ sơ của quý công ty đã được phê duyệt thành công.
                   Quý công ty đã có thể đăng nhập vào hệ thống để bắt đầu đăng tin tuyển dụng và quản lý thực tập sinh.
                 </p>
@@ -85,17 +85,17 @@
               <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:26px auto 0;">
                 <tr>
                   <td align="center" bgcolor="#E96500" style="background-color:#E96500; border-radius:999px;">
-                    <a th:href="${loginUrl}" target="_blank" style="display:block; padding:12px 22px; min-width:180px; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:16px; font-weight:800; color:#FFFFFF; text-align:center; text-decoration:none; border-radius:999px; background-color:#E96500;">
+                    <a th:href="${loginUrl}" target="_blank" style="display:block; padding:12px 22px; min-width:180px; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:16px; font-weight:800; color:#FFFFFF; text-align:center; text-decoration:none; border-radius:999px; background-color:#E96500;">
                       Đăng nhập hệ thống
                     </a>
                   </td>
                 </tr>
               </table>
 
-              <p style="margin:22px 0 0; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:20px; font-weight:700; color:#6B7280; text-align:center;">
+              <p style="margin:22px 0 0; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:20px; font-weight:700; color:#6B7280; text-align:center;">
                 Trân trọng,
               </p>
-              <p style="margin:4px 0 0; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:20px; font-weight:700; color:#E96500; text-align:center;">
+              <p style="margin:4px 0 0; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:20px; font-weight:700; color:#E96500; text-align:center;">
                 Team UEIMS
               </p>
 
@@ -105,7 +105,7 @@
                 </tr>
               </table>
 
-              <p style="margin:12px 0 0; font-family:Arial, Helvetica, sans-serif; font-size:11px; line-height:16px; color:#9CA3AF; text-align:center;">
+              <p style="margin:12px 0 0; font-family:'Times New Roman', Times, serif; font-size:11px; line-height:16px; color:#9CA3AF; text-align:center;">
                 Cần hỗ trợ? Liên hệ <a href="mailto:ueims.support@fpt.edu.vn" style="color:#E96500; font-weight:700; text-decoration:none;">ueims.support@fpt.edu.vn</a>
               </p>
 

@@ -8,7 +8,7 @@
   <meta name="x-apple-disable-message-reformatting" />
   <title th:text="${subject}">UEIMS - Welcome</title>
 </head>
-<body style="margin:0; padding:0; background-color:#FFFFFF; font-family:Arial, Helvetica, sans-serif;">
+<body style="margin:0; padding:0; background-color:#FFFFFF; font-family:'Times New Roman', Times, serif;">
   <!-- PREHEADER (Ẩn trên giao diện, chỉ hiện ở Inbox) -->
   <div style="display:none; max-height:0; overflow:hidden; font-size:1px; line-height:1px; color:#ffffff; opacity:0;">
     Chào mừng bạn đến với UEIMS. Thông tin tài khoản của bạn đã được tạo.
@@ -34,7 +34,7 @@
                     <img src="cid:logoImage" alt="UEIMS Logo" style="width:34px; height:34px; display:block; border:none;" />
                   </td>
                   <td align="left" style="vertical-align:middle;">
-                    <span style="font-family:Arial, Helvetica, sans-serif; font-size:22px; line-height:26px; font-weight:700; letter-spacing:3px; color:#E96500;">
+                    <span style="font-family:'Times New Roman', Times, serif; font-size:22px; line-height:26px; font-weight:700; letter-spacing:3px; color:#E96500;">
                       UEIMS
                     </span>
                   </td>
@@ -47,11 +47,11 @@
           <tr>
             <td style="padding:0 40px;">
 
-              <h1 style="margin:0; font-family:Arial, Helvetica, sans-serif; font-size:30px; line-height:36px; font-weight:700; color:#111827; text-align:center;">
+              <h1 style="margin:0; font-family:'Times New Roman', Times, serif; font-size:30px; line-height:36px; font-weight:700; color:#111827; text-align:center;">
                 Chào mừng, <span th:text="${fullName}">Nguyen Van A</span>
               </h1>
 
-              <p style="margin:12px 0 0; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:18px; font-weight:700; color:#111827; text-align:center;">
+              <p style="margin:12px 0 0; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:18px; font-weight:700; color:#111827; text-align:center;">
                 Tài khoản UEIMS của bạn đã được tạo.
               </p>
 
@@ -61,7 +61,7 @@
                 </tr>
               </table>
 
-              <p style="margin:22px 0 0; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:20px; font-weight:400; color:#6B7280; text-align:center;">
+              <p style="margin:22px 0 0; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:20px; font-weight:400; color:#6B7280; text-align:center;">
                 Bạn nhận email này vì Quản trị viên đã tạo tài khoản UEIMS cho bạn. Vui lòng đăng nhập bằng thông tin bên dưới và đổi mật khẩu ngay sau lần đăng nhập đầu tiên.
               </p>
 
@@ -69,16 +69,16 @@
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:18px 0 0;">
                 <tr>
                   <td style="padding:14px 16px; border:1px solid #F3F4F6; background-color:#FAFAFA;">
-                    <p style="margin:0 0 8px; font-family:Arial, Helvetica, sans-serif; font-size:12px; line-height:16px; color:#6B7280;">
+                    <p style="margin:0 0 8px; font-family:'Times New Roman', Times, serif; font-size:12px; line-height:16px; color:#6B7280;">
                       Email đăng nhập
                     </p>
-                    <p style="margin:0 0 14px; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:18px; color:#111827; font-weight:700; word-break:break-all;" th:text="${email}">
+                    <p style="margin:0 0 14px; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:18px; color:#111827; font-weight:700; word-break:break-all;" th:text="${email}">
                       a.nguyen@example.com
                     </p>
-                    <p style="margin:0 0 8px; font-family:Arial, Helvetica, sans-serif; font-size:12px; line-height:16px; color:#6B7280;">
+                    <p style="margin:0 0 8px; font-family:'Times New Roman', Times, serif; font-size:12px; line-height:16px; color:#6B7280;">
                       Mật khẩu tạm thời
                     </p>
-                    <p style="margin:0; font-family:Arial, Helvetica, sans-serif; font-size:16px; line-height:20px; color:#111827; font-weight:700; letter-spacing:1px;" th:text="${tempPassword}">
+                    <p style="margin:0; font-family:'Times New Roman', Times, serif; font-size:16px; line-height:20px; color:#111827; font-weight:700; letter-spacing:1px;" th:text="${tempPassword}">
                       TmpP@ss123
                     </p>
                   </td>
@@ -89,17 +89,17 @@
               <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:26px auto 0;">
                 <tr>
                   <td align="center" bgcolor="#E96500" style="background-color:#E96500; border-radius:999px;">
-                    <a th:href="${loginUrl}" target="_blank" style="display:block; padding:12px 22px; min-width:180px; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:16px; font-weight:800; color:#FFFFFF; text-align:center; text-decoration:none; border-radius:999px; background-color:#E96500;">
+                    <a th:href="${loginUrl}" target="_blank" style="display:block; padding:12px 22px; min-width:180px; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:16px; font-weight:800; color:#FFFFFF; text-align:center; text-decoration:none; border-radius:999px; background-color:#E96500;">
                       Đăng nhập UEIMS
                     </a>
                   </td>
                 </tr>
               </table>
 
-              <p style="margin:22px 0 0; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:20px; font-weight:700; color:#6B7280; text-align:center;">
+              <p style="margin:22px 0 0; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:20px; font-weight:700; color:#6B7280; text-align:center;">
                 Trân trọng,
               </p>
-              <p style="margin:4px 0 0; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:20px; font-weight:700; color:#E96500; text-align:center;">
+              <p style="margin:4px 0 0; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:20px; font-weight:700; color:#E96500; text-align:center;">
                 Team UEIMS
               </p>
 
@@ -109,7 +109,7 @@
                 </tr>
               </table>
 
-              <p style="margin:14px 0 0; font-family:Arial, Helvetica, sans-serif; font-size:11px; line-height:16px; color:#9CA3AF; text-align:center;">
+              <p style="margin:14px 0 0; font-family:'Times New Roman', Times, serif; font-size:11px; line-height:16px; color:#9CA3AF; text-align:center;">
                 Cần hỗ trợ? Liên hệ <a href="mailto:ueims.support@fpt.edu.vn" style="color:#E96500; font-weight:700; text-decoration:none;">ueims.support@fpt.edu.vn</a>
               </p>
 
