@@ -1,38 +1,114 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title th:text="${subject}">Cảnh báo trễ báo cáo</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="format-detection" content="telephone=no, date=no, address=no, email=no" />
+  <meta name="x-apple-disable-message-reformatting" />
+  <title th:text="${subject}">UEIMS - Late Report Warning</title>
 </head>
-<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-    
-    <div style="text-align: center; margin-bottom: 20px;">
-        <img src="cid:logoImage" alt="UEIMS Logo" style="width:34px; height:34px; display:inline-block; vertical-align:middle; border:none; margin-right: 10px;" />
-        <h2 style="color: #d9534f; display:inline-block; vertical-align:middle; margin:0;">Hệ thống Quản lý Thực tập UEIMS</h2>
-    </div>
+<body style="margin:0; padding:0; background-color:#FFFFFF; font-family:Arial, Helvetica, sans-serif;">
+  <!-- PREHEADER (Ẩn trên giao diện, chỉ hiện ở Inbox) -->
+  <div style="display:none; max-height:0; overflow:hidden; font-size:1px; line-height:1px; color:#ffffff; opacity:0;">
+    Cảnh báo nộp báo cáo thực tập trễ hạn.
+  </div>
 
-    <div style="background-color: #f9f9f9; padding: 20px; border-radius: 5px; border-left: 5px solid #d9534f;">
-        <p>Xin chào <strong><span th:text="${fullName}">Sinh viên</span></strong>,</p>
-        
-        <p>Hệ thống nhận thấy bạn <strong>chưa nộp báo cáo thực tập tuần <span th:text="${weekNumber}"></span></strong> theo đúng thời hạn quy định.</p>
-        
-        <p>Việc nộp báo cáo trễ hạn có thể ảnh hưởng đến kết quả đánh giá thực tập của bạn. Vui lòng đăng nhập vào hệ thống và nộp báo cáo ngay lập tức để tránh các hình thức kỷ luật từ nhà trường.</p>
-        
-        <div style="text-align: center; margin: 30px 0;">
-            <a th:href="${loginUrl}" style="background-color: #0056b3; color: white; padding: 12px 25px; text-decoration: none; border-radius: 4px; font-weight: bold;">
-                Đăng nhập để nộp báo cáo
-            </a>
-        </div>
-        
-        <p>Nếu bạn đã nộp báo cáo, vui lòng bỏ qua email này hoặc liên hệ với Training Manager để được hỗ trợ.</p>
-        
-        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
-        
-        <p style="font-size: 12px; color: #777; text-align: center;">
-            Đây là email tự động từ hệ thống UEIMS, vui lòng không trả lời email này.<br>
-            © 2026 UEIMS. All rights reserved.
-        </p>
-    </div>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#FFFFFF">
+    <tr>
+      <td align="center" style="padding:38px 16px 34px;">
+        <!--[if mso | IE]>
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="600" align="center" style="width:600px;">
+          <tr>
+            <td>
+        <![endif]-->
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="width:100%; max-width:600px; margin:0 auto;">
+          <!-- BRAND -->
+          <tr>
+            <td align="center" style="padding:0 0 28px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td align="center" style="vertical-align:middle; padding-right:10px;">
+                    <img src="cid:logoImage" alt="UEIMS Logo" style="width:34px; height:34px; display:block; border:none;" />
+                  </td>
+                  <td align="left" style="vertical-align:middle;">
+                    <span style="font-family:Arial, Helvetica, sans-serif; font-size:22px; line-height:26px; font-weight:700; letter-spacing:3px; color:#E96500;">
+                      UEIMS
+                    </span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
 
+          <!-- MAIN CONTENT -->
+          <tr>
+            <td style="padding:0 40px;">
+
+              <h1 style="margin:0; font-family:Arial, Helvetica, sans-serif; font-size:30px; line-height:36px; font-weight:700; color:#111827; text-align:center;">
+                Xin chào <span th:text="${fullName}">Sinh viên</span>,
+              </h1>
+
+              <p style="margin:12px 0 0; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:18px; font-weight:700; color:#dc3545; text-align:center;">
+                Cảnh báo trễ báo cáo.
+              </p>
+
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:22px 0 0;">
+                <tr>
+                  <td style="border-top:1px solid #E5E7EB; font-size:0; line-height:0;">&nbsp;</td>
+                </tr>
+              </table>
+
+              <p style="margin:22px 0 0; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:20px; font-weight:400; color:#6B7280; text-align:center;">
+                Hệ thống nhận thấy bạn <strong style="color:#dc3545;">chưa nộp báo cáo thực tập tuần <span th:text="${weekNumber}"></span></strong> theo đúng thời hạn quy định.
+              </p>
+
+              <p style="margin:18px 0 0; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:20px; font-weight:400; color:#6B7280; text-align:center;">
+                Việc nộp báo cáo trễ hạn có thể ảnh hưởng đến kết quả đánh giá thực tập của bạn. Vui lòng đăng nhập vào hệ thống và nộp báo cáo ngay lập tức để tránh các hình thức kỷ luật từ nhà trường.
+              </p>
+
+              <!-- CTA -->
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:26px auto 0;">
+                <tr>
+                  <td align="center" bgcolor="#E96500" style="background-color:#E96500; border-radius:999px;">
+                    <a th:href="${loginUrl}" target="_blank" style="display:block; padding:12px 22px; min-width:180px; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:16px; font-weight:800; color:#FFFFFF; text-align:center; text-decoration:none; border-radius:999px; background-color:#E96500;">
+                      Đăng nhập để nộp báo cáo
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin:18px 0 0; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:20px; font-weight:400; color:#6B7280; text-align:center;">
+                Nếu bạn đã nộp báo cáo, vui lòng bỏ qua email này hoặc liên hệ với Training Manager để được hỗ trợ.
+              </p>
+
+              <p style="margin:22px 0 0; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:20px; font-weight:700; color:#6B7280; text-align:center;">
+                Trân trọng,
+              </p>
+              <p style="margin:4px 0 0; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:20px; font-weight:700; color:#E96500; text-align:center;">
+                Team UEIMS
+              </p>
+
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:26px 0 0;">
+                <tr>
+                  <td style="border-top:1px solid #F3F4F6; font-size:0; line-height:0;">&nbsp;</td>
+                </tr>
+              </table>
+
+              <p style="margin:12px 0 0; font-family:Arial, Helvetica, sans-serif; font-size:11px; line-height:16px; color:#9CA3AF; text-align:center;">
+                Cần hỗ trợ? Liên hệ <a href="mailto:ueims.support@fpt.edu.vn" style="color:#E96500; font-weight:700; text-decoration:none;">ueims.support@fpt.edu.vn</a>
+              </p>
+
+            </td>
+          </tr>
+        </table>
+        <!--[if mso | IE]>
+            </td>
+          </tr>
+        </table>
+        <![endif]-->
+      </td>
+    </tr>
+  </table>
 </body>
 </html>

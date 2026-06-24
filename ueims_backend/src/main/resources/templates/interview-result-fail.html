@@ -1,10 +1,103 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="UTF-8"/><title th:text="${subject}">Result</title></head>
-<body style="font-family: Inter, Arial, sans-serif; padding: 24px; color: #0F172A;">
-<p>Xin chào <strong th:text="${fullName}">Student</strong>,</p>
-<p>Cảm ơn bạn đã tham gia buổi phỏng vấn. Rất tiếc, kết quả lần này <strong>chưa phù hợp</strong>.</p>
-<p th:if="${reason}">Nhận xét: <em th:text="${reason}">—</em></p>
-<p>Chúc bạn may mắn trong các cơ hội sắp tới.</p>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="format-detection" content="telephone=no, date=no, address=no, email=no" />
+  <meta name="x-apple-disable-message-reformatting" />
+  <title th:text="${subject}">UEIMS - Interview Result</title>
+</head>
+<body style="margin:0; padding:0; background-color:#FFFFFF; font-family:Arial, Helvetica, sans-serif;">
+  <!-- PREHEADER (Ẩn trên giao diện, chỉ hiện ở Inbox) -->
+  <div style="display:none; max-height:0; overflow:hidden; font-size:1px; line-height:1px; color:#ffffff; opacity:0;">
+    Thông báo kết quả phỏng vấn.
+  </div>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#FFFFFF">
+    <tr>
+      <td align="center" style="padding:38px 16px 34px;">
+        <!--[if mso | IE]>
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="600" align="center" style="width:600px;">
+          <tr>
+            <td>
+        <![endif]-->
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="width:100%; max-width:600px; margin:0 auto;">
+          <!-- BRAND -->
+          <tr>
+            <td align="center" style="padding:0 0 28px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td align="center" style="vertical-align:middle; padding-right:10px;">
+                    <img src="cid:logoImage" alt="UEIMS Logo" style="width:34px; height:34px; display:block; border:none;" />
+                  </td>
+                  <td align="left" style="vertical-align:middle;">
+                    <span style="font-family:Arial, Helvetica, sans-serif; font-size:22px; line-height:26px; font-weight:700; letter-spacing:3px; color:#E96500;">
+                      UEIMS
+                    </span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- MAIN CONTENT -->
+          <tr>
+            <td style="padding:0 40px;">
+
+              <h1 style="margin:0; font-family:Arial, Helvetica, sans-serif; font-size:30px; line-height:36px; font-weight:700; color:#111827; text-align:center;">
+                Xin chào <span th:text="${fullName}">Student</span>,
+              </h1>
+
+              <p style="margin:12px 0 0; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:18px; font-weight:700; color:#111827; text-align:center;">
+                Kết quả phỏng vấn.
+              </p>
+
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:22px 0 0;">
+                <tr>
+                  <td style="border-top:1px solid #E5E7EB; font-size:0; line-height:0;">&nbsp;</td>
+                </tr>
+              </table>
+
+              <p style="margin:22px 0 0; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:20px; font-weight:400; color:#6B7280; text-align:center;">
+                Cảm ơn bạn đã tham gia buổi phỏng vấn. Rất tiếc, kết quả lần này <strong style="color:#111827;">chưa phù hợp</strong>.
+              </p>
+
+              <p th:if="${reason}" style="margin:18px 0 0; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:20px; font-weight:400; color:#6B7280; text-align:center;">
+                Nhận xét: <em th:text="${reason}" style="font-weight:700; color:#111827;">—</em>
+              </p>
+
+              <p style="margin:18px 0 0; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:20px; font-weight:400; color:#6B7280; text-align:center;">
+                Chúc bạn may mắn trong các cơ hội sắp tới.
+              </p>
+
+              <p style="margin:22px 0 0; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:20px; font-weight:700; color:#6B7280; text-align:center;">
+                Trân trọng,
+              </p>
+              <p style="margin:4px 0 0; font-family:Arial, Helvetica, sans-serif; font-size:13px; line-height:20px; font-weight:700; color:#E96500; text-align:center;">
+                Team UEIMS
+              </p>
+
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:26px 0 0;">
+                <tr>
+                  <td style="border-top:1px solid #F3F4F6; font-size:0; line-height:0;">&nbsp;</td>
+                </tr>
+              </table>
+
+              <p style="margin:12px 0 0; font-family:Arial, Helvetica, sans-serif; font-size:11px; line-height:16px; color:#9CA3AF; text-align:center;">
+                Cần hỗ trợ? Liên hệ <a href="mailto:ueims.support@fpt.edu.vn" style="color:#E96500; font-weight:700; text-decoration:none;">ueims.support@fpt.edu.vn</a>
+              </p>
+
+            </td>
+          </tr>
+        </table>
+        <!--[if mso | IE]>
+            </td>
+          </tr>
+        </table>
+        <![endif]-->
+      </td>
+    </tr>
+  </table>
 </body>
 </html>
