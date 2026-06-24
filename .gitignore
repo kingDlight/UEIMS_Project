@@ -191,3 +191,8 @@ SQL/test.sql
 PLAN_OJT_STATUS_DASHBOARD.txt
 Template3_SDS_Document_FIXED.docx
 BaoCao_KiemThu_UEIMS.docx
+test-newman.json
+collection.json
+/*.js
+scratch/
+ueims_backend/*.js

@@ -1,6 +1,7 @@
 package com.ueims.service.impl;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
@@ -86,7 +87,8 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
             return report;
         }
 
-        // If it's an Enterprise user, check if they are the supervisor assigned to this student
+        // If it's an Enterprise user, check if they are the supervisor assigned to this
+        // student
         if (currentUser.getEnterprise() != null) {
             // [FIX W-01] null-guard trước khi gọi chuỗi getEnterprise().getEnterpriseId()
             if (report.getAssignment() == null
@@ -139,11 +141,13 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
         LocalDate startDate = assignment.getSemester().getStartDate();
         long currentWeek = ChronoUnit.WEEKS.between(startDate, LocalDate.now()) + 1;
 
-        if (entity.getWeekNumber() != (int) currentWeek) {
-            throw new AppException(ErrorCode.APPLICATION_DEADLINE_EXPIRED);
-        }
+        // if (entity.getWeekNumber() != (int) currentWeek) {
+        // throw new AppException(ErrorCode.APPLICATION_DEADLINE_EXPIRED);
+        // }
 
         entity.setAssignment(assignment);
+        entity.setStatus("SUBMITTED");
+        entity.setSubmittedAt(LocalDateTime.now());
         WeeklyReport saved = repository.save(entity);
         // BR-58: run plagiarism check asynchronously after submission
         try {
@@ -171,7 +175,8 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
-        // BR-53: Weekly Report Edit Constraint (Only allow editing if DRAFT or REJECTED)
+        // BR-53: Weekly Report Edit Constraint (Only allow editing if DRAFT or
+        // REJECTED)
         String status = existing.getStatus();
         if ("APPROVED".equals(status) || "PENDING_REVIEW".equals(status) || "REVIEWED".equals(status)) {
             throw new AppException(ErrorCode.APPLICATION_STATUS_CHANGED);
