@@ -7,7 +7,7 @@ test('TC-AUTH-018: Đổi mật khẩu - Pass mới không khớp', async ({ pag
   await page.getByLabel('Password').fill('1234567890');
   await page.getByRole('button', { name: 'LOGIN' }).click();
   // Chờ navigation sau khi login
-  await page.waitForURL(/.*dashboard/);
+  await page.waitForURL(/.*dashboard/, { timeout: 15000 });
 
   // 2. Mở Account Menu và click Change Password
   await page.locator('.modern-account-wrapper').click();

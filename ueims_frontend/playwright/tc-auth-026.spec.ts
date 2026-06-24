@@ -26,8 +26,7 @@ test('TC-AUTH-026: Tạo tài khoản mới thành công', async ({ page }) => {
   await page.locator('.ant-select-selector').last().click();
   await page.waitForSelector('.ant-select-item-option-content:has-text("STUDENT")');
   await page.locator('.ant-select-item-option-content:has-text("STUDENT")').click();
-  
-  // 5. Save
+ // 5. Save
   console.log('Clicking Create Account button...');
   
   // Lắng nghe tất cả request và response để debug

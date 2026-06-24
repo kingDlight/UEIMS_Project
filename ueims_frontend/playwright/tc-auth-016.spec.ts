@@ -23,6 +23,7 @@ test('TC-AUTH-016: Đổi mật khẩu thành công', async ({ page }) => {
   
   // Chờ cho ứng dụng chuyển hướng xong
   await page.waitForLoadState('networkidle');
+  await page.waitForURL(/.*dashboard/, { timeout: 15000 });
   await expect(page).toHaveURL(/.*dashboard/);
 
   // 2. Mở Account Menu và click Change Password
