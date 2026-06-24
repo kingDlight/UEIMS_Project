@@ -192,21 +192,36 @@ export const InterviewScheduleTab: React.FC = () => {
     try {
       const values = await rescheduleForm.validateFields();
       setSubmitting(true);
-      await InterviewService.reschedule(
-        selected.interviewId,
-        (values.newTime as Dayjs).toISOString(),
-        values.reason,
-        values.meetingLink,
-        values.location
-      );
-      message.success('Interview rescheduled. The student will be notified.');
+      
+      const newTime = values.newTime as Dayjs;
+      const oldTime = selected.scheduledTime ? dayjs(selected.scheduledTime) : null;
+      
+      if (oldTime && newTime.isSame(oldTime, 'minute')) {
+        // Time didn't change, just update details
+        await InterviewService.update(selected.interviewId, {
+          location: values.location,
+          meetingLink: values.meetingLink,
+        });
+        message.success('Interview details updated.');
+      } else {
+        // Time changed, trigger reschedule workflow
+        await InterviewService.reschedule(
+          selected.interviewId,
+          newTime.toISOString(),
+          values.reason,
+          values.meetingLink,
+          values.location
+        );
+        message.success('Interview rescheduled. The student will be notified.');
+      }
+      
       setRescheduleOpen(false);
       rescheduleForm.resetFields();
       await fetchInterviews();
     } catch (err: any) {
       if (err?.errorFields) return;
       const msg = err?.response?.data?.message;
-      message.error(msg ?? 'Failed to reschedule interview.');
+      message.error(msg ?? 'Failed to update interview.');
     } finally {
       setSubmitting(false);
     }
@@ -364,13 +379,14 @@ export const InterviewScheduleTab: React.FC = () => {
                   rescheduleForm.resetFields(); 
                   if (selected) {
                     rescheduleForm.setFieldsValue({
+                      newTime: selected.scheduledTime ? dayjs(selected.scheduledTime) : undefined,
                       location: selected.location,
                       meetingLink: selected.meetingLink,
                     });
                   }
                   setRescheduleOpen(true); 
                 }}>
-                  Reschedule
+                  Edit / Reschedule
                 </Button>
                 <Button block danger icon={<StopOutlined />} onClick={() => { setCancelReason(''); setCancelOpen(true); }}>
                   Cancel Interview
@@ -469,7 +485,7 @@ export const InterviewScheduleTab: React.FC = () => {
 
       {/* Reschedule modal */}
       <Modal
-        title={<div className="font-extrabold text-slate-900">Reschedule Interview</div>}
+        title={<div className="font-extrabold text-slate-900">Edit / Reschedule Interview</div>}
         open={rescheduleOpen}
         onCancel={() => { if (!submitting) setRescheduleOpen(false); }}
         footer={null}
@@ -477,7 +493,7 @@ export const InterviewScheduleTab: React.FC = () => {
         destroyOnHidden
       >
         <Form form={rescheduleForm} layout="vertical" preserve={false}>
-          <Form.Item label="New date & time" name="newTime" rules={[{ required: true }]}>
+          <Form.Item label="Scheduled date & time" name="newTime" rules={[{ required: true }]}>
             <DatePicker
               showTime={{ format: 'HH:mm', minuteStep: 1 }}
               format="YYYY-MM-DD HH:mm"
@@ -491,7 +507,7 @@ export const InterviewScheduleTab: React.FC = () => {
           <Form.Item label="Online meeting link" name="meetingLink" rules={[{ type: 'url', message: 'Must be a valid URL', warningOnly: true }]}>
             <Input placeholder="https://meet..." />
           </Form.Item>
-          <Form.Item label="Reason (optional)" name="reason">
+          <Form.Item label="Reason (optional)" name="reason" tooltip="Required only if changing the date/time.">
             <TextArea rows={2} maxLength={300} placeholder="Why are you rescheduling?" />
           </Form.Item>
           <div className="flex gap-2 justify-end">
