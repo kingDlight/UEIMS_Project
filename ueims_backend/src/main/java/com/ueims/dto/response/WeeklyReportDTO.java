@@ -10,5 +10,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class WeeklyReportDTO extends WeeklyReport {
-    // DTO subclass to resolve java:S4684 while maintaining exact JSON serialization contract.
+    private java.util.UUID assignmentId;
+
+    public java.util.UUID getAssignmentId() {
+        return assignmentId;
+    }
+
+    public void setAssignmentId(java.util.UUID assignmentId) {
+        this.assignmentId = assignmentId;
+    }
 }

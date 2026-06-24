@@ -64,6 +64,11 @@ public class WeeklyReportController {
     @PostMapping
     @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<WeeklyReportDTO> create(@Valid @RequestBody WeeklyReportDTO entity) {
+        if (entity.getAssignmentId() != null) {
+            com.ueims.model.entity.EnterpriseAssignment assignment = new com.ueims.model.entity.EnterpriseAssignment();
+            assignment.setAssignmentId(entity.getAssignmentId());
+            entity.setAssignment(assignment);
+        }
         // Sanitize rich-text HTML fields before saving
         if (entity.getTasksCompleted() != null)
             entity.setTasksCompleted(HtmlSanitizer.sanitize(entity.getTasksCompleted()));

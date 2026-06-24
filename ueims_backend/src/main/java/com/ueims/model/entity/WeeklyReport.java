@@ -4,6 +4,9 @@ import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.*;
@@ -41,6 +44,7 @@ public class WeeklyReport extends BaseEntity {
     @Column(name = "plan_next_week", columnDefinition = "TEXT")
     private String planNextWeek;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "attachment_urls", columnDefinition = "JSONB")
     private String attachmentUrls;
 
