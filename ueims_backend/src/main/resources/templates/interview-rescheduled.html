@@ -7,6 +7,22 @@
   <meta name="format-detection" content="telephone=no, date=no, address=no, email=no" />
   <meta name="x-apple-disable-message-reformatting" />
   <title th:text="${subject}">UEIMS - Interview Rescheduled</title>
+
+  <meta name="color-scheme" content="light dark" />
+  <meta name="supported-color-schemes" content="light dark" />
+  <style>
+    @media (prefers-color-scheme: dark) {
+      body, table[bgcolor="#FFFFFF"], td[bgcolor="#FFFFFF"] { background-color: #1F2937 !important; }
+      h1, p, span, strong, td { color: #F9FAFB !important; }
+      .bg-gray-dark { background-color: #374151 !important; border-color: #4B5563 !important; }
+      .text-orange { color: #E96500 !important; }
+      .btn-vml table, .btn-vml td { background-color: #E96500 !important; }
+      .btn-vml a { color: #FFFFFF !important; }
+      .text-danger { color: #EF4444 !important; }
+      .text-success { color: #10B981 !important; }
+      .text-muted { color: #9CA3AF !important; }
+    }
+  </style>
 </head>
 <body style="margin:0; padding:0; background-color:#FFFFFF; font-family:'Times New Roman', Times, serif;">
   <!-- PREHEADER (Ẩn trên giao diện, chỉ hiện ở Inbox) -->
@@ -29,10 +45,10 @@
               <table role="presentation" cellpadding="0" cellspacing="0" border="0">
                 <tr>
                   <td align="center" style="vertical-align:middle; padding-right:10px;">
-                    <img src="cid:logoImage" alt="UEIMS Logo" style="width:34px; height:34px; display:block; border:none;" />
+                    <img src="cid:logoImage" alt="UEIMS Logo" style="width:34px; height:34px; display:block; border:none; color:#E96500; font-family:Arial, Helvetica, sans-serif; font-size:12px; font-weight:bold; text-align:center; line-height:34px;" />
                   </td>
                   <td align="left" style="vertical-align:middle;">
-                    <span style="font-family:'Times New Roman', Times, serif; font-size:22px; line-height:26px; font-weight:700; letter-spacing:3px; color:#E96500;">
+                    <span style="font-family:'Times New Roman', Times, serif; font-size:22px; line-height:26px; font-weight:700; letter-spacing:3px; color:#E96500;" class="text-orange">
                       UEIMS
                     </span>
                   </td>
@@ -60,13 +76,13 @@
               </table>
 
               <p style="margin:22px 0 0; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:20px; font-weight:400; color:#6B7280; text-align:center;">
-                Chúng tôi rất <strong style="color:#dc3545;">xin lỗi</strong> vì sự bất tiện này. Buổi phỏng vấn của bạn đã được <strong style="color:#111827;">dời lịch</strong>. Thông tin chi tiết như sau:
+                Chúng tôi rất <strong style="color:#dc3545;" class="text-danger">xin lỗi</strong> vì sự bất tiện này. Buổi phỏng vấn của bạn đã được <strong style="color:#111827;">dời lịch</strong>. Thông tin chi tiết như sau:
               </p>
 
               <!-- Details -->
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:18px 0 0;">
                 <tr>
-                  <td style="padding:14px 16px; border:1px solid #F3F4F6; background-color:#FAFAFA;">
+                  <td style="padding:14px 16px; border:1px solid #F3F4F6; background-color:#FAFAFA;" class="bg-gray-dark">
                     <p style="margin:0 0 8px; font-family:'Times New Roman', Times, serif; font-size:12px; line-height:16px; color:#6B7280;">
                       Thời gian mới
                     </p>
@@ -86,7 +102,7 @@
                         Link họp
                       </p>
                       <p style="margin:0; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:20px; color:#111827; font-weight:700;">
-                        <a th:href="${meetingLink}" th:text="${meetingLink}" style="color:#E96500;">link</a>
+                        <a href="#" th:href="${meetingLink}" th:text="${meetingLink}" style="color:#E96500;" class="text-orange">link</a>
                       </p>
                     </div>
                   </td>
@@ -100,7 +116,7 @@
               <p style="margin:22px 0 0; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:20px; font-weight:700; color:#6B7280; text-align:center;">
                 Trân trọng,
               </p>
-              <p style="margin:4px 0 0; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:20px; font-weight:700; color:#E96500; text-align:center;">
+              <p style="margin:4px 0 0; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:20px; font-weight:700; color:#E96500; text-align:center;" class="text-orange">
                 Team UEIMS
               </p>
 
@@ -110,8 +126,8 @@
                 </tr>
               </table>
 
-              <p style="margin:12px 0 0; font-family:'Times New Roman', Times, serif; font-size:11px; line-height:16px; color:#9CA3AF; text-align:center;">
-                Cần hỗ trợ? Liên hệ <a href="mailto:ueims.support@fpt.edu.vn" style="color:#E96500; font-weight:700; text-decoration:none;">ueims.support@fpt.edu.vn</a>
+              <p style="margin:12px 0 0; font-family:'Times New Roman', Times, serif; font-size:11px; line-height:16px; color:#9CA3AF; text-align:center;" class="text-muted">
+                Cần hỗ trợ? Liên hệ <a href="mailto:ueims.support@fpt.edu.vn" style="color:#E96500; font-weight:700; text-decoration:none;" class="text-orange">ueims.support@fpt.edu.vn</a>
               </p>
 
             </td>
