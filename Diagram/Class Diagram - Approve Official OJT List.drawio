@@ -1,0 +1,54 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Class Diagram - Approve OJT List" id="class_ojt_approve">
+    <mxGraphModel dx="1425" dy="767" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="800" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="frame" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;pointerEvents=0;width=300;height=30;fontStyle=1;" value="Class Diagram - Approve Official OJT List" vertex="1">
+          <mxGeometry height="430" width="870" x="50" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="c1" parent="1" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;rounded=1;fontStyle=1;strokeWidth=2;align=center;arcSize=4;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" value="OjtPlacementController" vertex="1">
+          <mxGeometry height="80" width="400" x="90" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="c1_attr" parent="c1" style="align=left;strokeColor=none;fillColor=none;spacingLeft=4;spacingRight=4;verticalAlign=top;resizable=0;rotatable=0;part=1;html=1;whiteSpace=wrap;overflow=hidden;" value="+ approveOjtList(studentIds: List&amp;lt;UUID&amp;gt;): ResponseEntity" vertex="1">
+          <mxGeometry height="50" width="400" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="s1" parent="1" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;rounded=1;fontStyle=1;strokeWidth=2;align=center;arcSize=4;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="EnterpriseAssignmentService" vertex="1">
+          <mxGeometry height="80" width="400" x="90" y="230" as="geometry" />
+        </mxCell>
+        <mxCell id="s1_attr" parent="s1" style="align=left;strokeColor=none;fillColor=none;spacingLeft=4;spacingRight=4;verticalAlign=top;resizable=0;rotatable=0;part=1;html=1;whiteSpace=wrap;overflow=hidden;" value="+ approveList(studentIds: List&amp;lt;UUID&amp;gt;): boolean" vertex="1">
+          <mxGeometry height="50" width="400" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="r1" parent="1" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;rounded=1;fontStyle=1;strokeWidth=2;align=center;arcSize=4;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="EnterpriseAssignmentRepository" vertex="1">
+          <mxGeometry height="80" width="350" x="90" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="r1_attr" parent="r1" style="align=left;strokeColor=none;fillColor=none;spacingLeft=4;spacingRight=4;verticalAlign=top;resizable=0;rotatable=0;part=1;html=1;whiteSpace=wrap;overflow=hidden;" value="+ updateStatus(studentIds: List&amp;lt;UUID&amp;gt;, status: String): int" vertex="1">
+          <mxGeometry height="50" width="350" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="r2" parent="1" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;rounded=1;fontStyle=1;strokeWidth=2;align=center;arcSize=4;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="StudentProfileRepository" vertex="1">
+          <mxGeometry height="80" width="350" x="530" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="r2_attr" parent="r2" style="align=left;strokeColor=none;fillColor=none;spacingLeft=4;spacingRight=4;verticalAlign=top;resizable=0;rotatable=0;part=1;html=1;whiteSpace=wrap;overflow=hidden;" value="+ updateOjtStatus(studentIds: List&amp;lt;UUID&amp;gt;, status: String): int" vertex="1">
+          <mxGeometry height="50" width="350" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_0" edge="1" parent="1" source="c1" style="endArrow=classic;html=1;dashed=1;" target="s1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_1" edge="1" parent="1" source="s1" style="endArrow=classic;html=1;dashed=1;edgeStyle=orthogonalEdgeStyle;" target="r1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="275" y="290" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel_2" edge="1" parent="1" source="s1" style="endArrow=classic;html=1;dashed=1;edgeStyle=orthogonalEdgeStyle;" target="r2">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="725" y="290" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

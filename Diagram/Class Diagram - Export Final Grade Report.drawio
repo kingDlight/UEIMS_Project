@@ -1,0 +1,37 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Class - Export Grade" id="class_export_01">
+    <mxGraphModel dx="1425" dy="767" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="900" pageHeight="600" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="frame" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;pointerEvents=0;width=300;height=30;fontStyle=1;" value="Class Diagram - Export Final Grade Report" vertex="1">
+          <mxGeometry height="310" width="820" x="40" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="c1" parent="1" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;rounded=1;fontStyle=1;strokeWidth=2;align=center;arcSize=4;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" value="FinalGradeController" vertex="1">
+          <mxGeometry height="80" width="350" x="80" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="c1_attr" parent="c1" style="align=left;strokeColor=none;fillColor=none;spacingLeft=4;spacingRight=4;verticalAlign=top;resizable=0;rotatable=0;part=1;html=1;whiteSpace=wrap;overflow=hidden;" value="+ exportFinalGradesPdf(): ResponseEntity&amp;lt;Resource&amp;gt;" vertex="1">
+          <mxGeometry height="50" width="350" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="s1" parent="1" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;rounded=1;fontStyle=1;strokeWidth=2;align=center;arcSize=4;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="PdfExportServiceImpl" vertex="1">
+          <mxGeometry height="80" width="350" x="470" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="s1_attr" parent="s1" style="align=left;strokeColor=none;fillColor=none;spacingLeft=4;spacingRight=4;verticalAlign=top;resizable=0;rotatable=0;part=1;html=1;whiteSpace=wrap;overflow=hidden;" value="+ exportFinalGradesPdf(): ByteArrayInputStream" vertex="1">
+          <mxGeometry height="50" width="350" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="r1" parent="1" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;rounded=1;fontStyle=1;strokeWidth=2;align=center;arcSize=4;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="&amp;lt;&amp;lt;Interface&amp;gt;&amp;gt;&lt;br&gt;FinalGradeRepository" vertex="1">
+          <mxGeometry height="80" width="350" x="275" y="230" as="geometry" />
+        </mxCell>
+        <mxCell id="r1_attr" parent="r1" style="align=left;strokeColor=none;fillColor=none;spacingLeft=4;spacingRight=4;verticalAlign=top;resizable=0;rotatable=0;part=1;html=1;whiteSpace=wrap;overflow=hidden;" value="+ findAllGradesWithRubrics(): List&amp;lt;StudentGrade&amp;gt;" vertex="1">
+          <mxGeometry height="50" width="350" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_c_s" edge="1" parent="1" source="c1" style="endArrow=classic;html=1;dashed=1;" target="s1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_s_r" edge="1" parent="1" source="s1_attr" style="endArrow=classic;html=1;dashed=1;entryX=1;entryY=0;entryDx=0;entryDy=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" target="r1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

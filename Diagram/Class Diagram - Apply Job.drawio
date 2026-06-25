@@ -1,0 +1,72 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Class Diagram - Apply Job" id="class_apply_job_01">
+    <mxGraphModel dx="1188" dy="639" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1000" pageHeight="800" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="frame" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;pointerEvents=0;width=250;height=30;fontStyle=1;" value="Class Diagram - Apply Job" vertex="1">
+          <mxGeometry height="610" width="770" x="40" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="c1" parent="1" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;rounded=1;fontStyle=1;strokeWidth=2;align=center;arcSize=4;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" value="ApplicationController" vertex="1">
+          <mxGeometry height="80" width="350" x="80" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="c1_attr" parent="c1" style="align=left;strokeColor=none;fillColor=none;spacingLeft=4;spacingRight=4;verticalAlign=top;resizable=0;rotatable=0;part=1;html=1;whiteSpace=wrap;overflow=hidden;" value="+ apply(jobId: UUID, cvUrl: String): ResponseEntity" vertex="1">
+          <mxGeometry height="50" width="350" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="s1" parent="1" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;rounded=1;fontStyle=1;strokeWidth=2;align=center;arcSize=4;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="ApplicationServiceImpl" vertex="1">
+          <mxGeometry height="80" width="350" x="80" y="230" as="geometry" />
+        </mxCell>
+        <mxCell id="s1_attr" parent="s1" style="align=left;strokeColor=none;fillColor=none;spacingLeft=4;spacingRight=4;verticalAlign=top;resizable=0;rotatable=0;part=1;html=1;whiteSpace=wrap;overflow=hidden;" value="+ save(application: Application): Application" vertex="1">
+          <mxGeometry height="50" width="350" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="r1" parent="1" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;rounded=1;fontStyle=1;strokeWidth=2;align=center;arcSize=4;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="&amp;lt;&amp;lt;Interface&amp;gt;&amp;gt;&lt;br&gt;ApplicationRepository" vertex="1">
+          <mxGeometry height="80" width="350" x="420" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="r1_attr" parent="r1" style="align=left;strokeColor=none;fillColor=none;spacingLeft=4;spacingRight=4;verticalAlign=top;resizable=0;rotatable=0;part=1;html=1;whiteSpace=wrap;overflow=hidden;" value="+ save(application: Application): Application&lt;br&gt;+ findByStudentId(id: UUID): List&amp;lt;Application&amp;gt;" vertex="1">
+          <mxGeometry height="50" width="350" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" parent="1" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;rounded=1;fontStyle=1;strokeWidth=2;align=center;arcSize=4;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Application" vertex="1">
+          <mxGeometry height="130" width="300" x="80" y="480" as="geometry" />
+        </mxCell>
+        <mxCell id="e1_attr" parent="e1" style="align=left;strokeColor=none;fillColor=none;spacingLeft=4;spacingRight=4;verticalAlign=top;resizable=0;rotatable=0;part=1;html=1;whiteSpace=wrap;overflow=hidden;" value="- id: UUID&lt;br&gt;- studentId: UUID&lt;br&gt;- jobId: UUID&lt;br&gt;- cvUrl: String&lt;br&gt;- status: String&lt;br&gt;+ get/set()" vertex="1">
+          <mxGeometry height="100" width="300" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" parent="1" style="swimlane;childLayout=stackLayout;horizontal=1;startSize=30;horizontalStack=0;rounded=1;fontStyle=1;strokeWidth=2;align=center;arcSize=4;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="JobPost" vertex="1">
+          <mxGeometry height="115" width="300" x="470" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="e2_attr" parent="e2" style="align=left;strokeColor=none;fillColor=none;spacingLeft=4;spacingRight=4;verticalAlign=top;resizable=0;rotatable=0;part=1;html=1;whiteSpace=wrap;overflow=hidden;" value="- id: UUID&lt;br&gt;- title: String&lt;br&gt;- enterpriseId: UUID&lt;br&gt;- deadline: Date&lt;br&gt;+ get/set()" vertex="1">
+          <mxGeometry height="85" width="300" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_c_s" edge="1" parent="1" source="c1" style="endArrow=classic;html=1;dashed=1;" target="s1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_s_r" edge="1" parent="1" source="s1_attr" style="endArrow=classic;html=1;dashed=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;edgeStyle=orthogonalEdgeStyle;" target="r1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rel_r_e1" edge="1" parent="1" source="r1" style="endArrow=classic;html=1;dashed=1;edgeStyle=orthogonalEdgeStyle;entryX=1;entryY=0.25;entryDx=0;entryDy=0;" target="e1_attr">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="595" y="535" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel_s_e1" edge="1" parent="1" source="s1_attr" style="endArrow=classic;html=1;dashed=1;edgeStyle=orthogonalEdgeStyle;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;" target="e1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="168" y="400" />
+              <mxPoint x="155" y="400" />
+            </Array>
+            <mxPoint x="120" y="480" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel_s_e2" edge="1" parent="1" source="s1" style="endArrow=classic;html=1;dashed=1;edgeStyle=orthogonalEdgeStyle;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="e2_attr">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="620" y="280" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
