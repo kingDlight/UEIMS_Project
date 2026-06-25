@@ -24,8 +24,8 @@ public class SemesterCreationRequest {
     String semesterCode;
 
     @NotBlank(message = "FIELD_REQUIRED")
-    @Size.List({@Size(min = 2, message = "SEMESTER_NAME_INVALID"), @Size(max = 255, message = "SEMESTER_NAME_TOO_LONG")
-    })
+    @Size(min = 2, message = "SEMESTER_NAME_INVALID")
+    @Size(max = 255, message = "SEMESTER_NAME_TOO_LONG")
     String name;
 
     @NotNull(message = "FIELD_REQUIRED")
