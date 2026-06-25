@@ -1,0 +1,83 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0">
+  <diagram id="activity_uc08" name="UC-08 Activity Flow">
+    <mxGraphModel dx="1500" dy="807" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="Start" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#000000;strokeColor=none;" value="" vertex="1">
+          <mxGeometry height="40" width="40" x="380" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="InvokeWizard" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Invoke wizard panel" vertex="1">
+          <mxGeometry height="40" width="120" x="340" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="DisplayFields" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Display empty data fields" vertex="1">
+          <mxGeometry height="40" width="120" x="340" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="CompleteForm" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Complete form &amp; Save" vertex="1">
+          <mxGeometry height="40" width="120" x="340" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="EvaluateConstraints" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Evaluate DB constraints" vertex="1">
+          <mxGeometry height="40" width="120" x="340" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="IsValid" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="Is valid email?" vertex="1">
+          <mxGeometry height="80" width="120" x="340" y="420" as="geometry" />
+        </mxCell>
+        <mxCell id="ErrorDuplicate" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Flag input field" vertex="1">
+          <mxGeometry height="40" width="120" x="520" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="PromptCorrect" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Prompt to correct" vertex="1">
+          <mxGeometry height="40" width="120" x="520" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="AutoGenPassword" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Auto-generate password" vertex="1">
+          <mxGeometry height="40" width="120" x="340" y="540" as="geometry" />
+        </mxCell>
+        <mxCell id="HashAndPersist" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Hash and persist to DB" vertex="1">
+          <mxGeometry height="40" width="120" x="340" y="620" as="geometry" />
+        </mxCell>
+        <mxCell id="DispatchEmail" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Dispatch login info email" vertex="1">
+          <mxGeometry height="40" width="120" x="340" y="700" as="geometry" />
+        </mxCell>
+        <mxCell id="End" parent="1" style="ellipse;html=1;shape=endState;fillColor=#000000;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="40" width="40" x="380" y="780" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="Start" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="InvokeWizard" value="(1)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="InvokeWizard" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="DisplayFields" value="(2)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="DisplayFields" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="CompleteForm" value="(3)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="CompleteForm" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="EvaluateConstraints" value="(4)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="EvaluateConstraints" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="IsValid" value="(5)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="IsValid" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="ErrorDuplicate" value="(10) No">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="ErrorDuplicate" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=0;entryX=0.5;entryY=1;" target="PromptCorrect" value="(11)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="PromptCorrect" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" target="CompleteForm" value="(12)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="IsValid" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="AutoGenPassword" value="(6) Yes">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="AutoGenPassword" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="HashAndPersist" value="(7)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="HashAndPersist" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="DispatchEmail" value="(8)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="DispatchEmail" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="End" value="(9)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

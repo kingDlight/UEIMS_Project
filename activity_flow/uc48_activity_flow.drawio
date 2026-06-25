@@ -1,0 +1,71 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0">
+  <diagram id="activity_UC-48_Activity_Flow" name="UC-48 Activity Flow">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="Start" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#000000;strokeColor=none;" value="" vertex="1"><mxGeometry height="40" width="40" x="420" y="20" as="geometry" /></mxCell>
+        <mxCell id="ViewReport" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="View Report" vertex="1"><mxGeometry height="40" width="120" x="380" y="120" as="geometry" /></mxCell>
+        <mxCell id="TypeFeedback" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Type Feedback" vertex="1"><mxGeometry height="40" width="120" x="380" y="220" as="geometry" /></mxCell>
+        <mxCell id="SelectDecision" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Select Decision" vertex="1"><mxGeometry height="40" width="120" x="380" y="320" as="geometry" /></mxCell>
+        <mxCell id="ValidateFeedback" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="Validate Feedback" vertex="1"><mxGeometry height="80" width="120" x="380" y="420" as="geometry" /></mxCell>
+        <mxCell id="IsValid" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="Is Valid" vertex="1"><mxGeometry height="80" width="120" x="380" y="520" as="geometry" /></mxCell>
+        <mxCell id="UpdateStatusReject" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Update Status Reject" vertex="1"><mxGeometry height="40" width="120" x="380" y="620" as="geometry" /></mxCell>
+        <mxCell id="ShowSuccessReject" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Show Success Reject" vertex="1"><mxGeometry height="40" width="120" x="380" y="720" as="geometry" /></mxCell>
+        <mxCell id="End" parent="1" style="ellipse;html=1;shape=endState;fillColor=#000000;strokeColor=#000000;" value="" vertex="1"><mxGeometry height="40" width="40" x="420" y="820" as="geometry" /></mxCell>
+        <mxCell id="PromptConfirm" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Prompt Confirm" vertex="1"><mxGeometry height="40" width="120" x="620" y="100" as="geometry" /></mxCell>
+        <mxCell id="Confirm" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Confirm" vertex="1"><mxGeometry height="40" width="120" x="620" y="180" as="geometry" /></mxCell>
+        <mxCell id="UpdateStatusApprove" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Update Status Approve" vertex="1"><mxGeometry height="40" width="120" x="620" y="260" as="geometry" /></mxCell>
+        <mxCell id="SaveScore" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Save Score" vertex="1"><mxGeometry height="40" width="120" x="620" y="340" as="geometry" /></mxCell>
+        <mxCell id="ShowError" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Show Error" vertex="1"><mxGeometry height="40" width="120" x="620" y="420" as="geometry" /></mxCell>
+
+        <mxCell id="e1" edge="1" parent="1" source="Start" target="ViewReport" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" value="(1)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="ViewReport" target="TypeFeedback" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" value="(2)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="TypeFeedback" target="SelectDecision" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" value="(3)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="SelectDecision" target="ValidateFeedback" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" value="(4) Reject">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="ValidateFeedback" target="IsValid" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" value="(5)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="IsValid" target="UpdateStatusReject" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" value="(6) Yes">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="UpdateStatusReject" target="ShowSuccessReject" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" value="(7)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="ShowSuccessReject" target="End" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" value="(8)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="SelectDecision" target="PromptConfirm" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0.5;entryY=1;" value="(11) Approve">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="PromptConfirm" target="Confirm" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" value="(12) Yes">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="Confirm" target="UpdateStatusApprove" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" value="(13)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="UpdateStatusApprove" target="SaveScore" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" value="(14)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" edge="1" parent="1" source="SaveScore" target="End" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0;exitY=0.5;entryX=0.5;entryY=0;" value="(15)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e14" edge="1" parent="1" source="IsValid" target="ShowError" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0.5;entryY=1;" value="(9) No">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e15" edge="1" parent="1" source="ShowError" target="TypeFeedback" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0;exitY=0.5;entryX=0.5;entryY=1;" value="(10)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

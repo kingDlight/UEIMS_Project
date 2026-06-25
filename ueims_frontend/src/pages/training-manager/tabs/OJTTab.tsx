@@ -588,8 +588,8 @@ export const OJTTab: React.FC = () => {
     },
     {
       title: <HeaderBadge align="right">Status</HeaderBadge>,
-      dataIndex: 'status',
-      key: 'status',
+      dataIndex: 'workflowStatus',
+      key: 'workflowStatus',
       align: 'right' as const,
       width: 120,
       render: (status: WorkflowStatus) => (

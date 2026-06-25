@@ -103,7 +103,7 @@ public interface PlacementApplicationRepository extends JpaRepository<PlacementA
 		WHERE r.role_name = 'STUDENT'
 		AND u.status = 'ACTIVE'
 		AND u.deleted_at IS NULL
-		AND es.status IN ('ACCEPTED', 'OJT', 'MATCHED')
+		AND es.status IN ('ELIGIBLE', 'ACCEPTED', 'OJT', 'MATCHED')
 		ORDER BY u.full_name
 		""",
             nativeQuery = true)

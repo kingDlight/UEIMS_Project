@@ -1,0 +1,217 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0">
+  <diagram id="activity_uc01" name="UC-01 Activity Flow">
+    <mxGraphModel dx="864" dy="465" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="Start" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#000000;strokeColor=none;" value="" vertex="1">
+          <mxGeometry height="40" width="40" x="380" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="AccessLogin" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Access Login Page" vertex="1">
+          <mxGeometry height="40" width="120" x="340" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="ChooseMethod" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="Login Method?" vertex="1">
+          <mxGeometry height="80" width="120" x="340" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="EnterCreds" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Enter Email &amp; Password" vertex="1">
+          <mxGeometry height="40" width="120" x="90" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="ValidateCreds" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="System validates credentials" vertex="1">
+          <mxGeometry height="40" width="120" x="90" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="IsDeactivated" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="Account&lt;br&gt;deactivated?" vertex="1">
+          <mxGeometry height="80" width="120" x="90" y="420" as="geometry" />
+        </mxCell>
+        <mxCell id="ErrorDeactivated" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Display error &quot;Account locked&quot;" vertex="1">
+          <mxGeometry height="40" width="120" x="20" y="900" as="geometry" />
+        </mxCell>
+        <mxCell id="IsValid" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="Valid credentials?" vertex="1">
+          <mxGeometry height="80" width="120" x="90" y="585" as="geometry" />
+        </mxCell>
+        <mxCell id="CheckFailedCount" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="Failed 5 times?" vertex="1">
+          <mxGeometry height="80" width="120" x="310" y="580" as="geometry" />
+        </mxCell>
+        <mxCell id="LockAccount" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Lock account" vertex="1">
+          <mxGeometry height="40" width="120" x="310" y="720" as="geometry" />
+        </mxCell>
+        <mxCell id="ErrorInvalid" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Display error &quot;Invalid credentials&quot;" vertex="1">
+          <mxGeometry height="40" width="120" x="310" y="470" as="geometry" />
+        </mxCell>
+        <mxCell id="PromptReEnter1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Prompt to re-enter" vertex="1">
+          <mxGeometry height="40" width="120" x="310" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="ClickGoogle" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Click &quot;Login with Google&quot;" vertex="1">
+          <mxGeometry height="40" width="120" x="520" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="RedirectGoogle" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Redirect to Google OAuth consent screen" vertex="1">
+          <mxGeometry height="50" width="120" x="520" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="AuthGoogle" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Authenticate &amp; Grant permissions" vertex="1">
+          <mxGeometry height="40" width="120" x="520" y="450" as="geometry" />
+        </mxCell>
+        <mxCell id="RedirectBack" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Redirect back with authorization token" vertex="1">
+          <mxGeometry height="40" width="120" x="520" y="530" as="geometry" />
+        </mxCell>
+        <mxCell id="ValidateToken" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Validate token &amp; extract email" vertex="1">
+          <mxGeometry height="40" width="120" x="520" y="610" as="geometry" />
+        </mxCell>
+        <mxCell id="IsRegistered" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="Email registered?" vertex="1">
+          <mxGeometry height="80" width="120" x="520" y="690" as="geometry" />
+        </mxCell>
+        <mxCell id="ErrorNotRegistered" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Display error &quot;Not registered&quot;" vertex="1">
+          <mxGeometry height="40" width="120" x="720" y="710" as="geometry" />
+        </mxCell>
+        <mxCell id="MatchAccount" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Match with existing account" vertex="1">
+          <mxGeometry height="40" width="120" x="520" y="810" as="geometry" />
+        </mxCell>
+        <mxCell id="GenJWT_Google" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Generate secure JWT payload" vertex="1">
+          <mxGeometry height="40" width="120" x="265" y="810" as="geometry" />
+        </mxCell>
+        <mxCell id="LogAction" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="System logs the action" vertex="1">
+          <mxGeometry height="40" width="120" x="275" y="890" as="geometry" />
+        </mxCell>
+        <mxCell id="RedirectDashboard" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Redirect to Dashboard" vertex="1">
+          <mxGeometry height="40" width="120" x="275" y="960" as="geometry" />
+        </mxCell>
+        <mxCell id="EndSuccess" parent="1" style="ellipse;html=1;shape=endState;fillColor=#000000;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="40" width="40" x="420" y="1020" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="Start" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="AccessLogin" value="(1)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="AccessLogin" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="ChooseMethod" value="(2)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="ChooseMethod" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" target="EnterCreds" value="(3) Internal Account">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="ChooseMethod" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0.5;entryY=0;" target="ClickGoogle" value="(19) Google Account">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="EnterCreds" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="ValidateCreds" value="(4)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="150" y="310" />
+              <mxPoint x="150" y="310" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="ValidateCreds" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="IsDeactivated" value="(5)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="IsDeactivated" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0;exitY=0.5;entryX=0.5;entryY=0;" target="ErrorDeactivated" value="(11) No">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="80" y="460" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="IsDeactivated" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="IsValid" value="(6) Yes">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="ErrorDeactivated" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0.5;entryY=0;" target="EndSuccess" value="(12)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="80" y="1040" />
+            </Array>
+            <mxPoint x="-200" y="1010" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="IsValid" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0.5;entryY=0;" target="GenJWT_Google" value="(7) Yes">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="150" y="830" />
+            </Array>
+            <mxPoint x="230" y="880" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="IsValid" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="CheckFailedCount" value="(13) No">
+          <mxGeometry relative="1" x="0.0101" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="CheckFailedCount" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="LockAccount" value="(14)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" edge="1" parent="1" source="CheckFailedCount" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=0;entryX=0.5;entryY=1;" target="ErrorInvalid" value="(15) No">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e14" edge="1" parent="1" source="ErrorInvalid" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=0;entryX=0.5;entryY=1;" target="PromptReEnter1" value="(17)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="370" y="420" />
+              <mxPoint x="370" y="420" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e15" edge="1" parent="1" source="LockAccount" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=0;entryX=0.5;entryY=1;" target="PromptReEnter1" value="(16)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="480" y="735" />
+              <mxPoint x="480" y="320" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e16" edge="1" parent="1" source="PromptReEnter1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0;exitY=0.5;entryX=0.5;entryY=1;" target="EnterCreds" value="(18) Yes">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="190" y="320" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e17" edge="1" parent="1" source="ClickGoogle" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="RedirectGoogle" value="(20)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e18" edge="1" parent="1" source="RedirectGoogle" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="AuthGoogle" value="(21)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e19" edge="1" parent="1" source="AuthGoogle" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="RedirectBack" value="(22)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e20" edge="1" parent="1" source="RedirectBack" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="ValidateToken" value="(23)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e21" edge="1" parent="1" source="ValidateToken" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="IsRegistered" value="(24)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e22" edge="1" parent="1" source="IsRegistered" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="ErrorNotRegistered" value="(25) No">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e23" edge="1" parent="1" source="ErrorNotRegistered" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0;exitY=0.5;entryX=0.5;entryY=0;" target="EndSuccess" value="(27)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="780" y="1040" />
+            </Array>
+            <mxPoint x="770" y="1170" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e24" edge="1" parent="1" source="IsRegistered" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="MatchAccount" value="(26) Yes">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e25" edge="1" parent="1" source="MatchAccount" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" target="GenJWT_Google" value="(28)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="480" y="830" />
+              <mxPoint x="480" y="830" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e27" edge="1" parent="1" source="GenJWT_Google" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0.5;entryY=0;" target="LogAction" value="(8)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="355" y="880" />
+              <mxPoint x="355" y="880" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e28" edge="1" parent="1" source="LogAction" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="RedirectDashboard" value="(9)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e29" edge="1" parent="1" source="RedirectDashboard" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0.5;entryY=0;" target="EndSuccess" value="(10)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

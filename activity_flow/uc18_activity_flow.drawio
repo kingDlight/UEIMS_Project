@@ -1,0 +1,69 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0">
+  <diagram id="activity_uc18" name="UC-18 Activity Flow">
+    <mxGraphModel dx="475" dy="256" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="Start" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#000000;strokeColor=none;" value="" vertex="1">
+          <mxGeometry height="40" width="40" x="380" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="NavigateMenu" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Navigate to Enterprise Management" vertex="1">
+          <mxGeometry height="40" width="120" x="340" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="FetchList" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="System fetches enterprise list" vertex="1">
+          <mxGeometry height="40" width="120" x="340" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="DisplayList" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Display list with columns" vertex="1">
+          <mxGeometry height="40" width="120" x="340" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="IsFilterSort" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="Apply Filter / Sort?" vertex="1">
+          <mxGeometry height="80" width="120" x="340" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="SelectEnterprise" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Select an enterprise" vertex="1">
+          <mxGeometry height="40" width="120" x="340" y="460" as="geometry" />
+        </mxCell>
+        <mxCell id="ViewDetails" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="View detailed information" vertex="1">
+          <mxGeometry height="40" width="120" x="340" y="540" as="geometry" />
+        </mxCell>
+        <mxCell id="End" parent="1" style="ellipse;html=1;shape=endState;fillColor=#000000;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="40" width="40" x="380" y="620" as="geometry" />
+        </mxCell>
+        <mxCell id="ProcessAction" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Process filter/search/sort" vertex="1">
+          <mxGeometry height="40" width="120" x="540" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="Start" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="NavigateMenu" value="(1)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="NavigateMenu" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="FetchList" value="(2)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="FetchList" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="DisplayList" value="(3)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="DisplayList" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="IsFilterSort" value="(4)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="IsFilterSort" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="SelectEnterprise" value="(6) No">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="SelectEnterprise" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="ViewDetails" value="(7)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="ViewDetails" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="End" value="(8)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="IsFilterSort" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="ProcessAction" value="(5) Yes">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="ProcessAction" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0;exitY=0.5;entryX=0.5;entryY=1;" target="FetchList" value="(9)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="600" y="200" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

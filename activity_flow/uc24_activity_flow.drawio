@@ -1,0 +1,92 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0">
+  <diagram id="activity_UC-24_Activity_Flow" name="UC-24 Activity Flow">
+    <mxGraphModel dx="1239" dy="667" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="Start" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#000000;strokeColor=none;" value="" vertex="1">
+          <mxGeometry height="40" width="40" x="420" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="NavigateMenu" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Navigate Menu" vertex="1">
+          <mxGeometry height="40" width="120" x="380" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="SelectSemester" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Select Semester" vertex="1">
+          <mxGeometry height="40" width="120" x="380" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="ClickLock" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Click Lock" vertex="1">
+          <mxGeometry height="40" width="120" x="380" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="CheckAuth" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="Check Auth" vertex="1">
+          <mxGeometry height="80" width="120" x="380" y="420" as="geometry" />
+        </mxCell>
+        <mxCell id="IsAuth" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="Is Auth" vertex="1">
+          <mxGeometry height="80" width="120" x="380" y="545" as="geometry" />
+        </mxCell>
+        <mxCell id="ShowDialog" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Show Dialog" vertex="1">
+          <mxGeometry height="40" width="120" x="380" y="680" as="geometry" />
+        </mxCell>
+        <mxCell id="DoubleConfirm" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Double Confirm" vertex="1">
+          <mxGeometry height="40" width="120" x="380" y="770" as="geometry" />
+        </mxCell>
+        <mxCell id="ApplyLock" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Apply Lock" vertex="1">
+          <mxGeometry height="40" width="120" x="380" y="860" as="geometry" />
+        </mxCell>
+        <mxCell id="NotifyUsers" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Notify Users" vertex="1">
+          <mxGeometry height="40" width="120" x="380" y="950" as="geometry" />
+        </mxCell>
+        <mxCell id="UpdateStatus" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Update Status" vertex="1">
+          <mxGeometry height="40" width="120" x="380" y="1030" as="geometry" />
+        </mxCell>
+        <mxCell id="End" parent="1" style="ellipse;html=1;shape=endState;fillColor=#000000;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="40" width="40" x="420" y="1110" as="geometry" />
+        </mxCell>
+        <mxCell id="AccessDenied" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Access Denied" vertex="1">
+          <mxGeometry height="40" width="120" x="560" y="565" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="Start" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="NavigateMenu" value="(1)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="NavigateMenu" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="SelectSemester" value="(2)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="SelectSemester" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="ClickLock" value="(3)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="ClickLock" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="CheckAuth" value="(4)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="CheckAuth" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="IsAuth" value="(5)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="IsAuth" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="ShowDialog" value="(6) Yes">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="ShowDialog" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="DoubleConfirm" value="(7)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="DoubleConfirm" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="ApplyLock" value="(8)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="ApplyLock" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="NotifyUsers" value="(9)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="NotifyUsers" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="UpdateStatus" value="(10)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="UpdateStatus" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="End" value="(11)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="IsAuth" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="AccessDenied" value="(12) No">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" edge="1" parent="1" source="AccessDenied" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=1;entryY=0.5;exitDx=0;exitDy=0;entryDx=0;entryDy=0;" target="End" value="(13)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="620" y="1130" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

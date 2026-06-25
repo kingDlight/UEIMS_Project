@@ -1,0 +1,117 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0">
+  <diagram id="activity_uc16" name="UC-16 Activity Flow">
+    <mxGraphModel dx="1900" dy="1023" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="Start" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#000000;strokeColor=none;" value="" vertex="1">
+          <mxGeometry height="40" width="40" x="380" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="NavigateMenu" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Navigate to Semester Mgt" vertex="1">
+          <mxGeometry height="40" width="120" x="340" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="SelectSemester" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Select semester" vertex="1">
+          <mxGeometry height="40" width="120" x="340" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="ClickEdit" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Click Edit Semester" vertex="1">
+          <mxGeometry height="40" width="120" x="340" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="CheckStatus" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="Check Status" vertex="1">
+          <mxGeometry height="80" width="120" x="340" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="DisableNotify" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Disable edit &amp; Notify" vertex="1">
+          <mxGeometry height="40" width="120" x="540" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="DisableCoreWarn" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Disable core fields &amp; Warn" vertex="1">
+          <mxGeometry height="40" width="120" x="140" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="DisplayForm" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Display editable form" vertex="1">
+          <mxGeometry height="40" width="120" x="340" y="460" as="geometry" />
+        </mxCell>
+        <mxCell id="ModifyFields" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Modify fields" vertex="1">
+          <mxGeometry height="40" width="120" x="340" y="540" as="geometry" />
+        </mxCell>
+        <mxCell id="ValidateChanges" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Validate changes" vertex="1">
+          <mxGeometry height="40" width="120" x="340" y="620" as="geometry" />
+        </mxCell>
+        <mxCell id="IsValid" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="Is Valid?" vertex="1">
+          <mxGeometry height="80" width="120" x="340" y="700" as="geometry" />
+        </mxCell>
+        <mxCell id="ErrorTimeline" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Show error &amp; prevent save" vertex="1">
+          <mxGeometry height="40" width="120" x="520" y="720" as="geometry" />
+        </mxCell>
+        <mxCell id="ClickSave" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Click Save" vertex="1">
+          <mxGeometry height="40" width="120" x="340" y="820" as="geometry" />
+        </mxCell>
+        <mxCell id="UpdateAndSuccess" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Update info &amp; Success" vertex="1">
+          <mxGeometry height="40" width="120" x="340" y="900" as="geometry" />
+        </mxCell>
+        <mxCell id="End" parent="1" style="ellipse;html=1;shape=endState;fillColor=#000000;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="40" width="40" x="380" y="980" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="Start" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="NavigateMenu" value="(1)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="NavigateMenu" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="SelectSemester" value="(2)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="SelectSemester" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="ClickEdit" value="(3)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="ClickEdit" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="CheckStatus" value="(4)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="CheckStatus" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="DisableNotify" value="(15) Locked">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="DisableNotify" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0;exitY=0.5;entryX=0.5;entryY=0;" target="End" value="(16)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="689.9999999999854" y="940" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="CheckStatus" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0;exitY=0.5;entryX=1;entryY=0.5;" target="DisableCoreWarn" value="(5) Active">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="DisableCoreWarn" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0.5;entryY=0;" target="DisplayForm" value="(6)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="200" y="480" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="CheckStatus" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="DisplayForm" value="(17) Draft/Open">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="DisplayForm" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="ModifyFields" value="(7)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="ModifyFields" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="ValidateChanges" value="(8)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="ValidateChanges" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="IsValid" value="(9)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" edge="1" parent="1" source="IsValid" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" target="ErrorTimeline" value="(13) No">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e14" edge="1" parent="1" source="ErrorTimeline" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0;exitY=0.5;entryX=0.5;entryY=1;" target="ModifyFields" value="(14)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="580" y="560" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e15" edge="1" parent="1" source="IsValid" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="ClickSave" value="(10) Yes">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e16" edge="1" parent="1" source="ClickSave" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="UpdateAndSuccess" value="(11)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e17" edge="1" parent="1" source="UpdateAndSuccess" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="End" value="(12)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

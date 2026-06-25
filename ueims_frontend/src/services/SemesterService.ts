@@ -56,6 +56,11 @@ export const SemesterService = {
     return response.data;
   },
 
+  async reopenSemester(id: string): Promise<SemesterResponse> {
+    const response = await api.put<SemesterResponse>(`/semesters/${id}/reopen`);
+    return response.data;
+  },
+
   async updateSemester(
     id: string,
     data: {

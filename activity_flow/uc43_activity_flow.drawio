@@ -1,0 +1,104 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0">
+  <diagram id="activity_UC-43_Activity_Flow" name="UC-43 Activity Flow">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="Start" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#000000;strokeColor=none;" value="" vertex="1"><mxGeometry height="40" width="40" x="420" y="20" as="geometry" /></mxCell>
+        <mxCell id="SelectAction" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Select Action" vertex="1"><mxGeometry height="40" width="120" x="380" y="120" as="geometry" /></mxCell>
+        <mxCell id="EnterDetails" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Enter Details" vertex="1"><mxGeometry height="40" width="120" x="380" y="220" as="geometry" /></mxCell>
+        <mxCell id="ClickSave" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Click Save" vertex="1"><mxGeometry height="40" width="120" x="380" y="320" as="geometry" /></mxCell>
+        <mxCell id="ValidateDate" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="Validate Date" vertex="1"><mxGeometry height="80" width="120" x="380" y="420" as="geometry" /></mxCell>
+        <mxCell id="IsValid" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="Is Valid" vertex="1"><mxGeometry height="80" width="120" x="380" y="520" as="geometry" /></mxCell>
+        <mxCell id="SaveToDB" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Save To DB" vertex="1"><mxGeometry height="40" width="120" x="380" y="620" as="geometry" /></mxCell>
+        <mxCell id="SendEmail" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Send Email" vertex="1"><mxGeometry height="40" width="120" x="380" y="720" as="geometry" /></mxCell>
+        <mxCell id="IsEmailSent" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="Is Email Sent" vertex="1"><mxGeometry height="80" width="120" x="380" y="820" as="geometry" /></mxCell>
+        <mxCell id="ShowSuccess" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Show Success" vertex="1"><mxGeometry height="40" width="120" x="380" y="920" as="geometry" /></mxCell>
+        <mxCell id="End" parent="1" style="ellipse;html=1;shape=endState;fillColor=#000000;strokeColor=#000000;" value="" vertex="1"><mxGeometry height="40" width="40" x="420" y="1020" as="geometry" /></mxCell>
+        <mxCell id="ProposeSlots" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Propose Slots" vertex="1"><mxGeometry height="40" width="120" x="620" y="100" as="geometry" /></mxCell>
+        <mxCell id="ClickReschedule" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Click Reschedule" vertex="1"><mxGeometry height="40" width="120" x="620" y="180" as="geometry" /></mxCell>
+        <mxCell id="ClickCancel" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Click Cancel" vertex="1"><mxGeometry height="40" width="120" x="620" y="260" as="geometry" /></mxCell>
+        <mxCell id="EnterReason" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Enter Reason" vertex="1"><mxGeometry height="40" width="120" x="620" y="340" as="geometry" /></mxCell>
+        <mxCell id="ConfirmCancel" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Confirm Cancel" vertex="1"><mxGeometry height="40" width="120" x="620" y="420" as="geometry" /></mxCell>
+        <mxCell id="UpdateStatusCanceled" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Update Status Canceled" vertex="1"><mxGeometry height="40" width="120" x="620" y="500" as="geometry" /></mxCell>
+        <mxCell id="SendCancelEmail" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Send Cancel Email" vertex="1"><mxGeometry height="40" width="120" x="620" y="580" as="geometry" /></mxCell>
+        <mxCell id="ShowDateError" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Show Date Error" vertex="1"><mxGeometry height="40" width="120" x="620" y="660" as="geometry" /></mxCell>
+        <mxCell id="ShowEmailError" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Show Email Error" vertex="1"><mxGeometry height="40" width="120" x="620" y="740" as="geometry" /></mxCell>
+
+        <mxCell id="e1" edge="1" parent="1" source="Start" target="SelectAction" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" value="(1)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="SelectAction" target="EnterDetails" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" value="(2) Create">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="EnterDetails" target="ClickSave" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" value="(3)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="ClickSave" target="ValidateDate" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" value="(4)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="ValidateDate" target="IsValid" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" value="(5)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="IsValid" target="SaveToDB" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" value="(6) Yes">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="SaveToDB" target="SendEmail" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" value="(7)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="SendEmail" target="IsEmailSent" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" value="(8)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="IsEmailSent" target="ShowSuccess" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" value="(9) Yes">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="ShowSuccess" target="End" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" value="(10)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="SelectAction" target="ProposeSlots" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0.5;entryY=1;" value="(15) Propose">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="ProposeSlots" target="EnterDetails" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0;exitY=0.5;entryX=0.5;entryY=0;" value="(16)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" edge="1" parent="1" source="SelectAction" target="ClickReschedule" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0.5;entryY=0;" value="(17) Reschedule">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e14" edge="1" parent="1" source="ClickReschedule" target="EnterDetails" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0;exitY=0.5;entryX=0.5;entryY=0;" value="(18)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e15" edge="1" parent="1" source="SelectAction" target="ClickCancel" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0.5;entryY=0;" value="(19) Cancel">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e16" edge="1" parent="1" source="ClickCancel" target="EnterReason" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" value="(20)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e17" edge="1" parent="1" source="EnterReason" target="ConfirmCancel" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" value="(21)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e18" edge="1" parent="1" source="ConfirmCancel" target="UpdateStatusCanceled" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" value="(22)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e19" edge="1" parent="1" source="UpdateStatusCanceled" target="SendCancelEmail" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" value="(23)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e20" edge="1" parent="1" source="SendCancelEmail" target="End" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0;exitY=0.5;entryX=0.5;entryY=0;" value="(24)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e21" edge="1" parent="1" source="IsValid" target="ShowDateError" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0.5;entryY=0;" value="(11) No">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e22" edge="1" parent="1" source="ShowDateError" target="EnterDetails" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0;exitY=0.5;entryX=0.5;entryY=1;" value="(12)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e23" edge="1" parent="1" source="IsEmailSent" target="ShowEmailError" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0.5;entryY=1;" value="(13) No">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e24" edge="1" parent="1" source="ShowEmailError" target="End" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0;exitY=0.5;entryX=0.5;entryY=0;" value="(14)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

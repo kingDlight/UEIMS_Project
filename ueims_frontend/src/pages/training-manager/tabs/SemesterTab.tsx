@@ -8,6 +8,7 @@ import {
   Pencil,
   Star,
   Power,
+  RefreshCcw,
 } from 'lucide-react';
 import dayjs from 'dayjs';
 import { SemesterService } from '@/services/SemesterService';
@@ -236,13 +237,24 @@ export const SemesterTab: React.FC = () => {
         }
       }
       await SemesterService.activateSemester(record.id);
-      message.success({ content: `"${record.name}" is now set as Current semester.`, duration: 2.5 });
+      void message.success({ content: `Semester "${record.name}" is now the active semester`, duration: 3 });
       void fetchSemesters();
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message
-        ?? 'Failed to set current semester';
-      message.error(msg);
+      const msg = err.response?.data?.message || 'Failed to set active semester';
+      void message.error({ content: msg, duration: 4 });
+    }
+  }, [fetchSemesters]);
+
+  const handleReopen = useCallback(async (record: SemesterRecord) => {
+    try {
+      await SemesterService.reopenSemester(record.id);
+      void message.success({ content: `Semester "${record.name}" has been re-opened`, duration: 3 });
+      void fetchSemesters();
+    } catch (err: any) {
+      console.error(err);
+      const msg = err.response?.data?.message || 'Failed to re-open semester';
+      void message.error({ content: msg, duration: 4 });
     }
   }, [fetchSemesters]);
 
@@ -645,6 +657,53 @@ export const SemesterTab: React.FC = () => {
               >
                 <Power size={11} />
                 Close
+              </button>
+            </Popconfirm>
+          )}
+
+          {/* Re-open — only for CLOSED or LOCKED */}
+          {(record.originalStatus === 'CLOSED' || record.originalStatus === 'LOCKED') && (
+            <Popconfirm
+              title={`Re-open "${record.name}"?`}
+              description="This will change the semester status back to OPEN."
+              onConfirm={() => handleReopen(record)}
+              okText="Re-open"
+              cancelText="Cancel"
+              okButtonProps={{ style: { borderRadius: cc.radiusMd, fontWeight: 600 } }}
+              cancelButtonProps={{ style: { borderRadius: cc.radiusMd } }}
+            >
+              <button
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 5,
+                  padding: '5px 11px',
+                  borderRadius: cc.radiusMd,
+                  border: 'none',
+                  background: 'transparent',
+                  color: cc.textSecondary,
+                  fontSize: 11.5,
+                  fontWeight: 600,
+                  fontFamily: 'Inter, sans-serif',
+                  cursor: 'pointer',
+                  transition: 'all 0.18s ease',
+                  whiteSpace: 'nowrap',
+                }}
+                onMouseEnter={(e) => {
+                  const b = e.currentTarget as HTMLButtonElement;
+                  b.style.color = cc.brand;
+                  b.style.background = cc.brandMuted;
+                  b.style.transform = 'translateY(-1px)';
+                }}
+                onMouseLeave={(e) => {
+                  const b = e.currentTarget as HTMLButtonElement;
+                  b.style.color = cc.textSecondary;
+                  b.style.background = 'transparent';
+                  b.style.transform = 'translateY(0)';
+                }}
+              >
+                <RefreshCcw size={11} />
+                Re-open
               </button>
             </Popconfirm>
           )}

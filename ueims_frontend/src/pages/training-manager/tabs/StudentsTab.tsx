@@ -901,9 +901,13 @@ export const StudentsTab: React.FC = () => {
     try {
       setImporting(true);
       const activeSemester = await SemesterService.getActiveSemester();
+      if (!activeSemester?.semesterId) {
+        message.error({ content: 'No active semester found. Please set an active semester first.', key: 'import' });
+        return;
+      }
       await EligibleStudentService.importFromExcel(
         actualFile as File,
-        activeSemester?.semesterId ?? ''
+        activeSemester.semesterId
       );
       message.success({ content: t('studentsTab.importSuccess'), key: 'import' });
       setImportModalOpen(false);
@@ -917,14 +921,18 @@ export const StudentsTab: React.FC = () => {
   const handleExport = async () => {
     try {
       const activeSemester = await SemesterService.getActiveSemester();
+      if (!activeSemester?.semesterId) {
+        message.error({ content: 'No active semester found. Please set an active semester first.', key: 'export' });
+        return;
+      }
       const blob = await EligibleStudentService.exportToExcel(
-        activeSemester?.semesterId ?? ''
+        activeSemester.semesterId
       );
       const url = globalThis.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = `OJT_Students_${
-        activeSemester?.semesterCode ?? 'list'
+        activeSemester.semesterCode
       }.xlsx`;
       a.click();
       globalThis.URL.revokeObjectURL(url);
