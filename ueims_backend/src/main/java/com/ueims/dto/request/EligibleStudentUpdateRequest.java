@@ -34,7 +34,7 @@ public class EligibleStudentUpdateRequest {
 
     @NotNull(message = "GPA is required")
     @DecimalMin(value = "0.00", message = "GPA must be >= 0.00")
-    @DecimalMax(value = "4.00", message = "GPA must be <= 4.00")
+    @DecimalMax(value = "10.00", message = "GPA must be <= 10.00")
     private BigDecimal gpa;
 
     @Min(value = 1, message = "Current semester must be >= 1")

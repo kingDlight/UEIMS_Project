@@ -66,7 +66,7 @@ class EligibleStudentServiceImplTest {
                 .fullName("John Doe")
                 .email("john@test.com")
                 .major("SE")
-                .gpa(new BigDecimal("3.5"))
+                .gpa(new BigDecimal("7.50"))
                 .currentSemester(5)
                 .status("OJT")
                 .semester(semester)
