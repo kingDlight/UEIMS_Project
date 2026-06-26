@@ -346,7 +346,7 @@ INSERT INTO interviews (interview_id, application_id, scheduled_datetime, status
     ('127ce074-d940-48de-85d4-faffa10101bf', 'bfad22f8-cc63-4b06-9273-b016e5a5f4ec', '2026-07-15 10:00:00', 'COMPLETED', TRUE, 'PASS');
 -- Placement application APPROVED (TM approved the match)
 INSERT INTO placement_applications (application_id, student_id, enterprise_id, semester_id, status, cover_letter, reviewed_by, reviewed_at) VALUES
-    ('baba0001-0001-0001-0001-000000000001', 'f8577259-d7f4-4738-90db-5e3c6aefd84a', '0264a1ce-a950-4eb1-9d71-75fe9b254d43', '26f11784-e2dc-48bb-aec0-80ee582b49a0', 'APPROVED', 'I am eager to join Momo as a backend developer intern.', '249b64b9-1ab8-4e92-bd30-2951e07f1def', CURRENT_TIMESTAMP);
+    ('aaaa0001-1001-1001-1001-100000000001', 'f8577259-d7f4-4738-90db-5e3c6aefd84a', '0264a1ce-a950-4eb1-9d71-75fe9b254d43', '26f11784-e2dc-48bb-aec0-80ee582b49a0', 'APPROVED', 'I am eager to join Momo as a backend developer intern.', '249b64b9-1ab8-4e92-bd30-2951e07f1def', CURRENT_TIMESTAMP);
 -- NO enterprise_assignments yet — will be created when MATCHED→OJT transition happens
 
 -- STUDENT 17 (SE15017) — MATCHED
@@ -362,7 +362,7 @@ INSERT INTO applications (application_id, job_post_id, student_id, cv_file_url, 
 INSERT INTO interviews (interview_id, application_id, scheduled_datetime, status, student_confirmed, result) VALUES
     ('d4edf8ee-abf2-4539-be79-6bf3fb81433c', 'a39a2d59-b478-4dc4-bb38-ebfe0765090f', '2026-07-15 14:00:00', 'COMPLETED', TRUE, 'PASS');
 INSERT INTO placement_applications (application_id, student_id, enterprise_id, semester_id, status, cover_letter, reviewed_by, reviewed_at) VALUES
-    ('baba0002-0002-0002-0002-000000000002', 'afbfb57b-a5f4-4ca1-9d6a-b52e306b097b', '0264a1ce-a950-4eb1-9d71-75fe9b254d43', '26f11784-e2dc-48bb-aec0-80ee582b49a0', 'APPROVED', 'I am excited to intern at Momo.', '249b64b9-1ab8-4e92-bd30-2951e07f1def', CURRENT_TIMESTAMP);
+    ('aaaa0002-1002-1002-1002-100000000002', 'afbfb57b-a5f4-4ca1-9d6a-b52e306b097b', '0264a1ce-a950-4eb1-9d71-75fe9b254d43', '26f11784-e2dc-48bb-aec0-80ee582b49a0', 'APPROVED', 'I am excited to intern at Momo.', '249b64b9-1ab8-4e92-bd30-2951e07f1def', CURRENT_TIMESTAMP);
 
 -- STUDENT 18 (SE15018) — MATCHED
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
@@ -377,7 +377,7 @@ INSERT INTO applications (application_id, job_post_id, student_id, cv_file_url, 
 INSERT INTO interviews (interview_id, application_id, scheduled_datetime, status, student_confirmed, result) VALUES
     ('06e58ba6-16c8-4f00-8ceb-3588a2fe665d', '2d71c3d0-ae30-4502-8bbd-b191f27cc72d', '2026-07-16 09:00:00', 'COMPLETED', TRUE, 'PASS');
 INSERT INTO placement_applications (application_id, student_id, enterprise_id, semester_id, status, cover_letter, reviewed_by, reviewed_at) VALUES
-    ('baba0003-0003-0003-0003-000000000003', '477b7dea-6bb6-4515-bf47-6e40ad4e954e', '0264a1ce-a950-4eb1-9d71-75fe9b254d43', '26f11784-e2dc-48bb-aec0-80ee582b49a0', 'APPROVED', 'I want to learn from Momo team.', '249b64b9-1ab8-4e92-bd30-2951e07f1def', CURRENT_TIMESTAMP);
+    ('aaaa0003-1003-1003-1003-100000000003', '477b7dea-6bb6-4515-bf47-6e40ad4e954e', '0264a1ce-a950-4eb1-9d71-75fe9b254d43', '26f11784-e2dc-48bb-aec0-80ee582b49a0', 'APPROVED', 'I want to learn from Momo team.', '249b64b9-1ab8-4e92-bd30-2951e07f1def', CURRENT_TIMESTAMP);
 
 -- STUDENT 19 (SE15019) — MATCHED
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
@@ -392,7 +392,7 @@ INSERT INTO applications (application_id, job_post_id, student_id, cv_file_url, 
 INSERT INTO interviews (interview_id, application_id, scheduled_datetime, status, student_confirmed, result) VALUES
     ('24b1f843-4be7-4818-af60-e494e0af5da8', 'da85c815-64ca-4e02-a84c-a9900d0e4bec', '2026-07-16 14:00:00', 'COMPLETED', TRUE, 'PASS');
 INSERT INTO placement_applications (application_id, student_id, enterprise_id, semester_id, status, cover_letter, reviewed_by, reviewed_at) VALUES
-    ('baba0004-0004-0004-0004-000000000004', 'c5fcf5f0-647a-426b-8477-02a53f14cd29', '0264a1ce-a950-4eb1-9d71-75fe9b254d43', '26f11784-e2dc-48bb-aec0-80ee582b49a0', 'APPROVED', 'Excited to join Momo internship.', '249b64b9-1ab8-4e92-bd30-2951e07f1def', CURRENT_TIMESTAMP);
+    ('aaaa0004-1004-1004-1004-100000000004', 'c5fcf5f0-647a-426b-8477-02a53f14cd29', '0264a1ce-a950-4eb1-9d71-75fe9b254d43', '26f11784-e2dc-48bb-aec0-80ee582b49a0', 'APPROVED', 'Excited to join Momo internship.', '249b64b9-1ab8-4e92-bd30-2951e07f1def', CURRENT_TIMESTAMP);
 
 -- STUDENT 20 (SE15020) — MATCHED
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
@@ -407,7 +407,7 @@ INSERT INTO applications (application_id, job_post_id, student_id, cv_file_url, 
 INSERT INTO interviews (interview_id, application_id, scheduled_datetime, status, student_confirmed, result) VALUES
     ('a1b6c187-8cdf-4288-b954-5a375853b00a', '78e046b2-1ce9-440f-aea1-d88aa2b60408', '2026-07-17 10:00:00', 'COMPLETED', TRUE, 'PASS');
 INSERT INTO placement_applications (application_id, student_id, enterprise_id, semester_id, status, cover_letter, reviewed_by, reviewed_at) VALUES
-    ('baba0005-0005-0005-0005-000000000005', '4257fcb4-b199-485b-8606-27c5351df596', '0264a1ce-a950-4eb1-9d71-75fe9b254d43', '26f11784-e2dc-48bb-aec0-80ee582b49a0', 'APPROVED', 'I am ready for Momo internship.', '249b64b9-1ab8-4e92-bd30-2951e07f1def', CURRENT_TIMESTAMP);
+    ('aaaa0005-1005-1005-1005-100000000005', '4257fcb4-b199-485b-8606-27c5351df596', '0264a1ce-a950-4eb1-9d71-75fe9b254d43', '26f11784-e2dc-48bb-aec0-80ee582b49a0', 'APPROVED', 'I am ready for Momo internship.', '249b64b9-1ab8-4e92-bd30-2951e07f1def', CURRENT_TIMESTAMP);
 
 -- ============================================================
 -- STUDENTS 21-25 (SE15021-SE15025) — SEMESTER 6, OJT ACTIVE
@@ -439,12 +439,12 @@ INSERT INTO internship_plan_items (plan_item_id, plan_id, week_number, task_desc
 INSERT INTO weekly_reports (report_id, assignment_id, week_number, tasks_completed, issues_challenges, lessons_learned, plan_next_week, status, submitted_at) VALUES
     ('d91c4b40-378b-448f-abae-3e891182f67d', '77c0715f-58a7-4bcd-9052-513023700eea', 2, 'Implemented JWT authentication', 'Need to improve error handling', 'Learned about JWT security', 'Work on API documentation', 'APPROVED', '2026-03-28');
 INSERT INTO internship_plan_items (plan_item_id, plan_id, week_number, task_description, target_date, status) VALUES
-    ('55e12abc-8d9f-4c3e-be12-73f6e9c0d844', '50524b95-3d4b-4169-8dc1-e372ed8b435e', 3, 'Develop REST API endpoints', '2026-03-29', 'IN_PROGRESS');
+    ('55e12abc-8d9f-4c3e-be12-73f6e9c0d800', '50524b95-3d4b-4169-8dc1-e372ed8b435e', 3, 'Develop REST API endpoints', '2026-03-29', 'IN_PROGRESS');
 INSERT INTO weekly_reports (report_id, assignment_id, week_number, tasks_completed, issues_challenges, lessons_learned, plan_next_week, status, submitted_at) VALUES
-    ('e12d5a67-9a3f-4b1e-c8f2-48b3d0e1a956', '77c0715f-58a7-4bcd-9052-513023700eea', 3, 'Built 5 REST API endpoints', 'Working on validation', 'Learned REST best practices', 'Add unit tests', 'SUBMITTED', '2026-04-04');
+    ('e12d5a67-9a3f-4b1e-c8f2-48b3d0e1a9ab', '77c0715f-58a7-4bcd-9052-513023700eea', 3, 'Built 5 REST API endpoints', 'Working on validation', 'Learned REST best practices', 'Add unit tests', 'SUBMITTED', '2026-04-04');
 -- Enterprise evaluation (only for completed OJT - shown here for demo)
 INSERT INTO enterprise_evaluations (evaluation_id, assignment_id, attitude_score, professionalism_score, soft_skills_score, progress_score, overall_comments, is_locked, submitted_at) VALUES
-    ('baba00e1-0001-0001-0001-000000000001', '77c0715f-58a7-4bcd-9052-513023700eea', 8.50, 9.00, 8.00, 8.50, 'Excellent intern, proactive and quick learner.', TRUE, CURRENT_TIMESTAMP);
+    ('aaaa00e1-1001-1001-1001-100000000001', '77c0715f-58a7-4bcd-9052-513023700eea', 8.50, 9.00, 8.00, 8.50, 'Excellent intern, proactive and quick learner.', TRUE, CURRENT_TIMESTAMP);
 
 -- STUDENT 22 (SE15022) — Semester 6, OJT, ACTIVE, with evaluation
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
@@ -467,9 +467,9 @@ INSERT INTO internship_plan_items (plan_item_id, plan_id, week_number, task_desc
 INSERT INTO weekly_reports (report_id, assignment_id, week_number, tasks_completed, status, submitted_at) VALUES
     ('73928f33-7243-43e4-9d8e-a62278875216', '3b05ca37-25ae-43f1-9075-10ffd2a0cbd7', 2, 'Designed database schema', 'APPROVED', '2026-03-28');
 INSERT INTO weekly_reports (report_id, assignment_id, week_number, tasks_completed, status, submitted_at) VALUES
-    ('fa8c34b1-3a2d-4e5f-9a1b-6c8d0e9f1234', '3b05ca37-25ae-43f1-9075-10ffd2a0cbd7', 3, 'Implemented backend APIs', 'SUBMITTED', '2026-04-04');
+    ('fa8c34b1-3a2d-4e5f-9a1b-6c8d0e9f0abc', '3b05ca37-25ae-43f1-9075-10ffd2a0cbd7', 3, 'Implemented backend APIs', 'SUBMITTED', '2026-04-04');
 INSERT INTO enterprise_evaluations (evaluation_id, assignment_id, attitude_score, professionalism_score, soft_skills_score, progress_score, overall_comments, is_locked, submitted_at) VALUES
-    ('baba00e2-0002-0002-0002-000000000002', '3b05ca37-25ae-43f1-9075-10ffd2a0cbd7', 9.00, 9.50, 9.00, 9.00, 'Outstanding performance, highly recommended.', TRUE, CURRENT_TIMESTAMP);
+    ('aaaa00e2-1002-1002-1002-100000000002', '3b05ca37-25ae-43f1-9075-10ffd2a0cbd7', 9.00, 9.50, 9.00, 9.00, 'Outstanding performance, highly recommended.', TRUE, CURRENT_TIMESTAMP);
 
 -- STUDENT 23 (SE15023) — Semester 6, OJT, ACTIVE
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
@@ -492,7 +492,7 @@ INSERT INTO internship_plan_items (plan_item_id, plan_id, week_number, task_desc
 INSERT INTO weekly_reports (report_id, assignment_id, week_number, tasks_completed, status, submitted_at) VALUES
     ('52e32c89-09cb-44ff-ba93-0f5f43ca51f4', '0bb2b684-cc20-420d-99d2-58e05aa0d63e', 2, 'Started feature development', 'APPROVED', '2026-03-28');
 INSERT INTO weekly_reports (report_id, assignment_id, week_number, tasks_completed, status, submitted_at) VALUES
-    ('ab3d45f2-1a2c-4d3e-5f6a-7b8c9d0e1f234', '0bb2b684-cc20-420d-99d2-58e05aa0d63e', 3, 'Feature implementation ongoing', 'SUBMITTED', '2026-04-04');
+    ('ab3d45f2-1a2c-4d3e-5f6a-7b8c9d0e1a9ab', '0bb2b684-cc20-420d-99d2-58e05aa0d63e', 3, 'Feature implementation ongoing', 'SUBMITTED', '2026-04-04');
 
 -- STUDENT 24 (SE15024) — Semester 6, OJT, ACTIVE
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
@@ -561,11 +561,11 @@ INSERT INTO enterprise_assignments (assignment_id, enterprise_id, student_id, se
 INSERT INTO final_reports (final_report_id, assignment_id, file_url, file_size_bytes, submitted_at, is_late) VALUES
     ('a66b42dc-4329-41a2-a14d-5b9c66dd6dd4', '14f4e28c-1f74-42e1-ad47-e6d9b0753de7', 'final_se26.pdf', 1048576, '2026-07-15 23:00:00', FALSE);
 INSERT INTO enterprise_evaluations (evaluation_id, assignment_id, attitude_score, professionalism_score, soft_skills_score, progress_score, overall_comments, is_locked, submitted_at) VALUES
-    ('baba00e3-0003-0003-0003-000000000003', '14f4e28c-1f74-42e1-ad47-e6d9b0753de7', 8.00, 8.50, 8.00, 8.50, 'Good intern, consistent performance.', TRUE, '2026-07-16 10:00:00');
+    ('aaaa00e3-1003-1003-1003-100000000003', '14f4e28c-1f74-42e1-ad47-e6d9b0753de7', 8.00, 8.50, 8.00, 8.50, 'Good intern, consistent performance.', TRUE, '2026-07-16 10:00:00');
 INSERT INTO final_grades (grade_id, student_id, tm_id, semester_id, enterprise_total_score, final_grade, overall_status, is_locked, graded_at) VALUES
-    ('baba00g1-0001-0001-0001-000000000001', '50203323-58da-4ce0-9a53-9b15928b5b8f', '249b64b9-1ab8-4e92-bd30-2951e07f1def', '26f11784-e2dc-48bb-aec0-80ee582b49a0', 8.36, 8.4, 'PASSED', TRUE, '2026-07-20 14:00:00');
+    ('cccc0001-1001-1001-1001-100000000001', '50203323-58da-4ce0-9a53-9b15928b5b8f', '249b64b9-1ab8-4e92-bd30-2951e07f1def', '26f11784-e2dc-48bb-aec0-80ee582b49a0', 8.36, 8.4, 'PASSED', TRUE, '2026-07-20 14:00:00');
 INSERT INTO student_enterprise_feedbacks (feedback_id, student_id, enterprise_id, semester_id, training_quality_score, supervisor_support_score, work_environment_score, overall_score, positive_feedback, improvement_feedback, submitted_at) VALUES
-    ('baba00f1-0001-0001-0001-000000000001', '50203323-58da-4ce0-9a53-9b15928b5b8f', '0264a1ce-a950-4eb1-9d71-75fe9b254d43', '26f11784-e2dc-48bb-aec0-80ee582b49a0', 5, 4, 5, 5, 'Great mentorship and learning environment.', 'Could improve on feedback turnaround time.', '2026-07-18 09:00:00');
+    ('baba00f1-1001-1001-1001-100000000001', '50203323-58da-4ce0-9a53-9b15928b5b8f', '0264a1ce-a950-4eb1-9d71-75fe9b254d43', '26f11784-e2dc-48bb-aec0-80ee582b49a0', 5, 4, 5, 5, 'Great mentorship and learning environment.', 'Could improve on feedback turnaround time.', '2026-07-18 09:00:00');
 
 -- STUDENT 27 (SE15027) — Semester 7, OJT COMPLETED
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
@@ -580,11 +580,11 @@ INSERT INTO enterprise_assignments (assignment_id, enterprise_id, student_id, se
 INSERT INTO final_reports (final_report_id, assignment_id, file_url, file_size_bytes, submitted_at, is_late) VALUES
     ('7b508d56-8266-4c09-80b8-d4ce4854b260', 'b72de7c7-d879-45d7-9b3f-d17fcf78ff35', 'final_se27.pdf', 1048576, '2026-07-15 22:30:00', FALSE);
 INSERT INTO enterprise_evaluations (evaluation_id, assignment_id, attitude_score, professionalism_score, soft_skills_score, progress_score, overall_comments, is_locked, submitted_at) VALUES
-    ('baba00e4-0004-0004-0004-000000000004', 'b72de7c7-d879-45d7-9b3f-d17fcf78ff35', 7.50, 8.00, 7.50, 8.00, 'Solid performer, good team collaboration.', TRUE, '2026-07-16 11:00:00');
+    ('aaaa00e4-1004-1004-1004-100000000004', 'b72de7c7-d879-45d7-9b3f-d17fcf78ff35', 7.50, 8.00, 7.50, 8.00, 'Solid performer, good team collaboration.', TRUE, '2026-07-16 11:00:00');
 INSERT INTO final_grades (grade_id, student_id, tm_id, semester_id, enterprise_total_score, final_grade, overall_status, is_locked, graded_at) VALUES
-    ('baba00g2-0002-0002-0002-000000000002', 'd5981706-5aa5-4cff-8ebb-b7b26572a9bf', '249b64b9-1ab8-4e92-bd30-2951e07f1def', '26f11784-e2dc-48bb-aec0-80ee582b49a0', 7.85, 7.9, 'PASSED', TRUE, '2026-07-20 15:00:00');
+    ('cccc0002-1002-1002-1002-100000000002', 'd5981706-5aa5-4cff-8ebb-b7b26572a9bf', '249b64b9-1ab8-4e92-bd30-2951e07f1def', '26f11784-e2dc-48bb-aec0-80ee582b49a0', 7.85, 7.9, 'PASSED', TRUE, '2026-07-20 15:00:00');
 INSERT INTO student_enterprise_feedbacks (feedback_id, student_id, enterprise_id, semester_id, training_quality_score, supervisor_support_score, work_environment_score, overall_score, positive_feedback, improvement_feedback, submitted_at) VALUES
-    ('baba00f2-0002-0002-0002-000000000002', 'd5981706-5aa5-4cff-8ebb-b7b26572a9bf', '0264a1ce-a950-4eb1-9d71-75fe9b254d43', '26f11784-e2dc-48bb-aec0-80ee582b49a0', 4, 5, 4, 4, 'Good learning experience with supportive team.', 'More structured training curriculum.', '2026-07-18 10:00:00');
+    ('baba00f2-1002-1002-1002-100000000002', 'd5981706-5aa5-4cff-8ebb-b7b26572a9bf', '0264a1ce-a950-4eb1-9d71-75fe9b254d43', '26f11784-e2dc-48bb-aec0-80ee582b49a0', 4, 5, 4, 4, 'Good learning experience with supportive team.', 'More structured training curriculum.', '2026-07-18 10:00:00');
 
 -- STUDENT 28 (SE15028) — Semester 7, OJT COMPLETED (excellent student)
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
@@ -599,11 +599,11 @@ INSERT INTO enterprise_assignments (assignment_id, enterprise_id, student_id, se
 INSERT INTO final_reports (final_report_id, assignment_id, file_url, file_size_bytes, submitted_at, is_late) VALUES
     ('c217157f-5aba-482b-91d3-abef16ee1a78', 'cb3993f9-5074-4ebd-9293-6bb89c08a5e7', 'final_se28.pdf', 1048576, '2026-07-14 20:00:00', FALSE);
 INSERT INTO enterprise_evaluations (evaluation_id, assignment_id, attitude_score, professionalism_score, soft_skills_score, progress_score, overall_comments, is_locked, submitted_at) VALUES
-    ('baba00e5-0005-0005-0005-000000000005', 'cb3993f9-5074-4ebd-9293-6bb89c08a5e7', 9.50, 9.50, 9.00, 9.50, 'Exceptional intern, exceeded all expectations. Highly recommended for hire.', TRUE, '2026-07-16 09:00:00');
+    ('aaaa00e5-1005-1005-1005-100000000005', 'cb3993f9-5074-4ebd-9293-6bb89c08a5e7', 9.50, 9.50, 9.00, 9.50, 'Exceptional intern, exceeded all expectations. Highly recommended for hire.', TRUE, '2026-07-16 09:00:00');
 INSERT INTO final_grades (grade_id, student_id, tm_id, semester_id, enterprise_total_score, final_grade, overall_status, is_locked, graded_at) VALUES
-    ('baba00g3-0003-0003-0003-000000000003', '9f36b39b-3d25-4cd7-afca-dc86811b33ed', '249b64b9-1ab8-4e92-bd30-2951e07f1def', '26f11784-e2dc-48bb-aec0-80ee582b49a0', 9.40, 9.4, 'PASSED', TRUE, '2026-07-20 16:00:00');
+    ('cccc0003-1003-1003-1003-100000000003', '9f36b39b-3d25-4cd7-afca-dc86811b33ed', '249b64b9-1ab8-4e92-bd30-2951e07f1def', '26f11784-e2dc-48bb-aec0-80ee582b49a0', 9.40, 9.4, 'PASSED', TRUE, '2026-07-20 16:00:00');
 INSERT INTO student_enterprise_feedbacks (feedback_id, student_id, enterprise_id, semester_id, training_quality_score, supervisor_support_score, work_environment_score, overall_score, positive_feedback, improvement_feedback, submitted_at) VALUES
-    ('baba00f3-0003-0003-0003-000000000003', '9f36b39b-3d25-4cd7-afca-dc86811b33ed', '0264a1ce-a950-4eb1-9d71-75fe9b254d43', '26f11784-e2dc-48bb-aec0-80ee582b49a0', 5, 5, 5, 5, 'Excellent internship program with great mentorship.', 'Everything was well organized.', '2026-07-18 11:00:00');
+    ('baba00f3-1003-1003-1003-100000000003', '9f36b39b-3d25-4cd7-afca-dc86811b33ed', '0264a1ce-a950-4eb1-9d71-75fe9b254d43', '26f11784-e2dc-48bb-aec0-80ee582b49a0', 5, 5, 5, 5, 'Excellent internship program with great mentorship.', 'Everything was well organized.', '2026-07-18 11:00:00');
 
 -- STUDENT 29 (SE15029) — Semester 7, OJT COMPLETED
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
@@ -618,11 +618,11 @@ INSERT INTO enterprise_assignments (assignment_id, enterprise_id, student_id, se
 INSERT INTO final_reports (final_report_id, assignment_id, file_url, file_size_bytes, submitted_at, is_late) VALUES
     ('d35043ac-7868-46a5-8963-a54091eb131e', '69bc459c-9593-4bbd-a38c-df99f8b3059f', 'final_se29.pdf', 1048576, '2026-07-15 21:00:00', FALSE);
 INSERT INTO enterprise_evaluations (evaluation_id, assignment_id, attitude_score, professionalism_score, soft_skills_score, progress_score, overall_comments, is_locked, submitted_at) VALUES
-    ('baba00e6-0006-0006-0006-000000000006', '69bc459c-9593-4bbd-a38c-df99f8b3059f', 7.00, 7.50, 7.00, 7.50, 'Met expectations, some areas for improvement.', TRUE, '2026-07-16 12:00:00');
+    ('aaaa00e6-1006-1006-1006-100000000006', '69bc459c-9593-4bbd-a38c-df99f8b3059f', 7.00, 7.50, 7.00, 7.50, 'Met expectations, some areas for improvement.', TRUE, '2026-07-16 12:00:00');
 INSERT INTO final_grades (grade_id, student_id, tm_id, semester_id, enterprise_total_score, final_grade, overall_status, is_locked, graded_at) VALUES
-    ('baba00g4-0004-0004-0004-000000000004', '4b029a3a-0986-4a43-8a81-218da9e61a2f', '249b64b9-1ab8-4e92-bd30-2951e07f1def', '26f11784-e2dc-48bb-aec0-80ee582b49a0', 7.40, 7.4, 'PASSED', TRUE, '2026-07-20 17:00:00');
+    ('cccc0004-1004-1004-1004-100000000004', '4b029a3a-0986-4a43-8a81-218da9e61a2f', '249b64b9-1ab8-4e92-bd30-2951e07f1def', '26f11784-e2dc-48bb-aec0-80ee582b49a0', 7.40, 7.4, 'PASSED', TRUE, '2026-07-20 17:00:00');
 INSERT INTO student_enterprise_feedbacks (feedback_id, student_id, enterprise_id, semester_id, training_quality_score, supervisor_support_score, work_environment_score, overall_score, positive_feedback, improvement_feedback, submitted_at) VALUES
-    ('baba00f4-0004-0004-0004-000000000004', '4b029a3a-0986-4a43-8a81-218da9e61a2f', '0264a1ce-a950-4eb1-9d71-75fe9b254d43', '26f11784-e2dc-48bb-aec0-80ee582b49a0', 4, 4, 3, 4, 'Good experience overall, learned a lot.', 'More regular feedback sessions needed.', '2026-07-18 12:00:00');
+    ('baba00f4-1004-1004-1004-100000000004', '4b029a3a-0986-4a43-8a81-218da9e61a2f', '0264a1ce-a950-4eb1-9d71-75fe9b254d43', '26f11784-e2dc-48bb-aec0-80ee582b49a0', 4, 4, 3, 4, 'Good experience overall, learned a lot.', 'More regular feedback sessions needed.', '2026-07-18 12:00:00');
 
 -- STUDENT 30 (SE15030) — Semester 7, OJT COMPLETED
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
@@ -637,11 +637,11 @@ INSERT INTO enterprise_assignments (assignment_id, enterprise_id, student_id, se
 INSERT INTO final_reports (final_report_id, assignment_id, file_url, file_size_bytes, submitted_at, is_late) VALUES
     ('84ec61c9-dc97-4822-86f4-6d6a2496547d', '4e75220f-dd96-477b-b310-a0a528955414', 'final_se30.pdf', 1048576, '2026-07-15 20:00:00', FALSE);
 INSERT INTO enterprise_evaluations (evaluation_id, assignment_id, attitude_score, professionalism_score, soft_skills_score, progress_score, overall_comments, is_locked, submitted_at) VALUES
-    ('baba00e7-0007-0007-0007-000000000007', '4e75220f-dd96-477b-b310-a0a528955414', 8.00, 8.50, 8.00, 8.00, 'Reliable and consistent performer.', TRUE, '2026-07-16 13:00:00');
+    ('aaaa00e7-1007-1007-1007-100000000007', '4e75220f-dd96-477b-b310-a0a528955414', 8.00, 8.50, 8.00, 8.00, 'Reliable and consistent performer.', TRUE, '2026-07-16 13:00:00');
 INSERT INTO final_grades (grade_id, student_id, tm_id, semester_id, enterprise_total_score, final_grade, overall_status, is_locked, graded_at) VALUES
-    ('baba00g5-0005-0005-0005-000000000005', 'b899c952-17bc-4757-9fb5-193be918644d', '249b64b9-1ab8-4e92-bd30-2951e07f1def', '26f11784-e2dc-48bb-aec0-80ee582b49a0', 8.20, 8.2, 'PASSED', TRUE, '2026-07-20 18:00:00');
+    ('cccc0005-1005-1005-1005-100000000005', 'b899c952-17bc-4757-9fb5-193be918644d', '249b64b9-1ab8-4e92-bd30-2951e07f1def', '26f11784-e2dc-48bb-aec0-80ee582b49a0', 8.20, 8.2, 'PASSED', TRUE, '2026-07-20 18:00:00');
 INSERT INTO student_enterprise_feedbacks (feedback_id, student_id, enterprise_id, semester_id, training_quality_score, supervisor_support_score, work_environment_score, overall_score, positive_feedback, improvement_feedback, submitted_at) VALUES
-    ('baba00f5-0005-0005-0005-000000000005', 'b899c952-17bc-4757-9fb5-193be918644d', '0264a1ce-a950-4eb1-9d71-75fe9b254d43', '26f11784-e2dc-48bb-aec0-80ee582b49a0', 4, 5, 4, 4, 'Good project exposure and mentorship.', 'Could improve onboarding process.', '2026-07-18 13:00:00');
+    ('baba00f5-1005-1005-1005-100000000005', 'b899c952-17bc-4757-9fb5-193be918644d', '0264a1ce-a950-4eb1-9d71-75fe9b254d43', '26f11784-e2dc-48bb-aec0-80ee582b49a0', 4, 5, 4, 4, 'Good project exposure and mentorship.', 'Could improve onboarding process.', '2026-07-18 13:00:00');
 
 -- ============================================================
 -- STUDENTS 31-35: SEMESTER 8-9 (ELIGIBLE, cannot apply or do OJT)
