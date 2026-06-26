@@ -20,13 +20,14 @@ public interface EnterpriseAssignmentRepository extends JpaRepository<Enterprise
     // UC-45: Lọc danh sách phân công theo doanh nghiệp và học kỳ đang ACTIVE
     List<EnterpriseAssignment> findByEnterprise_EnterpriseIdAndSemester_Status(UUID enterpriseId, String status);
 
-    // UC-45: Chỉ hiển thị sinh viên có trạng thái OJT/MATCHED/ACCEPTED trong eligible_students
+    // UC-45: Chỉ hiển thị sinh viên đã được phân công thực tế (ACCEPTED/OJT)
+    // MATCHED chưa có assignment vì chưa qua bước TM approve OJT
     @Query("SELECT ea FROM EnterpriseAssignment ea "
             + "JOIN EligibleStudent es ON es.student.userId = ea.student.userId "
             + "AND es.semester.semesterId = ea.semester.semesterId "
             + "WHERE ea.enterprise.enterpriseId = :enterpriseId "
             + "AND ea.semester.status = 'ACTIVE' "
-            + "AND es.status IN ('OJT', 'MATCHED', 'ACCEPTED')")
+            + "AND es.status IN ('OJT', 'ACCEPTED')")
     List<EnterpriseAssignment> findByEnterpriseAndSemesterActiveAndValidStudentStatus(
             @Param("enterpriseId") UUID enterpriseId);
 
@@ -36,7 +37,7 @@ public interface EnterpriseAssignmentRepository extends JpaRepository<Enterprise
             + "AND es.semester.semesterId = ea.semester.semesterId "
             + "WHERE ea.enterprise.enterpriseId = :enterpriseId "
             + "AND ea.semester.status = 'ACTIVE' "
-            + "AND es.status IN ('OJT', 'MATCHED', 'ACCEPTED') "
+            + "AND es.status IN ('OJT', 'ACCEPTED') "
             + "AND (:keyword IS NULL OR LOWER(ea.student.fullName) LIKE LOWER(CONCAT('%', :keyword, '%')) "
             + "OR LOWER(ea.student.email) LIKE LOWER(CONCAT('%', :keyword, '%')))")
     List<EnterpriseAssignment> searchMyAssignments(

@@ -104,8 +104,9 @@ public class EnterpriseEvaluationServiceImpl implements EnterpriseEvaluationServ
                         assignment.getStudent().getUserId(),
                         assignment.getSemester().getSemesterId())
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_ELIGIBLE));
+        // Chỉ cho phép đánh giá sinh viên đã được phân công thực tế (ACCEPTED/OJT)
+        // MATCHED không có enterprise_assignment nên không thể đánh giá
         if (!"OJT".equals(eligibleStudent.getStatus())
-                && !"MATCHED".equals(eligibleStudent.getStatus())
                 && !"ACCEPTED".equals(eligibleStudent.getStatus())) {
             throw new AppException(ErrorCode.INVALID_STATUS_FOR_OJT);
         }

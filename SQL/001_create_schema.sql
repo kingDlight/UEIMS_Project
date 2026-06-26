@@ -298,6 +298,15 @@ CREATE OR REPLACE FUNCTION prevent_locked_student_edit()
 RETURNS TRIGGER AS $$
 BEGIN
     IF OLD.is_locked = TRUE THEN
+        -- FIX 017: Allow MATCHED → OJT transition even when locked
+        -- This is needed because trg_validate_ojt fires on the same UPDATE
+        -- and explicitly allows this transition (BR-22)
+        IF OLD.status = 'MATCHED' AND NEW.status = 'OJT' THEN
+            NEW.is_locked := TRUE;
+            NEW.approved_at := CURRENT_TIMESTAMP;
+            RETURN NEW;
+        END IF;
+
         -- Allow only status transition to CANCELLED
         IF NEW.status != 'CANCELLED' THEN
             RAISE EXCEPTION 'Student record is locked. Cannot modify status to % (BR-21).', NEW.status;
@@ -317,7 +326,6 @@ BEGIN
         END IF;
 
         -- Prevent modification of identity columns
-        -- (gpa, full_name, email, major được phép update)
         IF OLD.eligible_id != NEW.eligible_id OR
            OLD.semester_id != NEW.semester_id OR
            OLD.user_id IS DISTINCT FROM NEW.user_id OR
@@ -537,7 +545,7 @@ CREATE INDEX idx_applications_status ON applications(status);
 
 -- TRIGGER: BR-54 — Enforce Student in Semester 5 is allowed to apply
 CREATE OR REPLACE FUNCTION enforce_student_apply_permission()
-RETURNS TRIGGER AS $$
+RETURNS NEW AS $$
 DECLARE
     stud_sem INT;
 BEGIN
@@ -546,12 +554,14 @@ BEGIN
     JOIN job_posts jp ON es.semester_id = jp.semester_id
     WHERE es.user_id = NEW.student_id AND jp.job_post_id = NEW.job_post_id;
 
-    IF stud_sem IS NULL OR stud_sem != 5 THEN
-        RAISE EXCEPTION 'Student is not in Semester 5 (Current: %). Only Semester 5 students are permitted to apply for jobs (BR-54).', COALESCE(stud_sem::TEXT, 'Unknown');
+    -- FIX 017: Allow semesters 5 and 6 to apply
+    IF stud_sem IS NULL OR stud_sem NOT IN (5, 6) THEN
+        RAISE EXCEPTION 'Student is not in Semester 5 or 6 (Current: %). Only Semester 5-6 students are permitted to apply for jobs (BR-54).', COALESCE(stud_sem::TEXT, 'Unknown');
     END IF;
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
 
 CREATE TRIGGER trg_student_apply_permission
     BEFORE INSERT ON applications
@@ -924,8 +934,9 @@ BEGIN
     FROM eligible_students
     WHERE user_id = NEW.student_id AND semester_id = NEW.semester_id;
 
-    IF stud_status IS NULL OR stud_status != 'OJT' THEN
-        RAISE EXCEPTION 'Cannot assign student to enterprise: student status in this semester must be OJT, current status: %', COALESCE(stud_status, 'None');
+    -- FIX 017: Allow both OJT (actively interning) and ACCEPTED (matched, about to start)
+    IF stud_status IS NULL OR (stud_status != 'OJT' AND stud_status != 'ACCEPTED') THEN
+        RAISE EXCEPTION 'Cannot assign student to enterprise: student status in this semester must be OJT or ACCEPTED, current status: %', COALESCE(stud_status, 'None');
     END IF;
     RETURN NEW;
 END;
