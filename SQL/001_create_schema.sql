@@ -237,7 +237,7 @@ CREATE TABLE eligible_students (
     full_name       VARCHAR(255) NOT NULL,                           -- BR-17: Mandatory
     email           VARCHAR(255),                                    -- For auto-creating accounts
     major           VARCHAR(255) NOT NULL,                           -- BR-17: Mandatory
-    gpa             DECIMAL(4,2),                                    -- BR-17, BR-19: >= 2.0
+    gpa             DECIMAL(4,2),                                    -- BR-17, BR-19: 0.00 - 10.00 (thang 10)
     current_semester INT NOT NULL CHECK (current_semester BETWEEN 1 AND 9), -- BR-54: Semester-based access
     status          VARCHAR(20) NOT NULL DEFAULT 'ELIGIBLE'
                     CHECK (status IN ('ELIGIBLE','NOT_ELIGIBLE','PENDING','ACCEPTED','MATCHED','OJT','CANCELLED')),
@@ -268,9 +268,15 @@ CREATE UNIQUE INDEX uq_eligible_user_semester
     ON eligible_students(semester_id, user_id) 
     WHERE user_id IS NOT NULL;
 
+-- Legacy one-time migration: nếu DB cũ từng lưu GPA thang 4 (<=4.0), convert sang thang 10.
+-- Sau migration này, mọi GPA mới insert/đều ở thang 10; tuyệt đối KHÔNG chạy lại lệnh này
+-- vì sẽ scale bậy dữ liệu đã đúng.
 UPDATE eligible_students
 SET gpa = ROUND(gpa * 2.5, 2)
-WHERE gpa <= 4.0;
+WHERE gpa IS NOT NULL
+  AND gpa <= 4.0
+  -- Guard: chỉ chạy khi chưa từng convert. Nếu MAX(gpa) > 4.0 tức là dữ liệu đã ở thang 10, bỏ qua.
+  AND (SELECT MAX(gpa) FROM eligible_students) <= 4.0;
 
 -- TRIGGER: BR-22 — OJT approval only for ACCEPTED/MATCHED students
 -- BR-21: Auto-lock record when status changes to OJT
@@ -855,9 +861,12 @@ CREATE TABLE student_profiles (
 
 CREATE INDEX idx_profiles_user ON student_profiles(user_id);
 
+-- Legacy one-time migration cho student_profiles (xem comment ở eligible_students phía trên).
 UPDATE student_profiles
 SET gpa = ROUND(gpa * 2.5, 2)
-WHERE gpa <= 4.0 AND gpa IS NOT NULL;
+WHERE gpa IS NOT NULL
+  AND gpa <= 4.0
+  AND (SELECT MAX(gpa) FROM student_profiles) <= 4.0;
 
 -- ============================================================
 -- MODULE 5: INTERNSHIP TRAINING & SUPERVISION (ENTERPRISE)
@@ -903,7 +912,7 @@ COMMENT ON COLUMN enterprise_assignments.termination_reason IS 'Reason for assig
 COMMENT ON COLUMN enterprise_assignments.terminated_at IS 'The time when the assignment is terminated';
 COMMENT ON COLUMN enterprise_assignments.replaced_by_assignment_id IS 'A new assignment replaces this one (only if terminated due to replacement).';
 
--- TRIGGER: BR-54 — Verify Student is in Semester 6 to participate in active internship
+-- TRIGGER: BR-54 — Verify Student is in Semester 5 or 6 to participate in active internship
 CREATE OR REPLACE FUNCTION enforce_student_internship_permission()
 RETURNS TRIGGER AS $$
 DECLARE
@@ -913,8 +922,11 @@ BEGIN
     FROM eligible_students
     WHERE user_id = NEW.student_id AND semester_id = NEW.semester_id;
 
-    IF stud_sem IS NULL OR stud_sem != 6 THEN
-        RAISE EXCEPTION 'Student is not in Semester 6 (Current: %). Only Semester 6 students can participate in active internship (BR-54).', COALESCE(stud_sem::TEXT, 'Unknown');
+    -- FIX 018: Allow both semester 5 and 6 to enter internship.
+    -- Kỳ 5: SV vừa apply và được accept → assignment có thể tạo sớm
+    -- Kỳ 6: SV đang thực tập chính thức
+    IF stud_sem IS NULL OR stud_sem NOT IN (5, 6) THEN
+        RAISE EXCEPTION 'Student is not in Semester 5 or 6 (Current: %). Only Semester 5-6 students can participate in active internship (BR-54).', COALESCE(stud_sem::TEXT, 'Unknown');
     END IF;
     RETURN NEW;
 END;

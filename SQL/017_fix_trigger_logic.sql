@@ -1,6 +1,11 @@
 -- ============================================================
 -- SQL FIX 017: Fix Trigger Logic for Valid Data Flow
 --
+-- Purpose: File này chỉ cần chạy trên DB CŨ trước khi 001_create_schema.sql
+--          được update với các fix này. Nếu bạn đã chạy bản 001 mới nhất
+--          (có comment "-- FIX 017" hoặc "-- FIX 018" trong trigger), KHÔNG
+--          cần chạy file này nữa.
+--
 -- Problem 1: trg_locked_student_edit blocks MATCHED→OJT transition
 --   even though trg_validate_ojt explicitly allows it.
 --   Fix: Add exception for status=MATCHED → OJT transition.
@@ -101,7 +106,7 @@ $$ LANGUAGE plpgsql;
 --   This fix allows both semester 5 and semester 6 students to apply.
 -- ============================================================
 CREATE OR REPLACE FUNCTION enforce_student_apply_permission()
-RETURNS NEW AS $$
+RETURNS TRIGGER AS $$
 DECLARE
     stud_sem INT;
 BEGIN
