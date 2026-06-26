@@ -266,7 +266,7 @@ public class InterviewServiceImpl implements InterviewService {
             }
             if (!entity.getScheduledTime().equals(existing.getScheduledTime())) {
                 existing.setStudentConfirmed(false);
-                existing.setRescheduleReason("Schedule updated by " + currentUser.getRole());
+                existing.setRescheduleReason("Schedule updated by " + getActorLabel(currentUser));
                 timeChanged = true;
             }
             existing.setScheduledTime(entity.getScheduledTime());
@@ -510,5 +510,16 @@ public class InterviewServiceImpl implements InterviewService {
                         .equals(currentUser.getEnterprise().getEnterpriseId())) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
+    }
+
+    private String getActorLabel(User user) {
+        if (user == null || user.getRoles() == null || user.getRoles().isEmpty()) {
+            return "SYSTEM";
+        }
+        return user.getRoles().stream()
+                .map(ur -> ur.getRole() == null ? "USER" : ur.getRole().getRoleName())
+                .filter(r -> r != null && !r.isBlank())
+                .findFirst()
+                .orElse("USER");
     }
 }
