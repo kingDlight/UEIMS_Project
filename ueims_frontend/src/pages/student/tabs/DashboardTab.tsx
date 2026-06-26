@@ -319,14 +319,20 @@ const SemesterContextBar: React.FC<{ stats: StudentDashboardStats; ojtStatus: Oj
             gap: 4,
             padding: '3px 10px',
             borderRadius: cc.radiusFull,
-            backgroundColor: hexToRgba(cc.brand, 0.06),
-            border: `1px solid ${hexToRgba(cc.brand, 0.25)}`,
-            color: cc.brand,
+            backgroundColor: hexToRgba(cc.info, 0.06),
+            border: `1px solid ${hexToRgba(cc.info, 0.25)}`,
+            color: cc.info,
             fontSize: 11,
             fontWeight: 600,
           }}>
-            <StatusDot color={cc.brand} />
-            {t('ojtInProgress', 'OJT IN PROGRESS')}
+            <StatusDot color={cc.info} />
+            {isSemester1to4
+              ? t('preparing', 'PREPARING')
+              : isSemester5
+                ? t('eligible', 'ELIGIBLE TO APPLY')
+                : isSemester7to9
+                  ? t('completed', 'COMPLETED')
+                  : t('ojtInProgress', 'OJT IN PROGRESS')}
           </span>
         )}
       </motion.div>

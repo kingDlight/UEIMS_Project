@@ -19,7 +19,8 @@
   "noRecentActivities": "No recent activities",
   "viewAllHistory": "View All History",
   "preparing": "Preparing your dashboard...",
-  
+  "eligible": "ELIGIBLE TO APPLY",
+  "completed": "COMPLETED",
   "active": "ACTIVE",
   "daysRemaining": "{{count}} days remaining",
   "statusLabel": "Status",
