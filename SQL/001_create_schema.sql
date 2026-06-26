@@ -992,6 +992,7 @@ CREATE TABLE enterprise_evaluations (
     professionalism_score DECIMAL(4,2) NOT NULL CHECK (professionalism_score BETWEEN 0 AND 10),
     soft_skills_score   DECIMAL(4,2) NOT NULL CHECK (soft_skills_score BETWEEN 0 AND 10),
     progress_score      DECIMAL(4,2) NOT NULL CHECK (progress_score BETWEEN 0 AND 10),
+    version             BIGINT NOT NULL DEFAULT 0,
     -- BR-43: Auto-calculated weighted total
     total_score         DECIMAL(4,2) GENERATED ALWAYS AS (
         ROUND(attitude_score * 0.2 + professionalism_score * 0.4 + soft_skills_score * 0.2 + progress_score * 0.2, 2)
