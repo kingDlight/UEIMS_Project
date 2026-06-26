@@ -255,8 +255,11 @@ const StatChip: React.FC<{ icon: React.ReactNode; label: string; value: number |
 // ============================================================
 // SECTION: SEMESTER CONTEXT BAR
 // ============================================================
-const SemesterContextBar: React.FC<{ stats: StudentDashboardStats; ojtStatus: OjtStatusResponse | null }> = ({ stats, ojtStatus }) => {
+const SemesterContextBar: React.FC<{ stats: StudentDashboardStats; ojtStatus: OjtStatusResponse | null; currentSemester: number }> = ({ stats, ojtStatus, currentSemester }) => {
   const { t } = useTranslation(['studentDashboard']);
+  const isSemester1to4 = currentSemester >= 1 && currentSemester <= 4;
+  const isSemester5 = currentSemester === 5;
+  const isSemester7to9 = currentSemester >= 7 && currentSemester <= 9;
   return (
     <div style={{
       maxWidth: 1200,
@@ -1011,7 +1014,7 @@ export const StudentDashboardTab: React.FC<DashboardTabProps> = ({ currentSemest
               animate={{ opacity: 1 }}
               transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
             >
-              <SemesterContextBar stats={stats} ojtStatus={ojtStatus} />
+              <SemesterContextBar stats={stats} ojtStatus={ojtStatus} currentSemester={currentSemester} />
 
               {/* PRIMARY SEMESTER CARDS (Full Width) */}
               <div style={{ marginBottom: 24 }}>
