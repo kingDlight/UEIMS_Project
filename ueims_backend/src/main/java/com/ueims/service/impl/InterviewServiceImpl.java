@@ -428,7 +428,7 @@ public class InterviewServiceImpl implements InterviewService {
             throw new AppException(ErrorCode.INTERVIEW_OVERLAP);
         }
         existing.setScheduledTime(newTime);
-        existing.setStatus("RESCHEDULED");
+        existing.setStatus("POSTPONED");
         existing.setRescheduleReason(reason);
         if (meetingLink != null) existing.setMeetingLink(meetingLink);
         if (location != null) existing.setLocation(location);
