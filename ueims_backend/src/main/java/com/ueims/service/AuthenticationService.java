@@ -134,6 +134,10 @@ public class AuthenticationService {
             throw new AppException(ErrorCode.USER_PERMANENTLY_LOCKED);
         }
 
+        if ("INACTIVE".equals(user.getStatus())) {
+            throw new AppException(ErrorCode.USER_INACTIVE);
+        }
+
         if (user.getLockedUntil() != null) {
             if (user.getLockedUntil().isAfter(LocalDateTime.now())) {
                 throw new AppException(ErrorCode.USER_BANNED);
