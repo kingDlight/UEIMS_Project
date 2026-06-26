@@ -266,6 +266,7 @@ public class InterviewServiceImpl implements InterviewService {
             }
             if (!entity.getScheduledTime().equals(existing.getScheduledTime())) {
                 existing.setStudentConfirmed(false);
+                existing.setRescheduleReason("Schedule updated by " + currentUser.getRole());
                 timeChanged = true;
             }
             existing.setScheduledTime(entity.getScheduledTime());
@@ -393,6 +394,7 @@ public class InterviewServiceImpl implements InterviewService {
         existing.setStatus("CANCELLED");
         existing.setCancelReason(reason);
         existing.setCanceledAt(LocalDateTime.now());
+        existing.setStudentConfirmed(false);
         existing.setUpdatedAt(LocalDateTime.now());
         Interview saved = repository.saveAndFlush(existing);
 

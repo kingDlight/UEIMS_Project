@@ -750,11 +750,33 @@ CREATE TRIGGER trg_interview_eligible
     FOR EACH ROW EXECUTE FUNCTION validate_interview_eligibility();
 
 -- TRIGGER: BR-49 — Prevent reversing interview confirmation (irreversible once true)
+-- FIXED: Allow reset student_confirmed when there's a valid reason:
+--   1. scheduled_datetime changed (reschedule), OR
+--   2. reschedule_reason is provided, OR
+--   3. status changed to CANCELLED with cancel_reason
 CREATE OR REPLACE FUNCTION prevent_confirmation_reversal()
 RETURNS TRIGGER AS $$
 BEGIN
     IF OLD.student_confirmed = TRUE AND NEW.student_confirmed = FALSE THEN
-        RAISE EXCEPTION 'Interview confirmation cannot be reversed.';
+        -- Allow if scheduled time changed (rescheduling)
+        IF OLD.scheduled_datetime != NEW.scheduled_datetime THEN
+            RETURN NEW;
+        END IF;
+
+        -- Allow if reschedule_reason is provided
+        IF NEW.reschedule_reason IS NOT NULL AND NEW.reschedule_reason != '' THEN
+            RETURN NEW;
+        END IF;
+
+        -- Allow if canceling with reason
+        IF NEW.status = 'CANCELLED'
+           AND NEW.cancel_reason IS NOT NULL
+           AND NEW.cancel_reason != '' THEN
+            RETURN NEW;
+        END IF;
+
+        -- Otherwise: truly irreversible without reason
+        RAISE EXCEPTION 'Interview confirmation cannot be reversed without a reschedule or cancel reason (BR-49).';
     END IF;
     RETURN NEW;
 END;
