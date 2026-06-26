@@ -257,7 +257,7 @@ CREATE TABLE eligible_students (
     -- BR-23: Cancelled must have reason + who cancelled
     CONSTRAINT chk_cancel_audit CHECK (
         status != 'CANCELLED' OR (cancelled_reason IS NOT NULL AND cancelled_by IS NOT NULL)
-    ),
+    )
 );
 
 CREATE INDEX idx_eligible_semester ON eligible_students(semester_id);
@@ -545,7 +545,7 @@ CREATE INDEX idx_applications_status ON applications(status);
 
 -- TRIGGER: BR-54 — Enforce Student in Semester 5 is allowed to apply
 CREATE OR REPLACE FUNCTION enforce_student_apply_permission()
-RETURNS NEW AS $$
+RETURNS TRIGGER AS $$
 DECLARE
     stud_sem INT;
 BEGIN
