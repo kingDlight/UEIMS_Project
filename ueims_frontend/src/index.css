@@ -120,6 +120,21 @@
    FPT Brand Colors: E67E22 (Primary Orange)
    ============================================ */
 
+/* ─── Homepage Text Readability ───────────────────────────────────────────────
+   Utility class to add white halo shadow for text over light aurora background.
+   Disabled in dark mode.
+   ──────────────────────────────────────────────────────────────────────────── */
+html:not(.dark) .text-glow-light {
+  text-shadow:
+    0 0 1px rgba(255, 255, 255, 0.95),
+    0 0 4px rgba(255, 255, 255, 0.70),
+    0 1px 6px rgba(255, 255, 255, 0.50);
+}
+
+html.dark .text-glow-light {
+  text-shadow: none;
+}
+
 :root {
   /* FPT Brand Colors */
   --fpt-orange: #E67E22;

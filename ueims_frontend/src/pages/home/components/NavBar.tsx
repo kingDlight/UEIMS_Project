@@ -42,7 +42,7 @@ export const NavBar = ({ isDark, toggleTheme, scrolled, scrollToSection }: { isD
         style={{ background: 'none', border: 'none', padding: 0 }}
       >
         <LogoIcon style={{ height: '36px', width: 'auto' }} />
-        <span className={`font-bold text-lg tracking-wide transition-colors duration-300 ease-in-out ${isDark ? 'text-white' : 'text-slate-900'}`}>UEIMS</span>
+        <span className={`text-glow-light font-bold text-lg tracking-wide transition-colors duration-300 ease-in-out ${isDark ? 'text-white' : 'text-slate-900'}`}>UEIMS</span>
       </button>
 
       <div className="hidden md:flex items-center gap-1.5">
@@ -51,7 +51,7 @@ export const NavBar = ({ isDark, toggleTheme, scrolled, scrollToSection }: { isD
             key={link.label}
             href={link.href}
             onClick={(e) => { e.preventDefault(); scrollToSection(link.href); }}
-            className={`text-xs font-medium px-3.5 py-2 rounded-lg transition-all duration-300 ease-in-out ${isDark ? 'text-zinc-300 hover:text-white hover:bg-zinc-800/40' : 'text-slate-700 hover:text-slate-950 hover:bg-slate-100'
+            className={`text-glow-light text-xs font-medium px-3.5 py-2 rounded-lg transition-all duration-300 ease-in-out ${isDark ? 'text-zinc-300 hover:text-white hover:bg-zinc-800/40' : 'text-slate-700 hover:text-slate-950 hover:bg-slate-100'
               }`}
           >
             {t(link.label)}

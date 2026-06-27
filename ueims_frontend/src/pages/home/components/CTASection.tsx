@@ -7,7 +7,7 @@ export const CTASection = ({ isDark }: { isDark: boolean }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   return (
-    <section className={`py-20 md:py-32 px-6 md:px-12 relative z-10 text-center overflow-hidden border-b transition-colors duration-300 ease-in-out ${isDark ? 'bg-gradient-to-b from-[#0b0f19] to-[#070a11] border-transparent' : 'bg-gradient-to-b from-white to-slate-50 border-slate-200'}`}>
+    <section className={`py-20 md:py-32 px-6 md:px-12 relative z-10 text-center overflow-hidden border-b transition-colors duration-300 ease-in-out ${isDark ? 'bg-gradient-to-b from-[#0b0f19]/[0.91] to-[#070a11]/[0.91] border-transparent' : 'bg-gradient-to-b from-white/[0.91] to-slate-50/[0.91] border-slate-200'}`}>
       <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[400px] h-[400px] bg-[#f37021]/10 blur-[120px] rounded-full pointer-events-none"></div>
       <div
         className="max-w-4xl mx-auto relative z-10"
