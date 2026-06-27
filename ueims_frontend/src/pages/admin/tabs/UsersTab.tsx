@@ -258,10 +258,10 @@ export const UsersTab: React.FC = () => {
     try {
       if (statusModal.nextStatus === 'LOCKED') {
         await AdminService.updateUserStatus(statusModal.user.userId, 'LOCKED');
-        message.success('User account has been locked.');
+        message.success('User account has been locked. They cannot sign in until you unlock them.');
       } else if (statusModal.nextStatus === 'ACTIVE') {
         await AdminService.updateUserStatus(statusModal.user.userId, 'ACTIVE');
-        message.success('User account has been unlocked.');
+        message.success('User account has been unlocked. Failed-attempt counter reset.');
       } else {
         await AdminService.updateUserStatus(statusModal.user.userId, statusModal.nextStatus);
         message.success('User status updated.');
@@ -603,6 +603,16 @@ export const UsersTab: React.FC = () => {
                     icon={<WarningOutlined />}
                     label="Failed Login Attempts"
                     value={viewing.failedLoginAttempts.toString()}
+                  />
+                )}
+                {viewing.lockedUntil && (
+                  <Field
+                    icon={<LockOutlined />}
+                    label="Locked Until"
+                    value={new Date(viewing.lockedUntil).toLocaleString() +
+                      (new Date(viewing.lockedUntil) > new Date()
+                        ? ' (auto-unlocks)'
+                        : ' (expired)')}
                   />
                 )}
                 {viewing.mustChangePassword !== undefined && (
