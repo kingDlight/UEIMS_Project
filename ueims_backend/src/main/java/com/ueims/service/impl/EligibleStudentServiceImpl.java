@@ -20,8 +20,10 @@ import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
 import com.ueims.model.entity.EligibleStudent;
 import com.ueims.model.entity.Semester;
+import com.ueims.model.entity.StudentProfile;
 import com.ueims.repository.EligibleStudentRepository;
 import com.ueims.repository.SemesterRepository;
+import com.ueims.repository.StudentProfileRepository;
 import com.ueims.repository.UserRepository;
 import com.ueims.service.EligibleStudentService;
 import com.ueims.util.ExcelImportUtil;
@@ -39,6 +41,7 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
     EligibleStudentRepository repository;
     SemesterRepository semesterRepository;
     UserRepository userRepository;
+    StudentProfileRepository studentProfileRepository;
 
     @Override
     public List<EligibleStudent> findAll() {
@@ -167,7 +170,47 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
 
         existing.setStatus(newStatus);
 
-        return repository.save(existing);
+        EligibleStudent saved = repository.save(existing);
+
+        // Sync official school-issued data (gpa, full_name, email, major) into
+        // student_profiles so the student's self-service profile reflects the
+        // authoritative record imported by Training Manager. Students are NOT
+        // allowed to edit these fields themselves — only the school can.
+        syncOfficialDataToProfile(saved);
+
+        return saved;
+    }
+
+    /**
+     * Mirror school-issued fields from eligible_students → student_profiles.
+     * Idempotent: if no profile exists yet, create one with student_code matching.
+     */
+    private void syncOfficialDataToProfile(EligibleStudent es) {
+        if (es.getUser() == null || es.getUser().getUserId() == null) {
+            return;
+        }
+        UUID userId = es.getUser().getUserId();
+        try {
+            StudentProfile profile = studentProfileRepository.findByUser_UserId(userId);
+            if (profile == null) {
+                // Create a minimal profile row mirroring the school-issued data.
+                profile = StudentProfile.builder()
+                        .user(es.getUser())
+                        .studentCode(es.getStudentCode())
+                        .major(es.getMajor())
+                        .gpa(es.getGpa())
+                        .build();
+            } else {
+                profile.setStudentCode(es.getStudentCode());
+                profile.setMajor(es.getMajor());
+                profile.setGpa(es.getGpa());
+            }
+            studentProfileRepository.save(profile);
+        } catch (Exception ex) {
+            // Sync is best-effort; don't fail the eligibility update if profile sync breaks.
+            log.warn("Failed to sync eligible_student → student_profiles for user {}: {}",
+                    userId, ex.getMessage());
+        }
     }
 
     @Override

@@ -45,10 +45,10 @@ import lombok.extern.slf4j.Slf4j;
 public class PlacementApplicationServiceImpl implements PlacementApplicationService {
 
     /**
-     * Auto-match threshold: SV có GPA (quy đổi sang thang 10) dưới mức này sẽ KHÔNG được auto-match.
-     * GPA trong DB lưu thang 4 (max 4.0). Threshold tương đương 7.0/10 = 2.8/4.
+     * Auto-match threshold: SV có GPA (thang 10) dưới mức này sẽ KHÔNG được auto-match.
+     * GPA trong DB lưu thang 10 (0.00 – 10.00). Threshold 7.0/10.
      */
-    static final double AUTO_MATCH_GPA_THRESHOLD = 7.0; // DB lưu thang 10, threshold 7.0/10
+    static final double AUTO_MATCH_GPA_THRESHOLD = 7.0; // thang 10
 
     /** Auto-match scoring weights. */
     static final int SCORE_MAJOR_MATCH = 50;

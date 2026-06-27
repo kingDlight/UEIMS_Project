@@ -66,4 +66,17 @@ public class Application extends BaseEntity {
     @Column(name = "cv_download_count", nullable = false, columnDefinition = "integer default 0")
     @Builder.Default
     private Integer cvDownloadCount = 0;
+
+    // BR-26 tracking: records the application ID that triggered this application to become
+    // WITHDRAWN. This enables the undo-BR-26 cascade when an enterprise drags ACCEPTED
+    // back to a non-terminal state — we can revive only the apps this application withdrew.
+    @Column(name = "withdrawn_by_application_id")
+    private java.util.UUID withdrawnByApplicationId;
+
+    // BR-26 tracking: the status this application had just before BR-26 set it to
+    // WITHDRAWN. Used to restore the correct status when undoing BR-26, rather than
+    // blindly resetting to PENDING.
+    @Column(name = "previous_status", length = 30)
+    @Enumerated(EnumType.STRING)
+    private ApplicationStatus previousStatus;
 }

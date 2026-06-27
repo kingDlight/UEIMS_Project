@@ -64,8 +64,8 @@ public class EnterpriseAssignmentServiceImpl implements EnterpriseAssignmentServ
             return List.of();
         }
         UUID enterpriseId = currentUser.getEnterprise().getEnterpriseId();
-        // UC-45: Chỉ hiển thị sinh viên được phân công trong học kỳ ACTIVE
-        return repository.findByEnterprise_EnterpriseIdAndSemester_Status(enterpriseId, "ACTIVE");
+        // UC-45: Chỉ hiển thị sinh viên có trạng thái OJT/MATCHED/ACCEPTED trong eligible_students
+        return repository.findByEnterpriseAndSemesterActiveAndValidStudentStatus(enterpriseId);
     }
 
     @Override

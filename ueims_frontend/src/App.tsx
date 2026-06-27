@@ -2,7 +2,7 @@ import { RouterProvider } from 'react-router-dom';
 import { ConfigProvider } from 'antd';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { GoogleOAuthProvider } from '@react-oauth/google';
-import { router } from './routes';
+import { router } from './routes/router';
 import { themeConfig } from './theme/themeConfig';
 import { useEffect } from 'react';
 

@@ -3,7 +3,6 @@ import {
   TeamOutlined,
   ProjectOutlined,
   StarOutlined,
-  BarChartOutlined,
   BellOutlined,
   HomeOutlined,
   FileTextOutlined,
@@ -76,7 +75,6 @@ export const navItems: NavItem[] = [
   { key: 'reports', label: 'Weekly Reports', icon: React.createElement(FileTextOutlined), roles: ['ENTERPRISE'] },
   { key: 'incidents', label: 'Incidents', icon: React.createElement(AlertOutlined), roles: ['ENTERPRISE'] },
   { key: 'evaluation', label: 'Evaluation', icon: React.createElement(StarOutlined), roles: ['ENTERPRISE'] },
-  { key: 'analytics', label: 'Analytics', icon: React.createElement(BarChartOutlined), roles: ['ENTERPRISE'] },
   { key: 'profile', label: 'Profile', icon: React.createElement(UserOutlined), roles: ['ENTERPRISE'] },
   { key: 'notifications', label: 'Notices', icon: React.createElement(BellOutlined), roles: ['ENTERPRISE', 'STUDENT', 'TRAINING_MANAGER'] },
 ];

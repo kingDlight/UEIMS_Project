@@ -19,7 +19,8 @@
   "noRecentActivities": "Chưa có hoạt động nào",
   "viewAllHistory": "Xem tất cả lịch sử",
   "preparing": "Đang chuẩn bị bảng điều khiển...",
-  
+  "eligible": "ĐỦ ĐIỀU KIỆN ỨNG TUYỂN",
+  "completed": "ĐÃ HOÀN THÀNH",
   "active": "HOẠT ĐỘNG",
   "daysRemaining": "Còn {{count}} ngày",
   "statusLabel": "Trạng thái",

@@ -65,4 +65,8 @@ public interface ApplicationRepository extends JpaRepository<Application, UUID> 
     @Modifying
     @Query("UPDATE Application a SET a.cvDownloadCount = a.cvDownloadCount + 1 WHERE a.applicationId = :id")
     void incrementDownloadCount(@Param("id") UUID id);
+
+    // BR-26 undo: find all applications that were withdrawn by a given trigger app.
+    // Used to revive sibling applications when an enterprise drags ACCEPTED → REJECTED.
+    List<Application> findByWithdrawnByApplicationId(UUID withdrawnByApplicationId);
 }

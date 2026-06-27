@@ -34,6 +34,9 @@ public class StudentProfile extends BaseEntity {
     @Column(name = "major", nullable = false, length = 255)
     private String major;
 
+    @Column(name = "gpa", precision = 4, scale = 2)
+    private java.math.BigDecimal gpa;
+
     @Column(name = "cv_file_url", length = 500)
     private String cvFileUrl;
 

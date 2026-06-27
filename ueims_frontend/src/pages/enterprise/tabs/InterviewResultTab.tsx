@@ -7,6 +7,7 @@ import {
   TrophyOutlined,
   ReloadOutlined,
   HistoryOutlined,
+  FileTextOutlined,
 } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { InterviewService } from '@/services/InterviewService';
@@ -56,7 +57,15 @@ export const InterviewResultTab: React.FC = () => {
     }
   };
 
-  useEffect(() => { fetchRows(); }, []);
+  useEffect(() => {
+    fetchRows();
+
+    // Refetch when application status changes (e.g. rejection from Kanban)
+    // so cancelled interviews disappear from this list immediately.
+    const onStatusUpdated = () => fetchRows();
+    window.addEventListener('application-status-updated', onStatusUpdated);
+    return () => window.removeEventListener('application-status-updated', onStatusUpdated);
+  }, []);
 
   const handleConfirm = async () => {
     if (!decisionOpen) return;
@@ -168,41 +177,86 @@ export const InterviewResultTab: React.FC = () => {
             <div className="text-[13px] text-slate-500">Graded interviews will appear here.</div>
           </div>
         ) : (
-          <div className="flex flex-col gap-2 mt-2">
-            {gradedRows.map(r => (
-              <div
-                key={r.interviewId}
-                className="flex flex-col gap-2 bg-slate-50 border border-slate-200 rounded-xl px-4.5 py-3.5"
-              >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[14px] font-bold text-slate-900">{r.studentName ?? 'Student'}</span>
-                      <span className="text-[12px] text-slate-500">· {r.jobTitle ?? '—'}</span>
+          <div className="flex flex-col gap-3 mt-3">
+            {gradedRows.map(r => {
+              const passed = r.result === 'PASS';
+              const accent = passed ? 'emerald' : 'rose';
+              const statusLabel = passed ? 'PASSED' : 'FAILED';
+              const StatusIcon = passed ? CheckCircleOutlined : CloseCircleOutlined;
+              const initials = (r.studentName ?? 'S T')
+                .split(' ')
+                .map(p => p[0])
+                .filter(Boolean)
+                .slice(0, 2)
+                .join('')
+                .toUpperCase();
+              return (
+                <div
+                  key={r.interviewId}
+                  className={[
+                    'group bg-white border rounded-2xl px-5 py-4 transition-all',
+                    'hover:shadow-md hover:-translate-y-0.5',
+                    passed
+                      ? 'border-emerald-100 hover:border-emerald-200'
+                      : 'border-rose-100 hover:border-rose-200',
+                  ].join(' ')}
+                >
+                  <div className="flex items-center gap-4">
+                    <div
+                      className={[
+                        'w-11 h-11 rounded-full flex items-center justify-center font-extrabold text-[13px] shrink-0',
+                        passed
+                          ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100'
+                          : 'bg-rose-50 text-rose-700 ring-1 ring-rose-100',
+                      ].join(' ')}
+                    >
+                      {initials}
                     </div>
-                    <div className="text-[12px] text-slate-500 flex items-center gap-1.5">
-                      <CalendarOutlined className="text-slate-400" /> {r.scheduledTime ? dayjs(r.scheduledTime).format('ddd, MMM D YYYY · HH:mm') : '—'}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <span className="text-[14px] font-bold text-slate-900 truncate">
+                          {r.studentName ?? 'Student'}
+                        </span>
+                        <span className="text-slate-300">·</span>
+                        <span className="text-[12px] text-slate-500 truncate">
+                          {r.jobTitle ?? '—'}
+                        </span>
+                      </div>
+                      <div className="text-[12px] text-slate-500 flex items-center gap-1.5">
+                        <CalendarOutlined className="text-slate-400" />
+                        <span>
+                          {r.scheduledTime
+                            ? dayjs(r.scheduledTime).format('ddd, MMM D YYYY · HH:mm')
+                            : '—'}
+                        </span>
+                      </div>
                     </div>
+                    <Tag
+                      icon={<StatusIcon />}
+                      color={passed ? 'success' : 'error'}
+                      className="rounded-full px-3 py-1 text-[12px] font-bold m-0 border-0"
+                    >
+                      {statusLabel}
+                    </Tag>
                   </div>
-                  <div>
-                    {r.result === 'PASS' ? (
-                      <Tag icon={<CheckCircleOutlined />} color="success" className="rounded-full px-3 py-1 text-[13px] font-bold m-0 border-0">
-                        PASSED
-                      </Tag>
-                    ) : (
-                      <Tag icon={<CloseCircleOutlined />} color="error" className="rounded-full px-3 py-1 text-[13px] font-bold m-0 border-0">
-                        FAILED
-                      </Tag>
-                    )}
-                  </div>
+                  {r.feedback && (
+                    <div
+                      className={[
+                        'mt-3 ml-[60px] rounded-lg px-4 py-3 text-[13px] text-slate-600 border',
+                        passed
+                          ? 'bg-emerald-50/40 border-emerald-100'
+                          : 'bg-rose-50/40 border-rose-100',
+                      ].join(' ')}
+                    >
+                      <div className="flex items-center gap-1.5 mb-1 text-[11px] font-bold uppercase tracking-wide text-slate-500">
+                        <FileTextOutlined /> Notes
+                      </div>
+                      <div className="leading-relaxed">{r.feedback}</div>
+                    </div>
+                  )}
                 </div>
-                {r.feedback && (
-                  <div className="mt-2 bg-white rounded-lg p-3 text-[13px] text-slate-600 border border-slate-100 shadow-sm">
-                    <strong>Notes:</strong> {r.feedback}
-                  </div>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
         )
       )

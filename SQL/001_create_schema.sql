@@ -237,7 +237,7 @@ CREATE TABLE eligible_students (
     full_name       VARCHAR(255) NOT NULL,                           -- BR-17: Mandatory
     email           VARCHAR(255),                                    -- For auto-creating accounts
     major           VARCHAR(255) NOT NULL,                           -- BR-17: Mandatory
-    gpa             DECIMAL(4,2),                                    -- BR-17, BR-19: >= 2.0
+    gpa             DECIMAL(4,2),                                    -- BR-17, BR-19: 0.00 - 10.00 (thang 10)
     current_semester INT NOT NULL CHECK (current_semester BETWEEN 1 AND 9), -- BR-54: Semester-based access
     status          VARCHAR(20) NOT NULL DEFAULT 'ELIGIBLE'
                     CHECK (status IN ('ELIGIBLE','NOT_ELIGIBLE','PENDING','ACCEPTED','MATCHED','OJT','CANCELLED')),
@@ -257,7 +257,7 @@ CREATE TABLE eligible_students (
     -- BR-23: Cancelled must have reason + who cancelled
     CONSTRAINT chk_cancel_audit CHECK (
         status != 'CANCELLED' OR (cancelled_reason IS NOT NULL AND cancelled_by IS NOT NULL)
-    ),
+    )
 );
 
 CREATE INDEX idx_eligible_semester ON eligible_students(semester_id);
@@ -268,9 +268,15 @@ CREATE UNIQUE INDEX uq_eligible_user_semester
     ON eligible_students(semester_id, user_id) 
     WHERE user_id IS NOT NULL;
 
+-- Legacy one-time migration: nếu DB cũ từng lưu GPA thang 4 (<=4.0), convert sang thang 10.
+-- Sau migration này, mọi GPA mới insert/đều ở thang 10; tuyệt đối KHÔNG chạy lại lệnh này
+-- vì sẽ scale bậy dữ liệu đã đúng.
 UPDATE eligible_students
 SET gpa = ROUND(gpa * 2.5, 2)
-WHERE gpa <= 4.0;
+WHERE gpa IS NOT NULL
+  AND gpa <= 4.0
+  -- Guard: chỉ chạy khi chưa từng convert. Nếu MAX(gpa) > 4.0 tức là dữ liệu đã ở thang 10, bỏ qua.
+  AND (SELECT MAX(gpa) FROM eligible_students) <= 4.0;
 
 -- TRIGGER: BR-22 — OJT approval only for ACCEPTED/MATCHED students
 -- BR-21: Auto-lock record when status changes to OJT
@@ -298,6 +304,15 @@ CREATE OR REPLACE FUNCTION prevent_locked_student_edit()
 RETURNS TRIGGER AS $$
 BEGIN
     IF OLD.is_locked = TRUE THEN
+        -- FIX 017: Allow MATCHED → OJT transition even when locked
+        -- This is needed because trg_validate_ojt fires on the same UPDATE
+        -- and explicitly allows this transition (BR-22)
+        IF OLD.status = 'MATCHED' AND NEW.status = 'OJT' THEN
+            NEW.is_locked := TRUE;
+            NEW.approved_at := CURRENT_TIMESTAMP;
+            RETURN NEW;
+        END IF;
+
         -- Allow only status transition to CANCELLED
         IF NEW.status != 'CANCELLED' THEN
             RAISE EXCEPTION 'Student record is locked. Cannot modify status to % (BR-21).', NEW.status;
@@ -317,7 +332,6 @@ BEGIN
         END IF;
 
         -- Prevent modification of identity columns
-        -- (gpa, full_name, email, major được phép update)
         IF OLD.eligible_id != NEW.eligible_id OR
            OLD.semester_id != NEW.semester_id OR
            OLD.user_id IS DISTINCT FROM NEW.user_id OR
@@ -519,6 +533,14 @@ CREATE TABLE applications (
     screened_by     UUID REFERENCES users(user_id),
     screened_at     TIMESTAMP,
     withdrawn_at    TIMESTAMP,
+    -- BR-26 tracking: enables undo cascade when an enterprise reverses an ACCEPTED state.
+    -- withdrawn_by_application_id = the app that caused this one to be set to WITHDRAWN.
+    -- previous_status = the status this app had before BR-26 set it to WITHDRAWN,
+    --                    used to restore the correct status during undo.
+    withdrawn_by_application_id UUID REFERENCES applications(application_id),
+    previous_status  VARCHAR(30)
+                    CHECK (previous_status IN ('PENDING', 'SCREENING_PASSED', 'SCREENING_REJECTED',
+                                               'INTERVIEW_SCHEDULED', 'ACCEPTED', 'REJECTED', 'WITHDRAWN')),
     created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at      TIMESTAMP,
@@ -534,6 +556,10 @@ CREATE UNIQUE INDEX uq_active_application
 CREATE INDEX idx_applications_student ON applications(student_id);
 CREATE INDEX idx_applications_jobpost ON applications(job_post_id);
 CREATE INDEX idx_applications_status ON applications(status);
+-- BR-26 undo: fast lookup for "find all apps withdrawn by this trigger app"
+CREATE INDEX idx_applications_withdrawn_by
+    ON applications(withdrawn_by_application_id)
+    WHERE withdrawn_by_application_id IS NOT NULL;
 
 -- TRIGGER: BR-54 — Enforce Student in Semester 5 is allowed to apply
 CREATE OR REPLACE FUNCTION enforce_student_apply_permission()
@@ -546,12 +572,14 @@ BEGIN
     JOIN job_posts jp ON es.semester_id = jp.semester_id
     WHERE es.user_id = NEW.student_id AND jp.job_post_id = NEW.job_post_id;
 
-    IF stud_sem IS NULL OR stud_sem != 5 THEN
-        RAISE EXCEPTION 'Student is not in Semester 5 (Current: %). Only Semester 5 students are permitted to apply for jobs (BR-54).', COALESCE(stud_sem::TEXT, 'Unknown');
+    -- FIX 017: Allow semesters 5 and 6 to apply
+    IF stud_sem IS NULL OR stud_sem NOT IN (5, 6) THEN
+        RAISE EXCEPTION 'Student is not in Semester 5 or 6 (Current: %). Only Semester 5-6 students are permitted to apply for jobs (BR-54).', COALESCE(stud_sem::TEXT, 'Unknown');
     END IF;
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
 
 CREATE TRIGGER trg_student_apply_permission
     BEFORE INSERT ON applications
@@ -734,11 +762,33 @@ CREATE TRIGGER trg_interview_eligible
     FOR EACH ROW EXECUTE FUNCTION validate_interview_eligibility();
 
 -- TRIGGER: BR-49 — Prevent reversing interview confirmation (irreversible once true)
+-- FIXED: Allow reset student_confirmed when there's a valid reason:
+--   1. scheduled_datetime changed (reschedule), OR
+--   2. reschedule_reason is provided, OR
+--   3. status changed to CANCELLED with cancel_reason
 CREATE OR REPLACE FUNCTION prevent_confirmation_reversal()
 RETURNS TRIGGER AS $$
 BEGIN
     IF OLD.student_confirmed = TRUE AND NEW.student_confirmed = FALSE THEN
-        RAISE EXCEPTION 'Interview confirmation cannot be reversed.';
+        -- Allow if scheduled time changed (rescheduling)
+        IF OLD.scheduled_datetime != NEW.scheduled_datetime THEN
+            RETURN NEW;
+        END IF;
+
+        -- Allow if reschedule_reason is provided
+        IF NEW.reschedule_reason IS NOT NULL AND NEW.reschedule_reason != '' THEN
+            RETURN NEW;
+        END IF;
+
+        -- Allow if canceling with reason
+        IF NEW.status = 'CANCELLED'
+           AND NEW.cancel_reason IS NOT NULL
+           AND NEW.cancel_reason != '' THEN
+            RETURN NEW;
+        END IF;
+
+        -- Otherwise: truly irreversible without reason
+        RAISE EXCEPTION 'Interview confirmation cannot be reversed without a reschedule or cancel reason (BR-49).';
     END IF;
     RETURN NEW;
 END;
@@ -845,9 +895,12 @@ CREATE TABLE student_profiles (
 
 CREATE INDEX idx_profiles_user ON student_profiles(user_id);
 
+-- Legacy one-time migration cho student_profiles (xem comment ở eligible_students phía trên).
 UPDATE student_profiles
 SET gpa = ROUND(gpa * 2.5, 2)
-WHERE gpa <= 4.0 AND gpa IS NOT NULL;
+WHERE gpa IS NOT NULL
+  AND gpa <= 4.0
+  AND (SELECT MAX(gpa) FROM student_profiles) <= 4.0;
 
 -- ============================================================
 -- MODULE 5: INTERNSHIP TRAINING & SUPERVISION (ENTERPRISE)
@@ -893,7 +946,7 @@ COMMENT ON COLUMN enterprise_assignments.termination_reason IS 'Reason for assig
 COMMENT ON COLUMN enterprise_assignments.terminated_at IS 'The time when the assignment is terminated';
 COMMENT ON COLUMN enterprise_assignments.replaced_by_assignment_id IS 'A new assignment replaces this one (only if terminated due to replacement).';
 
--- TRIGGER: BR-54 — Verify Student is in Semester 6 to participate in active internship
+-- TRIGGER: BR-54 — Verify Student is in Semester 5 or 6 to participate in active internship
 CREATE OR REPLACE FUNCTION enforce_student_internship_permission()
 RETURNS TRIGGER AS $$
 DECLARE
@@ -903,8 +956,11 @@ BEGIN
     FROM eligible_students
     WHERE user_id = NEW.student_id AND semester_id = NEW.semester_id;
 
-    IF stud_sem IS NULL OR stud_sem != 6 THEN
-        RAISE EXCEPTION 'Student is not in Semester 6 (Current: %). Only Semester 6 students can participate in active internship (BR-54).', COALESCE(stud_sem::TEXT, 'Unknown');
+    -- FIX 018: Allow both semester 5 and 6 to enter internship.
+    -- Kỳ 5: SV vừa apply và được accept → assignment có thể tạo sớm
+    -- Kỳ 6: SV đang thực tập chính thức
+    IF stud_sem IS NULL OR stud_sem NOT IN (5, 6) THEN
+        RAISE EXCEPTION 'Student is not in Semester 5 or 6 (Current: %). Only Semester 5-6 students can participate in active internship (BR-54).', COALESCE(stud_sem::TEXT, 'Unknown');
     END IF;
     RETURN NEW;
 END;
@@ -924,8 +980,9 @@ BEGIN
     FROM eligible_students
     WHERE user_id = NEW.student_id AND semester_id = NEW.semester_id;
 
-    IF stud_status IS NULL OR stud_status != 'OJT' THEN
-        RAISE EXCEPTION 'Cannot assign student to enterprise: student status in this semester must be OJT, current status: %', COALESCE(stud_status, 'None');
+    -- FIX 017: Allow both OJT (actively interning) and ACCEPTED (matched, about to start)
+    IF stud_status IS NULL OR (stud_status != 'OJT' AND stud_status != 'ACCEPTED') THEN
+        RAISE EXCEPTION 'Cannot assign student to enterprise: student status in this semester must be OJT or ACCEPTED, current status: %', COALESCE(stud_status, 'None');
     END IF;
     RETURN NEW;
 END;
@@ -992,6 +1049,7 @@ CREATE TABLE enterprise_evaluations (
     professionalism_score DECIMAL(4,2) NOT NULL CHECK (professionalism_score BETWEEN 0 AND 10),
     soft_skills_score   DECIMAL(4,2) NOT NULL CHECK (soft_skills_score BETWEEN 0 AND 10),
     progress_score      DECIMAL(4,2) NOT NULL CHECK (progress_score BETWEEN 0 AND 10),
+    version             BIGINT NOT NULL DEFAULT 0,
     -- BR-43: Auto-calculated weighted total
     total_score         DECIMAL(4,2) GENERATED ALWAYS AS (
         ROUND(attitude_score * 0.2 + professionalism_score * 0.4 + soft_skills_score * 0.2 + progress_score * 0.2, 2)

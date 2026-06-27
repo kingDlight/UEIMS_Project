@@ -7,6 +7,7 @@ import com.ueims.dto.request.ApplicationRequest;
 import com.ueims.dto.request.ApplicationScreenRequest;
 import com.ueims.dto.request.ApplicationStatusUpdateRequest;
 import com.ueims.dto.response.ApplicationResponse;
+import com.ueims.model.entity.Application;
 
 public interface ApplicationService {
     List<ApplicationResponse> findAll();
@@ -43,4 +44,17 @@ public interface ApplicationService {
      * @return a Spring Resource pointing to the generated ZIP file
      */
     org.springframework.core.io.Resource bulkDownloadCv(List<UUID> applicationIds);
+
+    /**
+     * BR-26 helper exposed for cross-service use: withdraw every other
+     * non-terminal application of the same student in the same semester as the
+     * supplied trigger application. Called whenever an application transitions
+     * to a terminal "won" status (SCREENING_PASSED / ACCEPTED) so other
+     * enterprises don't waste cycles reviewing CVs for a student who's already
+     * committed elsewhere.
+     *
+     * <p>Implementation lives on the impl class because it touches several
+     * repositories and the notification service.
+     */
+    void withdrawOtherApplicationsInSemester(Application trigger, String triggerReason);
 }

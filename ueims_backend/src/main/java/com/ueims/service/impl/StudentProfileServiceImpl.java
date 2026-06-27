@@ -123,7 +123,9 @@ public class StudentProfileServiceImpl implements StudentProfileService {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
-        profile.setMajor(request.getMajor());
+        // School-issued fields (major, gpa, student_code) are NOT editable by students —
+        // they are managed exclusively by Training Manager via the eligible_students table
+        // and synced into student_profiles by EligibleStudentServiceImpl.
         profile.setSkills(request.getSkills());
         profile.setLinkedinUrl(request.getLinkedinUrl());
         profile.setGithubUrl(request.getGithubUrl());

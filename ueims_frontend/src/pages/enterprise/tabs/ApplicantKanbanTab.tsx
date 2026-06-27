@@ -8,6 +8,7 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
+  useDroppable,
   type DragStartEvent,
   type DragEndEvent,
 } from '@dnd-kit/core';
@@ -96,16 +97,19 @@ function mapToApplicantCard(item: any): ApplicantCard {
 // ============================================================
 // KANBAN COLUMN STATUSES — visible in kanban (others treated as PENDING bucket)
 // ============================================================
-type KanbanStatus = 'PENDING' | 'INTERVIEW_SCHEDULED' | 'ACCEPTED' | 'REJECTED';
+type KanbanStatus = 'PENDING' | 'INTERVIEW_SCHEDULED' | 'ACCEPTED' | 'REJECTED' | 'WITHDRAWN';
 
 const COLUMNS: { id: KanbanStatus; label: string; colorClass: string; bgClass: string; borderClass: string }[] = [
   { id: 'PENDING', label: 'Pending', colorClass: 'text-amber-500', bgClass: 'bg-amber-50', borderClass: 'border-amber-500/20' },
   { id: 'INTERVIEW_SCHEDULED', label: 'Interviewing', colorClass: 'text-blue-500', bgClass: 'bg-blue-50', borderClass: 'border-blue-500/20' },
   { id: 'ACCEPTED', label: 'Passed', colorClass: 'text-emerald-500', bgClass: 'bg-emerald-50', borderClass: 'border-emerald-500/20' },
   { id: 'REJECTED', label: 'Rejected', colorClass: 'text-red-500', bgClass: 'bg-red-50', borderClass: 'border-red-500/20' },
+  { id: 'WITHDRAWN', label: 'Withdrawn', colorClass: 'text-slate-500', bgClass: 'bg-slate-50', borderClass: 'border-slate-500/20' },
 ];
 
-// Map any backend status to a kanban column (so SCREENING_*/WITHDRAWN are visible in PENDING bucket)
+// Map any backend status to a kanban column. WITHDRAWN is terminal (BR-26 — student
+// was placed elsewhere), so it gets its own read-only bucket instead of being lumped
+// into REJECTED.
 function toKanbanStatus(status: ApplicationStatus): KanbanStatus {
   switch (status) {
     case 'PENDING':
@@ -117,8 +121,9 @@ function toKanbanStatus(status: ApplicationStatus): KanbanStatus {
     case 'ACCEPTED':
       return 'ACCEPTED';
     case 'REJECTED':
-    case 'WITHDRAWN':
       return 'REJECTED';
+    case 'WITHDRAWN':
+      return 'WITHDRAWN';
     default:
       return 'PENDING';
   }
@@ -154,7 +159,14 @@ const SortableCard: React.FC<{
   applicant: ApplicantCard;
   onViewDetails: (a: ApplicantCard) => void;
 }> = ({ applicant, onViewDetails }) => {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: applicant.id });
+  // BR-26 finality: WITHDRAWN is terminal — set only by BR-26, never by drag.
+  // ACCEPTED can be undone by dragging (undo BR-26 cascade runs in backend).
+  const isWithdrawn = applicant.status === 'WITHDRAWN';
+  const sortable = useSortable({
+    id: applicant.id,
+    disabled: isWithdrawn,
+  });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = sortable;
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -165,11 +177,11 @@ const SortableCard: React.FC<{
   const daysSinceApply = Math.floor((Date.now() - new Date(applicant.appliedAt).getTime()) / 86400000);
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+    <div ref={setNodeRef} style={style} {...attributes} {...(isWithdrawn ? {} : listeners)}>
       <motion.div
         onClick={() => onViewDetails(applicant)}
         whileHover={{ y: -1, boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)' }}
-        className="bg-white rounded-2xl border border-slate-200 shadow-sm p-3.5 cursor-grab mb-2.5 transition-all"
+        className={`bg-white rounded-2xl border border-slate-200 shadow-sm p-3.5 mb-2.5 transition-all ${isWithdrawn ? 'cursor-not-allowed opacity-75' : 'cursor-grab'}`}
       >
         <div className="flex items-start gap-2.5 mb-2.5">
           <div className={`w-[42px] h-[42px] rounded-xl ${avatarColor.bg} ${avatarColor.text} flex items-center justify-center text-[14px] font-extrabold shrink-0`}>
@@ -244,6 +256,7 @@ const DetailModal: React.FC<DetailModalProps> = ({ applicant, open, onClose, onS
   const avatarColor = applicant.avatarColor;
   const initials = (applicant.studentName || 'ST').substring(0, 2).toUpperCase();
   const isPending = applicant.status === 'PENDING';
+  const isWithdrawn = applicant.status === 'WITHDRAWN';
   const alreadyScreened = applicant.status === 'SCREENING_PASSED' || applicant.status === 'SCREENING_REJECTED';
 
   const openConfirm = (decision: 'SCREENING_PASSED' | 'SCREENING_REJECTED') => {
@@ -405,6 +418,17 @@ const DetailModal: React.FC<DetailModalProps> = ({ applicant, open, onClose, onS
             Evaluation locked — application has been screened.
           </div>
         )}
+        {isWithdrawn && (
+          <div className="text-[12px] text-slate-500 text-center px-3 py-2 bg-slate-50 rounded-xl border border-dashed border-slate-300">
+            <LockOutlined className="mr-1.5" />
+            Application withdrawn automatically — student has been placed with another enterprise.
+          </div>
+        )}
+        {applicant.status === 'ACCEPTED' && (
+          <div className="text-[12px] text-slate-500 text-center px-3 py-2 bg-emerald-50 rounded-xl border border-dashed border-emerald-200">
+            Application accepted — drag this card to another column to change status.
+          </div>
+        )}
       </div>
       <Modal
         title={
@@ -466,32 +490,42 @@ const KanbanColumn: React.FC<{
   column: typeof COLUMNS[number];
   applicants: ApplicantCard[];
   onViewDetails: (a: ApplicantCard) => void;
-}> = ({ column, applicants, onViewDetails }) => (
-  <div className="flex-[0_0_280px] flex flex-col min-w-0">
-    <div className={`px-3.5 py-3 rounded-xl ${column.bgClass} border ${column.borderClass} mb-3 flex items-center justify-between`}>
-      <div className="flex items-center gap-2">
-        <span className={`w-2 h-2 rounded-full inline-block bg-current ${column.colorClass}`} />
-        <span className={`text-[13px] font-bold ${column.colorClass}`}>{column.label}</span>
+}> = ({ column, applicants, onViewDetails }) => {
+  // BR-26 finality: the Withdrawn column is read-only — don't accept drops into it.
+  // Only BR-26 (backend) may put cards here.
+  const isReadOnly = column.id === 'WITHDRAWN';
+  const { setNodeRef, isOver } = useDroppable({ id: column.id, disabled: isReadOnly });
+  return (
+    <div className="flex-[0_0_280px] flex flex-col min-w-0">
+      <div className={`px-3.5 py-3 rounded-xl ${column.bgClass} border ${column.borderClass} mb-3 flex items-center justify-between`}>
+        <div className="flex items-center gap-2">
+          <span className={`w-2 h-2 rounded-full inline-block bg-current ${column.colorClass}`} />
+          <span className={`text-[13px] font-bold ${column.colorClass}`}>{column.label}</span>
+          {isReadOnly && <LockOutlined className={`text-[10px] ${column.colorClass}`} />}
+        </div>
+        <span className={`px-2 py-0.5 rounded-full bg-current/10 ${column.colorClass} text-[12px] font-bold`}>{applicants.length}</span>
       </div>
-      <span className={`px-2 py-0.5 rounded-full bg-current/10 ${column.colorClass} text-[12px] font-bold`}>{applicants.length}</span>
+      <SortableContext items={applicants.map(a => a.id)} strategy={verticalListSortingStrategy}>
+        <div
+          ref={setNodeRef}
+          className={`flex-1 px-1 py-1.5 min-h-[200px] rounded-xl bg-slate-50 border border-dashed overflow-y-auto max-h-[calc(100vh-280px)] transition-colors ${isOver && !isReadOnly ? 'border-[#E67E22] bg-[#E67E22]/5' : 'border-slate-200'}`}
+        >
+          {applicants.length === 0 ? (
+            <div className="py-8 px-4 text-center text-slate-500 text-[12px]">Drop here</div>
+          ) : (
+            <AnimatePresence>
+              {applicants.map((applicant) => (
+                <motion.div key={applicant.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2 }}>
+                  <SortableCard applicant={applicant} onViewDetails={onViewDetails} />
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          )}
+        </div>
+      </SortableContext>
     </div>
-    <SortableContext items={applicants.map(a => a.id)} strategy={verticalListSortingStrategy}>
-      <div className="flex-1 px-1 py-1.5 min-h-[200px] rounded-xl bg-slate-50 border border-dashed border-slate-200 overflow-y-auto max-h-[calc(100vh-280px)]">
-        {applicants.length === 0 ? (
-          <div className="py-8 px-4 text-center text-slate-500 text-[12px]">Drop here</div>
-        ) : (
-          <AnimatePresence>
-            {applicants.map((applicant) => (
-              <motion.div key={applicant.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2 }}>
-                <SortableCard applicant={applicant} onViewDetails={onViewDetails} />
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        )}
-      </div>
-    </SortableContext>
-  </div>
-);
+  );
+};
 
 // ============================================================
 // MAIN KANBAN BOARD
@@ -503,6 +537,12 @@ export const ApplicantKanbanTab: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [detailModal, setDetailModal] = useState<{ open: boolean; applicant: ApplicantCard | null }>({ open: false, applicant: null });
+  const [rejectModal, setRejectModal] = useState<{
+    open: boolean;
+    applicant: ApplicantCard | null;
+    pendingRejectReason: string;
+    submitting: boolean;
+  }>({ open: false, applicant: null, pendingRejectReason: '', submitting: false });
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
@@ -537,6 +577,12 @@ export const ApplicantKanbanTab: React.FC = () => {
     const draggedApplicant = applicants.find(a => a.id === active.id);
     if (!draggedApplicant) return;
 
+    // BR-26 finality: WITHDRAWN is terminal — only BR-26 can set it, drag is forbidden.
+    // ACCEPTED is draggable; undoing it triggers BR-26 undo cascade in the backend.
+    if (draggedApplicant.status === 'WITHDRAWN') {
+      return;
+    }
+
     const overId = over.id as string;
     const targetColumn = COLUMNS.find(col => col.id === overId);
     let targetStatus: KanbanStatus;
@@ -548,12 +594,55 @@ export const ApplicantKanbanTab: React.FC = () => {
       targetStatus = toKanbanStatus(overApplicant.status);
     }
 
+    // Dropping into the Withdrawn bucket is also blocked — only BR-26 may set that.
+    if (targetStatus === 'WITHDRAWN') {
+      return;
+    }
+
     if (toKanbanStatus(draggedApplicant.status) === targetStatus) return;
 
-    await updateStatus(draggedApplicant, targetStatus);
+    // Asking for a reason when dropping into REJECTED (especially from
+    // INTERVIEW_SCHEDULED — disciplinary / misconduct case).
+    if (targetStatus === 'REJECTED') {
+      setRejectModal({
+        open: true,
+        applicant: draggedApplicant,
+        pendingRejectReason: '',
+        submitting: false,
+      });
+      return;
+    }
+
+    await updateStatus(draggedApplicant, targetStatus, undefined);
   };
 
-  const updateStatus = async (applicant: ApplicantCard, newStatus: KanbanStatus) => {
+  const submitReject = async () => {
+    const { applicant, pendingRejectReason } = rejectModal;
+    if (!applicant) return;
+    if (!pendingRejectReason.trim()) {
+      message.warning('Please provide a rejection reason.');
+      return;
+    }
+    setRejectModal(prev => ({ ...prev, submitting: true }));
+    try {
+      await updateStatus(applicant, 'REJECTED', pendingRejectReason.trim());
+      setRejectModal({ open: false, applicant: null, pendingRejectReason: '', submitting: false });
+    } catch {
+      setRejectModal(prev => ({ ...prev, submitting: false }));
+    }
+  };
+
+  const updateStatus = async (
+    applicant: ApplicantCard,
+    newStatus: KanbanStatus,
+    rejectionReason?: string,
+  ) => {
+    // BR-26 finality: WITHDRAWN is terminal, never set by drag.
+    // ACCEPTED can be dragged away; the backend undo-BR-26 cascade handles cleanup.
+    if (newStatus === 'WITHDRAWN' || applicant.status === 'WITHDRAWN') {
+      return;
+    }
+
     const backendStatus: ApplicationStatus =
       newStatus === 'PENDING' ? 'PENDING' :
       newStatus === 'INTERVIEW_SCHEDULED' ? 'INTERVIEW_SCHEDULED' :
@@ -561,10 +650,22 @@ export const ApplicantKanbanTab: React.FC = () => {
       'REJECTED';
 
     // Optimistic update
-    setApplicants(prev => prev.map(a => a.id === applicant.id ? { ...a, status: backendStatus } : a));
+    setApplicants(prev => prev.map(a => a.id === applicant.id ? {
+      ...a,
+      status: backendStatus,
+      rejectionReason: rejectionReason ?? a.rejectionReason,
+    } : a));
     try {
-      await ApplicationService.updateStatus(applicant.applicationId, { status: backendStatus });
+      await ApplicationService.updateStatus(applicant.applicationId, {
+        status: backendStatus,
+        ...(rejectionReason ? { rejectionReason } : {}),
+      });
       message.success(`Moved ${applicant.studentName} to ${COLUMNS.find(c => c.id === newStatus)?.label}`);
+
+      // Notify other tabs (Dashboard, etc.) so they can refetch.
+      window.dispatchEvent(new CustomEvent('application-status-updated', {
+        detail: { applicationId: applicant.id, status: backendStatus },
+      }));
     } catch (err: any) {
       // Revert on error
       setApplicants(prev => prev.map(a => a.id === applicant.id ? { ...a, status: applicant.status } : a));
@@ -629,8 +730,69 @@ export const ApplicantKanbanTab: React.FC = () => {
               ? { ...item, status: newStatus, rejectionReason: reason ?? item.rejectionReason }
               : item
           ));
+          window.dispatchEvent(new CustomEvent('application-status-updated', {
+            detail: { applicationId: a.id, status: newStatus },
+          }));
         }}
       />
+
+      <Modal
+        open={rejectModal.open}
+        title={
+          <div className="font-extrabold text-slate-900">
+            Reject {rejectModal.applicant?.studentName}?
+          </div>
+        }
+        onCancel={() => {
+          if (rejectModal.submitting) return;
+          setRejectModal({ open: false, applicant: null, pendingRejectReason: '', submitting: false });
+        }}
+        footer={null}
+        destroyOnHidden
+      >
+        {rejectModal.applicant?.status === 'INTERVIEW_SCHEDULED' && (
+          <div className="mb-3 rounded-xl border border-amber-500/30 bg-amber-50 px-3 py-2 text-[12px] text-amber-700">
+            This candidate is currently in an interview. The active interview will be cancelled automatically.
+          </div>
+        )}
+        <div className="mb-3">
+          <div className="text-[12px] font-bold text-slate-500 mb-1.5">
+            Rejection reason <span className="text-red-500">*</span>
+          </div>
+          <Input.TextArea
+            value={rejectModal.pendingRejectReason}
+            onChange={e =>
+              setRejectModal(prev => ({ ...prev, pendingRejectReason: e.target.value }))
+            }
+            rows={3}
+            placeholder="e.g. Misconduct during interview, no-show, breach of company policy..."
+            maxLength={500}
+            showCount
+            className="rounded-xl"
+          />
+        </div>
+        <div className="flex justify-end gap-2">
+          <Button
+            onClick={() => {
+              if (rejectModal.submitting) return;
+              setRejectModal({ open: false, applicant: null, pendingRejectReason: '', submitting: false });
+            }}
+            disabled={rejectModal.submitting}
+            className="rounded-xl"
+          >
+            Cancel
+          </Button>
+          <Button
+            type="primary"
+            danger
+            loading={rejectModal.submitting}
+            onClick={submitReject}
+            className="rounded-xl"
+          >
+            Confirm reject
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 };
