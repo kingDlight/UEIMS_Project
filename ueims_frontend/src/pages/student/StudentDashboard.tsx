@@ -17,7 +17,7 @@ const FinalReportTab = React.lazy(() => import('./tabs/FinalReportTab').then(m =
 const EvaluationTab = React.lazy(() => import('./tabs/EvaluationTab').then(m => ({ default: m.EvaluationTab })));
 const FeedbackTab = React.lazy(() => import('./tabs/FeedbackTab').then(m => ({ default: m.FeedbackTab })));
 
-export type StudentPageKey = 
+export type StudentPageKey =
   | 'dashboard'
   | 'profile'
   | 'jobs'
@@ -28,8 +28,6 @@ export type StudentPageKey =
   | 'feedback'
   | 'final-report'
   | 'evaluation';
-
-export const studentNavItems = navItems;
 
 import { extractUserFromToken } from '@/utils/jwt';
 import { useQueryClient } from '@tanstack/react-query';
@@ -88,27 +86,27 @@ export const StudentDashboard: React.FC = () => {
   const currentSemester = profile?.currentSemester;
 
   const getFilteredNavItems = (sem: number | undefined | null, hasPlacement: boolean) => {
-    if (sem == null) return studentNavItems;
+    if (sem == null) return navItems;
     // Semester 1-4: browse only -> dashboard, profile, jobs
     if (sem >= 1 && sem <= 4) {
-      return studentNavItems.filter(item => ['dashboard', 'profile', 'jobs'].includes(item.key));
+      return navItems.filter(item => ['dashboard', 'profile', 'jobs'].includes(item.key));
     }
     // Semester 5: apply for jobs -> dashboard, profile, jobs, applications, schedule
     if (sem === 5) {
-      return studentNavItems.filter(item => ['dashboard', 'profile', 'jobs', 'applications', 'schedule'].includes(item.key));
+      return navItems.filter(item => ['dashboard', 'profile', 'jobs', 'applications', 'schedule'].includes(item.key));
     }
     // Semester 6: PLACED -> weekly reports + final report + schedule (in case they have past interviews); NOT PLACED -> job board + applications + schedule
     if (sem === 6) {
       if (hasPlacement) {
-        return studentNavItems.filter(item => ['dashboard', 'profile', 'schedule', 'training-plan', 'reports', 'final-report'].includes(item.key));
+        return navItems.filter(item => ['dashboard', 'profile', 'schedule', 'training-plan', 'reports', 'final-report'].includes(item.key));
       }
-      return studentNavItems.filter(item => ['dashboard', 'profile', 'jobs', 'applications', 'schedule'].includes(item.key));
+      return navItems.filter(item => ['dashboard', 'profile', 'jobs', 'applications', 'schedule'].includes(item.key));
     }
     // Semester 7-9: view results & feedback -> dashboard, profile, feedback, evaluation
     if (sem >= 7 && sem <= 9) {
-      return studentNavItems.filter(item => ['dashboard', 'profile', 'feedback', 'evaluation'].includes(item.key));
+      return navItems.filter(item => ['dashboard', 'profile', 'feedback', 'evaluation'].includes(item.key));
     }
-    return studentNavItems;
+    return navItems;
   };
 
   const filteredNavItems = getFilteredNavItems(currentSemester, hasActivePlacement);
