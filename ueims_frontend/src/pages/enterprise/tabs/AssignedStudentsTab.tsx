@@ -128,38 +128,63 @@ export const AssignedStudentsTab: React.FC = () => {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-3 px-6">
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(340px,1fr))] gap-4 px-6">
             {paged.map(r => {
               const meta = STATUS_META[(r.status ?? 'ACTIVE').toUpperCase()] ?? STATUS_META.ACTIVE;
+              const name = r.studentName ?? 'Student';
+              const initials = name
+                .split(' ')
+                .map(p => p[0])
+                .filter(Boolean)
+                .slice(0, 2)
+                .join('')
+                .toUpperCase() || 'ST';
               return (
                 <div
                   key={r.assignmentId}
-                  className="bg-white border border-slate-200 rounded-2xl p-4.5 shadow-sm hover:shadow-md transition-shadow"
+                  className="group bg-white border border-slate-200 rounded-2xl px-5 pt-5 pb-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-slate-300 transition-all"
                 >
-                  <div className="flex items-center gap-3 mb-3.5">
-                    <div className="w-12 h-12 rounded-xl bg-[#E67E22]/10 text-[#E67E22] flex items-center justify-center text-lg font-extrabold shrink-0">
-                      {(r.studentName ?? 'ST').substring(0, 2).toUpperCase()}
+                  <div className="flex items-center gap-3.5">
+                    <div className="w-12 h-12 rounded-full bg-[#E67E22]/10 text-[#E67E22] ring-1 ring-[#E67E22]/15 flex items-center justify-center text-[13px] font-extrabold shrink-0">
+                      {initials}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-[14px] font-bold text-slate-900 mb-0.5">{r.studentName ?? 'Student'}</div>
-                      <div className="text-[12px] text-slate-500 flex items-center gap-1">
-                        <MailOutlined /> <span className="overflow-hidden text-ellipsis whitespace-nowrap">{r.studentEmail ?? '—'}</span>
+                      <div className="text-[14px] font-bold text-slate-900 truncate mb-0.5">{name}</div>
+                      <div className="text-[12px] text-slate-500 flex items-center gap-1.5 min-w-0">
+                        <MailOutlined className="shrink-0" />
+                        <span className="truncate">{r.studentEmail ?? '—'}</span>
                       </div>
                     </div>
-                    <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold ${meta.bg} ${meta.color}`}>{meta.label}</span>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="mt-4 pt-4 border-t border-dashed border-slate-200 grid grid-cols-2 gap-x-3 gap-y-3">
                     <Field icon={<IdcardOutlined />} label="Student ID" value={r.studentCode ?? '—'} />
                     <Field icon={<BookOutlined />} label="Major" value={r.major ?? '—'} />
-                    {r.supervisorName && <Field icon={<UserOutlined />} label="Supervisor" value={r.supervisorName} />}
+                    {r.supervisorName && (
+                      <Field
+                        icon={<UserOutlined />}
+                        label="Supervisor"
+                        value={r.supervisorName}
+                        fullWidth
+                      />
+                    )}
                     {r.startDate && (
                       <Field
                         icon={<CalendarOutlined />}
                         label="Period"
                         value={`${dayjs(r.startDate).format('MMM D, YYYY')} – ${r.endDate ? dayjs(r.endDate).format('MMM D, YYYY') : '—'}`}
+                        fullWidth
                       />
                     )}
+                  </div>
+
+                  <div className="mt-4 flex justify-end">
+                    <span
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold ${meta.bg} ${meta.color}`}
+                    >
+                      <span className={`w-1.5 h-1.5 rounded-full ${meta.color.replace('text-', 'bg-')}`} />
+                      {meta.label}
+                    </span>
                   </div>
                 </div>
               );
@@ -167,7 +192,7 @@ export const AssignedStudentsTab: React.FC = () => {
           </div>
 
           {totalPages > 1 && (
-            <div className="flex justify-center items-center gap-2 mt-5">
+            <div className="flex justify-center items-center gap-2 mt-6">
               <Button disabled={safePage <= 1} onClick={() => setPage(p => p - 1)} className="rounded-xl">Prev</Button>
               <span className="text-[12px] text-slate-500">Page {safePage} of {totalPages}</span>
               <Button disabled={safePage >= totalPages} onClick={() => setPage(p => p + 1)} className="rounded-xl">Next</Button>
@@ -179,11 +204,11 @@ export const AssignedStudentsTab: React.FC = () => {
   );
 };
 
-const Field: React.FC<{ icon: React.ReactNode; label: string; value: string }> = ({ icon, label, value }) => (
-  <div className="px-2.5 py-2 bg-slate-50 rounded-lg">
-    <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 flex items-center gap-1">
-      {icon} {label}
+const Field: React.FC<{ icon: React.ReactNode; label: string; value: string; fullWidth?: boolean }> = ({ icon, label, value, fullWidth }) => (
+  <div className={fullWidth ? 'col-span-2' : ''}>
+    <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+      <span className="text-[#E67E22]">{icon}</span> {label}
     </div>
-    <div className="text-[12px] font-semibold text-slate-900 break-words">{value}</div>
+    <div className="text-[12.5px] font-semibold text-slate-900 break-words leading-snug">{value}</div>
   </div>
 );
