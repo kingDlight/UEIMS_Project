@@ -56,10 +56,18 @@ public class SemesterServiceImpl implements SemesterService {
         validateDates(entity);
 
         if (entity.getSemesterId() == null) {
+            if (entity.getStartDate() != null && entity.getStartDate().isBefore(java.time.LocalDate.now())) {
+                throw new AppException(ErrorCode.SEMESTER_INVALID_DATE, "Start date cannot be in the past");
+            }
             validateForCreate(entity);
         } else {
             Semester existing = repository.findById(entity.getSemesterId()).orElse(null);
             if (existing != null) {
+                if (entity.getStartDate() != null
+                        && !entity.getStartDate().equals(existing.getStartDate())
+                        && entity.getStartDate().isBefore(java.time.LocalDate.now())) {
+                    throw new AppException(ErrorCode.SEMESTER_INVALID_DATE, "Start date cannot be in the past");
+                }
                 validateForUpdate(entity, existing);
             }
         }
@@ -156,6 +164,16 @@ public class SemesterServiceImpl implements SemesterService {
             throw new AppException(ErrorCode.SEMESTER_INVALID_TRANSITION);
         }
         semester.setStatus(STATUS_LOCKED);
+        return repository.save(semester);
+    }
+
+    @Override
+    public Semester reopenSemester(UUID id) {
+        Semester semester = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.SEMESTER_NOT_FOUND));
+        if (!STATUS_CLOSED.equals(semester.getStatus()) && !STATUS_LOCKED.equals(semester.getStatus())) {
+            throw new AppException(ErrorCode.SEMESTER_INVALID_TRANSITION);
+        }
+        semester.setStatus(STATUS_OPEN);
         return repository.save(semester);
     }
 }

@@ -1,0 +1,155 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0">
+  <diagram id="activity_UC-23_Activity_Flow" name="UC-23 Activity Flow">
+    <mxGraphModel dx="1188" dy="639" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="Start" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#000000;strokeColor=none;" value="" vertex="1">
+          <mxGeometry height="40" width="40" x="420" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="NavigateMenu" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Navigate Menu" vertex="1">
+          <mxGeometry height="40" width="120" x="380" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="ReviewList" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Review List" vertex="1">
+          <mxGeometry height="40" width="120" x="380" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="SelectRecords" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Select Records" vertex="1">
+          <mxGeometry height="40" width="120" x="380" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="ClickApprove" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Click Approve" vertex="1">
+          <mxGeometry height="40" width="120" x="380" y="420" as="geometry" />
+        </mxCell>
+        <mxCell id="ValidateStatus" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Validate Status" vertex="1">
+          <mxGeometry height="40" width="120" x="380" y="520" as="geometry" />
+        </mxCell>
+        <mxCell id="IsValid" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="Is Valid" vertex="1">
+          <mxGeometry height="80" width="120" x="380" y="620" as="geometry" />
+        </mxCell>
+        <mxCell id="UpdateStatus" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Update Status" vertex="1">
+          <mxGeometry height="40" width="120" x="380" y="720" as="geometry" />
+        </mxCell>
+        <mxCell id="SendEmail" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Send Email" vertex="1">
+          <mxGeometry height="40" width="120" x="380" y="820" as="geometry" />
+        </mxCell>
+        <mxCell id="IsEmailSuccess" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="Is Email Success" vertex="1">
+          <mxGeometry height="80" width="120" x="380" y="920" as="geometry" />
+        </mxCell>
+        <mxCell id="ApplyLock" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Apply Lock" vertex="1">
+          <mxGeometry height="40" width="120" x="380" y="1020" as="geometry" />
+        </mxCell>
+        <mxCell id="IsLockSuccess" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="Is Lock Success" vertex="1">
+          <mxGeometry height="80" width="120" x="380" y="1120" as="geometry" />
+        </mxCell>
+        <mxCell id="ShowSuccess" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Show Success" vertex="1">
+          <mxGeometry height="40" width="120" x="380" y="1220" as="geometry" />
+        </mxCell>
+        <mxCell id="End" parent="1" style="ellipse;html=1;shape=endState;fillColor=#000000;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="40" width="40" x="420" y="1320" as="geometry" />
+        </mxCell>
+        <mxCell id="ShowValidationError" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Show Validation Error" vertex="1">
+          <mxGeometry height="40" width="120" x="190" y="640" as="geometry" />
+        </mxCell>
+        <mxCell id="QueueEmail" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Queue Email" vertex="1">
+          <mxGeometry height="40" width="120" x="560" y="940" as="geometry" />
+        </mxCell>
+        <mxCell id="RollbackTransaction" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Rollback Transaction" vertex="1">
+          <mxGeometry height="40" width="120" x="560" y="1140" as="geometry" />
+        </mxCell>
+        <mxCell id="ShowCriticalError" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Show Critical Error" vertex="1">
+          <mxGeometry height="40" width="120" x="560" y="1240" as="geometry" />
+        </mxCell>
+        <mxCell id="PartialApprove" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Partial Approve" vertex="1">
+          <mxGeometry height="40" width="120" x="190" y="810" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="Start" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="NavigateMenu" value="(1)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="NavigateMenu" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="ReviewList" value="(2)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="ReviewList" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="SelectRecords" value="(3)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="SelectRecords" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="ClickApprove" value="(4)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="ClickApprove" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="ValidateStatus" value="(5)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="ValidateStatus" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="IsValid" value="(6)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="IsValid" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="UpdateStatus" value="(7) Yes">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="UpdateStatus" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="SendEmail" value="(8)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="SendEmail" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="IsEmailSuccess" value="(9)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="IsEmailSuccess" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="ApplyLock" value="(10) Yes">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="ApplyLock" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="IsLockSuccess" value="(11)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="IsLockSuccess" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="ShowSuccess" value="(12) Yes">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" edge="1" parent="1" source="ShowSuccess" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="End" value="(13)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e14" edge="1" parent="1" source="IsValid" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0;exitY=0.5;entryX=1;entryY=0.5;entryDx=0;entryDy=0;exitDx=0;exitDy=0;" target="ShowValidationError" value="(14) No">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e15" edge="1" parent="1" source="ShowValidationError" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0;exitY=0.5;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="End" value="(15)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="170" y="660" />
+              <mxPoint x="170" y="1340" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e16" edge="1" parent="1" source="IsEmailSuccess" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="QueueEmail" value="(18) No">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e17" edge="1" parent="1" source="QueueEmail" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=1;entryY=0.5;exitDx=0;exitDy=0;entryDx=0;entryDy=0;" target="ApplyLock" value="(19)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="620" y="1040" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e18" edge="1" parent="1" source="IsLockSuccess" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="RollbackTransaction" value="(20) No">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e19" edge="1" parent="1" source="RollbackTransaction" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="ShowCriticalError" value="(21)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="670" y="1240" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e20" edge="1" parent="1" source="ShowCriticalError" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=1;entryY=0.5;exitDx=0;exitDy=0;entryDx=0;entryDy=0;" target="End" value="(22)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="620" y="1340" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e21" edge="1" parent="1" source="ShowValidationError" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitDx=0;exitDy=0;" target="PartialApprove" value="(16) Valid Subset">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="250" y="780" />
+              <mxPoint x="250" y="780" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e22" edge="1" parent="1" source="PartialApprove" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitDx=0;exitDy=0;" target="UpdateStatus" value="(17)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

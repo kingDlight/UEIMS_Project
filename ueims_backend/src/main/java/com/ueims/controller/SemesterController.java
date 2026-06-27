@@ -135,4 +135,14 @@ public class SemesterController {
     public ResponseEntity<SemesterResponse> lockSemester(@PathVariable UUID id) {
         return ResponseEntity.ok(SemesterResponse.fromEntity(service.lockSemester(id)));
     }
+
+    /**
+     * TM/Admin re-opens a semester
+     */
+    @PutMapping("/{id}/reopen")
+    @org.springframework.security.access.prepost.PreAuthorize(
+            "hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')")
+    public ResponseEntity<SemesterResponse> reopenSemester(@PathVariable UUID id) {
+        return ResponseEntity.ok(SemesterResponse.fromEntity(service.reopenSemester(id)));
+    }
 }

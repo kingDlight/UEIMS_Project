@@ -1,0 +1,87 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0">
+  <diagram id="activity_UC-32_Activity_Flow" name="UC-32 Activity Flow">
+    <mxGraphModel dx="919" dy="495" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="Start" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#000000;strokeColor=none;" value="" vertex="1">
+          <mxGeometry height="40" width="40" x="420" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="NavigateMenu" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Navigate Menu" vertex="1">
+          <mxGeometry height="40" width="120" x="380" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="ViewIncidentList" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="View Incident List" vertex="1">
+          <mxGeometry height="40" width="120" x="380" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="ClickPending" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Click Pending" vertex="1">
+          <mxGeometry height="40" width="120" x="380" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="EnterResolution" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Enter Resolution" vertex="1">
+          <mxGeometry height="40" width="120" x="380" y="420" as="geometry" />
+        </mxCell>
+        <mxCell id="ClickResolve" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Click Resolve" vertex="1">
+          <mxGeometry height="40" width="120" x="380" y="510" as="geometry" />
+        </mxCell>
+        <mxCell id="ValidateInput" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="Validate Input" vertex="1">
+          <mxGeometry height="80" width="120" x="380" y="600" as="geometry" />
+        </mxCell>
+        <mxCell id="IsBlank" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="Is Blank" vertex="1">
+          <mxGeometry height="80" width="120" x="380" y="720" as="geometry" />
+        </mxCell>
+        <mxCell id="ShowError" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Show Error" vertex="1">
+          <mxGeometry height="40" width="120" x="380" y="840" as="geometry" />
+        </mxCell>
+        <mxCell id="UpdateStatus" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Update Status" vertex="1">
+          <mxGeometry height="40" width="120" x="560" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="ShowSuccess" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Show Success" vertex="1">
+          <mxGeometry height="40" width="120" x="620" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="End" parent="1" style="ellipse;html=1;shape=endState;fillColor=#000000;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="40" width="40" x="660" y="310" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="Start" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="NavigateMenu" value="(1)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="NavigateMenu" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="ViewIncidentList" value="(2)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="ViewIncidentList" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="ClickPending" value="(3)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="ClickPending" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="EnterResolution" value="(4)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="EnterResolution" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="ClickResolve" value="(5)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="ClickResolve" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="ValidateInput" value="(6)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="ValidateInput" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="IsBlank" value="(7)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="IsBlank" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0.25;entryY=1;entryDx=0;entryDy=0;" target="UpdateStatus" value="(9) No">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="UpdateStatus" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.75;exitY=1;entryX=0.5;entryY=0;exitDx=0;exitDy=0;" target="ShowSuccess" value="(10)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="ShowSuccess" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="End" value="(11)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="IsBlank" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="ShowError" value="(8) Yes">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="ShowError" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0;exitY=0.5;entryX=0;entryY=0.5;" target="EnterResolution" value="(12)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="320" y="860" />
+              <mxPoint x="320" y="440" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

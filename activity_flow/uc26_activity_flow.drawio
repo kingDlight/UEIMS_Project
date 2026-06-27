@@ -1,0 +1,92 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0">
+  <diagram id="activity_UC-26_Activity_Flow" name="UC-26 Activity Flow">
+    <mxGraphModel dx="891" dy="479" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="Start" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#000000;strokeColor=none;" value="" vertex="1">
+          <mxGeometry height="40" width="40" x="420" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="NavigateMenu" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Navigate Menu" vertex="1">
+          <mxGeometry height="40" width="120" x="380" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="FetchData" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Fetch Data" vertex="1">
+          <mxGeometry height="40" width="120" x="380" y="230" as="geometry" />
+        </mxCell>
+        <mxCell id="IsDataAvail" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="Is Data Avail" vertex="1">
+          <mxGeometry height="80" width="120" x="380" y="310" as="geometry" />
+        </mxCell>
+        <mxCell id="IsTimeout" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="Is Timeout" vertex="1">
+          <mxGeometry height="80" width="120" x="380" y="430" as="geometry" />
+        </mxCell>
+        <mxCell id="LoadSummary" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Load Summary" vertex="1">
+          <mxGeometry height="40" width="120" x="380" y="540" as="geometry" />
+        </mxCell>
+        <mxCell id="DisplayDashboard" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Display Dashboard" vertex="1">
+          <mxGeometry height="40" width="120" x="380" y="620" as="geometry" />
+        </mxCell>
+        <mxCell id="InteractCharts" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Interact Charts" vertex="1">
+          <mxGeometry height="40" width="120" x="380" y="700" as="geometry" />
+        </mxCell>
+        <mxCell id="End" parent="1" style="ellipse;html=1;shape=endState;fillColor=#000000;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="40" width="40" x="420" y="770" as="geometry" />
+        </mxCell>
+        <mxCell id="ShowNoData" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Show No Data" vertex="1">
+          <mxGeometry height="40" width="120" x="560" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="ApplyFilters" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Apply Filters" vertex="1">
+          <mxGeometry height="40" width="120" x="560" y="620" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="Start" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="NavigateMenu" value="(1)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="NavigateMenu" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="FetchData" value="(2)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="FetchData" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="IsDataAvail" value="(3)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="IsDataAvail" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="IsTimeout" value="(4) Yes">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="IsTimeout" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0;exitY=0.5;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitDx=0;exitDy=0;" target="DisplayDashboard" value="(11) No">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="350" y="470" />
+              <mxPoint x="350" y="640" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="DisplayDashboard" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="InteractCharts" value="(7)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="InteractCharts" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="End" value="(8)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="IsDataAvail" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="ShowNoData" value="(9) No">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="ShowNoData" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=1;entryY=0.5;exitDx=0;exitDy=0;entryDx=0;entryDy=0;" target="End" value="(10)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="700" y="350" />
+              <mxPoint x="700" y="790" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="IsTimeout" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="LoadSummary" value="(5) Yes">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="LoadSummary" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="DisplayDashboard" value="(6)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="InteractCharts" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0.5;entryY=1;" target="ApplyFilters" value="(12) Filter">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" edge="1" parent="1" source="ApplyFilters" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0;exitY=0.5;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="DisplayDashboard" value="(13)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,0 +1,73 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0">
+  <diagram id="activity_UC-34_Activity_Flow" name="UC-34 Activity Flow">
+    <mxGraphModel dx="983" dy="529" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="Start" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#000000;strokeColor=none;" value="" vertex="1">
+          <mxGeometry height="40" width="40" x="420" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="AccessGrading" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Access Grading" vertex="1">
+          <mxGeometry height="40" width="120" x="380" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="ClickExport" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Click Export" vertex="1">
+          <mxGeometry height="40" width="120" x="380" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="CompileGrades" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Compile Grades" vertex="1">
+          <mxGeometry height="40" width="120" x="380" y="320" as="geometry" />
+        </mxCell>
+        <mxCell id="IsComplete" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="Is Complete" vertex="1">
+          <mxGeometry height="80" width="120" x="380" y="400" as="geometry" />
+        </mxCell>
+        <mxCell id="FormatPDF" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Format PDF" vertex="1">
+          <mxGeometry height="40" width="120" x="380" y="520" as="geometry" />
+        </mxCell>
+        <mxCell id="TriggerDownload" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Trigger Download" vertex="1">
+          <mxGeometry height="40" width="120" x="380" y="620" as="geometry" />
+        </mxCell>
+        <mxCell id="End" parent="1" style="ellipse;html=1;shape=endState;fillColor=#000000;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="40" width="40" x="420" y="720" as="geometry" />
+        </mxCell>
+        <mxCell id="ShowWarning" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Show Warning" vertex="1">
+          <mxGeometry height="40" width="120" x="520" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="ConfirmProceed" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Confirm Proceed" vertex="1">
+          <mxGeometry height="40" width="120" x="680" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="Start" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="AccessGrading" value="(1)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="AccessGrading" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="ClickExport" value="(2)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="ClickExport" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="CompileGrades" value="(3)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="CompileGrades" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="IsComplete" value="(4)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="IsComplete" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="FormatPDF" value="(5) Yes">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="FormatPDF" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="TriggerDownload" value="(6)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="TriggerDownload" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="End" value="(7)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="IsComplete" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="ShowWarning" value="(8) No">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="ShowWarning" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;entryDx=0;entryDy=0;exitDx=0;exitDy=0;" target="ConfirmProceed" value="(9)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="ConfirmProceed" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.25;exitY=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;exitDx=0;exitDy=0;" target="FormatPDF" value="(10) Yes">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="ConfirmProceed" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.75;exitY=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;exitDx=0;exitDy=0;" target="End" value="(11) No">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

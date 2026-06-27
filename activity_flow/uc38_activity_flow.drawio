@@ -1,0 +1,67 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0">
+  <diagram id="activity_UC-38_Activity_Flow" name="UC-38 Activity Flow">
+    <mxGraphModel dx="1425" dy="767" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="Start" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#000000;strokeColor=none;" value="" vertex="1">
+          <mxGeometry height="40" width="40" x="420" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="ClickToggle" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Click Toggle" vertex="1">
+          <mxGeometry height="40" width="120" x="380" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="PromptConfirm" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Prompt Confirm" vertex="1">
+          <mxGeometry height="40" width="120" x="380" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="ClickConfirm" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Click Confirm" vertex="1">
+          <mxGeometry height="40" width="120" x="380" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="UpdateStatus" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Update Status" vertex="1">
+          <mxGeometry height="40" width="120" x="380" y="420" as="geometry" />
+        </mxCell>
+        <mxCell id="ShowSuccess" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Show Success" vertex="1">
+          <mxGeometry height="40" width="120" x="380" y="520" as="geometry" />
+        </mxCell>
+        <mxCell id="End" parent="1" style="ellipse;html=1;shape=endState;fillColor=#000000;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="40" width="40" x="420" y="600" as="geometry" />
+        </mxCell>
+        <mxCell id="ClickCancel" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Click Cancel" vertex="1">
+          <mxGeometry height="40" width="120" x="260" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="ShowError" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Show Error" vertex="1">
+          <mxGeometry height="40" width="120" x="500" y="470" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="Start" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="ClickToggle" value="(1)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="ClickToggle" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="PromptConfirm" value="(2)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="PromptConfirm" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="ClickConfirm" value="(3) Yes">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="ClickConfirm" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="UpdateStatus" value="(4)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="UpdateStatus" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="ShowSuccess" value="(5)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="ShowSuccess" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="End" value="(6)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="PromptConfirm" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0;exitY=0.5;entryX=0.5;entryY=0;entryDx=0;entryDy=0;exitDx=0;exitDy=0;" target="ClickCancel" value="(9) No">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="ClickCancel" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0;entryY=0.5;exitDx=0;exitDy=0;entryDx=0;entryDy=0;" target="End" value="(10)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="UpdateStatus" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="ShowError" value="(7) Failed">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="ShowError" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;exitDx=0;exitDy=0;" target="End" value="(8)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
