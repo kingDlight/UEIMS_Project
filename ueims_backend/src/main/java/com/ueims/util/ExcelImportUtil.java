@@ -45,12 +45,12 @@ public class ExcelImportUtil {
 
     private static EligibleStudent parseRow(Row row) {
         EligibleStudent student = new EligibleStudent();
-        student.setStudentCode(getRequiredStringCellValue(row, 0));
-        student.setFullName(getRequiredStringCellValue(row, 1));
-        student.setEmail(getOptionalStringCellValue(row, 2));
-        student.setMajor(getRequiredStringCellValue(row, 3));
-        student.setGpa(getRequiredGpaValue(row, 4));
-        student.setCurrentSemester(getRequiredIntCellValue(row, 5));
+        student.setStudentCode(getRequiredStringCellValue(row, 1));
+        student.setFullName(getRequiredStringCellValue(row, 2));
+        student.setEmail(getOptionalStringCellValue(row, 3));
+        student.setMajor(getRequiredStringCellValue(row, 4));
+        student.setGpa(getRequiredGpaValue(row, 5));
+        student.setCurrentSemester(getRequiredIntCellValue(row, 6));
         return student;
     }
 
