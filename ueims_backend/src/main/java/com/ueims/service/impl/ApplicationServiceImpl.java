@@ -607,7 +607,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                         placementApplicationRepository.save(p);
                         log.info(
                                 "[BR-26 UNDO] Cancelled placement {} for student={} enterprise={}",
-                                p.getPlacementApplicationId(), studentId, enterpriseId);
+                                p.getApplicationId(), studentId, enterpriseId);
                     });
 
             // Terminate EnterpriseAssignment if ACTIVE
