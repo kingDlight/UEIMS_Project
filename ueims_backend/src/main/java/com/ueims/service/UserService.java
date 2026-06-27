@@ -25,6 +25,8 @@ public interface UserService {
 
     void updateUserStatus(UUID id, String status);
 
+    void updateUserStatus(UUID id, String status, Integer durationMinutes);
+
     UserResponse getMyInfo();
 
     UUID getCurrentUserId();

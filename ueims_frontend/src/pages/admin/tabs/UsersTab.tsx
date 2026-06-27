@@ -6,11 +6,13 @@ import {
   Modal,
   Form,
   Input,
+  InputNumber,
   Select,
   Empty,
   Pagination,
   Button,
   Tooltip,
+  Tag,
 } from 'antd';
 import {
   PlusOutlined,
@@ -74,6 +76,61 @@ const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
   );
 };
 
+/**
+ * Real-time countdown to a target ISO timestamp.
+ *
+ * - Recomputes every second against the wall clock (not by decrementing a
+ *   counter, so it stays accurate even if the tab is throttled).
+ * - Returns null once the deadline has passed → caller can drop the badge.
+ * - Wrapped in React.memo so a single global 1s ticker drives every badge
+ *   without re-rendering the whole tab.
+ */
+const LockCountdown: React.FC<{ until: string | undefined; small?: boolean }> = React.memo(
+  ({ until, small }) => {
+    const target = useMemo(() => (until ? new Date(until).getTime() : 0), [until]);
+    const compute = () => Math.max(0, target - Date.now());
+    const [remainingMs, setRemainingMs] = useState<number>(compute);
+
+    useEffect(() => {
+      setRemainingMs(compute());
+      if (target <= Date.now()) return;
+      const id = setInterval(() => {
+        const ms = compute();
+        setRemainingMs(ms);
+        if (ms <= 0) clearInterval(id);
+      }, 1000);
+      return () => clearInterval(id);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [target]);
+
+    if (!until || target <= Date.now() && remainingMs <= 0) return null;
+
+    const totalSec = Math.ceil(remainingMs / 1000);
+    const h = Math.floor(totalSec / 3600);
+    const m = Math.floor((totalSec % 3600) / 60);
+    const s = totalSec % 60;
+    const text = h > 0
+      ? `${h}h ${String(m).padStart(2, '0')}m ${String(s).padStart(2, '0')}s`
+      : `${m}m ${String(s).padStart(2, '0')}s`;
+
+    return (
+      <Tag
+        color="warning"
+        icon={<ClockCircleOutlined />}
+        style={{
+          fontSize: small ? 10 : 11,
+          fontWeight: 700,
+          padding: small ? '0 6px' : '1px 8px',
+          margin: 0,
+        }}
+      >
+        {text}
+      </Tag>
+    );
+  },
+);
+LockCountdown.displayName = 'LockCountdown';
+
 // ============================================================
 // TYPES
 // ============================================================
@@ -119,7 +176,9 @@ export const UsersTab: React.FC = () => {
     open: boolean;
     user: UserDetail | null;
     nextStatus: string;
-  }>({ open: false, user: null, nextStatus: 'ACTIVE' });
+    durationMinutes: number;
+    customMinutes: number;
+  }>({ open: false, user: null, nextStatus: 'ACTIVE', durationMinutes: 30, customMinutes: 60 });
   const [savingStatus, setSavingStatus] = useState(false);
 
   const [assignModal, setAssignModal] = useState<{ open: boolean; user: UserDetail | null }>({
@@ -249,7 +308,13 @@ export const UsersTab: React.FC = () => {
   // ========== STATUS (UC-10) ==========
   const requestStatusChange = (user: UserDetail) => {
     const next = user.status === 'ACTIVE' ? 'LOCKED' : 'ACTIVE';
-    setStatusModal({ open: true, user, nextStatus: next });
+    setStatusModal({
+      open: true,
+      user,
+      nextStatus: next,
+      durationMinutes: 30,
+      customMinutes: 60,
+    });
   };
 
   const confirmStatusChange = async () => {
@@ -257,8 +322,18 @@ export const UsersTab: React.FC = () => {
     setSavingStatus(true);
     try {
       if (statusModal.nextStatus === 'LOCKED') {
-        await AdminService.updateUserStatus(statusModal.user.userId, 'LOCKED');
-        message.success('User account has been locked. They cannot sign in until you unlock them.');
+        const effective =
+          statusModal.durationMinutes === -1
+            ? statusModal.customMinutes
+            : statusModal.durationMinutes;
+        await AdminService.updateUserStatus(
+          statusModal.user.userId,
+          'LOCKED',
+          effective,
+        );
+        message.success(
+          `User locked for ${effective} minute${effective === 1 ? '' : 's'}.`,
+        );
       } else if (statusModal.nextStatus === 'ACTIVE') {
         await AdminService.updateUserStatus(statusModal.user.userId, 'ACTIVE');
         message.success('User account has been unlocked. Failed-attempt counter reset.');
@@ -266,7 +341,7 @@ export const UsersTab: React.FC = () => {
         await AdminService.updateUserStatus(statusModal.user.userId, statusModal.nextStatus);
         message.success('User status updated.');
       }
-      setStatusModal({ open: false, user: null, nextStatus: 'ACTIVE' });
+      setStatusModal({ open: false, user: null, nextStatus: 'ACTIVE', durationMinutes: 30, customMinutes: 60 });
       await fetchUsers();
     } catch (err: any) {
       message.error(err.response?.data?.message || 'Failed to update status.');
@@ -398,6 +473,7 @@ export const UsersTab: React.FC = () => {
                 { value: 'ALL', label: 'All statuses' },
                 { value: 'ACTIVE', label: 'Active' },
                 { value: 'INACTIVE', label: 'Inactive' },
+                { value: 'LOCKED', label: 'Locked' },
               ]}
             />
             <span style={{ fontSize: 12, color: c.textMuted, whiteSpace: 'nowrap' }}>
@@ -477,6 +553,9 @@ export const UsersTab: React.FC = () => {
                             </div>
                           </div>
                           <StatusBadge status={user.status} />
+                          {user.status === 'LOCKED' && (
+                            <LockCountdown until={user.lockedUntil} small />
+                          )}
                         </div>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
                           {(user.roles || []).length === 0 ? (
@@ -589,6 +668,9 @@ export const UsersTab: React.FC = () => {
                   <div style={{ fontSize: 13, color: c.textMuted, marginTop: 2 }}>{viewing.email}</div>
                   <div style={{ marginTop: 6 }}>
                     <StatusBadge status={viewing.status} />
+                    {viewing.status === 'LOCKED' && (
+                      <LockCountdown until={viewing.lockedUntil} />
+                    )}
                   </div>
                 </div>
               </div>
@@ -609,10 +691,18 @@ export const UsersTab: React.FC = () => {
                   <Field
                     icon={<LockOutlined />}
                     label="Locked Until"
-                    value={new Date(viewing.lockedUntil).toLocaleString() +
-                      (new Date(viewing.lockedUntil) > new Date()
-                        ? ' (auto-unlocks)'
-                        : ' (expired)')}
+                    value={
+                      new Date(viewing.lockedUntil) > new Date()
+                        ? `${new Date(viewing.lockedUntil).toLocaleString()} (auto-unlocks)`
+                        : `${new Date(viewing.lockedUntil).toLocaleString()} (expired — will recover on next login)`
+                    }
+                  />
+                )}
+                {viewing.status === 'LOCKED' && new Date(viewing.lockedUntil || 0) > new Date() && (
+                  <Field
+                    icon={<ClockCircleOutlined />}
+                    label="Time Remaining"
+                    value={<LockCountdown until={viewing.lockedUntil} />}
                   />
                 )}
                 {viewing.mustChangePassword !== undefined && (
@@ -768,20 +858,70 @@ export const UsersTab: React.FC = () => {
           }}>
             <WarningOutlined style={{ fontSize: 28 }} />
           </div>
-          <div>
+          <div style={{ width: '100%' }}>
             <h3 style={{ fontSize: 17, fontWeight: 700, color: c.text, margin: '0 0 6px' }}>
-              {statusModal.nextStatus === 'INACTIVE' || statusModal.nextStatus === 'LOCKED' ? 'Deactivate this user?' : 'Reactivate this user?'}
+              {statusModal.nextStatus === 'LOCKED'
+                ? 'Lock this user?'
+                : statusModal.nextStatus === 'INACTIVE'
+                  ? 'Deactivate this user?'
+                  : 'Reactivate this user?'}
             </h3>
             <p style={{ fontSize: 13, color: c.textMuted, margin: 0, lineHeight: 1.5 }}>
-              {statusModal.nextStatus === 'INACTIVE' || statusModal.nextStatus === 'LOCKED'
-                ? 'Active sessions will be terminated immediately and the user will be unable to log in.'
-                : 'The user will regain access and be able to log in normally.'}
+              {statusModal.nextStatus === 'INACTIVE'
+                ? 'Active sessions will be terminated immediately. The user will not be able to log in until reactivated.'
+                : statusModal.nextStatus === 'LOCKED'
+                  ? 'The user cannot sign in until the timer expires or you unlock them. Active sessions will be terminated.'
+                  : 'The user will regain access and be able to log in normally.'}
             </p>
           </div>
+
+          {statusModal.nextStatus === 'LOCKED' && (
+            <div style={{ width: '100%', textAlign: 'left' }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: c.textMuted, textTransform: 'uppercase', marginBottom: 8 }}>
+                Lock duration
+              </div>
+              <Select
+                value={statusModal.durationMinutes}
+                onChange={(v) =>
+                  setStatusModal({ ...statusModal, durationMinutes: v })
+                }
+                style={{ width: '100%' }}
+                options={[
+                  { value: 15, label: '15 minutes' },
+                  { value: 30, label: '30 minutes' },
+                  { value: 60, label: '1 hour' },
+                  { value: 240, label: '4 hours' },
+                  { value: 1440, label: '24 hours' },
+                  { value: -1, label: 'Custom…' },
+                ]}
+              />
+              {statusModal.durationMinutes === -1 && (
+                <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <InputNumber
+                    min={1}
+                    max={43200}
+                    value={statusModal.customMinutes}
+                    onChange={(v) =>
+                      setStatusModal({
+                        ...statusModal,
+                        customMinutes: typeof v === 'number' ? v : 60,
+                      })
+                    }
+                    style={{ flex: 1 }}
+                    addonAfter="minutes"
+                  />
+                </div>
+              )}
+              <div style={{ fontSize: 11, color: c.textMuted, marginTop: 8, lineHeight: 1.5 }}>
+                The account will auto-unlock when the timer expires. You can also unlock manually at any time.
+              </div>
+            </div>
+          )}
+
           <div style={{ display: 'flex', gap: 10, width: '100%' }}>
             <Button
               block
-              onClick={() => setStatusModal({ open: false, user: null, nextStatus: 'ACTIVE' })}
+              onClick={() => setStatusModal({ open: false, user: null, nextStatus: 'ACTIVE', durationMinutes: 30, customMinutes: 60 })}
               style={{ borderRadius: c.radiusMd }}
             >
               Cancel
@@ -798,7 +938,7 @@ export const UsersTab: React.FC = () => {
                 borderColor: statusModal.nextStatus === 'INACTIVE' || statusModal.nextStatus === 'LOCKED' ? c.error : c.success,
               }}
             >
-              Yes, {statusModal.nextStatus === 'INACTIVE' || statusModal.nextStatus === 'LOCKED' ? 'Deactivate' : 'Reactivate'}
+              {statusModal.nextStatus === 'LOCKED' ? 'Lock user' : statusModal.nextStatus === 'INACTIVE' ? 'Yes, Deactivate' : 'Yes, Reactivate'}
             </Button>
           </div>
         </div>
@@ -848,7 +988,7 @@ export const UsersTab: React.FC = () => {
 // ============================================================
 // SUB COMPONENTS
 // ============================================================
-const Field: React.FC<{ icon: React.ReactNode; label: string; value: string }> = ({ icon, label, value }) => (
+const Field: React.FC<{ icon: React.ReactNode; label: string; value: React.ReactNode }> = ({ icon, label, value }) => (
   <div style={{ padding: '10px 12px', borderRadius: c.radiusMd, background: c.bg, border: `1px solid ${c.border}` }}>
     <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 10, fontWeight: 700, color: c.textMuted, textTransform: 'uppercase' }}>
       {icon} {label}
