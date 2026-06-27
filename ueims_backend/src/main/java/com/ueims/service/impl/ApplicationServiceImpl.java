@@ -803,7 +803,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                     InputStream is = null;
                     try {
                         if (cvUrl.startsWith("http://") || cvUrl.startsWith("https://")) {
-                            is = new java.net.URL(cvUrl).openConnection().getInputStream();
+                            is = java.net.URI.create(cvUrl).toURL().openConnection().getInputStream();
                         } else {
                             Path filePath =
                                     Paths.get(System.getProperty("user.dir"), cvUrl.replace("/uploads/", "uploads/"));
