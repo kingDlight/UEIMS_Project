@@ -129,22 +129,47 @@ public class AuthenticationService {
         return handleAuthenticationSuccess(user, request.getDeviceId());
     }
 
+    /**
+     * Unified lock check.
+     *
+     * <p><b>Unified semantics:</b> an account is considered "locked" iff
+     * {@code status = 'LOCKED'} (which means {@code lockedUntil} is also set
+     * — admin lock OR 5-failed-attempts lock). Both lock types use the same
+     * status field so the admin UI shows them identically.
+     *
+     * <ul>
+     *   <li>If {@code status = 'INACTIVE'} → reject (account permanently
+     *       disabled by admin, not auto-recoverable).</li>
+     *   <li>If {@code status = 'LOCKED'} but {@code lockedUntil} has passed →
+     *       auto-unlock: clear counter, clear lockedUntil, set status back
+     *       to ACTIVE. This implements the 30-minute auto-recovery from
+     *       failed-login lockout. Admin-set locks never have a
+     *       {@code lockedUntil}, so they survive this branch.</li>
+     *   <li>If {@code status = 'LOCKED'} and still within lock window →
+     *       reject with USER_LOCKED.</li>
+     * </ul>
+     */
     private void checkAndResetLockStatus(User user) {
-        if ("LOCKED".equals(user.getStatus())) {
-            throw new AppException(ErrorCode.USER_PERMANENTLY_LOCKED);
-        }
-
         if ("INACTIVE".equals(user.getStatus())) {
             throw new AppException(ErrorCode.USER_INACTIVE);
         }
 
-        if (user.getLockedUntil() != null) {
-            if (user.getLockedUntil().isAfter(LocalDateTime.now())) {
-                throw new AppException(ErrorCode.USER_BANNED);
-            } else {
+        if ("LOCKED".equals(user.getStatus())) {
+            if (user.getLockedUntil() != null && user.getLockedUntil().isAfter(LocalDateTime.now())) {
+                // Still inside the auto-recovery window — reject.
+                throw new AppException(ErrorCode.USER_LOCKED);
+            }
+            // Either admin-lock (no lockedUntil) — keep LOCKED until admin acts,
+            // OR auto-lock whose 30-min window has expired — recover.
+            if (user.getLockedUntil() != null) {
+                userRepository.updateLoginAttemptsAndStatus(
+                        user.getUserId(), 0, "ACTIVE", null);
                 user.setFailedLoginAttempts(0);
                 user.setLockedUntil(null);
-                userRepository.updateLoginAttemptsAndStatus(user.getUserId(), 0, user.getStatus(), null);
+                user.setStatus("ACTIVE");
+            } else {
+                // Admin lock — no auto-recovery.
+                throw new AppException(ErrorCode.USER_LOCKED);
             }
         }
     }
@@ -152,13 +177,25 @@ public class AuthenticationService {
     private void handleFailedLogin(User user) {
         int attempts = user.getFailedLoginAttempts() + 1;
         LocalDateTime lockedUntil = null;
-        if (attempts >= 5) {
-            lockedUntil = LocalDateTime.now().plusMinutes(30);
-        }
-        userRepository.updateLoginAttemptsAndStatus(user.getUserId(), attempts, user.getStatus(), lockedUntil);
+        String nextStatus = user.getStatus();
 
         if (attempts >= 5) {
-            throw new AppException(ErrorCode.USER_BANNED);
+            // Unified lock: status = LOCKED AND lockedUntil set, so:
+            //  1. Admin UI sees LOCKED and can manually unlock.
+            //  2. User gets the error code that points them to admin or to wait 30min.
+            lockedUntil = LocalDateTime.now().plusMinutes(30);
+            nextStatus = "LOCKED";
+        }
+
+        userRepository.updateLoginAttemptsAndStatus(
+                user.getUserId(), attempts, nextStatus, lockedUntil);
+
+        user.setFailedLoginAttempts(attempts);
+        user.setLockedUntil(lockedUntil);
+        user.setStatus(nextStatus);
+
+        if (attempts >= 5) {
+            throw new AppException(ErrorCode.USER_LOCKED);
         }
         throw new AppException(ErrorCode.UNAUTHENTICATED);
     }

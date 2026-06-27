@@ -136,11 +136,22 @@ public class UserServiceImpl implements UserService {
         if (user.getUserId().equals(currentUserId)) {
             throw new AppException(ErrorCode.ADMIN_INTERVENTION_REQUIRED);
         }
+
+        // UC-10 unified lock semantics:
+        //  - LOCKED  → admin lock OR 5-failed-attempts lock. Both use status=LOCKED.
+        //  - ACTIVE  → unlock. Clear failedLoginAttempts and lockedUntil so the
+        //              counter resets and any stale auto-lock window is dropped.
+        //  - INACTIVE → admin permanent deactivation. Counters untouched.
+        boolean isUnlocking = "ACTIVE".equalsIgnoreCase(status);
+        if (isUnlocking) {
+            user.setFailedLoginAttempts(0);
+            user.setLockedUntil(null);
+        }
         user.setStatus(status);
         repository.save(user);
 
         // UC-10 Other Information: Force logout active sessions when status becomes
-        // INACTIVE/LOCKED
+        // INACTIVE/LOCKED so the user cannot keep using a stale token.
         if ("INACTIVE".equalsIgnoreCase(status) || "LOCKED".equalsIgnoreCase(status)) {
             forceLogoutUser(user.getEmail());
         }

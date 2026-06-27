@@ -134,6 +134,10 @@ public enum ErrorCode {
     USER_PERMANENTLY_LOCKED(
             2007, "Your account has been permanently locked. Please contact the administrator.", HttpStatus.FORBIDDEN),
     USER_BANNED(2001, "Your account has been locked due to entering the wrong password 5 times", HttpStatus.FORBIDDEN),
+    USER_LOCKED(
+            2009,
+            "Your account is locked. Please contact the administrator or wait 30 minutes for auto-unlock.",
+            HttpStatus.FORBIDDEN),
     USER_INACTIVE(
             2008, "Your account is not active yet. Please wait for the administrator to approve your registration.", HttpStatus.FORBIDDEN),
     WRONG_OLD_PASSWORD(2002, "Incorrect old password", HttpStatus.BAD_REQUEST),
