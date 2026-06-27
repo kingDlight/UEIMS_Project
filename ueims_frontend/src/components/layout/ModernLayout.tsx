@@ -30,6 +30,13 @@ export interface NavItem {
   label: string;
   icon: React.ReactNode;
   roles?: string[];
+  /**
+   * Which lifecycle phase the item is visible in.
+   *   - 'PRE_OJT' : only before the student enters OJT (searching phase)
+   *   - 'IN_OJT'  : only after the student enters OJT (internship phase)
+   *   - 'BOTH'    : visible in either phase (default if omitted)
+   */
+  phase?: 'PRE_OJT' | 'IN_OJT' | 'BOTH';
 }
 
 const getCroppedImg = async (imageSrc: string, pixelCrop: any): Promise<string | null> => {
@@ -145,6 +152,12 @@ interface ModernLayoutProps {
   defaultRoute?: string;
   basePath?: string;
   onPrefetch?: (key: string) => void;
+  /**
+   * For student-side nav filtering by lifecycle phase.
+   * If omitted, all phase-tagged items are visible (backwards compatible).
+   * Values: 'PRE_OJT' (before OJT), 'IN_OJT' (during OJT).
+   */
+  ojtStatus?: string | null;
 }
 
 const renderProfileModal = (modal: React.ReactNode) => (
@@ -161,7 +174,8 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
   children,
   defaultRoute = 'dashboard',
   basePath = '/training-manager',
-  onPrefetch
+  onPrefetch,
+  ojtStatus,
 }) => {
   const [accountOpen, setAccountOpen] = useState(false);
   const [notificationOpen, setNotificationOpen] = useState(false);
@@ -256,14 +270,30 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
   };
 
   const filteredNavItems = useMemo(() => {
-    return navItems.filter((item) => {
-      if (!item.roles) return true;
+    const phase: 'PRE_OJT' | 'IN_OJT' | null =
+      ojtStatus === 'OJT'
+        ? 'IN_OJT'
+        : ojtStatus
+          ? 'PRE_OJT'
+          : null;
 
-      const payload = token ? extractUserFromToken(token) : null;
-      const userRoles: string[] = payload?.roles || [];
-      return item.roles.some(r => userRoles.includes(r) || userRoles.includes(`ROLE_${r}`));
+    return navItems.filter((item) => {
+      if (item.roles) {
+        const payload = token ? extractUserFromToken(token) : null;
+        const userRoles: string[] = payload?.roles || [];
+        const roleOk = item.roles.some(
+          (r) => userRoles.includes(r) || userRoles.includes(`ROLE_${r}`)
+        );
+        if (!roleOk) return false;
+      }
+
+      if (item.phase && phase) {
+        if (item.phase === 'BOTH') return true;
+        return item.phase === phase;
+      }
+      return true;
     });
-  }, [navItems, token]);
+  }, [navItems, token, ojtStatus]);
 
   const [profileOpen, setProfileOpen] = useState(false);
   const [detailsItem, setDetailsItem] = useState<NotificationItem | null>(null);

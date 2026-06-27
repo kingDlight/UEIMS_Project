@@ -113,16 +113,16 @@ export type StudentPageKey =
   | 'evaluation';
 
 export const navItems: NavItem[] = [
-  { key: 'dashboard', label: 'Dashboard', icon: React.createElement(CalendarOutlined), roles: ['STUDENT'] },
-  { key: 'profile', label: 'Profile', icon: React.createElement(UserOutlined), roles: ['STUDENT'] },
-  { key: 'jobs', label: 'Job Board', icon: React.createElement(TrophyOutlined), roles: ['STUDENT'] },
-  { key: 'applications', label: 'Applications', icon: React.createElement(FileTextOutlined), roles: ['STUDENT'] },
-  { key: 'schedule', label: 'Interviews', icon: React.createElement(CalendarOutlined), roles: ['STUDENT'] },
-  { key: 'training-plan', label: 'Progress', icon: React.createElement(BookOutlined), roles: ['STUDENT'] },
-  { key: 'reports', label: 'Reports', icon: React.createElement(SnippetsOutlined), roles: ['STUDENT'] },
-  { key: 'feedback', label: 'Feedback', icon: React.createElement(CheckCircleOutlined), roles: ['STUDENT'] },
-  { key: 'final-report', label: 'Final Report', icon: React.createElement(FileProtectOutlined), roles: ['STUDENT'] },
-  { key: 'evaluation', label: 'Evaluation', icon: React.createElement(TrophyOutlined), roles: ['STUDENT'] },
+  { key: 'dashboard', label: 'Dashboard', icon: React.createElement(CalendarOutlined), roles: ['STUDENT'], phase: 'BOTH' },
+  { key: 'profile', label: 'Profile', icon: React.createElement(UserOutlined), roles: ['STUDENT'], phase: 'BOTH' },
+  { key: 'jobs', label: 'Job Board', icon: React.createElement(TrophyOutlined), roles: ['STUDENT'], phase: 'PRE_OJT' },
+  { key: 'applications', label: 'Applications', icon: React.createElement(FileTextOutlined), roles: ['STUDENT'], phase: 'PRE_OJT' },
+  { key: 'schedule', label: 'Interviews', icon: React.createElement(CalendarOutlined), roles: ['STUDENT'], phase: 'PRE_OJT' },
+  { key: 'training-plan', label: 'Progress', icon: React.createElement(BookOutlined), roles: ['STUDENT'], phase: 'IN_OJT' },
+  { key: 'reports', label: 'Reports', icon: React.createElement(SnippetsOutlined), roles: ['STUDENT'], phase: 'IN_OJT' },
+  { key: 'feedback', label: 'Feedback', icon: React.createElement(CheckCircleOutlined), roles: ['STUDENT'], phase: 'IN_OJT' },
+  { key: 'final-report', label: 'Final Report', icon: React.createElement(FileProtectOutlined), roles: ['STUDENT'], phase: 'IN_OJT' },
+  { key: 'evaluation', label: 'Evaluation', icon: React.createElement(TrophyOutlined), roles: ['STUDENT'], phase: 'IN_OJT' },
 ];
 
 export const defaultPage: StudentPageKey = 'dashboard';

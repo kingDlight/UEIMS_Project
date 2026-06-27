@@ -87,31 +87,26 @@ export const StudentDashboard: React.FC = () => {
   // Use the profile's currentSemester as source of truth — never default to 5
   const currentSemester = profile?.currentSemester;
 
-  const getFilteredNavItems = (sem: number | undefined | null, hasPlacement: boolean) => {
-    if (sem == null) return studentNavItems;
-    // Semester 1-4: browse only -> dashboard, profile, jobs
-    if (sem >= 1 && sem <= 4) {
-      return studentNavItems.filter(item => ['dashboard', 'profile', 'jobs'].includes(item.key));
-    }
-    // Semester 5: apply for jobs -> dashboard, profile, jobs, applications, schedule
-    if (sem === 5) {
-      return studentNavItems.filter(item => ['dashboard', 'profile', 'jobs', 'applications', 'schedule'].includes(item.key));
-    }
-    // Semester 6: PLACED -> weekly reports + final report + schedule (in case they have past interviews); NOT PLACED -> job board + applications + schedule
-    if (sem === 6) {
-      if (hasPlacement) {
-        return studentNavItems.filter(item => ['dashboard', 'profile', 'schedule', 'training-plan', 'reports', 'final-report'].includes(item.key));
-      }
-      return studentNavItems.filter(item => ['dashboard', 'profile', 'jobs', 'applications', 'schedule'].includes(item.key));
-    }
-    // Semester 7-9: view results & feedback -> dashboard, profile, feedback, evaluation
-    if (sem >= 7 && sem <= 9) {
-      return studentNavItems.filter(item => ['dashboard', 'profile', 'feedback', 'evaluation'].includes(item.key));
-    }
-    return studentNavItems;
+  // Derive a coarse lifecycle phase from the student's eligible record. The
+  // backend exposes this via /student-profiles/my-profile as `ojtStatus`.
+  // 'OJT' (and beyond) means the student is past the application phase.
+  const ojtStatus = profile?.ojtStatus ?? null;
+
+  const getFilteredNavItems = (
+    sem: number | undefined | null,
+    placement: boolean,
+    status: string | null | undefined
+  ): typeof studentNavItems => {
+    const inOjt = status === 'OJT' || (sem != null && sem >= 6 && placement);
+
+    return studentNavItems.filter(item => {
+      if (!item.phase || item.phase === 'BOTH') return true;
+      if (inOjt) return item.phase === 'IN_OJT';
+      return item.phase === 'PRE_OJT';
+    });
   };
 
-  const filteredNavItems = getFilteredNavItems(currentSemester, hasActivePlacement);
+  const filteredNavItems = getFilteredNavItems(currentSemester, hasActivePlacement, ojtStatus);
   const allowedTabs = filteredNavItems.map(item => item.key);
 
   if (currentSemester != null && currentTab !== 'dashboard' && currentTab !== 'profile' && !allowedTabs.includes(currentTab)) {
@@ -132,11 +127,12 @@ export const StudentDashboard: React.FC = () => {
   };
 
   return (
-    <ModernLayout 
-      navItems={filteredNavItems} 
-      defaultRoute="dashboard" 
+    <ModernLayout
+      navItems={filteredNavItems}
+      defaultRoute="dashboard"
       basePath="/student"
       onPrefetch={handlePrefetch}
+      ojtStatus={ojtStatus}
     >
       <React.Suspense fallback={
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh', width: '100%' }}>

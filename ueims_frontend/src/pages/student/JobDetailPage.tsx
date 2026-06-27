@@ -92,23 +92,15 @@ export const JobDetailPage: React.FC = () => {
       .catch(() => setHasActivePlacement(false));
   }, []);
 
-  const getFilteredNavItems = (sem: number, hasPlacement: boolean) => {
-    if (sem >= 1 && sem <= 4) {
-      return navItems.filter(item => ['dashboard', 'profile', 'jobs'].includes(item.key));
-    }
-    if (sem === 5) {
-      return navItems.filter(item => ['dashboard', 'profile', 'jobs', 'applications', 'schedule'].includes(item.key));
-    }
-    if (sem === 6) {
-      if (hasPlacement) {
-        return navItems.filter(item => ['dashboard', 'profile', 'training-plan', 'reports', 'final-report'].includes(item.key));
-      }
-      return navItems.filter(item => ['dashboard', 'profile', 'jobs', 'applications', 'schedule'].includes(item.key));
-    }
-    if (sem >= 7 && sem <= 9) {
-      return navItems.filter(item => ['dashboard', 'profile', 'feedback', 'evaluation'].includes(item.key));
-    }
-    return navItems;
+  const ojtStatus = profile?.ojtStatus ?? null;
+  const inOjt = ojtStatus === 'OJT' || (currentSemester >= 6 && hasActivePlacement);
+
+  const getFilteredNavItems = (_sem: number, _hasPlacement: boolean) => {
+    return navItems.filter(item => {
+      if (!item.phase || item.phase === 'BOTH') return true;
+      if (inOjt) return item.phase === 'IN_OJT';
+      return item.phase === 'PRE_OJT';
+    });
   };
 
   useEffect(() => {
@@ -215,8 +207,24 @@ export const JobDetailPage: React.FC = () => {
 
   const filteredNavItems = getFilteredNavItems(currentSemester, hasActivePlacement);
 
+  if (inOjt) {
+    return (
+      <ModernLayout navItems={filteredNavItems} defaultRoute="dashboard" basePath="/student" ojtStatus={ojtStatus}>
+        <div style={{ maxWidth: 800, margin: '0 auto', padding: '32px 24px 60px', textAlign: 'center' }}>
+          <h2 style={{ fontSize: 20, fontWeight: 800, color: cc.textPrimary }}>You are currently in OJT</h2>
+          <p style={{ fontSize: 13, color: cc.textMuted, marginTop: 8 }}>
+            Job Board is not available during your internship phase.
+          </p>
+          <button onClick={() => navigate('/student/dashboard')} style={{ marginTop: 16, padding: '8px 18px', borderRadius: 8, border: 'none', background: cc.primary, color: '#fff', fontWeight: 700, cursor: 'pointer' }}>
+            Back to Dashboard
+          </button>
+        </div>
+      </ModernLayout>
+    );
+  }
+
   return (
-    <ModernLayout navItems={filteredNavItems} defaultRoute="jobs" basePath="/student">
+    <ModernLayout navItems={filteredNavItems} defaultRoute="jobs" basePath="/student" ojtStatus={ojtStatus}>
       <div style={{ maxWidth: 800, margin: '0 auto', padding: '32px 24px 60px' }}>
 
         {/* Back Button */}
