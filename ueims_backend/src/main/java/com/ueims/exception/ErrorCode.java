@@ -139,7 +139,9 @@ public enum ErrorCode {
             "Your account is locked. Please contact the administrator or wait 30 minutes for auto-unlock.",
             HttpStatus.FORBIDDEN),
     USER_INACTIVE(
-            2008, "Your account is not active yet. Please wait for the administrator to approve your registration.", HttpStatus.FORBIDDEN),
+            2008,
+            "Your account is not active yet. Please wait for the administrator to approve your registration.",
+            HttpStatus.FORBIDDEN),
     WRONG_OLD_PASSWORD(2002, "Incorrect old password", HttpStatus.BAD_REQUEST),
     PASSWORDS_NOT_MATCH(2003, "New password and confirmation password do not match", HttpStatus.BAD_REQUEST),
     USER_ALREADY_HAS_ROLE(2004, "User already has a role. Only one role can be assigned.", HttpStatus.BAD_REQUEST),

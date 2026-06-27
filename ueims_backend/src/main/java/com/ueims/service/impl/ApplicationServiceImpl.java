@@ -32,7 +32,6 @@ import com.ueims.model.entity.EligibleStudent;
 import com.ueims.model.entity.Interview;
 import com.ueims.model.entity.JobPost;
 import com.ueims.model.entity.Notification;
-import com.ueims.model.entity.PlacementApplication;
 import com.ueims.model.entity.User;
 import com.ueims.repository.ApplicationRepository;
 import com.ueims.repository.EligibleStudentRepository;
@@ -349,7 +348,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         }
 
         // BR-26 finality: WITHDRAWN is always terminal — set only by BR-26 itself.
-// Enterprise cannot move a withdrawn application.
+        // Enterprise cannot move a withdrawn application.
         if (application.getStatus() == ApplicationStatus.WITHDRAWN) {
             throw new AppException(ErrorCode.INVALID_PARAMETER_FORMAT);
         }
@@ -370,7 +369,8 @@ public class ApplicationServiceImpl implements ApplicationService {
         // (misconduct, no-show, disciplinary issue, etc.)
         if (request.getStatus() == ApplicationStatus.REJECTED
                 && application.getStatus() == ApplicationStatus.INTERVIEW_SCHEDULED) {
-            if (request.getRejectionReason() == null || request.getRejectionReason().isBlank()) {
+            if (request.getRejectionReason() == null
+                    || request.getRejectionReason().isBlank()) {
                 throw new AppException(ErrorCode.INVALID_PARAMETER_FORMAT);
             }
         }
@@ -410,8 +410,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         // Cascade: when rejecting from INTERVIEW_SCHEDULED, cancel any active
         // interview so the student doesn't see a "scheduled" ghost interview.
         if (request.getStatus() == ApplicationStatus.REJECTED) {
-            cancelActiveInterviewsForApplication(application.getApplicationId(),
-                    request.getRejectionReason());
+            cancelActiveInterviewsForApplication(application.getApplicationId(), request.getRejectionReason());
         }
 
         return mapToResponse(savedApp);
@@ -501,16 +500,15 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     private void notifyApplicationWithdrawn(Application withdrawnApp, Application trigger, String reason) {
         try {
-            String jobTitle =
-                    withdrawnApp.getJobPost() != null && withdrawnApp.getJobPost().getTitle() != null
-                            ? withdrawnApp.getJobPost().getTitle()
-                            : "job post";
-            String triggerJobTitle =
-                    trigger != null
+            String jobTitle = withdrawnApp.getJobPost() != null
+                            && withdrawnApp.getJobPost().getTitle() != null
+                    ? withdrawnApp.getJobPost().getTitle()
+                    : "job post";
+            String triggerJobTitle = trigger != null
                             && trigger.getJobPost() != null
                             && trigger.getJobPost().getTitle() != null
-                                    ? trigger.getJobPost().getTitle()
-                                    : "another opportunity";
+                    ? trigger.getJobPost().getTitle()
+                    : "another opportunity";
             Notification n = Notification.builder()
                     .recipient(withdrawnApp.getStudent())
                     .title("Đơn ứng tuyển đã được rút tự động")
@@ -566,8 +564,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         LocalDateTime now = LocalDateTime.now();
 
         // (1) Revive all sibling applications that were withdrawn by this trigger
-        List<Application> withdrawnByThis = repository
-                .findByWithdrawnByApplicationId(trigger.getApplicationId());
+        List<Application> withdrawnByThis = repository.findByWithdrawnByApplicationId(trigger.getApplicationId());
 
         for (Application sibling : withdrawnByThis) {
             ApplicationStatus previous = sibling.getPreviousStatus();
@@ -582,12 +579,13 @@ public class ApplicationServiceImpl implements ApplicationService {
             notifyApplicationRevived(sibling, trigger);
             log.info(
                     "[BR-26 UNDO] Revived application {} from WITHDRAWN to {} (trigger={})",
-                    sibling.getApplicationId(), previous, trigger.getApplicationId());
+                    sibling.getApplicationId(),
+                    previous,
+                    trigger.getApplicationId());
         }
 
         // (2) Cancel any active interviews for the trigger application
-        cancelActiveInterviewsForApplication(trigger.getApplicationId(),
-                "Acceptance undone by enterprise");
+        cancelActiveInterviewsForApplication(trigger.getApplicationId(), "Acceptance undone by enterprise");
 
         // (3) Cancel the placement record and assignment created when interview passed.
         // Both are set to APPROVED/ACTIVE by autoCreatePlacementAfterInterview().
@@ -607,7 +605,9 @@ public class ApplicationServiceImpl implements ApplicationService {
                         placementApplicationRepository.save(p);
                         log.info(
                                 "[BR-26 UNDO] Cancelled placement {} for student={} enterprise={}",
-                                p.getApplicationId(), studentId, enterpriseId);
+                                p.getApplicationId(),
+                                studentId,
+                                enterpriseId);
                     });
 
             // Terminate EnterpriseAssignment if ACTIVE
@@ -621,7 +621,9 @@ public class ApplicationServiceImpl implements ApplicationService {
                         enterpriseAssignmentRepository.save(ea);
                         log.info(
                                 "[BR-26 UNDO] Terminated assignment {} for student={} enterprise={}",
-                                ea.getAssignmentId(), studentId, enterpriseId);
+                                ea.getAssignmentId(),
+                                studentId,
+                                enterpriseId);
                     });
 
             // Revert EligibleStudent status from MATCHED back to ELIGIBLE.
@@ -634,7 +636,8 @@ public class ApplicationServiceImpl implements ApplicationService {
                         eligibleStudentRepository.save(e);
                         log.info(
                                 "[BR-26 UNDO] Reverted EligibleStudent status to ELIGIBLE for student={} semester={}",
-                                studentId, semesterId);
+                                studentId,
+                                semesterId);
                     });
         }
 
@@ -653,12 +656,11 @@ public class ApplicationServiceImpl implements ApplicationService {
                     revivedApp.getJobPost() != null && revivedApp.getJobPost().getTitle() != null
                             ? revivedApp.getJobPost().getTitle()
                             : "job post";
-            String triggerJobTitle =
-                    trigger != null
+            String triggerJobTitle = trigger != null
                             && trigger.getJobPost() != null
                             && trigger.getJobPost().getTitle() != null
-                                    ? trigger.getJobPost().getTitle()
-                                    : "another opportunity";
+                    ? trigger.getJobPost().getTitle()
+                    : "another opportunity";
 
             Notification n = Notification.builder()
                     .recipient(revivedApp.getStudent())
@@ -803,7 +805,12 @@ public class ApplicationServiceImpl implements ApplicationService {
                     InputStream is = null;
                     try {
                         if (cvUrl.startsWith("http://") || cvUrl.startsWith("https://")) {
-                            is = java.net.URI.create(cvUrl).toURL().openConnection().getInputStream();
+                            is = java.net
+                                    .URI
+                                    .create(cvUrl)
+                                    .toURL()
+                                    .openConnection()
+                                    .getInputStream();
                         } else {
                             Path filePath =
                                     Paths.get(System.getProperty("user.dir"), cvUrl.replace("/uploads/", "uploads/"));
