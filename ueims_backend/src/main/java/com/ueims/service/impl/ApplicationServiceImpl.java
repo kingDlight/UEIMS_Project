@@ -493,7 +493,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                     .message(String.format(
                             "Đơn ứng tuyển \"%s\" của bạn đã được rút vì bạn đã được chọn cho \"%s\" (%s).",
                             jobTitle, triggerJobTitle, reason == null ? "BR-26" : reason))
-                    .type("APPLICATION_WITHDRAWN_BR26")
+                    .type("GENERAL")
                     .referenceEntity("Application")
                     .referenceId(withdrawnApp.getApplicationId())
                     .isRead(false)
