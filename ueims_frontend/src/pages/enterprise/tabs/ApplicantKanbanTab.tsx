@@ -503,6 +503,12 @@ export const ApplicantKanbanTab: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [detailModal, setDetailModal] = useState<{ open: boolean; applicant: ApplicantCard | null }>({ open: false, applicant: null });
+  const [rejectModal, setRejectModal] = useState<{
+    open: boolean;
+    applicant: ApplicantCard | null;
+    pendingRejectReason: string;
+    submitting: boolean;
+  }>({ open: false, applicant: null, pendingRejectReason: '', submitting: false });
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
@@ -550,10 +556,42 @@ export const ApplicantKanbanTab: React.FC = () => {
 
     if (toKanbanStatus(draggedApplicant.status) === targetStatus) return;
 
-    await updateStatus(draggedApplicant, targetStatus);
+    // Asking for a reason when dropping into REJECTED (especially from
+    // INTERVIEW_SCHEDULED — disciplinary / misconduct case).
+    if (targetStatus === 'REJECTED') {
+      setRejectModal({
+        open: true,
+        applicant: draggedApplicant,
+        pendingRejectReason: '',
+        submitting: false,
+      });
+      return;
+    }
+
+    await updateStatus(draggedApplicant, targetStatus, undefined);
   };
 
-  const updateStatus = async (applicant: ApplicantCard, newStatus: KanbanStatus) => {
+  const submitReject = async () => {
+    const { applicant, pendingRejectReason } = rejectModal;
+    if (!applicant) return;
+    if (!pendingRejectReason.trim()) {
+      message.warning('Please provide a rejection reason.');
+      return;
+    }
+    setRejectModal(prev => ({ ...prev, submitting: true }));
+    try {
+      await updateStatus(applicant, 'REJECTED', pendingRejectReason.trim());
+      setRejectModal({ open: false, applicant: null, pendingRejectReason: '', submitting: false });
+    } catch {
+      setRejectModal(prev => ({ ...prev, submitting: false }));
+    }
+  };
+
+  const updateStatus = async (
+    applicant: ApplicantCard,
+    newStatus: KanbanStatus,
+    rejectionReason?: string,
+  ) => {
     const backendStatus: ApplicationStatus =
       newStatus === 'PENDING' ? 'PENDING' :
       newStatus === 'INTERVIEW_SCHEDULED' ? 'INTERVIEW_SCHEDULED' :
@@ -561,9 +599,16 @@ export const ApplicantKanbanTab: React.FC = () => {
       'REJECTED';
 
     // Optimistic update
-    setApplicants(prev => prev.map(a => a.id === applicant.id ? { ...a, status: backendStatus } : a));
+    setApplicants(prev => prev.map(a => a.id === applicant.id ? {
+      ...a,
+      status: backendStatus,
+      rejectionReason: rejectionReason ?? a.rejectionReason,
+    } : a));
     try {
-      await ApplicationService.updateStatus(applicant.applicationId, { status: backendStatus });
+      await ApplicationService.updateStatus(applicant.applicationId, {
+        status: backendStatus,
+        ...(rejectionReason ? { rejectionReason } : {}),
+      });
       message.success(`Moved ${applicant.studentName} to ${COLUMNS.find(c => c.id === newStatus)?.label}`);
     } catch (err: any) {
       // Revert on error
@@ -631,6 +676,64 @@ export const ApplicantKanbanTab: React.FC = () => {
           ));
         }}
       />
+
+      <Modal
+        open={rejectModal.open}
+        title={
+          <div className="font-extrabold text-slate-900">
+            Reject {rejectModal.applicant?.studentName}?
+          </div>
+        }
+        onCancel={() => {
+          if (rejectModal.submitting) return;
+          setRejectModal({ open: false, applicant: null, pendingRejectReason: '', submitting: false });
+        }}
+        footer={null}
+        destroyOnHidden
+      >
+        {rejectModal.applicant?.status === 'INTERVIEW_SCHEDULED' && (
+          <div className="mb-3 rounded-xl border border-amber-500/30 bg-amber-50 px-3 py-2 text-[12px] text-amber-700">
+            This candidate is currently in an interview. The active interview will be cancelled automatically.
+          </div>
+        )}
+        <div className="mb-3">
+          <div className="text-[12px] font-bold text-slate-500 mb-1.5">
+            Rejection reason <span className="text-red-500">*</span>
+          </div>
+          <Input.TextArea
+            value={rejectModal.pendingRejectReason}
+            onChange={e =>
+              setRejectModal(prev => ({ ...prev, pendingRejectReason: e.target.value }))
+            }
+            rows={3}
+            placeholder="e.g. Misconduct during interview, no-show, breach of company policy..."
+            maxLength={500}
+            showCount
+            className="rounded-xl"
+          />
+        </div>
+        <div className="flex justify-end gap-2">
+          <Button
+            onClick={() => {
+              if (rejectModal.submitting) return;
+              setRejectModal({ open: false, applicant: null, pendingRejectReason: '', submitting: false });
+            }}
+            disabled={rejectModal.submitting}
+            className="rounded-xl"
+          >
+            Cancel
+          </Button>
+          <Button
+            type="primary"
+            danger
+            loading={rejectModal.submitting}
+            onClick={submitReject}
+            className="rounded-xl"
+          >
+            Confirm reject
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 };

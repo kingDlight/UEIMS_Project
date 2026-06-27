@@ -25,4 +25,6 @@ public interface InterviewRepository extends JpaRepository<Interview, UUID> {
     List<Interview> findByEnterpriseId(@Param("enterpriseId") UUID enterpriseId);
 
     List<Interview> findByApplication_Student_UserId(UUID studentId);
+
+    List<Interview> findByApplication_ApplicationId(UUID applicationId);
 }

@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.zip.ZipEntry;
@@ -28,11 +29,13 @@ import com.ueims.mapper.ApplicationMapper;
 import com.ueims.model.entity.Application;
 import com.ueims.model.entity.ApplicationStatus;
 import com.ueims.model.entity.EligibleStudent;
+import com.ueims.model.entity.Interview;
 import com.ueims.model.entity.JobPost;
 import com.ueims.model.entity.User;
 import com.ueims.repository.ApplicationRepository;
 import com.ueims.repository.EligibleStudentRepository;
 import com.ueims.repository.EnterpriseAssignmentRepository;
+import com.ueims.repository.InterviewRepository;
 import com.ueims.repository.JobPostRepository;
 import com.ueims.repository.StudentProfileRepository;
 import com.ueims.repository.UserRepository;
@@ -54,6 +57,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     EligibleStudentRepository eligibleStudentRepository;
     StudentProfileRepository studentProfileRepository;
     EnterpriseAssignmentRepository enterpriseAssignmentRepository;
+    InterviewRepository interviewRepository;
     ApplicationMapper mapper;
 
     @Override
@@ -325,6 +329,15 @@ public class ApplicationServiceImpl implements ApplicationService {
             throw new AppException(ErrorCode.JOB_POST_CLOSED);
         }
 
+        // Guard: rejecting from INTERVIEW_SCHEDULED requires a reason
+        // (misconduct, no-show, disciplinary issue, etc.)
+        if (request.getStatus() == ApplicationStatus.REJECTED
+                && application.getStatus() == ApplicationStatus.INTERVIEW_SCHEDULED) {
+            if (request.getRejectionReason() == null || request.getRejectionReason().isBlank()) {
+                throw new AppException(ErrorCode.INVALID_PARAMETER_FORMAT);
+            }
+        }
+
         application.setStatus(request.getStatus());
         if (request.getStatus() == ApplicationStatus.REJECTED
                 || request.getStatus() == ApplicationStatus.SCREENING_REJECTED) {
@@ -347,7 +360,35 @@ public class ApplicationServiceImpl implements ApplicationService {
         }
         application.setScreenedBy(currentUser);
 
-        return mapToResponse(repository.save(application));
+        Application savedApp = repository.save(application);
+
+        // Cascade: when rejecting from INTERVIEW_SCHEDULED, cancel any active
+        // interview so the student doesn't see a "scheduled" ghost interview.
+        if (request.getStatus() == ApplicationStatus.REJECTED) {
+            cancelActiveInterviewsForApplication(application.getApplicationId(),
+                    request.getRejectionReason());
+        }
+
+        return mapToResponse(savedApp);
+    }
+
+    private void cancelActiveInterviewsForApplication(UUID applicationId, String reason) {
+        List<Interview> interviews = interviewRepository.findByApplication_ApplicationId(applicationId);
+        LocalDateTime now = LocalDateTime.now();
+        for (Interview iv : interviews) {
+            String s = iv.getStatus();
+            if ("SCHEDULED".equalsIgnoreCase(s)
+                    || "CONFIRMED".equalsIgnoreCase(s)
+                    || "RESCHEDULED".equalsIgnoreCase(s)) {
+                iv.setStatus("CANCELLED");
+                String composedReason = "Application rejected: " + (reason == null ? "" : reason);
+                if (iv.getCancelReason() == null || iv.getCancelReason().isBlank()) {
+                    iv.setCancelReason(composedReason);
+                }
+                iv.setUpdatedAt(now);
+            }
+        }
+        interviewRepository.saveAll(interviews);
     }
 
     private User getCurrentUser() {
