@@ -16,11 +16,19 @@ import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
 import com.ueims.model.entity.Application;
 import com.ueims.model.entity.ApplicationStatus;
+import com.ueims.model.entity.EligibleStudent;
+import com.ueims.model.entity.Enterprise;
+import com.ueims.model.entity.EnterpriseAssignment;
 import com.ueims.model.entity.Interview;
+import com.ueims.model.entity.PlacementApplication;
+import com.ueims.model.entity.Semester;
 import com.ueims.model.entity.User;
 import com.ueims.repository.ApplicationRepository;
+import com.ueims.repository.EligibleStudentRepository;
 import com.ueims.repository.EnterpriseAssignmentRepository;
 import com.ueims.repository.InterviewRepository;
+import com.ueims.repository.PlacementApplicationRepository;
+import com.ueims.repository.SemesterRepository;
 import com.ueims.repository.UserRepository;
 import com.ueims.service.InterviewService;
 import com.ueims.service.MailService;
@@ -40,6 +48,9 @@ public class InterviewServiceImpl implements InterviewService {
     ApplicationRepository applicationRepository;
     UserRepository userRepository;
     EnterpriseAssignmentRepository enterpriseAssignmentRepository;
+    PlacementApplicationRepository placementApplicationRepository;
+    EligibleStudentRepository eligibleStudentRepository;
+    SemesterRepository semesterRepository;
     MailService mailService;
     NotificationService notificationService;
 
@@ -339,9 +350,6 @@ public class InterviewServiceImpl implements InterviewService {
         if ("PASS".equals(upper)) {
             app.setStatus(ApplicationStatus.ACCEPTED);
 
-            // Internships (EnterpriseAssignments) are not created during the interview phase.
-            // They will be generated later when the student enters Semester 6 and their status becomes OJT.
-
             // BR-26: Withdraw other pending applications for this student in the current
             // semester
             java.util.List<Application> otherApps =
@@ -364,6 +372,20 @@ public class InterviewServiceImpl implements InterviewService {
                         applicationRepository.save(otherApp);
                     }
                 }
+            }
+
+            // Auto-create placement_applications + enterprise_assignments on PASS.
+            // The enterprise that posted the job the student just passed becomes their OJT placement.
+            // Student status in eligible_students is updated to MATCHED so they appear in the
+            // OJT Placement Center view immediately.
+            try {
+                autoCreatePlacementAfterInterview(existing);
+            } catch (Exception ex) {
+                log.error(
+                        "[UC-44] Failed to auto-create placement for student {} after interview {}: {}",
+                        app.getStudent().getUserId(),
+                        id,
+                        ex.getMessage());
             }
         } else if ("FAIL".equals(upper)) {
             app.setStatus(ApplicationStatus.REJECTED);
@@ -521,5 +543,101 @@ public class InterviewServiceImpl implements InterviewService {
                 .filter(r -> r != null && !r.isBlank())
                 .findFirst()
                 .orElse("USER");
+    }
+
+    /**
+     * Auto-creates placement_applications (APPROVED) + enterprise_assignments (ACTIVE) for a
+     * student who just passed an interview.
+     *
+     * <p>The enterprise is derived from the job post associated with the passed application. The
+     * semester is derived from the same job post. Student status in eligible_students is set to
+     * MATCHED so they appear in the OJT Placement Center immediately.
+     *
+     * <p>This mirrors the logic in PlacementApplicationServiceImpl.approve() but skips the pending
+     * step since the enterprise already selected the student via interview.
+     */
+    private void autoCreatePlacementAfterInterview(Interview interview) {
+        Application application = interview.getApplication();
+        User student = application.getStudent();
+        Enterprise enterprise = application.getJobPost().getEnterprise();
+        Semester semester = application.getJobPost().getSemester();
+
+        // Guard: only APPROVED enterprises get placements
+        if (!"APPROVED".equals(enterprise.getStatus())) {
+            log.warn(
+                    "[autoCreatePlacement] Skipping placement — enterprise {} status is {}",
+                    enterprise.getEnterpriseId(),
+                    enterprise.getStatus());
+            return;
+        }
+
+        // Guard: locked semester → skip
+        if ("LOCKED".equals(semester.getStatus())) {
+            log.warn(
+                    "[autoCreatePlacement] Skipping placement — semester {} is LOCKED",
+                    semester.getSemesterId());
+            return;
+        }
+
+        // Skip if student already has an ACTIVE assignment for this enterprise in this semester
+        if (enterpriseAssignmentRepository.existsByStudent_UserIdAndEnterprise_EnterpriseIdAndSemester_SemesterId(
+                student.getUserId(), enterprise.getEnterpriseId(), semester.getSemesterId())) {
+            log.info(
+                    "[autoCreatePlacement] Student {} already assigned to enterprise {} — skipping",
+                    student.getUserId(),
+                    enterprise.getEnterpriseId());
+            return;
+        }
+
+        // Create placement application (APPROVED — no pending step since enterprise selected via
+        // interview)
+        PlacementApplication placementApp = PlacementApplication.builder()
+                .student(student)
+                .enterprise(enterprise)
+                .semester(semester)
+                .status("APPROVED")
+                .coverLetter("[Interview Pass] Auto-placed after passing interview with " + enterprise.getCompanyName())
+                .reviewedBy(currentUser())
+                .reviewedAt(LocalDateTime.now())
+                .isReplacement(false)
+                .build();
+        placementApplicationRepository.save(placementApp);
+
+        // Create assignment (ACTIVE)
+        EnterpriseAssignment assignment = EnterpriseAssignment.builder()
+                .enterprise(enterprise)
+                .student(student)
+                .semester(semester)
+                .status("ACTIVE")
+                .assignedBy(currentUser())
+                .build();
+        enterpriseAssignmentRepository.save(assignment);
+
+        // Update eligible_students status → MATCHED so student appears in OJT view
+        eligibleStudentRepository
+                .findByUser_UserIdAndSemester_SemesterId(student.getUserId(), semester.getSemesterId())
+                .ifPresent(eligible -> {
+                    if (!"MATCHED".equals(eligible.getStatus())
+                            && !"OJT".equals(eligible.getStatus())) {
+                        eligible.setStatus("MATCHED");
+                        eligibleStudentRepository.save(eligible);
+                        log.info(
+                                "[autoCreatePlacement] Student {} eligible status updated to MATCHED (semester {})",
+                                student.getUserId(),
+                                semester.getSemesterId());
+                    }
+                });
+
+        log.info(
+                "[autoCreatePlacement] Student {} auto-placed to {} (assignment {})",
+                student.getUserId(),
+                enterprise.getCompanyName(),
+                assignment.getAssignmentId());
+    }
+
+    /** Shortcut to fetch the current authenticated user without repeating boilerplate. */
+    private User currentUser() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByEmail(email).orElse(null);
     }
 }
