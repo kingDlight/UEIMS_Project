@@ -16,7 +16,6 @@ import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
 import com.ueims.model.entity.Application;
 import com.ueims.model.entity.ApplicationStatus;
-import com.ueims.model.entity.EligibleStudent;
 import com.ueims.model.entity.Enterprise;
 import com.ueims.model.entity.EnterpriseAssignment;
 import com.ueims.model.entity.Interview;
@@ -553,9 +552,7 @@ public class InterviewServiceImpl implements InterviewService {
 
         // Guard: locked semester → skip
         if ("LOCKED".equals(semester.getStatus())) {
-            log.warn(
-                    "[autoCreatePlacement] Skipping placement — semester {} is LOCKED",
-                    semester.getSemesterId());
+            log.warn("[autoCreatePlacement] Skipping placement — semester {} is LOCKED", semester.getSemesterId());
             return;
         }
 
@@ -597,8 +594,7 @@ public class InterviewServiceImpl implements InterviewService {
         eligibleStudentRepository
                 .findByUser_UserIdAndSemester_SemesterId(student.getUserId(), semester.getSemesterId())
                 .ifPresent(eligible -> {
-                    if (!"MATCHED".equals(eligible.getStatus())
-                            && !"OJT".equals(eligible.getStatus())) {
+                    if (!"MATCHED".equals(eligible.getStatus()) && !"OJT".equals(eligible.getStatus())) {
                         eligible.setStatus("MATCHED");
                         eligibleStudentRepository.save(eligible);
                         log.info(

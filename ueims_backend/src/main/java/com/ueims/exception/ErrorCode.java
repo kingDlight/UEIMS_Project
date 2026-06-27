@@ -135,7 +135,9 @@ public enum ErrorCode {
             2007, "Your account has been permanently locked. Please contact the administrator.", HttpStatus.FORBIDDEN),
     USER_BANNED(2001, "Your account has been locked due to entering the wrong password 5 times", HttpStatus.FORBIDDEN),
     USER_INACTIVE(
-            2008, "Your account is not active yet. Please wait for the administrator to approve your registration.", HttpStatus.FORBIDDEN),
+            2008,
+            "Your account is not active yet. Please wait for the administrator to approve your registration.",
+            HttpStatus.FORBIDDEN),
     WRONG_OLD_PASSWORD(2002, "Incorrect old password", HttpStatus.BAD_REQUEST),
     PASSWORDS_NOT_MATCH(2003, "New password and confirmation password do not match", HttpStatus.BAD_REQUEST),
     USER_ALREADY_HAS_ROLE(2004, "User already has a role. Only one role can be assigned.", HttpStatus.BAD_REQUEST),

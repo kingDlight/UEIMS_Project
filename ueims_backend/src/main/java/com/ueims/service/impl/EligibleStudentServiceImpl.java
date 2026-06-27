@@ -208,8 +208,7 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
             studentProfileRepository.save(profile);
         } catch (Exception ex) {
             // Sync is best-effort; don't fail the eligibility update if profile sync breaks.
-            log.warn("Failed to sync eligible_student → student_profiles for user {}: {}",
-                    userId, ex.getMessage());
+            log.warn("Failed to sync eligible_student → student_profiles for user {}: {}", userId, ex.getMessage());
         }
     }
 
