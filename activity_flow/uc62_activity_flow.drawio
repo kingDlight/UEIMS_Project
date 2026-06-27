@@ -29,10 +29,10 @@
           <mxGeometry height="40" width="120" x="520" y="120" as="geometry" />
         </mxCell>
         <mxCell id="ValidateFile" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="Validate File" vertex="1">
-          <mxGeometry height="80" width="120" x="580" y="420" as="geometry" />
+          <mxGeometry height="80" width="120" x="660" y="200" as="geometry" />
         </mxCell>
         <mxCell id="IsValid" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="Is Valid" vertex="1">
-          <mxGeometry height="80" width="120" x="60" y="630" as="geometry" />
+          <mxGeometry height="80" width="120" x="660" y="320" as="geometry" />
         </mxCell>
         <mxCell id="ClickSubmit" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Click Submit" vertex="1">
           <mxGeometry height="40" width="120" x="430" y="800" as="geometry" />
@@ -41,10 +41,10 @@
           <mxGeometry height="40" width="120" x="700" y="820" as="geometry" />
         </mxCell>
         <mxCell id="ShowSuccess" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Show Success" vertex="1">
-          <mxGeometry height="40" width="120" x="750" y="545" as="geometry" />
+          <mxGeometry height="40" width="120" x="827" y="490" as="geometry" />
         </mxCell>
         <mxCell id="SaveAsDraft" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Save As Draft" vertex="1">
-          <mxGeometry height="40" width="120" x="620" y="660" as="geometry" />
+          <mxGeometry height="40" width="120" x="707" y="930" as="geometry" />
         </mxCell>
         <mxCell id="ShowFileError" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Show File Error" vertex="1">
           <mxGeometry height="40" width="120" x="620" y="740" as="geometry" />
