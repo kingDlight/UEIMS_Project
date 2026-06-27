@@ -343,7 +343,7 @@ export const EnterpriseDashboardTab: React.FC = () => {
         const res = await ApplicationService.getMyEnterprise();
         const data: any[] = res.data?.result ?? res.data ?? [];
 
-        if (data.length > 0) {
+        if (data.length >= 0) {
           const mapped: ApplicationItem[] = data.map((item: any) => ({
             applicationId: item.applicationId ?? item.id,
             studentName: item.studentName ?? 'Student',
@@ -357,10 +357,10 @@ export const EnterpriseDashboardTab: React.FC = () => {
           setApplications(mapped);
 
           const total = mapped.length;
-          const pending = mapped.filter(a => a.status === 'PENDING').length;
+          const pending = mapped.filter(a => a.status === 'PENDING' || a.status === 'SCREENING_PASSED' || a.status === 'SCREENING_REJECTED').length;
           const interviewing = mapped.filter(a => a.status === 'INTERVIEW_SCHEDULED').length;
           const accepted = mapped.filter(a => a.status === 'ACCEPTED').length;
-          const rejected = mapped.filter(a => a.status === 'REJECTED').length;
+          const rejected = mapped.filter(a => a.status === 'REJECTED' || a.status === 'WITHDRAWN').length;
           setStats({ totalApplicants: total, pending, interviewing, accepted, rejected });
         }
       } catch (err) {
@@ -370,7 +370,21 @@ export const EnterpriseDashboardTab: React.FC = () => {
       }
     };
     fetchData();
-  }, []);
+
+    // Refetch when other tabs (Kanban, Interview) change an application status.
+    const onStatusUpdated = () => fetchData();
+    window.addEventListener('application-status-updated', onStatusUpdated);
+
+    // Also refetch when the tab/window regains focus, in case state
+    // changed elsewhere (other tab, websocket, manual SQL fix).
+    const onFocus = () => fetchData();
+    window.addEventListener('focus', onFocus);
+
+    return () => {
+      window.removeEventListener('application-status-updated', onStatusUpdated);
+      window.removeEventListener('focus', onFocus);
+    };
+  }, [message, t]);
 
   const handleNavigate = (route: string) => {
     navigate(`/enterprise-dashboard/${route}`);

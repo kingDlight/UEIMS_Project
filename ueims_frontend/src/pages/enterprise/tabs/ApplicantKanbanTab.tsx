@@ -617,6 +617,11 @@ export const ApplicantKanbanTab: React.FC = () => {
         ...(rejectionReason ? { rejectionReason } : {}),
       });
       message.success(`Moved ${applicant.studentName} to ${COLUMNS.find(c => c.id === newStatus)?.label}`);
+
+      // Notify other tabs (Dashboard, etc.) so they can refetch.
+      window.dispatchEvent(new CustomEvent('application-status-updated', {
+        detail: { applicationId: applicant.id, status: backendStatus },
+      }));
     } catch (err: any) {
       // Revert on error
       setApplicants(prev => prev.map(a => a.id === applicant.id ? { ...a, status: applicant.status } : a));
@@ -681,6 +686,9 @@ export const ApplicantKanbanTab: React.FC = () => {
               ? { ...item, status: newStatus, rejectionReason: reason ?? item.rejectionReason }
               : item
           ));
+          window.dispatchEvent(new CustomEvent('application-status-updated', {
+            detail: { applicationId: a.id, status: newStatus },
+          }));
         }}
       />
 

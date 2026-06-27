@@ -120,6 +120,14 @@ export const InterviewScheduleTab: React.FC = () => {
   useEffect(() => {
     fetchInterviews();
     fetchApplications();
+
+    // Refetch when application status changes elsewhere (e.g. Kanban reject).
+    const onStatusUpdated = () => {
+      fetchInterviews();
+      fetchApplications();
+    };
+    window.addEventListener('application-status-updated', onStatusUpdated);
+    return () => window.removeEventListener('application-status-updated', onStatusUpdated);
   }, []);
 
   const filtered = useMemo(() => {

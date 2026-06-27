@@ -56,7 +56,15 @@ export const InterviewResultTab: React.FC = () => {
     }
   };
 
-  useEffect(() => { fetchRows(); }, []);
+  useEffect(() => {
+    fetchRows();
+
+    // Refetch when application status changes (e.g. rejection from Kanban)
+    // so cancelled interviews disappear from this list immediately.
+    const onStatusUpdated = () => fetchRows();
+    window.addEventListener('application-status-updated', onStatusUpdated);
+    return () => window.removeEventListener('application-status-updated', onStatusUpdated);
+  }, []);
 
   const handleConfirm = async () => {
     if (!decisionOpen) return;
