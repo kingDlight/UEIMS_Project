@@ -159,12 +159,14 @@ const SortableCard: React.FC<{
   applicant: ApplicantCard;
   onViewDetails: (a: ApplicantCard) => void;
 }> = ({ applicant, onViewDetails }) => {
-  // BR-26 finality: withdrawn cards are read-only — disable drag listeners and the
-  // grab cursor so the user sees they cannot be moved.
-  const isWithdrawn = applicant.status === 'WITHDRAWN';
+  // BR-X1 finality: withdrawn + accepted cards are terminal and read-only. Withdrawn
+  // is set by BR-26 only; accepted triggers BR-26 which strands sibling applications
+  // at WITHDRAWN — letting the user undo ACCEPTED would break the student's other
+  // options without recourse. Both must be disabled at the drag layer too.
+  const isLocked = applicant.status === 'WITHDRAWN' || applicant.status === 'ACCEPTED';
   const sortable = useSortable({
     id: applicant.id,
-    disabled: isWithdrawn,
+    disabled: isLocked,
   });
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = sortable;
   const style: React.CSSProperties = {
@@ -177,11 +179,11 @@ const SortableCard: React.FC<{
   const daysSinceApply = Math.floor((Date.now() - new Date(applicant.appliedAt).getTime()) / 86400000);
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...(isWithdrawn ? {} : listeners)}>
+    <div ref={setNodeRef} style={style} {...attributes} {...(isLocked ? {} : listeners)}>
       <motion.div
         onClick={() => onViewDetails(applicant)}
         whileHover={{ y: -1, boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)' }}
-        className={`bg-white rounded-2xl border border-slate-200 shadow-sm p-3.5 mb-2.5 transition-all ${isWithdrawn ? 'cursor-not-allowed opacity-75' : 'cursor-grab'}`}
+        className={`bg-white rounded-2xl border border-slate-200 shadow-sm p-3.5 mb-2.5 transition-all ${isLocked ? 'cursor-not-allowed opacity-75' : 'cursor-grab'}`}
       >
         <div className="flex items-start gap-2.5 mb-2.5">
           <div className={`w-[42px] h-[42px] rounded-xl ${avatarColor.bg} ${avatarColor.text} flex items-center justify-center text-[14px] font-extrabold shrink-0`}>
@@ -424,6 +426,12 @@ const DetailModal: React.FC<DetailModalProps> = ({ applicant, open, onClose, onS
             Application withdrawn automatically — this student has been placed with another enterprise.
           </div>
         )}
+        {applicant.status === 'ACCEPTED' && (
+          <div className="text-[12px] text-slate-500 text-center px-3 py-2 bg-emerald-50 rounded-xl border border-dashed border-emerald-200">
+            <LockOutlined className="mr-1.5" />
+            Application accepted — status is locked. Contact admin to make changes.
+          </div>
+        )}
       </div>
       <Modal
         title={
@@ -572,10 +580,11 @@ export const ApplicantKanbanTab: React.FC = () => {
     const draggedApplicant = applicants.find(a => a.id === active.id);
     if (!draggedApplicant) return;
 
-    // BR-26 finality: WITHDRAWN applications are terminal. The student has been
-    // placed elsewhere, so the card is read-only — refuse any drag, even back to
-    // its own column. Backend also enforces this (ApplicationServiceImpl.updateStatus).
-    if (draggedApplicant.status === 'WITHDRAWN') {
+    // BR-26 + BR-X1 finality: WITHDRAWN and ACCEPTED are terminal. WITHDRAWN is
+    // set by BR-26; ACCEPTED triggers BR-26 which strands sibling applications at
+    // WITHDRAWN — letting the user undo ACCEPTED would break the student's other
+    // options without recourse. Both are read-only; refuse any drag.
+    if (draggedApplicant.status === 'WITHDRAWN' || draggedApplicant.status === 'ACCEPTED') {
       return;
     }
 
@@ -633,6 +642,17 @@ export const ApplicantKanbanTab: React.FC = () => {
     newStatus: KanbanStatus,
     rejectionReason?: string,
   ) => {
+    // BR-X1 finality guard: never call the API with WITHDRAWN or ACCEPTED targets
+    // from this code path. WITHDRAWN is set by BR-26 only; ACCEPTED triggers BR-26.
+    // Even if the drag handler somehow slipped through, the backend will reject
+    // (INVALID_PARAMETER_FORMAT), but failing fast here is cleaner.
+    if (newStatus === 'WITHDRAWN' || newStatus === 'ACCEPTED' && applicant.status === 'ACCEPTED') {
+      return;
+    }
+    if (applicant.status === 'WITHDRAWN' || applicant.status === 'ACCEPTED') {
+      return;
+    }
+
     const backendStatus: ApplicationStatus =
       newStatus === 'PENDING' ? 'PENDING' :
       newStatus === 'INTERVIEW_SCHEDULED' ? 'INTERVIEW_SCHEDULED' :

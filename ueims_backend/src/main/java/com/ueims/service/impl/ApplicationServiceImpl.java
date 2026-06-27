@@ -352,6 +352,17 @@ public class ApplicationServiceImpl implements ApplicationService {
             throw new AppException(ErrorCode.INVALID_PARAMETER_FORMAT);
         }
 
+        // BR-X1 finality: ACCEPTED is a terminal state because BR-26 has already
+        // withdrawn every other non-terminal application of this student in the
+        // semester. Letting an enterprise drag ACCEPTED back to REJECTED/PENDING
+        // would leave sibling applications stranded at WITHDRAWN — the student
+        // would be locked out of every enterprise without anyone to blame.
+        // If an enterprise truly needs to undo an acceptance, that must go through
+        // an admin/supervisor (out of band) — not the Kanban.
+        if (application.getStatus() == ApplicationStatus.ACCEPTED) {
+            throw new AppException(ErrorCode.INVALID_PARAMETER_FORMAT);
+        }
+
         // Guard: rejecting from INTERVIEW_SCHEDULED requires a reason
         // (misconduct, no-show, disciplinary issue, etc.)
         if (request.getStatus() == ApplicationStatus.REJECTED
@@ -360,6 +371,16 @@ public class ApplicationServiceImpl implements ApplicationService {
                 throw new AppException(ErrorCode.INVALID_PARAMETER_FORMAT);
             }
         }
+
+        // BR-X2: when an enterprise reverts REJECTED → INTERVIEW_SCHEDULED, the
+        // previously-cancelled interview must be re-checked. We allow the revert
+        // because cancelActiveInterviewsForApplication() already cleaned the
+        // interview to CANCELLED state, so no ghost interview remains. The
+        // application itself just slides back into the interview bucket. The
+        // enterprise must schedule a new interview (handled by InterviewController
+        // independently).
+        // No additional cascade needed here; cleanup already ran on the forward
+        // REJECTED transition.
 
         application.setStatus(request.getStatus());
         if (request.getStatus() == ApplicationStatus.REJECTED
