@@ -17,7 +17,6 @@ const InterviewResultTab = React.lazy(() => import('./tabs/InterviewResultTab').
 const InternshipPlanTab = React.lazy(() => import('./tabs/InternshipPlanTab').then(m => ({ default: m.InternshipPlanTab })));
 const WeeklyReportReviewTab = React.lazy(() => import('./tabs/WeeklyReportReviewTab').then(m => ({ default: m.WeeklyReportReviewTab })));
 const IncidentReportTab = React.lazy(() => import('./tabs/IncidentReportTab').then(m => ({ default: m.IncidentReportTab })));
-const AnalyticsTab = React.lazy(() => import('./tabs/AnalyticsTab'));
 const NoticesTab = React.lazy(() => import('./tabs/NoticesTab'));
 
 export type EnterprisePageKey =
@@ -32,7 +31,6 @@ export type EnterprisePageKey =
   | 'incidents'
   | 'evaluation'
   | 'profile'
-  | 'analytics'
   | 'notifications'
   | 'notices';
 
@@ -66,7 +64,6 @@ export const EnterpriseDashboard: React.FC = () => {
     incidents: <IncidentReportTab />,
     evaluation: <EvaluationTab />,
     profile: <EnterpriseProfileTab />,
-    analytics: <AnalyticsTab />,
     notifications: <NoticesTab />,
     notices: <NoticesTab />,
   };
