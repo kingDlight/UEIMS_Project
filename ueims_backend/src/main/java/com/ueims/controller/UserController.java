@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.ueims.dto.request.UserCreationRequest;
 import com.ueims.dto.request.UserUpdateRequest;
+import com.ueims.dto.request.UpdateEmailRequest;
 import com.ueims.dto.response.UserDetailResponse;
 import com.ueims.model.entity.User;
 import com.ueims.service.UserService;
@@ -150,5 +151,12 @@ public class UserController {
             @RequestParam(required = false) Integer durationMinutes) {
         service.updateUserStatus(id, status, durationMinutes);
         return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/{id}/email")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('SYSTEM_ADMIN') or hasRole('ADMIN') or hasRole('TRAINING_MANAGER')")
+    public ResponseEntity<UserDetailResponse> updateEmail(
+            @PathVariable UUID id, @RequestBody @Valid UpdateEmailRequest request) {
+        return ResponseEntity.ok(service.updateUserEmail(id, request));
     }
 }

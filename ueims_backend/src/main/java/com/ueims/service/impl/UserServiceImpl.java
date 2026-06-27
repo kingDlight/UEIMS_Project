@@ -16,12 +16,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.ueims.dto.request.UpdateEmailRequest;
 import com.ueims.dto.request.UserCreationRequest;
 import com.ueims.dto.response.UserDetailResponse;
 import com.ueims.dto.response.UserResponse;
 import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
 import com.ueims.model.entity.User;
+import com.ueims.repository.EligibleStudentRepository;
 import com.ueims.repository.InvalidatedTokenRepository;
 import com.ueims.repository.UserRepository;
 import com.ueims.repository.UserSessionRepository;
@@ -43,6 +45,7 @@ public class UserServiceImpl implements UserService {
     PasswordEncoder passwordEncoder;
     UserSessionRepository userSessionRepository;
     InvalidatedTokenRepository invalidatedTokenRepository;
+    EligibleStudentRepository eligibleStudentRepository;
 
     private static final long MAX_AVATAR_BYTES = 2L * 1024 * 1024;
     private static final Set<String> ALLOWED_AVATAR_TYPES =
@@ -241,6 +244,50 @@ public class UserServiceImpl implements UserService {
         }
         repository.save(user);
         return toDetailResponse(user);
+    }
+
+    @Override
+    @Transactional
+    public UserDetailResponse updateUserEmail(UUID id, UpdateEmailRequest request) {
+        User user = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        String newEmail = request.getNewEmail() == null ? null : request.getNewEmail().trim();
+        if (newEmail == null || newEmail.isEmpty()) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+        if (newEmail.equalsIgnoreCase(user.getEmail())) {
+            // No-op: same email, nothing to sync.
+            return toDetailResponse(user);
+        }
+        if (repository.existsByEmail(newEmail)) {
+            throw new AppException(ErrorCode.EMAIL_ALREADY_EXISTS);
+        }
+
+        String oldEmail = user.getEmail();
+        user.setEmail(newEmail);
+        repository.save(user);
+
+        // Sync email across every related record for this user.
+        syncEmailToEligibleStudents(user.getUserId(), newEmail);
+        forceLogoutUser(oldEmail);
+
+        log.info("[user.email.sync] user_id={} {} -> {}", user.getUserId(), oldEmail, newEmail);
+        return toDetailResponse(user);
+    }
+
+    private void syncEmailToEligibleStudents(UUID userId, String newEmail) {
+        try {
+            List<com.ueims.model.entity.EligibleStudent> records =
+                    eligibleStudentRepository.findAllByUser_UserId(userId);
+            for (var es : records) {
+                if (!newEmail.equals(es.getEmail())) {
+                    es.setEmail(newEmail);
+                    eligibleStudentRepository.save(es);
+                }
+            }
+        } catch (Exception ex) {
+            log.error("[user.email.sync] eligible_students sync failed for user_id={}: {}",
+                    userId, ex.getMessage());
+        }
     }
 
     private UserDetailResponse toDetailResponse(User user) {

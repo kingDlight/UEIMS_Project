@@ -8,6 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.ueims.dto.request.UserCreationRequest;
 import com.ueims.dto.request.UserUpdateRequest;
+import com.ueims.dto.request.UpdateEmailRequest;
 import com.ueims.dto.response.UserDetailResponse;
 import com.ueims.dto.response.UserResponse;
 import com.ueims.model.entity.User;
@@ -34,6 +35,8 @@ public interface UserService {
     UserResponse updateMyInfo(UserUpdateRequest request);
 
     UserDetailResponse updateUser(UUID id, UserUpdateRequest request);
+
+    UserDetailResponse updateUserEmail(UUID id, UpdateEmailRequest request);
 
     String uploadAvatar(MultipartFile file) throws IOException;
 }

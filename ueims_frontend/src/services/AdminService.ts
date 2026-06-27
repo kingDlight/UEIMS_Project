@@ -65,6 +65,11 @@ export const AdminService = {
     return res.data?.result ?? res.data;
   },
 
+  updateUserEmail: async (userId: string, newEmail: string) => {
+    const res = await api.patch(`/users/${userId}/email`, { newEmail });
+    return res.data?.result ?? res.data;
+  },
+
   updateUserStatus: async (userId: string, status: string, durationMinutes?: number) => {
     const res = await api.patch(`/users/${userId}/status`, null, {
       params: { status, ...(durationMinutes ? { durationMinutes } : {}) },
