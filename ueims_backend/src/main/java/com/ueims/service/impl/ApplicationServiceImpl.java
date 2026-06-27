@@ -31,15 +31,18 @@ import com.ueims.model.entity.ApplicationStatus;
 import com.ueims.model.entity.EligibleStudent;
 import com.ueims.model.entity.Interview;
 import com.ueims.model.entity.JobPost;
+import com.ueims.model.entity.Notification;
 import com.ueims.model.entity.User;
 import com.ueims.repository.ApplicationRepository;
 import com.ueims.repository.EligibleStudentRepository;
 import com.ueims.repository.EnterpriseAssignmentRepository;
 import com.ueims.repository.InterviewRepository;
 import com.ueims.repository.JobPostRepository;
+import com.ueims.repository.NotificationRepository;
 import com.ueims.repository.StudentProfileRepository;
 import com.ueims.repository.UserRepository;
 import com.ueims.service.ApplicationService;
+import com.ueims.service.NotificationService;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -58,6 +61,8 @@ public class ApplicationServiceImpl implements ApplicationService {
     StudentProfileRepository studentProfileRepository;
     EnterpriseAssignmentRepository enterpriseAssignmentRepository;
     InterviewRepository interviewRepository;
+    NotificationRepository notificationRepository;
+    NotificationService notificationService;
     ApplicationMapper mapper;
 
     @Override
@@ -303,7 +308,18 @@ public class ApplicationServiceImpl implements ApplicationService {
 
         application.setScreenedBy(currentUser);
 
-        return mapToResponse(repository.save(application));
+        Application savedApp = repository.save(application);
+
+        // BR-26: when this application passes screening, withdraw the student's
+        // other PENDING applications in the same semester. The enterprise has
+        // committed to interview this student, so we no longer let them keep
+        // spamming other job posts. SCREENING_REJECTED intentionally does NOT
+        // trigger this branch — the student is free to apply elsewhere.
+        if (request.getStatus() == ApplicationStatus.SCREENING_PASSED) {
+            withdrawOtherApplicationsInSemester(savedApp, "SCREENING_PASSED");
+        }
+
+        return mapToResponse(savedApp);
     }
 
     @Override
@@ -362,6 +378,14 @@ public class ApplicationServiceImpl implements ApplicationService {
 
         Application savedApp = repository.save(application);
 
+        // BR-26: when this application is ACCEPTED (via Kanban direct-accept),
+        // withdraw any other non-terminal applications of the same student in the
+        // same semester so other enterprises don't waste time reviewing CVs and
+        // scheduling interviews for a student who has already been placed.
+        if (request.getStatus() == ApplicationStatus.ACCEPTED) {
+            withdrawOtherApplicationsInSemester(savedApp, "ACCEPTED via Kanban");
+        }
+
         // Cascade: when rejecting from INTERVIEW_SCHEDULED, cancel any active
         // interview so the student doesn't see a "scheduled" ghost interview.
         if (request.getStatus() == ApplicationStatus.REJECTED) {
@@ -389,6 +413,98 @@ public class ApplicationServiceImpl implements ApplicationService {
             }
         }
         interviewRepository.saveAll(interviews);
+    }
+
+    /**
+     * BR-26: Centralized helper that withdraws every other non-terminal application
+     * of the same student in the same semester whenever a terminal "won" event
+     * happens — i.e. the application is set to SCREENING_PASSED (selected for
+     * interview) or ACCEPTED (passed interview / direct accept).
+     *
+     * <p>Behavior:
+     * <ul>
+     *   <li>Only operates on applications within the same semester as the trigger.</li>
+     *   <li>Withdraws only non-terminal statuses: PENDING, SCREENING_PASSED,
+     *       INTERVIEW_SCHEDULED.</li>
+     *   <li>Skips the triggering application itself.</li>
+     *   <li>Sends a notification to the student for each withdrawn application so
+     *       they understand why their other applications disappeared.</li>
+     * </ul>
+     */
+    public void withdrawOtherApplicationsInSemester(Application trigger, String triggerReason) {
+        if (trigger == null
+                || trigger.getStudent() == null
+                || trigger.getJobPost() == null
+                || trigger.getJobPost().getSemester() == null) {
+            return;
+        }
+        UUID studentId = trigger.getStudent().getUserId();
+        UUID semesterId = trigger.getJobPost().getSemester().getSemesterId();
+
+        List<Application> otherApps = repository.findByStudent_UserId(studentId);
+        LocalDateTime now = LocalDateTime.now();
+        int withdrawn = 0;
+        for (Application other : otherApps) {
+            if (other.getApplicationId().equals(trigger.getApplicationId())) {
+                continue;
+            }
+            if (other.getJobPost() == null
+                    || other.getJobPost().getSemester() == null
+                    || !semesterId.equals(other.getJobPost().getSemester().getSemesterId())) {
+                continue;
+            }
+            ApplicationStatus s = other.getStatus();
+            if (s != ApplicationStatus.PENDING
+                    && s != ApplicationStatus.SCREENING_PASSED
+                    && s != ApplicationStatus.INTERVIEW_SCHEDULED) {
+                continue;
+            }
+            other.setStatus(ApplicationStatus.WITHDRAWN);
+            other.setUpdatedAt(now);
+            repository.save(other);
+            notifyApplicationWithdrawn(other, trigger, triggerReason);
+            withdrawn++;
+        }
+        if (withdrawn > 0) {
+            log.info(
+                    "[BR-26] Withdrew {} other application(s) for student={} semester={} (reason={})",
+                    withdrawn,
+                    studentId,
+                    semesterId,
+                    triggerReason);
+        }
+    }
+
+    private void notifyApplicationWithdrawn(Application withdrawnApp, Application trigger, String reason) {
+        try {
+            String jobTitle =
+                    withdrawnApp.getJobPost() != null && withdrawnApp.getJobPost().getTitle() != null
+                            ? withdrawnApp.getJobPost().getTitle()
+                            : "job post";
+            String triggerJobTitle =
+                    trigger != null
+                            && trigger.getJobPost() != null
+                            && trigger.getJobPost().getTitle() != null
+                                    ? trigger.getJobPost().getTitle()
+                                    : "another opportunity";
+            Notification n = Notification.builder()
+                    .recipient(withdrawnApp.getStudent())
+                    .title("Đơn ứng tuyển đã được rút tự động")
+                    .message(String.format(
+                            "Đơn ứng tuyển \"%s\" của bạn đã được rút vì bạn đã được chọn cho \"%s\" (%s).",
+                            jobTitle, triggerJobTitle, reason == null ? "BR-26" : reason))
+                    .type("APPLICATION_WITHDRAWN_BR26")
+                    .referenceEntity("Application")
+                    .referenceId(withdrawnApp.getApplicationId())
+                    .isRead(false)
+                    .build();
+            notificationService.save(n);
+        } catch (Exception ex) {
+            log.warn(
+                    "[BR-26] Failed to notify student about withdrawn application {}: {}",
+                    withdrawnApp.getApplicationId(),
+                    ex.getMessage());
+        }
     }
 
     private User getCurrentUser() {

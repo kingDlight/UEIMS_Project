@@ -30,6 +30,7 @@ import com.ueims.repository.InterviewRepository;
 import com.ueims.repository.PlacementApplicationRepository;
 import com.ueims.repository.SemesterRepository;
 import com.ueims.repository.UserRepository;
+import com.ueims.service.ApplicationService;
 import com.ueims.service.InterviewService;
 import com.ueims.service.MailService;
 import com.ueims.service.NotificationService;
@@ -53,6 +54,7 @@ public class InterviewServiceImpl implements InterviewService {
     SemesterRepository semesterRepository;
     MailService mailService;
     NotificationService notificationService;
+    ApplicationService applicationService;
 
     @Override
     @Transactional(readOnly = true)
@@ -349,30 +351,8 @@ public class InterviewServiceImpl implements InterviewService {
         Application app = existing.getApplication();
         if ("PASS".equals(upper)) {
             app.setStatus(ApplicationStatus.ACCEPTED);
-
-            // BR-26: Withdraw other pending applications for this student in the current
-            // semester
-            java.util.List<Application> otherApps =
-                    applicationRepository.findByStudent_UserId(app.getStudent().getUserId());
-            for (Application otherApp : otherApps) {
-                if (!otherApp.getApplicationId().equals(app.getApplicationId())
-                        && otherApp.getJobPost() != null
-                        && otherApp.getJobPost().getSemester() != null
-                        && otherApp.getJobPost()
-                                .getSemester()
-                                .getSemesterId()
-                                .equals(app.getJobPost().getSemester().getSemesterId())) {
-
-                    if (otherApp.getStatus() == ApplicationStatus.PENDING
-                            || otherApp.getStatus() == ApplicationStatus.SCREENING_PASSED
-                            || otherApp.getStatus() == ApplicationStatus.INTERVIEW_SCHEDULED) {
-
-                        otherApp.setStatus(ApplicationStatus.WITHDRAWN);
-                        otherApp.setUpdatedAt(LocalDateTime.now());
-                        applicationRepository.save(otherApp);
-                    }
-                }
-            }
+            // BR-26: delegated to ApplicationService so the rule lives in one place.
+            applicationService.withdrawOtherApplicationsInSemester(app, "Interview PASS");
 
             // Auto-create placement_applications + enterprise_assignments on PASS.
             // The enterprise that posted the job the student just passed becomes their OJT placement.
