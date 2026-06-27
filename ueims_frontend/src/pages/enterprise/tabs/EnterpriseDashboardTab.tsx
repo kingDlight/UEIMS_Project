@@ -385,31 +385,33 @@ const HiringFunnel: React.FC<{ stats: DashboardStats }> = ({ stats }) => {
         </div>
       ) : (
         <>
-          <div className="ed-funnel" style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+          <div className="ed-funnel" style={{ display: 'flex', gap: 6, marginBottom: 16, alignItems: 'stretch' }}>
             {stages.map((stage, i) => (
               <React.Fragment key={stage.label}>
                 <div style={{
                   flex: 1,
-                  padding: '16px 12px',
+                  minHeight: 92,
+                  padding: '14px 8px',
                   borderRadius: cc.radiusLg,
                   background: hexToRgba(stage.color, 0.12),
                   border: `1px solid ${hexToRgba(stage.color, 0.4)}`,
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
+                  justifyContent: 'center',
                   position: 'relative',
                 }}>
-                  <span style={{ fontSize: 24, fontWeight: 800, color: stage.color }}>{stage.value}</span>
-                  <span style={{ fontSize: 10, fontWeight: 700, color: stage.color, marginTop: 4, letterSpacing: '0.05em' }}>
+                  <span style={{ fontSize: 26, fontWeight: 800, color: stage.color, lineHeight: 1 }}>{stage.value}</span>
+                  <span style={{ fontSize: 10, fontWeight: 700, color: stage.color, marginTop: 6, letterSpacing: '0.05em' }}>
                     {stage.label}
                   </span>
-                  <span style={{ fontSize: 10, color: cc.textPrimary, fontWeight: 500, marginTop: 2, textAlign: 'center' }}>
+                  <span style={{ fontSize: 10, color: cc.textSecondary, fontWeight: 500, marginTop: 2, textAlign: 'center' }}>
                     {stage.desc}
                   </span>
                 </div>
                 {i < stages.length - 1 && (
-                  <div style={{ display: 'flex', alignItems: 'center', color: cc.textSecondary }}>
-                    <ChevronRight size={20} />
+                  <div style={{ display: 'flex', alignItems: 'center', color: cc.textDisabled, flexShrink: 0 }}>
+                    <ChevronRight size={18} />
                   </div>
                 )}
               </React.Fragment>
@@ -546,10 +548,10 @@ const TopJobPosts: React.FC<{ applications: ApplicationItem[] }> = ({ applicatio
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         {top.map((jp, i) => (
-          <div key={jp.title} style={{ display: 'grid', gridTemplateColumns: '24px 1fr 80px', gap: 12, alignItems: 'center' }}>
+          <div key={jp.title} style={{ display: 'grid', gridTemplateColumns: '24px 1fr 140px', gap: 12, alignItems: 'center' }}>
             <div style={{ fontSize: 12, fontWeight: 800, color: cc.brand }}>#{i + 1}</div>
-            <div>
-              <div style={{ fontSize: 13.5, fontWeight: 600, color: cc.textPrimary, marginBottom: 6 }}>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: 13.5, fontWeight: 600, color: cc.textPrimary, marginBottom: 6, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {jp.title}
               </div>
               <div style={{ width: '100%', height: 6, borderRadius: cc.radiusFull, backgroundColor: cc.borderSubtle, overflow: 'hidden' }}>
@@ -561,17 +563,17 @@ const TopJobPosts: React.FC<{ applications: ApplicationItem[] }> = ({ applicatio
                 />
               </div>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 14, fontSize: 12 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, fontSize: 12 }}>
               <div style={{ textAlign: 'right' }}>
-                <div style={{ fontWeight: 800, color: cc.textPrimary }}>{jp.count}</div>
-                <div style={{ fontSize: 10, color: cc.textMuted, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  applicants
+                <div style={{ fontWeight: 800, color: cc.textPrimary, fontSize: 13 }}>{jp.count}</div>
+                <div style={{ fontSize: 10, color: cc.textMuted, textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600 }}>
+                  Applicants
                 </div>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <div style={{ fontWeight: 800, color: cc.success }}>{jp.accepted}</div>
-                <div style={{ fontSize: 10, color: cc.textMuted, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                  accepted
+                <div style={{ fontWeight: 800, color: cc.success, fontSize: 13 }}>{jp.accepted}</div>
+                <div style={{ fontSize: 10, color: cc.textMuted, textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600 }}>
+                  Accepted
                 </div>
               </div>
             </div>
