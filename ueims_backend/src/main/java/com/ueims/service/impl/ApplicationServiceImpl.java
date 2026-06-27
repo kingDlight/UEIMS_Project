@@ -32,6 +32,7 @@ import com.ueims.model.entity.EligibleStudent;
 import com.ueims.model.entity.Interview;
 import com.ueims.model.entity.JobPost;
 import com.ueims.model.entity.Notification;
+import com.ueims.model.entity.PlacementApplication;
 import com.ueims.model.entity.User;
 import com.ueims.repository.ApplicationRepository;
 import com.ueims.repository.EligibleStudentRepository;
@@ -39,6 +40,7 @@ import com.ueims.repository.EnterpriseAssignmentRepository;
 import com.ueims.repository.InterviewRepository;
 import com.ueims.repository.JobPostRepository;
 import com.ueims.repository.NotificationRepository;
+import com.ueims.repository.PlacementApplicationRepository;
 import com.ueims.repository.StudentProfileRepository;
 import com.ueims.repository.UserRepository;
 import com.ueims.service.ApplicationService;
@@ -60,6 +62,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     EligibleStudentRepository eligibleStudentRepository;
     StudentProfileRepository studentProfileRepository;
     EnterpriseAssignmentRepository enterpriseAssignmentRepository;
+    PlacementApplicationRepository placementApplicationRepository;
     InterviewRepository interviewRepository;
     NotificationRepository notificationRepository;
     NotificationService notificationService;
@@ -345,22 +348,22 @@ public class ApplicationServiceImpl implements ApplicationService {
             throw new AppException(ErrorCode.JOB_POST_CLOSED);
         }
 
-        // BR-26 finality: a withdrawn application is terminal — the student has been
-        // placed elsewhere, so no enterprise (including the one that withdrew it) may
-        // resurrect the application. This prevents drag-and-drop from undoing BR-26.
+        // BR-26 finality: WITHDRAWN is always terminal — set only by BR-26 itself.
+// Enterprise cannot move a withdrawn application.
         if (application.getStatus() == ApplicationStatus.WITHDRAWN) {
             throw new AppException(ErrorCode.INVALID_PARAMETER_FORMAT);
         }
 
-        // BR-X1 finality: ACCEPTED is a terminal state because BR-26 has already
-        // withdrawn every other non-terminal application of this student in the
-        // semester. Letting an enterprise drag ACCEPTED back to REJECTED/PENDING
-        // would leave sibling applications stranded at WITHDRAWN — the student
-        // would be locked out of every enterprise without anyone to blame.
-        // If an enterprise truly needs to undo an acceptance, that must go through
-        // an admin/supervisor (out of band) — not the Kanban.
+        // BR-26 undo cascade: when moving away from ACCEPTED, we must reverse the
+        // BR-26 side-effects that were applied when ACCEPTED was first set:
+        //   (1) Any sibling applications this app caused to become WITHDRAWN must be
+        //       revived back to their previousStatus (PENDING / SCREENING_PASSED /
+        //       INTERVIEW_SCHEDULED).
+        //   (2) Any active interviews for this application must be cancelled, because
+        //       the placement is being undone.
+        // This gives the student a clean slate and prevents a stranded WITHDRAWN state.
         if (application.getStatus() == ApplicationStatus.ACCEPTED) {
-            throw new AppException(ErrorCode.INVALID_PARAMETER_FORMAT);
+            undoBr26Cascade(application);
         }
 
         // Guard: rejecting from INTERVIEW_SCHEDULED requires a reason
@@ -371,16 +374,6 @@ public class ApplicationServiceImpl implements ApplicationService {
                 throw new AppException(ErrorCode.INVALID_PARAMETER_FORMAT);
             }
         }
-
-        // BR-X2: when an enterprise reverts REJECTED → INTERVIEW_SCHEDULED, the
-        // previously-cancelled interview must be re-checked. We allow the revert
-        // because cancelActiveInterviewsForApplication() already cleaned the
-        // interview to CANCELLED state, so no ghost interview remains. The
-        // application itself just slides back into the interview bucket. The
-        // enterprise must schedule a new interview (handled by InterviewController
-        // independently).
-        // No additional cascade needed here; cleanup already ran on the forward
-        // REJECTED transition.
 
         application.setStatus(request.getStatus());
         if (request.getStatus() == ApplicationStatus.REJECTED
@@ -488,6 +481,9 @@ public class ApplicationServiceImpl implements ApplicationService {
                 continue;
             }
             other.setStatus(ApplicationStatus.WITHDRAWN);
+            // BR-26 tracking: record the trigger app so undo can revive this app later
+            other.setWithdrawnByApplicationId(trigger.getApplicationId());
+            other.setPreviousStatus(s);
             other.setUpdatedAt(now);
             repository.save(other);
             notifyApplicationWithdrawn(other, trigger, triggerReason);
@@ -531,6 +527,155 @@ public class ApplicationServiceImpl implements ApplicationService {
             log.warn(
                     "[BR-26] Failed to notify student about withdrawn application {}: {}",
                     withdrawnApp.getApplicationId(),
+                    ex.getMessage());
+        }
+    }
+
+    /**
+     * BR-26 undo cascade: called when an enterprise moves an ACCEPTED application
+     * away from ACCEPTED (e.g. ACCEPTED → REJECTED). This reverses the side-effects
+     * that BR-26 / InterviewServiceImpl introduced when ACCEPTED was first set:
+     *
+     * <ul>
+     *   <li>(1) Revives all sibling applications that were set to WITHDRAWN by this
+     *       trigger back to their previousStatus (PENDING / SCREENING_PASSED /
+     *       INTERVIEW_SCHEDULED), with a notification to the student.</li>
+     *   <li>(2) Cancels any active interviews for the trigger application.</li>
+     *   <li>(3) Cancels the PlacementApplication (APPROVED) and EnterpriseAssignment
+     *       (ACTIVE) that autoCreatePlacementAfterInterview() created, and reverts
+     *       the student's eligible_students status from MATCHED back to ELIGIBLE.</li>
+     * </ul>
+     *
+     * <p>This ensures no sibling application is left stranded at WITHDRAWN, no
+     * phantom placement exists, and the student reappears as a candidate for the
+     * other enterprises to consider.
+     */
+    private void undoBr26Cascade(Application trigger) {
+        if (trigger == null || trigger.getApplicationId() == null) {
+            return;
+        }
+
+        UUID studentId = trigger.getStudent() != null ? trigger.getStudent().getUserId() : null;
+        UUID enterpriseId = trigger.getJobPost() != null && trigger.getJobPost().getEnterprise() != null
+                ? trigger.getJobPost().getEnterprise().getEnterpriseId()
+                : null;
+        UUID semesterId = trigger.getJobPost() != null && trigger.getJobPost().getSemester() != null
+                ? trigger.getJobPost().getSemester().getSemesterId()
+                : null;
+
+        LocalDateTime now = LocalDateTime.now();
+
+        // (1) Revive all sibling applications that were withdrawn by this trigger
+        List<Application> withdrawnByThis = repository
+                .findByWithdrawnByApplicationId(trigger.getApplicationId());
+
+        for (Application sibling : withdrawnByThis) {
+            ApplicationStatus previous = sibling.getPreviousStatus();
+            if (previous == null) {
+                previous = ApplicationStatus.PENDING;
+            }
+            sibling.setStatus(previous);
+            sibling.setWithdrawnByApplicationId(null);
+            sibling.setPreviousStatus(null);
+            sibling.setUpdatedAt(now);
+            repository.save(sibling);
+            notifyApplicationRevived(sibling, trigger);
+            log.info(
+                    "[BR-26 UNDO] Revived application {} from WITHDRAWN to {} (trigger={})",
+                    sibling.getApplicationId(), previous, trigger.getApplicationId());
+        }
+
+        // (2) Cancel any active interviews for the trigger application
+        cancelActiveInterviewsForApplication(trigger.getApplicationId(),
+                "Acceptance undone by enterprise");
+
+        // (3) Cancel the placement record and assignment created when interview passed.
+        // Both are set to APPROVED/ACTIVE by autoCreatePlacementAfterInterview().
+        // Cancelling is safe because we just reversed the acceptance — the student has
+        // no valid placement claim. Reverting all 3 records (placement + assignment +
+        // eligible_students status) keeps the OJT Placement Center and eligible-student
+        // views consistent with the application's new REJECTED state.
+        if (studentId != null && enterpriseId != null && semesterId != null) {
+            // Cancel PlacementApplication if APPROVED
+            placementApplicationRepository
+                    .findByStudent_UserIdAndEnterprise_EnterpriseIdAndSemester_SemesterId(
+                            studentId, enterpriseId, semesterId)
+                    .filter(p -> "APPROVED".equals(p.getStatus()))
+                    .ifPresent(p -> {
+                        p.setStatus("CANCELLED");
+                        p.setUpdatedAt(now);
+                        placementApplicationRepository.save(p);
+                        log.info(
+                                "[BR-26 UNDO] Cancelled placement {} for student={} enterprise={}",
+                                p.getPlacementApplicationId(), studentId, enterpriseId);
+                    });
+
+            // Terminate EnterpriseAssignment if ACTIVE
+            enterpriseAssignmentRepository
+                    .findByStudent_UserIdAndEnterprise_EnterpriseIdAndSemester_SemesterIdAndStatus(
+                            studentId, enterpriseId, semesterId, "ACTIVE")
+                    .ifPresent(ea -> {
+                        ea.setStatus("TERMINATED");
+                        ea.setTerminationReason("Acceptance undone by enterprise");
+                        ea.setTerminatedAt(now);
+                        enterpriseAssignmentRepository.save(ea);
+                        log.info(
+                                "[BR-26 UNDO] Terminated assignment {} for student={} enterprise={}",
+                                ea.getAssignmentId(), studentId, enterpriseId);
+                    });
+
+            // Revert EligibleStudent status from MATCHED back to ELIGIBLE.
+            // autoCreatePlacementAfterInterview() sets it to MATCHED; undo should restore it.
+            eligibleStudentRepository
+                    .findByUser_UserIdAndSemester_SemesterId(studentId, semesterId)
+                    .filter(e -> "MATCHED".equals(e.getStatus()))
+                    .ifPresent(e -> {
+                        e.setStatus("ELIGIBLE");
+                        eligibleStudentRepository.save(e);
+                        log.info(
+                                "[BR-26 UNDO] Reverted EligibleStudent status to ELIGIBLE for student={} semester={}",
+                                studentId, semesterId);
+                    });
+        }
+
+        if (!withdrawnByThis.isEmpty()) {
+            log.info(
+                    "[BR-26 UNDO] Revived {} application(s) for trigger={} (student={})",
+                    withdrawnByThis.size(),
+                    trigger.getApplicationId(),
+                    studentId);
+        }
+    }
+
+    private void notifyApplicationRevived(Application revivedApp, Application trigger) {
+        try {
+            String jobTitle =
+                    revivedApp.getJobPost() != null && revivedApp.getJobPost().getTitle() != null
+                            ? revivedApp.getJobPost().getTitle()
+                            : "job post";
+            String triggerJobTitle =
+                    trigger != null
+                            && trigger.getJobPost() != null
+                            && trigger.getJobPost().getTitle() != null
+                                    ? trigger.getJobPost().getTitle()
+                                    : "another opportunity";
+
+            Notification n = Notification.builder()
+                    .recipient(revivedApp.getStudent())
+                    .title("Đơn ứng tuyển đã được khôi phục")
+                    .message(String.format(
+                            "Đơn ứng tuyển \"%s\" của bạn đã được khôi phục sau khi enterprise hủy offer tại \"%s\".",
+                            jobTitle, triggerJobTitle))
+                    .type("GENERAL")
+                    .referenceEntity("Application")
+                    .referenceId(revivedApp.getApplicationId())
+                    .isRead(false)
+                    .build();
+            notificationService.save(n);
+        } catch (Exception ex) {
+            log.warn(
+                    "[BR-26 UNDO] Failed to notify student about revived application {}: {}",
+                    revivedApp.getApplicationId(),
                     ex.getMessage());
         }
     }

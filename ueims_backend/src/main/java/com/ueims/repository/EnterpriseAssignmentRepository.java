@@ -69,4 +69,8 @@ public interface EnterpriseAssignmentRepository extends JpaRepository<Enterprise
     void deleteByEnterprise_EnterpriseId(UUID enterpriseId);
 
     long countByStatus(String status);
+
+    // BR-26 undo: find the active assignment for a student+enterprise+semester triple.
+    Optional<EnterpriseAssignment> findByStudent_UserIdAndEnterprise_EnterpriseIdAndSemester_SemesterIdAndStatus(
+            UUID studentId, UUID enterpriseId, UUID semesterId, String status);
 }

@@ -533,6 +533,14 @@ CREATE TABLE applications (
     screened_by     UUID REFERENCES users(user_id),
     screened_at     TIMESTAMP,
     withdrawn_at    TIMESTAMP,
+    -- BR-26 tracking: enables undo cascade when an enterprise reverses an ACCEPTED state.
+    -- withdrawn_by_application_id = the app that caused this one to be set to WITHDRAWN.
+    -- previous_status = the status this app had before BR-26 set it to WITHDRAWN,
+    --                    used to restore the correct status during undo.
+    withdrawn_by_application_id UUID REFERENCES applications(application_id),
+    previous_status  VARCHAR(30)
+                    CHECK (previous_status IN ('PENDING', 'SCREENING_PASSED', 'SCREENING_REJECTED',
+                                               'INTERVIEW_SCHEDULED', 'ACCEPTED', 'REJECTED', 'WITHDRAWN')),
     created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at      TIMESTAMP,
@@ -548,6 +556,10 @@ CREATE UNIQUE INDEX uq_active_application
 CREATE INDEX idx_applications_student ON applications(student_id);
 CREATE INDEX idx_applications_jobpost ON applications(job_post_id);
 CREATE INDEX idx_applications_status ON applications(status);
+-- BR-26 undo: fast lookup for "find all apps withdrawn by this trigger app"
+CREATE INDEX idx_applications_withdrawn_by
+    ON applications(withdrawn_by_application_id)
+    WHERE withdrawn_by_application_id IS NOT NULL;
 
 -- TRIGGER: BR-54 — Enforce Student in Semester 5 is allowed to apply
 CREATE OR REPLACE FUNCTION enforce_student_apply_permission()

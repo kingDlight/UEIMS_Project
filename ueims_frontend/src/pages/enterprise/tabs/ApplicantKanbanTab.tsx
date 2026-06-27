@@ -159,14 +159,12 @@ const SortableCard: React.FC<{
   applicant: ApplicantCard;
   onViewDetails: (a: ApplicantCard) => void;
 }> = ({ applicant, onViewDetails }) => {
-  // BR-X1 finality: withdrawn + accepted cards are terminal and read-only. Withdrawn
-  // is set by BR-26 only; accepted triggers BR-26 which strands sibling applications
-  // at WITHDRAWN — letting the user undo ACCEPTED would break the student's other
-  // options without recourse. Both must be disabled at the drag layer too.
-  const isLocked = applicant.status === 'WITHDRAWN' || applicant.status === 'ACCEPTED';
+  // BR-26 finality: WITHDRAWN is terminal — set only by BR-26, never by drag.
+  // ACCEPTED can be undone by dragging (undo BR-26 cascade runs in backend).
+  const isWithdrawn = applicant.status === 'WITHDRAWN';
   const sortable = useSortable({
     id: applicant.id,
-    disabled: isLocked,
+    disabled: isWithdrawn,
   });
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = sortable;
   const style: React.CSSProperties = {
@@ -179,11 +177,11 @@ const SortableCard: React.FC<{
   const daysSinceApply = Math.floor((Date.now() - new Date(applicant.appliedAt).getTime()) / 86400000);
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...(isLocked ? {} : listeners)}>
+    <div ref={setNodeRef} style={style} {...attributes} {...(isWithdrawn ? {} : listeners)}>
       <motion.div
         onClick={() => onViewDetails(applicant)}
         whileHover={{ y: -1, boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)' }}
-        className={`bg-white rounded-2xl border border-slate-200 shadow-sm p-3.5 mb-2.5 transition-all ${isLocked ? 'cursor-not-allowed opacity-75' : 'cursor-grab'}`}
+        className={`bg-white rounded-2xl border border-slate-200 shadow-sm p-3.5 mb-2.5 transition-all ${isWithdrawn ? 'cursor-not-allowed opacity-75' : 'cursor-grab'}`}
       >
         <div className="flex items-start gap-2.5 mb-2.5">
           <div className={`w-[42px] h-[42px] rounded-xl ${avatarColor.bg} ${avatarColor.text} flex items-center justify-center text-[14px] font-extrabold shrink-0`}>
@@ -423,13 +421,12 @@ const DetailModal: React.FC<DetailModalProps> = ({ applicant, open, onClose, onS
         {isWithdrawn && (
           <div className="text-[12px] text-slate-500 text-center px-3 py-2 bg-slate-50 rounded-xl border border-dashed border-slate-300">
             <LockOutlined className="mr-1.5" />
-            Application withdrawn automatically — this student has been placed with another enterprise.
+            Application withdrawn automatically — student has been placed with another enterprise.
           </div>
         )}
         {applicant.status === 'ACCEPTED' && (
           <div className="text-[12px] text-slate-500 text-center px-3 py-2 bg-emerald-50 rounded-xl border border-dashed border-emerald-200">
-            <LockOutlined className="mr-1.5" />
-            Application accepted — status is locked. Contact admin to make changes.
+            Application accepted — drag this card to another column to change status.
           </div>
         )}
       </div>
@@ -580,11 +577,9 @@ export const ApplicantKanbanTab: React.FC = () => {
     const draggedApplicant = applicants.find(a => a.id === active.id);
     if (!draggedApplicant) return;
 
-    // BR-26 + BR-X1 finality: WITHDRAWN and ACCEPTED are terminal. WITHDRAWN is
-    // set by BR-26; ACCEPTED triggers BR-26 which strands sibling applications at
-    // WITHDRAWN — letting the user undo ACCEPTED would break the student's other
-    // options without recourse. Both are read-only; refuse any drag.
-    if (draggedApplicant.status === 'WITHDRAWN' || draggedApplicant.status === 'ACCEPTED') {
+    // BR-26 finality: WITHDRAWN is terminal — only BR-26 can set it, drag is forbidden.
+    // ACCEPTED is draggable; undoing it triggers BR-26 undo cascade in the backend.
+    if (draggedApplicant.status === 'WITHDRAWN') {
       return;
     }
 
@@ -642,14 +637,9 @@ export const ApplicantKanbanTab: React.FC = () => {
     newStatus: KanbanStatus,
     rejectionReason?: string,
   ) => {
-    // BR-X1 finality guard: never call the API with WITHDRAWN or ACCEPTED targets
-    // from this code path. WITHDRAWN is set by BR-26 only; ACCEPTED triggers BR-26.
-    // Even if the drag handler somehow slipped through, the backend will reject
-    // (INVALID_PARAMETER_FORMAT), but failing fast here is cleaner.
-    if (newStatus === 'WITHDRAWN' || newStatus === 'ACCEPTED' && applicant.status === 'ACCEPTED') {
-      return;
-    }
-    if (applicant.status === 'WITHDRAWN' || applicant.status === 'ACCEPTED') {
+    // BR-26 finality: WITHDRAWN is terminal, never set by drag.
+    // ACCEPTED can be dragged away; the backend undo-BR-26 cascade handles cleanup.
+    if (newStatus === 'WITHDRAWN' || applicant.status === 'WITHDRAWN') {
       return;
     }
 
