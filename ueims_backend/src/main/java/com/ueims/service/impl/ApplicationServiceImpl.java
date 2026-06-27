@@ -345,6 +345,13 @@ public class ApplicationServiceImpl implements ApplicationService {
             throw new AppException(ErrorCode.JOB_POST_CLOSED);
         }
 
+        // BR-26 finality: a withdrawn application is terminal — the student has been
+        // placed elsewhere, so no enterprise (including the one that withdrew it) may
+        // resurrect the application. This prevents drag-and-drop from undoing BR-26.
+        if (application.getStatus() == ApplicationStatus.WITHDRAWN) {
+            throw new AppException(ErrorCode.INVALID_PARAMETER_FORMAT);
+        }
+
         // Guard: rejecting from INTERVIEW_SCHEDULED requires a reason
         // (misconduct, no-show, disciplinary issue, etc.)
         if (request.getStatus() == ApplicationStatus.REJECTED

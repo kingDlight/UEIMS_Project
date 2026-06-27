@@ -97,16 +97,19 @@ function mapToApplicantCard(item: any): ApplicantCard {
 // ============================================================
 // KANBAN COLUMN STATUSES — visible in kanban (others treated as PENDING bucket)
 // ============================================================
-type KanbanStatus = 'PENDING' | 'INTERVIEW_SCHEDULED' | 'ACCEPTED' | 'REJECTED';
+type KanbanStatus = 'PENDING' | 'INTERVIEW_SCHEDULED' | 'ACCEPTED' | 'REJECTED' | 'WITHDRAWN';
 
 const COLUMNS: { id: KanbanStatus; label: string; colorClass: string; bgClass: string; borderClass: string }[] = [
   { id: 'PENDING', label: 'Pending', colorClass: 'text-amber-500', bgClass: 'bg-amber-50', borderClass: 'border-amber-500/20' },
   { id: 'INTERVIEW_SCHEDULED', label: 'Interviewing', colorClass: 'text-blue-500', bgClass: 'bg-blue-50', borderClass: 'border-blue-500/20' },
   { id: 'ACCEPTED', label: 'Passed', colorClass: 'text-emerald-500', bgClass: 'bg-emerald-50', borderClass: 'border-emerald-500/20' },
   { id: 'REJECTED', label: 'Rejected', colorClass: 'text-red-500', bgClass: 'bg-red-50', borderClass: 'border-red-500/20' },
+  { id: 'WITHDRAWN', label: 'Withdrawn', colorClass: 'text-slate-500', bgClass: 'bg-slate-50', borderClass: 'border-slate-500/20' },
 ];
 
-// Map any backend status to a kanban column (so SCREENING_*/WITHDRAWN are visible in PENDING bucket)
+// Map any backend status to a kanban column. WITHDRAWN is terminal (BR-26 — student
+// was placed elsewhere), so it gets its own read-only bucket instead of being lumped
+// into REJECTED.
 function toKanbanStatus(status: ApplicationStatus): KanbanStatus {
   switch (status) {
     case 'PENDING':
@@ -118,8 +121,9 @@ function toKanbanStatus(status: ApplicationStatus): KanbanStatus {
     case 'ACCEPTED':
       return 'ACCEPTED';
     case 'REJECTED':
-    case 'WITHDRAWN':
       return 'REJECTED';
+    case 'WITHDRAWN':
+      return 'WITHDRAWN';
     default:
       return 'PENDING';
   }
@@ -155,7 +159,14 @@ const SortableCard: React.FC<{
   applicant: ApplicantCard;
   onViewDetails: (a: ApplicantCard) => void;
 }> = ({ applicant, onViewDetails }) => {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: applicant.id });
+  // BR-26 finality: withdrawn cards are read-only — disable drag listeners and the
+  // grab cursor so the user sees they cannot be moved.
+  const isWithdrawn = applicant.status === 'WITHDRAWN';
+  const sortable = useSortable({
+    id: applicant.id,
+    disabled: isWithdrawn,
+  });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = sortable;
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -166,11 +177,11 @@ const SortableCard: React.FC<{
   const daysSinceApply = Math.floor((Date.now() - new Date(applicant.appliedAt).getTime()) / 86400000);
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+    <div ref={setNodeRef} style={style} {...attributes} {...(isWithdrawn ? {} : listeners)}>
       <motion.div
         onClick={() => onViewDetails(applicant)}
         whileHover={{ y: -1, boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)' }}
-        className="bg-white rounded-2xl border border-slate-200 shadow-sm p-3.5 cursor-grab mb-2.5 transition-all"
+        className={`bg-white rounded-2xl border border-slate-200 shadow-sm p-3.5 mb-2.5 transition-all ${isWithdrawn ? 'cursor-not-allowed opacity-75' : 'cursor-grab'}`}
       >
         <div className="flex items-start gap-2.5 mb-2.5">
           <div className={`w-[42px] h-[42px] rounded-xl ${avatarColor.bg} ${avatarColor.text} flex items-center justify-center text-[14px] font-extrabold shrink-0`}>
@@ -245,6 +256,7 @@ const DetailModal: React.FC<DetailModalProps> = ({ applicant, open, onClose, onS
   const avatarColor = applicant.avatarColor;
   const initials = (applicant.studentName || 'ST').substring(0, 2).toUpperCase();
   const isPending = applicant.status === 'PENDING';
+  const isWithdrawn = applicant.status === 'WITHDRAWN';
   const alreadyScreened = applicant.status === 'SCREENING_PASSED' || applicant.status === 'SCREENING_REJECTED';
 
   const openConfirm = (decision: 'SCREENING_PASSED' | 'SCREENING_REJECTED') => {
@@ -406,6 +418,12 @@ const DetailModal: React.FC<DetailModalProps> = ({ applicant, open, onClose, onS
             Evaluation locked — application has been screened.
           </div>
         )}
+        {isWithdrawn && (
+          <div className="text-[12px] text-slate-500 text-center px-3 py-2 bg-slate-50 rounded-xl border border-dashed border-slate-300">
+            <LockOutlined className="mr-1.5" />
+            Application withdrawn automatically — this student has been placed with another enterprise.
+          </div>
+        )}
       </div>
       <Modal
         title={
@@ -468,20 +486,24 @@ const KanbanColumn: React.FC<{
   applicants: ApplicantCard[];
   onViewDetails: (a: ApplicantCard) => void;
 }> = ({ column, applicants, onViewDetails }) => {
-  const { setNodeRef, isOver } = useDroppable({ id: column.id });
+  // BR-26 finality: the Withdrawn column is read-only — don't accept drops into it.
+  // Only BR-26 (backend) may put cards here.
+  const isReadOnly = column.id === 'WITHDRAWN';
+  const { setNodeRef, isOver } = useDroppable({ id: column.id, disabled: isReadOnly });
   return (
     <div className="flex-[0_0_280px] flex flex-col min-w-0">
       <div className={`px-3.5 py-3 rounded-xl ${column.bgClass} border ${column.borderClass} mb-3 flex items-center justify-between`}>
         <div className="flex items-center gap-2">
           <span className={`w-2 h-2 rounded-full inline-block bg-current ${column.colorClass}`} />
           <span className={`text-[13px] font-bold ${column.colorClass}`}>{column.label}</span>
+          {isReadOnly && <LockOutlined className={`text-[10px] ${column.colorClass}`} />}
         </div>
         <span className={`px-2 py-0.5 rounded-full bg-current/10 ${column.colorClass} text-[12px] font-bold`}>{applicants.length}</span>
       </div>
       <SortableContext items={applicants.map(a => a.id)} strategy={verticalListSortingStrategy}>
         <div
           ref={setNodeRef}
-          className={`flex-1 px-1 py-1.5 min-h-[200px] rounded-xl bg-slate-50 border border-dashed overflow-y-auto max-h-[calc(100vh-280px)] transition-colors ${isOver ? 'border-[#E67E22] bg-[#E67E22]/5' : 'border-slate-200'}`}
+          className={`flex-1 px-1 py-1.5 min-h-[200px] rounded-xl bg-slate-50 border border-dashed overflow-y-auto max-h-[calc(100vh-280px)] transition-colors ${isOver && !isReadOnly ? 'border-[#E67E22] bg-[#E67E22]/5' : 'border-slate-200'}`}
         >
           {applicants.length === 0 ? (
             <div className="py-8 px-4 text-center text-slate-500 text-[12px]">Drop here</div>
@@ -550,6 +572,13 @@ export const ApplicantKanbanTab: React.FC = () => {
     const draggedApplicant = applicants.find(a => a.id === active.id);
     if (!draggedApplicant) return;
 
+    // BR-26 finality: WITHDRAWN applications are terminal. The student has been
+    // placed elsewhere, so the card is read-only — refuse any drag, even back to
+    // its own column. Backend also enforces this (ApplicationServiceImpl.updateStatus).
+    if (draggedApplicant.status === 'WITHDRAWN') {
+      return;
+    }
+
     const overId = over.id as string;
     const targetColumn = COLUMNS.find(col => col.id === overId);
     let targetStatus: KanbanStatus;
@@ -559,6 +588,11 @@ export const ApplicantKanbanTab: React.FC = () => {
       const overApplicant = applicants.find(a => a.id === overId);
       if (!overApplicant) return;
       targetStatus = toKanbanStatus(overApplicant.status);
+    }
+
+    // Dropping into the Withdrawn bucket is also blocked — only BR-26 may set that.
+    if (targetStatus === 'WITHDRAWN') {
+      return;
     }
 
     if (toKanbanStatus(draggedApplicant.status) === targetStatus) return;
