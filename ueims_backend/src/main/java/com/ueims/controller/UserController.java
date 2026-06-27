@@ -144,8 +144,11 @@ public class UserController {
 
     @PatchMapping("/{id}/status")
     @org.springframework.security.access.prepost.PreAuthorize("hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')")
-    public ResponseEntity<Void> updateStatus(@PathVariable UUID id, @RequestParam String status) {
-        service.updateUserStatus(id, status);
+    public ResponseEntity<Void> updateStatus(
+            @PathVariable UUID id,
+            @RequestParam String status,
+            @RequestParam(required = false) Integer durationMinutes) {
+        service.updateUserStatus(id, status, durationMinutes);
         return ResponseEntity.ok().build();
     }
 }

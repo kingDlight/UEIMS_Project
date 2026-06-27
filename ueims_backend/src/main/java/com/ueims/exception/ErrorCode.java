@@ -136,7 +136,7 @@ public enum ErrorCode {
     USER_BANNED(2001, "Your account has been locked due to entering the wrong password 5 times", HttpStatus.FORBIDDEN),
     USER_LOCKED(
             2009,
-            "Your account is locked. Please contact the administrator or wait 30 minutes for auto-unlock.",
+            "Your account is locked. Please contact the administrator.",
             HttpStatus.FORBIDDEN),
     USER_INACTIVE(
             2008,

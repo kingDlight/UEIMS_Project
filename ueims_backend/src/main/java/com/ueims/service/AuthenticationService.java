@@ -1,6 +1,7 @@
 package com.ueims.service;
 
 import java.text.ParseException;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -156,11 +157,13 @@ public class AuthenticationService {
 
         if ("LOCKED".equals(user.getStatus())) {
             if (user.getLockedUntil() != null && user.getLockedUntil().isAfter(LocalDateTime.now())) {
-                // Still inside the auto-recovery window — reject.
-                throw new AppException(ErrorCode.USER_LOCKED);
+                // Still inside the auto-recovery window — reject with the
+                // real remaining minutes so the user sees the actual time
+                // (30 minutes for failed-login, or whatever the admin set).
+                throw new AppException(ErrorCode.USER_LOCKED, formatLockedMessage(user.getLockedUntil()));
             }
             // Either admin-lock (no lockedUntil) — keep LOCKED until admin acts,
-            // OR auto-lock whose 30-min window has expired — recover.
+            // OR auto-lock whose window has expired — recover.
             if (user.getLockedUntil() != null) {
                 userRepository.updateLoginAttemptsAndStatus(
                         user.getUserId(), 0, "ACTIVE", null);
@@ -172,6 +175,28 @@ public class AuthenticationService {
                 throw new AppException(ErrorCode.USER_LOCKED);
             }
         }
+    }
+
+    /**
+     * Build a user-facing lock message that reflects the real remaining time
+     * instead of hard-coding "30 minutes". Handles singular/plural and rounds
+     * up to the next whole minute so we never tell the user "0 minutes left".
+     */
+    private String formatLockedMessage(LocalDateTime lockedUntil) {
+        long minutesLeft = Duration.between(LocalDateTime.now(), lockedUntil).toMinutes();
+        if (minutesLeft < 1) {
+            // Less than a full minute remaining — show in seconds so the message
+            // is still useful instead of claiming "0 minutes".
+            long secondsLeft = Math.max(1, Duration.between(LocalDateTime.now(), lockedUntil).getSeconds());
+            return String.format(
+                    "Your account is locked. Please try again in %d second%s or contact the administrator.",
+                    secondsLeft,
+                    secondsLeft == 1 ? "" : "s");
+        }
+        return String.format(
+                "Your account is locked. Please try again in %d minute%s or contact the administrator.",
+                minutesLeft,
+                minutesLeft == 1 ? "" : "s");
     }
 
     private void handleFailedLogin(User user) {
@@ -195,7 +220,7 @@ public class AuthenticationService {
         user.setStatus(nextStatus);
 
         if (attempts >= 5) {
-            throw new AppException(ErrorCode.USER_LOCKED);
+            throw new AppException(ErrorCode.USER_LOCKED, formatLockedMessage(lockedUntil));
         }
         throw new AppException(ErrorCode.UNAUTHENTICATED);
     }

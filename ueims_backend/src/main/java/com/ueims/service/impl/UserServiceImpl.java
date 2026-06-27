@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -129,6 +130,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void updateUserStatus(UUID id, String status) {
+        updateUserStatus(id, status, null);
+    }
+
+    @Override
+    public void updateUserStatus(UUID id, String status, Integer durationMinutes) {
         User user = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         // UC-10 PRE-1 + 10.0.E1: Admin cannot change status of their own active session
         // account
@@ -138,7 +144,8 @@ public class UserServiceImpl implements UserService {
         }
 
         // UC-10 unified lock semantics:
-        //  - LOCKED  → admin lock OR 5-failed-attempts lock. Both use status=LOCKED.
+        //  - LOCKED  → admin lock (with optional duration) OR 5-failed-attempts
+        //              lock. Both use status=LOCKED. Duration drives lockedUntil.
         //  - ACTIVE  → unlock. Clear failedLoginAttempts and lockedUntil so the
         //              counter resets and any stale auto-lock window is dropped.
         //  - INACTIVE → admin permanent deactivation. Counters untouched.
@@ -147,6 +154,11 @@ public class UserServiceImpl implements UserService {
             user.setFailedLoginAttempts(0);
             user.setLockedUntil(null);
         }
+
+        if ("LOCKED".equalsIgnoreCase(status) && durationMinutes != null && durationMinutes > 0) {
+            user.setLockedUntil(LocalDateTime.now().plusMinutes(durationMinutes));
+        }
+
         user.setStatus(status);
         repository.save(user);
 
