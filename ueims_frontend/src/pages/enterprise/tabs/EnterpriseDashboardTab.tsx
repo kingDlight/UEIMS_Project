@@ -6,13 +6,8 @@ import {
 } from 'recharts';
 import {
   Users,
-  Calendar,
-  CheckCircle2,
-  Clock,
-  AlertTriangle,
   Briefcase,
   TrendingUp,
-  BarChart3,
   Activity,
   ChevronRight,
   RefreshCw,
@@ -135,33 +130,6 @@ const StatusDot: React.FC<{ color: string; pulse?: boolean }> = ({ color, pulse 
   }} />
 );
 
-const StatusPill: React.FC<{ status: string; count: number }> = ({ status, count }) => {
-  const map: Record<string, { color: string; bg: string; border: string; label: string; icon: React.ReactNode }> = {
-    PENDING: { color: cc.warning, bg: hexToRgba(cc.warning, 0.12), border: hexToRgba(cc.warning, 0.45), label: 'Pending', icon: <Clock size={12} /> },
-    INTERVIEW_SCHEDULED: { color: cc.info, bg: hexToRgba(cc.info, 0.12), border: hexToRgba(cc.info, 0.45), label: 'Interviewing', icon: <Calendar size={12} /> },
-    ACCEPTED: { color: cc.success, bg: hexToRgba(cc.success, 0.12), border: hexToRgba(cc.success, 0.45), label: 'Accepted', icon: <CheckCircle2 size={12} /> },
-    REJECTED: { color: cc.error, bg: hexToRgba(cc.error, 0.12), border: hexToRgba(cc.error, 0.45), label: 'Rejected', icon: <AlertTriangle size={12} /> },
-  };
-  const s = map[status] ?? { color: cc.textMuted, bg: hexToRgba(cc.textMuted, 0.12), border: hexToRgba(cc.textMuted, 0.45), label: status, icon: <Clock size={12} /> };
-  return (
-    <span style={{
-      display: 'inline-flex',
-      alignItems: 'center',
-      gap: 6,
-      padding: '4px 10px',
-      borderRadius: cc.radiusFull,
-      backgroundColor: s.bg,
-      border: `1px solid ${s.border}`,
-      color: s.color,
-      fontSize: 11,
-      fontWeight: 700,
-    }}>
-      {s.icon}
-      {s.label}: <span style={{ fontWeight: 800 }}>{count}</span>
-    </span>
-  );
-};
-
 const CustomTooltip: React.FC<any> = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
@@ -280,7 +248,7 @@ const DashboardHeader: React.FC = () => (
 );
 
 // ============================================================
-// SECTION: KPI CARDS ROW (6 cards)
+// SECTION: KPI CARDS ROW (3 cards)
 // ============================================================
 const KPICardsRow: React.FC<{
   stats: DashboardStats;
@@ -300,36 +268,6 @@ const KPICardsRow: React.FC<{
       route: 'applicants',
     },
     {
-      label: 'Pending Review',
-      value: stats.pending,
-      color: cc.warning,
-      bg: '#FFFBEB',
-      border: '#FDE68A',
-      icon: <Clock size={20} />,
-      desc: 'Awaiting your action',
-      route: 'applicants',
-    },
-    {
-      label: 'Interviewing',
-      value: stats.interviewing,
-      color: cc.info,
-      bg: '#EFF6FF',
-      border: '#BFDBFE',
-      icon: <Calendar size={20} />,
-      desc: 'In interview stage',
-      route: 'applicants',
-    },
-    {
-      label: 'Accepted',
-      value: stats.accepted,
-      color: cc.success,
-      bg: '#F0FDF4',
-      border: '#BBF7D0',
-      icon: <CheckCircle2 size={20} />,
-      desc: `${stats.rejected} rejected`,
-      route: 'evaluation',
-    },
-    {
       label: 'Pass Rate',
       value: `${passRate}%`,
       color: cc.brand,
@@ -342,9 +280,9 @@ const KPICardsRow: React.FC<{
     {
       label: 'Active Job Posts',
       value: activePosts,
-      color: cc.info,
-      bg: '#EFF6FF',
-      border: '#BFDBFE',
+      color: cc.success,
+      bg: '#F0FDF4',
+      border: '#BBF7D0',
       icon: <Briefcase size={20} />,
       desc: 'Currently accepting applications',
       route: 'job-posts',
@@ -488,12 +426,6 @@ const HiringFunnel: React.FC<{ stats: DashboardStats }> = ({ stats }) => {
               transition={{ duration: 0.7, ease: [0.32, 0.72, 0, 1] }}
               style={{ height: '100%', backgroundColor: cc.success, borderRadius: cc.radiusFull }}
             />
-          </div>
-          <div style={{ display: 'flex', gap: 8, marginTop: 14, flexWrap: 'wrap' }}>
-            <StatusPill status="PENDING" count={stats.pending} />
-            <StatusPill status="INTERVIEW_SCHEDULED" count={stats.interviewing} />
-            <StatusPill status="ACCEPTED" count={stats.accepted} />
-            <StatusPill status="REJECTED" count={stats.rejected} />
           </div>
         </>
       )}
