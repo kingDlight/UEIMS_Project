@@ -80,8 +80,17 @@ export const LoginPage: React.FC = () => {
 
       if (code === 2007) {
         message.error(t('auth.accountPermanentlyLocked', 'Your account is permanently locked. Please contact the administrator.'));
-      } else if (code === 2001) {
-        message.error(t('auth.accountLocked', 'Account locked due to 5 failed password attempts. Please try again after 30 minutes.'));
+      } else if (code === 2001 || code === 2009) {
+        // Prefer the server-supplied message — it contains the real remaining
+        // minutes (or seconds) computed from lockedUntil. Fall back to a
+        // generic message only if the server didn't include one.
+        message.error(
+          errorMsg ||
+            t(
+              'auth.accountLocked',
+              'Your account is locked. Please contact the administrator.',
+            ),
+        );
       } else if (code === 1006) {
         form.setFields([{ name: 'password', errors: [t('auth.authFailed', 'Authentication failed. Please check your login information.')] }]);
       } else if (code === 1005) {
@@ -120,8 +129,16 @@ export const LoginPage: React.FC = () => {
       
       if (code === 2007) {
         message.error(t('auth.accountPermanentlyLocked', 'Your account is permanently locked. Please contact the administrator.'));
-      } else if (code === 2001) {
-        message.error(t('auth.accountLocked', 'Account locked due to 5 failed password attempts. Please try again after 30 minutes.'));
+      } else if (code === 2001 || code === 2009) {
+        // Prefer the server-supplied message — it carries the real remaining
+        // lock duration instead of a hard-coded 30 minutes.
+        message.error(
+          errorMsg ||
+            t(
+              'auth.accountLocked',
+              'Your account is locked. Please contact the administrator.',
+            ),
+        );
       } else if (errorMsg) {
         message.error(errorMsg);
       } else {
