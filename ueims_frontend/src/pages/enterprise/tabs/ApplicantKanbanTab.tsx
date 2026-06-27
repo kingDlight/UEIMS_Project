@@ -8,6 +8,7 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
+  useDroppable,
   type DragStartEvent,
   type DragEndEvent,
 } from '@dnd-kit/core';
@@ -466,32 +467,38 @@ const KanbanColumn: React.FC<{
   column: typeof COLUMNS[number];
   applicants: ApplicantCard[];
   onViewDetails: (a: ApplicantCard) => void;
-}> = ({ column, applicants, onViewDetails }) => (
-  <div className="flex-[0_0_280px] flex flex-col min-w-0">
-    <div className={`px-3.5 py-3 rounded-xl ${column.bgClass} border ${column.borderClass} mb-3 flex items-center justify-between`}>
-      <div className="flex items-center gap-2">
-        <span className={`w-2 h-2 rounded-full inline-block bg-current ${column.colorClass}`} />
-        <span className={`text-[13px] font-bold ${column.colorClass}`}>{column.label}</span>
+}> = ({ column, applicants, onViewDetails }) => {
+  const { setNodeRef, isOver } = useDroppable({ id: column.id });
+  return (
+    <div className="flex-[0_0_280px] flex flex-col min-w-0">
+      <div className={`px-3.5 py-3 rounded-xl ${column.bgClass} border ${column.borderClass} mb-3 flex items-center justify-between`}>
+        <div className="flex items-center gap-2">
+          <span className={`w-2 h-2 rounded-full inline-block bg-current ${column.colorClass}`} />
+          <span className={`text-[13px] font-bold ${column.colorClass}`}>{column.label}</span>
+        </div>
+        <span className={`px-2 py-0.5 rounded-full bg-current/10 ${column.colorClass} text-[12px] font-bold`}>{applicants.length}</span>
       </div>
-      <span className={`px-2 py-0.5 rounded-full bg-current/10 ${column.colorClass} text-[12px] font-bold`}>{applicants.length}</span>
+      <SortableContext items={applicants.map(a => a.id)} strategy={verticalListSortingStrategy}>
+        <div
+          ref={setNodeRef}
+          className={`flex-1 px-1 py-1.5 min-h-[200px] rounded-xl bg-slate-50 border border-dashed overflow-y-auto max-h-[calc(100vh-280px)] transition-colors ${isOver ? 'border-[#E67E22] bg-[#E67E22]/5' : 'border-slate-200'}`}
+        >
+          {applicants.length === 0 ? (
+            <div className="py-8 px-4 text-center text-slate-500 text-[12px]">Drop here</div>
+          ) : (
+            <AnimatePresence>
+              {applicants.map((applicant) => (
+                <motion.div key={applicant.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2 }}>
+                  <SortableCard applicant={applicant} onViewDetails={onViewDetails} />
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          )}
+        </div>
+      </SortableContext>
     </div>
-    <SortableContext items={applicants.map(a => a.id)} strategy={verticalListSortingStrategy}>
-      <div className="flex-1 px-1 py-1.5 min-h-[200px] rounded-xl bg-slate-50 border border-dashed border-slate-200 overflow-y-auto max-h-[calc(100vh-280px)]">
-        {applicants.length === 0 ? (
-          <div className="py-8 px-4 text-center text-slate-500 text-[12px]">Drop here</div>
-        ) : (
-          <AnimatePresence>
-            {applicants.map((applicant) => (
-              <motion.div key={applicant.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2 }}>
-                <SortableCard applicant={applicant} onViewDetails={onViewDetails} />
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        )}
-      </div>
-    </SortableContext>
-  </div>
-);
+  );
+};
 
 // ============================================================
 // MAIN KANBAN BOARD
