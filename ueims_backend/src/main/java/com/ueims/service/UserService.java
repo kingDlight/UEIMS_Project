@@ -6,9 +6,9 @@ import java.util.UUID;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import com.ueims.dto.request.UpdateEmailRequest;
 import com.ueims.dto.request.UserCreationRequest;
 import com.ueims.dto.request.UserUpdateRequest;
-import com.ueims.dto.request.UpdateEmailRequest;
 import com.ueims.dto.response.UserDetailResponse;
 import com.ueims.dto.response.UserResponse;
 import com.ueims.model.entity.User;

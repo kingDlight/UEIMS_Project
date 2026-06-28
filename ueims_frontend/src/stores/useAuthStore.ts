@@ -75,8 +75,10 @@ export const useAuthStore = create<AuthState>()(
 
       setTokens: (token: string, refreshToken: string) => set({ token, refreshToken }),
 
-      logout: () =>
-        set({ user: null, token: null, refreshToken: null, currentRole: null, isAuthenticated: false }),
+      logout: () => {
+        globalThis.dispatchEvent(new CustomEvent('auth:logout'));
+        set({ user: null, token: null, refreshToken: null, currentRole: null, isAuthenticated: false });
+      },
 
       switchRole: (role) => set({ currentRole: role }),
 

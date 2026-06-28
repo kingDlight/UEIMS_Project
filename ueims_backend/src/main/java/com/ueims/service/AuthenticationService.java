@@ -165,8 +165,7 @@ public class AuthenticationService {
             // Either admin-lock (no lockedUntil) — keep LOCKED until admin acts,
             // OR auto-lock whose window has expired — recover.
             if (user.getLockedUntil() != null) {
-                userRepository.updateLoginAttemptsAndStatus(
-                        user.getUserId(), 0, "ACTIVE", null);
+                userRepository.updateLoginAttemptsAndStatus(user.getUserId(), 0, "ACTIVE", null);
                 user.setFailedLoginAttempts(0);
                 user.setLockedUntil(null);
                 user.setStatus("ACTIVE");
@@ -187,16 +186,15 @@ public class AuthenticationService {
         if (minutesLeft < 1) {
             // Less than a full minute remaining — show in seconds so the message
             // is still useful instead of claiming "0 minutes".
-            long secondsLeft = Math.max(1, Duration.between(LocalDateTime.now(), lockedUntil).getSeconds());
+            long secondsLeft = Math.max(
+                    1, Duration.between(LocalDateTime.now(), lockedUntil).getSeconds());
             return String.format(
                     "Your account is locked. Please try again in %d second%s or contact the administrator.",
-                    secondsLeft,
-                    secondsLeft == 1 ? "" : "s");
+                    secondsLeft, secondsLeft == 1 ? "" : "s");
         }
         return String.format(
                 "Your account is locked. Please try again in %d minute%s or contact the administrator.",
-                minutesLeft,
-                minutesLeft == 1 ? "" : "s");
+                minutesLeft, minutesLeft == 1 ? "" : "s");
     }
 
     private void handleFailedLogin(User user) {
@@ -212,8 +210,7 @@ public class AuthenticationService {
             nextStatus = "LOCKED";
         }
 
-        userRepository.updateLoginAttemptsAndStatus(
-                user.getUserId(), attempts, nextStatus, lockedUntil);
+        userRepository.updateLoginAttemptsAndStatus(user.getUserId(), attempts, nextStatus, lockedUntil);
 
         user.setFailedLoginAttempts(attempts);
         user.setLockedUntil(lockedUntil);

@@ -250,7 +250,8 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserDetailResponse updateUserEmail(UUID id, UpdateEmailRequest request) {
         User user = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-        String newEmail = request.getNewEmail() == null ? null : request.getNewEmail().trim();
+        String newEmail =
+                request.getNewEmail() == null ? null : request.getNewEmail().trim();
         if (newEmail == null || newEmail.isEmpty()) {
             throw new AppException(ErrorCode.INVALID_REQUEST);
         }
@@ -285,8 +286,7 @@ public class UserServiceImpl implements UserService {
                 }
             }
         } catch (Exception ex) {
-            log.error("[user.email.sync] eligible_students sync failed for user_id={}: {}",
-                    userId, ex.getMessage());
+            log.error("[user.email.sync] eligible_students sync failed for user_id={}: {}", userId, ex.getMessage());
         }
     }
 
