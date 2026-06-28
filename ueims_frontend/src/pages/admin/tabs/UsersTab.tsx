@@ -187,6 +187,12 @@ export const UsersTab: React.FC = () => {
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
   const [savingRoles, setSavingRoles] = useState(false);
 
+  const [emailModal, setEmailModal] = useState<{ open: boolean; user: UserDetail | null }>({
+    open: false, user: null,
+  });
+  const [savingEmail, setSavingEmail] = useState(false);
+  const [emailForm] = Form.useForm<{ newEmail: string }>();
+
   // ========== FETCH LIST (UC-06.0 Step 2) ==========
   const fetchUsers = async () => {
     try {
@@ -302,6 +308,45 @@ export const UsersTab: React.FC = () => {
       }
     } finally {
       setSavingEdit(false);
+    }
+  };
+
+  // ========== CHANGE EMAIL (Admin / TM only) ==========
+  const openChangeEmail = (user: UserDetail) => {
+    setEmailModal({ open: true, user });
+    emailForm.setFieldsValue({ newEmail: user.email });
+  };
+
+  const submitChangeEmail = async () => {
+    if (!emailModal.user) return;
+    try {
+      const values = await emailForm.validateFields();
+      if (values.newEmail.trim() === emailModal.user.email) {
+        message.info('Email unchanged.');
+        setEmailModal({ open: false, user: null });
+        return;
+      }
+      setSavingEmail(true);
+      await AdminService.updateUserEmail(emailModal.user.userId, values.newEmail.trim());
+      message.success(
+        `Email updated to ${values.newEmail.trim()}. ` +
+          `Their active sessions have been invalidated and they must sign in again.`,
+      );
+      setEmailModal({ open: false, user: null });
+      emailForm.resetFields();
+      // Refresh the viewed user if it's the same record.
+      if (viewing && viewing.userId === emailModal.user.userId) {
+        setViewing({ ...viewing, email: values.newEmail.trim() });
+      }
+      await fetchUsers();
+    } catch (err: any) {
+      if (err.errorFields) {
+        message.error('Please enter a valid email.');
+      } else {
+        message.error(err.response?.data?.message || 'Failed to change email.');
+      }
+    } finally {
+      setSavingEmail(false);
     }
   };
 
@@ -665,7 +710,18 @@ export const UsersTab: React.FC = () => {
                 </div>
                 <div style={{ flex: 1 }}>
                   <h2 style={{ fontSize: 18, fontWeight: 800, color: c.text, margin: 0 }}>{viewing.fullName}</h2>
-                  <div style={{ fontSize: 13, color: c.textMuted, marginTop: 2 }}>{viewing.email}</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 2 }}>
+                    <span style={{ fontSize: 13, color: c.textMuted }}>{viewing.email}</span>
+                    <Button
+                      type="link"
+                      size="small"
+                      icon={<MailOutlined />}
+                      onClick={() => openChangeEmail(viewing)}
+                      style={{ padding: 0, fontSize: 12, height: 'auto' }}
+                    >
+                      Change
+                    </Button>
+                  </div>
                   <div style={{ marginTop: 6 }}>
                     <StatusBadge status={viewing.status} />
                     {viewing.status === 'LOCKED' && (
@@ -734,6 +790,84 @@ export const UsersTab: React.FC = () => {
             </Spin>
           </div>
         )}
+      </Modal>
+
+      {/* ========== CHANGE EMAIL MODAL ========== */}
+      <Modal
+        title={
+          <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, color: c.text, fontSize: 16 }}>
+            <MailOutlined style={{ marginRight: 8, color: c.brand }} /> Change Email
+          </div>
+        }
+        open={emailModal.open}
+        onCancel={() => {
+          if (savingEmail) return;
+          setEmailModal({ open: false, user: null });
+          emailForm.resetFields();
+        }}
+        onOk={submitChangeEmail}
+        confirmLoading={savingEmail}
+        okText="Update Email"
+        width={520}
+        styles={{
+          content: { borderRadius: c.radiusLg, padding: '24px 28px' },
+          header: { borderBottom: 'none', marginBottom: 16, padding: 0 },
+          body: { padding: 0 },
+        }}
+      >
+        <Form form={emailForm} layout="vertical" requiredMark="optional">
+          <div
+            style={{
+              marginBottom: 12,
+              padding: '8px 12px',
+              borderRadius: c.radiusMd,
+              background: hexToRgba(c.warning, 0.1),
+              border: `1px solid ${hexToRgba(c.warning, 0.3)}`,
+              fontSize: 12,
+              color: c.textSecondary,
+              lineHeight: 1.5,
+            }}
+          >
+            <WarningOutlined style={{ color: c.warning, marginRight: 6 }} />
+            Changing the email will update <strong>users</strong> and every related{' '}
+            <strong>eligible_students</strong> record (by user_id) for this student. Any active
+            sessions or JWT tokens will be invalidated — the user must sign in with the new email.
+          </div>
+          <div
+            style={{
+              marginBottom: 12,
+              padding: '8px 12px',
+              borderRadius: c.radiusMd,
+              background: c.brandMuted,
+              border: `1px solid ${hexToRgba(c.brand, 0.2)}`,
+            }}
+          >
+            <div style={{ fontSize: 11, fontWeight: 700, color: c.textMuted, textTransform: 'uppercase' }}>
+              Current email
+            </div>
+            <div style={{ fontSize: 14, color: c.text, fontWeight: 600, marginTop: 2 }}>
+              {emailModal.user?.email}
+            </div>
+          </div>
+          <Form.Item
+            name="newEmail"
+            label="New Email"
+            rules={[
+              { required: true, message: 'Email is required' },
+              { type: 'email', message: 'Please enter a valid email' },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value || value.trim() === emailModal.user?.email) {
+                    return Promise.resolve();
+                  }
+                  return Promise.resolve();
+                },
+              }),
+            ]}
+          >
+            <Input placeholder="new.address@truong.edu" autoFocus />
+          </Form.Item>
+        </Form>
       </Modal>
 
       {/* ========== CREATE USER MODAL (UC-08) ========== */}
