@@ -59,7 +59,7 @@ class AuditLogServiceImplTest {
 
     @Test
     void findAll_returnsList() {
-        when(repository.findAll()).thenReturn(List.of(auditLog));
+        when(repository.findAllWithUser()).thenReturn(List.of(auditLog));
         when(mapper.toDto(any())).thenReturn(new AuditLogResponseDTO());
         List<AuditLogResponseDTO> result = service.findAll();
         assertEquals(1, result.size());

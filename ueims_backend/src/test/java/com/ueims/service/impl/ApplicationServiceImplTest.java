@@ -487,4 +487,164 @@ class ApplicationServiceImplTest {
         AppException e = assertThrows(AppException.class, () -> service.bulkDownloadCv(List.of()));
         assertEquals(ErrorCode.INVALID_PARAMETER_FORMAT, e.getErrorCode());
     }
+
+    // findByEnterpriseId
+    @Test
+    void findByEnterpriseId_success() {
+        mockSecurityContext();
+        when(repository.findByJobPost_Enterprise_EnterpriseIdAndDeletedAtIsNull(enterprise.getEnterpriseId()))
+                .thenReturn(List.of(application));
+        when(mapper.toApplicationResponse(application)).thenReturn(new ApplicationResponse());
+
+        List<ApplicationResponse> list = service.findByEnterpriseId(null, null);
+        assertEquals(1, list.size());
+    }
+
+    @Test
+    void findByEnterpriseId_withSearch_success() {
+        mockSecurityContext();
+        when(repository.searchByEnterpriseId(enterprise.getEnterpriseId(), "test"))
+                .thenReturn(List.of(application));
+        when(mapper.toApplicationResponse(application)).thenReturn(new ApplicationResponse());
+
+        List<ApplicationResponse> list = service.findByEnterpriseId(null, " test ");
+        assertEquals(1, list.size());
+    }
+
+    @Test
+    void findByEnterpriseId_noEnterprise_returnsEmpty() {
+        currentUser.setEnterprise(null);
+        mockSecurityContext();
+        List<ApplicationResponse> list = service.findByEnterpriseId(null, null);
+        assertTrue(list.isEmpty());
+    }
+
+    // updateStatus
+    @Test
+    void updateStatus_success() {
+        mockSecurityContext();
+        com.ueims.dto.request.ApplicationStatusUpdateRequest req =
+                new com.ueims.dto.request.ApplicationStatusUpdateRequest();
+        req.setStatus(ApplicationStatus.INTERVIEW_SCHEDULED);
+        req.setInterviewDate("2026-06-28T10:00:00");
+        req.setInterviewLink("http://meet.google.com");
+
+        when(repository.findById(application.getApplicationId())).thenReturn(Optional.of(application));
+        when(repository.save(application)).thenReturn(application);
+        when(mapper.toApplicationResponse(application)).thenReturn(new ApplicationResponse());
+
+        service.updateStatus(application.getApplicationId(), req);
+        assertEquals(ApplicationStatus.INTERVIEW_SCHEDULED, application.getStatus());
+        assertNotNull(application.getInterviewDate());
+        assertEquals("http://meet.google.com", application.getInterviewLink());
+    }
+
+    @Test
+    void updateStatus_acceptedTriggerCascade() {
+        mockSecurityContext();
+        com.ueims.dto.request.ApplicationStatusUpdateRequest req =
+                new com.ueims.dto.request.ApplicationStatusUpdateRequest();
+        req.setStatus(ApplicationStatus.ACCEPTED);
+
+        when(repository.findById(application.getApplicationId())).thenReturn(Optional.of(application));
+        when(repository.save(application)).thenReturn(application);
+        when(mapper.toApplicationResponse(application)).thenReturn(new ApplicationResponse());
+
+        // Mock withdrawOtherApplicationsInSemester dependencies
+        Application otherApp = new Application();
+        otherApp.setApplicationId(UUID.randomUUID());
+        otherApp.setStudent(currentUser);
+        otherApp.setJobPost(jobPost);
+        otherApp.setStatus(ApplicationStatus.PENDING);
+
+        when(repository.findByStudent_UserId(currentUser.getUserId())).thenReturn(List.of(application, otherApp));
+
+        service.updateStatus(application.getApplicationId(), req);
+        assertEquals(ApplicationStatus.ACCEPTED, application.getStatus());
+        assertEquals(ApplicationStatus.WITHDRAWN, otherApp.getStatus());
+    }
+
+    @Test
+    void updateStatus_invalidDate_throwsException() {
+        mockSecurityContext();
+        com.ueims.dto.request.ApplicationStatusUpdateRequest req =
+                new com.ueims.dto.request.ApplicationStatusUpdateRequest();
+        req.setStatus(ApplicationStatus.INTERVIEW_SCHEDULED);
+        req.setInterviewDate("invalid-date");
+
+        when(repository.findById(application.getApplicationId())).thenReturn(Optional.of(application));
+
+        AppException e =
+                assertThrows(AppException.class, () -> service.updateStatus(application.getApplicationId(), req));
+        assertEquals(ErrorCode.INVALID_PARAMETER_FORMAT, e.getErrorCode());
+    }
+
+    @Test
+    void updateStatus_unauthorized() {
+        mockSecurityContext();
+        Enterprise otherEnterprise = new Enterprise();
+        otherEnterprise.setEnterpriseId(UUID.randomUUID());
+        jobPost.setEnterprise(otherEnterprise);
+
+        com.ueims.dto.request.ApplicationStatusUpdateRequest req =
+                new com.ueims.dto.request.ApplicationStatusUpdateRequest();
+
+        when(repository.findById(application.getApplicationId())).thenReturn(Optional.of(application));
+
+        AppException e =
+                assertThrows(AppException.class, () -> service.updateStatus(application.getApplicationId(), req));
+        assertEquals(ErrorCode.UNAUTHORIZED, e.getErrorCode());
+    }
+
+    @Test
+    void updateStatus_jobClosed() {
+        mockSecurityContext();
+        jobPost.setStatus("CLOSED");
+
+        com.ueims.dto.request.ApplicationStatusUpdateRequest req =
+                new com.ueims.dto.request.ApplicationStatusUpdateRequest();
+
+        when(repository.findById(application.getApplicationId())).thenReturn(Optional.of(application));
+
+        AppException e =
+                assertThrows(AppException.class, () -> service.updateStatus(application.getApplicationId(), req));
+        assertEquals(ErrorCode.JOB_POST_CLOSED, e.getErrorCode());
+    }
+
+    @Test
+    void updateStatus_withdrawnApp() {
+        mockSecurityContext();
+        application.setStatus(ApplicationStatus.WITHDRAWN);
+
+        com.ueims.dto.request.ApplicationStatusUpdateRequest req =
+                new com.ueims.dto.request.ApplicationStatusUpdateRequest();
+
+        when(repository.findById(application.getApplicationId())).thenReturn(Optional.of(application));
+
+        AppException e =
+                assertThrows(AppException.class, () -> service.updateStatus(application.getApplicationId(), req));
+        assertEquals(ErrorCode.INVALID_PARAMETER_FORMAT, e.getErrorCode());
+    }
+
+    // downloadCv
+    @Test
+    void downloadCv_emptyUrl() {
+        mockSecurityContext();
+        application.setCvFileUrl("");
+        when(repository.findById(application.getApplicationId())).thenReturn(Optional.of(application));
+
+        AppException e = assertThrows(AppException.class, () -> service.downloadCv(application.getApplicationId()));
+        assertEquals(ErrorCode.FILE_NOT_FOUND, e.getErrorCode());
+    }
+
+    @Test
+    void downloadCv_externalUrl_success() {
+        mockSecurityContext();
+        application.setCvFileUrl("http://example.com/cv.pdf");
+        when(repository.findById(application.getApplicationId())).thenReturn(Optional.of(application));
+
+        org.springframework.core.io.Resource res = service.downloadCv(application.getApplicationId());
+        assertNotNull(res);
+        verify(repository).incrementDownloadCount(application.getApplicationId());
+    }
 }

@@ -32,6 +32,12 @@ class UserRoleServiceImplTest {
     @Mock
     private UserRoleRepository repository;
 
+    @Mock
+    private com.ueims.repository.UserRepository userRepository;
+
+    @Mock
+    private com.ueims.repository.RoleRepository roleRepository;
+
     @InjectMocks
     private UserRoleServiceImpl service;
 
@@ -102,5 +108,82 @@ class UserRoleServiceImplTest {
         service.deleteById(userRoleId);
 
         verify(repository).deleteById(userRoleId);
+    }
+
+    @Test
+    void assignRoleSuccess() {
+        com.ueims.dto.request.UserRoleRequest request = new com.ueims.dto.request.UserRoleRequest();
+        request.setUserId(userId);
+        request.setRoleName("ROLE_STUDENT");
+
+        User mockUser = User.builder().userId(userId).build();
+        com.ueims.model.entity.Role mockRole =
+                com.ueims.model.entity.Role.builder().roleName("ROLE_STUDENT").build();
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
+        when(roleRepository.findById("ROLE_STUDENT")).thenReturn(Optional.of(mockRole));
+        when(repository.existsById(userRoleId)).thenReturn(false);
+
+        service.assignRole(request);
+
+        verify(repository).save(any(UserRole.class));
+    }
+
+    @Test
+    void assignRoleUserNotFoundThrowsException() {
+        com.ueims.dto.request.UserRoleRequest request = new com.ueims.dto.request.UserRoleRequest();
+        request.setUserId(userId);
+        request.setRoleName("ROLE_STUDENT");
+
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        AppException exception = assertThrows(AppException.class, () -> service.assignRole(request));
+        assertEquals(ErrorCode.USER_NOT_EXISTED, exception.getErrorCode());
+    }
+
+    @Test
+    void assignRoleRoleNotFoundThrowsException() {
+        com.ueims.dto.request.UserRoleRequest request = new com.ueims.dto.request.UserRoleRequest();
+        request.setUserId(userId);
+        request.setRoleName("ROLE_UNKNOWN");
+
+        User mockUser = User.builder().userId(userId).build();
+        when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
+        when(roleRepository.findById("ROLE_UNKNOWN")).thenReturn(Optional.empty());
+
+        AppException exception = assertThrows(AppException.class, () -> service.assignRole(request));
+        assertEquals(ErrorCode.ROLE_NOT_EXISTED, exception.getErrorCode());
+    }
+
+    @Test
+    void assignRoleAlreadyHasRoleThrowsException() {
+        com.ueims.dto.request.UserRoleRequest request = new com.ueims.dto.request.UserRoleRequest();
+        request.setUserId(userId);
+        request.setRoleName("ROLE_STUDENT");
+
+        User mockUser = User.builder().userId(userId).build();
+        com.ueims.model.entity.Role mockRole =
+                com.ueims.model.entity.Role.builder().roleName("ROLE_STUDENT").build();
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
+        when(roleRepository.findById("ROLE_STUDENT")).thenReturn(Optional.of(mockRole));
+        when(repository.existsById(userRoleId)).thenReturn(true);
+
+        AppException exception = assertThrows(AppException.class, () -> service.assignRole(request));
+        assertEquals(ErrorCode.USER_ALREADY_HAS_ROLE, exception.getErrorCode());
+    }
+
+    @Test
+    void revokeRoleSuccess() {
+        when(repository.existsById(userRoleId)).thenReturn(true);
+        service.revokeRole(userId, "ROLE_STUDENT");
+        verify(repository).deleteById(userRoleId);
+    }
+
+    @Test
+    void revokeRoleNotFoundThrowsException() {
+        when(repository.existsById(userRoleId)).thenReturn(false);
+        AppException exception = assertThrows(AppException.class, () -> service.revokeRole(userId, "ROLE_STUDENT"));
+        assertEquals(ErrorCode.USER_ROLE_NOT_FOUND, exception.getErrorCode());
     }
 }

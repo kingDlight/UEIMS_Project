@@ -1,141 +1,296 @@
 package com.ueims.service.impl;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.ueims.dto.request.BroadcastNotificationRequest;
 import com.ueims.exception.ResourceNotFoundException;
-import com.ueims.model.entity.Notification;
+import com.ueims.model.entity.*;
 import com.ueims.repository.NotificationRepository;
+import com.ueims.repository.UserRepository;
+import com.ueims.service.websocket.NotificationBroadcaster;
 
 @ExtendWith(MockitoExtension.class)
 class NotificationServiceImplTest {
-
-    private static final String TEST_EMAIL = "user@test.com";
 
     @Mock
     private NotificationRepository repository;
 
     @Mock
-    private com.ueims.repository.UserRepository userRepository;
+    private UserRepository userRepository;
 
-    private com.ueims.service.websocket.NotificationBroadcaster broadcaster;
+    private NotificationBroadcaster broadcaster;
+    private int pushToUserCalled = 0;
+    private int pushUnreadCalled = 0;
 
+    @InjectMocks
     private NotificationServiceImpl service;
 
+    private User student;
+    private User tm;
     private Notification notification;
-    private UUID notificationId;
 
     @BeforeEach
     void setUp() {
-        broadcaster = new com.ueims.service.websocket.NotificationBroadcaster(null, null) {
+        student = new User();
+        student.setUserId(UUID.randomUUID());
+        student.setEmail("student@fpt.edu.vn");
+        student.setStatus("ACTIVE");
+
+        tm = new User();
+        tm.setUserId(UUID.randomUUID());
+        tm.setEmail("tm@fpt.edu.vn");
+        tm.setStatus("ACTIVE");
+
+        Role tmRole = new Role();
+        tmRole.setRoleName("TRAINING_MANAGER");
+        UserRole userRole = new UserRole();
+        userRole.setRole(tmRole);
+        tm.setRoles(Set.of(userRole));
+
+        notification = new Notification();
+        notification.setNotificationId(UUID.randomUUID());
+        notification.setRecipient(student);
+        notification.setIsRead(false);
+
+        pushToUserCalled = 0;
+        pushUnreadCalled = 0;
+        broadcaster = new NotificationBroadcaster(null, null) {
             @Override
-            public void pushToUser(String userEmail, Notification notification) {}
+            public void pushToUser(String userEmail, Notification notification) {
+                pushToUserCalled++;
+            }
 
             @Override
-            public void pushUnreadCountToUser(String userEmail, long unread) {}
+            public void pushUnreadCountToUser(String userEmail, long unread) {
+                pushUnreadCalled++;
+            }
         };
         service = new NotificationServiceImpl(repository, userRepository, broadcaster);
-        notificationId = UUID.randomUUID();
-        notification = Notification.builder()
-                .notificationId(notificationId)
-                .title("Test Title")
-                .message("Test Content")
-                .isRead(false)
-                .build();
     }
 
     @Test
-    void findAllSuccess() {
+    void crud_Methods_CallRepository() {
         when(repository.findAll()).thenReturn(List.of(notification));
+        assertEquals(1, service.findAll().size());
 
-        List<Notification> result = service.findAll();
+        when(repository.findById(notification.getNotificationId())).thenReturn(Optional.of(notification));
+        assertNotNull(service.findById(notification.getNotificationId()));
 
-        assertEquals(1, result.size());
-        assertEquals(notificationId, result.get(0).getNotificationId());
+        when(repository.save(notification)).thenReturn(notification);
+        assertEquals(notification, service.save(notification));
+
+        doNothing().when(repository).deleteById(notification.getNotificationId());
+        assertDoesNotThrow(() -> service.deleteById(notification.getNotificationId()));
     }
 
     @Test
-    void findByIdSuccess() {
-        when(repository.findById(notificationId)).thenReturn(Optional.of(notification));
-
-        Notification result = service.findById(notificationId);
-
-        assertNotNull(result);
-        assertEquals(notificationId, result.getNotificationId());
+    void getMyNotifications_ReturnsList() {
+        when(repository.findByRecipient_EmailOrderByCreatedAtDesc("student@fpt.edu.vn"))
+                .thenReturn(List.of(notification));
+        assertEquals(1, service.getMyNotifications("student@fpt.edu.vn").size());
     }
 
     @Test
-    void findByIdNotFound() {
-        when(repository.findById(notificationId)).thenReturn(Optional.empty());
-
-        Notification result = service.findById(notificationId);
-
-        assertNull(result);
+    void countUnreadForEmail_ReturnsCount() {
+        when(repository.countByRecipient_EmailAndIsReadFalse("student@fpt.edu.vn"))
+                .thenReturn(5L);
+        assertEquals(5L, service.countUnreadForEmail("student@fpt.edu.vn"));
     }
 
     @Test
-    void saveSuccess() {
+    void broadcast_ThrowsExceptionIfInvalid() {
+        assertThrows(IllegalArgumentException.class, () -> service.broadcast(null));
+
+        BroadcastNotificationRequest req1 = new BroadcastNotificationRequest();
+        assertThrows(IllegalArgumentException.class, () -> service.broadcast(req1));
+
+        req1.setTitle("Title");
+        assertThrows(IllegalArgumentException.class, () -> service.broadcast(req1));
+    }
+
+    @Test
+    void broadcast_WithExplicitRecipients_Success() {
+        BroadcastNotificationRequest req = new BroadcastNotificationRequest();
+        req.setTitle("Hello");
+        req.setMessage("Test Message");
+        req.setRecipientIds(List.of(student.getUserId()));
+
+        when(userRepository.findById(student.getUserId())).thenReturn(Optional.of(student));
         when(repository.save(any(Notification.class))).thenReturn(notification);
 
-        Notification result = service.save(notification);
+        int sent = service.broadcast(req);
 
-        assertNotNull(result);
-        assertEquals(notificationId, result.getNotificationId());
+        assertEquals(1, sent);
+        verify(repository, times(1)).save(any(Notification.class));
+        assertEquals(1, pushToUserCalled);
     }
 
     @Test
-    void deleteByIdSuccess() {
-        service.deleteById(notificationId);
+    void broadcast_WithTargetRole_Success() {
+        BroadcastNotificationRequest req = new BroadcastNotificationRequest();
+        req.setTitle("Hello");
+        req.setMessage("Test Message");
+        req.setTargetRole("STUDENT");
 
-        verify(repository).deleteById(notificationId);
-    }
-
-    @Test
-    void getMyNotificationsSuccess() {
-        when(repository.findByRecipient_EmailOrderByCreatedAtDesc(TEST_EMAIL)).thenReturn(List.of(notification));
-
-        List<Notification> result = service.getMyNotifications(TEST_EMAIL);
-
-        assertEquals(1, result.size());
-        assertEquals(notificationId, result.get(0).getNotificationId());
-    }
-
-    @Test
-    void markAsReadSuccess() {
-        when(repository.findByNotificationIdAndRecipient_Email(notificationId, TEST_EMAIL))
-                .thenReturn(Optional.of(notification));
+        when(userRepository.findActiveUsersByRoleName("STUDENT")).thenReturn(List.of(student));
+        when(userRepository.findById(student.getUserId())).thenReturn(Optional.of(student));
         when(repository.save(any(Notification.class))).thenReturn(notification);
 
-        Notification result = service.markAsRead(notificationId, TEST_EMAIL);
+        int sent = service.broadcast(req);
 
-        assertNotNull(result);
-        assertTrue(result.getIsRead());
+        assertEquals(1, sent);
+        verify(userRepository).findActiveUsersByRoleName("STUDENT");
     }
 
     @Test
-    void markAsReadNotFoundThrowsException() {
-        when(repository.findByNotificationIdAndRecipient_Email(notificationId, TEST_EMAIL))
+    void broadcast_SaveFails_Continues() {
+        BroadcastNotificationRequest req = new BroadcastNotificationRequest();
+        req.setTitle("Hello");
+        req.setMessage("Test Message");
+        req.setRecipientIds(List.of(student.getUserId(), tm.getUserId()));
+
+        when(userRepository.findById(student.getUserId())).thenReturn(Optional.of(student));
+        when(userRepository.findById(tm.getUserId())).thenReturn(Optional.of(tm));
+
+        // Throw for first, succeed for second
+        when(repository.save(any(Notification.class)))
+                .thenThrow(new RuntimeException("DB Error"))
+                .thenReturn(notification);
+
+        int sent = service.broadcast(req);
+
+        assertEquals(1, sent); // 1 success out of 2
+    }
+
+    @Test
+    void markAsRead_NotFound_Throws() {
+        when(repository.findByNotificationIdAndRecipient_Email(any(), anyString()))
                 .thenReturn(Optional.empty());
+        assertThrows(ResourceNotFoundException.class, () -> service.markAsRead(UUID.randomUUID(), "test"));
+    }
 
-        ResourceNotFoundException exception =
-                assertThrows(ResourceNotFoundException.class, () -> service.markAsRead(notificationId, TEST_EMAIL));
+    @Test
+    void markAsRead_AlreadyRead_ReturnsImmediately() {
+        notification.setIsRead(true);
+        when(repository.findByNotificationIdAndRecipient_Email(notification.getNotificationId(), "student@fpt.edu.vn"))
+                .thenReturn(Optional.of(notification));
 
-        assertEquals("Notification not found", exception.getMessage());
+        Notification result = service.markAsRead(notification.getNotificationId(), "student@fpt.edu.vn");
+
+        assertTrue(result.getIsRead());
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void markAsRead_Success() {
+        when(repository.findByNotificationIdAndRecipient_Email(notification.getNotificationId(), "student@fpt.edu.vn"))
+                .thenReturn(Optional.of(notification));
+        when(repository.save(any())).thenReturn(notification);
+        when(repository.countByRecipient_EmailAndIsReadFalse("student@fpt.edu.vn"))
+                .thenReturn(0L);
+
+        Notification result = service.markAsRead(notification.getNotificationId(), "student@fpt.edu.vn");
+
+        assertTrue(result.getIsRead());
+        assertEquals(1, pushUnreadCalled);
+    }
+
+    @Test
+    void markAllAsRead_Success() {
+        when(repository.markAllAsReadForRecipient("student@fpt.edu.vn")).thenReturn(5);
+
+        int updated = service.markAllAsRead("student@fpt.edu.vn");
+
+        assertEquals(5, updated);
+        assertEquals(1, pushUnreadCalled);
+    }
+
+    @Test
+    void notifyInterview_Scheduled() {
+        Interview interview = createMockInterview();
+        when(userRepository.findById(student.getUserId())).thenReturn(Optional.of(student));
+        when(repository.save(any())).thenReturn(notification);
+
+        service.notifyInterviewScheduled(interview);
+
+        verify(repository).save(argThat(n -> "INTERVIEW_SCHEDULED".equals(n.getType())));
+    }
+
+    @Test
+    void notifyInterview_Result() {
+        Interview interview = createMockInterview();
+        interview.setResult("PASS");
+        when(userRepository.findById(student.getUserId())).thenReturn(Optional.of(student));
+        when(repository.save(any())).thenReturn(notification);
+
+        service.notifyInterviewResult(interview);
+
+        verify(repository).save(argThat(n -> n.getTitle().contains("ĐẬU")));
+    }
+
+    @Test
+    void notifyWeeklyReport_Approved() {
+        WeeklyReport report = createMockWeeklyReport();
+        when(userRepository.findById(student.getUserId())).thenReturn(Optional.of(student));
+        when(repository.save(any())).thenReturn(notification);
+
+        service.notifyWeeklyReportApproved(report);
+
+        verify(repository).save(argThat(n -> "WEEKLY_REPORT_APPROVED".equals(n.getType())));
+    }
+
+    @Test
+    void notifyWeeklyReport_Rejected() {
+        WeeklyReport report = createMockWeeklyReport();
+        when(userRepository.findById(student.getUserId())).thenReturn(Optional.of(student));
+        when(repository.save(any())).thenReturn(notification);
+
+        service.notifyWeeklyReportRejected(report, "Bad content");
+
+        verify(repository)
+                .save(argThat(n -> "WEEKLY_REPORT_REJECTED".equals(n.getType())
+                        && n.getMessage().contains("Bad content")));
+    }
+
+    @Test
+    void notifyTrainingManagerOfIncident() {
+        Incident incident = new Incident();
+        incident.setCategory("Violation");
+
+        when(userRepository.findAll()).thenReturn(List.of(student, tm)); // student is not TM, tm is TM
+        when(repository.save(any())).thenReturn(notification);
+
+        service.notifyTrainingManagerOfIncident(incident);
+
+        // Should only send to TM
+        verify(repository, times(1)).save(any());
+    }
+
+    private Interview createMockInterview() {
+        Application app = new Application();
+        app.setStudent(student);
+        Interview interview = new Interview();
+        interview.setInterviewId(UUID.randomUUID());
+        interview.setApplication(app);
+        return interview;
+    }
+
+    private WeeklyReport createMockWeeklyReport() {
+        EnterpriseAssignment assignment = new EnterpriseAssignment();
+        assignment.setStudent(student);
+        WeeklyReport report = new WeeklyReport();
+        report.setAssignment(assignment);
+        return report;
     }
 }

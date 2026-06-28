@@ -141,9 +141,9 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
         LocalDate startDate = assignment.getSemester().getStartDate();
         long currentWeek = ChronoUnit.WEEKS.between(startDate, LocalDate.now()) + 1;
 
-        // if (entity.getWeekNumber() != (int) currentWeek) {
-        // throw new AppException(ErrorCode.APPLICATION_DEADLINE_EXPIRED);
-        // }
+        if (entity.getWeekNumber() != (int) currentWeek) {
+            throw new AppException(ErrorCode.APPLICATION_DEADLINE_EXPIRED);
+        }
 
         entity.setAssignment(assignment);
         entity.setStatus("SUBMITTED");

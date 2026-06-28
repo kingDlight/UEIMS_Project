@@ -245,4 +245,62 @@ class JobPostServiceImplTest {
         verify(repository).save(jobPost);
         assertNotNull(jobPost.getDeletedAt());
     }
+
+    @Test
+    void deleteById_hasApplications_throwsException() {
+        mockSecurityContext(currentUser);
+        jobPost.setCreatedBy(currentUser);
+        when(repository.findWithEnterpriseByJobPostId(jobPostId)).thenReturn(Optional.of(jobPost));
+        when(applicationRepository.existsByJobPost_JobPostId(jobPostId)).thenReturn(true);
+
+        AppException e = assertThrows(AppException.class, () -> service.deleteById(jobPostId));
+        assertEquals(ErrorCode.JOB_POST_HAS_APPLICATIONS, e.getErrorCode());
+    }
+
+    @Test
+    void findMyPosts_hasEnterprise_returnsList() {
+        mockSecurityContext(currentUser);
+        when(repository.findByEnterprise_EnterpriseId(enterprise.getEnterpriseId()))
+                .thenReturn(List.of(jobPost));
+        List<JobPost> result = service.findMyPosts();
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void findMyPosts_noEnterprise_returnsEmptyList() {
+        currentUser.setEnterprise(null);
+        mockSecurityContext(currentUser);
+        List<JobPost> result = service.findMyPosts();
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void findActive_success() {
+        mockSecurityContext(currentUser);
+        when(repository.findByStatusAndSemester_StatusAndDeletedAtIsNull("OPEN", "ACTIVE"))
+                .thenReturn(List.of(jobPost));
+        List<JobPost> result = service.findActive();
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void toggleStatus_success() {
+        mockSecurityContext(currentUser);
+        jobPost.setCreatedBy(currentUser);
+        when(repository.findWithEnterpriseByJobPostId(jobPostId)).thenReturn(Optional.of(jobPost));
+        when(repository.save(any(JobPost.class))).thenAnswer(i -> i.getArgument(0));
+
+        JobPost result = service.toggleStatus(jobPostId, "CLOSED");
+        assertEquals("CLOSED", result.getStatus());
+    }
+
+    @Test
+    void toggleStatus_invalidStatus_throwsException() {
+        mockSecurityContext(currentUser);
+        jobPost.setCreatedBy(currentUser);
+        when(repository.findWithEnterpriseByJobPostId(jobPostId)).thenReturn(Optional.of(jobPost));
+
+        AppException e = assertThrows(AppException.class, () -> service.toggleStatus(jobPostId, "INVALID"));
+        assertEquals(ErrorCode.INVALID_PARAMETER_FORMAT, e.getErrorCode());
+    }
 }

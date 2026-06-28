@@ -43,6 +43,15 @@ class InterviewServiceImplTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private com.ueims.service.MailService mailService;
+
+    @Mock
+    private com.ueims.service.NotificationService notificationService;
+
+    @Mock
+    private com.ueims.service.ApplicationService applicationService;
+
     @InjectMocks
     private InterviewServiceImpl service;
 
@@ -62,6 +71,7 @@ class InterviewServiceImplTest {
         currentUser.setUserId(UUID.randomUUID());
         currentUser.setEmail("test@test.com");
         currentUser.setEnterprise(enterprise);
+        currentUser.setRoles(java.util.Set.of());
 
         jobPost = new JobPost();
         jobPost.setJobPostId(UUID.randomUUID());
@@ -234,5 +244,115 @@ class InterviewServiceImplTest {
     void deleteById_success() {
         service.deleteById(interviewId);
         verify(repository).deleteById(interviewId);
+    }
+
+    @Test
+    void findMyEnterpriseInterviews_success() {
+        mockSecurityContext(currentUser);
+        when(repository.findByEnterpriseId(enterprise.getEnterpriseId())).thenReturn(List.of(interview));
+
+        List<Interview> result = service.findMyEnterpriseInterviews();
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void findMyEnterpriseInterviews_noEnterprise() {
+        currentUser.setEnterprise(null);
+        mockSecurityContext(currentUser);
+
+        List<Interview> result = service.findMyEnterpriseInterviews();
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void create_success() {
+        mockSecurityContext(currentUser);
+        com.ueims.dto.request.InterviewRequest req = new com.ueims.dto.request.InterviewRequest();
+        req.setApplicationId(application.getApplicationId());
+        req.setScheduledTime(LocalDateTime.now().plusDays(2));
+        req.setDurationMinutes(60);
+
+        when(applicationRepository.findById(application.getApplicationId())).thenReturn(Optional.of(application));
+        when(repository.existsByEnterpriseAndTime(eq(enterprise.getEnterpriseId()), any()))
+                .thenReturn(false);
+        when(repository.saveAndFlush(any(Interview.class))).thenAnswer(i -> i.getArgument(0));
+
+        Interview created = service.create(req);
+        assertNotNull(created);
+        assertEquals(ApplicationStatus.INTERVIEW_SCHEDULED, application.getStatus());
+    }
+
+    @Test
+    void update_success() {
+        mockSecurityContext(currentUser);
+        Interview updateInfo = new Interview();
+        updateInfo.setDurationMinutes(90);
+        updateInfo.setScheduledTime(LocalDateTime.now().plusDays(3));
+
+        when(repository.findById(interviewId)).thenReturn(Optional.of(interview));
+        when(repository.saveAndFlush(any(Interview.class))).thenAnswer(i -> i.getArgument(0));
+
+        Interview updated = service.update(interviewId, updateInfo);
+        assertEquals(90, updated.getDurationMinutes());
+    }
+
+    @Test
+    void recordResult_pass_success() {
+        mockSecurityContext(currentUser);
+        interview.setScheduledTime(LocalDateTime.now().minusDays(1));
+        when(repository.findById(interviewId)).thenReturn(Optional.of(interview));
+        when(repository.saveAndFlush(any(Interview.class))).thenAnswer(i -> i.getArgument(0));
+
+        Interview result = service.recordResult(interviewId, "PASS", "Good job");
+        assertEquals("PASS", result.getResult());
+        assertEquals("COMPLETED", result.getStatus());
+        assertEquals(ApplicationStatus.ACCEPTED, application.getStatus());
+    }
+
+    @Test
+    void recordResult_fail_success() {
+        mockSecurityContext(currentUser);
+        interview.setScheduledTime(LocalDateTime.now().minusDays(1));
+        when(repository.findById(interviewId)).thenReturn(Optional.of(interview));
+        when(repository.saveAndFlush(any(Interview.class))).thenAnswer(i -> i.getArgument(0));
+
+        Interview result = service.recordResult(interviewId, "FAIL", "Needs improvement");
+        assertEquals("FAIL", result.getResult());
+        assertEquals("COMPLETED", result.getStatus());
+        assertEquals(ApplicationStatus.REJECTED, application.getStatus());
+    }
+
+    @Test
+    void cancel_success() {
+        mockSecurityContext(currentUser);
+        when(repository.findById(interviewId)).thenReturn(Optional.of(interview));
+        when(repository.saveAndFlush(any(Interview.class))).thenAnswer(i -> i.getArgument(0));
+
+        Interview result = service.cancel(interviewId, "Emergency");
+        assertEquals("CANCELLED", result.getStatus());
+        assertEquals("Emergency", result.getCancelReason());
+    }
+
+    @Test
+    void reschedule_success() {
+        mockSecurityContext(currentUser);
+        when(repository.findById(interviewId)).thenReturn(Optional.of(interview));
+        when(repository.saveAndFlush(any(Interview.class))).thenAnswer(i -> i.getArgument(0));
+
+        LocalDateTime newTime = LocalDateTime.now().plusDays(5);
+        Interview result = service.reschedule(interviewId, newTime, "Conflict", "link", "loc");
+        assertEquals("SCHEDULED", result.getStatus());
+        assertEquals(newTime, result.getScheduledTime());
+    }
+
+    @Test
+    void proposeSlots_success() {
+        mockSecurityContext(currentUser);
+        when(applicationRepository.findById(application.getApplicationId())).thenReturn(Optional.of(application));
+        when(repository.findByEnterpriseId(enterprise.getEnterpriseId())).thenReturn(List.of(interview));
+
+        List<LocalDateTime> slots = service.proposeSlots(application.getApplicationId());
+        assertNotNull(slots);
+        assertTrue(slots.size() <= 3);
     }
 }

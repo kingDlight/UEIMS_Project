@@ -106,17 +106,7 @@ class AuthenticationServiceTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        mailService = new MailService(null, null) {
-            @Override
-            public void sendPasswordChangedMail(String to, String fullName, String time) {
-                // Empty mock method
-            }
-
-            @Override
-            public void sendPasswordResetMail(String to, String fullName, String resetLink) {
-                // Empty mock method
-            }
-        };
+        mailService = org.mockito.Mockito.mock(MailService.class);
 
         sessionInvalidated = false;
         userSessionManagementService = new UserSessionManagementService(null, null) {
@@ -216,7 +206,7 @@ class AuthenticationServiceTest {
         when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.of(user));
 
         AppException e = assertThrows(AppException.class, () -> service.authenticate(request));
-        assertEquals(ErrorCode.USER_PERMANENTLY_LOCKED, e.getErrorCode());
+        assertEquals(ErrorCode.USER_LOCKED, e.getErrorCode());
     }
 
     @Test

@@ -120,4 +120,111 @@ class InternshipPlanServiceImplTest {
 
         verify(repository).deleteById(planId);
     }
+
+    @Test
+    void findMyPlanSuccess() {
+        UUID studentId = UUID.randomUUID();
+        when(repository.findByAssignment_Student_UserId(studentId)).thenReturn(internshipPlan);
+        when(itemRepository.findByPlan_PlanId(planId)).thenReturn(List.of());
+
+        InternshipPlan result = service.findMyPlan(studentId);
+
+        assertNotNull(result);
+        assertEquals(planId, result.getPlanId());
+        assertNotNull(result.getItems());
+    }
+
+    @Test
+    void findMyPlanNotFound() {
+        UUID studentId = UUID.randomUUID();
+        when(repository.findByAssignment_Student_UserId(studentId)).thenReturn(null);
+
+        InternshipPlan result = service.findMyPlan(studentId);
+
+        assertNull(result);
+    }
+
+    @Test
+    void findByAssignmentIdSuccess() {
+        UUID assignmentId = internshipPlan.getAssignment().getAssignmentId();
+        when(repository.findByAssignment_AssignmentId(assignmentId)).thenReturn(List.of(internshipPlan));
+        when(itemRepository.findByPlan_PlanId(planId)).thenReturn(List.of());
+
+        InternshipPlan result = service.findByAssignmentId(assignmentId);
+
+        assertNotNull(result);
+        assertEquals(planId, result.getPlanId());
+        assertNotNull(result.getItems());
+    }
+
+    @Test
+    void findByAssignmentIdNotFound() {
+        UUID assignmentId = UUID.randomUUID();
+        when(repository.findByAssignment_AssignmentId(assignmentId)).thenReturn(List.of());
+
+        InternshipPlan result = service.findByAssignmentId(assignmentId);
+
+        assertNull(result);
+    }
+
+    @Test
+    void save_missingAssignment() {
+        InternshipPlan plan = new InternshipPlan();
+
+        com.ueims.exception.AppException e = org.junit.jupiter.api.Assertions.assertThrows(
+                com.ueims.exception.AppException.class, () -> service.save(plan));
+        assertEquals(com.ueims.exception.ErrorCode.FIELD_REQUIRED, e.getErrorCode());
+    }
+
+    @Test
+    void save_assignmentNotFound() {
+        when(assignmentRepository.findById(internshipPlan.getAssignment().getAssignmentId()))
+                .thenReturn(Optional.empty());
+
+        com.ueims.exception.AppException e = org.junit.jupiter.api.Assertions.assertThrows(
+                com.ueims.exception.AppException.class, () -> service.save(internshipPlan));
+        assertEquals(com.ueims.exception.ErrorCode.ASSIGNMENT_NOT_FOUND, e.getErrorCode());
+    }
+
+    @Test
+    void save_unauthorized() {
+        SecurityContextHolder.getContext()
+                .setAuthentication(new UsernamePasswordAuthenticationToken("admin@test.com", null));
+        when(userRepository.findByEmail("admin@test.com"))
+                .thenReturn(Optional.of(com.ueims.model.entity.User.builder().build()));
+        when(assignmentRepository.findById(internshipPlan.getAssignment().getAssignmentId()))
+                .thenReturn(Optional.of(internshipPlan.getAssignment()));
+
+        com.ueims.exception.AppException e = org.junit.jupiter.api.Assertions.assertThrows(
+                com.ueims.exception.AppException.class, () -> service.save(internshipPlan));
+        assertEquals(com.ueims.exception.ErrorCode.UNAUTHORIZED, e.getErrorCode());
+    }
+
+    @Test
+    void save_upsertWhenPlanIdNull() {
+        SecurityContextHolder.getContext()
+                .setAuthentication(new UsernamePasswordAuthenticationToken("admin@test.com", null));
+        when(userRepository.findByEmail("admin@test.com"))
+                .thenReturn(Optional.of(com.ueims.model.entity.User.builder()
+                        .enterprise(internshipPlan.getAssignment().getEnterprise())
+                        .build()));
+        when(assignmentRepository.findById(internshipPlan.getAssignment().getAssignmentId()))
+                .thenReturn(Optional.of(internshipPlan.getAssignment()));
+
+        InternshipPlan existingPlan = new InternshipPlan();
+        existingPlan.setPlanId(UUID.randomUUID());
+
+        when(repository.findByAssignment_AssignmentId(
+                        internshipPlan.getAssignment().getAssignmentId()))
+                .thenReturn(List.of(existingPlan));
+        when(repository.save(any(InternshipPlan.class))).thenReturn(existingPlan);
+
+        InternshipPlan newPlan = new InternshipPlan();
+        newPlan.setAssignment(internshipPlan.getAssignment());
+        newPlan.setOverallGoal("New Goal");
+
+        InternshipPlan result = service.save(newPlan);
+
+        assertNotNull(result);
+    }
 }

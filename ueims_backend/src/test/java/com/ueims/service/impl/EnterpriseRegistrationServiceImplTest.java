@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -48,20 +47,11 @@ class EnterpriseRegistrationServiceImplTest {
 
     private MailService mailService;
 
-    private boolean welcomeMailSent;
-
-    @InjectMocks
     private EnterpriseRegistrationServiceImpl service;
 
     @org.junit.jupiter.api.BeforeEach
     void setUp() {
-        welcomeMailSent = false;
-        mailService = new MailService(null, null) {
-            @Override
-            public void sendWelcomeMail(String to, String fullName, String tempPassword) {
-                welcomeMailSent = true;
-            }
-        };
+        mailService = mock(MailService.class);
         // Re-inject manually to use our stub instead of mockito's failed mock
         service = new EnterpriseRegistrationServiceImpl(
                 enterpriseRepository, userRepository, userRoleRepository, roleRepository, passwordEncoder, mailService);
@@ -108,7 +98,7 @@ class EnterpriseRegistrationServiceImplTest {
         verify(enterpriseRepository).save(any(Enterprise.class));
         verify(userRepository).save(any(User.class));
         verify(userRoleRepository).save(any(UserRole.class));
-        assertTrue(welcomeMailSent);
+        verify(mailService, times(1)).sendWelcomeMail(anyString(), anyString(), anyString());
     }
 
     @Test
@@ -121,7 +111,7 @@ class EnterpriseRegistrationServiceImplTest {
         AppException exception = assertThrows(AppException.class, () -> service.register(request));
         assertEquals(ErrorCode.PASSWORDS_NOT_MATCH, exception.getErrorCode());
         verifyNoInteractions(userRepository, enterpriseRepository);
-        assertFalse(welcomeMailSent);
+        verify(mailService, never()).sendWelcomeMail(anyString(), anyString(), anyString());
     }
 
     @ParameterizedTest
@@ -145,7 +135,7 @@ class EnterpriseRegistrationServiceImplTest {
         AppException exception = assertThrows(AppException.class, () -> service.register(request));
         assertEquals(ErrorCode.USER_EXISTED, exception.getErrorCode());
         verifyNoInteractions(enterpriseRepository);
-        assertFalse(welcomeMailSent);
+        verify(mailService, never()).sendWelcomeMail(anyString(), anyString(), anyString());
     }
 
     @Test
@@ -159,7 +149,7 @@ class EnterpriseRegistrationServiceImplTest {
         AppException exception = assertThrows(AppException.class, () -> service.register(request));
         assertEquals(ErrorCode.TAX_CODE_EXISTED, exception.getErrorCode());
         verify(enterpriseRepository, never()).save(any());
-        assertFalse(welcomeMailSent);
+        verify(mailService, never()).sendWelcomeMail(anyString(), anyString(), anyString());
     }
 
     @Test

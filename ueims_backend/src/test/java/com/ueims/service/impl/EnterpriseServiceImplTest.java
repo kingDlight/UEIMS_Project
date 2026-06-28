@@ -36,24 +36,8 @@ class EnterpriseServiceImplTest {
     @Mock
     private UserRepository userRepository;
 
-    static class MockMailService extends MailService {
-        String lastTo;
-        String lastStatus;
-        String lastReason;
-
-        public MockMailService() {
-            super(null, null);
-        }
-
-        @Override
-        public void sendEnterpriseStatusNotification(String to, String contactPerson, String status, String reason) {
-            this.lastTo = to;
-            this.lastStatus = status;
-            this.lastReason = reason;
-        }
-    }
-
-    private MockMailService mailService;
+    @Mock
+    private MailService mailService;
 
     private EnterpriseServiceImpl service;
 
@@ -63,7 +47,6 @@ class EnterpriseServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        mailService = new MockMailService();
         service = new EnterpriseServiceImpl(repository, userRepository, mailService);
 
         enterprise = new Enterprise();
@@ -240,8 +223,9 @@ class EnterpriseServiceImplTest {
         assertEquals("APPROVED", result.getStatus());
         assertNull(result.getRejectionReason());
 
-        assertEquals(enterprise.getContactEmail(), mailService.lastTo);
-        assertEquals("APPROVED", mailService.lastStatus);
+        verify(mailService)
+                .sendEnterpriseStatusNotification(
+                        eq(enterprise.getContactEmail()), eq(enterprise.getContactPerson()), eq("APPROVED"), eq(null));
     }
 
     @Test
@@ -253,9 +237,12 @@ class EnterpriseServiceImplTest {
         assertEquals("REJECTED", result.getStatus());
         assertEquals("Not enough info", result.getRejectionReason());
 
-        assertEquals(enterprise.getContactEmail(), mailService.lastTo);
-        assertEquals("REJECTED", mailService.lastStatus);
-        assertEquals("Not enough info", mailService.lastReason);
+        verify(mailService)
+                .sendEnterpriseStatusNotification(
+                        eq(enterprise.getContactEmail()),
+                        eq(enterprise.getContactPerson()),
+                        eq("REJECTED"),
+                        eq("Not enough info"));
     }
 
     @Test

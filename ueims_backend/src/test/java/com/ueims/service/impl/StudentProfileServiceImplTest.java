@@ -208,11 +208,10 @@ class StudentProfileServiceImplTest {
         when(repository.save(any(StudentProfile.class))).thenAnswer(i -> i.getArgument(0));
 
         StudentProfileUpdateRequest request = new StudentProfileUpdateRequest();
-        request.setMajor("AI");
         request.setSkills("Java");
 
         StudentProfile updated = service.updateProfile(profileId, request);
-        assertEquals("AI", updated.getMajor());
+        assertEquals("SE", updated.getMajor());
         assertEquals("Java", updated.getSkills());
     }
 

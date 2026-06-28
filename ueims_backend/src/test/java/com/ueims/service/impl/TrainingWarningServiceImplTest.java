@@ -36,31 +36,15 @@ class TrainingWarningServiceImplTest {
     @Mock
     private EnterpriseAssignmentRepository enterpriseAssignmentRepository;
 
-    static class MockMailService extends MailService {
-        String lastTo;
-        String lastFullName;
-        Integer lastWeekNumber;
+    @Mock
+    private MailService mailService;
 
-        public MockMailService() {
-            super(null, null);
-        }
-
-        @Override
-        public void sendLateReportWarningMail(String to, String fullName, Integer weekNumber) {
-            this.lastTo = to;
-            this.lastFullName = fullName;
-            this.lastWeekNumber = weekNumber;
-        }
-    }
-
-    private MockMailService mailService;
     private TrainingWarningServiceImpl service;
     private TrainingWarning warning;
     private UUID warningId;
 
     @BeforeEach
     void setUp() {
-        mailService = new MockMailService();
         service = new TrainingWarningServiceImpl(
                 repository, weeklyReportRepository, enterpriseAssignmentRepository, mailService);
 
@@ -114,7 +98,7 @@ class TrainingWarningServiceImplTest {
 
         assertEquals(0, count);
         verify(repository, never()).saveAll(any());
-        assertNull(mailService.lastTo);
+        verifyNoInteractions(mailService);
     }
 
     @Test
@@ -143,9 +127,7 @@ class TrainingWarningServiceImplTest {
             return w.getStudent().getUserId().equals(student.getUserId()) && w.getWeekNumber() == 3;
         }));
 
-        assertEquals("nva@example.com", mailService.lastTo);
-        assertEquals("Nguyen Van A", mailService.lastFullName);
-        assertEquals(3, mailService.lastWeekNumber);
+        verify(mailService).sendLateReportWarningMail(eq("nva@example.com"), eq("Nguyen Van A"), eq(3));
     }
 
     @Test
@@ -168,7 +150,7 @@ class TrainingWarningServiceImplTest {
 
         assertEquals(1, count);
         verify(repository).saveAll(any());
-        assertEquals("nvb@example.com", mailService.lastTo);
+        verify(mailService).sendLateReportWarningMail(eq("nvb@example.com"), eq("Nguyen Van B"), eq(4));
     }
 
     @Test
@@ -201,6 +183,6 @@ class TrainingWarningServiceImplTest {
 
         assertEquals(2, count);
         verify(repository).saveAll(any());
-        assertNull(mailService.lastTo); // No mail should be sent
+        verifyNoInteractions(mailService); // No mail should be sent
     }
 }

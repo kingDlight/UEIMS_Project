@@ -1,4 +1,4 @@
-package com.ueims.service;
+package com.ueims.service.impl;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
@@ -20,7 +20,7 @@ import org.thymeleaf.spring6.SpringTemplateEngine;
 import org.thymeleaf.templateresolver.StringTemplateResolver;
 
 @ExtendWith(MockitoExtension.class)
-class MailServiceTest {
+class MailServiceImplTest {
 
     private static final String TEST_EMAIL = "test@test.com";
     private static final String TEST_USER = "Test User";
@@ -28,7 +28,7 @@ class MailServiceTest {
     @Mock
     private JavaMailSender javaMailSender;
 
-    private MailService mailService;
+    private MailServiceImpl mailService;
 
     private MimeMessage mimeMessage;
 
@@ -38,9 +38,11 @@ class MailServiceTest {
         StringTemplateResolver resolver = new StringTemplateResolver();
         templateEngine.setTemplateResolver(resolver);
 
-        mailService = new MailService(javaMailSender, templateEngine);
+        mailService = new MailServiceImpl(javaMailSender, templateEngine);
 
         mimeMessage = new JavaMailSenderImpl().createMimeMessage();
+
+        // reflection property if needed
         ReflectionTestUtils.setField(mailService, "appBaseUrl", "http://localhost:5173");
     }
 
