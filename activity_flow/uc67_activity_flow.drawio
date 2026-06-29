@@ -1,0 +1,142 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0">
+  <diagram id="activity_UC-67_Activity_Flow" name="UC-67 Activity Flow">
+    <mxGraphModel dx="983" dy="529" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="Start" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#000000;strokeColor=none;" value="" vertex="1">
+          <mxGeometry height="40" width="40" x="400" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="SubmitReport" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Submit Weekly Report" vertex="1">
+          <mxGeometry height="40" width="120" x="360" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="UpdateProcessing" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Update Status to Processing" vertex="1">
+          <mxGeometry height="40" width="120" x="360" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="IsServiceBusy" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="Is Service Busy?" vertex="1">
+          <mxGeometry height="80" width="120" x="360" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="PlaceInQueue" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Place in Queue" vertex="1">
+          <mxGeometry height="40" width="120" x="160" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="NotifyStudentScanning" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Notify Student Scanning" vertex="1">
+          <mxGeometry height="40" width="120" x="160" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="TriggerScan" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Trigger Plagiarism Scan" vertex="1">
+          <mxGeometry height="40" width="120" x="360" y="460" as="geometry" />
+        </mxCell>
+        <mxCell id="CompareText" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Compare Text with DB" vertex="1">
+          <mxGeometry height="40" width="120" x="360" y="540" as="geometry" />
+        </mxCell>
+        <mxCell id="IsError" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="Processing Error?" vertex="1">
+          <mxGeometry height="80" width="120" x="360" y="620" as="geometry" />
+        </mxCell>
+        <mxCell id="LogError" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Log Error" vertex="1">
+          <mxGeometry height="40" width="120" x="160" y="740" as="geometry" />
+        </mxCell>
+        <mxCell id="NotifyManagerError" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Notify TM (Error)" vertex="1">
+          <mxGeometry height="40" width="120" x="160" y="820" as="geometry" />
+        </mxCell>
+        <mxCell id="CalculateScore" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Calculate Jaccard Score" vertex="1">
+          <mxGeometry height="40" width="120" x="360" y="740" as="geometry" />
+        </mxCell>
+        <mxCell id="SaveScore" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Save Score to DB" vertex="1">
+          <mxGeometry height="40" width="120" x="360" y="820" as="geometry" />
+        </mxCell>
+        <mxCell id="IsAnomaly" parent="1" style="rhombus;whiteSpace=wrap;html=1;" value="Score &gt;= 85%?" vertex="1">
+          <mxGeometry height="80" width="120" x="360" y="900" as="geometry" />
+        </mxCell>
+        <mxCell id="MarkAnomaly" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Mark as Anomaly" vertex="1">
+          <mxGeometry height="40" width="120" x="560" y="920" as="geometry" />
+        </mxCell>
+        <mxCell id="NotifyManagerAnomaly" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Notify TM &amp; Flag Enterprise" vertex="1">
+          <mxGeometry height="40" width="120" x="480" y="1000" as="geometry" />
+        </mxCell>
+        <mxCell id="EndSuccess" parent="1" style="ellipse;html=1;shape=endState;fillColor=#000000;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="40" width="40" x="400" y="1040" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="Start" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="SubmitReport" value="(1)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="SubmitReport" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="UpdateProcessing" value="(2)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="UpdateProcessing" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="IsServiceBusy" value="(3)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="IsServiceBusy" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0;exitY=0.5;entryX=0.5;entryY=0;" target="PlaceInQueue" value="(4) Yes">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="220" y="320" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="PlaceInQueue" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="NotifyStudentScanning" value="(5)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="NotifyStudentScanning" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0;entryY=0.5;" target="TriggerScan" value="(6)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="220" y="480" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="IsServiceBusy" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="TriggerScan" value="(7) No">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="TriggerScan" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="CompareText" value="(8)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="CompareText" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="IsError" value="(9)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="IsError" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0;exitY=0.5;entryX=0.5;entryY=0;" target="LogError" value="(10) Yes">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="220" y="660" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="LogError" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="NotifyManagerError" value="(11)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="NotifyManagerError" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0;entryY=0.5;" target="EndSuccess" value="(12)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="220" y="1060" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e13" edge="1" parent="1" source="IsError" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="CalculateScore" value="(13) No">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e14" edge="1" parent="1" source="CalculateScore" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="SaveScore" value="(14)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e15" edge="1" parent="1" source="SaveScore" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="IsAnomaly" value="(15)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e16" edge="1" parent="1" source="IsAnomaly" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0.5;entryY=0;" target="MarkAnomaly" value="(16) Yes">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="520" y="940" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e17" edge="1" parent="1" source="MarkAnomaly" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="NotifyManagerAnomaly" value="(17)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e18" edge="1" parent="1" source="NotifyManagerAnomaly" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=1;entryY=0.5;" target="EndSuccess" value="(18)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="540" y="1060" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e19" edge="1" parent="1" source="IsAnomaly" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" target="EndSuccess" value="(19) No">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
