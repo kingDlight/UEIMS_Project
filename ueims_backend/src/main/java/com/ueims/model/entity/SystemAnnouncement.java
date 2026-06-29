@@ -45,7 +45,7 @@ public class SystemAnnouncement extends BaseEntity {
     private String status = "DRAFT";
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by", nullable = false)
+    @JoinColumn(name = "created_by", nullable = false, updatable = false)
     @NotFound(action = NotFoundAction.IGNORE)
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private User createdBy;
