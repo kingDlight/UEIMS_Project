@@ -3,10 +3,10 @@ package com.ueims.model.entity;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import jakarta.persistence.*;
+
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
-
-import jakarta.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 

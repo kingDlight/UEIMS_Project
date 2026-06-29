@@ -5,6 +5,11 @@ import java.util.UUID;
 
 import jakarta.persistence.*;
 
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import lombok.*;
 
 @Entity
@@ -25,7 +30,8 @@ public class SystemAnnouncement extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "semester_id")
-    @com.fasterxml.jackson.annotation.JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @NotFound(action = NotFoundAction.IGNORE)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Semester semester;
 
     @Column(name = "title", nullable = false, length = 500)
@@ -40,7 +46,8 @@ public class SystemAnnouncement extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by", nullable = false)
-    @com.fasterxml.jackson.annotation.JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @NotFound(action = NotFoundAction.IGNORE)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private User createdBy;
 
     @Column(name = "published_at")
