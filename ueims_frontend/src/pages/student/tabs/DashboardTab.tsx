@@ -735,7 +735,7 @@ const UpcomingCard: React.FC<{ onNavigate: (route: string) => void }> = ({ onNav
   );
 };
 
-const RecentActivityCard: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => {
+const RecentActivityCard: React.FC<{ onNavigate: (route: string) => void, activities: any[] }> = ({ onNavigate, activities }) => {
   const { t } = useTranslation(['studentDashboard']);
   return (
     <motion.div
@@ -756,8 +756,8 @@ const RecentActivityCard: React.FC<{ onNavigate: (route: string) => void }> = ({
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, flex: 1 }}>
-          {stats.recentActivities && stats.recentActivities.length > 0 ? (
-            stats.recentActivities.slice(0, 5).map((item, i) => {
+          {activities && activities.length > 0 ? (
+            activities.slice(0, 5).map((item, i) => {
               let tone = cc.info;
               if (item.type === 'interview') tone = cc.warning;
               if (item.type === 'report') tone = cc.success;
@@ -790,7 +790,7 @@ const RecentActivityCard: React.FC<{ onNavigate: (route: string) => void }> = ({
 
         <div style={{ height: 1, background: cc.borderSubtle, marginTop: 'auto', marginBottom: 14 }} />
         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <TextLink color={cc.brand} onClick={() => onNavigate('dashboard')}>{t('viewAllHistory', 'View All History')}</TextLink>
+          <TextLink color={cc.brand} onClick={() => onNavigate('history')}>{t('viewAllHistory', 'View All History')}</TextLink>
         </div>
       </CardWrapper>
     </motion.div>
@@ -1057,7 +1057,7 @@ export const StudentDashboardTab: React.FC<DashboardTabProps> = ({ currentSemest
               <div style={{ display: 'grid', gridTemplateColumns: '7fr 3fr', gap: 24 }}>
                 {/* Left Column (Main content) */}
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  {showRecentActivity && <RecentActivityCard onNavigate={handleNavigate} />}
+                  {showRecentActivity && <RecentActivityCard onNavigate={handleNavigate} activities={stats.recentActivities} />}
                 </div>
 
                 {/* Right Column (Sidebar content) */}

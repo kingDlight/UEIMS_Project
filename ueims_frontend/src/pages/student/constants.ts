@@ -9,6 +9,7 @@ import {
   CheckCircleOutlined,
   SettingOutlined,
   FileProtectOutlined,
+  HistoryOutlined,
 } from '@ant-design/icons';
 import type { NavItem } from '@/components/layout/ModernLayout';
 
@@ -110,7 +111,8 @@ export type StudentPageKey =
   | 'reports'
   | 'feedback'
   | 'final-report'
-  | 'evaluation';
+  | 'evaluation'
+  | 'history';
 
 export const navItems: NavItem[] = [
   { key: 'dashboard', label: 'Dashboard', icon: React.createElement(CalendarOutlined), roles: ['STUDENT'] },
@@ -123,6 +125,7 @@ export const navItems: NavItem[] = [
   { key: 'feedback', label: 'Feedback', icon: React.createElement(CheckCircleOutlined), roles: ['STUDENT'] },
   { key: 'final-report', label: 'Final Report', icon: React.createElement(FileProtectOutlined), roles: ['STUDENT'] },
   { key: 'evaluation', label: 'Evaluation', icon: React.createElement(TrophyOutlined), roles: ['STUDENT'] },
+  { key: 'history', label: 'History', icon: React.createElement(HistoryOutlined), roles: ['STUDENT'] },
 ];
 
 export const defaultPage: StudentPageKey = 'dashboard';
