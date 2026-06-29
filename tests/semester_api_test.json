@@ -1,0 +1,285 @@
+{
+  "info": {
+    "name": "Semester API Tests - Issues #139 #140 #144",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Login - Get Token",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Login successful - status 200', function() {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "var jsonData = pm.response.json();",
+              "pm.test('Response has token', function() {",
+              "  pm.expect(jsonData.result.accessToken).to.be.a('string').and.not.empty;",
+              "});",
+              "pm.collectionVariables.set('token', jsonData.result.accessToken || '');",
+              "console.log('Token set successfully:', !!pm.collectionVariables.get('token'));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\":\"tm@ueims.edu.vn\",\"password\":\"1234567890\",\"deviceId\":\"newman-test-device-001\"}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/auth/token",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "auth", "token"]
+        }
+      }
+    },
+    {
+      "name": "TC-SEM-003: Get Semesters - Default (no params)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200 OK', function() {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Response is an array', function() {",
+              "  var jsonData = pm.response.json();",
+              "  pm.expect(jsonData).to.be.an('array');",
+              "});",
+              "var jsonData = pm.response.json();",
+              "if (jsonData.length > 0) {",
+              "  pm.collectionVariables.set('semesterId', jsonData[0].semesterId);",
+              "  console.log('Total semesters:', jsonData.length);",
+              "  console.log('First semester:', jsonData[0].semesterCode, '-', jsonData[0].status);",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/semesters",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "semesters"]
+        }
+      }
+    },
+    {
+      "name": "TC-SEM-003: Sort by startDate ASC",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200 OK', function() {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Response is a non-empty array', function() {",
+              "  var jsonData = pm.response.json();",
+              "  pm.expect(jsonData).to.be.an('array');",
+              "});",
+              "pm.test('Sorted by startDate ascending', function() {",
+              "  var jsonData = pm.response.json();",
+              "  if (jsonData.length > 1) {",
+              "    for (var i = 1; i < jsonData.length; i++) {",
+              "      var prev = new Date(jsonData[i-1].startDate).getTime();",
+              "      var curr = new Date(jsonData[i].startDate).getTime();",
+              "      pm.expect(curr).to.be.at.least(prev, 'startDate should be ascending at index ' + i);",
+              "    }",
+              "  }",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/semesters?sortBy=startDate&sortDirection=asc",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "semesters"],
+          "query": [
+            { "key": "sortBy", "value": "startDate" },
+            { "key": "sortDirection", "value": "asc" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "TC-SEM-003: Sort by endDate DESC",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200 OK', function() {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Sorted by endDate descending', function() {",
+              "  var jsonData = pm.response.json();",
+              "  if (jsonData.length > 1) {",
+              "    for (var i = 1; i < jsonData.length; i++) {",
+              "      var prev = new Date(jsonData[i-1].endDate).getTime();",
+              "      var curr = new Date(jsonData[i].endDate).getTime();",
+              "      pm.expect(curr).to.be.at.most(prev, 'endDate should be descending at index ' + i);",
+              "    }",
+              "  }",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/semesters?sortBy=endDate&sortDirection=desc",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "semesters"],
+          "query": [
+            { "key": "sortBy", "value": "endDate" },
+            { "key": "sortDirection", "value": "desc" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "TC-SEM-002: Filter by status=ACTIVE",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200 OK', function() {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('All returned semesters have status ACTIVE', function() {",
+              "  var jsonData = pm.response.json();",
+              "  pm.expect(jsonData).to.be.an('array');",
+              "  jsonData.forEach(function(s, idx) {",
+              "    pm.expect(s.status).to.equal('ACTIVE', 'Item at index ' + idx + ' should be ACTIVE');",
+              "  });",
+              "  console.log('ACTIVE semesters count:', jsonData.length);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/semesters?status=ACTIVE",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "semesters"],
+          "query": [
+            { "key": "status", "value": "ACTIVE" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "TC-SEM-002: Filter by status=DRAFT",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200 OK', function() {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('All returned semesters have status DRAFT', function() {",
+              "  var jsonData = pm.response.json();",
+              "  pm.expect(jsonData).to.be.an('array');",
+              "  jsonData.forEach(function(s, idx) {",
+              "    pm.expect(s.status).to.equal('DRAFT', 'Item at index ' + idx + ' should be DRAFT');",
+              "  });",
+              "  console.log('DRAFT semesters count:', jsonData.length);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/semesters?status=DRAFT",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "semesters"],
+          "query": [
+            { "key": "status", "value": "DRAFT" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "TC-SEM-012: State Machine - GET semester by ID",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200 OK', function() {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Has required semester fields', function() {",
+              "  var jsonData = pm.response.json();",
+              "  pm.expect(jsonData).to.have.property('semesterId');",
+              "  pm.expect(jsonData).to.have.property('status');",
+              "  pm.expect(jsonData).to.have.property('semesterCode');",
+              "  pm.expect(jsonData).to.have.property('startDate');",
+              "  pm.expect(jsonData).to.have.property('endDate');",
+              "  console.log('Semester status:', jsonData.status);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/semesters/{{semesterId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "semesters", "{{semesterId}}"]
+        }
+      }
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "token", "value": "" },
+    { "key": "semesterId", "value": "" }
+  ]
+}

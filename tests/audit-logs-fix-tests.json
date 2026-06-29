@@ -1,0 +1,170 @@
+{
+  "info": {
+    "name": "Issue #222 & #223 - Audit Logs RBAC & Export Tests",
+    "_postman_id": "audit-logs-test-collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "adminToken",
+      "value": ""
+    },
+    {
+      "key": "studentToken",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Setup - Login as ADMIN",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('ADMIN login successful', function() {",
+              "  pm.response.to.have.status(200);",
+              "  const json = pm.response.json();",
+              "  pm.expect(json.result.accessToken).to.not.be.empty;",
+              "  pm.collectionVariables.set('adminToken', json.result.accessToken);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "url": "{{baseUrl}}/api/auth/token",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\":\"admin@fpt.edu.vn\",\"password\":\"1234567890\",\"deviceId\":\"newman-test-admin\"}"
+        }
+      }
+    },
+    {
+      "name": "Setup - Login as STUDENT",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('STUDENT login successful', function() {",
+              "  pm.response.to.have.status(200);",
+              "  const json = pm.response.json();",
+              "  pm.expect(json.result.accessToken).to.not.be.empty;",
+              "  pm.collectionVariables.set('studentToken', json.result.accessToken);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "url": "{{baseUrl}}/api/auth/token",
+        "body": {
+          "mode": "raw",
+          "raw": "{\"email\":\"student15@fpt.edu.vn\",\"password\":\"1234567890\",\"deviceId\":\"newman-test-student\"}"
+        }
+      }
+    },
+    {
+      "name": "TC-AUTH-037 - STUDENT must get 403 on GET /api/audit-logs",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('TC-AUTH-037: STUDENT cannot access audit logs (403 Forbidden)', function() {",
+              "  pm.response.to.have.status(403);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [{"key": "Authorization", "value": "Bearer {{studentToken}}"}],
+        "url": "{{baseUrl}}/api/audit-logs"
+      }
+    },
+    {
+      "name": "TC-AUTH-037b - STUDENT must get 403 on GET /api/audit-logs/export",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('TC-AUTH-037: STUDENT cannot access audit log export (403 Forbidden)', function() {",
+              "  pm.response.to.have.status(403);",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [{"key": "Authorization", "value": "Bearer {{studentToken}}"}],
+        "url": "{{baseUrl}}/api/audit-logs/export"
+      }
+    },
+    {
+      "name": "TC-AUTH-038 - ADMIN can GET /api/audit-logs (no timeout)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('TC-AUTH-038: ADMIN can access audit logs (200 OK)', function() {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('TC-AUTH-038: Response received within 10 seconds', function() {",
+              "  pm.expect(pm.response.responseTime).to.be.below(10000);",
+              "});",
+              "pm.test('TC-AUTH-038: Response has result array', function() {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json.result).to.be.an('array');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [{"key": "Authorization", "value": "Bearer {{adminToken}}"}],
+        "url": "{{baseUrl}}/api/audit-logs"
+      }
+    },
+    {
+      "name": "TC-AUTH-039 - ADMIN can export audit logs (no timeout)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('TC-AUTH-039: ADMIN can export audit logs (200 OK)', function() {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('TC-AUTH-039: Response received within 30 seconds', function() {",
+              "  pm.expect(pm.response.responseTime).to.be.below(30000);",
+              "});",
+              "pm.test('TC-AUTH-039: Content-Disposition is attachment', function() {",
+              "  pm.expect(pm.response.headers.get('Content-Disposition')).to.include('attachment');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [{"key": "Authorization", "value": "Bearer {{adminToken}}"}],
+        "url": "{{baseUrl}}/api/audit-logs/export"
+      }
+    }
+  ]
+}
