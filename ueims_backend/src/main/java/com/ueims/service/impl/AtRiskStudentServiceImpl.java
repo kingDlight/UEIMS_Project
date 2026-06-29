@@ -81,16 +81,19 @@ public class AtRiskStudentServiceImpl implements AtRiskStudentService {
                 semester.getSemesterId(), List.of("ELIGIBLE", "PENDING"));
 
         for (EligibleStudent es : eligibleList) {
-            Optional<EnterpriseAssignment> existingAssignment =
-                    enterpriseAssignmentRepository.findByStudent_UserIdAndSemester_Status(
-                            es.getUser().getUserId(), "ACTIVE");
+            if (es.getUser() != null && es.getUser().getUserId() != null) {
+                Optional<EnterpriseAssignment> existingAssignment =
+                        enterpriseAssignmentRepository.findByStudent_UserIdAndSemester_Status(
+                                es.getUser().getUserId(), "ACTIVE");
 
-            if (existingAssignment.isPresent()) continue;
+                if (existingAssignment.isPresent()) continue;
+            }
 
+            LocalDate startDate = semester.getStartDate() != null ? semester.getStartDate() : LocalDate.now();
             long daysAtRisk = ChronoUnit.DAYS.between(
                     Optional.ofNullable(es.getApprovedAt())
                             .map(la -> la.toLocalDate())
-                            .orElse(semester.getStartDate()),
+                            .orElse(startDate),
                     LocalDate.now());
 
             int priorityScore = daysAtRisk >= 14 ? 90 : daysAtRisk >= 7 ? 70 : 50;
@@ -103,7 +106,7 @@ public class AtRiskStudentServiceImpl implements AtRiskStudentService {
 
             results.add(AtRiskStudentResult.builder()
                     .assignmentId(null)
-                    .studentId(es.getUser().getUserId())
+                    .studentId(es.getUser() != null ? es.getUser().getUserId() : null)
                     .studentName(es.getFullName())
                     .studentCode(es.getStudentCode())
                     .semesterId(semester.getSemesterId())
@@ -139,7 +142,8 @@ public class AtRiskStudentServiceImpl implements AtRiskStudentService {
             UUID assignmentId = ea.getAssignmentId();
             List<WeeklyReport> reports = weeklyReportRepository.findByAssignment_AssignmentId(assignmentId);
 
-            int expectedWeeks = (int) ChronoUnit.WEEKS.between(semester.getStartDate(), LocalDate.now()) + 1;
+            LocalDate startDate = semester.getStartDate() != null ? semester.getStartDate() : LocalDate.now();
+            int expectedWeeks = (int) ChronoUnit.WEEKS.between(startDate, LocalDate.now()) + 1;
             expectedWeeks = Math.max(0, expectedWeeks);
 
             int submitted = (int) reports.stream()
@@ -167,10 +171,10 @@ public class AtRiskStudentServiceImpl implements AtRiskStudentService {
 
             results.add(AtRiskStudentResult.builder()
                     .assignmentId(assignmentId)
-                    .studentId(ea.getStudent().getUserId())
-                    .studentName(ea.getStudent().getFullName())
+                    .studentId(ea.getStudent() != null ? ea.getStudent().getUserId() : null)
+                    .studentName(ea.getStudent() != null ? ea.getStudent().getFullName() : null)
                     .studentCode(
-                            ea.getStudent().getStudentProfile() != null
+                            ea.getStudent() != null && ea.getStudent().getStudentProfile() != null
                                     ? ea.getStudent().getStudentProfile().getStudentCode()
                                     : "—")
                     .semesterId(semester.getSemesterId())
@@ -205,7 +209,7 @@ public class AtRiskStudentServiceImpl implements AtRiskStudentService {
         for (EligibleStudent es : cancelledList) {
             results.add(AtRiskStudentResult.builder()
                     .assignmentId(null)
-                    .studentId(es.getUser().getUserId())
+                    .studentId(es.getUser() != null ? es.getUser().getUserId() : null)
                     .studentName(es.getFullName())
                     .studentCode(es.getStudentCode())
                     .semesterId(semester.getSemesterId())
