@@ -756,24 +756,36 @@ const RecentActivityCard: React.FC<{ onNavigate: (route: string) => void }> = ({
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, flex: 1 }}>
-          {[
-            { title: t('appSubmitted', 'Application submitted to TechCorp'), meta: '2 hours ago', tone: cc.info },
-            { title: t('reportApproved', 'Weekly report W22 approved'), meta: 'Yesterday', tone: cc.success },
-            { title: t('interviewScheduled', 'Interview scheduled for Jul 15'), meta: '3 days ago', tone: cc.warning },
-          ].map((item, i) => (
-            <motion.div
-              key={i}
-              whileHover={{ x: 2 }}
-              transition={{ duration: 0.15 }}
-              style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '12px 14px', borderRadius: cc.radiusMd, background: cc.borderSubtle }}
-            >
-              <div style={{ width: 10, height: 10, borderRadius: '50%', background: item.tone, boxShadow: `0 0 0 4px ${item.tone}20`, marginTop: 4, flexShrink: 0 }} />
-              <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: cc.textPrimary }}>{item.title}</div>
-                <div style={{ fontSize: 11, color: cc.textMuted, marginTop: 2 }}>{item.meta}</div>
-              </div>
-            </motion.div>
-          ))}
+          {stats.recentActivities && stats.recentActivities.length > 0 ? (
+            stats.recentActivities.slice(0, 5).map((item, i) => {
+              let tone = cc.info;
+              if (item.type === 'interview') tone = cc.warning;
+              if (item.type === 'report') tone = cc.success;
+              
+              // Simple date formatting if date-fns is not available
+              const d = new Date(item.date);
+              const meta = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+              
+              return (
+                <motion.div
+                  key={item.id || i}
+                  whileHover={{ x: 2 }}
+                  transition={{ duration: 0.15 }}
+                  style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '12px 14px', borderRadius: cc.radiusMd, background: cc.borderSubtle }}
+                >
+                  <div style={{ width: 10, height: 10, borderRadius: '50%', background: tone, boxShadow: `0 0 0 4px ${tone}20`, marginTop: 4, flexShrink: 0 }} />
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: cc.textPrimary }}>{item.title}</div>
+                    <div style={{ fontSize: 11, color: cc.textMuted, marginTop: 2 }}>{meta}</div>
+                  </div>
+                </motion.div>
+              );
+            })
+          ) : (
+            <div style={{ padding: '20px', textAlign: 'center', color: cc.textMuted, fontSize: 13 }}>
+              No recent activity found.
+            </div>
+          )}
         </div>
 
         <div style={{ height: 1, background: cc.borderSubtle, marginTop: 'auto', marginBottom: 14 }} />
