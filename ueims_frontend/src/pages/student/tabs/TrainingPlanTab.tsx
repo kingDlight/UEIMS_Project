@@ -26,19 +26,19 @@ interface InternshipPlanResponse {
 
 const statusConfig: Record<string, { label: string; color: string; bg: string; icon: React.ReactNode }> = {
   COMPLETED: {
-    label: 'Hoàn thành',
+    label: 'Completed',
     color: '#16a34a',
     bg: '#dcfce7',
     icon: <CheckCircleOutlined />,
   },
   IN_PROGRESS: {
-    label: 'Đang thực hiện',
+    label: 'In Progress',
     color: '#2563eb',
     bg: '#dbeafe',
     icon: <ClockCircleOutlined />,
   },
   PENDING: {
-    label: 'Chưa bắt đầu',
+    label: 'Pending',
     color: '#d97706',
     bg: '#fef3c7',
     icon: <DownCircleOutlined />,
@@ -57,12 +57,12 @@ const EmptyState: React.FC<{ hasError: boolean }> = ({ hasError }) => (
       <BookOutlined style={{ fontSize: 32 }} />
     </div>
     <h3 style={{ fontSize: 16, fontWeight: 600, color: cc.textPrimary, margin: '0 0 6px' }}>
-      {hasError ? 'Không thể tải kế hoạch' : 'Chưa có kế hoạch đào tạo'}
+      {hasError ? 'Unable to load training plan' : 'No training plan yet'}
     </h3>
     <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}>
       {hasError
-        ? 'Đã xảy ra lỗi khi tải dữ liệu. Vui lòng thử lại sau.'
-        : 'Kế hoạch đào tạo sẽ được hiển thị khi doanh nghiệp của bạn tạo và gửi cho bạn.'}
+        ? 'Something went wrong while loading your data. Please try again later.'
+        : 'Your training plan will appear here once your enterprise assigns one for you.'}
     </p>
   </NeuSurface>
 );
@@ -102,10 +102,10 @@ export const TrainingPlanTab: React.FC = () => {
       <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 24px 40px', fontFamily: 'Inter, sans-serif' }}>
         <div style={{ marginBottom: 24 }}>
           <h2 style={{ fontSize: 22, fontWeight: 800, color: cc.textPrimary, margin: '0 0 6px', letterSpacing: '-0.01em' }}>
-            {t('pageTitle', 'Kế hoạch Đào tạo')}
+            {t('pageTitle', 'Training Plan')}
           </h2>
           <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}>
-            Lộ trình thực tập từ doanh nghiệp của bạn
+            Your internship training roadmap from your enterprise
           </p>
         </div>
         <EmptyState hasError={hasError} />
@@ -129,10 +129,10 @@ export const TrainingPlanTab: React.FC = () => {
     <div style={{ maxWidth: 900, margin: '0 auto', padding: '0 24px 40px', fontFamily: 'Inter, sans-serif' }}>
       <div style={{ marginBottom: 24 }}>
         <h2 style={{ fontSize: 22, fontWeight: 800, color: cc.textPrimary, margin: '0 0 6px', letterSpacing: '-0.01em' }}>
-          {t('pageTitle', 'Kế hoạch Đào tạo')}
+          {t('pageTitle', 'Training Plan')}
         </h2>
         <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}>
-          Lộ trình thực tập từ doanh nghiệp của bạn
+          Your internship training roadmap from your enterprise
         </p>
       </div>
 
@@ -140,7 +140,7 @@ export const TrainingPlanTab: React.FC = () => {
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16, gap: 16 }}>
           <div style={{ flex: 1 }}>
             <h3 style={{ fontSize: 17, fontWeight: 700, color: cc.textPrimary, margin: '0 0 6px' }}>
-              {plan.overallGoal || 'Kế hoạch Thực tập OJT'}
+              {plan.overallGoal || 'OJT Training Plan'}
             </h3>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
               {plan.enterpriseName && (
@@ -150,8 +150,8 @@ export const TrainingPlanTab: React.FC = () => {
               )}
               {plan.startDate && (
                 <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 13, color: cc.textSecondary }}>
-                  <span style={{ color: cc.textMuted }}>Bắt đầu:</span>
-                  {new Date(plan.startDate).toLocaleDateString('vi-VN', { day: '2-digit', month: 'long', year: 'numeric' })}
+                  <span style={{ color: cc.textMuted }}>Started:</span>
+                  {new Date(plan.startDate).toLocaleDateString('en-US', { day: '2-digit', month: 'long', year: 'numeric' })}
                 </span>
               )}
             </div>
@@ -161,13 +161,13 @@ export const TrainingPlanTab: React.FC = () => {
             <div style={{ fontSize: 28, fontWeight: 800, color: cc.textPrimary, lineHeight: 1 }}>
               {completedCount}/{totalCount}
             </div>
-            <div style={{ fontSize: 12, color: cc.textMuted, marginTop: 2 }}>nhiệm vụ hoàn thành</div>
+            <div style={{ fontSize: 12, color: cc.textMuted, marginTop: 2 }}>tasks completed</div>
           </div>
         </div>
 
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-            <span style={{ fontSize: 12, fontWeight: 600, color: cc.textSecondary }}>Tiến độ tổng thể</span>
+            <span style={{ fontSize: 12, fontWeight: 600, color: cc.textSecondary }}>Overall Progress</span>
             <span style={{ fontSize: 12, fontWeight: 700, color: cc.primary }}>{progressPct}%</span>
           </div>
           <div style={{ height: 8, borderRadius: 4, background: cc.borderSubtle, overflow: 'hidden' }}>
@@ -198,10 +198,10 @@ export const TrainingPlanTab: React.FC = () => {
               </div>
               <div>
                 <div style={{ fontSize: 14, fontWeight: 700, color: cc.textPrimary }}>
-                  Tuần {weekNum}
+                  Week {weekNum}
                 </div>
                 <div style={{ fontSize: 11, color: cc.textMuted }}>
-                  {weekGroups[weekNum].length} nhiệm vụ
+                  {weekGroups[weekNum].length} {weekGroups[weekNum].length === 1 ? 'task' : 'tasks'}
                 </div>
               </div>
             </div>
@@ -233,7 +233,7 @@ export const TrainingPlanTab: React.FC = () => {
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                         <span style={{ fontSize: 13, fontWeight: 600, color: cc.textPrimary }}>
-                          Nhiệm vụ {idx + 1}
+                          Task {idx + 1}
                         </span>
                         <span style={{
                           fontSize: 11, fontWeight: 600,
@@ -248,7 +248,7 @@ export const TrainingPlanTab: React.FC = () => {
                       </p>
                       {task.targetDate && (
                         <div style={{ fontSize: 11, color: cc.textMuted, marginTop: 4 }}>
-                          Hạn chót: {new Date(task.targetDate).toLocaleDateString('vi-VN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                          Due: {new Date(task.targetDate).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' })}
                         </div>
                       )}
                     </div>
