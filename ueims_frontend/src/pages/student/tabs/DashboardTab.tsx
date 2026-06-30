@@ -800,10 +800,6 @@ export const StudentDashboardTab: React.FC<DashboardTabProps> = ({ currentSemest
     fetchStats();
   }, []);
 
-  const handleNavigate = (route: string) => {
-    navigate(`/student/${route}`);
-  };
-
   const isSemester1to4 = currentSemester >= 1 && currentSemester <= 4;
   const isSemester5 = currentSemester === 5;
   const isSemester6 = currentSemester === 6;
