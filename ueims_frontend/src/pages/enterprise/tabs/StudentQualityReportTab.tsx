@@ -127,7 +127,7 @@ export const StudentQualityReportTab: React.FC = () => {
                 const list = await SemesterService.getAllSemesters();
                 setSemesters(list);
 
-                // Default: prefer ACTIVE kỳ; fallback về semester mới nhất
+                // Default: prefer ACTIVE semester; fall back to most recent
                 const active = list.find((s) => s.status === 'ACTIVE');
                 const fallback =
                     active ?? [...list].sort((a, b) => (b.semesterCode || '').localeCompare(a.semesterCode || ''))[0];
@@ -186,11 +186,11 @@ export const StudentQualityReportTab: React.FC = () => {
         const totalFailed = rows.reduce((s, r) => s + r.interviewsFailed, 0);
         const totalInterview = totalPassed + totalFailed;
 
-        // GPA trung bình weighted bởi số SV
+        // GPA weighted by student count
         const gpaWeightedSum = rows.reduce((s, r) => s + (r.avgGpa ?? 0) * r.totalStudents, 0);
         const avgGpa = totalStudents > 0 ? gpaWeightedSum / totalStudents : 0;
 
-        // Final grade trung bình weighted
+        // Final grade weighted average
         const gradeWeightedSum = rows.reduce(
             (s, r) => s + (r.avgFinalGrade ?? 0) * r.totalStudents,
             0,
@@ -212,7 +212,7 @@ export const StudentQualityReportTab: React.FC = () => {
     // Chart data: grouped by semester for "All", single semester for specific
     const chartData = useMemo(() => {
         if (selectedSemester === ALL_SEMESTERS) {
-            // Group by semesterCode → bar cho total students và tổng pass/fail
+            // Group by semesterCode → bars for total students and aggregated pass/fail
             const map = new Map<
                 string,
                 { semester: string; students: number; passed: number; failed: number; passRate: number }
@@ -293,19 +293,19 @@ export const StudentQualityReportTab: React.FC = () => {
                                 marginTop: 6,
                             }}
                         >
-                            Thống kê chất lượng sinh viên theo ngành mà doanh nghiệp đã/đang nhận.
+                            Statistical breakdown of student quality by major that the enterprise has hosted or is currently hosting.
                         </div>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                         <span style={{ fontSize: 12, color: cc.textSecondary, fontWeight: 600 }}>
-                            Kỳ học:
+                            Semester:
                         </span>
                         <Select
                             value={selectedSemester}
                             onChange={(val) => setSelectedSemester(val)}
                             style={{ minWidth: 240 }}
                             options={[
-                                { value: ALL_SEMESTERS, label: 'Tất cả các kỳ' },
+                                { value: ALL_SEMESTERS, label: 'All semesters' },
                                 ...semesters.map((s) => ({
                                     value: s.semesterId,
                                     label: `${s.name} ${s.status === 'ACTIVE' ? '(Active)' : ''}`,
@@ -345,28 +345,28 @@ export const StudentQualityReportTab: React.FC = () => {
             >
                 <KpiCard
                     icon={<Users size={18} />}
-                    label="Tổng SV đã nhận"
+                    label="Total students hosted"
                     value={summary.totalStudents.toLocaleString()}
                     color={cc.info}
                     bg="#EFF6FF"
                 />
                 <KpiCard
                     icon={<Layers size={18} />}
-                    label="Số ngành"
+                    label="Majors"
                     value={summary.majorCount.toString()}
                     color={cc.brand}
                     bg="#FFF8F0"
                 />
                 <KpiCard
                     icon={<TrendingUp size={18} />}
-                    label="GPA trung bình"
+                    label="Average GPA"
                     value={summary.avgGpa.toFixed(2)}
                     color="#7C3AED"
                     bg="#F5F3FF"
                 />
                 <KpiCard
                     icon={<CheckCircle2 size={18} />}
-                    label="Pass Rate phỏng vấn"
+                    label="Interview pass rate"
                     value={`${summary.overallPassRate.toFixed(1)}%`}
                     color={passRateColor(summary.overallPassRate)}
                     bg={hexToRgba(passRateColor(summary.overallPassRate), 0.08)}
@@ -374,7 +374,7 @@ export const StudentQualityReportTab: React.FC = () => {
                 />
                 <KpiCard
                     icon={<Award size={18} />}
-                    label="Điểm tổng kết TB"
+                    label="Average final grade"
                     value={summary.avgFinalGrade > 0 ? summary.avgFinalGrade.toFixed(2) : '—'}
                     color="#0891B2"
                     bg="#ECFEFF"
@@ -387,8 +387,8 @@ export const StudentQualityReportTab: React.FC = () => {
                     icon={<TrendingUp size={16} />}
                     title={
                         selectedSemester === ALL_SEMESTERS
-                            ? 'Số lượng SV và Pass Rate theo kỳ'
-                            : 'Số lượng SV và Pass Rate theo ngành'
+                            ? 'Student count & pass rate by semester'
+                            : 'Student count & pass rate by major'
                     }
                 />
                 {loadingReport ? (
@@ -396,7 +396,7 @@ export const StudentQualityReportTab: React.FC = () => {
                         <Spin />
                     </div>
                 ) : chartData.length === 0 ? (
-                    <Empty description="Chưa có dữ liệu cho kỳ đã chọn." />
+                    <Empty description="No data for the selected semester." />
                 ) : (
                     <ResponsiveContainer width="100%" height={320}>
                         <BarChart data={chartData} margin={{ top: 16, right: 16, left: 0, bottom: 8 }}>
@@ -433,7 +433,7 @@ export const StudentQualityReportTab: React.FC = () => {
                             <Bar
                                 yAxisId="left"
                                 dataKey="students"
-                                name="Số SV"
+                                name="Students"
                                 fill={cc.brand}
                                 radius={[6, 6, 0, 0]}
                             />
@@ -455,13 +455,13 @@ export const StudentQualityReportTab: React.FC = () => {
                     icon={<Layers size={16} />}
                     title={
                         selectedSemester === ALL_SEMESTERS
-                            ? 'Chi tiết theo ngành × kỳ'
-                            : 'Chi tiết theo ngành'
+                            ? 'Breakdown by major × semester'
+                            : 'Breakdown by major'
                     }
                     subtitle={
                         selectedSemester === ALL_SEMESTERS
-                            ? 'Mỗi dòng là một tổ hợp (kỳ, ngành) doanh nghiệp đã nhận SV.'
-                            : 'Từng ngành trong kỳ đang chọn.'
+                            ? 'Each row is a (semester, major) pair the enterprise has hosted students for.'
+                            : 'All majors within the selected semester.'
                     }
                 />
                 {loadingReport ? (
@@ -469,7 +469,7 @@ export const StudentQualityReportTab: React.FC = () => {
                         <Spin />
                     </div>
                 ) : rows.length === 0 ? (
-                    <Empty description="Chưa có dữ liệu." />
+                    <Empty description="No data available." />
                 ) : (
                     <div style={{ overflowX: 'auto' }}>
                         <table
@@ -482,15 +482,15 @@ export const StudentQualityReportTab: React.FC = () => {
                             <thead>
                                 <tr style={{ backgroundColor: cc.neutralBg }}>
                                     {selectedSemester === ALL_SEMESTERS && (
-                                        <Th>Kỳ</Th>
+                                        <Th>Semester</Th>
                                     )}
-                                    <Th>Ngành</Th>
-                                    <Th align="center">Số SV</Th>
-                                    <Th align="center">GPA TB</Th>
+                                    <Th>Major</Th>
+                                    <Th align="center">Students</Th>
+                                    <Th align="center">Avg GPA</Th>
                                     <Th align="center">Pass</Th>
                                     <Th align="center">Fail</Th>
                                     <Th align="center">Pass Rate</Th>
-                                    <Th align="center">Final Grade TB</Th>
+                                    <Th align="center">Avg Final Grade</Th>
                                 </tr>
                             </thead>
                             <tbody>
