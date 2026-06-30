@@ -12,6 +12,7 @@ const EvaluationTab = React.lazy(() => import('./tabs/EvaluationTab').then(m => 
 const EnterpriseProfileTab = React.lazy(() => import('./tabs/EnterpriseProfileTab').then(m => ({ default: m.EnterpriseProfileTab })));
 const JobPostManagementTab = React.lazy(() => import('./tabs/JobPostManagementTab').then(m => ({ default: m.JobPostManagementTab })));
 const AssignedStudentsTab = React.lazy(() => import('./tabs/AssignedStudentsTab').then(m => ({ default: m.AssignedStudentsTab })));
+const StudentQualityReportTab = React.lazy(() => import('./tabs/StudentQualityReportTab').then(m => ({ default: m.StudentQualityReportTab })));
 const InterviewScheduleTab = React.lazy(() => import('./tabs/InterviewScheduleTab').then(m => ({ default: m.InterviewScheduleTab })));
 const InterviewResultTab = React.lazy(() => import('./tabs/InterviewResultTab').then(m => ({ default: m.InterviewResultTab })));
 const InternshipPlanTab = React.lazy(() => import('./tabs/InternshipPlanTab').then(m => ({ default: m.InternshipPlanTab })));
@@ -24,6 +25,7 @@ export type EnterprisePageKey =
   | 'applicants'
   | 'job-posts'
   | 'students'
+  | 'quality-report'
   | 'interviews'
   | 'results'
   | 'plans'
@@ -57,6 +59,7 @@ export const EnterpriseDashboard: React.FC = () => {
     applicants: <ApplicantKanbanTab />,
     'job-posts': <JobPostManagementTab />,
     students: <AssignedStudentsTab />,
+    'quality-report': <StudentQualityReportTab />,
     interviews: <InterviewScheduleTab />,
     results: <InterviewResultTab />,
     plans: <InternshipPlanTab />,

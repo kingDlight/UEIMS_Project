@@ -16,6 +16,10 @@ public interface EnterpriseAssignmentRepository extends JpaRepository<Enterprise
 
     List<EnterpriseAssignment> findByEnterprise_EnterpriseId(UUID enterpriseId);
 
+    // Lọc assignment theo DN + kỳ cụ thể (dùng cho EnterpriseAnalytics theo kỳ được chọn)
+    List<EnterpriseAssignment> findByEnterprise_EnterpriseIdAndSemester_SemesterId(
+            UUID enterpriseId, UUID semesterId);
+
     // UC-45: Lọc danh sách phân công theo doanh nghiệp và học kỳ đang ACTIVE
     List<EnterpriseAssignment> findByEnterprise_EnterpriseIdAndSemester_Status(UUID enterpriseId, String status);
 
