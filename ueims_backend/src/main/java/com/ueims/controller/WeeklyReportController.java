@@ -63,10 +63,11 @@ public class WeeklyReportController {
 
     @PostMapping
     @PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<WeeklyReportDTO> create(@Valid @RequestBody WeeklyReportDTO entity) {
-        if (entity.getAssignmentId() != null) {
+    public ResponseEntity<WeeklyReportDTO> create(@Valid @RequestBody WeeklyReportDTO dto) {
+        com.ueims.model.entity.WeeklyReport entity = mapper.toEntity(dto);
+        if (dto.getAssignmentId() != null) {
             com.ueims.model.entity.EnterpriseAssignment assignment = new com.ueims.model.entity.EnterpriseAssignment();
-            assignment.setAssignmentId(entity.getAssignmentId());
+            assignment.setAssignmentId(dto.getAssignmentId());
             entity.setAssignment(assignment);
         }
         // Sanitize rich-text HTML fields before saving
@@ -76,8 +77,10 @@ public class WeeklyReportController {
             entity.setIssuesChallenges(HtmlSanitizer.sanitize(entity.getIssuesChallenges()));
         if (entity.getLessonsLearned() != null)
             entity.setLessonsLearned(HtmlSanitizer.sanitize(entity.getLessonsLearned()));
-        if (entity.getPlanNextWeek() != null) entity.setPlanNextWeek(HtmlSanitizer.sanitize(entity.getPlanNextWeek()));
-        return ResponseEntity.ok(mapper.toDto(service.save(mapper.toEntity(entity))));
+        if (entity.getPlanNextWeek() != null) 
+            entity.setPlanNextWeek(HtmlSanitizer.sanitize(entity.getPlanNextWeek()));
+            
+        return ResponseEntity.ok(mapper.toDto(service.save(entity)));
     }
 
     @PutMapping("/{id}")
