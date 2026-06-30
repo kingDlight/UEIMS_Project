@@ -6,11 +6,12 @@ import java.util.UUID;
 import com.ueims.dto.request.IncidentReportRequest;
 import com.ueims.dto.request.IncidentRequest;
 import com.ueims.dto.request.IncidentResolveRequest;
+import com.ueims.dto.response.IncidentDTO;
 import com.ueims.dto.response.IncidentResponse;
 import com.ueims.model.entity.Incident;
 
 public interface IncidentService {
-    List<Incident> findAll();
+    List<IncidentDTO> findAll();
 
     Incident findById(UUID id);
 
@@ -24,5 +25,5 @@ public interface IncidentService {
 
     IncidentResponse reportIncident(IncidentReportRequest request);
 
-    Incident resolveIncident(UUID incidentId, IncidentResolveRequest request);
+    IncidentDTO resolveIncident(UUID incidentId, IncidentResolveRequest request);
 }

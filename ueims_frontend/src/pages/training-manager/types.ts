@@ -69,6 +69,18 @@ export type Incident = {
   assignment?: any;
   reportedBy?: any;
   resolutionNote?: string;
+  // Flat fields from IncidentDTO
+  assignmentId?: string;
+  studentId?: string;
+  studentName?: string;
+  studentCode?: string;
+  studentEmail?: string;
+  enterpriseId?: string;
+  enterpriseName?: string;
+  reportedById?: string;
+  reportedByFullName?: string;
+  resolvedById?: string;
+  resolvedByFullName?: string;
 };
 
 export type WeeklyReport = {

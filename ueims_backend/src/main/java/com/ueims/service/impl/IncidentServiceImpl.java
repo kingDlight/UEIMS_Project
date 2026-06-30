@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.ueims.dto.request.IncidentReportRequest;
 import com.ueims.dto.request.IncidentRequest;
 import com.ueims.dto.request.IncidentResolveRequest;
+import com.ueims.dto.response.IncidentDTO;
 import com.ueims.dto.response.IncidentResponse;
 import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
@@ -59,13 +60,14 @@ public class IncidentServiceImpl implements IncidentService {
     }
 
     @Override
-    public List<Incident> findAll() {
+    public List<IncidentDTO> findAll() {
         String email = org.springframework.security.core.context.SecurityContextHolder.getContext()
                 .getAuthentication()
                 .getName();
         User currentUser = userRepository.findByEmail(email).orElse(null);
+        List<Incident> raw;
         if (currentUser != null && currentUser.getEnterprise() != null) {
-            return repository.findAll().stream()
+            raw = repository.findAll().stream()
                     .filter(inc -> inc.getAssignment() != null
                             && inc.getAssignment().getEnterprise() != null
                             && inc.getAssignment()
@@ -73,8 +75,10 @@ public class IncidentServiceImpl implements IncidentService {
                                     .getEnterpriseId()
                                     .equals(currentUser.getEnterprise().getEnterpriseId()))
                     .toList();
+        } else {
+            raw = repository.findAll();
         }
-        return repository.findAll();
+        return raw.stream().map(IncidentDTO::from).toList();
     }
 
     @Override
@@ -238,7 +242,7 @@ public class IncidentServiceImpl implements IncidentService {
     }
 
     @Override
-    public Incident resolveIncident(UUID incidentId, IncidentResolveRequest request) {
+    public IncidentDTO resolveIncident(UUID incidentId, IncidentResolveRequest request) {
         Incident incident =
                 repository.findById(incidentId).orElseThrow(() -> new IllegalArgumentException("Incident not found"));
 
@@ -260,6 +264,7 @@ public class IncidentServiceImpl implements IncidentService {
         incident.setResolvedBy(resolvedBy);
         incident.setResolvedAt(LocalDateTime.now());
 
-        return repository.save(incident);
+        Incident saved = repository.save(incident);
+        return IncidentDTO.from(saved);
     }
 }

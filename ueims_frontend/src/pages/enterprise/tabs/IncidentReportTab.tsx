@@ -37,6 +37,7 @@ interface Incident {
   studentName?: string;
   studentCode?: string;
   studentId?: string;
+  enterpriseName?: string;
 }
 
 const CATEGORIES = [
@@ -84,9 +85,8 @@ export const IncidentReportTab: React.FC = () => {
         : [];
       setAssignments(Array.isArray(aData) ? aData : []);
 
-      // Server-side: get all and filter to my enterprise's students
       const allIncidents: Incident[] = i.status === 'fulfilled'
-        ? (i.value.data?.result ?? i.value.data ?? [])
+        ? (i.value.data?.result ?? (Array.isArray(i.value.data) ? i.value.data : []))
         : [];
       const studentIds = new Set(
         (Array.isArray(aData) ? aData : []).map((x: any) => x.studentId ?? x.student?.userId)

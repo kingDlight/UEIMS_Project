@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import com.ueims.dto.response.IncidentDTO;
 import com.ueims.dto.response.IncidentResponse;
 import com.ueims.model.entity.Incident;
 import com.ueims.service.IncidentService;
@@ -26,7 +27,7 @@ public class IncidentController {
 
     @GetMapping
     @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN') or hasRole('ADMIN') or hasRole('ENTERPRISE')")
-    public ResponseEntity<List<Incident>> getAll() {
+    public ResponseEntity<List<IncidentDTO>> getAll() {
         return ResponseEntity.ok(service.findAll());
     }
 
@@ -65,7 +66,7 @@ public class IncidentController {
 
     @PutMapping("/{id}/resolve")
     @PreAuthorize("hasRole('TRAINING_MANAGER')")
-    public ResponseEntity<Incident> resolveIncident(
+    public ResponseEntity<IncidentDTO> resolveIncident(
             @PathVariable UUID id, @Valid @RequestBody com.ueims.dto.request.IncidentResolveRequest request) {
         return ResponseEntity.ok(service.resolveIncident(id, request));
     }

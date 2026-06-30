@@ -108,11 +108,14 @@ const SEVERITY_CONFIG: Record<Severity, {
 
 function deriveSeverity(incident: Incident): Severity {
   if (incident.status === 'RESOLVED' || incident.status === 'CLOSED') return 'RESOLVED';
-  const cat = (incident.category || '').toLowerCase();
-  if (cat.includes('harassment') || cat.includes('accident') || cat.includes('safety'))
+  const cat = (incident.category || '').toUpperCase();
+  // Match normalized categories from backend CATEGORY_ALIAS
+  if (cat.includes('PROLONGED') || cat.includes('ABSENCE') || cat.includes('SAFETY') || cat.includes('DISCIPLINARY'))
     return 'CRITICAL';
-  if (cat.includes('attendance') || cat.includes('absent')) return 'HIGH';
-  if (cat.includes('performance') || cat.includes('late')) return 'MEDIUM';
+  if (cat.includes('POOR') || cat.includes('ATTITUDE') || cat.includes('CONFIDENTIAL'))
+    return 'HIGH';
+  if (cat.includes('PERFORMANCE') || cat.includes('LATE'))
+    return 'MEDIUM';
   return 'LOW';
 }
 
@@ -130,8 +133,8 @@ const IncidentCard: React.FC<{
   const isResolved = severity === 'RESOLVED';
   const isCritical = severity === 'CRITICAL';
 
-  const student = incident.assignment?.student;
-  const enterprise = incident.assignment?.enterprise;
+  const student = incident.studentName ? { fullName: incident.studentName } : (incident.assignment?.student ?? null);
+  const enterprise = incident.enterpriseName ? { companyName: incident.enterpriseName } : (incident.assignment?.enterprise ?? null);
 
   return (
     <button
@@ -576,12 +579,13 @@ export const IncidentsTab: React.FC = () => {
   const [selected, setSelected] = useState<Incident | null>(null);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
+      useEffect(() => {
     const fetchIncidents = async () => {
       try {
         setLoading(true);
-        const data = await IncidentService.getAll();
-        setIncidents(data.result || []);
+        const raw = await IncidentService.getAll();
+        const list: Incident[] = (raw as any)?.result ?? (Array.isArray(raw) ? raw : []);
+        setIncidents(list);
       } catch (err) {
         console.error('Failed to load incidents', err);
         setIncidents([]);
@@ -609,14 +613,8 @@ export const IncidentsTab: React.FC = () => {
 
   const handleResolve = useCallback(async (id: string, _outcome: string, note: string) => {
     try {
-      if (id.startsWith('INC')) {
-        // Simulate network delay for mock incidents to prevent 400 -> 401 logout
-        await new Promise(r => setTimeout(r, 500));
-      } else {
-        await IncidentService.resolve(id, { resolutionNote: note });
-      }
+      const resolved = await IncidentService.resolve(id, { resolutionNote: note });
       void message.success('Incident closed successfully.');
-      
       setIncidents(prev => {
         const updated = prev.map((i) =>
           i.incidentId === id ? { ...i, status: 'RESOLVED' as const, resolutionNote: note } : i
@@ -949,7 +947,7 @@ export const IncidentsTab: React.FC = () => {
                     { label: 'Student', value: student?.fullName ?? '—' },
                     { label: 'Enterprise', value: enterprise?.companyName ?? '—' },
                     { label: 'Student Code', value: student?.studentCode ?? '—' },
-                    { label: 'Reported By', value: selected.reportedBy?.fullName ?? '—' },
+                    { label: 'Reported By', value: incident.reportedByFullName ?? incident.reportedBy?.fullName ?? '—' },
                   ].map(({ label, value }) => (
                     <div key={label}>
                       <div style={{ fontSize: 10, fontWeight: 700, color: cc.textMuted, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 3 }}>
