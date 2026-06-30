@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import {
   ArrowRight,
-  Upload,
   FileText,
   Calendar,
   CheckCircle2,
@@ -622,118 +621,8 @@ const ReportPipelineRow: React.FC<{ stats: StudentDashboardStats; onNavigate: (r
 };
 
 // ============================================================
-// SECTION: QUICK ACTIONS
+// SECTION: RECENT ACTIVITY
 // ============================================================
-const QuickActionsRow: React.FC<{
-  onNavigate: (route: string) => void;
-  actions: Array<{ label: string; description: string; icon: React.ReactNode; route: string }>;
-}> = ({ onNavigate, actions }) => {
-  const { t } = useTranslation(['studentDashboard']);
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.3, ease: [0.32, 0.72, 0, 1] }}
-      style={{ marginBottom: 16 }}
-    >
-      <div style={{ fontSize: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', color: cc.textMuted, marginBottom: 10, paddingLeft: 2 }}>
-        {t('quickActions', 'Quick Actions')}
-      </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, alignItems: 'stretch' }}>
-        {actions.map((action) => (
-          <div key={action.label} style={{ display: 'flex', flexDirection: 'column' }}>
-            <motion.div
-              onClick={() => action.route && onNavigate(action.route)}
-              whileHover={{ y: -3, boxShadow: cc.shadowMd }}
-              whileTap={{ scale: 0.98 }}
-              transition={{ duration: 0.15, ease: [0.32, 0.72, 0, 1] }}
-              style={{
-                backgroundColor: '#FFFFFF',
-                opacity: 1,
-                borderRadius: cc.radiusLg,
-                border: `1px solid ${cc.border}`,
-                boxShadow: cc.shadowSm,
-                padding: '16px 16px 14px',
-                cursor: 'pointer',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 8,
-                flex: 1,
-                position: 'relative',
-                overflow: 'hidden',
-              }}
-            >
-              <div style={{ width: 40, height: 40, borderRadius: cc.radiusMd, background: `${cc.brand}12`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.brand, position: 'relative' }}>
-                {action.icon}
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 14, fontWeight: 600, color: cc.textPrimary, marginBottom: 2 }}>{action.label}</div>
-                <div style={{ fontSize: 11, color: cc.textMuted, lineHeight: 1.4 }}>{action.description}</div>
-              </div>
-              <div style={{ position: 'absolute', bottom: 12, right: 12, color: cc.brand, opacity: 0.6 }}>
-                <ArrowRight size={14} />
-              </div>
-            </motion.div>
-          </div>
-        ))}
-      </div>
-    </motion.div>
-  );
-};
-
-// ============================================================
-// SECTION: RIGHT COLUMN — UPCOMING & ACTIVITY
-// ============================================================
-const UpcomingCard: React.FC<{ onNavigate: (route: string) => void }> = ({ onNavigate }) => {
-  const { t } = useTranslation(['studentDashboard']);
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.35, ease: [0.32, 0.72, 0, 1] }}
-      style={{ display: 'flex', flexDirection: 'column', marginBottom: 16 }}
-    >
-      <CardWrapper style={{ padding: 20, flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-          <div style={{ width: 32, height: 32, borderRadius: cc.radiusMd, background: `${cc.info}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.info }}>
-            <Calendar size={16} />
-          </div>
-          <div>
-            <div style={{ fontSize: 15, fontWeight: 600, color: cc.textPrimary }}>{t('upcomingEvents', 'Upcoming Events')}</div>
-            <div style={{ fontSize: 12, color: cc.textMuted }}>{t('yourSchedule', 'Your schedule')}</div>
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, flex: 1 }}>
-          {[
-            { title: t('weeklyReportDeadline', 'Weekly Report Deadline'), meta: t('sundayDeadline', 'Sunday, 11:59 PM'), tone: cc.warning, icon: <Clock size={14} /> },
-            { title: t('midReviewMeeting', 'Mid-Review Meeting'), meta: t('nextWeek', 'Next Week'), tone: cc.info, icon: <Calendar size={14} /> },
-          ].map((item, i) => (
-            <div key={i} style={{
-              display: 'flex', alignItems: 'flex-start', gap: 10,
-              padding: '12px 14px', borderRadius: cc.radiusMd,
-              background: hexToRgba(item.tone, 0.06),
-              border: `1px solid ${hexToRgba(item.tone, 0.2)}`,
-            }}>
-              <div style={{ width: 10, height: 10, borderRadius: '50%', background: item.tone, boxShadow: `0 0 0 4px ${item.tone}20`, marginTop: 4, flexShrink: 0 }} />
-              <div style={{ minWidth: 0, flex: 1 }}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: cc.textPrimary }}>{item.title}</div>
-                <div style={{ fontSize: 11, color: cc.textMuted, marginTop: 2, display: 'flex', alignItems: 'center', gap: 4 }}>{item.icon} {item.meta}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div style={{ height: 1, background: cc.borderSubtle, marginTop: 'auto', marginBottom: 14 }} />
-        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <CTAButton variant="ghost" size="sm" icon={false} onClick={() => onNavigate('schedule')}>{t('viewCalendar', 'View Calendar')}</CTAButton>
-        </div>
-      </CardWrapper>
-    </motion.div>
-  );
-};
-
 const RecentActivityCard: React.FC<{ onNavigate: (route: string) => void, activities: any[] }> = ({ onNavigate, activities }) => {
   const { t } = useTranslation(['studentDashboard']);
   return (
@@ -919,94 +808,11 @@ export const StudentDashboardTab: React.FC<DashboardTabProps> = ({ currentSemest
   const isSemester5 = currentSemester === 5;
   const isSemester6 = currentSemester === 6;
   const isSemester7to9 = currentSemester >= 7 && currentSemester <= 9;
-  const showUpcoming = isSemester5 || (isSemester6 && hasActivePlacement);
-  const showRecentActivity = isSemester5 || (isSemester6 && hasActivePlacement);
+  const showRecentActivity = isSemester5;
 
-  const quickActions = (() => {
-    const actions = [] as Array<{ label: string; description: string; icon: React.ReactNode; route: string }>;
-
-    if (isSemester1to4) {
-      actions.push({
-        label: t('browseJobs', 'Browse Jobs'),
-        description: t('browseJobsDesc', 'Find and apply for internships'),
-        icon: <Briefcase size={24} />,
-        route: 'jobs',
-      });
-      return actions;
-    }
-
-    if (isSemester5) {
-      actions.push({
-        label: t('browseJobs', 'Browse Jobs'),
-        description: t('browseJobsDesc', 'Find and apply for internships'),
-        icon: <Briefcase size={24} />,
-        route: 'jobs',
-      });
-      actions.push({
-        label: t('mySchedule', 'My Schedule'),
-        description: t('myScheduleDesc', 'View upcoming interviews'),
-        icon: <Calendar size={24} />,
-        route: 'schedule',
-      });
-      return actions;
-    }
-
-    if (isSemester6) {
-      if (!hasActivePlacement) {
-        actions.push({
-          label: t('browseJobs', 'Browse Jobs'),
-          description: t('browseJobsDesc', 'Find and apply for internships'),
-          icon: <Briefcase size={24} />,
-          route: 'jobs',
-        });
-        actions.push({
-          label: t('mySchedule', 'My Schedule'),
-          description: t('myScheduleDesc', 'View upcoming interviews'),
-          icon: <Calendar size={24} />,
-          route: 'schedule',
-        });
-      } else {
-        actions.push({
-          label: t('submitReport', 'Submit Report'),
-          description: t('submitReportDesc', 'Submit your weekly progress report'),
-          icon: <Upload size={24} />,
-          route: 'reports',
-        });
-        actions.push({
-          label: t('mySchedule', 'My Schedule'),
-          description: t('myScheduleDesc', 'View upcoming interviews'),
-          icon: <Calendar size={24} />,
-          route: 'schedule',
-        });
-        actions.push({
-          label: t('browseJobs', 'Browse Jobs'),
-          description: t('browseJobsDesc', 'Find and apply for internships'),
-          icon: <Briefcase size={24} />,
-          route: 'jobs',
-        });
-      }
-      return actions;
-    }
-
-    if (isSemester7to9) {
-      actions.push({
-        label: t('sendFeedback', 'Send Feedback'),
-        description: t('sendFeedbackDesc', 'Rate your enterprise experience'),
-        icon: <Star size={24} />,
-        route: 'feedback',
-      });
-      return actions;
-    }
-
-    return [
-      {
-        label: t('browseJobs', 'Browse Jobs'),
-        description: t('browseJobsDesc', 'Find and apply for internships'),
-        icon: <Briefcase size={24} />,
-        route: 'jobs',
-      },
-    ];
-  })();
+  const handleNavigate = (route: string) => {
+    navigate(`/student/${route}`);
+  };
 
   if (loading) {
     return (
@@ -1050,22 +856,9 @@ export const StudentDashboardTab: React.FC<DashboardTabProps> = ({ currentSemest
                 )}
               </div>
 
-              {/* QUICK ACTIONS ROW (Full Width) */}
+              {/* RECENT ACTIVITY (left aligned, full width) */}
               <div style={{ marginBottom: 24 }}>
-                <QuickActionsRow onNavigate={handleNavigate} actions={quickActions} />
-            </div>
-
-              {/* SPLIT SCREEN WORKSPACE GRID */}
-              <div style={{ display: 'grid', gridTemplateColumns: '7fr 3fr', gap: 24 }}>
-                {/* Left Column (Main content) */}
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  {showRecentActivity && <RecentActivityCard onNavigate={handleNavigate} activities={stats.recentActivities} />}
-                </div>
-
-                {/* Right Column (Sidebar content) */}
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  {showUpcoming && <UpcomingCard onNavigate={handleNavigate} />}
-                </div>
+                {showRecentActivity && <RecentActivityCard onNavigate={handleNavigate} activities={stats.recentActivities} />}
               </div>
             </motion.div>
           )}
