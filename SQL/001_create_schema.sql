@@ -998,7 +998,8 @@ CREATE TABLE internship_plans (
     assignment_id   UUID NOT NULL UNIQUE REFERENCES enterprise_assignments(assignment_id),
     created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deleted_at      TIMESTAMP
+    deleted_at      TIMESTAMP,
+    overall_goal    TEXT
 );
 
 -- TABLE 20: internship_plan_items
