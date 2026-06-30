@@ -17,7 +17,11 @@ export const EligibleStudentService = {
     formData.append('file', file);
     formData.append('semesterId', semesterId);
 
-    const response = await api.post('/eligible-students/upload', formData);
+    const response = await api.post('/eligible-students/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
     return response.data;
   },
 

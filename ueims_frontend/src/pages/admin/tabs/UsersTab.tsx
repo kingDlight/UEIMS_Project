@@ -977,7 +977,7 @@ export const UsersTab: React.FC = () => {
       {/* ========== STATUS CHANGE CONFIRMATION (UC-10) ========== */}
       <Modal
         open={statusModal.open}
-        onCancel={() => setStatusModal({ open: false, user: null, nextStatus: 'ACTIVE' })}
+        onCancel={() => setStatusModal({ open: false, user: null, nextStatus: 'ACTIVE', durationMinutes: 0, customMinutes: 0 })}
         footer={null}
         width={420}
         centered
