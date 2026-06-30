@@ -546,11 +546,10 @@ const ReportPipelineRow: React.FC<{ stats: StudentDashboardStats; onNavigate: (r
             </span>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 16 }}>
-            <StatChip icon={<CheckCircle2 size={16} />} label={t('submitted', 'Submitted')} value={stats.reports} color={cc.success} />
-            <StatChip icon={<Clock size={16} />} label={t('pending', 'Pending')} value={1} color={cc.warning} />
-            <StatChip icon={<AlertTriangle size={16} />} label={t('late', 'Late')} value={0} color={cc.error} />
-            <StatChip icon={<BookOpen size={16} />} label={t('totalWeeks', 'Total Weeks')} value={stats.daysRemaining > 0 ? Math.max(1, 12 - stats.reports) : '-'} color={cc.info} />
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 16 }}>
+            <StatChip icon={<AlertTriangle size={16} />} label={t('notSubmitted', 'Not Submitted')} value={stats.notSubmittedReports} color={cc.error} />
+            <StatChip icon={<Clock size={16} />} label={t('submitted', 'Submitted')} value={stats.submittedReports} color={cc.warning} />
+            <StatChip icon={<CheckCircle2 size={16} />} label={t('approved', 'Approved')} value={stats.approvedReports} color={cc.success} />
           </div>
 
           <div style={{ height: 1, background: cc.borderSubtle, marginBottom: 14 }} />
@@ -863,6 +862,9 @@ export const StudentDashboardTab: React.FC<DashboardTabProps> = ({ currentSemest
     applications: 0,
     interviews: 0,
     reports: 0,
+    notSubmittedReports: 0,
+    submittedReports: 0,
+    approvedReports: 0,
     daysRemaining: 0,
     semesterName: '—',
     semesterStatus: 'N/A',

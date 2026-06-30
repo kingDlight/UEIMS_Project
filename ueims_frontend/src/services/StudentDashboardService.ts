@@ -81,8 +81,11 @@ const unwrapApiResponse = <T>(response: ApiResponse<T> | T | undefined): T | und
 export interface StudentDashboardStats {
   applications: number;
   interviews: number;
-  reports: number;
-  daysRemaining: number;
+    reports: number;
+    notSubmittedReports: number;
+    submittedReports: number;
+    approvedReports: number;
+    daysRemaining: number;
   semesterName: string;
   semesterStatus: string;
   currentSemester?: number;
@@ -170,18 +173,20 @@ export const StudentDashboardService = {
         .sort((a, b) => new Date(a.scheduledTime || '').getTime() - new Date(b.scheduledTime || '').getTime());
     }
 
-    // Reports count & Logged Hours (Assume 40 hours per approved report)
+    // Reports count & Logged Hours (40 hours per approved report)
     let reports = 0;
+    let notSubmittedReports = 0;
+    let submittedReports = 0;
+    let approvedReports = 0;
     let loggedHours = 0;
     let allReports: WeeklyReportDto[] = [];
     if (reportsRes.status === 'fulfilled') {
       const response = reportsRes.value;
       allReports = unwrapApiResponse<WeeklyReportDto[]>(response) ?? [];
-      reports = allReports.filter(
-        (r) => r.status !== 'NOT_SUBMITTED' && r.status !== 'DRAFT'
-      ).length;
-      
-      const approvedReports = allReports.filter((r) => r.status === 'APPROVED').length;
+      notSubmittedReports = allReports.filter((r) => r.status === 'NOT_SUBMITTED').length;
+      submittedReports = allReports.filter((r) => r.status === 'SUBMITTED').length;
+      approvedReports = allReports.filter((r) => r.status === 'APPROVED').length;
+      reports = submittedReports + approvedReports;
       loggedHours = approvedReports * 40;
     }
 
@@ -249,6 +254,9 @@ export const StudentDashboardService = {
       applications,
       interviews,
       reports,
+      notSubmittedReports,
+      submittedReports,
+      approvedReports,
       daysRemaining,
       semesterName,
       semesterStatus,
