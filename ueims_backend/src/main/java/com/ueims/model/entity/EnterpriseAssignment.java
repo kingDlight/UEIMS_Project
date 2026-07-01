@@ -66,8 +66,10 @@ public class EnterpriseAssignment extends BaseEntity {
     private java.time.LocalDateTime terminatedAt;
 
     /** Assignment mới thay thế assignment này (chỉ có khi status = TERMINATED do replacement). */
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, targetEntity = EnterpriseAssignment.class)
     @JoinColumn(name = "replaced_by_assignment_id")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private EnterpriseAssignment replacedByAssignment;
 }

@@ -77,9 +77,8 @@ public class WeeklyReportController {
             entity.setIssuesChallenges(HtmlSanitizer.sanitize(entity.getIssuesChallenges()));
         if (entity.getLessonsLearned() != null)
             entity.setLessonsLearned(HtmlSanitizer.sanitize(entity.getLessonsLearned()));
-        if (entity.getPlanNextWeek() != null) 
-            entity.setPlanNextWeek(HtmlSanitizer.sanitize(entity.getPlanNextWeek()));
-            
+        if (entity.getPlanNextWeek() != null) entity.setPlanNextWeek(HtmlSanitizer.sanitize(entity.getPlanNextWeek()));
+
         return ResponseEntity.ok(mapper.toDto(service.save(entity)));
     }
 

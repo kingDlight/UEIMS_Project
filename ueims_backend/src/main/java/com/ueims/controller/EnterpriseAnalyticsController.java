@@ -58,8 +58,7 @@ public class EnterpriseAnalyticsController {
 
     private UUID resolveCurrentEnterpriseId() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         if (user.getEnterprise() == null) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }

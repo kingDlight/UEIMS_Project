@@ -195,3 +195,4 @@ collection.json
 /*.js
 scratch/
 ueims_backend/*.js
+/nbproject/private/

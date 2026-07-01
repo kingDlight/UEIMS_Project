@@ -34,11 +34,11 @@ CASCADE;
 -- SYSTEM ACCOUNTS
 -- ============================================================
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('00000000-0000-0000-0000-000000000001', 'admin@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'System Administrator', 'ACTIVE', FALSE);
+    ('00000000-0000-0000-0000-000000000001', 'admin@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'System Administrator', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('00000000-0000-0000-0000-000000000001', 'ADMIN');
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('00000000-0000-0000-0000-000000000002', 'manager@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Training Manager Demo', 'ACTIVE', FALSE);
+    ('00000000-0000-0000-0000-000000000002', 'manager@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Training Manager Demo', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('00000000-0000-0000-0000-000000000002', 'TRAINING_MANAGER');
 
 -- ============================================================
@@ -47,25 +47,25 @@ INSERT INTO users_roles (user_id, role_name) VALUES ('00000000-0000-0000-0000-00
 INSERT INTO enterprises (enterprise_id, company_name, industry, company_size, description, address, contact_person_name, contact_person_email, contact_person_phone, approval_status, approved_by, approved_at, website) VALUES
     ('c0000000-0000-0000-0000-000000000001', 'Momo', 'Fintech', '500-1000', 'Leading e-wallet and digital payments platform in Vietnam.', 'District 1, Ho Chi Minh City', 'HR Momo', 'hr@momo.vn', '0900000001', 'APPROVED', '00000000-0000-0000-0000-000000000001', CURRENT_TIMESTAMP, 'https://momo.vn');
 INSERT INTO users (user_id, email, password_hash, full_name, status, enterprise_id, must_change_password) VALUES
-    ('c0000000-0000-0000-0000-000000000011', 'hr@momo.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'HR Momo', 'ACTIVE', 'c0000000-0000-0000-0000-000000000001', FALSE);
+    ('c0000000-0000-0000-0000-000000000011', 'hr@momo.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'HR Momo', 'ACTIVE', 'c0000000-0000-0000-0000-000000000001', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('c0000000-0000-0000-0000-000000000011', 'ENTERPRISE');
 
 INSERT INTO enterprises (enterprise_id, company_name, industry, company_size, description, address, contact_person_name, contact_person_email, contact_person_phone, approval_status, approved_by, approved_at, website) VALUES
     ('c0000000-0000-0000-0000-000000000002', 'FPT Software', 'IT Services', '500-1000', 'Global technology and IT services company.', 'District 1, Ho Chi Minh City', 'HR FPT Software', 'hr@fsoft.com', '0900000002', 'APPROVED', '00000000-0000-0000-0000-000000000001', CURRENT_TIMESTAMP, 'https://fptsoftware.com');
 INSERT INTO users (user_id, email, password_hash, full_name, status, enterprise_id, must_change_password) VALUES
-    ('c0000000-0000-0000-0000-000000000012', 'hr@fsoft.com', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'HR FPT Software', 'ACTIVE', 'c0000000-0000-0000-0000-000000000002', FALSE);
+    ('c0000000-0000-0000-0000-000000000012', 'hr@fsoft.com', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'HR FPT Software', 'ACTIVE', 'c0000000-0000-0000-0000-000000000002', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('c0000000-0000-0000-0000-000000000012', 'ENTERPRISE');
 
 INSERT INTO enterprises (enterprise_id, company_name, industry, company_size, description, address, contact_person_name, contact_person_email, contact_person_phone, approval_status, approved_by, approved_at, website) VALUES
     ('c0000000-0000-0000-0000-000000000003', 'Shopee Vietnam', 'E-commerce', '500-1000', 'Leading e-commerce platform in Southeast Asia.', 'District 1, Ho Chi Minh City', 'HR Shopee Vietnam', 'hr@shopee.vn', '0900000003', 'APPROVED', '00000000-0000-0000-0000-000000000001', CURRENT_TIMESTAMP, 'https://shopee.vn');
 INSERT INTO users (user_id, email, password_hash, full_name, status, enterprise_id, must_change_password) VALUES
-    ('c0000000-0000-0000-0000-000000000013', 'hr@shopee.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'HR Shopee Vietnam', 'ACTIVE', 'c0000000-0000-0000-0000-000000000003', FALSE);
+    ('c0000000-0000-0000-0000-000000000013', 'hr@shopee.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'HR Shopee Vietnam', 'ACTIVE', 'c0000000-0000-0000-0000-000000000003', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('c0000000-0000-0000-0000-000000000013', 'ENTERPRISE');
 
 INSERT INTO enterprises (enterprise_id, company_name, industry, company_size, description, address, contact_person_name, contact_person_email, contact_person_phone, approval_status, approved_by, approved_at, website) VALUES
     ('c0000000-0000-0000-0000-000000000004', 'VNG Corporation', 'Technology & Gaming', '500-1000', 'Top Vietnamese technology and gaming company.', 'District 1, Ho Chi Minh City', 'HR VNG Corporation', 'hr@vng.com.vn', '0900000004', 'APPROVED', '00000000-0000-0000-0000-000000000001', CURRENT_TIMESTAMP, 'https://vng.com.vn');
 INSERT INTO users (user_id, email, password_hash, full_name, status, enterprise_id, must_change_password) VALUES
-    ('c0000000-0000-0000-0000-000000000014', 'hr@vng.com.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'HR VNG Corporation', 'ACTIVE', 'c0000000-0000-0000-0000-000000000004', FALSE);
+    ('c0000000-0000-0000-0000-000000000014', 'hr@vng.com.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'HR VNG Corporation', 'ACTIVE', 'c0000000-0000-0000-0000-000000000004', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('c0000000-0000-0000-0000-000000000014', 'ENTERPRISE');
 
 -- ============================================================
@@ -103,7 +103,7 @@ INSERT INTO job_posts (job_post_id, enterprise_id, semester_id, title, descripti
 
 -- SE15001: demo student
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000001', 'demo.student@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Demo Student', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000001', 'demo.student@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Demo Student', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000001', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked) VALUES
     ('e0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000001', 'SE15001', 'Demo Student', 'demo.student@fpt.edu.vn', 'Software Engineering', 6.78, 5, 'ELIGIBLE', FALSE);
@@ -112,7 +112,7 @@ INSERT INTO student_profiles (user_id, student_code, university, major, gpa, ski
 
 -- SE15002
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000002', 'student2@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Tran Ngoc Uyen', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000002', 'student2@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Tran Ngoc Uyen', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000002', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked) VALUES
     ('e0000000-0000-0000-0000-000000000002', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000002', 'SE15002', 'Tran Ngoc Uyen', 'student2@fpt.edu.vn', 'Software Engineering', 6.83, 6, 'ELIGIBLE', FALSE);
@@ -121,7 +121,7 @@ INSERT INTO student_profiles (user_id, student_code, university, major, gpa, ski
 
 -- SE15003
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000003', 'student3@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Dang Xuan Vinh', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000003', 'student3@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Dang Xuan Vinh', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000003', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked) VALUES
     ('e0000000-0000-0000-0000-000000000003', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000003', 'SE15003', 'Dang Xuan Vinh', 'student3@fpt.edu.vn', 'Software Engineering', 7.19, 6, 'ELIGIBLE', FALSE);
@@ -130,7 +130,7 @@ INSERT INTO student_profiles (user_id, student_code, university, major, gpa, ski
 
 -- SE15004
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000004', 'student4@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Dang Thu Linh', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000004', 'student4@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Dang Thu Linh', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000004', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked) VALUES
     ('e0000000-0000-0000-0000-000000000004', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000004', 'SE15004', 'Dang Thu Linh', 'student4@fpt.edu.vn', 'Software Engineering', 7.99, 5, 'ELIGIBLE', FALSE);
@@ -139,7 +139,7 @@ INSERT INTO student_profiles (user_id, student_code, university, major, gpa, ski
 
 -- SE15005
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000005', 'student5@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Ngo Thanh Uyen', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000005', 'student5@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Ngo Thanh Uyen', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000005', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked) VALUES
     ('e0000000-0000-0000-0000-000000000005', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000005', 'SE15005', 'Ngo Thanh Uyen', 'student5@fpt.edu.vn', 'Software Engineering', 7.63, 5, 'ELIGIBLE', FALSE);
@@ -152,7 +152,7 @@ INSERT INTO student_profiles (user_id, student_code, university, major, gpa, ski
 -- ============================================================
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000006', 'student6@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Vu Thanh Phong', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000006', 'student6@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Vu Thanh Phong', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000006', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked) VALUES
     ('e0000000-0000-0000-0000-000000000006', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000006', 'SE15006', 'Vu Thanh Phong', 'student6@fpt.edu.vn', 'Software Engineering', 8.54, 5, 'PENDING', FALSE);
@@ -162,7 +162,7 @@ INSERT INTO applications (application_id, job_post_id, student_id, cv_file_url, 
     ('a0000000-0000-0000-0000-000000000006', 'f0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000006', 'https://cv.example.com/se15006.pdf', 'PENDING');
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000007', 'student7@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Hoang Xuan Duc', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000007', 'student7@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Hoang Xuan Duc', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000007', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked) VALUES
     ('e0000000-0000-0000-0000-000000000007', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000007', 'SE15007', 'Hoang Xuan Duc', 'student7@fpt.edu.vn', 'Software Engineering', 9.31, 5, 'PENDING', FALSE);
@@ -172,7 +172,7 @@ INSERT INTO applications (application_id, job_post_id, student_id, cv_file_url, 
     ('a0000000-0000-0000-0000-000000000007', 'f0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000007', 'https://cv.example.com/se15007.pdf', 'PENDING');
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000008', 'student8@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Le Thanh Binh', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000008', 'student8@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Le Thanh Binh', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000008', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked) VALUES
     ('e0000000-0000-0000-0000-000000000008', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000008', 'SE15008', 'Le Thanh Binh', 'student8@fpt.edu.vn', 'Software Engineering', 6.56, 5, 'PENDING', FALSE);
@@ -182,7 +182,7 @@ INSERT INTO applications (application_id, job_post_id, student_id, cv_file_url, 
     ('a0000000-0000-0000-0000-000000000008', 'f0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000008', 'https://cv.example.com/se15008.pdf', 'PENDING');
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000009', 'student9@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Huy Xuan Nam', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000009', 'student9@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Huy Xuan Nam', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000009', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked) VALUES
     ('e0000000-0000-0000-0000-000000000009', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000009', 'SE15009', 'Huy Xuan Nam', 'student9@fpt.edu.vn', 'Software Engineering', 6.86, 5, 'PENDING', FALSE);
@@ -192,7 +192,7 @@ INSERT INTO applications (application_id, job_post_id, student_id, cv_file_url, 
     ('a0000000-0000-0000-0000-000000000009', 'f0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000009', 'https://cv.example.com/se15009.pdf', 'PENDING');
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000010', 'student10@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Pham Minh Hai', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000010', 'student10@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Pham Minh Hai', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000010', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked) VALUES
     ('e0000000-0000-0000-0000-000000000010', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000010', 'SE15010', 'Pham Minh Hai', 'student10@fpt.edu.vn', 'Software Engineering', 7.55, 5, 'PENDING', FALSE);
@@ -207,7 +207,7 @@ INSERT INTO applications (application_id, job_post_id, student_id, cv_file_url, 
 -- ============================================================
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000011', 'student11@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Hoang Van Uyen', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000011', 'student11@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Hoang Van Uyen', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000011', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked) VALUES
     ('e0000000-0000-0000-0000-000000000011', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000011', 'SE15011', 'Hoang Van Uyen', 'student11@fpt.edu.vn', 'Software Engineering', 7.69, 5, 'PENDING', FALSE);
@@ -219,7 +219,7 @@ INSERT INTO interviews (interview_id, application_id, scheduled_datetime, durati
     ('b0000000-0000-0000-0000-000000000011', 'a0000000-0000-0000-0000-000000000011', '2026-07-28 10:00:00', 45, 'https://meet.momo.vn/interview-11', 'SCHEDULED', FALSE);
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000012', 'student12@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Nguyen Huu Son', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000012', 'student12@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Nguyen Huu Son', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000012', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked) VALUES
     ('e0000000-0000-0000-0000-000000000012', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000012', 'SE15012', 'Nguyen Huu Son', 'student12@fpt.edu.vn', 'Software Engineering', 8.99, 5, 'PENDING', FALSE);
@@ -231,7 +231,7 @@ INSERT INTO interviews (interview_id, application_id, scheduled_datetime, durati
     ('b0000000-0000-0000-0000-000000000012', 'a0000000-0000-0000-0000-000000000012', '2026-07-28 14:00:00', 45, 'https://meet.momo.vn/interview-12', 'SCHEDULED', FALSE);
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000013', 'student13@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Vo Minh Giang', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000013', 'student13@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Vo Minh Giang', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000013', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked) VALUES
     ('e0000000-0000-0000-0000-000000000013', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000013', 'SE15013', 'Vo Minh Giang', 'student13@fpt.edu.vn', 'Software Engineering', 8.85, 5, 'PENDING', FALSE);
@@ -243,7 +243,7 @@ INSERT INTO interviews (interview_id, application_id, scheduled_datetime, durati
     ('b0000000-0000-0000-0000-000000000013', 'a0000000-0000-0000-0000-000000000013', '2026-07-29 09:00:00', 60, 'https://meet.momo.vn/interview-13', 'SCHEDULED', FALSE);
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000014', 'student14@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Tran Thanh Nam', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000014', 'student14@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Tran Thanh Nam', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000014', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked) VALUES
     ('e0000000-0000-0000-0000-000000000014', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000014', 'SE15014', 'Tran Thanh Nam', 'student14@fpt.edu.vn', 'Software Engineering', 7.45, 5, 'PENDING', FALSE);
@@ -255,7 +255,7 @@ INSERT INTO interviews (interview_id, application_id, scheduled_datetime, durati
     ('b0000000-0000-0000-0000-000000000014', 'a0000000-0000-0000-0000-000000000014', '2026-07-29 14:00:00', 45, 'https://meet.momo.vn/interview-14', 'SCHEDULED', FALSE);
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000015', 'student15@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Vu Thanh Giang', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000015', 'student15@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Vu Thanh Giang', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000015', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked) VALUES
     ('e0000000-0000-0000-0000-000000000015', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000015', 'SE15015', 'Vu Thanh Giang', 'student15@fpt.edu.vn', 'Software Engineering', 8.57, 5, 'PENDING', FALSE);
@@ -273,7 +273,7 @@ INSERT INTO interviews (interview_id, application_id, scheduled_datetime, durati
 -- ============================================================
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000016', 'student16@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Vo Thi Minh', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000016', 'student16@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Vo Thi Minh', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000016', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked) VALUES
     ('e0000000-0000-0000-0000-000000000016', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000016', 'SE15016', 'Vo Thi Minh', 'student16@fpt.edu.vn', 'Software Engineering', 9.70, 5, 'MATCHED', FALSE);
@@ -287,7 +287,7 @@ INSERT INTO placement_applications (application_id, student_id, enterprise_id, s
     ('a0000000-0000-0000-0000-000000000016', 'd0000000-0000-0000-0000-000000000016', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 'APPROVED', 'I am eager to join Momo as a backend developer intern.', '00000000-0000-0000-0000-000000000002', CURRENT_TIMESTAMP);
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000017', 'student17@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Nguyen Minh Vinh', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000017', 'student17@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Nguyen Minh Vinh', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000017', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked) VALUES
     ('e0000000-0000-0000-0000-000000000017', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000017', 'SE15017', 'Nguyen Minh Vinh', 'student17@fpt.edu.vn', 'Software Engineering', 7.54, 5, 'MATCHED', FALSE);
@@ -301,7 +301,7 @@ INSERT INTO placement_applications (application_id, student_id, enterprise_id, s
     ('a0000000-0000-0000-0000-000000000017', 'd0000000-0000-0000-0000-000000000017', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 'APPROVED', 'Excited to intern at Momo.', '00000000-0000-0000-0000-000000000002', CURRENT_TIMESTAMP);
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000018', 'student18@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Ly Tuyet Thanh', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000018', 'student18@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Ly Tuyet Thanh', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000018', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked) VALUES
     ('e0000000-0000-0000-0000-000000000018', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000018', 'SE15018', 'Ly Tuyet Thanh', 'student18@fpt.edu.vn', 'Software Engineering', 8.56, 5, 'MATCHED', FALSE);
@@ -315,7 +315,7 @@ INSERT INTO placement_applications (application_id, student_id, enterprise_id, s
     ('a0000000-0000-0000-0000-000000000018', 'd0000000-0000-0000-0000-000000000018', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 'APPROVED', 'I want to learn from Momo team.', '00000000-0000-0000-0000-000000000002', CURRENT_TIMESTAMP);
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000019', 'student19@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Ngo Ngoc Xuan', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000019', 'student19@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Ngo Ngoc Xuan', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000019', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked) VALUES
     ('e0000000-0000-0000-0000-000000000019', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000019', 'SE15019', 'Ngo Ngoc Xuan', 'student19@fpt.edu.vn', 'Software Engineering', 7.83, 5, 'MATCHED', FALSE);
@@ -329,7 +329,7 @@ INSERT INTO placement_applications (application_id, student_id, enterprise_id, s
     ('a0000000-0000-0000-0000-000000000019', 'd0000000-0000-0000-0000-000000000019', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 'APPROVED', 'Excited to join Momo internship.', '00000000-0000-0000-0000-000000000002', CURRENT_TIMESTAMP);
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000020', 'student20@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Huy Minh Xuan', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000020', 'student20@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Huy Minh Xuan', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000020', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked) VALUES
     ('e0000000-0000-0000-0000-000000000020', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000020', 'SE15020', 'Huy Minh Xuan', 'student20@fpt.edu.vn', 'Software Engineering', 7.23, 5, 'MATCHED', FALSE);
@@ -348,7 +348,7 @@ INSERT INTO placement_applications (application_id, student_id, enterprise_id, s
 -- ============================================================
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000021', 'student21@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Vu Huu Quan', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000021', 'student21@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Vu Huu Quan', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000021', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked, approved_at) VALUES
     ('e0000000-0000-0000-0000-000000000021', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000021', 'SE15021', 'Vu Huu Quan', 'student21@fpt.edu.vn', 'Software Engineering', 8.06, 6, 'OJT', TRUE, CURRENT_TIMESTAMP);
@@ -380,7 +380,7 @@ INSERT INTO incidents (incident_id, assignment_id, reported_by, category, descri
     ('00000000-0000-0000-000b-000000000021', 'f0000000-0000-0000-0000-000000000021', 'c0000000-0000-0000-0000-000000000011', 'PROLONGED_ABSENCE', 'Student was absent for 3 consecutive days without prior notice.', 'RESOLVED', 'Student had a family emergency. Has submitted leave request and made up the work.', '00000000-0000-0000-0000-000000000002', CURRENT_TIMESTAMP);
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000022', 'student22@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Ho Gia Quan', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000022', 'student22@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Ho Gia Quan', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000022', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked, approved_at) VALUES
     ('e0000000-0000-0000-0000-000000000022', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000022', 'SE15022', 'Ho Gia Quan', 'student22@fpt.edu.vn', 'Software Engineering', 9.66, 6, 'OJT', TRUE, CURRENT_TIMESTAMP);
@@ -404,7 +404,7 @@ INSERT INTO enterprise_evaluations (evaluation_id, assignment_id, attitude_score
     ('00000000-0000-0000-0009-000000000022', 'f0000000-0000-0000-0000-000000000022', 9.00, 9.50, 9.00, 9.00, 'Outstanding performance, highly recommended.', TRUE, CURRENT_TIMESTAMP);
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000023', 'student23@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Vu Duc Uyen', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000023', 'student23@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Vu Duc Uyen', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000023', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked, approved_at) VALUES
     ('e0000000-0000-0000-0000-000000000023', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000023', 'SE15023', 'Vu Duc Uyen', 'student23@fpt.edu.vn', 'Software Engineering', 9.17, 6, 'OJT', TRUE, CURRENT_TIMESTAMP);
@@ -426,7 +426,7 @@ INSERT INTO weekly_reports (report_id, assignment_id, week_number, tasks_complet
     ('00000000-0000-0000-0007-000000000023', 'f0000000-0000-0000-0000-000000000023', 3, 'Feature implementation ongoing, addressing review comments', 'Time management challenge', 'Learned agile workflow', 'Complete feature and testing', 'SUBMITTED', '2026-04-04');
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000024', 'student24@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Huy Huu Yen', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000024', 'student24@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Huy Huu Yen', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000024', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked, approved_at) VALUES
     ('e0000000-0000-0000-0000-000000000024', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000024', 'SE15024', 'Huy Huu Yen', 'student24@fpt.edu.vn', 'Software Engineering', 7.91, 6, 'OJT', TRUE, CURRENT_TIMESTAMP);
@@ -448,7 +448,7 @@ INSERT INTO weekly_reports (report_id, assignment_id, week_number, tasks_complet
     ('00000000-0000-0000-0007-000000000024', 'f0000000-0000-0000-0000-000000000024', 3, 'Feature development in progress', 'Feature scope management', 'Learned sprint planning', 'Complete first feature module', 'SUBMITTED', '2026-04-04');
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000025', 'student25@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Vu Thanh Son', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000025', 'student25@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Vu Thanh Son', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000025', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked, approved_at) VALUES
     ('e0000000-0000-0000-0000-000000000025', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000025', 'SE15025', 'Vu Thanh Son', 'student25@fpt.edu.vn', 'Software Engineering', 6.91, 6, 'OJT', TRUE, CURRENT_TIMESTAMP);
@@ -475,7 +475,7 @@ INSERT INTO weekly_reports (report_id, assignment_id, week_number, tasks_complet
 -- ============================================================
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000026', 'student26@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Do Thi Thanh', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000026', 'student26@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Do Thi Thanh', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000026', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked, approved_at) VALUES
     ('e0000000-0000-0000-0000-000000000026', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000026', 'SE15026', 'Do Thi Thanh', 'student26@fpt.edu.vn', 'Software Engineering', 8.56, 7, 'OJT', TRUE, CURRENT_TIMESTAMP);
@@ -493,7 +493,7 @@ INSERT INTO student_enterprise_feedbacks (feedback_id, student_id, enterprise_id
     ('00000000-0000-0000-000f-000000000026', 'd0000000-0000-0000-0000-000000000026', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 5, 4, 5, 5, 'Great mentorship and learning environment at Momo.', 'Could improve on feedback turnaround time.', '2026-07-18 09:00:00');
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000027', 'student27@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Nguyen Thanh Duc', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000027', 'student27@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Nguyen Thanh Duc', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000027', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked, approved_at) VALUES
     ('e0000000-0000-0000-0000-000000000027', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000027', 'SE15027', 'Nguyen Thanh Duc', 'student27@fpt.edu.vn', 'Software Engineering', 7.56, 7, 'OJT', TRUE, CURRENT_TIMESTAMP);
@@ -511,7 +511,7 @@ INSERT INTO student_enterprise_feedbacks (feedback_id, student_id, enterprise_id
     ('00000000-0000-0000-000f-000000000027', 'd0000000-0000-0000-0000-000000000027', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 4, 5, 4, 4, 'Good learning experience with supportive team at Momo.', 'More structured training curriculum needed.', '2026-07-18 10:00:00');
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000028', 'student28@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Ho Tuyet Linh', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000028', 'student28@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Ho Tuyet Linh', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000028', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked, approved_at) VALUES
     ('e0000000-0000-0000-0000-000000000028', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000028', 'SE15028', 'Ho Tuyet Linh', 'student28@fpt.edu.vn', 'Software Engineering', 8.83, 7, 'OJT', TRUE, CURRENT_TIMESTAMP);
@@ -529,7 +529,7 @@ INSERT INTO student_enterprise_feedbacks (feedback_id, student_id, enterprise_id
     ('00000000-0000-0000-000f-000000000028', 'd0000000-0000-0000-0000-000000000028', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 5, 5, 5, 5, 'Excellent internship program with great mentorship at Momo.', 'Everything was well organized.', '2026-07-18 11:00:00');
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000029', 'student29@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Ngo Thanh Phong', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000029', 'student29@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Ngo Thanh Phong', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000029', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked, approved_at) VALUES
     ('e0000000-0000-0000-0000-000000000029', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000029', 'SE15029', 'Ngo Thanh Phong', 'student29@fpt.edu.vn', 'Software Engineering', 6.61, 7, 'OJT', TRUE, CURRENT_TIMESTAMP);
@@ -547,7 +547,7 @@ INSERT INTO student_enterprise_feedbacks (feedback_id, student_id, enterprise_id
     ('00000000-0000-0000-000f-000000000029', 'd0000000-0000-0000-0000-000000000029', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 4, 4, 3, 4, 'Good experience overall, learned a lot at Momo.', 'More regular feedback sessions needed.', '2026-07-18 12:00:00');
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000030', 'student30@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Vu Duc Yen', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000030', 'student30@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Vu Duc Yen', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000030', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked, approved_at) VALUES
     ('e0000000-0000-0000-0000-000000000030', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000030', 'SE15030', 'Vu Duc Yen', 'student30@fpt.edu.vn', 'Software Engineering', 7.89, 7, 'OJT', TRUE, CURRENT_TIMESTAMP);
@@ -569,7 +569,7 @@ INSERT INTO student_enterprise_feedbacks (feedback_id, student_id, enterprise_id
 -- ============================================================
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000031', 'student31@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Duong Minh Khanh', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000031', 'student31@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Duong Minh Khanh', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000031', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked) VALUES
     ('e0000000-0000-0000-0000-000000000031', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000031', 'SE15031', 'Duong Minh Khanh', 'student31@fpt.edu.vn', 'Software Engineering', 8.17, 8, 'ELIGIBLE', FALSE);
@@ -577,7 +577,7 @@ INSERT INTO student_profiles (user_id, student_code, university, major, gpa, ski
     ('d0000000-0000-0000-0000-000000000031', 'SE15031', 'FPT University', 'Software Engineering', 6.5, '["Java", "Spring Boot"]'::jsonb, 'https://cv.example.com/se15031.pdf');
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000032', 'student32@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Do Xuan Quan', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000032', 'student32@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Do Xuan Quan', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000032', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked) VALUES
     ('e0000000-0000-0000-0000-000000000032', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000032', 'SE15032', 'Do Xuan Quan', 'student32@fpt.edu.vn', 'Software Engineering', 9.22, 9, 'ELIGIBLE', FALSE);
@@ -585,7 +585,7 @@ INSERT INTO student_profiles (user_id, student_code, university, major, gpa, ski
     ('d0000000-0000-0000-0000-000000000032', 'SE15032', 'FPT University', 'Software Engineering', 6.5, '["Java", "Spring Boot"]'::jsonb, 'https://cv.example.com/se15032.pdf');
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000033', 'student33@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Vo Huu Yen', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000033', 'student33@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Vo Huu Yen', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000033', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked) VALUES
     ('e0000000-0000-0000-0000-000000000033', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000033', 'SE15033', 'Vo Huu Yen', 'student33@fpt.edu.vn', 'Software Engineering', 8.87, 1, 'ELIGIBLE', FALSE);
@@ -593,7 +593,7 @@ INSERT INTO student_profiles (user_id, student_code, university, major, gpa, ski
     ('d0000000-0000-0000-0000-000000000033', 'SE15033', 'FPT University', 'Software Engineering', 7.5, '["Java", "Spring Boot"]'::jsonb, 'https://cv.example.com/se15033.pdf');
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000034', 'student34@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Ho Xuan Linh', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000034', 'student34@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Ho Xuan Linh', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000034', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked) VALUES
     ('e0000000-0000-0000-0000-000000000034', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000034', 'SE15034', 'Ho Xuan Linh', 'student34@fpt.edu.vn', 'Software Engineering', 7.10, 7, 'ELIGIBLE', FALSE);
@@ -601,7 +601,7 @@ INSERT INTO student_profiles (user_id, student_code, university, major, gpa, ski
     ('d0000000-0000-0000-0000-000000000034', 'SE15034', 'FPT University', 'Software Engineering', 7.5, '["Java", "Spring Boot"]'::jsonb, 'https://cv.example.com/se15034.pdf');
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000035', 'student35@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Bui Xuan Phong', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000035', 'student35@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Bui Xuan Phong', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000035', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked) VALUES
     ('e0000000-0000-0000-0000-000000000035', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000035', 'SE15035', 'Bui Xuan Phong', 'student35@fpt.edu.vn', 'Software Engineering', 6.80, 1, 'ELIGIBLE', FALSE);
@@ -772,7 +772,7 @@ INSERT INTO semester_enterprises (semester_enterprise_id, semester_id, enterpris
 -- NOT_ELIGIBLE students (SE15036-37) for eligibility rejection demo
 -- NOTE: chk_gpa_minimum requires gpa >= 5.0, so NOT_ELIGIBLE here means "missing certifications" not low GPA
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000036', 'student36@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Tran Van Khoa', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000036', 'student36@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Tran Van Khoa', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000036', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked) VALUES
     ('e0000000-0000-0000-0000-000000000036', '50000000-0000-0000-0000-000000000002', 'd0000000-0000-0000-0000-000000000036', 'SE15036', 'Tran Van Khoa', 'student36@fpt.edu.vn', 'Software Engineering', 5.50, 5, 'NOT_ELIGIBLE', FALSE);
@@ -780,7 +780,7 @@ INSERT INTO student_profiles (user_id, student_code, university, major, gpa, ski
     ('d0000000-0000-0000-0000-000000000036', 'SE15036', 'FPT University', 'Software Engineering', 5.5, '["Java"]'::jsonb);
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000037', 'student37@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Nguyen Thi Lan', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000037', 'student37@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Nguyen Thi Lan', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000037', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked) VALUES
     ('e0000000-0000-0000-0000-000000000037', '50000000-0000-0000-0000-000000000002', 'd0000000-0000-0000-0000-000000000037', 'SE15037', 'Nguyen Thi Lan', 'student37@fpt.edu.vn', 'Software Engineering', 5.20, 5, 'NOT_ELIGIBLE', FALSE);
@@ -789,7 +789,7 @@ INSERT INTO student_profiles (user_id, student_code, university, major, gpa, ski
 
 -- ACCEPTED students (SE15038) for ACCEPTED status demo
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000038', 'student38@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Pham Hoang Nam', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000038', 'student38@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Pham Hoang Nam', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000038', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked) VALUES
     ('e0000000-0000-0000-0000-000000000038', '50000000-0000-0000-0000-000000000002', 'd0000000-0000-0000-0000-000000000038', 'SE15038', 'Pham Hoang Nam', 'student38@fpt.edu.vn', 'Software Engineering', 7.80, 5, 'ACCEPTED', FALSE);
@@ -798,7 +798,7 @@ INSERT INTO student_profiles (user_id, student_code, university, major, gpa, ski
 
 -- CANCELLED students (SE15039) for cancellation demo
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000039', 'student39@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Le Thi Mai', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000039', 'student39@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Le Thi Mai', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000039', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked, cancelled_reason, cancelled_by) VALUES
     ('e0000000-0000-0000-0000-000000000039', '50000000-0000-0000-0000-000000000002', 'd0000000-0000-0000-0000-000000000039', 'SE15039', 'Le Thi Mai', 'student39@fpt.edu.vn', 'Software Engineering', 6.10, 5, 'CANCELLED', FALSE, 'Student withdrew from program', '00000000-0000-0000-0000-000000000002');
@@ -811,7 +811,7 @@ INSERT INTO student_profiles (user_id, student_code, university, major, gpa, ski
 
 -- SCREENING_PASSED: student40 passed screening, awaiting interview scheduling
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000040', 'student40@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Dao Van An', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000040', 'student40@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Dao Van An', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000040', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status) VALUES
     ('e0000000-0000-0000-0000-000000000040', '50000000-0000-0000-0000-000000000002', 'd0000000-0000-0000-0000-000000000040', 'SE15040', 'Dao Van An', 'student40@fpt.edu.vn', 'Software Engineering', 8.00, 5, 'PENDING');
@@ -822,7 +822,7 @@ INSERT INTO applications (application_id, job_post_id, student_id, cv_file_url, 
 
 -- SCREENING_PASSED: student41 passed screening
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000041', 'student41@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Bui Thi Hoa', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000041', 'student41@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Bui Thi Hoa', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000041', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status) VALUES
     ('e0000000-0000-0000-0000-000000000041', '50000000-0000-0000-0000-000000000002', 'd0000000-0000-0000-0000-000000000041', 'SE15041', 'Bui Thi Hoa', 'student41@fpt.edu.vn', 'Software Engineering', 7.20, 5, 'PENDING');
@@ -833,7 +833,7 @@ INSERT INTO applications (application_id, job_post_id, student_id, cv_file_url, 
 
 -- SCREENING_REJECTED: student42 rejected at screening
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000042', 'student42@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Hoang Van Cuong', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000042', 'student42@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Hoang Van Cuong', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000042', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status) VALUES
     ('e0000000-0000-0000-0000-000000000042', '50000000-0000-0000-0000-000000000002', 'd0000000-0000-0000-0000-000000000042', 'SE15042', 'Hoang Van Cuong', 'student42@fpt.edu.vn', 'Software Engineering', 5.20, 5, 'ELIGIBLE');
@@ -844,7 +844,7 @@ INSERT INTO applications (application_id, job_post_id, student_id, cv_file_url, 
 
 -- SCREENING_REJECTED: student43 rejected at screening (REJECTED final status after interview)
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000043', 'student43@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Tran Thi Thu', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000043', 'student43@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Tran Thi Thu', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000043', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status) VALUES
     ('e0000000-0000-0000-0000-000000000043', '50000000-0000-0000-0000-000000000002', 'd0000000-0000-0000-0000-000000000043', 'SE15043', 'Tran Thi Thu', 'student43@fpt.edu.vn', 'Software Engineering', 6.50, 5, 'PENDING');
@@ -855,7 +855,7 @@ INSERT INTO applications (application_id, job_post_id, student_id, cv_file_url, 
 
 -- WITHDRAWN: student44 withdrew before screening
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000044', 'student44@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Vu Van Binh', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000044', 'student44@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Vu Van Binh', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000044', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status) VALUES
     ('e0000000-0000-0000-0000-000000000044', '50000000-0000-0000-0000-000000000002', 'd0000000-0000-0000-0000-000000000044', 'SE15044', 'Vu Van Binh', 'student44@fpt.edu.vn', 'Software Engineering', 7.00, 5, 'ELIGIBLE');

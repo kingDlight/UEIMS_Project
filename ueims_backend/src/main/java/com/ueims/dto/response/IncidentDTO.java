@@ -72,7 +72,10 @@ public class IncidentDTO {
                 }
             }
             if (incident.getAssignment().getEnterprise() != null) {
-                enterpriseId = incident.getAssignment().getEnterprise().getEnterpriseId().toString();
+                enterpriseId = incident.getAssignment()
+                        .getEnterprise()
+                        .getEnterpriseId()
+                        .toString();
                 enterpriseName = incident.getAssignment().getEnterprise().getCompanyName();
             }
         }

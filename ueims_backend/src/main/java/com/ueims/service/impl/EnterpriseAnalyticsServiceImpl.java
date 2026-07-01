@@ -58,12 +58,10 @@ public class EnterpriseAnalyticsServiceImpl implements EnterpriseAnalyticsServic
         }
 
         // 1. Lấy assignment của DN. Có thể lọc theo kỳ nếu client truyền lên.
-        List<EnterpriseAssignment> assignments =
-                semesterId != null
-                        ? enterpriseAssignmentRepository
-                                .findByEnterprise_EnterpriseIdAndSemester_SemesterId(
-                                        enterpriseId, semesterId)
-                        : enterpriseAssignmentRepository.findByEnterprise_EnterpriseId(enterpriseId);
+        List<EnterpriseAssignment> assignments = semesterId != null
+                ? enterpriseAssignmentRepository.findByEnterprise_EnterpriseIdAndSemester_SemesterId(
+                        enterpriseId, semesterId)
+                : enterpriseAssignmentRepository.findByEnterprise_EnterpriseId(enterpriseId);
 
         if (assignments.isEmpty()) {
             return List.of();
@@ -95,8 +93,7 @@ public class EnterpriseAnalyticsServiceImpl implements EnterpriseAnalyticsServic
             if (major == null || major.isBlank()) continue;
 
             String key = sem.getSemesterId() + "|" + major;
-            AggregateBucket bucket =
-                    buckets.computeIfAbsent(key, k -> new AggregateBucket(sem, major));
+            AggregateBucket bucket = buckets.computeIfAbsent(key, k -> new AggregateBucket(sem, major));
 
             bucket.totalStudents++;
             if (eligible.getGpa() != null) {
@@ -129,7 +126,8 @@ public class EnterpriseAnalyticsServiceImpl implements EnterpriseAnalyticsServic
                     continue;
                 }
                 // Match theo semester
-                if (!bucket.semester.getSemesterId()
+                if (!bucket.semester
+                        .getSemesterId()
                         .equals(iv.getApplication().getJobPost().getSemester().getSemesterId())) {
                     continue;
                 }
@@ -137,8 +135,7 @@ public class EnterpriseAnalyticsServiceImpl implements EnterpriseAnalyticsServic
                 UUID interviewStudentId = iv.getApplication().getStudent().getUserId();
                 // Chỉ đếm SV thuộc bucket này nếu major của SV khớp
                 EligibleStudent eligible = eligibleStudentRepository
-                        .findByUser_UserIdAndSemester_SemesterId(
-                                interviewStudentId, bucket.semester.getSemesterId())
+                        .findByUser_UserIdAndSemester_SemesterId(interviewStudentId, bucket.semester.getSemesterId())
                         .orElse(null);
                 if (eligible == null || !bucket.major.equals(eligible.getMajor())) {
                     continue;
@@ -156,23 +153,24 @@ public class EnterpriseAnalyticsServiceImpl implements EnterpriseAnalyticsServic
         // 6. Build DTO list, sort theo semester desc rồi major asc
         List<MajorQualityDTO> result = buckets.values().stream()
                 .map(this::toDto)
-                .sorted(Comparator
-                        .comparing(MajorQualityDTO::semesterCode).reversed()
+                .sorted(Comparator.comparing(MajorQualityDTO::semesterCode)
+                        .reversed()
                         .thenComparing(MajorQualityDTO::major))
                 .collect(Collectors.toList());
 
-        log.info("[EnterpriseAnalytics] enterprise={} semester={} → {} major buckets",
-                enterpriseId, semesterId, result.size());
+        log.info(
+                "[EnterpriseAnalytics] enterprise={} semester={} → {} major buckets",
+                enterpriseId,
+                semesterId,
+                result.size());
         return result;
     }
 
     private MajorQualityDTO toDto(AggregateBucket b) {
-        BigDecimal avgGpa = b.gpaCount > 0
-                ? b.gpaSum.divide(BigDecimal.valueOf(b.gpaCount), 2, RoundingMode.HALF_UP)
-                : null;
-        BigDecimal avgGrade = b.gradeCount > 0
-                ? b.gradeSum.divide(BigDecimal.valueOf(b.gradeCount), 2, RoundingMode.HALF_UP)
-                : null;
+        BigDecimal avgGpa =
+                b.gpaCount > 0 ? b.gpaSum.divide(BigDecimal.valueOf(b.gpaCount), 2, RoundingMode.HALF_UP) : null;
+        BigDecimal avgGrade =
+                b.gradeCount > 0 ? b.gradeSum.divide(BigDecimal.valueOf(b.gradeCount), 2, RoundingMode.HALF_UP) : null;
         long totalInterview = b.passed + b.failed;
         BigDecimal passRate = totalInterview > 0
                 ? BigDecimal.valueOf(b.passed)
