@@ -11,6 +11,8 @@ import com.ueims.model.entity.InternshipPlan;
         builder = @org.mapstruct.Builder(disableBuilder = true))
 public interface InternshipPlanMapper {
     @Mapping(target = "assignmentId", source = "assignment.assignmentId")
+    @Mapping(target = "jobPostId", source = "jobPost.jobPostId")
+    @Mapping(target = "jobPostTitle", source = "jobPost.title")
     @Mapping(
             target = "enterpriseName",
             expression =

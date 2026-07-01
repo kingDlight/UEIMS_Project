@@ -14,6 +14,14 @@ public interface InternshipPlanService {
 
     InternshipPlan findByAssignmentId(UUID assignmentId);
 
+    InternshipPlan findByJobPostId(UUID jobPostId);
+
+    List<InternshipPlan> findPendingMasterPlans();
+
+    InternshipPlan approveMasterPlan(UUID planId);
+
+    InternshipPlan rejectMasterPlan(UUID planId, String reason);
+
     InternshipPlan save(InternshipPlan entity);
 
     void deleteById(UUID id);

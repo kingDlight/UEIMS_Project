@@ -13,9 +13,11 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-@JsonIgnoreProperties({"assignment", "items", "createdAt", "updatedAt", "createdBy", "updatedBy"})
+@JsonIgnoreProperties({"assignment", "jobPost", "items", "createdAt", "updatedAt", "createdBy", "updatedBy"})
 public class InternshipPlanDTO extends InternshipPlan {
     private UUID assignmentId;
+    private UUID jobPostId;
+    private String jobPostTitle;
     private String enterpriseName;
     private String startDate;
     private List<InternshipPlanItemDTO> tasks;

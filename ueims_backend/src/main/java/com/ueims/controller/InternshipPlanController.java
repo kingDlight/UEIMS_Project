@@ -1,6 +1,7 @@
 package com.ueims.controller;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import jakarta.validation.Valid;
@@ -40,9 +41,6 @@ public class InternshipPlanController {
         return ResponseEntity.ok(mapper.toDto(plan));
     }
 
-    /**
-     * UC-46: Enterprise fetches the plan associated with a given assignment.
-     */
     @GetMapping("/by-assignment/{assignmentId}")
     @PreAuthorize("hasRole('ENTERPRISE') or hasRole('TRAINING_MANAGER')")
     public ResponseEntity<com.ueims.dto.response.InternshipPlanDTO> getByAssignment(@PathVariable UUID assignmentId) {
@@ -55,6 +53,40 @@ public class InternshipPlanController {
                     .build()));
         }
         return ResponseEntity.ok(mapper.toDto(plan));
+    }
+
+    @GetMapping("/by-job-post/{jobPostId}")
+    @PreAuthorize("hasRole('ENTERPRISE') or hasRole('TRAINING_MANAGER')")
+    public ResponseEntity<com.ueims.dto.response.InternshipPlanDTO> getByJobPost(@PathVariable UUID jobPostId) {
+        com.ueims.model.entity.InternshipPlan plan = service.findByJobPostId(jobPostId);
+        if (plan == null) {
+            return ResponseEntity.ok(mapper.toDto(com.ueims.model.entity.InternshipPlan.builder()
+                    .jobPost(com.ueims.model.entity.JobPost.builder()
+                            .jobPostId(jobPostId)
+                            .build())
+                    .build()));
+        }
+        return ResponseEntity.ok(mapper.toDto(plan));
+    }
+
+    @GetMapping("/pending-master-plans")
+    @PreAuthorize("hasRole('TRAINING_MANAGER')")
+    public ResponseEntity<List<com.ueims.dto.response.InternshipPlanDTO>> getPendingMasterPlans() {
+        return ResponseEntity.ok(
+                service.findPendingMasterPlans().stream().map(mapper::toDto).toList());
+    }
+
+    @PostMapping("/{planId}/approve")
+    @PreAuthorize("hasRole('TRAINING_MANAGER')")
+    public ResponseEntity<com.ueims.dto.response.InternshipPlanDTO> approvePlan(@PathVariable UUID planId) {
+        return ResponseEntity.ok(mapper.toDto(service.approveMasterPlan(planId)));
+    }
+
+    @PostMapping("/{planId}/reject")
+    @PreAuthorize("hasRole('TRAINING_MANAGER')")
+    public ResponseEntity<com.ueims.dto.response.InternshipPlanDTO> rejectPlan(
+            @PathVariable UUID planId, @RequestBody Map<String, String> payload) {
+        return ResponseEntity.ok(mapper.toDto(service.rejectMasterPlan(planId, payload.get("reason"))));
     }
 
     @GetMapping("/{id}")

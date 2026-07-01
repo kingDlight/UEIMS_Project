@@ -11,7 +11,8 @@ export type PageKey =
   | 'weekly-reports'
   | 'calendar'
   | 'notifications'
-  | 'at-risk';
+  | 'at-risk'
+  | 'plan-approvals';
 
 export type ThemeColors = {
   bg: string;
