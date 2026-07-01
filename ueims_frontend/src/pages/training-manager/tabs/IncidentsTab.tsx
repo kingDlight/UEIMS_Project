@@ -911,7 +911,7 @@ export const IncidentsTab: React.FC = () => {
                   </div>
                   <div>
                     <div style={{ fontSize: 13, fontWeight: 700, color: cc.textPrimary, fontFamily: 'Inter, sans-serif' }}>
-                      {selected.incidentId} &middot; {selected.category}
+                      {String(selected.incidentId).split('-').pop()?.replace(/^0+/, '') || selected.incidentId} &middot; {selected.category}
                     </div>
                     <div style={{ fontSize: 11, color: cc.textMuted, marginTop: 1, fontFamily: 'Inter, sans-serif' }}>
                       {new Date(selected.createdAt).toLocaleDateString('en-GB', {
@@ -942,23 +942,33 @@ export const IncidentsTab: React.FC = () => {
 
               {/* Incident Info Grid */}
               <div style={{ padding: '16px 18px 0' }}>
-                <div className="info-grid">
-                  {[
-                    { label: 'Student', value: student?.fullName ?? '—' },
-                    { label: 'Enterprise', value: enterprise?.companyName ?? '—' },
-                    { label: 'Student Code', value: student?.studentCode ?? '—' },
-                    { label: 'Reported By', value: incident.reportedByFullName ?? incident.reportedBy?.fullName ?? '—' },
-                  ].map(({ label, value }) => (
-                    <div key={label}>
-                      <div style={{ fontSize: 10, fontWeight: 700, color: cc.textMuted, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 3 }}>
-                        {label}
-                      </div>
-                      <div style={{ fontSize: 13, fontWeight: 600, color: cc.textPrimary, fontFamily: 'Inter, sans-serif', lineHeight: 1.3 }}>
-                        {value}
-                      </div>
+                {(() => {
+                  const student = selected.studentName
+                    ? { fullName: selected.studentName, studentCode: selected.studentCode }
+                    : (selected.assignment?.student ?? null);
+                  const enterprise = selected.enterpriseName
+                    ? { companyName: selected.enterpriseName }
+                    : (selected.assignment?.enterprise ?? null);
+                  return (
+                    <div className="info-grid">
+                      {[
+                        { label: 'Student', value: student?.fullName ?? '—' },
+                        { label: 'Enterprise', value: enterprise?.companyName ?? '—' },
+                        { label: 'Student Code', value: student?.studentCode ?? '—' },
+                        { label: 'Reported By', value: selected.reportedByFullName ?? selected.reportedBy?.fullName ?? '—' },
+                      ].map(({ label, value }) => (
+                        <div key={label}>
+                          <div style={{ fontSize: 10, fontWeight: 700, color: cc.textMuted, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 3 }}>
+                            {label}
+                          </div>
+                          <div style={{ fontSize: 13, fontWeight: 600, color: cc.textPrimary, fontFamily: 'Inter, sans-serif', lineHeight: 1.3 }}>
+                            {value}
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  );
+                })()}
 
                 {/* Description */}
                 <div style={{ marginBottom: 16 }}>
