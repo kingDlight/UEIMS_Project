@@ -23,6 +23,8 @@ public interface ApplicationRepository extends JpaRepository<Application, UUID> 
 
     boolean existsByJobPost_JobPostId(UUID jobPostId);
 
+    List<Application> findByJobPost_JobPostId(UUID jobPostId);
+
     long countByStudent_UserIdAndStudent_DeletedAtIsNull(UUID studentId);
 
     @Query("SELECT a FROM Application a " + "LEFT JOIN FETCH a.jobPost jp "

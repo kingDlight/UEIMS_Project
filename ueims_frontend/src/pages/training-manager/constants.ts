@@ -53,6 +53,7 @@ export const navItems: NavItem[] = [
   { key: 'calendar', label: 'Semester', icon: React.createElement(CalendarOutlined), roles: ['TRAINING_MANAGER', 'SYSTEM_ADMIN'] },
   { key: 'notifications', label: 'Notices', icon: React.createElement(BellOutlined), roles: ['TRAINING_MANAGER', 'SYSTEM_ADMIN', 'ENTERPRISE', 'STUDENT'] },
   { key: 'at-risk', label: 'At-Risk Students', icon: React.createElement(AlertOutlined), roles: ['TRAINING_MANAGER', 'SYSTEM_ADMIN'] },
+  { key: 'plan-approvals', label: 'Plan Approvals', icon: React.createElement(FileProtectOutlined), roles: ['TRAINING_MANAGER', 'SYSTEM_ADMIN'] },
 ];
 
 export const defaultPage: PageKey = 'dashboard';

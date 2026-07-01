@@ -18,6 +18,8 @@ import com.ueims.model.entity.Application;
 import com.ueims.model.entity.ApplicationStatus;
 import com.ueims.model.entity.Enterprise;
 import com.ueims.model.entity.EnterpriseAssignment;
+import com.ueims.model.entity.InternshipPlan;
+import com.ueims.model.entity.InternshipPlanItem;
 import com.ueims.model.entity.Interview;
 import com.ueims.model.entity.PlacementApplication;
 import com.ueims.model.entity.Semester;
@@ -25,6 +27,8 @@ import com.ueims.model.entity.User;
 import com.ueims.repository.ApplicationRepository;
 import com.ueims.repository.EligibleStudentRepository;
 import com.ueims.repository.EnterpriseAssignmentRepository;
+import com.ueims.repository.InternshipPlanItemRepository;
+import com.ueims.repository.InternshipPlanRepository;
 import com.ueims.repository.InterviewRepository;
 import com.ueims.repository.PlacementApplicationRepository;
 import com.ueims.repository.SemesterRepository;
@@ -56,6 +60,8 @@ public class InterviewServiceImpl implements InterviewService {
     NotificationService notificationService;
     ApplicationService applicationService;
     EnterpriseAssignmentService enterpriseAssignmentService;
+    InternshipPlanRepository internshipPlanRepository;
+    InternshipPlanItemRepository internshipPlanItemRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -594,6 +600,38 @@ public class InterviewServiceImpl implements InterviewService {
 
         // Auto-complete assignment ACTIVE cũ ở kỳ khác (SV đã lên kỳ mới qua interview)
         enterpriseAssignmentService.autoCompletePriorActiveAssignments(student.getUserId(), semester.getSemesterId());
+
+        // Auto clone internship plan if there is an approved master plan for this JobPost
+        List<InternshipPlan> masterPlans = internshipPlanRepository.findByJobPost_JobPostId(
+                application.getJobPost().getJobPostId());
+        if (!masterPlans.isEmpty()) {
+            InternshipPlan masterPlan = masterPlans.get(0);
+            if ("APPROVED".equals(masterPlan.getStatus())) {
+                InternshipPlan studentPlan = InternshipPlan.builder()
+                        .assignment(assignment)
+                        .overallGoal(masterPlan.getOverallGoal())
+                        .status("APPROVED")
+                        .build();
+                internshipPlanRepository.save(studentPlan);
+
+                List<InternshipPlanItem> masterItems =
+                        internshipPlanItemRepository.findByPlan_PlanId(masterPlan.getPlanId());
+                for (InternshipPlanItem item : masterItems) {
+                    InternshipPlanItem clonedItem = InternshipPlanItem.builder()
+                            .plan(studentPlan)
+                            .weekNumber(item.getWeekNumber())
+                            .taskDescription(item.getTaskDescription())
+                            .targetDate(item.getTargetDate())
+                            .status("PENDING")
+                            .orderIndex(item.getOrderIndex())
+                            .build();
+                    internshipPlanItemRepository.save(clonedItem);
+                }
+                log.info(
+                        "[autoCreatePlacement] Cloned master plan to student assignment {}",
+                        assignment.getAssignmentId());
+            }
+        }
 
         // Update eligible_students status → MATCHED so student appears in OJT view
         eligibleStudentRepository
