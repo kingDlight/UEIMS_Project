@@ -20,7 +20,9 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 
-@Component
+// DISABLED — seed data is managed by SQL/016_seed_realistic_data.sql
+// To re-enable: add @Component back and set app.seed.enabled=true in properties
+// @Component
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j

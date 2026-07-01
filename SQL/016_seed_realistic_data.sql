@@ -2,6 +2,7 @@
 -- SEED DATA 016: Realistic Full-Stack Demo Data
 -- All UUIDs use valid hex characters only (0-9, a-f)
 -- Follows 001_create_schema.sql exactly
+-- Idempotent: safe to run multiple times
 -- ============================================================
 
 BEGIN;
@@ -10,6 +11,24 @@ BEGIN;
 -- Disable all triggers and constraints
 -- ============================================================
 SET session_replication_role = 'replica';
+
+-- ============================================================
+-- CLEANUP: Remove existing seed data (idempotent guard)
+-- Single TRUNCATE CASCADE on a top-level table cleans entire FK graph.
+-- Order: permissions → announcements → notifications → other seed tables
+-- (users CASCADE handles users_roles, eligible_students, applications, interviews,
+--  assignments, weekly_reports, final_grades, etc. transitively)
+-- ============================================================
+TRUNCATE TABLE
+    permissions,
+    role_permissions,
+    system_announcements,
+    notifications,
+    semesters,
+    enterprises,
+    users
+CASCADE;
+-- NOTE: audit_logs is immutable (BR-07 trigger). Skip cleanup.
 
 -- ============================================================
 -- SYSTEM ACCOUNTS
@@ -630,6 +649,321 @@ INSERT INTO notifications (notification_id, recipient_id, title, message, type, 
     ('00000000-0000-0002-0000-000000000027', 'd0000000-0000-0000-0000-000000000027', 'Your Final Grade Has Been Published', 'Final grade for Summer 2026: 7.9 - PASSED. Congratulations!', 'GRADE_PUBLISHED', 'final_grades', '00000000-0000-0000-000e-000000000027', FALSE);
 INSERT INTO notifications (notification_id, recipient_id, title, message, type, reference_entity, reference_id, is_read) VALUES
     ('00000000-0000-0002-0000-000000000028', 'd0000000-0000-0000-0000-000000000028', 'Your Final Grade Has Been Published', 'Final grade for Summer 2026: 9.4 - PASSED. Outstanding!', 'GRADE_PUBLISHED', 'final_grades', '00000000-0000-0000-000e-000000000028', FALSE);
+
+-- ============================================================
+-- PART 0: UPDATE EMAILS
+-- (Password unchanged: Password@123 for all accounts)
+-- ============================================================
+
+-- Update email for Training Manager (account 2)
+UPDATE users SET email = 'dominhgiabaobmg@gmail.com' WHERE user_id = '00000000-0000-0000-0000-000000000002';
+
+-- Update email for Momo HR (account 11)
+UPDATE users SET email = 'dominhgiabaobmg1@gmail.com' WHERE user_id = 'c0000000-0000-0000-0000-000000000011';
+
+-- Update email for FPT Software HR (account 12)
+UPDATE users SET email = 'dlmkjadragonbmg@gmail.com' WHERE user_id = 'c0000000-0000-0000-0000-000000000012';
+
+-- Update email for Shopee HR (account 13)
+UPDATE users SET email = 'gogodlmkja21022006@gmail.com' WHERE user_id = 'c0000000-0000-0000-0000-000000000013';
+
+-- ============================================================
+-- PART 1: PERMISSIONS & RBAC
+-- (System non-functional without these — CRITICAL)
+-- ============================================================
+
+INSERT INTO permissions (permission_name, description) VALUES
+    -- Admin permissions
+    ('USERS_CREATE',        'Create new user accounts'),
+    ('USERS_READ',          'View user accounts'),
+    ('USERS_UPDATE',        'Update user accounts'),
+    ('USERS_DELETE',        'Delete user accounts'),
+    ('ROLES_ASSIGN',        'Assign roles to users'),
+    -- Training Manager permissions
+    ('SEMESTER_MANAGE',     'Create and manage semesters'),
+    ('SEMESTER_VIEW',       'View semester data'),
+    ('STUDENTS_IMPORT',     'Import eligible student list'),
+    ('STUDENTS_MANAGE',     'Manage student eligibility and status'),
+    ('STUDENTS_VIEW',       'View student information'),
+    ('GRADES_MANAGE',       'Manage and publish final grades'),
+    ('GRADES_VIEW',         'View grades'),
+    ('INCIDENTS_MANAGE',    'Resolve incidents and training warnings'),
+    ('INCIDENTS_VIEW',      'View incidents'),
+    ('WARNINGS_SEND',       'Send training warnings to students'),
+    ('ANNOUNCEMENTS_MANAGE', 'Create and publish announcements'),
+    -- Enterprise permissions
+    ('RECRUITMENT_MANAGE',  'Post jobs and manage recruitment'),
+    ('RECRUITMENT_VIEW',    'View recruitment pipeline'),
+    ('APPLICATIONS_SCREEN', 'Screen and evaluate applications'),
+    ('INTERVIEWS_SCHEDULE', 'Schedule and manage interviews'),
+    ('INTERVIEWS_VIEW',     'View interview schedules'),
+    ('TRAINING_MANAGE',     'Manage OJT training and evaluations'),
+    ('TRAINING_VIEW',       'View student training progress'),
+    ('REPORTS_REVIEW',      'Review and approve student reports'),
+    ('INCIDENTS_REPORT',    'Report incidents'),
+    -- Student permissions
+    ('JOBS_VIEW',           'View available job posts'),
+    ('JOBS_APPLY',          'Apply for jobs'),
+    ('MY_APPLICATIONS',     'View own applications'),
+    ('MY_REPORTS',          'Submit weekly reports'),
+    ('MY_PROFILE',          'Manage own profile'),
+    ('MY_INTERVIEWS',       'View interview invitations');
+
+-- RBAC: ADMIN = all permissions
+INSERT INTO role_permissions (role_name, permission_name)
+SELECT 'ADMIN', permission_name FROM permissions;
+
+-- RBAC: TRAINING_MANAGER
+INSERT INTO role_permissions (role_name, permission_name) VALUES
+    ('TRAINING_MANAGER', 'SEMESTER_VIEW'), ('TRAINING_MANAGER', 'SEMESTER_MANAGE'),
+    ('TRAINING_MANAGER', 'STUDENTS_VIEW'), ('TRAINING_MANAGER', 'STUDENTS_MANAGE'),
+    ('TRAINING_MANAGER', 'STUDENTS_IMPORT'),
+    ('TRAINING_MANAGER', 'GRADES_VIEW'), ('TRAINING_MANAGER', 'GRADES_MANAGE'),
+    ('TRAINING_MANAGER', 'INCIDENTS_VIEW'), ('TRAINING_MANAGER', 'INCIDENTS_MANAGE'),
+    ('TRAINING_MANAGER', 'WARNINGS_SEND'),
+    ('TRAINING_MANAGER', 'ANNOUNCEMENTS_MANAGE'),
+    ('TRAINING_MANAGER', 'RECRUITMENT_VIEW'), ('TRAINING_MANAGER', 'APPLICATIONS_SCREEN'),
+    ('TRAINING_MANAGER', 'INTERVIEWS_VIEW'), ('TRAINING_MANAGER', 'INTERVIEWS_SCHEDULE'),
+    ('TRAINING_MANAGER', 'TRAINING_VIEW'), ('TRAINING_MANAGER', 'REPORTS_REVIEW'),
+    ('TRAINING_MANAGER', 'JOBS_VIEW'), ('TRAINING_MANAGER', 'MY_PROFILE');
+
+-- RBAC: ENTERPRISE
+INSERT INTO role_permissions (role_name, permission_name) VALUES
+    ('ENTERPRISE', 'RECRUITMENT_MANAGE'), ('ENTERPRISE', 'RECRUITMENT_VIEW'),
+    ('ENTERPRISE', 'APPLICATIONS_SCREEN'),
+    ('ENTERPRISE', 'INTERVIEWS_VIEW'), ('ENTERPRISE', 'INTERVIEWS_SCHEDULE'),
+    ('ENTERPRISE', 'TRAINING_MANAGE'), ('ENTERPRISE', 'TRAINING_VIEW'),
+    ('ENTERPRISE', 'REPORTS_REVIEW'),
+    ('ENTERPRISE', 'INCIDENTS_REPORT'), ('ENTERPRISE', 'INCIDENTS_VIEW'),
+    ('ENTERPRISE', 'JOBS_VIEW'), ('ENTERPRISE', 'MY_PROFILE');
+
+-- RBAC: STUDENT
+INSERT INTO role_permissions (role_name, permission_name) VALUES
+    ('STUDENT', 'JOBS_VIEW'), ('STUDENT', 'JOBS_APPLY'),
+    ('STUDENT', 'MY_APPLICATIONS'),
+    ('STUDENT', 'MY_INTERVIEWS'),
+    ('STUDENT', 'MY_REPORTS'),
+    ('STUDENT', 'MY_PROFILE'),
+    ('STUDENT', 'TRAINING_VIEW');
+
+-- ============================================================
+-- PART 3: ADDITIONAL SEMESTERS (Multi-semester demo)
+-- ============================================================
+
+-- SU26: Summer 2026 (ACTIVE) — second active semester for demo
+INSERT INTO semesters (semester_id, semester_code, name, start_date, end_date, weekly_report_deadline_day, weekly_report_deadline_time, final_report_deadline, status, created_by) VALUES
+    ('50000000-0000-0000-0000-000000000002', 'SU26', 'Summer 2026', '2026-06-01', '2026-09-30', 'SUNDAY', '23:59:00', '2026-10-05 23:59:00', 'OPEN', '00000000-0000-0000-0000-000000000002');
+UPDATE semesters SET status = 'ACTIVE' WHERE semester_id = '50000000-0000-0000-0000-000000000002';
+
+-- FA25: Fall 2025 (CLOSED) — historical semester for grade comparison demo
+INSERT INTO semesters (semester_id, semester_code, name, start_date, end_date, weekly_report_deadline_day, weekly_report_deadline_time, final_report_deadline, status, created_by) VALUES
+    ('50000000-0000-0000-0000-000000000003', 'FA25', 'Fall 2025', '2025-08-01', '2025-12-31', 'SUNDAY', '23:59:00', '2026-01-05 23:59:00', 'CLOSED', '00000000-0000-0000-0000-000000000002');
+
+-- Register enterprises for SU26
+INSERT INTO semester_enterprises (semester_enterprise_id, semester_id, enterprise_id, registration_status, reviewed_by, reviewed_at) VALUES
+    ('51000000-0000-0000-0000-000000000005', '50000000-0000-0000-0000-000000000002', 'c0000000-0000-0000-0000-000000000001', 'APPROVED', '00000000-0000-0000-0000-000000000002', CURRENT_TIMESTAMP),
+    ('51000000-0000-0000-0000-000000000006', '50000000-0000-0000-0000-000000000002', 'c0000000-0000-0000-0000-000000000002', 'APPROVED', '00000000-0000-0000-0000-000000000002', CURRENT_TIMESTAMP),
+    ('51000000-0000-0000-0000-000000000007', '50000000-0000-0000-0000-000000000002', 'c0000000-0000-0000-0000-000000000003', 'APPROVED', '00000000-0000-0000-0000-000000000002', CURRENT_TIMESTAMP);
+
+-- ============================================================
+-- PART 4: STUDENTS WITH MISSING STATUSES
+-- ============================================================
+
+-- NOT_ELIGIBLE students (SE15036-37) for eligibility rejection demo
+-- NOTE: chk_gpa_minimum requires gpa >= 5.0, so NOT_ELIGIBLE here means "missing certifications" not low GPA
+INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
+    ('d0000000-0000-0000-0000-000000000036', 'student36@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Tran Van Khoa', 'ACTIVE', FALSE);
+INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000036', 'STUDENT');
+INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked) VALUES
+    ('e0000000-0000-0000-0000-000000000036', '50000000-0000-0000-0000-000000000002', 'd0000000-0000-0000-0000-000000000036', 'SE15036', 'Tran Van Khoa', 'student36@fpt.edu.vn', 'Software Engineering', 5.50, 5, 'NOT_ELIGIBLE', FALSE);
+INSERT INTO student_profiles (user_id, student_code, university, major, gpa, skills) VALUES
+    ('d0000000-0000-0000-0000-000000000036', 'SE15036', 'FPT University', 'Software Engineering', 5.5, '["Java"]'::jsonb);
+
+INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
+    ('d0000000-0000-0000-0000-000000000037', 'student37@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Nguyen Thi Lan', 'ACTIVE', FALSE);
+INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000037', 'STUDENT');
+INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked) VALUES
+    ('e0000000-0000-0000-0000-000000000037', '50000000-0000-0000-0000-000000000002', 'd0000000-0000-0000-0000-000000000037', 'SE15037', 'Nguyen Thi Lan', 'student37@fpt.edu.vn', 'Software Engineering', 5.20, 5, 'NOT_ELIGIBLE', FALSE);
+INSERT INTO student_profiles (user_id, student_code, university, major, gpa, skills) VALUES
+    ('d0000000-0000-0000-0000-000000000037', 'SE15037', 'FPT University', 'Software Engineering', 5.2, '["Python"]'::jsonb);
+
+-- ACCEPTED students (SE15038) for ACCEPTED status demo
+INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
+    ('d0000000-0000-0000-0000-000000000038', 'student38@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Pham Hoang Nam', 'ACTIVE', FALSE);
+INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000038', 'STUDENT');
+INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked) VALUES
+    ('e0000000-0000-0000-0000-000000000038', '50000000-0000-0000-0000-000000000002', 'd0000000-0000-0000-0000-000000000038', 'SE15038', 'Pham Hoang Nam', 'student38@fpt.edu.vn', 'Software Engineering', 7.80, 5, 'ACCEPTED', FALSE);
+INSERT INTO student_profiles (user_id, student_code, university, major, gpa, skills) VALUES
+    ('d0000000-0000-0000-0000-000000000038', 'SE15038', 'FPT University', 'Software Engineering', 7.5, '["Java", "React"]'::jsonb);
+
+-- CANCELLED students (SE15039) for cancellation demo
+INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
+    ('d0000000-0000-0000-0000-000000000039', 'student39@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Le Thi Mai', 'ACTIVE', FALSE);
+INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000039', 'STUDENT');
+INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked, cancelled_reason, cancelled_by) VALUES
+    ('e0000000-0000-0000-0000-000000000039', '50000000-0000-0000-0000-000000000002', 'd0000000-0000-0000-0000-000000000039', 'SE15039', 'Le Thi Mai', 'student39@fpt.edu.vn', 'Software Engineering', 6.10, 5, 'CANCELLED', FALSE, 'Student withdrew from program', '00000000-0000-0000-0000-000000000002');
+INSERT INTO student_profiles (user_id, student_code, university, major, gpa, skills) VALUES
+    ('d0000000-0000-0000-0000-000000000039', 'SE15039', 'FPT University', 'Software Engineering', 7.0, '["JavaScript"]'::jsonb);
+
+-- ============================================================
+-- PART 5: APPLICATIONS WITH ALL 7 STATUSES
+-- ============================================================
+
+-- SCREENING_PASSED: student40 passed screening, awaiting interview scheduling
+INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
+    ('d0000000-0000-0000-0000-000000000040', 'student40@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Dao Van An', 'ACTIVE', FALSE);
+INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000040', 'STUDENT');
+INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status) VALUES
+    ('e0000000-0000-0000-0000-000000000040', '50000000-0000-0000-0000-000000000002', 'd0000000-0000-0000-0000-000000000040', 'SE15040', 'Dao Van An', 'student40@fpt.edu.vn', 'Software Engineering', 8.00, 5, 'PENDING');
+INSERT INTO student_profiles (user_id, student_code, university, major, gpa, skills) VALUES
+    ('d0000000-0000-0000-0000-000000000040', 'SE15040', 'FPT University', 'Software Engineering', 7.5, '["React", "Node.js"]'::jsonb);
+INSERT INTO applications (application_id, job_post_id, student_id, cv_file_url, status, screening_note, screened_by, screened_at) VALUES
+    ('a0000000-0000-0000-0000-000000000040', 'f0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000040', 'https://cv.example.com/se15040.pdf', 'SCREENING_PASSED', 'Strong portfolio, passed technical screening', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP);
+
+-- SCREENING_PASSED: student41 passed screening
+INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
+    ('d0000000-0000-0000-0000-000000000041', 'student41@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Bui Thi Hoa', 'ACTIVE', FALSE);
+INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000041', 'STUDENT');
+INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status) VALUES
+    ('e0000000-0000-0000-0000-000000000041', '50000000-0000-0000-0000-000000000002', 'd0000000-0000-0000-0000-000000000041', 'SE15041', 'Bui Thi Hoa', 'student41@fpt.edu.vn', 'Software Engineering', 7.20, 5, 'PENDING');
+INSERT INTO student_profiles (user_id, student_code, university, major, gpa, skills) VALUES
+    ('d0000000-0000-0000-0000-000000000041', 'SE15041', 'FPT University', 'Software Engineering', 7.5, '["Python", "Django"]'::jsonb);
+INSERT INTO applications (application_id, job_post_id, student_id, cv_file_url, status, screening_note, screened_by, screened_at) VALUES
+    ('a0000000-0000-0000-0000-000000000041', 'f0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000041', 'https://cv.example.com/se15041.pdf', 'SCREENING_PASSED', 'Good GPA, relevant projects', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP);
+
+-- SCREENING_REJECTED: student42 rejected at screening
+INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
+    ('d0000000-0000-0000-0000-000000000042', 'student42@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Hoang Van Cuong', 'ACTIVE', FALSE);
+INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000042', 'STUDENT');
+INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status) VALUES
+    ('e0000000-0000-0000-0000-000000000042', '50000000-0000-0000-0000-000000000002', 'd0000000-0000-0000-0000-000000000042', 'SE15042', 'Hoang Van Cuong', 'student42@fpt.edu.vn', 'Software Engineering', 5.20, 5, 'ELIGIBLE');
+INSERT INTO student_profiles (user_id, student_code, university, major, gpa, skills) VALUES
+    ('d0000000-0000-0000-0000-000000000042', 'SE15042', 'FPT University', 'Software Engineering', 7.0, '[]'::jsonb);
+INSERT INTO applications (application_id, job_post_id, student_id, cv_file_url, status, screening_note, screened_by, screened_at) VALUES
+    ('a0000000-0000-0000-0000-000000000042', 'f0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000042', 'https://cv.example.com/se15042.pdf', 'SCREENING_REJECTED', 'No relevant skills listed, GPA below requirement', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP);
+
+-- SCREENING_REJECTED: student43 rejected at screening (REJECTED final status after interview)
+INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
+    ('d0000000-0000-0000-0000-000000000043', 'student43@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Tran Thi Thu', 'ACTIVE', FALSE);
+INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000043', 'STUDENT');
+INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status) VALUES
+    ('e0000000-0000-0000-0000-000000000043', '50000000-0000-0000-0000-000000000002', 'd0000000-0000-0000-0000-000000000043', 'SE15043', 'Tran Thi Thu', 'student43@fpt.edu.vn', 'Software Engineering', 6.50, 5, 'PENDING');
+INSERT INTO student_profiles (user_id, student_code, university, major, gpa, skills) VALUES
+    ('d0000000-0000-0000-0000-000000000043', 'SE15043', 'FPT University', 'Software Engineering', 7.0, '["Java"]'::jsonb);
+INSERT INTO applications (application_id, job_post_id, student_id, cv_file_url, status, screening_note, screened_by, screened_at) VALUES
+    ('a0000000-0000-0000-0000-000000000043', 'f0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000043', 'https://cv.example.com/se15043.pdf', 'SCREENING_REJECTED', 'Missing required certifications', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP);
+
+-- WITHDRAWN: student44 withdrew before screening
+INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
+    ('d0000000-0000-0000-0000-000000000044', 'student44@fpt.edu.vn', '$2b$10$TH29bfSrpsz3Mklv.1.5ceSCA9tK9r4o2KO8XIZsVMGoYeZdQ.ZlC', 'Vu Van Binh', 'ACTIVE', FALSE);
+INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000044', 'STUDENT');
+INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status) VALUES
+    ('e0000000-0000-0000-0000-000000000044', '50000000-0000-0000-0000-000000000002', 'd0000000-0000-0000-0000-000000000044', 'SE15044', 'Vu Van Binh', 'student44@fpt.edu.vn', 'Software Engineering', 7.00, 5, 'ELIGIBLE');
+INSERT INTO student_profiles (user_id, student_code, university, major, gpa, skills) VALUES
+    ('d0000000-0000-0000-0000-000000000044', 'SE15044', 'FPT University', 'Software Engineering', 7.0, '["JavaScript"]'::jsonb);
+INSERT INTO applications (application_id, job_post_id, student_id, cv_file_url, status, withdrawn_at) VALUES
+    ('a0000000-0000-0000-0000-000000000044', 'f0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000044', 'https://cv.example.com/se15044.pdf', 'WITHDRAWN', CURRENT_TIMESTAMP);
+
+-- ============================================================
+-- PART 6: INTERVIEWS WITH ALL STATUSES
+-- ============================================================
+
+-- CONFIRMED: student11 interview confirmed (upgrade from SCHEDULED)
+UPDATE interviews SET status = 'CONFIRMED', student_confirmed = TRUE, confirmed_at = CURRENT_TIMESTAMP
+WHERE application_id = 'a0000000-0000-0000-0000-000000000011';
+
+-- CANCELLED: student12 interview cancelled
+UPDATE interviews SET status = 'CANCELLED', cancel_reason = 'Candidate scheduling conflict, will reschedule'
+WHERE application_id = 'a0000000-0000-0000-0000-000000000012';
+
+-- COMPLETED with FAIL: student13 interview failed
+UPDATE interviews SET status = 'COMPLETED', result = 'FAIL', result_note = 'Insufficient technical knowledge for the role requirements', decided_by = 'c0000000-0000-0000-0000-000000000011', decided_at = CURRENT_TIMESTAMP
+WHERE application_id = 'a0000000-0000-0000-0000-000000000013';
+
+-- New CONFIRMED interview (student14) — second-round interview, distinct interview_id from line 255
+INSERT INTO interviews (interview_id, application_id, scheduled_datetime, duration_minutes, meeting_link, status, student_confirmed, confirmed_at) VALUES
+    ('b0000000-0000-0000-0000-000000000021', 'a0000000-0000-0000-0000-000000000014', '2026-08-05 09:00:00', 45, 'https://meet.momo.vn/interview-14-new', 'CONFIRMED', TRUE, CURRENT_TIMESTAMP);
+
+-- ============================================================
+-- PART 7: INCIDENTS WITH ALL STATUSES (OPEN, UNDER_REVIEW, RESOLVED)
+-- ============================================================
+
+-- OPEN incident: student21 absent without leave (2 days) — pending TM action
+INSERT INTO incidents (incident_id, assignment_id, reported_by, category, description, evidence_urls, status) VALUES
+    ('00000000-0000-0000-000c-000000000021', 'f0000000-0000-0000-0000-000000000021', 'c0000000-0000-0000-0000-000000000011', 'PROLONGED_ABSENCE',
+     'Student has been absent for 2 consecutive days (July 1-2, 2026) without submitting any leave request or notifying the supervisor.',
+     '["https://evidence.example.com/absence-1.pdf"]'::jsonb, 'OPEN');
+
+-- UNDER_REVIEW incident: student22 professionalism issue — TM investigating
+INSERT INTO incidents (incident_id, assignment_id, reported_by, category, description, evidence_urls, status) VALUES
+    ('00000000-0000-0000-000c-000000000022', 'f0000000-0000-0000-0000-000000000022', 'c0000000-0000-0000-0000-000000000011', 'POOR_ATTITUDE',
+     'Student submitted a weekly report with plagiarized content and unprofessional language directed at supervisor feedback.',
+     '["https://evidence.example.com/report-plagiarism.pdf"]'::jsonb, 'UNDER_REVIEW');
+
+-- Notification for TM about OPEN incident
+INSERT INTO notifications (notification_id, recipient_id, title, message, type, reference_entity, reference_id, is_read) VALUES
+    ('00000000-0000-0002-0000-000000000040', '00000000-0000-0000-0000-000000000002', 'New Incident: Prolonged Absence', 'An absence incident has been reported for Vu Huu Quan (SE15021) at Momo. Please review and take action.', 'INCIDENT', 'incidents', '00000000-0000-0000-000c-000000000021', FALSE);
+
+-- ============================================================
+-- PART 8: REPORT FEEDBACKS — APPROVED examples
+-- ============================================================
+
+INSERT INTO report_feedbacks (feedback_id, report_id, reviewer_id, feedback_text, action) VALUES
+    ('00000000-0000-0003-0000-000000000021', '00000000-0000-0000-0003-000000000021', 'c0000000-0000-0000-0000-000000000011', 'Excellent progress this week. Well-structured report. Keep it up!', 'APPROVED'),
+    ('00000000-0000-0003-0000-000000000022', '00000000-0000-0000-0003-000000000022', 'c0000000-0000-0000-0000-000000000011', 'Good work on the project kickoff. Comprehensive report.', 'APPROVED'),
+    ('00000000-0000-0003-0000-000000000023', '00000000-0000-0000-0003-000000000023', 'c0000000-0000-0000-0000-000000000011', 'Thorough report with good technical details. Approved.', 'APPROVED'),
+    ('00000000-0000-0003-0000-000000000024', '00000000-0000-0000-0003-000000000024', 'c0000000-0000-0000-0000-000000000011', 'Well-documented code review activities. Great work.', 'APPROVED'),
+    ('00000000-0000-0003-0000-000000000025', '00000000-0000-0000-0003-000000000025', 'c0000000-0000-0000-0000-000000000011', 'Good system setup and clear documentation. Approved.', 'APPROVED');
+
+-- ============================================================
+-- PART 9: FINAL GRADES — FAILED & CANCELLED examples
+-- ============================================================
+
+-- FAILED grade (FA25 historical semester) — distinct grade_id from line 563 (which is current semester)
+INSERT INTO final_grades (grade_id, student_id, tm_id, semester_id, enterprise_total_score, final_grade, overall_status, is_locked, graded_at) VALUES
+    ('00000000-0000-0000-0010-000000000031', 'd0000000-0000-0000-0000-000000000030', '00000000-0000-0000-0000-000000000002', '50000000-0000-0000-0000-000000000003', 3.20, 3.2, 'FAILED', TRUE, '2025-12-20 10:00:00');
+
+-- CANCELLED grade (student withdrew mid-semester)
+INSERT INTO final_grades (grade_id, student_id, tm_id, semester_id, enterprise_total_score, final_grade, overall_status, is_locked, cancelled_reason, cancelled_by, cancelled_at) VALUES
+    ('00000000-0000-0000-000e-000000000031', 'd0000000-0000-0000-0000-000000000039', '00000000-0000-0000-0000-000000000002', '50000000-0000-0000-0000-000000000002', NULL, 0.0, 'CANCELLED', TRUE, 'Student withdrew from program before evaluation', '00000000-0000-0000-0000-000000000002', CURRENT_TIMESTAMP);
+
+-- ============================================================
+-- PART 10: WEEKLY REPORTS — NOT_SUBMITTED for at-risk demo
+-- ============================================================
+
+-- student21 week 4 NOT_SUBMITTED (triggers warning + at-risk)
+INSERT INTO weekly_reports (report_id, assignment_id, week_number, status) VALUES
+    ('00000000-0000-0000-0010-000000000021', 'f0000000-0000-0000-0000-000000000021', 4, 'NOT_SUBMITTED');
+
+-- student22 week 4 NOT_SUBMITTED
+INSERT INTO weekly_reports (report_id, assignment_id, week_number, status) VALUES
+    ('00000000-0000-0000-0010-000000000022', 'f0000000-0000-0000-0000-000000000022', 4, 'NOT_SUBMITTED');
+
+-- student23 week 4 NOT_SUBMITTED
+INSERT INTO weekly_reports (report_id, assignment_id, week_number, status) VALUES
+    ('00000000-0000-0000-0010-000000000023', 'f0000000-0000-0000-0000-000000000023', 4, 'NOT_SUBMITTED');
+
+-- ============================================================
+-- PART 11: TRAINING WARNINGS — additional for dashboard variety
+-- ============================================================
+
+INSERT INTO training_warnings (warning_id, tm_id, student_id, semester_id, week_number, warning_message, sent_at) VALUES
+    ('00000000-0000-0000-000a-000000000022', '00000000-0000-0000-0000-000000000002', 'd0000000-0000-0000-0000-000000000022', '50000000-0000-0000-0000-000000000001', 4, 'Weekly report for week 4 has not been submitted. Please submit by deadline.', CURRENT_TIMESTAMP),
+    ('00000000-0000-0000-000a-000000000023', '00000000-0000-0000-0000-000000000002', 'd0000000-0000-0000-0000-000000000023', '50000000-0000-0000-0000-000000000001', 4, 'Weekly report for week 4 has not been submitted. Immediate submission required.', CURRENT_TIMESTAMP);
+
+-- ============================================================
+-- PART 12: AUDIT LOGS — synthetic entries for audit trail demo
+-- ============================================================
+
+INSERT INTO audit_logs (user_id, action, target_entity, target_id, old_value, new_value, ip_address) VALUES
+    ('00000000-0000-0000-0000-000000000002', 'UPDATE_STATUS', 'eligible_students', 'e0000000-0000-0000-0000-000000000016', 'PENDING', 'MATCHED', '192.168.1.100'),
+    ('00000000-0000-0000-0000-000000000002', 'UPDATE_STATUS', 'eligible_students', 'e0000000-0000-0000-0000-000000000021', 'MATCHED', 'OJT', '192.168.1.100'),
+    ('c0000000-0000-0000-0000-000000000011', 'CREATE', 'job_posts', 'f0000000-0000-0000-0000-000000000001', NULL, '{"title":"Java Backend Developer Intern"}', '10.0.0.50'),
+    ('c0000000-0000-0000-0000-000000000011', 'UPDATE_STATUS', 'applications', 'a0000000-0000-0000-0000-000000000006', 'PENDING', 'SCREENING_PASSED', '10.0.0.50'),
+    ('00000000-0000-0000-0000-000000000002', 'RESOLVE', 'incidents', '00000000-0000-0000-000b-000000000021', 'OPEN', 'RESOLVED', '192.168.1.100'),
+    ('00000000-0000-0000-0000-000000000002', 'PUBLISH', 'final_grades', '00000000-0000-0000-000e-000000000026', 'LOCKED', 'PUBLISHED', '192.168.1.100'),
+    ('d0000000-0000-0000-0000-000000000021', 'SUBMIT', 'weekly_reports', '00000000-0000-0000-0007-000000000021', 'NOT_SUBMITTED', 'SUBMITTED', '172.16.0.20'),
+    ('c0000000-0000-0000-0000-000000000011', 'SCHEDULE', 'interviews', 'b0000000-0000-0000-0000-000000000011', NULL, '{"scheduled_datetime":"2026-07-28 10:00:00"}', '10.0.0.50');
 
 -- ============================================================
 -- Re-enable all triggers and constraints
