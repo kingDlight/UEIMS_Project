@@ -31,6 +31,7 @@ import com.ueims.repository.EnterpriseRepository;
 import com.ueims.repository.PlacementApplicationRepository;
 import com.ueims.repository.SemesterRepository;
 import com.ueims.repository.UserRepository;
+import com.ueims.service.EnterpriseAssignmentService;
 import com.ueims.service.PlacementApplicationService;
 
 import lombok.AccessLevel;
@@ -62,6 +63,7 @@ public class PlacementApplicationServiceImpl implements PlacementApplicationServ
     EnterpriseRepository enterpriseRepository;
     SemesterRepository semesterRepository;
     UserRepository userRepository;
+    EnterpriseAssignmentService enterpriseAssignmentService;
     PlacementApplicationMapper mapper;
 
     @Override
@@ -199,6 +201,15 @@ public class PlacementApplicationServiceImpl implements PlacementApplicationServ
                 .assignedBy(reviewer)
                 .build();
         newAssignment = assignmentRepository.save(newAssignment);
+
+        // Auto-complete assignment ACTIVE cũ ở kỳ khác (SV đã lên kỳ mới)
+        int completed = enterpriseAssignmentService.autoCompletePriorActiveAssignments(
+                app.getStudent().getUserId(), app.getSemester().getSemesterId());
+        if (completed > 0) {
+            log.info(
+                    "[AUTO-COMPLETE] Prior assignments auto-completed before replacement link: {}",
+                    completed);
+        }
 
         // Link assignment cũ → mới (nếu là replacement)
         if (oldAssignment != null) {
@@ -421,6 +432,10 @@ public class PlacementApplicationServiceImpl implements PlacementApplicationServ
                 .assignedBy(reviewer)
                 .build();
         assignmentRepository.save(assignment);
+
+        // Auto-complete assignment ACTIVE cũ ở kỳ khác (SV đã lên kỳ mới)
+        enterpriseAssignmentService.autoCompletePriorActiveAssignments(
+                student.getUserId(), semester.getSemesterId());
 
         log.info(
                 "Manual match: student {} → enterprise {} by reviewer {}",

@@ -44,6 +44,38 @@ public interface PlacementApplicationRepository extends JpaRepository<PlacementA
     @Query(
             value =
                     """
+		WITH ranked_eligible AS (
+			SELECT
+				es.*,
+				ROW_NUMBER() OVER (
+					PARTITION BY es.user_id
+					ORDER BY
+						-- Ưu tiên 1: Row có assignment ACTIVE (SV đang thực tập ở DN nào đó)
+						EXISTS(
+							SELECT 1 FROM enterprise_assignments ea
+							WHERE ea.student_id = es.user_id
+							AND ea.semester_id = es.semester_id
+							AND ea.status = 'ACTIVE'
+						) DESC,
+						-- Ưu tiên 2: Semester có start_date MỚI NHẤT trong các semester của SV.
+						-- (Subquery lấy start_date của row đang xét - sort DESC để semester mới nhất
+						-- của SV luôn được ưu tiên hơn semester cũ. KHÔNG dùng current_semester vì
+						-- cùng 1 semester_code Summer/Fall có thể chứa SV ở nhiều kỳ 1..9).
+						(SELECT s.start_date FROM semesters s WHERE s.semester_id = es.semester_id) DESC NULLS LAST,
+						-- Ưu tiên 3: Row có assignment COMPLETED trong kỳ mới nhất (hiển thị kết quả)
+						EXISTS(
+							SELECT 1 FROM enterprise_assignments ea
+							WHERE ea.student_id = es.user_id
+							AND ea.semester_id = es.semester_id
+							AND ea.status = 'COMPLETED'
+						) DESC,
+						-- Fallback: row mới nhất
+						es.imported_at DESC
+				) AS rn
+			FROM eligible_students es
+			-- Chỉ xét các row của semester OPEN/ACTIVE (giống logic cũ)
+			JOIN semesters sem ON sem.semester_id = es.semester_id AND sem.status IN ('OPEN', 'ACTIVE')
+		)
 		SELECT
 			u.user_id              AS student_id,
 			u.full_name            AS student_name,
@@ -99,7 +131,7 @@ public interface PlacementApplicationRepository extends JpaRepository<PlacementA
 		JOIN users_roles ur      ON ur.user_id = u.user_id
 		JOIN roles r             ON r.role_name = ur.role_name
 		JOIN semesters sem       ON sem.status IN ('OPEN', 'ACTIVE')
-		JOIN eligible_students es ON es.user_id = u.user_id AND es.semester_id = sem.semester_id
+		JOIN ranked_eligible es  ON es.user_id = u.user_id AND es.semester_id = sem.semester_id AND es.rn = 1
 		WHERE r.role_name = 'STUDENT'
 		AND u.status = 'ACTIVE'
 		AND u.deleted_at IS NULL

@@ -984,7 +984,31 @@ CREATE TRIGGER trg_student_internship_permission
     BEFORE INSERT ON enterprise_assignments
     FOR EACH ROW EXECUTE FUNCTION enforce_student_internship_permission();
 
--- TRIGGER: Ensure assigned students hold OJT status (approved OJT list)
+-- TRIGGER: Ensure assigned students hold a positionable status (FIX 021)
+--
+-- Background (UC-44 interview PASS + manual placement):
+--   autoCreatePlacementAfterInterview flow:
+--     1. INSERT enterprise_assignments.status = 'ACTIVE'  <-- trigger fires HERE
+--     2. UPDATE eligible_students.status = 'MATCHED'        (only if el.row exists)
+--
+--   The previous FIX 017 version only allowed OJT or ACCEPTED. That
+--   assumption is wrong for the UC-44 auto-placement flow: the assignment
+--   is inserted while the student is still ELIGIBLE (and exactly for that
+--   reason - to mark them as MATCHED right after). Without FIX 021 the
+--   trigger RAISES EXCEPTION, Hibernate rolls back the whole
+--   @Transactional method, and the FE observes an HTTP 500 with no DB
+--   change.
+--
+-- Allowed statuses for assignment creation:
+--   ELIGIBLE   - student freshly passed interview (UC-44 auto-placement)
+--   ACCEPTED   - student accepted offer, matched by hand
+--   MATCHED    - student matched to position (manual match / auto-match)
+--   OJT        - student in active OJT (replace flow)
+--
+-- Disallowed (still rejected):
+--   NULL            - student not in eligible_students for this semester
+--   CANCELLED       - explicit cancellation
+--   NOT_ELIGIBLE / PENDING / other - invalid
 CREATE OR REPLACE FUNCTION validate_enterprise_assignment_student_status()
 RETURNS TRIGGER AS $$
 DECLARE
@@ -994,9 +1018,11 @@ BEGIN
     FROM eligible_students
     WHERE user_id = NEW.student_id AND semester_id = NEW.semester_id;
 
-    -- FIX 017: Allow both OJT (actively interning) and ACCEPTED (matched, about to start)
-    IF stud_status IS NULL OR (stud_status != 'OJT' AND stud_status != 'ACCEPTED') THEN
-        RAISE EXCEPTION 'Cannot assign student to enterprise: student status in this semester must be OJT or ACCEPTED, current status: %', COALESCE(stud_status, 'None');
+    -- FIX 021: Allow ELIGIBLE | ACCEPTED | MATCHED | OJT students.
+    -- See comment block above for full rationale.
+    IF stud_status IS NULL OR
+       stud_status NOT IN ('ELIGIBLE', 'ACCEPTED', 'MATCHED', 'OJT') THEN
+        RAISE EXCEPTION 'Cannot assign student to enterprise: student status in this semester must be ELIGIBLE, ACCEPTED, MATCHED or OJT, current status: %', COALESCE(stud_status, 'None');
     END IF;
     RETURN NEW;
 END;
@@ -1005,6 +1031,58 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER trg_validate_ea_student_status
     BEFORE INSERT ON enterprise_assignments
     FOR EACH ROW EXECUTE FUNCTION validate_enterprise_assignment_student_status();
+
+-- TRIGGER 022: Auto-complete prior ACTIVE assignments when a new ACTIVE assignment is created
+--
+-- Invariant: a student can have at most 1 ACTIVE assignment across all semesters at any time.
+--
+-- Background:
+--   When a student moves from semester K5 -> K6 and gets a new placement (interview pass
+--   or manual match), the system must NOT leave the K5 assignment in ACTIVE state forever.
+--   Otherwise:
+--     - findOjtPlacementView() picks the wrong row when 2 semesters are both OPEN/ACTIVE.
+--     - existsActiveAssignmentForStudentInSemester() returns true for the old semester,
+--       blocking valid operations.
+--
+--   Backend code (EnterpriseAssignmentServiceImpl.autoCompletePriorActiveAssignments) also
+--   enforces this at the service layer. This trigger is the safety net for direct INSERTs,
+--   migrations, or race conditions.
+--
+-- Behavior:
+--   ON INSERT/UPDATE of enterprise_assignments WHERE status = 'ACTIVE':
+--     Any OTHER row where student_id = NEW.student_id, semester_id != NEW.semester_id,
+--     and status = 'ACTIVE' is set to COMPLETED with audit trail.
+CREATE OR REPLACE FUNCTION auto_complete_prior_assignments()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.status = 'ACTIVE' THEN
+        UPDATE enterprise_assignments
+        SET status             = 'COMPLETED',
+            terminated_at      = NOW(),
+            termination_reason = COALESCE(termination_reason,
+                'Auto-completed by trigger 022: student placed in another semester')
+        WHERE student_id   = NEW.student_id
+          AND semester_id IS DISTINCT FROM NEW.semester_id
+          AND status       = 'ACTIVE';
+
+        RAISE NOTICE '[TRG 022] Auto-completed prior ACTIVE assignments for student % (new semester %)',
+            NEW.student_id, NEW.semester_id;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_auto_complete_prior_assignments ON enterprise_assignments;
+
+CREATE TRIGGER trg_auto_complete_prior_assignments
+    AFTER INSERT OR UPDATE OF status ON enterprise_assignments
+    FOR EACH ROW
+    WHEN (NEW.status = 'ACTIVE')
+    EXECUTE FUNCTION auto_complete_prior_assignments();
+
+COMMENT ON TRIGGER trg_auto_complete_prior_assignments ON enterprise_assignments IS
+    'Invariant: 1 student <= 1 ACTIVE assignment at any time. Auto-completes prior ACTIVE rows in other semesters when a new ACTIVE assignment is created.';
 
 -- TABLE 19: internship_plans
 CREATE TABLE internship_plans (

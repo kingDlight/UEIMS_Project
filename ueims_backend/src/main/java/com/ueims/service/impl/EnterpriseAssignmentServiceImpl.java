@@ -1,5 +1,6 @@
 package com.ueims.service.impl;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,10 +21,12 @@ import com.ueims.service.EnterpriseAssignmentService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Slf4j
 public class EnterpriseAssignmentServiceImpl implements EnterpriseAssignmentService {
     EnterpriseAssignmentRepository repository;
     UserRepository userRepository;
@@ -121,5 +124,31 @@ public class EnterpriseAssignmentServiceImpl implements EnterpriseAssignmentServ
     @Override
     public void deleteById(UUID id) {
         repository.deleteById(id);
+    }
+
+    @Override
+    @Transactional
+    public int autoCompletePriorActiveAssignments(UUID studentId, UUID newSemesterId) {
+        List<EnterpriseAssignment> actives = repository.findByStudent_UserIdAndStatus(studentId, "ACTIVE");
+        int completed = 0;
+        for (EnterpriseAssignment old : actives) {
+            if (old.getSemester() != null
+                    && !old.getSemester().getSemesterId().equals(newSemesterId)) {
+                old.setStatus("COMPLETED");
+                if (old.getTerminationReason() == null) {
+                    old.setTerminationReason("Auto-completed: student assigned in new semester");
+                }
+                old.setTerminatedAt(LocalDateTime.now());
+                repository.save(old);
+                completed++;
+                log.info(
+                        "[AUTO-COMPLETE] Assignment {} (semester={}) → COMPLETED (student={} moved to new semester={})",
+                        old.getAssignmentId(),
+                        old.getSemester().getSemesterId(),
+                        studentId,
+                        newSemesterId);
+            }
+        }
+        return completed;
     }
 }

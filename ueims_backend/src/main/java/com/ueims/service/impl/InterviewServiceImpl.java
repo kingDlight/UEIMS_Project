@@ -30,6 +30,7 @@ import com.ueims.repository.PlacementApplicationRepository;
 import com.ueims.repository.SemesterRepository;
 import com.ueims.repository.UserRepository;
 import com.ueims.service.ApplicationService;
+import com.ueims.service.EnterpriseAssignmentService;
 import com.ueims.service.InterviewService;
 import com.ueims.service.MailService;
 import com.ueims.service.NotificationService;
@@ -54,6 +55,7 @@ public class InterviewServiceImpl implements InterviewService {
     MailService mailService;
     NotificationService notificationService;
     ApplicationService applicationService;
+    EnterpriseAssignmentService enterpriseAssignmentService;
 
     @Override
     @Transactional(readOnly = true)
@@ -589,6 +591,10 @@ public class InterviewServiceImpl implements InterviewService {
                 .assignedBy(currentUser())
                 .build();
         enterpriseAssignmentRepository.save(assignment);
+
+        // Auto-complete assignment ACTIVE cũ ở kỳ khác (SV đã lên kỳ mới qua interview)
+        enterpriseAssignmentService.autoCompletePriorActiveAssignments(
+                student.getUserId(), semester.getSemesterId());
 
         // Update eligible_students status → MATCHED so student appears in OJT view
         eligibleStudentRepository
