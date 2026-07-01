@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.ueims.dto.response.EligibleStudentResponse;
+import com.ueims.dto.response.StudentImportResult;
 import com.ueims.model.entity.EligibleStudent;
 
 public interface EligibleStudentService {
@@ -22,6 +23,22 @@ public interface EligibleStudentService {
     void deleteById(UUID id);
 
     List<EligibleStudentResponse> importFromExcel(MultipartFile file, UUID semesterId);
+
+    /**
+     * TM bulk upload — parses the Excel, then for every row:
+     *  - upserts a {@code User} (matched by email, then by studentCode via
+     *    {@code StudentProfile})
+     *  - upserts the linked {@code StudentProfile} with classCode, dob, gender,
+     *    address, links, skills, bio
+     *  - inserts a new {@code EligibleStudent} record for the given semester
+     *  - resets the user's password to {@code Password@123} (mustChangePassword
+     *    left untouched — see TM-101 product decision)
+     *  - assigns the STUDENT role to brand-new users
+     *
+     * Existing {@code eligible_students} rows for the same (studentCode, semester)
+     * pair are skipped, not duplicated.
+     */
+    StudentImportResult importRoster(MultipartFile file, UUID semesterId);
 
     int finalizeOjtList(List<UUID> studentIds);
 

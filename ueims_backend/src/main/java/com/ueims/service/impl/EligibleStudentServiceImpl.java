@@ -4,27 +4,40 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.ueims.dto.request.EligibleStudentUpdateRequest;
+import com.ueims.dto.request.StudentImportRow;
 import com.ueims.dto.response.EligibleStudentResponse;
+import com.ueims.dto.response.StudentImportResult;
 import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
 import com.ueims.model.entity.EligibleStudent;
+import com.ueims.model.entity.Role;
 import com.ueims.model.entity.Semester;
 import com.ueims.model.entity.StudentProfile;
+import com.ueims.model.entity.User;
+import com.ueims.model.entity.UserRole;
+import com.ueims.model.entity.UserRoleId;
 import com.ueims.repository.EligibleStudentRepository;
+import com.ueims.repository.RoleRepository;
 import com.ueims.repository.SemesterRepository;
 import com.ueims.repository.StudentProfileRepository;
 import com.ueims.repository.UserRepository;
+import com.ueims.repository.UserRoleRepository;
 import com.ueims.service.EligibleStudentService;
 import com.ueims.util.ExcelImportUtil;
 
@@ -38,10 +51,16 @@ import lombok.extern.slf4j.Slf4j;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 public class EligibleStudentServiceImpl implements EligibleStudentService {
+    static final String DEFAULT_IMPORT_PASSWORD = "Password@123";
+    static final String STUDENT_ROLE = "STUDENT";
+
     EligibleStudentRepository repository;
     SemesterRepository semesterRepository;
     UserRepository userRepository;
     StudentProfileRepository studentProfileRepository;
+    RoleRepository roleRepository;
+    UserRoleRepository userRoleRepository;
+    PasswordEncoder passwordEncoder;
 
     @Override
     public List<EligibleStudent> findAll() {
@@ -258,6 +277,203 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
     }
 
     @Override
+    @Transactional
+    public StudentImportResult importRoster(MultipartFile file, UUID semesterId) {
+        Semester semester = semesterRepository
+                .findById(semesterId)
+                .orElseThrow(() -> new AppException(ErrorCode.SEMESTER_NOT_FOUND));
+
+        List<StudentImportRow> rows;
+        try {
+            rows = ExcelImportUtil.parseStudentImportRows(file.getInputStream());
+        } catch (AppException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Failed to parse TM roster Excel", e);
+            throw new AppException(ErrorCode.INVALID_EXCEL_FORMAT);
+        }
+
+        StudentImportResult result = StudentImportResult.builder()
+                .totalRows(rows.size())
+                .build();
+
+        // Track student codes that already triggered an email-collision error in
+        // this import — avoids spamming the error list for 100 rows pointing at
+        // the same wrong email.
+        Set<String> reportedCollisions = new HashSet<>();
+
+        for (int i = 0; i < rows.size(); i++) {
+            StudentImportRow row = rows.get(i);
+            int excelRowNumber = i + 2; // +1 for header, +1 to make it 1-based
+            try {
+                UpsertOutcome outcome = upsertStudentFromRow(row, semester, reportedCollisions);
+                switch (outcome) {
+                    case CREATED -> result.setCreated(result.getCreated() + 1);
+                    case UPDATED -> result.setUpdated(result.getUpdated() + 1);
+                    case SKIPPED_DUPLICATE -> result.setSkipped(result.getSkipped() + 1);
+                }
+            } catch (AppException e) {
+                result.getErrors().add(StudentImportResult.RowError.builder()
+                        .row(excelRowNumber)
+                        .studentCode(row.getStudentCode())
+                        .reason(e.getErrorCode() != null ? e.getErrorCode().getMessage() : e.getMessage())
+                        .build());
+            } catch (Exception e) {
+                log.error("Unexpected failure on roster row {}", excelRowNumber, e);
+                result.getErrors().add(StudentImportResult.RowError.builder()
+                        .row(excelRowNumber)
+                        .studentCode(row.getStudentCode())
+                        .reason("Unexpected error: " + e.getMessage())
+                        .build());
+            }
+        }
+
+        log.info(
+                "Roster import complete — semester={} total={} created={} updated={} skipped={} errors={}",
+                semesterId, result.getTotalRows(), result.getCreated(), result.getUpdated(),
+                result.getSkipped(), result.getErrors().size());
+        return result;
+    }
+
+    /** Per-row resolution outcome, used to build the import summary. */
+    private enum UpsertOutcome {
+        CREATED, UPDATED, SKIPPED_DUPLICATE
+    }
+
+    /**
+     * Resolves a single {@link StudentImportRow} against the database. The
+     * semester is passed in by the controller — the {@code semesterNameOrCode}
+     * on the row is currently informational, not authoritative.
+     */
+    private UpsertOutcome upsertStudentFromRow(
+            StudentImportRow row, Semester semester, Set<String> reportedCollisions) {
+
+        // (studentCode, semester) dedup check first — cheap.
+        if (repository.existsByStudentCodeAndSemester_SemesterId(row.getStudentCode(), semester.getSemesterId())) {
+            return UpsertOutcome.SKIPPED_DUPLICATE;
+        }
+
+        // Find existing user via email first, then via studentCode (linked profile).
+        Optional<User> userOpt = userRepository.findByEmail(row.getEmail());
+        boolean createdUser = false;
+        if (userOpt.isEmpty()) {
+            userOpt = studentProfileRepository
+                    .findByStudentCode(row.getStudentCode())
+                    .map(StudentProfile::getUser);
+        }
+        User user;
+        if (userOpt.isEmpty()) {
+            // Brand new student — create user, profile and assign STUDENT role.
+            if (userRepository.existsByEmail(row.getEmail())) {
+                // Race / data quirk: row email matches an account that
+                // studentProfile lookup didn't find. Skip rather than corrupt.
+                reportCollisionOnce(reportedCollisions, row.getEmail());
+                throw new AppException(ErrorCode.EMAIL_ALREADY_EXISTS);
+            }
+            user = createNewStudentUser(row);
+            createdUser = true;
+        } else {
+            user = userOpt.get();
+            // Email changed for an existing account — guard against collision.
+            if (!user.getEmail().equalsIgnoreCase(row.getEmail())
+                    && userRepository.existsByEmail(row.getEmail())) {
+                reportCollisionOnce(reportedCollisions, row.getEmail());
+                throw new AppException(ErrorCode.EMAIL_ALREADY_EXISTS);
+            }
+            updateExistingStudentUser(user, row);
+        }
+
+        // Upsert the linked StudentProfile (1-1 with user).
+        StudentProfile profile = studentProfileRepository.findByUser_UserId(user.getUserId());
+        if (profile == null) {
+            profile = StudentProfile.builder()
+                    .user(user)
+                    .studentCode(row.getStudentCode())
+                    .build();
+        }
+        applyProfileFields(profile, row);
+        studentProfileRepository.save(profile);
+
+        // Create a new EligibleStudent record for the given semester. The
+        // status defaults to ELIGIBLE — TM can change it manually.
+        EligibleStudent eligible = EligibleStudent.builder()
+                .semester(semester)
+                .user(user)
+                .studentCode(row.getStudentCode())
+                .fullName(row.getFullName())
+                .email(row.getEmail())
+                .major(row.getMajor())
+                .gpa(row.getGpa())
+                .currentSemester(row.getCurrentSemester())
+                .status("ELIGIBLE")
+                .isLocked(false)
+                .importedAt(LocalDateTime.now())
+                .build();
+        repository.save(eligible);
+
+        return createdUser ? UpsertOutcome.CREATED : UpsertOutcome.UPDATED;
+    }
+
+    private User createNewStudentUser(StudentImportRow row) {
+        User user = User.builder()
+                .email(row.getEmail())
+                .password(passwordEncoder.encode(DEFAULT_IMPORT_PASSWORD))
+                .fullName(row.getFullName())
+                .phone(row.getPhone())
+                .authProvider("LOCAL")
+                .status("ACTIVE")
+                .mustChangePassword(false)
+                .passwordChangedAt(LocalDateTime.now())
+                .build();
+        user = userRepository.save(user);
+
+        Role studentRole = roleRepository.findById(STUDENT_ROLE).orElseGet(() -> roleRepository.save(Role.builder()
+                .roleName(STUDENT_ROLE)
+                .description("Student role")
+                .isActive(true)
+                .build()));
+        userRoleRepository.save(UserRole.builder()
+                .id(new UserRoleId(user.getUserId(), studentRole.getRoleName()))
+                .user(user)
+                .role(studentRole)
+                .build());
+        return user;
+    }
+
+    private void updateExistingStudentUser(User user, StudentImportRow row) {
+        user.setFullName(row.getFullName());
+        user.setPhone(row.getPhone());
+        user.setEmail(row.getEmail());
+        // Product decision: every periodic import resets the password to the
+        // shared default so the TM can always hand the student their creds
+        // (e.g. after the student forgot). mustChangePassword stays as-is.
+        user.setPassword(passwordEncoder.encode(DEFAULT_IMPORT_PASSWORD));
+        user.setPasswordChangedAt(LocalDateTime.now());
+        userRepository.save(user);
+    }
+
+    private void applyProfileFields(StudentProfile profile, StudentImportRow row) {
+        profile.setStudentCode(row.getStudentCode());
+        profile.setMajor(row.getMajor());
+        profile.setGpa(row.getGpa());
+        if (row.getClassCode() != null) profile.setClassCode(row.getClassCode());
+        if (row.getDateOfBirth() != null) profile.setDateOfBirth(row.getDateOfBirth());
+        if (row.getGender() != null) profile.setGender(row.getGender());
+        if (row.getAddress() != null) profile.setAddress(row.getAddress());
+        if (row.getSkills() != null) profile.setSkills(row.getSkills());
+        if (row.getLinkedinUrl() != null) profile.setLinkedinUrl(row.getLinkedinUrl());
+        if (row.getGithubUrl() != null) profile.setGithubUrl(row.getGithubUrl());
+        if (row.getPortfolioUrl() != null) profile.setPortfolioUrl(row.getPortfolioUrl());
+        if (row.getBio() != null) profile.setBio(row.getBio());
+    }
+
+    private void reportCollisionOnce(Set<String> reported, String email) {
+        if (reported.add(email)) {
+            log.warn("Email collision detected for {}", email);
+        }
+    }
+
+    @Override
     public int finalizeOjtList(List<UUID> studentIds) {
         if (studentIds == null || studentIds.isEmpty()) {
             return 0;
@@ -296,9 +512,30 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
                 ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             Sheet sheet = workbook.createSheet("OJT Students");
 
-            // Header row
+            // Header row — the same columns the TM roster importer understands
+            // (see ExcelImportUtil.parseStudentImportRows for matching).
             Row headerRow = sheet.createRow(0);
-            String[] columns = {"No.", "Student Code", "Full Name", "Email", "Major", "GPA", "Semester", "Status"};
+            String[] columns = {
+                    "No.",
+                    "Student Code",
+                    "Full Name",
+                    "Email",
+                    "Major",
+                    "GPA",
+                    "Current Semester",
+                    "Semester",
+                    "Status",
+                    "Phone",
+                    "Class Code",
+                    "Date Of Birth",
+                    "Gender",
+                    "Address",
+                    "Skills",
+                    "LinkedIn",
+                    "GitHub",
+                    "Portfolio",
+                    "Bio",
+            };
             for (int i = 0; i < columns.length; i++) {
                 headerRow.createCell(i).setCellValue(columns[i]);
             }
@@ -307,6 +544,10 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
             int rowIdx = 1;
             for (EligibleStudent student : students) {
                 Row row = sheet.createRow(rowIdx++);
+                StudentProfile profile = student.getUser() != null
+                        ? studentProfileRepository.findByUser_UserId(student.getUser().getUserId())
+                        : null;
+
                 row.createCell(0).setCellValue((double) rowIdx - 1);
                 row.createCell(1).setCellValue(student.getStudentCode());
                 row.createCell(2).setCellValue(student.getFullName());
@@ -316,7 +557,28 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
                         .setCellValue(
                                 student.getGpa() != null ? student.getGpa().doubleValue() : 0.0);
                 row.createCell(6).setCellValue(student.getCurrentSemester() != null ? student.getCurrentSemester() : 0);
-                row.createCell(7).setCellValue(student.getStatus());
+                row.createCell(7).setCellValue(student.getSemester() != null ? student.getSemester().getName() : "");
+                row.createCell(8).setCellValue(student.getStatus());
+                row.createCell(9).setCellValue(student.getUser() != null && student.getUser().getPhone() != null
+                        ? student.getUser().getPhone()
+                        : "");
+                row.createCell(10).setCellValue(profile != null && profile.getClassCode() != null ? profile.getClassCode() : "");
+                row.createCell(11).setCellValue(profile != null && profile.getDateOfBirth() != null
+                        ? profile.getDateOfBirth().toString()
+                        : "");
+                row.createCell(12).setCellValue(profile != null && profile.getGender() != null ? profile.getGender() : "");
+                row.createCell(13).setCellValue(profile != null && profile.getAddress() != null ? profile.getAddress() : "");
+                row.createCell(14).setCellValue(profile != null && profile.getSkills() != null ? profile.getSkills() : "");
+                row.createCell(15).setCellValue(profile != null && profile.getLinkedinUrl() != null
+                        ? profile.getLinkedinUrl()
+                        : "");
+                row.createCell(16).setCellValue(profile != null && profile.getGithubUrl() != null
+                        ? profile.getGithubUrl()
+                        : "");
+                row.createCell(17).setCellValue(profile != null && profile.getPortfolioUrl() != null
+                        ? profile.getPortfolioUrl()
+                        : "");
+                row.createCell(18).setCellValue(profile != null && profile.getBio() != null ? profile.getBio() : "");
             }
 
             workbook.write(out);

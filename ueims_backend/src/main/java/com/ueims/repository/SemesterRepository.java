@@ -14,4 +14,6 @@ public interface SemesterRepository extends JpaRepository<Semester, UUID>, JpaSp
     boolean existsBySemesterCode(String semesterCode);
 
     List<Semester> findByStatus(String status);
+
+    Optional<Semester> findBySemesterCode(String semesterCode);
 }

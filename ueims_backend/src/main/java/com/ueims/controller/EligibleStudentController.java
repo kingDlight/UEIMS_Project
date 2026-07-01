@@ -72,6 +72,18 @@ public class EligibleStudentController {
         return ResponseEntity.ok(service.importFromExcel(file, semesterId));
     }
 
+    /**
+     * TM roster upload — parses the Excel and upserts into {@code users},
+     * {@code student_profiles} and {@code eligible_students} in one transaction
+     * per row. Designed for periodic bulk updates from the TM's spreadsheet.
+     */
+    @PreAuthorize("hasRole('TRAINING_MANAGER')")
+    @PostMapping("/upload-roster")
+    public ResponseEntity<com.ueims.dto.response.StudentImportResult> uploadRoster(
+            @RequestParam("file") MultipartFile file, @RequestParam("semesterId") UUID semesterId) {
+        return ResponseEntity.ok(service.importRoster(file, semesterId));
+    }
+
     @PreAuthorize("hasRole('TRAINING_MANAGER')")
     @PostMapping("/finalize-ojt")
     public ResponseEntity<java.util.Map<String, Object>> finalizeOjtList(@RequestBody List<UUID> studentIds) {

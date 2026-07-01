@@ -793,6 +793,14 @@ export const StudentsTab: React.FC = () => {
   const [major, setMajor] = useState<string>(MAJORS[0].value);
   const [acadSem, setAcadSem] = useState<string>('ALL');
   const [importModalOpen, setImportModalOpen] = useState(false);
+  const [rosterResultModalOpen, setRosterResultModalOpen] = useState(false);
+  const [rosterResult, setRosterResult] = useState<{
+    totalRows: number;
+    created: number;
+    updated: number;
+    skipped: number;
+    errors: Array<{ row: number; studentCode: string; reason: string }>;
+  } | null>(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] =
@@ -905,12 +913,14 @@ export const StudentsTab: React.FC = () => {
         message.error({ content: 'No active semester found. Please set an active semester first.', key: 'import' });
         return;
       }
-      await EligibleStudentService.importFromExcel(
+      const result = await EligibleStudentService.uploadRoster(
         actualFile as File,
         activeSemester.semesterId
       );
-      message.success({ content: t('studentsTab.importSuccess'), key: 'import' });
       setImportModalOpen(false);
+      setRosterResult(result);
+      setRosterResultModalOpen(true);
+      void refetchStudents();
     } catch {
       message.error({ content: t('studentsTab.importError'), key: 'import' });
     } finally {
@@ -1520,8 +1530,127 @@ export const StudentsTab: React.FC = () => {
         onClose={() => setEditModalOpen(false)}
         onSaved={handleEditSaved}
       />
+
+      {/* Roster Import Result Modal — shows created/updated/skipped/errors */}
+      <Modal
+        open={rosterResultModalOpen}
+        onCancel={() => setRosterResultModalOpen(false)}
+        footer={null}
+        width={620}
+        title={
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <UserCheck size={18} color={st.success} />
+            <span style={{ fontWeight: 700, fontSize: 15 }}>Roster import result</span>
+          </div>
+        }
+      >
+        {rosterResult && (
+          <div style={{ fontFamily: 'Inter, sans-serif' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 14 }}>
+              {[
+                { label: 'Total', value: rosterResult.totalRows, bg: st.infoMuted, fg: st.infoText },
+                { label: 'Created', value: rosterResult.created, bg: st.successMuted, fg: st.successText },
+                { label: 'Updated', value: rosterResult.updated, bg: st.brandMuted, fg: st.brand },
+                { label: 'Skipped', value: rosterResult.skipped, bg: st.warningMuted, fg: st.warningText },
+              ].map(({ label, value, bg, fg }) => (
+                <div key={label} style={{ background: bg, borderRadius: st.radiusMd, padding: '10px 12px' }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: fg, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                    {label}
+                  </div>
+                  <div style={{ fontSize: 22, fontWeight: 700, color: fg, marginTop: 2 }}>{value}</div>
+                </div>
+              ))}
+            </div>
+
+            {rosterResult.errors.length > 0 ? (
+              <div style={{ border: `1px solid ${st.errorMuted}`, borderRadius: st.radiusMd, overflow: 'hidden' }}>
+                <div
+                  style={{
+                    padding: '8px 12px',
+                    background: st.errorMuted,
+                    color: st.errorText,
+                    fontWeight: 700,
+                    fontSize: 12,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.06em',
+                  }}
+                >
+                  {rosterResult.errors.length} row(s) failed
+                </div>
+                <div style={{ maxHeight: 240, overflowY: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+                    <thead style={{ background: st.neutralBg, color: st.textSecondary }}>
+                      <tr>
+                        <th style={modalTh}>Row</th>
+                        <th style={modalTh}>Student Code</th>
+                        <th style={{ ...modalTh, textAlign: 'left' }}>Reason</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {rosterResult.errors.map((err, i) => (
+                        <tr key={i} style={{ borderTop: `1px solid ${st.borderSubtle}` }}>
+                          <td style={{ ...modalTd, fontFamily: 'monospace', textAlign: 'center' }}>{err.row}</td>
+                          <td style={{ ...modalTd, fontFamily: 'monospace' }}>{err.studentCode || '—'}</td>
+                          <td style={{ ...modalTd, textAlign: 'left', color: st.errorText }}>{err.reason}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ) : (
+              <div
+                style={{
+                  padding: 14,
+                  background: st.successMuted,
+                  borderRadius: st.radiusMd,
+                  color: st.successText,
+                  fontWeight: 600,
+                  fontSize: 13,
+                }}
+              >
+                All rows processed successfully.
+              </div>
+            )}
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 14 }}>
+              <button
+                onClick={() => setRosterResultModalOpen(false)}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: st.radiusMd,
+                  border: 'none',
+                  background: st.brand,
+                  color: '#fff',
+                  fontWeight: 700,
+                  fontSize: 13,
+                  cursor: 'pointer',
+                  fontFamily: 'Inter, sans-serif',
+                }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
+};
+
+const modalTh: React.CSSProperties = {
+  padding: '8px 10px',
+  fontSize: 10,
+  fontWeight: 700,
+  textTransform: 'uppercase',
+  letterSpacing: '0.06em',
+  textAlign: 'center',
+};
+
+const modalTd: React.CSSProperties = {
+  padding: '8px 10px',
+  fontSize: 12,
+  color: st.textPrimary,
 };
 
 const thStyle: React.CSSProperties = {

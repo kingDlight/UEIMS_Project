@@ -1,5 +1,6 @@
 package com.ueims.dto.response;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -23,6 +24,10 @@ public class StudentProfileResponseDTO {
     private String githubUrl;
     private String portfolioUrl;
     private String bio;
+    private String classCode;
+    private LocalDate dateOfBirth;
+    private String gender;
+    private String address;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

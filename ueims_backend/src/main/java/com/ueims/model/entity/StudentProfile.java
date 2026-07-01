@@ -58,4 +58,16 @@ public class StudentProfile extends BaseEntity {
 
     @Column(name = "bio", columnDefinition = "TEXT")
     private String bio;
+
+    @Column(name = "class_code", length = 50)
+    private String classCode;
+
+    @Column(name = "date_of_birth")
+    private java.time.LocalDate dateOfBirth;
+
+    @Column(name = "gender", length = 20)
+    private String gender;
+
+    @Column(name = "address", length = 500)
+    private String address;
 }

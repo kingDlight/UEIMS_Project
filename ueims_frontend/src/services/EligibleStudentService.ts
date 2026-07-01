@@ -25,6 +25,27 @@ export const EligibleStudentService = {
     return response.data;
   },
 
+  /**
+   * TM periodic roster upload — upserts into users + student_profiles + eligible_students
+   * in one call. Returns a summary { totalRows, created, updated, skipped, errors[] }.
+   */
+  async uploadRoster(file: File, semesterId: string): Promise<{
+    totalRows: number;
+    created: number;
+    updated: number;
+    skipped: number;
+    errors: Array<{ row: number; studentCode: string; reason: string }>;
+  }> {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('semesterId', semesterId);
+
+    const response = await api.post('/eligible-students/upload-roster', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data;
+  },
+
   async exportToExcel(semesterId: string): Promise<Blob> {
     const response = await api.get('/eligible-students/export-ojt', {
       params: { semesterId },

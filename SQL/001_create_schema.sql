@@ -885,15 +885,24 @@ CREATE TABLE student_profiles (
     linkedin_url    VARCHAR(500),
     github_url      VARCHAR(500),
     portfolio_url   VARCHAR(500),
+    class_code      VARCHAR(50),                                     -- TM bulk-import enrichment (migration 019)
+    date_of_birth   DATE,                                            -- TM bulk-import enrichment (migration 019)
+    gender          VARCHAR(20),                                     -- TM bulk-import enrichment (migration 019)
+    address         VARCHAR(500),                                    -- TM bulk-import enrichment (migration 019)
     created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at      TIMESTAMP,
 
     CONSTRAINT chk_cv_size CHECK (cv_file_size IS NULL OR cv_file_size <= 5242880),  -- BR-45
-    CONSTRAINT chk_profile_cv_format CHECK (cv_file_url IS NULL OR cv_file_url ILIKE '%.pdf') -- BR-31
+    CONSTRAINT chk_profile_cv_format CHECK (cv_file_url IS NULL OR cv_file_url ILIKE '%.pdf'), -- BR-31
+    CONSTRAINT chk_student_profiles_gender CHECK (gender IS NULL OR gender IN ('MALE', 'FEMALE', 'OTHER')),
+    CONSTRAINT uq_student_profiles_student_code UNIQUE (student_code)
 );
 
-CREATE INDEX idx_profiles_user ON student_profiles(user_id);
+-- Lookup index for TM bulk import / upsert by student_code
+CREATE INDEX idx_student_profiles_student_code
+    ON student_profiles(student_code)
+    WHERE student_code IS NOT NULL;
 
 -- Legacy one-time migration cho student_profiles (xem comment ở eligible_students phía trên).
 UPDATE student_profiles
