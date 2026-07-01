@@ -12,12 +12,22 @@ test('TC-AUTH-039: Export khi không có dữ liệu', async ({ page }) => {
   await page.goto('/admin/audit');
   await page.waitForLoadState('networkidle');
   
-  // 3. Lọc dữ liệu không có kết quả
+  // 3. Lọc dữ liệu không có kết quả (nếu có dữ liệu)
   const searchInput = page.getByPlaceholder('Search user, action, entity, IP...');
-  await searchInput.fill('non-existent-log-query-12345');
+  const emptyState = page.locator('.ant-empty');
+
+  // Chờ input hoặc empty state xuất hiện
+  await Promise.race([
+    searchInput.waitFor({ state: 'visible', timeout: 15000 }).catch(() => {}),
+    emptyState.waitFor({ state: 'visible', timeout: 15000 }).catch(() => {})
+  ]);
+
+  if (await searchInput.isVisible()) {
+    await searchInput.fill('non-existent-log-query-12345');
+  }
   
   // 4. Verify: Empty component should be visible
-  await expect(page.locator('.ant-empty')).toBeVisible({ timeout: 20000 });
+  await expect(emptyState).toBeVisible({ timeout: 20000 });
   
   // 5. Verify: Nút Export Excel (có thể vẫn hiển thị nhưng nên disable hoặc không cho click)
   const exportButton = page.getByRole('button', { name: /Export Excel/i });

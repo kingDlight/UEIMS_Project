@@ -22,6 +22,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import com.ueims.dto.request.IncidentReportRequest;
 import com.ueims.dto.request.IncidentRequest;
 import com.ueims.dto.request.IncidentResolveRequest;
+import com.ueims.dto.response.IncidentDTO;
 import com.ueims.model.entity.Enterprise;
 import com.ueims.model.entity.EnterpriseAssignment;
 import com.ueims.model.entity.Incident;
@@ -62,8 +63,7 @@ class IncidentServiceImplTest {
         reportedById = UUID.randomUUID();
         resolvedById = UUID.randomUUID();
 
-        reportedBy =
-                User.builder().userId(reportedById).email("student@test.com").build();
+        reportedBy = User.builder().userId(reportedById).email("student@test.com").build();
         resolvedBy = User.builder().userId(resolvedById).email("admin@test.com").build();
 
         assignment = EnterpriseAssignment.builder()
@@ -92,7 +92,7 @@ class IncidentServiceImplTest {
                 .setAuthentication(new UsernamePasswordAuthenticationToken("admin@test.com", null));
         when(userRepository.findByEmail("admin@test.com")).thenReturn(Optional.of(resolvedBy));
         when(repository.findAll()).thenReturn(Arrays.asList(incident));
-        List<Incident> result = service.findAll();
+        List<IncidentDTO> result = service.findAll();
         assertEquals(1, result.size());
         assertEquals(incidentId, result.get(0).getIncidentId());
         verify(repository).findAll();
@@ -173,8 +173,7 @@ class IncidentServiceImplTest {
 
     @Test
     void createIncident_whenAssignmentNotFound_throwsException() {
-        IncidentRequest request =
-                IncidentRequest.builder().assignmentId(assignmentId).build();
+        IncidentRequest request = IncidentRequest.builder().assignmentId(assignmentId).build();
         when(assignmentRepository.findById(assignmentId)).thenReturn(Optional.empty());
 
         assertThrows(IllegalArgumentException.class, () -> service.createIncident(request));
@@ -260,8 +259,7 @@ class IncidentServiceImplTest {
 
     @Test
     void reportIncident_whenUserHasNoPermission_throwsException() {
-        User otherUser =
-                User.builder().userId(UUID.randomUUID()).email("other@test.com").build();
+        User otherUser = User.builder().userId(UUID.randomUUID()).email("other@test.com").build();
         IncidentReportRequest request = new IncidentReportRequest();
         request.setAssignmentId(assignmentId);
 
@@ -286,11 +284,11 @@ class IncidentServiceImplTest {
         when(userRepository.findByEmail("admin@test.com")).thenReturn(Optional.of(resolvedBy));
         when(repository.save(any(Incident.class))).thenAnswer(i -> i.getArgument(0));
 
-        Incident result = service.resolveIncident(incidentId, request);
+        IncidentDTO result = service.resolveIncident(incidentId, request);
 
         assertEquals("RESOLVED", result.getStatus());
         assertEquals("Fixed", result.getResolutionNote());
-        assertEquals(resolvedBy, result.getResolvedBy());
+        assertEquals(resolvedBy.getUserId().toString(), result.getResolvedById());
         assertNotNull(result.getResolvedAt());
     }
 
