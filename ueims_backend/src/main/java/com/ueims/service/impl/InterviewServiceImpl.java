@@ -593,8 +593,7 @@ public class InterviewServiceImpl implements InterviewService {
         enterpriseAssignmentRepository.save(assignment);
 
         // Auto-complete assignment ACTIVE cũ ở kỳ khác (SV đã lên kỳ mới qua interview)
-        enterpriseAssignmentService.autoCompletePriorActiveAssignments(
-                student.getUserId(), semester.getSemesterId());
+        enterpriseAssignmentService.autoCompletePriorActiveAssignments(student.getUserId(), semester.getSemesterId());
 
         // Update eligible_students status → MATCHED so student appears in OJT view
         eligibleStudentRepository

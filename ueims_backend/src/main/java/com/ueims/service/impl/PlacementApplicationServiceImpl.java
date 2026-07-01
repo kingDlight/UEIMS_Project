@@ -206,9 +206,7 @@ public class PlacementApplicationServiceImpl implements PlacementApplicationServ
         int completed = enterpriseAssignmentService.autoCompletePriorActiveAssignments(
                 app.getStudent().getUserId(), app.getSemester().getSemesterId());
         if (completed > 0) {
-            log.info(
-                    "[AUTO-COMPLETE] Prior assignments auto-completed before replacement link: {}",
-                    completed);
+            log.info("[AUTO-COMPLETE] Prior assignments auto-completed before replacement link: {}", completed);
         }
 
         // Link assignment cũ → mới (nếu là replacement)
@@ -434,8 +432,7 @@ public class PlacementApplicationServiceImpl implements PlacementApplicationServ
         assignmentRepository.save(assignment);
 
         // Auto-complete assignment ACTIVE cũ ở kỳ khác (SV đã lên kỳ mới)
-        enterpriseAssignmentService.autoCompletePriorActiveAssignments(
-                student.getUserId(), semester.getSemesterId());
+        enterpriseAssignmentService.autoCompletePriorActiveAssignments(student.getUserId(), semester.getSemesterId());
 
         log.info(
                 "Manual match: student {} → enterprise {} by reviewer {}",

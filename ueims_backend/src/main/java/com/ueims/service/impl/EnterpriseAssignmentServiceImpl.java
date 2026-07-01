@@ -132,8 +132,7 @@ public class EnterpriseAssignmentServiceImpl implements EnterpriseAssignmentServ
         List<EnterpriseAssignment> actives = repository.findByStudent_UserIdAndStatus(studentId, "ACTIVE");
         int completed = 0;
         for (EnterpriseAssignment old : actives) {
-            if (old.getSemester() != null
-                    && !old.getSemester().getSemesterId().equals(newSemesterId)) {
+            if (old.getSemester() != null && !old.getSemester().getSemesterId().equals(newSemesterId)) {
                 old.setStatus("COMPLETED");
                 if (old.getTerminationReason() == null) {
                     old.setTerminationReason("Auto-completed: student assigned in new semester");
