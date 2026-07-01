@@ -19,7 +19,8 @@ public class InternshipPlan extends BaseEntity {
     @Column(name = "plan_id")
     private java.util.UUID planId;
 
-    @Column(name = "assignment_id", nullable = false, unique = true)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "assignment_id", nullable = false, unique = true)
     private EnterpriseAssignment assignment;
 
     @Column(name = "overall_goal", columnDefinition = "TEXT")
