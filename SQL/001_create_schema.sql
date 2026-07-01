@@ -10,6 +10,11 @@
 -- Total: 29 Tables + 2 Views + 16 Triggers
 -- Coverage: 66/66 UCs + 55/55 BRs
 -- ============================================================
+-- USAGE: For a clean database, run ONLY this file. It creates the entire
+--   schema and self-heals missing enrichment columns in student_profiles
+--   via the backfill block at the bottom (a no-op on fresh setups).
+--   If upgrading from an older schema, also apply 020_*.sql.
+-- ============================================================
 
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
@@ -885,10 +890,10 @@ CREATE TABLE student_profiles (
     linkedin_url    VARCHAR(500),
     github_url      VARCHAR(500),
     portfolio_url   VARCHAR(500),
-    class_code      VARCHAR(50),                                     -- TM bulk-import enrichment (migration 019)
-    date_of_birth   DATE,                                            -- TM bulk-import enrichment (migration 019)
-    gender          VARCHAR(20),                                     -- TM bulk-import enrichment (migration 019)
-    address         VARCHAR(500),                                    -- TM bulk-import enrichment (migration 019)
+    class_code      VARCHAR(50),
+    date_of_birth   DATE,
+    gender          VARCHAR(20),
+    address         VARCHAR(500),
     created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at      TIMESTAMP,
@@ -1696,6 +1701,34 @@ BEGIN
             ALTER TABLE request_logs
             ADD CONSTRAINT fk_request_log_user
             FOREIGN KEY (user_id) REFERENCES users(user_id);
+        END IF;
+    END IF;
+END $$;
+
+-- ============================================================================
+-- Backfill enrichment columns for environments that applied an older
+-- 001_create_schema.sql before these columns existed. Fresh setups already
+-- get these columns inside the CREATE TABLE statement above, so on a new
+-- database this block is a no-op. Mirrors
+-- SQL/020_add_profile_enrichment_columns_to_student_profiles.sql.
+-- ============================================================================
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'student_profiles') THEN
+        ALTER TABLE student_profiles
+            ADD COLUMN IF NOT EXISTS class_code    VARCHAR(50),
+            ADD COLUMN IF NOT EXISTS date_of_birth DATE,
+            ADD COLUMN IF NOT EXISTS gender        VARCHAR(20),
+            ADD COLUMN IF NOT EXISTS address       VARCHAR(500);
+
+        IF NOT EXISTS (
+            SELECT 1 FROM pg_constraint
+            WHERE conname = 'chk_student_profiles_gender'
+              AND conrelid = 'student_profiles'::regclass
+        ) THEN
+            ALTER TABLE student_profiles
+                ADD CONSTRAINT chk_student_profiles_gender
+                CHECK (gender IS NULL OR gender IN ('MALE', 'FEMALE', 'OTHER'));
         END IF;
     END IF;
 END $$;
