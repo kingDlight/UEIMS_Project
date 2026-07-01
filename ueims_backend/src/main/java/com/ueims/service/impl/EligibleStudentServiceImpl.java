@@ -293,9 +293,8 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
             throw new AppException(ErrorCode.INVALID_EXCEL_FORMAT);
         }
 
-        StudentImportResult result = StudentImportResult.builder()
-                .totalRows(rows.size())
-                .build();
+        StudentImportResult result =
+                StudentImportResult.builder().totalRows(rows.size()).build();
 
         // Track student codes that already triggered an email-collision error in
         // this import — avoids spamming the error list for 100 rows pointing at
@@ -313,31 +312,42 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
                     case SKIPPED_DUPLICATE -> result.setSkipped(result.getSkipped() + 1);
                 }
             } catch (AppException e) {
-                result.getErrors().add(StudentImportResult.RowError.builder()
-                        .row(excelRowNumber)
-                        .studentCode(row.getStudentCode())
-                        .reason(e.getErrorCode() != null ? e.getErrorCode().getMessage() : e.getMessage())
-                        .build());
+                result.getErrors()
+                        .add(StudentImportResult.RowError.builder()
+                                .row(excelRowNumber)
+                                .studentCode(row.getStudentCode())
+                                .reason(
+                                        e.getErrorCode() != null
+                                                ? e.getErrorCode().getMessage()
+                                                : e.getMessage())
+                                .build());
             } catch (Exception e) {
                 log.error("Unexpected failure on roster row {}", excelRowNumber, e);
-                result.getErrors().add(StudentImportResult.RowError.builder()
-                        .row(excelRowNumber)
-                        .studentCode(row.getStudentCode())
-                        .reason("Unexpected error: " + e.getMessage())
-                        .build());
+                result.getErrors()
+                        .add(StudentImportResult.RowError.builder()
+                                .row(excelRowNumber)
+                                .studentCode(row.getStudentCode())
+                                .reason("Unexpected error: " + e.getMessage())
+                                .build());
             }
         }
 
         log.info(
                 "Roster import complete — semester={} total={} created={} updated={} skipped={} errors={}",
-                semesterId, result.getTotalRows(), result.getCreated(), result.getUpdated(),
-                result.getSkipped(), result.getErrors().size());
+                semesterId,
+                result.getTotalRows(),
+                result.getCreated(),
+                result.getUpdated(),
+                result.getSkipped(),
+                result.getErrors().size());
         return result;
     }
 
     /** Per-row resolution outcome, used to build the import summary. */
     private enum UpsertOutcome {
-        CREATED, UPDATED, SKIPPED_DUPLICATE
+        CREATED,
+        UPDATED,
+        SKIPPED_DUPLICATE
     }
 
     /**
@@ -375,8 +385,7 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
         } else {
             user = userOpt.get();
             // Email changed for an existing account — guard against collision.
-            if (!user.getEmail().equalsIgnoreCase(row.getEmail())
-                    && userRepository.existsByEmail(row.getEmail())) {
+            if (!user.getEmail().equalsIgnoreCase(row.getEmail()) && userRepository.existsByEmail(row.getEmail())) {
                 reportCollisionOnce(reportedCollisions, row.getEmail());
                 throw new AppException(ErrorCode.EMAIL_ALREADY_EXISTS);
             }
@@ -427,11 +436,13 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
                 .build();
         user = userRepository.save(user);
 
-        Role studentRole = roleRepository.findById(STUDENT_ROLE).orElseGet(() -> roleRepository.save(Role.builder()
-                .roleName(STUDENT_ROLE)
-                .description("Student role")
-                .isActive(true)
-                .build()));
+        Role studentRole = roleRepository
+                .findById(STUDENT_ROLE)
+                .orElseGet(() -> roleRepository.save(Role.builder()
+                        .roleName(STUDENT_ROLE)
+                        .description("Student role")
+                        .isActive(true)
+                        .build()));
         userRoleRepository.save(UserRole.builder()
                 .id(new UserRoleId(user.getUserId(), studentRole.getRoleName()))
                 .user(user)
@@ -516,25 +527,25 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
             // (see ExcelImportUtil.parseStudentImportRows for matching).
             Row headerRow = sheet.createRow(0);
             String[] columns = {
-                    "No.",
-                    "Student Code",
-                    "Full Name",
-                    "Email",
-                    "Major",
-                    "GPA",
-                    "Current Semester",
-                    "Semester",
-                    "Status",
-                    "Phone",
-                    "Class Code",
-                    "Date Of Birth",
-                    "Gender",
-                    "Address",
-                    "Skills",
-                    "LinkedIn",
-                    "GitHub",
-                    "Portfolio",
-                    "Bio",
+                "No.",
+                "Student Code",
+                "Full Name",
+                "Email",
+                "Major",
+                "GPA",
+                "Current Semester",
+                "Semester",
+                "Status",
+                "Phone",
+                "Class Code",
+                "Date Of Birth",
+                "Gender",
+                "Address",
+                "Skills",
+                "LinkedIn",
+                "GitHub",
+                "Portfolio",
+                "Bio",
             };
             for (int i = 0; i < columns.length; i++) {
                 headerRow.createCell(i).setCellValue(columns[i]);
@@ -545,7 +556,8 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
             for (EligibleStudent student : students) {
                 Row row = sheet.createRow(rowIdx++);
                 StudentProfile profile = student.getUser() != null
-                        ? studentProfileRepository.findByUser_UserId(student.getUser().getUserId())
+                        ? studentProfileRepository.findByUser_UserId(
+                                student.getUser().getUserId())
                         : null;
 
                 row.createCell(0).setCellValue((double) rowIdx - 1);
@@ -557,27 +569,38 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
                         .setCellValue(
                                 student.getGpa() != null ? student.getGpa().doubleValue() : 0.0);
                 row.createCell(6).setCellValue(student.getCurrentSemester() != null ? student.getCurrentSemester() : 0);
-                row.createCell(7).setCellValue(student.getSemester() != null ? student.getSemester().getName() : "");
+                row.createCell(7)
+                        .setCellValue(
+                                student.getSemester() != null
+                                        ? student.getSemester().getName()
+                                        : "");
                 row.createCell(8).setCellValue(student.getStatus());
-                row.createCell(9).setCellValue(student.getUser() != null && student.getUser().getPhone() != null
-                        ? student.getUser().getPhone()
-                        : "");
-                row.createCell(10).setCellValue(profile != null && profile.getClassCode() != null ? profile.getClassCode() : "");
-                row.createCell(11).setCellValue(profile != null && profile.getDateOfBirth() != null
-                        ? profile.getDateOfBirth().toString()
-                        : "");
-                row.createCell(12).setCellValue(profile != null && profile.getGender() != null ? profile.getGender() : "");
-                row.createCell(13).setCellValue(profile != null && profile.getAddress() != null ? profile.getAddress() : "");
-                row.createCell(14).setCellValue(profile != null && profile.getSkills() != null ? profile.getSkills() : "");
-                row.createCell(15).setCellValue(profile != null && profile.getLinkedinUrl() != null
-                        ? profile.getLinkedinUrl()
-                        : "");
-                row.createCell(16).setCellValue(profile != null && profile.getGithubUrl() != null
-                        ? profile.getGithubUrl()
-                        : "");
-                row.createCell(17).setCellValue(profile != null && profile.getPortfolioUrl() != null
-                        ? profile.getPortfolioUrl()
-                        : "");
+                row.createCell(9)
+                        .setCellValue(
+                                student.getUser() != null && student.getUser().getPhone() != null
+                                        ? student.getUser().getPhone()
+                                        : "");
+                row.createCell(10)
+                        .setCellValue(profile != null && profile.getClassCode() != null ? profile.getClassCode() : "");
+                row.createCell(11)
+                        .setCellValue(
+                                profile != null && profile.getDateOfBirth() != null
+                                        ? profile.getDateOfBirth().toString()
+                                        : "");
+                row.createCell(12)
+                        .setCellValue(profile != null && profile.getGender() != null ? profile.getGender() : "");
+                row.createCell(13)
+                        .setCellValue(profile != null && profile.getAddress() != null ? profile.getAddress() : "");
+                row.createCell(14)
+                        .setCellValue(profile != null && profile.getSkills() != null ? profile.getSkills() : "");
+                row.createCell(15)
+                        .setCellValue(
+                                profile != null && profile.getLinkedinUrl() != null ? profile.getLinkedinUrl() : "");
+                row.createCell(16)
+                        .setCellValue(profile != null && profile.getGithubUrl() != null ? profile.getGithubUrl() : "");
+                row.createCell(17)
+                        .setCellValue(
+                                profile != null && profile.getPortfolioUrl() != null ? profile.getPortfolioUrl() : "");
                 row.createCell(18).setCellValue(profile != null && profile.getBio() != null ? profile.getBio() : "");
             }
 

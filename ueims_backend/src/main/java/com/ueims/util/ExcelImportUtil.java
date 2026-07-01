@@ -22,10 +22,10 @@ import com.ueims.model.entity.EligibleStudent;
 public class ExcelImportUtil {
 
     private static final DateTimeFormatter[] DATE_FORMATS = new DateTimeFormatter[] {
-            DateTimeFormatter.ISO_LOCAL_DATE,                 // 2026-07-01
-            DateTimeFormatter.ofPattern("dd/MM/yyyy"),
-            DateTimeFormatter.ofPattern("d/M/yyyy"),
-            DateTimeFormatter.ofPattern("MM/dd/yyyy"),
+        DateTimeFormatter.ISO_LOCAL_DATE, // 2026-07-01
+        DateTimeFormatter.ofPattern("dd/MM/yyyy"),
+        DateTimeFormatter.ofPattern("d/M/yyyy"),
+        DateTimeFormatter.ofPattern("MM/dd/yyyy"),
     };
 
     private ExcelImportUtil() {
