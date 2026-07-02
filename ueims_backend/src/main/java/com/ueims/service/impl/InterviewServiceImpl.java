@@ -218,8 +218,8 @@ public class InterviewServiceImpl implements InterviewService {
     @Override
     @Transactional
     public Interview confirmAttendance(UUID id) {
-        Interview interview =
-                repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.INTERVIEW_NOT_FOUND));
+        Interview interview = repository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.INTERVIEW_NOT_FOUND));
 
         // BR-49: Không thể xác nhận nếu phỏng vấn đã bị hủy (CANCELLED/CANCELED)
         if ("CANCELLED".equalsIgnoreCase(interview.getStatus()) || "CANCELED".equalsIgnoreCase(interview.getStatus())) {
@@ -239,8 +239,8 @@ public class InterviewServiceImpl implements InterviewService {
     @Override
     @Transactional
     public Interview declineAttendance(UUID id, String reason) {
-        Interview interview =
-                repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.INTERVIEW_NOT_FOUND));
+        Interview interview = repository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.INTERVIEW_NOT_FOUND));
 
         // BR-49: Tính không thể đảo ngược
         if (Boolean.TRUE.equals(interview.getStudentConfirmed())) {
@@ -286,9 +286,12 @@ public class InterviewServiceImpl implements InterviewService {
             }
             existing.setScheduledTime(entity.getScheduledTime());
         }
-        if (entity.getDurationMinutes() != null) existing.setDurationMinutes(entity.getDurationMinutes());
-        if (entity.getMeetingLink() != null) existing.setMeetingLink(entity.getMeetingLink());
-        if (entity.getLocation() != null) existing.setLocation(entity.getLocation());
+        if (entity.getDurationMinutes() != null)
+            existing.setDurationMinutes(entity.getDurationMinutes());
+        if (entity.getMeetingLink() != null)
+            existing.setMeetingLink(entity.getMeetingLink());
+        if (entity.getLocation() != null)
+            existing.setLocation(entity.getLocation());
         if (entity.getStatus() != null) {
             String newStatus = entity.getStatus().toUpperCase();
             if ("COMPLETED".equals(newStatus) && !"COMPLETED".equals(existing.getStatus())) {
@@ -299,7 +302,8 @@ public class InterviewServiceImpl implements InterviewService {
             }
             existing.setStatus(newStatus);
         }
-        if (entity.getFeedback() != null) existing.setFeedback(entity.getFeedback());
+        if (entity.getFeedback() != null)
+            existing.setFeedback(entity.getFeedback());
         existing.setUpdatedAt(LocalDateTime.now());
 
         Interview saved = repository.saveAndFlush(existing);
@@ -357,8 +361,10 @@ public class InterviewServiceImpl implements InterviewService {
             applicationService.withdrawOtherApplicationsInSemester(app, "Interview PASS");
 
             // Auto-create placement_applications + enterprise_assignments on PASS.
-            // The enterprise that posted the job the student just passed becomes their OJT placement.
-            // Student status in eligible_students is updated to MATCHED so they appear in the
+            // The enterprise that posted the job the student just passed becomes their OJT
+            // placement.
+            // Student status in eligible_students is updated to MATCHED so they appear in
+            // the
             // OJT Placement Center view immediately.
             try {
                 autoCreatePlacementAfterInterview(existing);
@@ -425,8 +431,7 @@ public class InterviewServiceImpl implements InterviewService {
         User currentUser = getCurrentUser();
         checkEnterpriseOwnershipOrTm(existing, currentUser);
         // BR-35: also check overlap
-        UUID enterpriseIdToCheck =
-                existing.getApplication().getJobPost().getEnterprise().getEnterpriseId();
+        UUID enterpriseIdToCheck = existing.getApplication().getJobPost().getEnterprise().getEnterpriseId();
         boolean overlap = repository.existsByEnterpriseAndTime(enterpriseIdToCheck, newTime);
         if (overlap) {
             throw new AppException(ErrorCode.INTERVIEW_OVERLAP);
@@ -434,8 +439,10 @@ public class InterviewServiceImpl implements InterviewService {
         existing.setScheduledTime(newTime);
         existing.setStatus("SCHEDULED");
         existing.setRescheduleReason(reason);
-        if (meetingLink != null) existing.setMeetingLink(meetingLink);
-        if (location != null) existing.setLocation(location);
+        if (meetingLink != null)
+            existing.setMeetingLink(meetingLink);
+        if (location != null)
+            existing.setLocation(location);
         existing.setStudentConfirmed(false);
         existing.setUpdatedAt(LocalDateTime.now());
         Interview saved = repository.saveAndFlush(existing);
@@ -487,22 +494,24 @@ public class InterviewServiceImpl implements InterviewService {
 
     private boolean isValidSlot(LocalDateTime candidate, List<Interview> existing) {
         int dow = candidate.getDayOfWeek().getValue();
-        if (dow < 1 || dow > 5) return false;
+        if (dow < 1 || dow > 5)
+            return false;
 
         int hour = candidate.getHour();
-        if ((hour < 9 || hour >= 12) && (hour < 14 || hour >= 17)) return false;
+        if ((hour < 9 || hour >= 12) && (hour < 14 || hour >= 17))
+            return false;
 
         return existing.stream()
                 .noneMatch(i -> i.getScheduledTime() != null
                         && Math.abs(java.time.Duration.between(i.getScheduledTime(), candidate)
-                                        .toMinutes())
-                                < 60);
+                                .toMinutes()) < 60);
     }
 
     private void checkEnterpriseOwnershipOrTm(Interview existing, User currentUser) {
         boolean isTm = currentUser.getRoles().stream()
                 .anyMatch(r -> "TRAINING_MANAGER".equals(r.getRole().getRoleName()));
-        if (isTm) return;
+        if (isTm)
+            return;
         if (currentUser.getEnterprise() == null
                 || existing.getApplication() == null
                 || existing.getApplication().getJobPost() == null
@@ -528,14 +537,20 @@ public class InterviewServiceImpl implements InterviewService {
     }
 
     /**
-     * Auto-creates placement_applications (APPROVED) + enterprise_assignments (ACTIVE) for a
+     * Auto-creates placement_applications (APPROVED) + enterprise_assignments
+     * (ACTIVE) for a
      * student who just passed an interview.
      *
-     * <p>The enterprise is derived from the job post associated with the passed application. The
-     * semester is derived from the same job post. Student status in eligible_students is set to
+     * <p>
+     * The enterprise is derived from the job post associated with the passed
+     * application. The
+     * semester is derived from the same job post. Student status in
+     * eligible_students is set to
      * MATCHED so they appear in the OJT Placement Center immediately.
      *
-     * <p>This mirrors the logic in PlacementApplicationServiceImpl.approve() but skips the pending
+     * <p>
+     * This mirrors the logic in PlacementApplicationServiceImpl.approve() but skips
+     * the pending
      * step since the enterprise already selected the student via interview.
      */
     private void autoCreatePlacementAfterInterview(Interview interview) {
@@ -559,7 +574,8 @@ public class InterviewServiceImpl implements InterviewService {
             return;
         }
 
-        // Skip if student already has an ACTIVE assignment for this enterprise in this semester
+        // Skip if student already has an ACTIVE assignment for this enterprise in this
+        // semester
         if (enterpriseAssignmentRepository.existsByStudent_UserIdAndEnterprise_EnterpriseIdAndSemester_SemesterId(
                 student.getUserId(), enterprise.getEnterpriseId(), semester.getSemesterId())) {
             log.info(
@@ -569,7 +585,8 @@ public class InterviewServiceImpl implements InterviewService {
             return;
         }
 
-        // Create placement application (APPROVED — no pending step since enterprise selected via
+        // Create placement application (APPROVED — no pending step since enterprise
+        // selected via
         // interview)
         PlacementApplication placementApp = PlacementApplication.builder()
                 .student(student)
@@ -621,7 +638,10 @@ public class InterviewServiceImpl implements InterviewService {
                 assignment.getAssignmentId());
     }
 
-    /** Shortcut to fetch the current authenticated user without repeating boilerplate. */
+    /**
+     * Shortcut to fetch the current authenticated user without repeating
+     * boilerplate.
+     */
     private User currentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByEmail(email).orElse(null);
