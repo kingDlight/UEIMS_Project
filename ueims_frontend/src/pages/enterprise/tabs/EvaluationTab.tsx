@@ -237,10 +237,21 @@ export const EvaluationTab: React.FC = () => {
               major: item.major ?? '—',
               gpa: item.gpa ?? 0,
               jobTitle: item.jobPostTitle ?? 'Intern',
-              evaluationId: undefined,
+              evaluationId: item.evaluationId,
             }));
           setStudents(mapped);
-          if (mapped.length > 0) {
+          
+          const searchParams = new URLSearchParams(window.location.search);
+          const assignmentIdParam = searchParams.get('assignmentId');
+          
+          if (assignmentIdParam) {
+            const found = mapped.find(s => s.assignmentId === assignmentIdParam);
+            if (found) {
+              setSelectedStudent(found);
+            } else {
+              setSelectedStudent(mapped[0]);
+            }
+          } else if (mapped.length > 0) {
             setSelectedStudent(mapped[0]);
           }
         }

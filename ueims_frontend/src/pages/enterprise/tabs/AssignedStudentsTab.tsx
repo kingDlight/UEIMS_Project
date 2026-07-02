@@ -26,6 +26,8 @@ interface AssignmentRow {
   supervisorEmail?: string;
   startDate?: string;
   endDate?: string;
+  evaluationId?: string;
+  finalReportUrl?: string;
 }
 
 const STATUS_META: Record<string, { label: string; color: string; bg: string }> = {
@@ -178,7 +180,19 @@ export const AssignedStudentsTab: React.FC = () => {
                     )}
                   </div>
 
-                  <div className="mt-4 flex justify-end">
+                  <div className="mt-4 flex justify-between items-center border-t border-slate-100 pt-3">
+                    <div className="flex gap-2">
+                      {r.finalReportUrl && (
+                        <a href={`http://localhost:8080${r.finalReportUrl}`} target="_blank" rel="noreferrer" className="text-[12px] font-semibold text-blue-500 hover:text-blue-600 transition-colors bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100 hover:border-blue-200 cursor-pointer inline-block no-underline">
+                          View Final Report
+                        </a>
+                      )}
+                      {r.evaluationId && (
+                        <a href={`/enterprise-dashboard/evaluation?assignmentId=${r.assignmentId}`} className="text-[12px] font-semibold text-[#E67E22] hover:text-[#D35400] transition-colors bg-[#E67E22]/10 px-3 py-1.5 rounded-lg border border-[#E67E22]/20 hover:border-[#E67E22]/30 cursor-pointer inline-block no-underline">
+                          View Evaluation
+                        </a>
+                      )}
+                    </div>
                     <span
                       className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold ${meta.bg} ${meta.color}`}
                     >

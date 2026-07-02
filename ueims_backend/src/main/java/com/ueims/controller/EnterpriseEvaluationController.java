@@ -38,7 +38,7 @@ public class EnterpriseEvaluationController {
     public ResponseEntity<Map<String, Object>> getMyEvaluation() {
         var evaluation = service.findMyEvaluation(userService.getCurrentUserId());
         if (evaluation == null) {
-            return ResponseEntity.ok(Map.of("result", Map.of()));
+            return ResponseEntity.ok(java.util.Collections.emptyMap());
         }
         return ResponseEntity.ok(Map.of("result", mapper.toDto(evaluation)));
     }

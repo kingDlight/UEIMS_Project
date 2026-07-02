@@ -59,7 +59,12 @@ public class EnterpriseEvaluationServiceImpl implements EnterpriseEvaluationServ
     @Override
     @Transactional(readOnly = true)
     public EnterpriseEvaluation findMyEvaluation(UUID studentId) {
-        return repository.findByAssignment_Student_UserId(studentId).orElse(null);
+        EnterpriseEvaluation evaluation =
+                repository.findByAssignment_Student_UserId(studentId).orElse(null);
+        if (evaluation != null) {
+            validateAccess(evaluation);
+        }
+        return evaluation;
     }
 
     @Override

@@ -40,4 +40,9 @@ public class EnterpriseAssignmentResponseDTO {
     // Audit fields inherited from BaseEntity
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
+
+    // Related Entities IDs
+    UUID evaluationId;
+    UUID finalReportId;
+    String finalReportUrl;
 }
