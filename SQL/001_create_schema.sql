@@ -1085,14 +1085,28 @@ COMMENT ON TRIGGER trg_auto_complete_prior_assignments ON enterprise_assignments
     'Invariant: 1 student <= 1 ACTIVE assignment at any time. Auto-completes prior ACTIVE rows in other semesters when a new ACTIVE assignment is created.';
 
 -- TABLE 19: internship_plans
+-- Refactored: 1 plan / 1 Enterprise × 1 Semester (không còn per-assignment)
 CREATE TABLE internship_plans (
-    plan_id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    assignment_id   UUID NOT NULL UNIQUE REFERENCES enterprise_assignments(assignment_id),
-    created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deleted_at      TIMESTAMP,
-    overall_goal    TEXT
+    plan_id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    enterprise_id       UUID NOT NULL REFERENCES enterprises(enterprise_id),
+    semester_id         UUID NOT NULL REFERENCES semesters(semester_id),
+    job_post_id         UUID REFERENCES job_posts(job_post_id),              -- optional: tham chiếu job post gốc để lấy semester ref
+    overall_goal        TEXT,
+    status              VARCHAR(30) NOT NULL DEFAULT 'PENDING_APPROVAL'
+                        CHECK (status IN ('PENDING_APPROVAL', 'APPROVED', 'REJECTED')),
+    rejection_reason    TEXT,
+    approved_by         UUID REFERENCES users(user_id),
+    approved_at         TIMESTAMP,
+    created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at          TIMESTAMP,
+
+    UNIQUE (enterprise_id, semester_id)                                    -- 1 plan / DN / kỳ
 );
+
+CREATE INDEX idx_plan_enterprise_semester_status ON internship_plans(enterprise_id, semester_id, status);
+CREATE INDEX idx_plan_jobpost ON internship_plans(job_post_id);
+CREATE INDEX idx_plan_deleted ON internship_plans(deleted_at);
 
 -- TABLE 20: internship_plan_items
 CREATE TABLE internship_plan_items (
@@ -1112,15 +1126,23 @@ CREATE TABLE internship_plan_items (
 CREATE INDEX idx_planitems_plan ON internship_plan_items(plan_id);
 
 -- TRIGGER: BR-39 — Plan item target_date must fall within semester dates
+-- Refactored: plan.semester_id trực tiếp (không còn qua assignment)
 CREATE OR REPLACE FUNCTION validate_plan_item_date_boundary()
 RETURNS TRIGGER AS $$
-DECLARE sem_start DATE; sem_end DATE;
+DECLARE sem_start DATE; sem_end DATE; plan_sem_id UUID;
 BEGIN
-    SELECT s.start_date, s.end_date INTO sem_start, sem_end
-    FROM semesters s
-    JOIN enterprise_assignments ea ON s.semester_id = ea.semester_id
-    JOIN internship_plans ip ON ea.assignment_id = ip.assignment_id
-    WHERE ip.plan_id = NEW.plan_id;
+    SELECT semester_id INTO plan_sem_id FROM internship_plans WHERE plan_id = NEW.plan_id;
+
+    IF plan_sem_id IS NULL THEN
+        RAISE EXCEPTION 'Plan % has no semester_id', NEW.plan_id;
+    END IF;
+
+    SELECT start_date, end_date INTO sem_start, sem_end
+    FROM semesters WHERE semester_id = plan_sem_id;
+
+    IF sem_start IS NULL OR sem_end IS NULL THEN
+        RAISE EXCEPTION 'Semester % has no start/end date', plan_sem_id;
+    END IF;
 
     IF NEW.target_date < sem_start OR NEW.target_date > sem_end THEN
         RAISE EXCEPTION 'Plan item target_date (%) must be within semester dates (% to %)',
@@ -1680,13 +1702,12 @@ BEGIN
             WHERE a.application_id = target_row.application_id;
             
         WHEN 'internship_plans' THEN
-            SELECT semester_id INTO sem_id FROM enterprise_assignments WHERE assignment_id = target_row.assignment_id;
+            sem_id := target_row.semester_id;      -- Refactored: direct column, no longer via assignment
             
         WHEN 'internship_plan_items' THEN
-            SELECT ea.semester_id INTO sem_id 
-            FROM internship_plans ip 
-            JOIN enterprise_assignments ea ON ip.assignment_id = ea.assignment_id
-            WHERE ip.plan_id = target_row.plan_id;
+            SELECT semester_id INTO sem_id       -- Refactored: plan has semester_id directly
+            FROM internship_plans
+            WHERE plan_id = target_row.plan_id;
             
         WHEN 'enterprise_evaluations', 'weekly_reports', 'final_reports', 'incidents' THEN
             SELECT semester_id INTO sem_id FROM enterprise_assignments WHERE assignment_id = target_row.assignment_id;

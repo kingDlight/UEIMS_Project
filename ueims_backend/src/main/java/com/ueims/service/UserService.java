@@ -32,6 +32,9 @@ public interface UserService {
 
     UUID getCurrentUserId();
 
+    /** Trả về User entity của người đang login (để lấy enterprise, role, ...). */
+    User getCurrentUser();
+
     UserResponse updateMyInfo(UserUpdateRequest request);
 
     UserDetailResponse updateUser(UUID id, UserUpdateRequest request);

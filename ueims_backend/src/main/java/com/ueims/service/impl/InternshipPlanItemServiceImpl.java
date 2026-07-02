@@ -56,24 +56,22 @@ public class InternshipPlanItemServiceImpl implements InternshipPlanItemService 
 
         InternshipPlan plan = planRepository
                 .findById(entity.getPlan().getPlanId())
-                .orElseThrow(() -> new AppException(ErrorCode.INTERVIEW_NOT_FOUND, "Plan not found"));
+                .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Plan not found"));
 
-        // Ownership check: only enterprise owning the assignment can save
+        // Ownership check: only enterprise owning the plan can save items
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         var currentUser = userRepository.findByEmail(email).orElse(null);
         if (currentUser == null
                 || currentUser.getEnterprise() == null
-                || plan.getAssignment() == null
-                || plan.getAssignment().getEnterprise() == null
-                || !plan.getAssignment()
-                        .getEnterprise()
+                || plan.getEnterprise() == null
+                || !plan.getEnterprise()
                         .getEnterpriseId()
                         .equals(currentUser.getEnterprise().getEnterpriseId())) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
         // BR-39: Target date must be within semester boundary
-        Semester semester = plan.getAssignment().getSemester();
+        Semester semester = plan.getSemester();
         if (semester != null
                 && (entity.getTargetDate().isBefore(semester.getStartDate())
                         || entity.getTargetDate().isAfter(semester.getEndDate()))) {

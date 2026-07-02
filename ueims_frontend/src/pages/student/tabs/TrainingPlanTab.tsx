@@ -18,9 +18,10 @@ interface TaskItem {
 interface InternshipPlanResponse {
   planId: string;
   overallGoal: string | null;
-  assignmentId: string;
+  enterpriseId?: string;
   enterpriseName: string | null;
-  startDate: string | null;
+  semesterId?: string;
+  semesterCode?: string;
   tasks: TaskItem[];
 }
 
@@ -59,11 +60,11 @@ const EmptyState: React.FC<{ hasError: boolean }> = ({ hasError }) => (
     <h3 style={{ fontSize: 16, fontWeight: 600, color: cc.textPrimary, margin: '0 0 6px' }}>
       {hasError ? 'Unable to load training plan' : 'No training plan yet'}
     </h3>
-    <p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}>
-      {hasError
-        ? 'Something went wrong while loading your data. Please try again later.'
-        : 'Your training plan will appear here once your enterprise assigns one for you.'}
-    </p>
+<p style={{ fontSize: 13, color: cc.textMuted, margin: 0 }}>
+          {hasError
+            ? 'Something went wrong while loading your data. Please try again later.'
+            : 'Your training plan will appear here once your enterprise submits one and the Training Manager approves it.'}
+        </p>
   </NeuSurface>
 );
 
@@ -148,10 +149,10 @@ export const TrainingPlanTab: React.FC = () => {
                   <BankOutlined style={{ color: cc.primary }} /> {plan.enterpriseName}
                 </span>
               )}
-              {plan.startDate && (
+              {plan.semesterCode && (
                 <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 13, color: cc.textSecondary }}>
-                  <span style={{ color: cc.textMuted }}>Started:</span>
-                  {new Date(plan.startDate).toLocaleDateString('en-US', { day: '2-digit', month: 'long', year: 'numeric' })}
+                  <span style={{ color: cc.textMuted }}>Semester:</span>
+                  {plan.semesterCode}
                 </span>
               )}
             </div>

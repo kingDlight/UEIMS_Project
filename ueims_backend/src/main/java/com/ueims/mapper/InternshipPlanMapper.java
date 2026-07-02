@@ -10,20 +10,26 @@ import com.ueims.model.entity.InternshipPlan;
         unmappedTargetPolicy = ReportingPolicy.IGNORE,
         builder = @org.mapstruct.Builder(disableBuilder = true))
 public interface InternshipPlanMapper {
-    @Mapping(target = "assignmentId", source = "assignment.assignmentId")
-    @Mapping(target = "jobPostId", source = "jobPost.jobPostId")
-    @Mapping(target = "jobPostTitle", source = "jobPost.title")
+    @Mapping(target = "enterpriseId", source = "enterprise.enterpriseId")
     @Mapping(
             target = "enterpriseName",
             expression =
-                    "java(entity != null && entity.getAssignment() != null && entity.getAssignment().getEnterprise() != null ? entity.getAssignment().getEnterprise().getCompanyName() : null)")
+                    "java(entity != null && entity.getEnterprise() != null ? entity.getEnterprise().getCompanyName() : null)")
+    @Mapping(target = "semesterId", source = "semester.semesterId")
     @Mapping(
-            target = "startDate",
+            target = "semesterCode",
             expression =
-                    "java(entity != null && entity.getAssignment() != null && entity.getAssignment().getSemester() != null && entity.getAssignment().getSemester().getStartDate() != null ? entity.getAssignment().getSemester().getStartDate().toString() : null)")
+                    "java(entity != null && entity.getSemester() != null ? entity.getSemester().getSemesterCode() : null)")
+    @Mapping(target = "jobPostId", source = "jobPost.jobPostId")
+    @Mapping(
+            target = "jobPostTitle",
+            expression =
+                    "java(entity != null && entity.getJobPost() != null ? entity.getJobPost().getTitle() : null)")
     @Mapping(target = "tasks", source = "items")
     InternshipPlanDTO toDto(InternshipPlan entity);
 
-    @Mapping(target = "assignment.assignmentId", source = "assignmentId")
+    @Mapping(target = "enterprise.enterpriseId", source = "enterpriseId")
+    @Mapping(target = "semester.semesterId", source = "semesterId")
+    @Mapping(target = "jobPost.jobPostId", source = "jobPostId")
     InternshipPlan toEntity(InternshipPlanDTO dto);
 }

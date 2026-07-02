@@ -214,6 +214,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User getCurrentUser() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return repository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+    }
+
+    @Override
     public UserResponse updateMyInfo(com.ueims.dto.request.UserUpdateRequest request) {
         var context = SecurityContextHolder.getContext();
         String email = context.getAuthentication().getName();

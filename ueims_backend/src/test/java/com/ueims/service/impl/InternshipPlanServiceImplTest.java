@@ -4,28 +4,27 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 
+import com.ueims.dto.response.InternshipPlanDTO;
 import com.ueims.model.entity.Enterprise;
-import com.ueims.model.entity.EnterpriseAssignment;
 import com.ueims.model.entity.InternshipPlan;
-import com.ueims.repository.EnterpriseAssignmentRepository;
+import com.ueims.model.entity.Semester;
+import com.ueims.repository.EnterpriseRepository;
 import com.ueims.repository.InternshipPlanItemRepository;
 import com.ueims.repository.InternshipPlanRepository;
+import com.ueims.repository.JobPostRepository;
+import com.ueims.repository.SemesterRepository;
 import com.ueims.repository.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,51 +34,38 @@ class InternshipPlanServiceImplTest {
     private InternshipPlanRepository repository;
 
     @Mock
-    private UserRepository userRepository;
-
-    @Mock
-    private EnterpriseAssignmentRepository assignmentRepository;
-
-    @Mock
     private InternshipPlanItemRepository itemRepository;
+
+    @Mock
+    private EnterpriseRepository enterpriseRepository;
+
+    @Mock
+    private SemesterRepository semesterRepository;
+
+    @Mock
+    private JobPostRepository jobPostRepository;
+
+    @Mock
+    private UserRepository userRepository;
 
     @InjectMocks
     private InternshipPlanServiceImpl service;
 
-    private InternshipPlan internshipPlan;
-    private UUID planId;
-
-    @BeforeEach
-    void setUp() {
-        planId = UUID.randomUUID();
-        Enterprise enterprise =
-                Enterprise.builder().enterpriseId(UUID.randomUUID()).build();
-        EnterpriseAssignment assignment = EnterpriseAssignment.builder()
-                .assignmentId(UUID.randomUUID())
-                .enterprise(enterprise)
-                .build();
-
-        internshipPlan = InternshipPlan.builder()
-                .planId(planId)
-                .assignment(assignment)
-                .overallGoal("To learn a lot")
-                .isLocked(false)
-                .build();
-    }
-
     @Test
     void findAllSuccess() {
-        when(repository.findAll()).thenReturn(List.of(internshipPlan));
+        InternshipPlan plan = InternshipPlan.builder().planId(UUID.randomUUID()).build();
+        when(repository.findAll()).thenReturn(List.of(plan));
 
         List<InternshipPlan> result = service.findAll();
 
         assertEquals(1, result.size());
-        assertEquals(planId, result.get(0).getPlanId());
     }
 
     @Test
     void findByIdSuccess() {
-        when(repository.findById(planId)).thenReturn(Optional.of(internshipPlan));
+        UUID planId = UUID.randomUUID();
+        InternshipPlan plan = InternshipPlan.builder().planId(planId).build();
+        when(repository.findById(planId)).thenReturn(Optional.of(plan));
 
         InternshipPlan result = service.findById(planId);
 
@@ -89,6 +75,7 @@ class InternshipPlanServiceImplTest {
 
     @Test
     void findByIdNotFound() {
+        UUID planId = UUID.randomUUID();
         when(repository.findById(planId)).thenReturn(Optional.empty());
 
         InternshipPlan result = service.findById(planId);
@@ -97,47 +84,37 @@ class InternshipPlanServiceImplTest {
     }
 
     @Test
-    void saveSuccess() {
-        SecurityContextHolder.getContext()
-                .setAuthentication(new UsernamePasswordAuthenticationToken("admin@test.com", null));
-        when(userRepository.findByEmail("admin@test.com"))
-                .thenReturn(Optional.of(com.ueims.model.entity.User.builder()
-                        .enterprise(internshipPlan.getAssignment().getEnterprise())
-                        .build()));
-        when(assignmentRepository.findById(internshipPlan.getAssignment().getAssignmentId()))
-                .thenReturn(Optional.of(internshipPlan.getAssignment()));
-        when(repository.save(any(InternshipPlan.class))).thenReturn(internshipPlan);
+    void findByEnterpriseAndSemesterSuccess() {
+        UUID enterpriseId = UUID.randomUUID();
+        UUID semesterId = UUID.randomUUID();
+        InternshipPlan plan = InternshipPlan.builder().planId(UUID.randomUUID()).build();
+        when(repository.findByEnterprise_EnterpriseIdAndSemester_SemesterId(enterpriseId, semesterId))
+                .thenReturn(Optional.of(plan));
+        when(itemRepository.findByPlan_PlanId(plan.getPlanId())).thenReturn(List.of());
 
-        InternshipPlan result = service.save(internshipPlan);
+        InternshipPlan result = service.findByEnterpriseAndSemester(enterpriseId, semesterId);
 
         assertNotNull(result);
-        assertEquals(planId, result.getPlanId());
-    }
-
-    @Test
-    void deleteByIdSuccess() {
-        service.deleteById(planId);
-
-        verify(repository).deleteById(planId);
-    }
-
-    @Test
-    void findMyPlanSuccess() {
-        UUID studentId = UUID.randomUUID();
-        when(repository.findByAssignment_Student_UserId(studentId)).thenReturn(internshipPlan);
-        when(itemRepository.findByPlan_PlanId(planId)).thenReturn(List.of());
-
-        InternshipPlan result = service.findMyPlan(studentId);
-
-        assertNotNull(result);
-        assertEquals(planId, result.getPlanId());
         assertNotNull(result.getItems());
     }
 
     @Test
-    void findMyPlanNotFound() {
+    void findMyPlanReturnsApprovedPlanMatchingActiveAssignment() {
         UUID studentId = UUID.randomUUID();
-        when(repository.findByAssignment_Student_UserId(studentId)).thenReturn(null);
+        InternshipPlan plan = InternshipPlan.builder().planId(UUID.randomUUID()).build();
+        when(repository.findActivePlanForStudent(studentId)).thenReturn(Optional.of(plan));
+        when(itemRepository.findByPlan_PlanId(plan.getPlanId())).thenReturn(List.of());
+
+        InternshipPlan result = service.findMyPlan(studentId);
+
+        assertNotNull(result);
+        assertEquals(plan.getPlanId(), result.getPlanId());
+    }
+
+    @Test
+    void findMyPlanReturnsNullWhenNoActivePlan() {
+        UUID studentId = UUID.randomUUID();
+        when(repository.findActivePlanForStudent(studentId)).thenReturn(Optional.empty());
 
         InternshipPlan result = service.findMyPlan(studentId);
 
@@ -145,86 +122,170 @@ class InternshipPlanServiceImplTest {
     }
 
     @Test
-    void findByAssignmentIdSuccess() {
-        UUID assignmentId = internshipPlan.getAssignment().getAssignmentId();
-        when(repository.findByAssignment_AssignmentId(assignmentId)).thenReturn(List.of(internshipPlan));
-        when(itemRepository.findByPlan_PlanId(planId)).thenReturn(List.of());
+    void upsertPlan_createsNewWhenNoneExists() {
+        UUID enterpriseId = UUID.randomUUID();
+        UUID semesterId = UUID.randomUUID();
+        Enterprise enterprise = Enterprise.builder().enterpriseId(enterpriseId).build();
+        Semester semester =
+                Semester.builder().semesterId(semesterId).status("ACTIVE").build();
 
-        InternshipPlan result = service.findByAssignmentId(assignmentId);
-
-        assertNotNull(result);
-        assertEquals(planId, result.getPlanId());
-        assertNotNull(result.getItems());
-    }
-
-    @Test
-    void findByAssignmentIdNotFound() {
-        UUID assignmentId = UUID.randomUUID();
-        when(repository.findByAssignment_AssignmentId(assignmentId)).thenReturn(List.of());
-
-        InternshipPlan result = service.findByAssignmentId(assignmentId);
-
-        assertNull(result);
-    }
-
-    @Test
-    void save_missingAssignment() {
-        InternshipPlan plan = new InternshipPlan();
-
-        com.ueims.exception.AppException e = org.junit.jupiter.api.Assertions.assertThrows(
-                com.ueims.exception.AppException.class, () -> service.save(plan));
-        assertEquals(com.ueims.exception.ErrorCode.FIELD_REQUIRED, e.getErrorCode());
-    }
-
-    @Test
-    void save_assignmentNotFound() {
-        when(assignmentRepository.findById(internshipPlan.getAssignment().getAssignmentId()))
+        when(enterpriseRepository.findById(enterpriseId)).thenReturn(Optional.of(enterprise));
+        when(semesterRepository.findById(semesterId)).thenReturn(Optional.of(semester));
+        when(repository.findByEnterprise_EnterpriseIdAndSemester_SemesterId(enterpriseId, semesterId))
                 .thenReturn(Optional.empty());
+        when(repository.save(any(InternshipPlan.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        com.ueims.exception.AppException e = org.junit.jupiter.api.Assertions.assertThrows(
-                com.ueims.exception.AppException.class, () -> service.save(internshipPlan));
-        assertEquals(com.ueims.exception.ErrorCode.ASSIGNMENT_NOT_FOUND, e.getErrorCode());
-    }
+        InternshipPlanDTO dto = InternshipPlanDTO.builder()
+                .semesterId(semesterId)
+                .overallGoal("Test goal")
+                .build();
 
-    @Test
-    void save_unauthorized() {
-        SecurityContextHolder.getContext()
-                .setAuthentication(new UsernamePasswordAuthenticationToken("admin@test.com", null));
-        when(userRepository.findByEmail("admin@test.com"))
-                .thenReturn(Optional.of(com.ueims.model.entity.User.builder().build()));
-        when(assignmentRepository.findById(internshipPlan.getAssignment().getAssignmentId()))
-                .thenReturn(Optional.of(internshipPlan.getAssignment()));
-
-        com.ueims.exception.AppException e = org.junit.jupiter.api.Assertions.assertThrows(
-                com.ueims.exception.AppException.class, () -> service.save(internshipPlan));
-        assertEquals(com.ueims.exception.ErrorCode.UNAUTHORIZED, e.getErrorCode());
-    }
-
-    @Test
-    void save_upsertWhenPlanIdNull() {
-        SecurityContextHolder.getContext()
-                .setAuthentication(new UsernamePasswordAuthenticationToken("admin@test.com", null));
-        when(userRepository.findByEmail("admin@test.com"))
-                .thenReturn(Optional.of(com.ueims.model.entity.User.builder()
-                        .enterprise(internshipPlan.getAssignment().getEnterprise())
-                        .build()));
-        when(assignmentRepository.findById(internshipPlan.getAssignment().getAssignmentId()))
-                .thenReturn(Optional.of(internshipPlan.getAssignment()));
-
-        InternshipPlan existingPlan = new InternshipPlan();
-        existingPlan.setPlanId(UUID.randomUUID());
-
-        when(repository.findByAssignment_AssignmentId(
-                        internshipPlan.getAssignment().getAssignmentId()))
-                .thenReturn(List.of(existingPlan));
-        when(repository.save(any(InternshipPlan.class))).thenReturn(existingPlan);
-
-        InternshipPlan newPlan = new InternshipPlan();
-        newPlan.setAssignment(internshipPlan.getAssignment());
-        newPlan.setOverallGoal("New Goal");
-
-        InternshipPlan result = service.save(newPlan);
+        InternshipPlan result = service.upsertPlan(dto, enterpriseId);
 
         assertNotNull(result);
+        assertEquals("PENDING_APPROVAL", result.getStatus());
+        assertEquals("Test goal", result.getOverallGoal());
+    }
+
+    @Test
+    void upsertPlan_rejectsModifyingApprovedPlan() {
+        UUID enterpriseId = UUID.randomUUID();
+        UUID semesterId = UUID.randomUUID();
+        Enterprise enterprise = Enterprise.builder().enterpriseId(enterpriseId).build();
+        Semester semester =
+                Semester.builder().semesterId(semesterId).status("ACTIVE").build();
+        InternshipPlan existing = InternshipPlan.builder()
+                .planId(UUID.randomUUID())
+                .enterprise(enterprise)
+                .semester(semester)
+                .status("APPROVED")
+                .build();
+
+        when(enterpriseRepository.findById(enterpriseId)).thenReturn(Optional.of(enterprise));
+        when(semesterRepository.findById(semesterId)).thenReturn(Optional.of(semester));
+        when(repository.findByEnterprise_EnterpriseIdAndSemester_SemesterId(enterpriseId, semesterId))
+                .thenReturn(Optional.of(existing));
+
+        InternshipPlanDTO dto = InternshipPlanDTO.builder()
+                .semesterId(semesterId)
+                .overallGoal("Trying to modify")
+                .build();
+
+        com.ueims.exception.AppException e = org.junit.jupiter.api.Assertions.assertThrows(
+                com.ueims.exception.AppException.class, () -> service.upsertPlan(dto, enterpriseId));
+        assertEquals(com.ueims.exception.ErrorCode.RESOURCE_INVALID_STATE, e.getErrorCode());
+    }
+
+    @Test
+    void upsertPlan_resubmitsRejectedPlan() {
+        UUID enterpriseId = UUID.randomUUID();
+        UUID semesterId = UUID.randomUUID();
+        Enterprise enterprise = Enterprise.builder().enterpriseId(enterpriseId).build();
+        Semester semester =
+                Semester.builder().semesterId(semesterId).status("ACTIVE").build();
+        InternshipPlan rejected = InternshipPlan.builder()
+                .planId(UUID.randomUUID())
+                .enterprise(enterprise)
+                .semester(semester)
+                .status("REJECTED")
+                .rejectionReason("Incomplete")
+                .build();
+
+        when(enterpriseRepository.findById(enterpriseId)).thenReturn(Optional.of(enterprise));
+        when(semesterRepository.findById(semesterId)).thenReturn(Optional.of(semester));
+        when(repository.findByEnterprise_EnterpriseIdAndSemester_SemesterId(enterpriseId, semesterId))
+                .thenReturn(Optional.of(rejected));
+        when(repository.save(any(InternshipPlan.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        InternshipPlanDTO dto = InternshipPlanDTO.builder()
+                .semesterId(semesterId)
+                .overallGoal("Updated goal")
+                .build();
+
+        InternshipPlan result = service.upsertPlan(dto, enterpriseId);
+
+        assertEquals("PENDING_APPROVAL", result.getStatus());
+        assertNull(result.getRejectionReason());
+        assertEquals("Updated goal", result.getOverallGoal());
+    }
+
+    @Test
+    void upsertPlan_blocksOnLockedSemester() {
+        UUID enterpriseId = UUID.randomUUID();
+        UUID semesterId = UUID.randomUUID();
+        Enterprise enterprise = Enterprise.builder().enterpriseId(enterpriseId).build();
+        Semester semester =
+                Semester.builder().semesterId(semesterId).status("LOCKED").build();
+
+        when(enterpriseRepository.findById(enterpriseId)).thenReturn(Optional.of(enterprise));
+        when(semesterRepository.findById(semesterId)).thenReturn(Optional.of(semester));
+
+        InternshipPlanDTO dto = InternshipPlanDTO.builder()
+                .semesterId(semesterId)
+                .overallGoal("Test")
+                .build();
+
+        com.ueims.exception.AppException e = org.junit.jupiter.api.Assertions.assertThrows(
+                com.ueims.exception.AppException.class, () -> service.upsertPlan(dto, enterpriseId));
+        assertEquals(com.ueims.exception.ErrorCode.SEMESTER_LOCKED_DATE, e.getErrorCode());
+    }
+
+    @Test
+    void approvePlan_changesStatusToApproved() {
+        UUID planId = UUID.randomUUID();
+        UUID reviewerId = UUID.randomUUID();
+        com.ueims.model.entity.User reviewer =
+                com.ueims.model.entity.User.builder().userId(reviewerId).build();
+        Semester semester =
+                Semester.builder().semesterId(UUID.randomUUID()).status("ACTIVE").build();
+        InternshipPlan plan = InternshipPlan.builder()
+                .planId(planId)
+                .semester(semester)
+                .status("PENDING_APPROVAL")
+                .build();
+
+        when(repository.findById(planId)).thenReturn(Optional.of(plan));
+        when(userRepository.findById(reviewerId)).thenReturn(Optional.of(reviewer));
+        when(repository.save(any(InternshipPlan.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        InternshipPlan result = service.approveMasterPlan(planId, reviewerId);
+
+        assertEquals("APPROVED", result.getStatus());
+        assertNotNull(result.getApprovedAt());
+    }
+
+    @Test
+    void rejectPlan_requiresReason() {
+        UUID planId = UUID.randomUUID();
+        UUID reviewerId = UUID.randomUUID();
+
+        com.ueims.exception.AppException e = org.junit.jupiter.api.Assertions.assertThrows(
+                com.ueims.exception.AppException.class,
+                () -> service.rejectMasterPlan(planId, reviewerId, ""));
+        assertEquals(com.ueims.exception.ErrorCode.REJECTION_REASON_REQUIRED, e.getErrorCode());
+    }
+
+    @Test
+    void rejectPlan_changesStatusToRejected() {
+        UUID planId = UUID.randomUUID();
+        UUID reviewerId = UUID.randomUUID();
+        com.ueims.model.entity.User reviewer =
+                com.ueims.model.entity.User.builder().userId(reviewerId).build();
+        Semester semester =
+                Semester.builder().semesterId(UUID.randomUUID()).status("ACTIVE").build();
+        InternshipPlan plan = InternshipPlan.builder()
+                .planId(planId)
+                .semester(semester)
+                .status("PENDING_APPROVAL")
+                .build();
+
+        when(repository.findById(planId)).thenReturn(Optional.of(plan));
+        when(userRepository.findById(reviewerId)).thenReturn(Optional.of(reviewer));
+        when(repository.save(any(InternshipPlan.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        InternshipPlan result = service.rejectMasterPlan(planId, reviewerId, "Goals too vague");
+
+        assertEquals("REJECTED", result.getStatus());
+        assertEquals("Goals too vague", result.getRejectionReason());
     }
 }

@@ -19,9 +19,13 @@ public class InternshipPlan extends BaseEntity {
     @Column(name = "plan_id")
     private java.util.UUID planId;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "assignment_id", nullable = true) // nullable because it can be a master plan
-    private EnterpriseAssignment assignment;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "enterprise_id", nullable = false)
+    private Enterprise enterprise;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "semester_id", nullable = false)
+    private Semester semester;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "job_post_id")
@@ -30,16 +34,19 @@ public class InternshipPlan extends BaseEntity {
     @Column(name = "overall_goal", columnDefinition = "TEXT")
     private String overallGoal;
 
-    @Transient
-    @Builder.Default
-    private Boolean isLocked = false;
-
     @Column(name = "status", length = 30)
     @Builder.Default
-    private String status = "PENDING_APPROVAL"; // PENDING_APPROVAL, APPROVED, REJECTED (for master plans)
+    private String status = "PENDING_APPROVAL";
 
     @Column(name = "rejection_reason", columnDefinition = "TEXT")
     private String rejectionReason;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "approved_by")
+    private User approvedBy;
+
+    @Column(name = "approved_at")
+    private java.time.LocalDateTime approvedAt;
 
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "plan_id")

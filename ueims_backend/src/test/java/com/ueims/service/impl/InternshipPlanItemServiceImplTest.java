@@ -20,7 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.ueims.model.entity.EnterpriseAssignment;
+import com.ueims.model.entity.Enterprise;
 import com.ueims.model.entity.InternshipPlan;
 import com.ueims.model.entity.InternshipPlanItem;
 import com.ueims.model.entity.Semester;
@@ -44,6 +44,8 @@ class InternshipPlanItemServiceImplTest {
 
     private InternshipPlanItem item;
     private InternshipPlan plan;
+    private Enterprise enterprise;
+    private Semester semester;
     private UUID itemId;
     private UUID planId;
 
@@ -52,21 +54,20 @@ class InternshipPlanItemServiceImplTest {
         itemId = UUID.randomUUID();
         planId = UUID.randomUUID();
 
-        Semester semester = Semester.builder()
+        semester = Semester.builder()
                 .startDate(LocalDate.of(2023, 9, 1))
                 .endDate(LocalDate.of(2023, 12, 31))
                 .build();
 
-        com.ueims.model.entity.Enterprise enterprise = com.ueims.model.entity.Enterprise.builder()
+        enterprise = Enterprise.builder()
                 .enterpriseId(UUID.randomUUID())
                 .build();
 
-        EnterpriseAssignment assignment = EnterpriseAssignment.builder()
-                .semester(semester)
+        plan = InternshipPlan.builder()
+                .planId(planId)
                 .enterprise(enterprise)
+                .semester(semester)
                 .build();
-
-        plan = InternshipPlan.builder().planId(planId).assignment(assignment).build();
 
         org.springframework.security.core.context.SecurityContextHolder.getContext()
                 .setAuthentication(new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
@@ -113,7 +114,7 @@ class InternshipPlanItemServiceImplTest {
     void saveSuccess() {
         when(userRepository.findByEmail("admin@test.com"))
                 .thenReturn(Optional.of(com.ueims.model.entity.User.builder()
-                        .enterprise(plan.getAssignment().getEnterprise())
+                        .enterprise(plan.getEnterprise())
                         .build()));
         when(planRepository.findById(planId)).thenReturn(Optional.of(plan));
         when(repository.save(any(InternshipPlanItem.class))).thenReturn(item);
@@ -160,7 +161,7 @@ class InternshipPlanItemServiceImplTest {
 
         when(userRepository.findByEmail("admin@test.com"))
                 .thenReturn(Optional.of(com.ueims.model.entity.User.builder()
-                        .enterprise(plan.getAssignment().getEnterprise())
+                        .enterprise(plan.getEnterprise())
                         .build()));
         when(planRepository.findById(planId)).thenReturn(Optional.of(plan));
 
@@ -178,7 +179,7 @@ class InternshipPlanItemServiceImplTest {
 
         when(userRepository.findByEmail("admin@test.com"))
                 .thenReturn(Optional.of(com.ueims.model.entity.User.builder()
-                        .enterprise(plan.getAssignment().getEnterprise())
+                        .enterprise(plan.getEnterprise())
                         .build()));
         when(planRepository.findById(planId)).thenReturn(Optional.of(plan));
 
@@ -195,6 +196,23 @@ class InternshipPlanItemServiceImplTest {
         item.setTargetDate(null);
 
         assertThrows(Exception.class, () -> service.save(item));
+    }
+
+    @Test
+    void saveUnauthorizedThrowsWhenDifferentEnterprise() {
+        Enterprise otherEnterprise =
+                Enterprise.builder().enterpriseId(UUID.randomUUID()).build();
+
+        when(userRepository.findByEmail("admin@test.com"))
+                .thenReturn(Optional.of(com.ueims.model.entity.User.builder()
+                        .enterprise(otherEnterprise)
+                        .build()));
+        when(planRepository.findById(planId)).thenReturn(Optional.of(plan));
+
+        com.ueims.exception.AppException exception =
+                assertThrows(com.ueims.exception.AppException.class, () -> service.save(item));
+
+        assertEquals(com.ueims.exception.ErrorCode.UNAUTHORIZED, exception.getErrorCode());
     }
 
     @Test
