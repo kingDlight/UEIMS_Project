@@ -25,7 +25,10 @@ export const EvaluationTab: React.FC = () => {
     try {
       setLoading(true);
       const res = await api.get('/enterprise-evaluations/my-evaluation');
-      const data = res.data?.result ?? res.data;
+      let data = res.data?.result ?? res.data;
+      if (data && Object.keys(data).length === 0) {
+        data = null;
+      }
       setEvaluation(data || null);
     } catch {
       setEvaluation(null);
