@@ -59,9 +59,7 @@ class InternshipPlanItemServiceImplTest {
                 .endDate(LocalDate.of(2023, 12, 31))
                 .build();
 
-        enterprise = Enterprise.builder()
-                .enterpriseId(UUID.randomUUID())
-                .build();
+        enterprise = Enterprise.builder().enterpriseId(UUID.randomUUID()).build();
 
         plan = InternshipPlan.builder()
                 .planId(planId)

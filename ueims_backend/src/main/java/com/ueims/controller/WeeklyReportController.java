@@ -37,28 +37,26 @@ public class WeeklyReportController {
     @GetMapping
     @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')")
     public ResponseEntity<List<WeeklyReportDTO>> getAll() {
-        return ResponseEntity.ok(service.findAll().stream().map(mapper::toDto).toList());
+        return ResponseEntity.ok(service.findAllDtos());
     }
 
     @GetMapping("/my-reports")
     @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<List<WeeklyReportDTO>> getMyReports() {
-        return ResponseEntity.ok(
-                service.findMyReports().stream().map(mapper::toDto).toList());
+        return ResponseEntity.ok(service.findMyReportsDtos());
     }
 
     @GetMapping("/by-enterprise")
     @PreAuthorize("hasRole('ENTERPRISE') or hasRole('TRAINING_MANAGER')")
     public ResponseEntity<List<WeeklyReportDTO>> getByEnterprise() {
-        return ResponseEntity.ok(
-                service.findByEnterprise().stream().map(mapper::toDto).toList());
+        return ResponseEntity.ok(service.findByEnterprise());
     }
 
     @GetMapping("/{id}")
     @PreAuthorize(
             "hasRole('STUDENT') or hasRole('ENTERPRISE') or hasRole('TRAINING_MANAGER') or hasRole('SYSTEM_ADMIN') or hasRole('ADMIN')")
     public ResponseEntity<WeeklyReportDTO> getById(@PathVariable UUID id) {
-        return ResponseEntity.ok(mapper.toDto(service.findById(id)));
+        return ResponseEntity.ok(service.findByIdDto(id));
     }
 
     @PostMapping
@@ -79,14 +77,14 @@ public class WeeklyReportController {
             entity.setLessonsLearned(HtmlSanitizer.sanitize(entity.getLessonsLearned()));
         if (entity.getPlanNextWeek() != null) entity.setPlanNextWeek(HtmlSanitizer.sanitize(entity.getPlanNextWeek()));
 
-        return ResponseEntity.ok(mapper.toDto(service.save(entity)));
+        return ResponseEntity.ok(service.saveAndEnrich(entity));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<WeeklyReportDTO> update(
             @PathVariable UUID id, @Valid @RequestBody WeeklyReportRequest request) {
-        return ResponseEntity.ok(mapper.toDto(service.updateReport(id, request)));
+        return ResponseEntity.ok(service.updateReportAndEnrich(id, request));
     }
 
     @PutMapping("/{id}/approve")
@@ -94,7 +92,7 @@ public class WeeklyReportController {
     public ResponseEntity<WeeklyReportDTO> approve(
             @PathVariable UUID id, @RequestBody(required = false) WeeklyReportRequest feedback) {
         String fb = feedback == null ? null : feedback.getFeedback();
-        return ResponseEntity.ok(mapper.toDto(service.approveReport(id, fb)));
+        return ResponseEntity.ok(service.approveReportAndEnrich(id, fb));
     }
 
     @PutMapping("/{id}/reject")
@@ -105,7 +103,7 @@ public class WeeklyReportController {
                 || request.getFeedback().isBlank()) {
             throw new com.ueims.exception.AppException(com.ueims.exception.ErrorCode.FIELD_REQUIRED);
         }
-        return ResponseEntity.ok(mapper.toDto(service.rejectReport(id, request.getFeedback())));
+        return ResponseEntity.ok(service.rejectReportAndEnrich(id, request.getFeedback()));
     }
 
     @DeleteMapping("/{id}")

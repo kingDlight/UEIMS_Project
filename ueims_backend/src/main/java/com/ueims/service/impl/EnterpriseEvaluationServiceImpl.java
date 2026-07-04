@@ -48,6 +48,21 @@ public class EnterpriseEvaluationServiceImpl implements EnterpriseEvaluationServ
 
     @Override
     @Transactional(readOnly = true)
+    public List<EnterpriseEvaluation> findByEnterprise() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        if (currentUser.getEnterprise() == null) return List.of();
+        UUID enterpriseId = currentUser.getEnterprise().getEnterpriseId();
+        return repository.findAll().stream()
+                .filter(e -> e.getAssignment() != null
+                        && e.getAssignment().getEnterprise() != null
+                        && enterpriseId.equals(e.getAssignment().getEnterprise().getEnterpriseId()))
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public EnterpriseEvaluation findById(UUID id) {
         EnterpriseEvaluation evaluation =
                 repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.EVALUATION_NOT_FOUND));

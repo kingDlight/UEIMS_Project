@@ -8,6 +8,8 @@ import com.ueims.model.entity.EnterpriseEvaluation;
 public interface EnterpriseEvaluationService {
     List<EnterpriseEvaluation> findAll();
 
+    List<EnterpriseEvaluation> findByEnterprise();
+
     EnterpriseEvaluation findById(UUID id);
 
     EnterpriseEvaluation findMyEvaluation(UUID studentId);

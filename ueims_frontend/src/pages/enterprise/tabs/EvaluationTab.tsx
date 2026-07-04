@@ -226,19 +226,39 @@ export const EvaluationTab: React.FC = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const res = await EnterpriseAssignmentService.getMyEnterpriseAssignments();
-        const data = res.data?.result ?? res.data ?? [];
+        const [assignmentsRes, evaluationsRes] = await Promise.all([
+          EnterpriseAssignmentService.getMyEnterpriseAssignments(),
+          EnterpriseEvaluationService.getByEnterprise().catch(() => ({ data: [] })),
+        ]);
+        const data = assignmentsRes.data?.result ?? assignmentsRes.data ?? [];
+        const evaluationsData = evaluationsRes.data?.result ?? evaluationsRes.data ?? [];
+
+        // Build a map: assignmentId -> existing evaluation
+        const evalByAssignment = new Map<string, any>();
+        if (Array.isArray(evaluationsData)) {
+          evaluationsData.forEach((ev: any) => {
+            const aId = ev.assignmentId
+              ?? ev.assignment?.assignmentId
+              ?? ev.assignment?.id;
+            if (aId) evalByAssignment.set(aId, ev);
+          });
+        }
+
         if (Array.isArray(data) && data.length > 0) {
           const mapped: AssignedStudent[] = data
-            .map((item: any) => ({
-              assignmentId: item.assignmentId ?? item.id,
-              studentName: item.studentName ?? 'Student',
-              studentCode: item.studentCode ?? '—',
-              major: item.major ?? '—',
-              gpa: item.gpa ?? 0,
-              jobTitle: item.jobPostTitle ?? 'Intern',
-              evaluationId: undefined,
-            }));
+            .map((item: any) => {
+              const aId = item.assignmentId ?? item.id;
+              const existing = evalByAssignment.get(aId);
+              return {
+                assignmentId: aId,
+                studentName: item.studentName ?? 'Student',
+                studentCode: item.studentCode ?? '—',
+                major: item.major ?? '—',
+                gpa: item.gpa ?? 0,
+                jobTitle: item.jobPostTitle ?? 'Intern',
+                evaluationId: existing?.evaluationId ?? existing?.id,
+              };
+            });
           setStudents(mapped);
           if (mapped.length > 0) {
             setSelectedStudent(mapped[0]);
@@ -282,7 +302,9 @@ export const EvaluationTab: React.FC = () => {
               progress: evalData.progressScore ?? evalData.scores?.progress ?? 0,
             });
             setComments(evalData.overallComments ?? evalData.comments ?? '');
-            setSubmitted(['SUBMITTED', 'APPROVED'].includes(evalData.status));
+            // Once an evaluation exists for this assignment, treat it as submitted.
+            // Backend locks by default (BR-47) and forbids resubmission via isLocked check.
+            setSubmitted(true);
           }
         } else {
           resetForm();
@@ -392,13 +414,18 @@ export const EvaluationTab: React.FC = () => {
             whileHover={{ y: -2 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setSelectedStudent(student)}
-            className={`px-4 py-2.5 rounded-2xl border-2 cursor-pointer font-sans shadow-sm transition-all text-[13px] ${
+            className={`px-4 py-2.5 rounded-2xl border-2 cursor-pointer font-sans shadow-sm transition-all text-[13px] flex items-center gap-2 ${
               selectedStudent?.assignmentId === student.assignmentId
                 ? 'border-[#E67E22] bg-[#E67E22]/10 text-[#E67E22] font-bold shadow-[0_4px_12px_rgba(230,126,34,0.2)]'
                 : 'border-slate-200 bg-white text-slate-900 font-medium'
             }`}
           >
-            {student.studentName}
+            <span>{student.studentName}</span>
+            {student.evaluationId && (
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 text-[10px] font-bold uppercase tracking-wide">
+                <CheckCircleOutlined /> Done
+              </span>
+            )}
           </motion.button>
         ))}
       </div>

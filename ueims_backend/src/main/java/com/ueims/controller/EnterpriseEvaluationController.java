@@ -33,6 +33,13 @@ public class EnterpriseEvaluationController {
         return ResponseEntity.ok(service.findAll().stream().map(mapper::toDto).toList());
     }
 
+    @GetMapping("/my-enterprise")
+    @PreAuthorize("hasRole('ENTERPRISE')")
+    public ResponseEntity<List<EnterpriseEvaluationDTO>> getByEnterprise() {
+        return ResponseEntity.ok(
+                service.findByEnterprise().stream().map(mapper::toDto).toList());
+    }
+
     @GetMapping("/my-evaluation")
     @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<Map<String, Object>> getMyEvaluation() {

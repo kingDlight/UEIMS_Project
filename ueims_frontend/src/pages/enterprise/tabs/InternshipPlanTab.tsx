@@ -11,7 +11,7 @@ import {
 import dayjs from 'dayjs';
 import { InternshipPlanService } from '@/services/InternshipPlanService';
 import { InternshipPlanItemService } from '@/services/InternshipPlanItemService';
-import { SemesterService, SemesterResponse } from '@/services/SemesterService';
+import { SemesterService, type SemesterResponse } from '@/services/SemesterService';
 
 const { TextArea } = Input;
 

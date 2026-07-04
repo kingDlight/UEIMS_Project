@@ -10,8 +10,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.ueims.dto.request.WeeklyReportRequest;
+import com.ueims.dto.response.WeeklyReportDTO;
 import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
+import com.ueims.model.entity.EligibleStudent;
 import com.ueims.model.entity.EnterpriseAssignment;
 import com.ueims.model.entity.User;
 import com.ueims.model.entity.WeeklyReport;
@@ -48,11 +50,18 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
 
     @Override
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public List<WeeklyReportDTO> findAllDtos() {
+        return enrichDtos(findAll());
+    }
+
+    @Override
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public List<WeeklyReport> findAll() {
         return repository.findAll();
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public List<WeeklyReport> findMyReports() {
         User currentUser = getCurrentUser();
         return repository.findByAssignment_Student_UserId(currentUser.getUserId());
@@ -60,10 +69,16 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
 
     @Override
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
-    public List<WeeklyReport> findByEnterprise() {
+    public List<WeeklyReportDTO> findMyReportsDtos() {
+        return enrichDtos(findMyReports());
+    }
+
+    @Override
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public List<WeeklyReportDTO> findByEnterprise() {
         User currentUser = getCurrentUser();
         if (currentUser.getEnterprise() == null) return List.of();
-        return repository.findAll().stream()
+        List<WeeklyReport> reports = repository.findAll().stream()
                 .filter(r -> r.getAssignment() != null
                         && r.getAssignment().getEnterprise() != null
                         && currentUser
@@ -71,6 +86,7 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
                                 .getEnterpriseId()
                                 .equals(r.getAssignment().getEnterprise().getEnterpriseId()))
                 .toList();
+        return enrichDtos(reports);
     }
 
     @Override
@@ -111,6 +127,12 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
         }
 
         return report;
+    }
+
+    @Override
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public WeeklyReportDTO findByIdDto(UUID id) {
+        return enrichDto(findById(id));
     }
 
     @Override
@@ -165,6 +187,12 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
+    public WeeklyReportDTO saveAndEnrich(WeeklyReport entity) {
+        return enrichDto(save(entity));
+    }
+
+    @Override
     public WeeklyReport updateReport(UUID id, WeeklyReportRequest request) {
         WeeklyReport existing = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.FIELD_REQUIRED));
 
@@ -193,6 +221,12 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
         if (request.getAttachmentUrls() != null) existing.setAttachmentUrls(request.getAttachmentUrls());
         if (request.getStatus() != null) existing.setStatus(request.getStatus());
         return repository.save(existing);
+    }
+
+    @Override
+    @org.springframework.transaction.annotation.Transactional
+    public WeeklyReportDTO updateReportAndEnrich(UUID id, WeeklyReportRequest request) {
+        return enrichDto(updateReport(id, request));
     }
 
     @Override
@@ -243,6 +277,12 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
 
     @Override
     @org.springframework.transaction.annotation.Transactional
+    public WeeklyReportDTO approveReportAndEnrich(UUID id, String feedback) {
+        return enrichDto(approveReport(id, feedback));
+    }
+
+    @Override
+    @org.springframework.transaction.annotation.Transactional
     public WeeklyReport rejectReport(UUID id, String feedback) {
         WeeklyReport existing = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.FIELD_REQUIRED));
         User currentUser = getCurrentUser();
@@ -271,5 +311,58 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
             log.warn("[UC-48] Reject notification failed: {}", ex.getMessage());
         }
         return saved;
+    }
+
+    @Override
+    @org.springframework.transaction.annotation.Transactional
+    public WeeklyReportDTO rejectReportAndEnrich(UUID id, String feedback) {
+        return enrichDto(rejectReport(id, feedback));
+    }
+
+    /**
+     * Populate student info (name, code, email) onto DTOs.
+     * Falls back to assignment.student.user.fullName if EligibleStudent record not found.
+     */
+    public List<WeeklyReportDTO> enrichDtos(List<WeeklyReport> reports) {
+        return reports.stream().map(this::enrichDto).toList();
+    }
+
+    public WeeklyReportDTO enrichDto(WeeklyReport report) {
+        WeeklyReportDTO dto = new WeeklyReportDTO();
+        dto.setReportId(report.getReportId());
+        if (report.getAssignment() != null) {
+            dto.setAssignmentId(report.getAssignment().getAssignmentId());
+        }
+        dto.setWeekNumber(report.getWeekNumber());
+        dto.setTasksCompleted(report.getTasksCompleted());
+        dto.setIssuesChallenges(report.getIssuesChallenges());
+        dto.setLessonsLearned(report.getLessonsLearned());
+        dto.setPlanNextWeek(report.getPlanNextWeek());
+        dto.setAttachmentUrls(report.getAttachmentUrls());
+        dto.setStatus(report.getStatus());
+        dto.setFeedback(report.getFeedback());
+        dto.setSubmittedAt(report.getSubmittedAt());
+        dto.setPlagiarismScore(report.getPlagiarismScore());
+        dto.setIsAnomaly(report.getIsAnomaly());
+
+        if (report.getAssignment() != null
+                && report.getAssignment().getStudent() != null
+                && report.getAssignment().getSemester() != null) {
+            User student = report.getAssignment().getStudent();
+            dto.setStudentName(student.getFullName());
+            dto.setStudentEmail(student.getEmail());
+
+            // Try to get student code from EligibleStudent table
+            EligibleStudent eligible = eligibleStudentRepository
+                    .findByUser_UserIdAndSemester_SemesterId(
+                            student.getUserId(),
+                            report.getAssignment().getSemester().getSemesterId())
+                    .orElse(null);
+            if (eligible != null) {
+                dto.setStudentCode(eligible.getStudentCode());
+            }
+        }
+
+        return dto;
     }
 }

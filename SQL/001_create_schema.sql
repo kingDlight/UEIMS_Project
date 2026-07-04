@@ -488,7 +488,9 @@ CREATE TABLE semester_enterprises (
     reviewed_by     UUID REFERENCES users(user_id),
     reviewed_at     TIMESTAMP,
     registered_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    created_at      TIMESTAMP,
+    created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at      TIMESTAMP,
 
     CONSTRAINT uq_semester_enterprise UNIQUE (semester_id, enterprise_id),
     CONSTRAINT chk_se_rejection_reason CHECK (
@@ -1512,7 +1514,9 @@ CREATE TABLE notifications (
     CONSTRAINT notifications_type_check
     CHECK (type IN (
         'WARNING', 'INCIDENT', 'REPORT_FEEDBACK', 'INTERVIEW_INVITE',
-        'SYSTEM_ANNOUNCEMENT', 'GRADE_PUBLISHED', 'APPROVAL', 'GENERAL'
+        'SYSTEM_ANNOUNCEMENT', 'GRADE_PUBLISHED', 'APPROVAL', 'GENERAL',
+        'PLAN_APPROVED', 'PLAN_REJECTED', 'PLAN_PENDING',
+        'WEEKLY_REPORT_APPROVED', 'WEEKLY_REPORT_REJECTED'
     )),
     reference_entity VARCHAR(100),
     reference_id    UUID,

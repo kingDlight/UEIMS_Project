@@ -8,6 +8,12 @@
 BEGIN;
 
 -- ============================================================
+-- MINI-RESET: Chỉ xóa internship_plans + internship_plan_items
+-- Dùng khi muốn demo lại flow tạo training plan mà không reset cả DB
+-- ============================================================
+-- TRUNCATE TABLE internship_plan_items, internship_plans CASCADE;
+
+-- ============================================================
 -- Disable all triggers and constraints
 -- ============================================================
 SET session_replication_role = 'replica';
@@ -356,18 +362,20 @@ INSERT INTO student_profiles (user_id, student_code, university, major, gpa, ski
     ('d0000000-0000-0000-0000-000000000021', 'SE15021', 'FPT University', 'Software Engineering', 7.5, '["Java", "Spring Boot"]'::jsonb, 'https://cv.example.com/se15021.pdf');
 INSERT INTO enterprise_assignments (assignment_id, enterprise_id, student_id, semester_id, supervisor_name, supervisor_email, assigned_by, status, start_date) VALUES
     ('f0000000-0000-0000-0000-000000000021', 'c0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000021', '50000000-0000-0000-0000-000000000001', 'Sup Momo', 'sup@momo.vn', '00000000-0000-0000-0000-000000000002', 'ACTIVE', '2026-03-15');
-INSERT INTO internship_plans (plan_id, assignment_id) VALUES
-    ('00000000-0000-0000-0001-000000000021', 'f0000000-0000-0000-0000-000000000021');
-INSERT INTO internship_plan_items (plan_item_id, plan_id, week_number, task_description, training_objective, target_date, status) VALUES
-    ('00000000-0000-0000-0002-000000000021', '00000000-0000-0000-0001-000000000021', 1, 'Orientation & development environment setup', 'Understand company culture and tools', '2026-03-15', 'COMPLETED');
+-- internship_plans: commented out for demo purposes (TM wants to see fresh plan creation)
+-- INSERT INTO internship_plans (plan_id, enterprise_id, semester_id, overall_goal, status, created_at, updated_at) VALUES
+--     ('00000000-0000-0000-0001-000000000020', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 'Complete 12-week OJT: setup env, implement core features, testing, deployment.', 'APPROVED', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+-- internship_plan_items: commented out for demo purposes
+-- INSERT INTO internship_plan_items (plan_item_id, plan_id, week_number, task_description, training_objective, target_date, status) VALUES
+--     ('00000000-0000-0000-0002-000000000020', '00000000-0000-0000-0001-000000000020', 1, 'Orientation & development environment setup', 'Understand company culture and tools', '2026-03-15', 'COMPLETED');
 INSERT INTO weekly_reports (report_id, assignment_id, week_number, tasks_completed, issues_challenges, lessons_learned, plan_next_week, status, submitted_at, feedback) VALUES
     ('00000000-0000-0000-0003-000000000021', 'f0000000-0000-0000-0000-000000000021', 1, 'Setup dev environment, understand codebase structure', 'Minor issues with API integration', 'Learned Spring Boot basics', 'Start with user module', 'APPROVED', '2026-03-21', 'Good start, keep it up!');
-INSERT INTO internship_plan_items (plan_item_id, plan_id, week_number, task_description, training_objective, target_date, status) VALUES
-    ('00000000-0000-0000-0004-000000000021', '00000000-0000-0000-0001-000000000021', 2, 'Implement user authentication module', 'Build secure JWT authentication', '2026-03-22', 'COMPLETED');
+-- INSERT INTO internship_plan_items (plan_item_id, plan_id, week_number, task_description, training_objective, target_date, status) VALUES
+--     ('00000000-0000-0000-0004-000000000020', '00000000-0000-0000-0001-000000000020', 2, 'Implement core feature module', 'Build deliverable feature', '2026-03-22', 'COMPLETED');
 INSERT INTO weekly_reports (report_id, assignment_id, week_number, tasks_completed, issues_challenges, lessons_learned, plan_next_week, status, submitted_at, feedback) VALUES
-    ('00000000-0000-0000-0005-000000000021', 'f0000000-0000-0000-0000-000000000021', 2, 'Implemented JWT authentication module', 'Need to improve error handling', 'Learned about JWT security', 'Work on API documentation', 'APPROVED', '2026-03-28', 'Solid implementation.');
-INSERT INTO internship_plan_items (plan_item_id, plan_id, week_number, task_description, training_objective, target_date, status) VALUES
-    ('00000000-0000-0000-0006-000000000021', '00000000-0000-0000-0001-000000000021', 3, 'Develop REST API endpoints', 'Create clean and documented APIs', '2026-03-29', 'IN_PROGRESS');
+    ('00000000-0000-0000-0005-000000000021', 'f0000000-0000-0000-0000-000000000021', 2, 'Implemented core feature module', 'Need to improve error handling', 'Learned about JWT security', 'Work on API documentation', 'APPROVED', '2026-03-28', 'Solid implementation.');
+-- INSERT INTO internship_plan_items (plan_item_id, plan_id, week_number, task_description, training_objective, target_date, status) VALUES
+--     ('00000000-0000-0000-0006-000000000020', '00000000-0000-0000-0001-000000000020', 3, 'Develop remaining features & integration', 'Create clean and documented APIs', '2026-03-29', 'IN_PROGRESS');
 INSERT INTO weekly_reports (report_id, assignment_id, week_number, tasks_completed, issues_challenges, lessons_learned, plan_next_week, status, submitted_at) VALUES
     ('00000000-0000-0000-0007-000000000021', 'f0000000-0000-0000-0000-000000000021', 3, 'Built 5 REST API endpoints', 'Working on validation', 'Learned REST best practices', 'Add unit tests', 'SUBMITTED', '2026-04-04');
 INSERT INTO report_feedbacks (feedback_id, report_id, reviewer_id, feedback_text, action) VALUES
@@ -388,14 +396,9 @@ INSERT INTO student_profiles (user_id, student_code, university, major, gpa, ski
     ('d0000000-0000-0000-0000-000000000022', 'SE15022', 'FPT University', 'Software Engineering', 7.5, '["Java", "Spring Boot"]'::jsonb, 'https://cv.example.com/se15022.pdf');
 INSERT INTO enterprise_assignments (assignment_id, enterprise_id, student_id, semester_id, supervisor_name, supervisor_email, assigned_by, status, start_date) VALUES
     ('f0000000-0000-0000-0000-000000000022', 'c0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000022', '50000000-0000-0000-0000-000000000001', 'Sup Momo', 'sup@momo.vn', '00000000-0000-0000-0000-000000000002', 'ACTIVE', '2026-03-15');
-INSERT INTO internship_plans (plan_id, assignment_id) VALUES
-    ('00000000-0000-0000-0001-000000000022', 'f0000000-0000-0000-0000-000000000022');
-INSERT INTO internship_plan_items (plan_item_id, plan_id, week_number, task_description, training_objective, target_date, status) VALUES
-    ('00000000-0000-0000-0002-000000000022', '00000000-0000-0000-0001-000000000022', 1, 'Project kickoff and team onboarding', 'Learn team processes', '2026-03-15', 'COMPLETED');
+-- Student 22 dùng chung plan + items từ plan 00000000-0000-0000-0001-000000000020
 INSERT INTO weekly_reports (report_id, assignment_id, week_number, tasks_completed, issues_challenges, lessons_learned, plan_next_week, status, submitted_at, feedback) VALUES
     ('00000000-0000-0000-0003-000000000022', 'f0000000-0000-0000-0000-000000000022', 1, 'Completed onboarding tasks, met team members', 'No issues', 'Learned team workflow', 'Start database design', 'APPROVED', '2026-03-21', 'Excellent progress!');
-INSERT INTO internship_plan_items (plan_item_id, plan_id, week_number, task_description, training_objective, target_date, status) VALUES
-    ('00000000-0000-0000-0004-000000000022', '00000000-0000-0000-0001-000000000022', 2, 'Database design and implementation', 'Design normalized database schema', '2026-03-22', 'COMPLETED');
 INSERT INTO weekly_reports (report_id, assignment_id, week_number, tasks_completed, issues_challenges, lessons_learned, plan_next_week, status, submitted_at, feedback) VALUES
     ('00000000-0000-0000-0005-000000000022', 'f0000000-0000-0000-0000-000000000022', 2, 'Designed database schema, started implementation', 'None', 'Learned database best practices', 'API development', 'APPROVED', '2026-03-28', 'Great work on the schema!');
 INSERT INTO weekly_reports (report_id, assignment_id, week_number, tasks_completed, issues_challenges, lessons_learned, plan_next_week, status, submitted_at) VALUES
@@ -412,14 +415,9 @@ INSERT INTO student_profiles (user_id, student_code, university, major, gpa, ski
     ('d0000000-0000-0000-0000-000000000023', 'SE15023', 'FPT University', 'Software Engineering', 7.5, '["Java", "Spring Boot"]'::jsonb, 'https://cv.example.com/se15023.pdf');
 INSERT INTO enterprise_assignments (assignment_id, enterprise_id, student_id, semester_id, supervisor_name, supervisor_email, assigned_by, status, start_date) VALUES
     ('f0000000-0000-0000-0000-000000000023', 'c0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000023', '50000000-0000-0000-0000-000000000001', 'Sup Momo', 'sup@momo.vn', '00000000-0000-0000-0000-000000000002', 'ACTIVE', '2026-03-15');
-INSERT INTO internship_plans (plan_id, assignment_id) VALUES
-    ('00000000-0000-0000-0001-000000000023', 'f0000000-0000-0000-0000-000000000023');
-INSERT INTO internship_plan_items (plan_item_id, plan_id, week_number, task_description, training_objective, target_date, status) VALUES
-    ('00000000-0000-0000-0002-000000000023', '00000000-0000-0000-0001-000000000023', 1, 'Training on company tech stack', 'Get familiar with Momo tech', '2026-03-15', 'COMPLETED');
+-- Student 23 dùng chung plan + items từ plan 00000000-0000-0000-0001-000000000020
 INSERT INTO weekly_reports (report_id, assignment_id, week_number, tasks_completed, issues_challenges, lessons_learned, plan_next_week, status, submitted_at, feedback) VALUES
     ('00000000-0000-0000-0003-000000000023', 'f0000000-0000-0000-0000-000000000023', 1, 'Completed tech stack training modules', 'Some modules were complex', 'Learned microservices basics', 'Start feature development', 'APPROVED', '2026-03-21', 'Good learning attitude.');
-INSERT INTO internship_plan_items (plan_item_id, plan_id, week_number, task_description, training_objective, target_date, status) VALUES
-    ('00000000-0000-0000-0004-000000000023', '00000000-0000-0000-0001-000000000023', 2, 'Start working on assigned features', 'Deliver first feature module', '2026-03-22', 'COMPLETED');
 INSERT INTO weekly_reports (report_id, assignment_id, week_number, tasks_completed, issues_challenges, lessons_learned, plan_next_week, status, submitted_at, feedback) VALUES
     ('00000000-0000-0000-0005-000000000023', 'f0000000-0000-0000-0000-000000000023', 2, 'Started feature development, first PR submitted', 'Code review feedback to address', 'Learned code review process', 'Address code review comments', 'APPROVED', '2026-03-28', 'Good first PR!');
 INSERT INTO weekly_reports (report_id, assignment_id, week_number, tasks_completed, issues_challenges, lessons_learned, plan_next_week, status, submitted_at) VALUES
@@ -434,14 +432,9 @@ INSERT INTO student_profiles (user_id, student_code, university, major, gpa, ski
     ('d0000000-0000-0000-0000-000000000024', 'SE15024', 'FPT University', 'Software Engineering', 7.5, '["Java", "Spring Boot"]'::jsonb, 'https://cv.example.com/se15024.pdf');
 INSERT INTO enterprise_assignments (assignment_id, enterprise_id, student_id, semester_id, supervisor_name, supervisor_email, assigned_by, status, start_date) VALUES
     ('f0000000-0000-0000-0000-000000000024', 'c0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000024', '50000000-0000-0000-0000-000000000001', 'Sup Momo', 'sup@momo.vn', '00000000-0000-0000-0000-000000000002', 'ACTIVE', '2026-03-15');
-INSERT INTO internship_plans (plan_id, assignment_id) VALUES
-    ('00000000-0000-0000-0001-000000000024', 'f0000000-0000-0000-0000-000000000024');
-INSERT INTO internship_plan_items (plan_item_id, plan_id, week_number, task_description, training_objective, target_date, status) VALUES
-    ('00000000-0000-0000-0002-000000000024', '00000000-0000-0000-0001-000000000024', 1, 'Code review and documentation', 'Improve code quality', '2026-03-15', 'COMPLETED');
+-- Student 24 dùng chung plan + items từ plan 00000000-0000-0000-0001-000000000020
 INSERT INTO weekly_reports (report_id, assignment_id, week_number, tasks_completed, issues_challenges, lessons_learned, plan_next_week, status, submitted_at, feedback) VALUES
     ('00000000-0000-0000-0003-000000000024', 'f0000000-0000-0000-0000-000000000024', 1, 'Code review sessions, wrote technical docs', 'Understanding legacy code', 'Learned documentation standards', 'Start bug fixes', 'APPROVED', '2026-03-21', 'Thorough documentation!');
-INSERT INTO internship_plan_items (plan_item_id, plan_id, week_number, task_description, training_objective, target_date, status) VALUES
-    ('00000000-0000-0000-0004-000000000024', '00000000-0000-0000-0001-000000000024', 2, 'Work on bug fixes', 'Resolve production issues', '2026-03-22', 'COMPLETED');
 INSERT INTO weekly_reports (report_id, assignment_id, week_number, tasks_completed, issues_challenges, lessons_learned, plan_next_week, status, submitted_at, feedback) VALUES
     ('00000000-0000-0000-0005-000000000024', 'f0000000-0000-0000-0000-000000000024', 2, 'Fixed 3 critical bugs, 5 minor bugs', 'Debugging complex issues', 'Learned debugging tools', 'Feature development', 'APPROVED', '2026-03-28', 'Excellent debugging skills!');
 INSERT INTO weekly_reports (report_id, assignment_id, week_number, tasks_completed, issues_challenges, lessons_learned, plan_next_week, status, submitted_at) VALUES
@@ -456,14 +449,9 @@ INSERT INTO student_profiles (user_id, student_code, university, major, gpa, ski
     ('d0000000-0000-0000-0000-000000000025', 'SE15025', 'FPT University', 'Software Engineering', 8.5, '["Java", "Spring Boot"]'::jsonb, 'https://cv.example.com/se15025.pdf');
 INSERT INTO enterprise_assignments (assignment_id, enterprise_id, student_id, semester_id, supervisor_name, supervisor_email, assigned_by, status, start_date) VALUES
     ('f0000000-0000-0000-0000-000000000025', 'c0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000025', '50000000-0000-0000-0000-000000000001', 'Sup Momo', 'sup@momo.vn', '00000000-0000-0000-0000-000000000002', 'ACTIVE', '2026-03-15');
-INSERT INTO internship_plans (plan_id, assignment_id) VALUES
-    ('00000000-0000-0000-0001-000000000025', 'f0000000-0000-0000-0000-000000000025');
-INSERT INTO internship_plan_items (plan_item_id, plan_id, week_number, task_description, training_objective, target_date, status) VALUES
-    ('00000000-0000-0000-0002-000000000025', '00000000-0000-0000-0001-000000000025', 1, 'System setup and training', 'Get production-ready', '2026-03-15', 'COMPLETED');
+-- Student 25 dùng chung plan + items từ plan 00000000-0000-0000-0001-000000000020
 INSERT INTO weekly_reports (report_id, assignment_id, week_number, tasks_completed, issues_challenges, lessons_learned, plan_next_week, status, submitted_at, feedback) VALUES
     ('00000000-0000-0000-0003-000000000025', 'f0000000-0000-0000-0000-000000000025', 1, 'System setup completed, initial training done', 'None', 'Learned Momo architecture', 'Start feature work', 'APPROVED', '2026-03-21', 'Well prepared!');
-INSERT INTO internship_plan_items (plan_item_id, plan_id, week_number, task_description, training_objective, target_date, status) VALUES
-    ('00000000-0000-0000-0004-000000000025', '00000000-0000-0000-0001-000000000025', 2, 'Start feature implementation', 'Deliver first module', '2026-03-22', 'COMPLETED');
 INSERT INTO weekly_reports (report_id, assignment_id, week_number, tasks_completed, issues_challenges, lessons_learned, plan_next_week, status, submitted_at, feedback) VALUES
     ('00000000-0000-0000-0005-000000000025', 'f0000000-0000-0000-0000-000000000025', 2, 'Feature implementation started', 'Git workflow questions', 'Learned Git branching strategy', 'Continue feature dev', 'APPROVED', '2026-03-28', 'Good progress!');
 INSERT INTO weekly_reports (report_id, assignment_id, week_number, tasks_completed, issues_challenges, lessons_learned, plan_next_week, status, submitted_at) VALUES

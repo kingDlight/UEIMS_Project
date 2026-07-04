@@ -236,8 +236,10 @@ class InternshipPlanServiceImplTest {
         UUID reviewerId = UUID.randomUUID();
         com.ueims.model.entity.User reviewer =
                 com.ueims.model.entity.User.builder().userId(reviewerId).build();
-        Semester semester =
-                Semester.builder().semesterId(UUID.randomUUID()).status("ACTIVE").build();
+        Semester semester = Semester.builder()
+                .semesterId(UUID.randomUUID())
+                .status("ACTIVE")
+                .build();
         InternshipPlan plan = InternshipPlan.builder()
                 .planId(planId)
                 .semester(semester)
@@ -260,8 +262,7 @@ class InternshipPlanServiceImplTest {
         UUID reviewerId = UUID.randomUUID();
 
         com.ueims.exception.AppException e = org.junit.jupiter.api.Assertions.assertThrows(
-                com.ueims.exception.AppException.class,
-                () -> service.rejectMasterPlan(planId, reviewerId, ""));
+                com.ueims.exception.AppException.class, () -> service.rejectMasterPlan(planId, reviewerId, ""));
         assertEquals(com.ueims.exception.ErrorCode.REJECTION_REASON_REQUIRED, e.getErrorCode());
     }
 
@@ -271,8 +272,10 @@ class InternshipPlanServiceImplTest {
         UUID reviewerId = UUID.randomUUID();
         com.ueims.model.entity.User reviewer =
                 com.ueims.model.entity.User.builder().userId(reviewerId).build();
-        Semester semester =
-                Semester.builder().semesterId(UUID.randomUUID()).status("ACTIVE").build();
+        Semester semester = Semester.builder()
+                .semesterId(UUID.randomUUID())
+                .status("ACTIVE")
+                .build();
         InternshipPlan plan = InternshipPlan.builder()
                 .planId(planId)
                 .semester(semester)
