@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,7 +13,6 @@ import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
 import com.ueims.model.entity.Enterprise;
 import com.ueims.model.entity.InternshipPlan;
-import com.ueims.model.entity.InternshipPlanItem;
 import com.ueims.model.entity.JobPost;
 import com.ueims.model.entity.Notification;
 import com.ueims.model.entity.Semester;
@@ -121,13 +119,12 @@ public class InternshipPlanServiceImpl implements InternshipPlanService {
 
         // Notify enterprise
         if (plan.getEnterprise() != null) {
-            List<User> enterpriseUsers =
-                    userRepository.findActiveUsersByRoleName("ENTERPRISE").stream()
-                            .filter(u -> u.getEnterprise() != null
-                                    && plan.getEnterprise()
-                                            .getEnterpriseId()
-                                            .equals(u.getEnterprise().getEnterpriseId()))
-                            .toList();
+            List<User> enterpriseUsers = userRepository.findActiveUsersByRoleName("ENTERPRISE").stream()
+                    .filter(u -> u.getEnterprise() != null
+                            && plan.getEnterprise()
+                                    .getEnterpriseId()
+                                    .equals(u.getEnterprise().getEnterpriseId()))
+                    .toList();
             for (User entUser : enterpriseUsers) {
                 Notification notif = Notification.builder()
                         .recipient(entUser)
@@ -173,13 +170,12 @@ public class InternshipPlanServiceImpl implements InternshipPlanService {
 
         // Notify enterprise
         if (plan.getEnterprise() != null) {
-            List<User> enterpriseUsers =
-                    userRepository.findActiveUsersByRoleName("ENTERPRISE").stream()
-                            .filter(u -> u.getEnterprise() != null
-                                    && plan.getEnterprise()
-                                            .getEnterpriseId()
-                                            .equals(u.getEnterprise().getEnterpriseId()))
-                            .toList();
+            List<User> enterpriseUsers = userRepository.findActiveUsersByRoleName("ENTERPRISE").stream()
+                    .filter(u -> u.getEnterprise() != null
+                            && plan.getEnterprise()
+                                    .getEnterpriseId()
+                                    .equals(u.getEnterprise().getEnterpriseId()))
+                    .toList();
             for (User entUser : enterpriseUsers) {
                 Notification notif = Notification.builder()
                         .recipient(entUser)
@@ -286,7 +282,11 @@ public class InternshipPlanServiceImpl implements InternshipPlanService {
             notificationService.save(notif);
         }
 
-        log.info("Plan {} saved by enterprise {} for semester {}", saved.getPlanId(), enterpriseId, semester.getSemesterId());
+        log.info(
+                "Plan {} saved by enterprise {} for semester {}",
+                saved.getPlanId(),
+                enterpriseId,
+                semester.getSemesterId());
         return saved;
     }
 

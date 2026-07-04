@@ -49,16 +49,14 @@ public class InternshipPlanController {
      */
     @GetMapping("/by-enterprise-semester")
     @PreAuthorize("hasRole('ENTERPRISE') or hasRole('TRAINING_MANAGER')")
-    public ResponseEntity<InternshipPlanDTO> getByEnterpriseSemester(
-            @RequestParam UUID semesterId) {
+    public ResponseEntity<InternshipPlanDTO> getByEnterpriseSemester(@RequestParam UUID semesterId) {
         UUID enterpriseId = resolveCurrentEnterpriseId();
         var plan = service.findByEnterpriseAndSemester(enterpriseId, semesterId);
         if (plan == null) {
             // Trả empty DTO (không 404) để frontend biết "chưa có plan"
-            return ResponseEntity.ok(mapper.toDto(
-                    com.ueims.model.entity.InternshipPlan.builder()
-                            .enterprise(Enterprise.builder().enterpriseId(enterpriseId).build())
-                            .build()));
+            return ResponseEntity.ok(mapper.toDto(com.ueims.model.entity.InternshipPlan.builder()
+                    .enterprise(Enterprise.builder().enterpriseId(enterpriseId).build())
+                    .build()));
         }
         return ResponseEntity.ok(mapper.toDto(plan));
     }

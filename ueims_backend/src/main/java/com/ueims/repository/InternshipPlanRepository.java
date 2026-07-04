@@ -18,8 +18,7 @@ public interface InternshipPlanRepository extends JpaRepository<InternshipPlan, 
      * Tìm plan của 1 DN theo kỳ (cả PENDING_APPROVAL và APPROVED).
      * Vì UNIQUE index trên (enterprise_id, semester_id), chỉ trả 1 row.
      */
-    Optional<InternshipPlan> findByEnterprise_EnterpriseIdAndSemester_SemesterId(
-            UUID enterpriseId, UUID semesterId);
+    Optional<InternshipPlan> findByEnterprise_EnterpriseIdAndSemester_SemesterId(UUID enterpriseId, UUID semesterId);
 
     /**
      * Lấy plan đã APPROVED của DN tại kỳ.
@@ -38,16 +37,15 @@ public interface InternshipPlanRepository extends JpaRepository<InternshipPlan, 
      *   (a) plan.status = 'APPROVED', AND
      *   (b) SV có EnterpriseAssignment ACTIVE trong cùng enterprise + semester đó.
      */
-    @Query(
-            "SELECT ip FROM InternshipPlan ip "
-                    + "WHERE ip.status = 'APPROVED' "
-                    + "AND EXISTS ("
-                    + "  SELECT 1 FROM EnterpriseAssignment ea "
-                    + "  WHERE ea.student.userId = :studentId "
-                    + "  AND ea.status = 'ACTIVE' "
-                    + "  AND ea.enterprise.enterpriseId = ip.enterprise.enterpriseId "
-                    + "  AND ea.semester.semesterId = ip.semester.semesterId"
-                    + ")")
+    @Query("SELECT ip FROM InternshipPlan ip "
+            + "WHERE ip.status = 'APPROVED' "
+            + "AND EXISTS ("
+            + "  SELECT 1 FROM EnterpriseAssignment ea "
+            + "  WHERE ea.student.userId = :studentId "
+            + "  AND ea.status = 'ACTIVE' "
+            + "  AND ea.enterprise.enterpriseId = ip.enterprise.enterpriseId "
+            + "  AND ea.semester.semesterId = ip.semester.semesterId"
+            + ")")
     Optional<InternshipPlan> findActivePlanForStudent(@Param("studentId") UUID studentId);
 
     /** Danh sách các plan PENDING_APPROVAL cho TM duyệt. */

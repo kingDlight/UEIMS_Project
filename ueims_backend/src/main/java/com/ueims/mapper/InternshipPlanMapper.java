@@ -23,8 +23,7 @@ public interface InternshipPlanMapper {
     @Mapping(target = "jobPostId", source = "jobPost.jobPostId")
     @Mapping(
             target = "jobPostTitle",
-            expression =
-                    "java(entity != null && entity.getJobPost() != null ? entity.getJobPost().getTitle() : null)")
+            expression = "java(entity != null && entity.getJobPost() != null ? entity.getJobPost().getTitle() : null)")
     @Mapping(target = "tasks", source = "items")
     InternshipPlanDTO toDto(InternshipPlan entity);
 
