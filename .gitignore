@@ -198,5 +198,5 @@ ueims_backend/*.js
 /nbproject/private/
 projects/
 ueims_backend/src/test/java/
-# ueims_frontend/playwright/
-ueims_frontend/playwright/demo-user-stories.spec.ts
+ueims_frontend/playwright/
+.pptx_extract

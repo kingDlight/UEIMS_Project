@@ -3,15 +3,25 @@ package com.ueims.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.ueims.dto.response.EnterpriseAssignmentResponseDTO;
 import com.ueims.model.entity.EnterpriseAssignment;
+import com.ueims.repository.EnterpriseEvaluationRepository;
+import com.ueims.repository.FinalReportRepository;
 
 @Mapper(
         componentModel = "spring",
         unmappedTargetPolicy = ReportingPolicy.IGNORE,
         builder = @org.mapstruct.Builder(disableBuilder = true))
-public interface EnterpriseAssignmentMapper {
+public abstract class EnterpriseAssignmentMapper {
+
+    @Autowired
+    protected FinalReportRepository finalReportRepository;
+
+    @Autowired
+    protected EnterpriseEvaluationRepository enterpriseEvaluationRepository;
+
     @org.mapstruct.Mapping(source = "student.fullName", target = "studentName")
     @org.mapstruct.Mapping(source = "student.studentProfile.studentCode", target = "studentCode")
     @org.mapstruct.Mapping(source = "student.email", target = "studentEmail")
@@ -21,9 +31,26 @@ public interface EnterpriseAssignmentMapper {
     @org.mapstruct.Mapping(source = "supervisorName", target = "supervisorName")
     @org.mapstruct.Mapping(source = "supervisorEmail", target = "supervisorEmail")
     @org.mapstruct.Mapping(source = "supervisorPhone", target = "supervisorPhone")
-    EnterpriseAssignmentResponseDTO toDto(EnterpriseAssignment entity);
+    public abstract EnterpriseAssignmentResponseDTO toDto(EnterpriseAssignment entity);
 
-    EnterpriseAssignment toEntity(EnterpriseAssignmentResponseDTO dto);
+    public abstract EnterpriseAssignment toEntity(EnterpriseAssignmentResponseDTO dto);
 
-    void updateEntity(EnterpriseAssignmentResponseDTO dto, @MappingTarget EnterpriseAssignment entity);
+    public abstract void updateEntity(EnterpriseAssignmentResponseDTO dto, @MappingTarget EnterpriseAssignment entity);
+
+    @org.mapstruct.AfterMapping
+    protected void afterMapping(EnterpriseAssignment entity, @MappingTarget EnterpriseAssignmentResponseDTO dto) {
+        if (finalReportRepository != null && entity.getAssignmentId() != null) {
+            finalReportRepository
+                    .findByAssignment_AssignmentId(entity.getAssignmentId())
+                    .ifPresent(report -> {
+                        dto.setFinalReportId(report.getFinalReportId());
+                        dto.setFinalReportUrl(report.getFileUrl());
+                    });
+        }
+        if (enterpriseEvaluationRepository != null && entity.getAssignmentId() != null) {
+            enterpriseEvaluationRepository
+                    .findByAssignment_AssignmentId(entity.getAssignmentId())
+                    .ifPresent(eval -> dto.setEvaluationId(eval.getEvaluationId()));
+        }
+    }
 }
