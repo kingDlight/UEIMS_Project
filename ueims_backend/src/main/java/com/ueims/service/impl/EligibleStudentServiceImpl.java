@@ -18,6 +18,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.ueims.dto.request.EligibleStudentUpdateRequest;
@@ -283,7 +284,6 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
     }
 
     @Override
-    @Transactional
     public StudentImportResult importRoster(MultipartFile file, UUID semesterId) {
         Semester semester = semesterRepository
                 .findById(semesterId)
@@ -304,19 +304,14 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
         StudentImportResult result =
                 StudentImportResult.builder().totalRows(rows.size()).build();
 
-        // Tracks studentCodes already processed within this batch — silently skips
-        // duplicate rows from the same file (e.g. TM accidentally pasted the same
-        // row twice).  Does NOT guard against cross-file duplicates since each
-        // import is a separate semester-eligible record.
         Set<String> seenStudentCodes = new HashSet<>();
-        // Tracks email collisions already reported to avoid log spam.
         Set<String> reportedCollisions = new HashSet<>();
 
         for (int i = 0; i < rows.size(); i++) {
             StudentImportRow row = rows.get(i);
-            int excelRowNumber = i + 2; // +1 for header, +1 to make it 1-based
+            int excelRowNumber = i + 2;
             try {
-                UpsertOutcome outcome = upsertStudentFromRow(row, semester, seenStudentCodes, reportedCollisions);
+                UpsertOutcome outcome = upsertStudentFromRowNewTx(row, semester, seenStudentCodes, reportedCollisions);
                 switch (outcome) {
                     case CREATED -> result.setCreated(result.getCreated() + 1);
                     case UPDATED -> result.setUpdated(result.getUpdated() + 1);
@@ -352,6 +347,17 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
                 result.getSkipped(),
                 result.getErrors().size());
         return result;
+    }
+
+    /**
+     * Each row runs in its own transaction (REQUIRES_NEW). If one row fails,
+     * only that row's transaction rolls back — the parent transaction stays clean.
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public UpsertOutcome upsertStudentFromRowNewTx(
+            StudentImportRow row, Semester semester,
+            Set<String> seenStudentCodes, Set<String> reportedCollisions) {
+        return upsertStudentFromRow(row, semester, seenStudentCodes, reportedCollisions);
     }
 
     /** Per-row resolution outcome, used to build the import summary. */
