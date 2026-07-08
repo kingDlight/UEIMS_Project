@@ -87,7 +87,8 @@ public class ExcelImportUtil {
         } catch (AppException e) {
             throw e;
         } catch (Exception e) {
-            throw new AppException(ErrorCode.INVALID_EXCEL_FORMAT,
+            throw new AppException(
+                    ErrorCode.INVALID_EXCEL_FORMAT,
                     "Invalid Excel file format. Could not read the workbook: " + e.getMessage());
         }
     }
@@ -184,7 +185,8 @@ public class ExcelImportUtil {
             }
             return gpa;
         } catch (NumberFormatException e) {
-            throw buildExcelError("GPA must be a number (got: '" + formatter.formatCellValue(cell) + "')", null, rowNumber);
+            throw buildExcelError(
+                    "GPA must be a number (got: '" + formatter.formatCellValue(cell) + "')", null, rowNumber);
         }
     }
 
@@ -217,7 +219,8 @@ public class ExcelImportUtil {
     private static AppException buildExcelError(String reason, String columnLabel, int rowNumber) {
         StringBuilder sb = new StringBuilder("Invalid Excel file format.");
         if (rowNumber > 0) sb.append(" Row ").append(rowNumber).append(':');
-        if (columnLabel != null && !columnLabel.isEmpty()) sb.append(" Column '").append(columnLabel).append("':");
+        if (columnLabel != null && !columnLabel.isEmpty())
+            sb.append(" Column '").append(columnLabel).append("':");
         sb.append(' ').append(reason).append('.');
         return new AppException(ErrorCode.INVALID_EXCEL_FORMAT, sb.toString());
     }
@@ -302,7 +305,8 @@ public class ExcelImportUtil {
         } catch (AppException e) {
             throw e;
         } catch (Exception e) {
-            throw new AppException(ErrorCode.INVALID_EXCEL_FORMAT,
+            throw new AppException(
+                    ErrorCode.INVALID_EXCEL_FORMAT,
                     "Invalid Excel file format. Could not read the workbook: " + e.getMessage());
         }
     }
@@ -368,8 +372,10 @@ public class ExcelImportUtil {
             out.setEmail(getRequiredStringCellValue(row, mapping.email, "Email", rowNumber));
             out.setMajor(getRequiredStringCellValue(row, mapping.major, "Major", rowNumber));
             out.setGpa(getRequiredGpaValue(row, mapping.gpa, rowNumber));
-            out.setCurrentSemester(getRequiredIntCellValue(row, mapping.currentSemester, "Current Semester", rowNumber));
-            out.setSemesterNameOrCode(getRequiredStringCellValue(row, mapping.semesterNameOrCode, "Semester", rowNumber));
+            out.setCurrentSemester(
+                    getRequiredIntCellValue(row, mapping.currentSemester, "Current Semester", rowNumber));
+            out.setSemesterNameOrCode(
+                    getRequiredStringCellValue(row, mapping.semesterNameOrCode, "Semester", rowNumber));
 
             if (mapping.phone != -1) {
                 out.setPhone(getOptionalStringCellValue(row, mapping.phone));

@@ -247,7 +247,8 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
             throw e;
         } catch (Exception e) {
             log.error("Failed to parse eligible students Excel", e);
-            throw new AppException(ErrorCode.INVALID_EXCEL_FORMAT,
+            throw new AppException(
+                    ErrorCode.INVALID_EXCEL_FORMAT,
                     "Invalid Excel file format. Could not read the workbook: " + e.getMessage());
         }
 
@@ -295,7 +296,8 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
             throw e;
         } catch (Exception e) {
             log.error("Failed to parse TM roster Excel", e);
-            throw new AppException(ErrorCode.INVALID_EXCEL_FORMAT,
+            throw new AppException(
+                    ErrorCode.INVALID_EXCEL_FORMAT,
                     "Invalid Excel file format. Could not read the workbook: " + e.getMessage());
         }
 
@@ -443,10 +445,8 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
         // the email only fires once the surrounding transaction commits —
         // otherwise we'd mail a password for a user that doesn't exist.
         if (createdUser) {
-            eventPublisher.publishEvent(new StudentRosterUserCreatedEvent(
-                    user.getEmail(),
-                    user.getFullName(),
-                    DEFAULT_IMPORT_PASSWORD));
+            eventPublisher.publishEvent(
+                    new StudentRosterUserCreatedEvent(user.getEmail(), user.getFullName(), DEFAULT_IMPORT_PASSWORD));
         }
 
         return createdUser ? UpsertOutcome.CREATED : UpsertOutcome.UPDATED;
@@ -502,9 +502,11 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
         // from the import when the field is currently null.
         if (profile.getBio() == null && row.getBio() != null) profile.setBio(row.getBio());
         if (profile.getSkills() == null && row.getSkills() != null) profile.setSkills(row.getSkills());
-        if (profile.getLinkedinUrl() == null && row.getLinkedinUrl() != null) profile.setLinkedinUrl(row.getLinkedinUrl());
+        if (profile.getLinkedinUrl() == null && row.getLinkedinUrl() != null)
+            profile.setLinkedinUrl(row.getLinkedinUrl());
         if (profile.getGithubUrl() == null && row.getGithubUrl() != null) profile.setGithubUrl(row.getGithubUrl());
-        if (profile.getPortfolioUrl() == null && row.getPortfolioUrl() != null) profile.setPortfolioUrl(row.getPortfolioUrl());
+        if (profile.getPortfolioUrl() == null && row.getPortfolioUrl() != null)
+            profile.setPortfolioUrl(row.getPortfolioUrl());
     }
 
     private void reportCollisionOnce(Set<String> reported, String email) {

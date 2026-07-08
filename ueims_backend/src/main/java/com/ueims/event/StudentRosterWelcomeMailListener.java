@@ -26,16 +26,10 @@ public class StudentRosterWelcomeMailListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onStudentRosterCreated(StudentRosterUserCreatedEvent event) {
         try {
-            mailService.sendRosterWelcomeMail(
-                    event.getEmail(),
-                    event.getFullName(),
-                    event.getTempPassword());
+            mailService.sendRosterWelcomeMail(event.getEmail(), event.getFullName(), event.getTempPassword());
         } catch (Exception e) {
             // Logging only — never let mail failures abort the import response.
-            log.warn(
-                    "[RosterWelcomeMail] Failed for {}: {}",
-                    event.getEmail(),
-                    e.getMessage());
+            log.warn("[RosterWelcomeMail] Failed for {}: {}", event.getEmail(), e.getMessage());
         }
     }
 }
