@@ -422,7 +422,7 @@ export const StudentQualityReportTab: React.FC = () => {
                                     border: `1px solid ${cc.border}`,
                                     boxShadow: cc.shadowMd,
                                 }}
-                                formatter={(value: any, name: string) => {
+                                formatter={(value: any, name: any) => {
                                     if (name === 'Pass Rate (%)') {
                                         return [`${Number(value).toFixed(1)}%`, name];
                                     }

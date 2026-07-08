@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useScrollAnimation } from '../../../hooks/useScrollAnimation';
 import { PlacementApplicationService } from '../../../services/PlacementApplicationService';
 import { SemesterService } from '../../../services/SemesterService';
-import { apiClient } from '../../../lib/apiClient';
+import { api as apiClient } from '../../../services/api';
 
 import { Table, Select, App } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
@@ -267,7 +267,7 @@ export const ReportsTab: React.FC = () => {
       const activeSemester = semesters.find((s) => s.status === 'ACTIVE') ?? semesters[0];
       if (!activeSemester) throw new Error('No active semester found');
 
-      let response: { data: ArrayBuffer | Blob; headers?: Record<string, string> };
+      let response: any;
       let filename = '';
 
       if (template.id === 'tpl-1') {
