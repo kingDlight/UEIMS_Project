@@ -5,6 +5,8 @@ import java.util.UUID;
 
 import jakarta.validation.Valid;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -57,5 +59,16 @@ public class StudentEnterpriseFeedbackController {
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         service.deleteById(id);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/export")
+    @PreAuthorize("hasRole('TRAINING_MANAGER')")
+    public ResponseEntity<byte[]> exportToExcel(@RequestParam UUID semesterId) {
+        byte[] data = service.exportToExcel(semesterId);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType(
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+        headers.add("Content-Disposition", "attachment; filename=enterprise_feedback_report.xlsx");
+        return new ResponseEntity<>(data, headers, org.springframework.http.HttpStatus.OK);
     }
 }

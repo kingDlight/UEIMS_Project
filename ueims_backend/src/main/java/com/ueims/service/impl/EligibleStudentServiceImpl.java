@@ -28,7 +28,6 @@ import com.ueims.dto.response.StudentImportResult;
 import com.ueims.event.StudentRosterUserCreatedEvent;
 import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
-import org.springframework.dao.DataIntegrityViolationException;
 import com.ueims.model.entity.EligibleStudent;
 import com.ueims.model.entity.Role;
 import com.ueims.model.entity.Semester;
@@ -381,8 +380,24 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
             return UpsertOutcome.SKIPPED_DUPLICATE;
         }
 
-        // Find existing user via email first, then via studentCode (linked profile).
-        Optional<User> userOpt = userRepository.findByEmail(row.getEmail());
+        // 1. Hard security gate: reject any email that already belongs to a
+        // non-STUDENT account (admin, enterprise, etc.) — even if that account
+        // does not exist yet. This blocks impersonation via roster import.
+        List<User> collidingUsers = userRepository.findByEmailIgnoreCase(row.getEmail());
+        if (!collidingUsers.isEmpty()) {
+            // If the colliding user(s) all have STUDENT role, we can update them.
+            // Otherwise reject to prevent privilege escalation.
+            boolean allAreStudents = collidingUsers.stream().allMatch(this::userHasStudentRole);
+            if (!allAreStudents) {
+                reportCollisionOnce(reportedCollisions, row.getEmail());
+                throw new AppException(ErrorCode.EMAIL_ALREADY_EXISTS);
+            }
+        }
+
+        // 2. Find existing user via email first, then via studentCode (linked profile).
+        Optional<User> userOpt = collidingUsers.isEmpty()
+                ? userRepository.findByEmail(row.getEmail())
+                : collidingUsers.stream().findFirst();
         boolean createdUser = false;
         if (userOpt.isEmpty()) {
             userOpt = studentProfileRepository
@@ -391,19 +406,12 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
         }
         User user;
         if (userOpt.isEmpty()) {
-            // Brand new student — create user, profile and assign STUDENT role.
-            if (userRepository.existsByEmail(row.getEmail())) {
-                // Race / data quirk: row email matches an account that
-                // studentProfile lookup didn't find. Skip rather than corrupt.
-                reportCollisionOnce(reportedCollisions, row.getEmail());
-                throw new AppException(ErrorCode.EMAIL_ALREADY_EXISTS);
-            }
             user = createNewStudentUser(row);
             createdUser = true;
         } else {
             user = userOpt.get();
             // Guard: existing user must not be a non-student account (e.g.
-            // lecturer / admin) — refusing to share an account between roles
+            // admin / enterprise) — refusing to share an account between roles
             // is the safer call than silently mutating it.
             if (!userHasStudentRole(user)) {
                 reportCollisionOnce(reportedCollisions, row.getEmail());

@@ -250,6 +250,10 @@ public class ExcelImportUtil {
         int githubUrl = -1;
         int portfolioUrl = -1;
         int bio = -1;
+        // Import-only: status column is informational only during import;
+        // the system always sets status = ELIGIBLE for new/updated records.
+        int status = -1;
+        // "No." column is skipped (row index, informational).
 
         boolean isValid() {
             return studentCode != -1
@@ -352,6 +356,11 @@ public class ExcelImportUtil {
                 mapping.portfolioUrl = cell.getColumnIndex();
             } else if (containsAny(header, "bio", "about", "giới thiệu")) {
                 mapping.bio = cell.getColumnIndex();
+            } else if (containsAny(header, "status", "trạng thái")) {
+                mapping.status = cell.getColumnIndex();
+            } else if (header.matches("(?i)^\\s*no\\.?\\s*$")
+                    || containsAny(header, "stt", "số thứ tự", "số tt")) {
+                // Informational row number — skip
             }
         }
         return mapping;

@@ -1,5 +1,6 @@
 package com.ueims.service.impl;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.nio.file.Files;
@@ -8,6 +9,15 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -164,5 +174,67 @@ public class StudentEnterpriseFeedbackServiceImpl implements StudentEnterpriseFe
         }
 
         repository.deleteById(id);
+    }
+
+    @Override
+    public byte[] exportToExcel(UUID semesterId) {
+        List<StudentEnterpriseFeedback> feedbacks = repository.findBySemester_SemesterId(semesterId);
+
+        try (Workbook workbook = new XSSFWorkbook();
+                ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            Sheet sheet = workbook.createSheet("Enterprise Feedback Report");
+
+            // Header style
+            CellStyle headerStyle = workbook.createCellStyle();
+            org.apache.poi.ss.usermodel.Font headerFont = workbook.createFont();
+            headerFont.setBold(true);
+            headerFont.setColor(IndexedColors.WHITE.getIndex());
+            headerStyle.setFont(headerFont);
+            headerStyle.setFillForegroundColor(IndexedColors.DARK_BLUE.getIndex());
+            headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+            headerStyle.setAlignment(HorizontalAlignment.CENTER);
+
+            String[] headers = {
+                    "No.", "Student Code", "Student Name", "Enterprise",
+                    "Training Quality", "Supervisor Support", "Work Environment", "Overall Score",
+                    "Positive Feedback", "Areas for Improvement", "Additional Comments", "Submitted At"
+            };
+
+            Row headerRow = sheet.createRow(0);
+            for (int i = 0; i < headers.length; i++) {
+                Cell cell = headerRow.createCell(i);
+                cell.setCellValue(headers[i]);
+                cell.setCellStyle(headerStyle);
+                sheet.setColumnWidth(i, 5000);
+            }
+            sheet.setColumnWidth(8, 10000);
+            sheet.setColumnWidth(9, 10000);
+            sheet.setColumnWidth(10, 8000);
+
+            int rowIdx = 1;
+            for (StudentEnterpriseFeedback fb : feedbacks) {
+                Row row = sheet.createRow(rowIdx++);
+                row.createCell(0).setCellValue(rowIdx - 1);
+                row.createCell(1).setCellValue(fb.getStudent() != null
+                        ? (fb.getStudent().getStudentCode() != null ? fb.getStudent().getStudentCode() : "") : "");
+                row.createCell(2).setCellValue(fb.getStudent() != null
+                        ? fb.getStudent().getFullName() : "");
+                row.createCell(3).setCellValue(fb.getEnterprise() != null
+                        ? fb.getEnterprise().getName() : "");
+                row.createCell(4).setCellValue(fb.getTrainingQualityScore() != null ? fb.getTrainingQualityScore() : 0);
+                row.createCell(5).setCellValue(fb.getSupervisorSupportScore() != null ? fb.getSupervisorSupportScore() : 0);
+                row.createCell(6).setCellValue(fb.getWorkEnvironmentScore() != null ? fb.getWorkEnvironmentScore() : 0);
+                row.createCell(7).setCellValue(fb.getOverallScore() != null ? fb.getOverallScore() : 0);
+                row.createCell(8).setCellValue(fb.getPositiveFeedback() != null ? fb.getPositiveFeedback() : "");
+                row.createCell(9).setCellValue(fb.getImprovementFeedback() != null ? fb.getImprovementFeedback() : "");
+                row.createCell(10).setCellValue(fb.getAdditionalComments() != null ? fb.getAdditionalComments() : "");
+                row.createCell(11).setCellValue(fb.getSubmittedAt() != null ? fb.getSubmittedAt().toString() : "");
+            }
+
+            workbook.write(out);
+            return out.toByteArray();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to export enterprise feedback report", e);
+        }
     }
 }

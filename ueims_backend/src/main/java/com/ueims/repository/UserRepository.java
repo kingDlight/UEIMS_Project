@@ -17,6 +17,10 @@ import com.ueims.model.entity.*;
 public interface UserRepository extends JpaRepository<User, UUID> {
     Optional<User> findByEmail(String email);
 
+    @org.springframework.data.jpa.repository.Query(
+            "SELECT u FROM User u WHERE LOWER(u.email) = LOWER(:email) AND u.deletedAt IS NULL")
+    List<User> findByEmailIgnoreCase(@org.springframework.data.repository.query.Param("email") String email);
+
     boolean existsByEmail(String email);
 
     List<User> findByEnterprise_EnterpriseId(UUID enterpriseId);

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useScrollAnimation } from '../../../hooks/useScrollAnimation';
 import { PlacementApplicationService } from '../../../services/PlacementApplicationService';
 import { SemesterService } from '../../../services/SemesterService';
+import { apiClient } from '../../../lib/apiClient';
 
 import { Table, Select, App } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
@@ -258,26 +259,70 @@ export const ReportsTab: React.FC = () => {
   // Suppress unused variable warning if your linter complains about exportingId
   console.debug('Exporting:', exportingId);
 
-  const handleExport = (template: ReportTemplate) => {
+  const handleExport = async (template: ReportTemplate) => {
     setExportingId(template.id);
-    setTimeout(() => {
-      setExportingId(null);
-      void message.success({
-        content: `${template.title} (${template.format}) is being generated — check your downloads.`,
-        duration: 3,
+    try {
+      void message.loading({ content: `Generating ${template.title}...`, key: 'export', duration: 0 });
+      const semesters = await SemesterService.getAllSemesters();
+      const activeSemester = semesters.find((s) => s.status === 'ACTIVE') ?? semesters[0];
+      if (!activeSemester) throw new Error('No active semester found');
+
+      let response: { data: ArrayBuffer | Blob; headers?: Record<string, string> };
+      let filename = '';
+
+      if (template.id === 'tpl-1') {
+        // OJT Placement Summary
+        response = await PlacementApplicationService.exportOjtPlacements(activeSemester.semesterId);
+        filename = `OJT_Placement_Summary_${semester}.xlsx`;
+      } else if (template.id === 'tpl-2') {
+        // Final GPA & Evaluation — PDF
+        response = await apiClient.get('/final-grade/export/pdf', {
+          responseType: 'arraybuffer',
+        });
+        filename = `Final_GPA_Evaluation_${semester}.pdf`;
+      } else if (template.id === 'tpl-3') {
+        // Enterprise Feedback Report
+        response = await apiClient.get('/student-enterprise-feedbacks/export', {
+          params: { semesterId: activeSemester.semesterId },
+          responseType: 'arraybuffer',
+        });
+        filename = `Enterprise_Feedback_Report_${semester}.xlsx`;
+      } else {
+        throw new Error('Unknown template');
+      }
+
+      const blob = new Blob([response.data as ArrayBuffer], {
+        type: template.format === 'PDF'
+          ? 'application/pdf'
+          : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       });
-      
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
       const newHistory: ReportHistoryItem = {
         key: `h-${Date.now()}`,
         name: `${template.title} — ${semester.replace('_', ' ')}`,
         category: template.title.includes('Placement') ? 'Placement' : (template.title.includes('Feedback') ? 'Enterprise Feedback' : 'End-of-Term'),
         categoryColor: template.formatColor,
-        date: new Date().toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute:'2-digit' }),
-        size: '1.2 MB',
-        sizeBytes: 1200000,
+        date: new Date().toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+        size: `${(blob.size / 1024).toFixed(0)} KB`,
+        sizeBytes: blob.size,
+        blob,
       };
       setReportHistory(prev => [newHistory, ...prev]);
-    }, 1200);
+      void message.success({ key: 'export', content: `${template.title} downloaded successfully.`, duration: 3 });
+    } catch {
+      void message.error({ key: 'export', content: 'Failed to generate report. Please try again.', duration: 3 });
+    } finally {
+      setExportingId(null);
+    }
   };
 
   const handleDownload = async (record: ReportHistoryItem) => {

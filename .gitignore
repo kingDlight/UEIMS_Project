@@ -200,3 +200,4 @@ projects/
 ueims_backend/src/test/java/
 ueims_frontend/playwright/
 .pptx_extract
+~$test_student_roster_import.xlsx

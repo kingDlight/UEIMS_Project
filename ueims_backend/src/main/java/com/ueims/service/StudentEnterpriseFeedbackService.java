@@ -15,4 +15,6 @@ public interface StudentEnterpriseFeedbackService {
     StudentEnterpriseFeedback save(StudentEnterpriseFeedback entity);
 
     void deleteById(UUID id);
+
+    byte[] exportToExcel(UUID semesterId);
 }

@@ -18,4 +18,6 @@ public interface StudentEnterpriseFeedbackRepository extends JpaRepository<Stude
     void deleteByEnterprise_EnterpriseId(UUID enterpriseId);
 
     List<StudentEnterpriseFeedback> findByEnterprise_EnterpriseId(UUID enterpriseId);
+
+    List<StudentEnterpriseFeedback> findBySemester_SemesterId(UUID semesterId);
 }
