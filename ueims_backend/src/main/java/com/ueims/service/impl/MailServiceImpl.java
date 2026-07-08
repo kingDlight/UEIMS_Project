@@ -75,6 +75,29 @@ public class MailServiceImpl implements MailService {
         log.info("Email chào mừng đã được gửi đến: {}", to);
     }
 
+    /**
+     * Welcome email sent after a TM roster import creates a brand-new student
+     * account. Reuses the standard {@code welcome} template so the message
+     * format stays consistent across admin-created and roster-imported users.
+     */
+    @Async("mailTaskExecutor")
+    public void sendRosterWelcomeMail(String to, String fullName, String tempPassword) {
+        String loginUrl = appBaseUrl + PATH_LOGIN;
+        String subject = "Tài khoản UEIMS của bạn đã được tạo — UEIMS";
+
+        Context ctx = new Context();
+        ctx.setVariable(VAR_FULL_NAME, fullName);
+        ctx.setVariable("email", to);
+        ctx.setVariable("tempPassword", tempPassword);
+        ctx.setVariable(VAR_LOGIN_URL, loginUrl);
+        ctx.setVariable(VAR_SUBJECT, subject);
+
+        String html = templateEngine.process("welcome", ctx);
+        sendHtml(to, subject, html);
+
+        log.info("Email thông báo tài khoản roster đã được gửi đến: {}", to);
+    }
+
     // ===== Password Changed (VI) =====
     @Async("mailTaskExecutor")
     public void sendPasswordChangedMail(String to, String fullName, String changedAt) {

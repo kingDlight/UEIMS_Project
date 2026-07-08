@@ -43,6 +43,16 @@ public class ExcelImportUtil {
         boolean isValid() {
             return studentCode != -1 && fullName != -1 && major != -1 && gpa != -1 && semester != -1;
         }
+
+        List<String> missingColumns() {
+            List<String> missing = new java.util.ArrayList<>();
+            if (studentCode == -1) missing.add("Student Code");
+            if (fullName == -1) missing.add("Full Name");
+            if (major == -1) missing.add("Major");
+            if (gpa == -1) missing.add("GPA");
+            if (semester == -1) missing.add("Semester");
+            return missing;
+        }
     }
 
     public static List<EligibleStudent> parseEligibleStudents(InputStream is) {
@@ -52,11 +62,17 @@ public class ExcelImportUtil {
             ColumnMapping mapping = null;
 
             boolean isHeader = true;
+            int physicalRowIdx = 0;
             for (Row row : sheet) {
+                physicalRowIdx++;
                 if (isHeader) {
                     mapping = parseHeader(row);
                     if (!mapping.isValid()) {
-                        throw new AppException(ErrorCode.INVALID_EXCEL_FORMAT);
+                        List<String> missing = mapping.missingColumns();
+                        String msg = "Invalid Excel file format. Missing required header column(s): "
+                                + String.join(", ", missing)
+                                + ". Expected headers include: Student Code, Full Name, Major, GPA, Semester.";
+                        throw new AppException(ErrorCode.INVALID_EXCEL_FORMAT, msg);
                     }
                     isHeader = false;
                     continue;
@@ -65,13 +81,14 @@ public class ExcelImportUtil {
                 // Skip completely empty rows
                 if (isRowEmpty(row)) continue;
 
-                students.add(parseRow(row, mapping));
+                students.add(parseRow(row, mapping, physicalRowIdx));
             }
             return students;
         } catch (AppException e) {
             throw e;
         } catch (Exception e) {
-            throw new AppException(ErrorCode.INVALID_EXCEL_FORMAT);
+            throw new AppException(ErrorCode.INVALID_EXCEL_FORMAT,
+                    "Invalid Excel file format. Could not read the workbook: " + e.getMessage());
         }
     }
 
@@ -106,16 +123,16 @@ public class ExcelImportUtil {
         return mapping;
     }
 
-    private static EligibleStudent parseRow(Row row, ColumnMapping mapping) {
+    private static EligibleStudent parseRow(Row row, ColumnMapping mapping, int rowNumber) {
         EligibleStudent student = new EligibleStudent();
-        student.setStudentCode(getRequiredStringCellValue(row, mapping.studentCode));
-        student.setFullName(getRequiredStringCellValue(row, mapping.fullName));
+        student.setStudentCode(getRequiredStringCellValue(row, mapping.studentCode, "Student Code", rowNumber));
+        student.setFullName(getRequiredStringCellValue(row, mapping.fullName, "Full Name", rowNumber));
         if (mapping.email != -1) {
             student.setEmail(getOptionalStringCellValue(row, mapping.email));
         }
-        student.setMajor(getRequiredStringCellValue(row, mapping.major));
-        student.setGpa(getRequiredGpaValue(row, mapping.gpa));
-        student.setCurrentSemester(getRequiredIntCellValue(row, mapping.semester));
+        student.setMajor(getRequiredStringCellValue(row, mapping.major, "Major", rowNumber));
+        student.setGpa(getRequiredGpaValue(row, mapping.gpa, rowNumber));
+        student.setCurrentSemester(getRequiredIntCellValue(row, mapping.semester, "Semester", rowNumber));
         return student;
     }
 
@@ -123,14 +140,18 @@ public class ExcelImportUtil {
             new org.apache.poi.ss.usermodel.DataFormatter();
 
     private static String getRequiredStringCellValue(Row row, int cellIndex) {
-        if (cellIndex < 0) throw new AppException(ErrorCode.INVALID_EXCEL_FORMAT);
+        return getRequiredStringCellValue(row, cellIndex, null, -1);
+    }
+
+    private static String getRequiredStringCellValue(Row row, int cellIndex, String columnLabel, int rowNumber) {
+        if (cellIndex < 0) throw buildExcelError("Missing required column", columnLabel, rowNumber);
         Cell cell = row.getCell(cellIndex, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
         if (cell == null) {
-            throw new AppException(ErrorCode.INVALID_EXCEL_FORMAT);
+            throw buildExcelError("Cell is empty", columnLabel, rowNumber);
         }
         String val = formatter.formatCellValue(cell).trim();
         if (val.isEmpty()) {
-            throw new AppException(ErrorCode.INVALID_EXCEL_FORMAT);
+            throw buildExcelError("Cell is empty", columnLabel, rowNumber);
         }
         return val;
     }
@@ -146,35 +167,59 @@ public class ExcelImportUtil {
     }
 
     private static BigDecimal getRequiredGpaValue(Row row, int cellIndex) {
-        if (cellIndex < 0) throw new AppException(ErrorCode.INVALID_EXCEL_FORMAT);
+        return getRequiredGpaValue(row, cellIndex, -1);
+    }
+
+    private static BigDecimal getRequiredGpaValue(Row row, int cellIndex, int rowNumber) {
+        if (cellIndex < 0) throw buildExcelError("Missing required column 'GPA'", null, rowNumber);
         Cell cell = row.getCell(cellIndex, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
         if (cell == null) {
-            throw new AppException(ErrorCode.INVALID_EXCEL_FORMAT);
+            throw buildExcelError("GPA cell is empty", null, rowNumber);
         }
         try {
             String strVal = formatter.formatCellValue(cell).trim();
             BigDecimal gpa = new BigDecimal(strVal);
             if (gpa.compareTo(BigDecimal.ZERO) < 0 || gpa.compareTo(new BigDecimal("10.0")) > 0) {
-                throw new AppException(ErrorCode.INVALID_EXCEL_FORMAT);
+                throw buildExcelError("GPA must be between 0.0 and 10.0 (got: " + strVal + ")", null, rowNumber);
             }
             return gpa;
         } catch (NumberFormatException e) {
-            throw new AppException(ErrorCode.INVALID_EXCEL_FORMAT);
+            throw buildExcelError("GPA must be a number (got: '" + formatter.formatCellValue(cell) + "')", null, rowNumber);
         }
     }
 
     private static int getRequiredIntCellValue(Row row, int cellIndex) {
-        if (cellIndex < 0) throw new AppException(ErrorCode.INVALID_EXCEL_FORMAT);
+        return getRequiredIntCellValue(row, cellIndex, null, -1);
+    }
+
+    private static int getRequiredIntCellValue(Row row, int cellIndex, String columnLabel, int rowNumber) {
+        if (cellIndex < 0) throw buildExcelError("Missing required column", columnLabel, rowNumber);
         Cell cell = row.getCell(cellIndex, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
         if (cell == null) {
-            throw new AppException(ErrorCode.INVALID_EXCEL_FORMAT);
+            throw buildExcelError("Cell is empty", columnLabel, rowNumber);
         }
         try {
             String strVal = formatter.formatCellValue(cell).trim();
             return Integer.parseInt(strVal);
         } catch (NumberFormatException e) {
-            throw new AppException(ErrorCode.INVALID_EXCEL_FORMAT);
+            throw buildExcelError(
+                    "Value must be an integer (got: '" + formatter.formatCellValue(cell) + "')",
+                    columnLabel,
+                    rowNumber);
         }
+    }
+
+    /**
+     * Builds an AppException whose message carries the row number and column label
+     * so the user can fix the spreadsheet. Re-uses the INVALID_EXCEL_FORMAT error
+     * code so existing exception handlers keep working.
+     */
+    private static AppException buildExcelError(String reason, String columnLabel, int rowNumber) {
+        StringBuilder sb = new StringBuilder("Invalid Excel file format.");
+        if (rowNumber > 0) sb.append(" Row ").append(rowNumber).append(':');
+        if (columnLabel != null && !columnLabel.isEmpty()) sb.append(" Column '").append(columnLabel).append("':");
+        sb.append(' ').append(reason).append('.');
+        return new AppException(ErrorCode.INVALID_EXCEL_FORMAT, sb.toString());
     }
 
     // ============================================================
@@ -212,6 +257,18 @@ public class ExcelImportUtil {
                     && currentSemester != -1
                     && semesterNameOrCode != -1;
         }
+
+        List<String> missingColumns() {
+            List<String> missing = new java.util.ArrayList<>();
+            if (studentCode == -1) missing.add("Student Code");
+            if (fullName == -1) missing.add("Full Name");
+            if (email == -1) missing.add("Email");
+            if (major == -1) missing.add("Major");
+            if (gpa == -1) missing.add("GPA");
+            if (currentSemester == -1) missing.add("Current Semester");
+            if (semesterNameOrCode == -1) missing.add("Semester");
+            return missing;
+        }
     }
 
     /**
@@ -230,7 +287,11 @@ public class ExcelImportUtil {
                 if (mapping == null) {
                     mapping = parseImportHeader(row);
                     if (!mapping.isValid()) {
-                        throw new AppException(ErrorCode.INVALID_EXCEL_FORMAT);
+                        List<String> missing = mapping.missingColumns();
+                        String msg = "Invalid Excel file format. Missing required header column(s): "
+                                + String.join(", ", missing)
+                                + ". Expected headers include: Student Code, Full Name, Email, Major, GPA, Current Semester, Semester.";
+                        throw new AppException(ErrorCode.INVALID_EXCEL_FORMAT, msg);
                     }
                     continue;
                 }
@@ -241,7 +302,8 @@ public class ExcelImportUtil {
         } catch (AppException e) {
             throw e;
         } catch (Exception e) {
-            throw new AppException(ErrorCode.INVALID_EXCEL_FORMAT);
+            throw new AppException(ErrorCode.INVALID_EXCEL_FORMAT,
+                    "Invalid Excel file format. Could not read the workbook: " + e.getMessage());
         }
     }
 
@@ -301,13 +363,13 @@ public class ExcelImportUtil {
     private static StudentImportRow parseImportRow(Row row, ImportColumnMapping mapping, int rowNumber) {
         try {
             StudentImportRow out = new StudentImportRow();
-            out.setStudentCode(getRequiredStringCellValue(row, mapping.studentCode));
-            out.setFullName(getRequiredStringCellValue(row, mapping.fullName));
-            out.setEmail(getRequiredStringCellValue(row, mapping.email));
-            out.setMajor(getRequiredStringCellValue(row, mapping.major));
-            out.setGpa(getRequiredGpaValue(row, mapping.gpa));
-            out.setCurrentSemester(getRequiredIntCellValue(row, mapping.currentSemester));
-            out.setSemesterNameOrCode(getRequiredStringCellValue(row, mapping.semesterNameOrCode));
+            out.setStudentCode(getRequiredStringCellValue(row, mapping.studentCode, "Student Code", rowNumber));
+            out.setFullName(getRequiredStringCellValue(row, mapping.fullName, "Full Name", rowNumber));
+            out.setEmail(getRequiredStringCellValue(row, mapping.email, "Email", rowNumber));
+            out.setMajor(getRequiredStringCellValue(row, mapping.major, "Major", rowNumber));
+            out.setGpa(getRequiredGpaValue(row, mapping.gpa, rowNumber));
+            out.setCurrentSemester(getRequiredIntCellValue(row, mapping.currentSemester, "Current Semester", rowNumber));
+            out.setSemesterNameOrCode(getRequiredStringCellValue(row, mapping.semesterNameOrCode, "Semester", rowNumber));
 
             if (mapping.phone != -1) {
                 out.setPhone(getOptionalStringCellValue(row, mapping.phone));
@@ -341,8 +403,8 @@ public class ExcelImportUtil {
             }
             return out;
         } catch (AppException e) {
-            // re-throw with row context so the caller can build a useful error report
-            throw new AppException(ErrorCode.INVALID_EXCEL_FORMAT);
+            // Re-throw with row context so the caller can build a useful error report
+            throw e;
         }
     }
 

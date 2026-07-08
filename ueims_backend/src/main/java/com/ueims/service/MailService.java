@@ -8,6 +8,8 @@ public interface MailService {
 
     void sendWelcomeMail(String to, String fullName, String tempPassword);
 
+    void sendRosterWelcomeMail(String to, String fullName, String tempPassword);
+
     void sendPasswordChangedMail(String to, String fullName, String changedAt);
 
     void sendLateReportWarningMail(String to, String fullName, Integer weekNumber);

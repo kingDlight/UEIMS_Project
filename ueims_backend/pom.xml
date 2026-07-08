@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -13,7 +13,7 @@
     <version>0.0.1-SNAPSHOT</version>
     <name>ueims_backend</name>
     <description>UEIMS Backend Application</description>
-    
+
     <properties>
         <java.version>21</java.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
@@ -22,7 +22,7 @@
         <lombok.version>1.18.38</lombok.version>
         <spotless.version>2.44.0</spotless.version>
     </properties>
-    
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -68,7 +68,7 @@
             <version>${lombok.version}</version>
             <optional>true</optional>
         </dependency>
-        
+
         <!-- MapStruct for DTO mapping -->
         <dependency>
             <groupId>org.mapstruct</groupId>

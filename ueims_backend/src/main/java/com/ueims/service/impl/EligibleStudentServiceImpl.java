@@ -14,6 +14,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +24,7 @@ import com.ueims.dto.request.EligibleStudentUpdateRequest;
 import com.ueims.dto.request.StudentImportRow;
 import com.ueims.dto.response.EligibleStudentResponse;
 import com.ueims.dto.response.StudentImportResult;
+import com.ueims.event.StudentRosterUserCreatedEvent;
 import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
 import com.ueims.model.entity.EligibleStudent;
@@ -61,6 +63,7 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
     RoleRepository roleRepository;
     UserRoleRepository userRoleRepository;
     PasswordEncoder passwordEncoder;
+    ApplicationEventPublisher eventPublisher;
 
     @Override
     public List<EligibleStudent> findAll() {
@@ -243,7 +246,9 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
         } catch (AppException e) {
             throw e;
         } catch (Exception e) {
-            throw new AppException(ErrorCode.INVALID_EXCEL_FORMAT);
+            log.error("Failed to parse eligible students Excel", e);
+            throw new AppException(ErrorCode.INVALID_EXCEL_FORMAT,
+                    "Invalid Excel file format. Could not read the workbook: " + e.getMessage());
         }
 
         List<EligibleStudent> toInsert = new ArrayList<>();
@@ -290,22 +295,26 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
             throw e;
         } catch (Exception e) {
             log.error("Failed to parse TM roster Excel", e);
-            throw new AppException(ErrorCode.INVALID_EXCEL_FORMAT);
+            throw new AppException(ErrorCode.INVALID_EXCEL_FORMAT,
+                    "Invalid Excel file format. Could not read the workbook: " + e.getMessage());
         }
 
         StudentImportResult result =
                 StudentImportResult.builder().totalRows(rows.size()).build();
 
-        // Track student codes that already triggered an email-collision error in
-        // this import — avoids spamming the error list for 100 rows pointing at
-        // the same wrong email.
+        // Tracks studentCodes already processed within this batch — silently skips
+        // duplicate rows from the same file (e.g. TM accidentally pasted the same
+        // row twice).  Does NOT guard against cross-file duplicates since each
+        // import is a separate semester-eligible record.
+        Set<String> seenStudentCodes = new HashSet<>();
+        // Tracks email collisions already reported to avoid log spam.
         Set<String> reportedCollisions = new HashSet<>();
 
         for (int i = 0; i < rows.size(); i++) {
             StudentImportRow row = rows.get(i);
             int excelRowNumber = i + 2; // +1 for header, +1 to make it 1-based
             try {
-                UpsertOutcome outcome = upsertStudentFromRow(row, semester, reportedCollisions);
+                UpsertOutcome outcome = upsertStudentFromRow(row, semester, seenStudentCodes, reportedCollisions);
                 switch (outcome) {
                     case CREATED -> result.setCreated(result.getCreated() + 1);
                     case UPDATED -> result.setUpdated(result.getUpdated() + 1);
@@ -356,10 +365,11 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
      * on the row is currently informational, not authoritative.
      */
     private UpsertOutcome upsertStudentFromRow(
-            StudentImportRow row, Semester semester, Set<String> reportedCollisions) {
+            StudentImportRow row, Semester semester, Set<String> seenStudentCodes, Set<String> reportedCollisions) {
 
-        // (studentCode, semester) dedup check first — cheap.
-        if (repository.existsByStudentCodeAndSemester_SemesterId(row.getStudentCode(), semester.getSemesterId())) {
+        // Silently skip rows with duplicate studentCode within the same file —
+        // protects against TM accidentally pasting the same row twice.
+        if (!seenStudentCodes.add(row.getStudentCode())) {
             return UpsertOutcome.SKIPPED_DUPLICATE;
         }
 
@@ -384,8 +394,17 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
             createdUser = true;
         } else {
             user = userOpt.get();
-            // Email changed for an existing account — guard against collision.
-            if (!user.getEmail().equalsIgnoreCase(row.getEmail()) && userRepository.existsByEmail(row.getEmail())) {
+            // Guard: existing user must not be a non-student account (e.g.
+            // lecturer / admin) — refusing to share an account between roles
+            // is the safer call than silently mutating it.
+            if (!userHasStudentRole(user)) {
+                reportCollisionOnce(reportedCollisions, row.getEmail());
+                throw new AppException(ErrorCode.EMAIL_ALREADY_EXISTS);
+            }
+            // Email is institution-assigned — never mutate an existing user's email
+            // during roster import. If the Excel row contains a different email, it
+            // is treated as a data error for TM to resolve manually.
+            if (!user.getEmail().equalsIgnoreCase(row.getEmail())) {
                 reportCollisionOnce(reportedCollisions, row.getEmail());
                 throw new AppException(ErrorCode.EMAIL_ALREADY_EXISTS);
             }
@@ -420,6 +439,16 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
                 .build();
         repository.save(eligible);
 
+        // Notify the freshly minted student of their credentials. Event-based so
+        // the email only fires once the surrounding transaction commits —
+        // otherwise we'd mail a password for a user that doesn't exist.
+        if (createdUser) {
+            eventPublisher.publishEvent(new StudentRosterUserCreatedEvent(
+                    user.getEmail(),
+                    user.getFullName(),
+                    DEFAULT_IMPORT_PASSWORD));
+        }
+
         return createdUser ? UpsertOutcome.CREATED : UpsertOutcome.UPDATED;
     }
 
@@ -431,8 +460,8 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
                 .phone(row.getPhone())
                 .authProvider("LOCAL")
                 .status("ACTIVE")
-                .mustChangePassword(false)
-                .passwordChangedAt(LocalDateTime.now())
+                .mustChangePassword(true)
+                .passwordChangedAt(null)
                 .build();
         user = userRepository.save(user);
 
@@ -454,34 +483,39 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
     private void updateExistingStudentUser(User user, StudentImportRow row) {
         user.setFullName(row.getFullName());
         user.setPhone(row.getPhone());
-        user.setEmail(row.getEmail());
-        // Product decision: every periodic import resets the password to the
-        // shared default so the TM can always hand the student their creds
-        // (e.g. after the student forgot). mustChangePassword stays as-is.
-        user.setPassword(passwordEncoder.encode(DEFAULT_IMPORT_PASSWORD));
-        user.setPasswordChangedAt(LocalDateTime.now());
+        // Email is institution-assigned and must NOT be mutated during import —
+        // TM handles any email reconciliation separately.
+        // Password is never reset for existing users.
         userRepository.save(user);
     }
 
     private void applyProfileFields(StudentProfile profile, StudentImportRow row) {
         profile.setStudentCode(row.getStudentCode());
+        // Official school-issued fields — always override from the import file.
         profile.setMajor(row.getMajor());
         profile.setGpa(row.getGpa());
         if (row.getClassCode() != null) profile.setClassCode(row.getClassCode());
         if (row.getDateOfBirth() != null) profile.setDateOfBirth(row.getDateOfBirth());
         if (row.getGender() != null) profile.setGender(row.getGender());
         if (row.getAddress() != null) profile.setAddress(row.getAddress());
-        if (row.getSkills() != null) profile.setSkills(row.getSkills());
-        if (row.getLinkedinUrl() != null) profile.setLinkedinUrl(row.getLinkedinUrl());
-        if (row.getGithubUrl() != null) profile.setGithubUrl(row.getGithubUrl());
-        if (row.getPortfolioUrl() != null) profile.setPortfolioUrl(row.getPortfolioUrl());
-        if (row.getBio() != null) profile.setBio(row.getBio());
+        // Personal profile fields — SV manages these themselves; only populate
+        // from the import when the field is currently null.
+        if (profile.getBio() == null && row.getBio() != null) profile.setBio(row.getBio());
+        if (profile.getSkills() == null && row.getSkills() != null) profile.setSkills(row.getSkills());
+        if (profile.getLinkedinUrl() == null && row.getLinkedinUrl() != null) profile.setLinkedinUrl(row.getLinkedinUrl());
+        if (profile.getGithubUrl() == null && row.getGithubUrl() != null) profile.setGithubUrl(row.getGithubUrl());
+        if (profile.getPortfolioUrl() == null && row.getPortfolioUrl() != null) profile.setPortfolioUrl(row.getPortfolioUrl());
     }
 
     private void reportCollisionOnce(Set<String> reported, String email) {
         if (reported.add(email)) {
             log.warn("Email collision detected for {}", email);
         }
+    }
+
+    private boolean userHasStudentRole(User user) {
+        if (user == null || user.getUserId() == null) return false;
+        return userRoleRepository.existsByUserIdAndRoleName(user.getUserId(), STUDENT_ROLE);
     }
 
     @Override

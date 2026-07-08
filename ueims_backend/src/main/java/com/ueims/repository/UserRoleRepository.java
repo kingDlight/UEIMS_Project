@@ -15,4 +15,7 @@ public interface UserRoleRepository extends JpaRepository<UserRole, UserRoleId> 
 
     @Query("SELECT COUNT(ur) FROM UserRole ur WHERE ur.id.roleName = :roleName")
     long countByRoleName(@Param("roleName") String roleName);
+
+    @Query("SELECT COUNT(ur) > 0 FROM UserRole ur WHERE ur.user.userId = :userId AND ur.id.roleName = :roleName")
+    boolean existsByUserIdAndRoleName(@Param("userId") UUID userId, @Param("roleName") String roleName);
 }

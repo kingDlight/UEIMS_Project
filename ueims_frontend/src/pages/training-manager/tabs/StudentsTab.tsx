@@ -921,8 +921,13 @@ export const StudentsTab: React.FC = () => {
       setRosterResult(result);
       setRosterResultModalOpen(true);
       void refetchStudents();
-    } catch {
-      message.error({ content: t('studentsTab.importError'), key: 'import' });
+    } catch (err: any) {
+      const backendMessage =
+        err?.response?.data?.message
+        ?? err?.response?.data?.error
+        ?? err?.message
+        ?? t('studentsTab.importError');
+      message.error({ content: backendMessage, key: 'import', duration: 6 });
     } finally {
       setImporting(false);
     }
@@ -1456,6 +1461,9 @@ export const StudentsTab: React.FC = () => {
           >
             Only students with GPA{' '}
             <strong>5.0 or higher</strong> will be imported as Eligible.
+            <br />
+            New students get an account with default password{' '}
+            <strong>Password@123</strong>. They may change it after first login.
           </div>
         </div>
         <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
