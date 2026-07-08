@@ -23,6 +23,8 @@ public interface EligibleStudentRepository extends JpaRepository<EligibleStudent
 
     List<EligibleStudent> findAllByUser_UserId(UUID userId);
 
+    java.util.Optional<EligibleStudent> findBySemester_SemesterIdAndStudentCode(UUID semesterId, String studentCode);
+
     java.util.Optional<EligibleStudent> findTopByUser_UserIdOrderByImportedAtDesc(UUID userId);
 
     @org.springframework.data.jpa.repository.Query(

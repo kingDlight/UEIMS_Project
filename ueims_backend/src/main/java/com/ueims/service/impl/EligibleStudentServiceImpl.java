@@ -17,8 +17,8 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.ueims.dto.request.EligibleStudentUpdateRequest;
@@ -28,6 +28,7 @@ import com.ueims.dto.response.StudentImportResult;
 import com.ueims.event.StudentRosterUserCreatedEvent;
 import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
+import org.springframework.dao.DataIntegrityViolationException;
 import com.ueims.model.entity.EligibleStudent;
 import com.ueims.model.entity.Role;
 import com.ueims.model.entity.Semester;
@@ -355,8 +356,7 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public UpsertOutcome upsertStudentFromRowNewTx(
-            StudentImportRow row, Semester semester,
-            Set<String> seenStudentCodes, Set<String> reportedCollisions) {
+            StudentImportRow row, Semester semester, Set<String> seenStudentCodes, Set<String> reportedCollisions) {
         return upsertStudentFromRow(row, semester, seenStudentCodes, reportedCollisions);
     }
 
@@ -430,21 +430,31 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
         applyProfileFields(profile, row);
         studentProfileRepository.save(profile);
 
-        // Create a new EligibleStudent record for the given semester. The
-        // status defaults to ELIGIBLE — TM can change it manually.
-        EligibleStudent eligible = EligibleStudent.builder()
-                .semester(semester)
-                .user(user)
-                .studentCode(row.getStudentCode())
-                .fullName(row.getFullName())
-                .email(row.getEmail())
-                .major(row.getMajor())
-                .gpa(row.getGpa())
-                .currentSemester(row.getCurrentSemester())
-                .status("ELIGIBLE")
-                .isLocked(false)
-                .importedAt(LocalDateTime.now())
-                .build();
+        // Upsert EligibleStudent for this semester: update if exists, insert if not.
+        // The unique constraint is (semester_id, student_code).
+        EligibleStudent eligible = repository
+                .findBySemester_SemesterIdAndStudentCode(semester.getSemesterId(), row.getStudentCode())
+                .map(existing -> {
+                    existing.setFullName(row.getFullName());
+                    existing.setEmail(row.getEmail());
+                    existing.setMajor(row.getMajor());
+                    existing.setGpa(row.getGpa());
+                    existing.setCurrentSemester(row.getCurrentSemester());
+                    return existing;
+                })
+                .orElseGet(() -> EligibleStudent.builder()
+                        .semester(semester)
+                        .user(user)
+                        .studentCode(row.getStudentCode())
+                        .fullName(row.getFullName())
+                        .email(row.getEmail())
+                        .major(row.getMajor())
+                        .gpa(row.getGpa())
+                        .currentSemester(row.getCurrentSemester())
+                        .status("ELIGIBLE")
+                        .isLocked(false)
+                        .importedAt(LocalDateTime.now())
+                        .build());
         repository.save(eligible);
 
         // Notify the freshly minted student of their credentials. Event-based so
