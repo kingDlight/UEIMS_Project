@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8080/api/training-warnings';
+const API_URL = `${process.env.VITE_API_URL || 'http://localhost:8080/api'}/training-warnings`;
 
 export const TrainingWarningService = {
     getAll: () => axios.get(API_URL),

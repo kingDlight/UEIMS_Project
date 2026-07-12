@@ -358,8 +358,7 @@ public class ExcelImportUtil {
                 mapping.bio = cell.getColumnIndex();
             } else if (containsAny(header, "status", "trạng thái")) {
                 mapping.status = cell.getColumnIndex();
-            } else if (header.matches("(?i)^\\s*no\\.?\\s*$")
-                    || containsAny(header, "stt", "số thứ tự", "số tt")) {
+            } else if (header.matches("(?i)^\\s*no\\.?\\s*$") || containsAny(header, "stt", "số thứ tự", "số tt")) {
                 // Informational row number — skip
             }
         }

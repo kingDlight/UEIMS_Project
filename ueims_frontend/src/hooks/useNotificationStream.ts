@@ -36,7 +36,7 @@ export function useNotificationStream() {
       return;
     }
 
-    const baseHttp = (import.meta.env.VITE_API_URL || 'http://localhost:8080/api').replace(/\/api\/?$/, '');
+    const baseHttp = (process.env.VITE_API_URL || `${process.env.VITE_API_URL || 'http://localhost:8080/api'}`).replace(/\/api\/?$/, '');
     const wsUrl = `${baseHttp}/ws?token=${encodeURIComponent(token)}`;
 
     const client = new Client({

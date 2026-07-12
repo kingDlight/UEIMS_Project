@@ -183,7 +183,7 @@ export const AssignedStudentsTab: React.FC = () => {
                   <div className="mt-4 flex justify-between items-center border-t border-slate-100 pt-3">
                     <div className="flex gap-2">
                       {r.finalReportUrl && (
-                        <a href={`http://localhost:8080${r.finalReportUrl}`} target="_blank" rel="noreferrer" className="text-[12px] font-semibold text-blue-500 hover:text-blue-600 transition-colors bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100 hover:border-blue-200 cursor-pointer inline-block no-underline">
+                        <a href={`${(process.env.VITE_API_URL || 'http://localhost:8080/api').replace(/\/api\/?$/, '')}${r.finalReportUrl}`} target="_blank" rel="noreferrer" className="text-[12px] font-semibold text-blue-500 hover:text-blue-600 transition-colors bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100 hover:border-blue-200 cursor-pointer inline-block no-underline">
                           View Final Report
                         </a>
                       )}

@@ -15,7 +15,7 @@ import { api } from '@/services/api';
 const toAbsoluteAssetUrl = (path?: string | null): string | null => {
   if (!path) return null;
   if (path.startsWith('http') || path.startsWith('data:') || path.startsWith('blob:')) return path;
-  const base = (import.meta.env.VITE_API_URL || 'http://localhost:8080/api').replace(/\/api\/?$/, '');
+  const base = (process.env.VITE_API_URL || `${process.env.VITE_API_URL || 'http://localhost:8080/api'}`).replace(/\/api\/?$/, '');
   return `${base}${path.startsWith('/') ? path : `/${path}`}`;
 };
 import { useNotificationStore, type NotificationItem } from '@/stores/useNotificationStore';

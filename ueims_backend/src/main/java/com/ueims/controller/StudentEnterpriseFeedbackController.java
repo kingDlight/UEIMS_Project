@@ -66,8 +66,8 @@ public class StudentEnterpriseFeedbackController {
     public ResponseEntity<byte[]> exportToExcel(@RequestParam UUID semesterId) {
         byte[] data = service.exportToExcel(semesterId);
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.parseMediaType(
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+        headers.setContentType(
+                MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
         headers.add("Content-Disposition", "attachment; filename=enterprise_feedback_report.xlsx");
         return new ResponseEntity<>(data, headers, org.springframework.http.HttpStatus.OK);
     }

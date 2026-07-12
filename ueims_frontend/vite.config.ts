@@ -1,6 +1,9 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'node:path'
+import dotenv from 'dotenv'
+
+dotenv.config()
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -14,6 +17,7 @@ export default defineConfig({
   // to `globalThis` so the bundled code runs in the browser.
   define: {
     global: 'globalThis',
+    'process.env': process.env
   },
   optimizeDeps: {
     force: true,

@@ -3,7 +3,7 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { getDeviceId } from '@/utils/device';
 
 // If VITE_API_URL is provided by environment (e.g., prod), use it. Otherwise, use localhost.
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+const API_URL = process.env.VITE_API_URL || `${process.env.VITE_API_URL || 'http://localhost:8080/api'}`;
 
 export const api = axios.create({
   baseURL: API_URL,

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8080/api/audit-logs';
+const API_URL = `${process.env.VITE_API_URL || 'http://localhost:8080/api'}/audit-logs`;
 
 export const AuditLogService = {
     getAll: () => axios.get(API_URL),
