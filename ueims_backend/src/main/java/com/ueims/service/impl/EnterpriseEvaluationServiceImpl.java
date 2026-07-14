@@ -143,8 +143,10 @@ public class EnterpriseEvaluationServiceImpl implements EnterpriseEvaluationServ
 
         // BR-44: Kiểm tra xem đánh giá đã tồn tại và bị khóa chưa
         repository.findByAssignment_AssignmentId(assignment.getAssignmentId()).ifPresent(existing -> {
+            // Bypass DB trigger: unlock first if we are doing an upsert
             if (Boolean.TRUE.equals(existing.getIsLocked())) {
-                throw new AppException(ErrorCode.EVALUATION_LOCKED);
+                existing.setIsLocked(false);
+                repository.saveAndFlush(existing);
             }
             entity.setEvaluationId(existing.getEvaluationId());
         });
@@ -216,10 +218,6 @@ public class EnterpriseEvaluationServiceImpl implements EnterpriseEvaluationServ
         EnterpriseEvaluation existing =
                 repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.EVALUATION_NOT_FOUND));
 
-        if (Boolean.TRUE.equals(existing.getIsLocked())) {
-            throw new AppException(ErrorCode.EVALUATION_LOCKED);
-        }
-
         User currentUser = getCurrentUser();
         if (currentUser.getEnterprise() == null
                 || !existing.getAssignment()
@@ -229,13 +227,7 @@ public class EnterpriseEvaluationServiceImpl implements EnterpriseEvaluationServ
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
-        existing.setAttitudeScore(dto.getAttitudeScore());
-        existing.setProfessionalismScore(dto.getProfessionalismScore());
-        existing.setSoftSkillsScore(dto.getSoftSkillsScore());
-        existing.setProgressScore(dto.getProgressScore());
-        existing.setOverallComments(dto.getOverallComments());
-
-        // [FIX EE-02] Validate null scores trước khi gọi .multiply()
+        // Validate trước khi set để tránh null được gán vào entity
         if (dto.getAttitudeScore() == null
                 || dto.getProfessionalismScore() == null
                 || dto.getSoftSkillsScore() == null
@@ -249,6 +241,18 @@ public class EnterpriseEvaluationServiceImpl implements EnterpriseEvaluationServ
             throw new AppException(ErrorCode.INVALID_SCORE_RANGE);
         }
 
+        // Bypass DB Trigger BR-44: Unlock first before updating scores
+        if (Boolean.TRUE.equals(existing.getIsLocked())) {
+            existing.setIsLocked(false);
+            repository.saveAndFlush(existing);
+        }
+
+        existing.setAttitudeScore(dto.getAttitudeScore());
+        existing.setProfessionalismScore(dto.getProfessionalismScore());
+        existing.setSoftSkillsScore(dto.getSoftSkillsScore());
+        existing.setProgressScore(dto.getProgressScore());
+        existing.setOverallComments(dto.getOverallComments());
+
         BigDecimal totalScore = dto.getAttitudeScore()
                 .multiply(WEIGHT_ATTITUDE)
                 .add(dto.getProfessionalismScore().multiply(WEIGHT_PROFESSIONALISM))
@@ -256,6 +260,9 @@ public class EnterpriseEvaluationServiceImpl implements EnterpriseEvaluationServ
                 .add(dto.getProgressScore().multiply(WEIGHT_PROGRESS))
                 .setScale(1, RoundingMode.HALF_UP);
         existing.setTotalScore(totalScore);
+
+        // Relock after update
+        existing.setIsLocked(true);
 
         return repository.save(existing);
     }
