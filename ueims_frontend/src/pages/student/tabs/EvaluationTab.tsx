@@ -42,14 +42,14 @@ export const EvaluationTab: React.FC = () => {
   }
 
   const rubricScores = evaluation ? [
-    { name: t('attitude', 'Attitude (20%)'), score: evaluation.attitudeScore, maxScore: 5, weight: 0.2 },
-    { name: t('professionalism', 'Professionalism (40%)'), score: evaluation.professionalismScore, maxScore: 5, weight: 0.4 },
-    { name: t('softSkills', 'Soft Skills (20%)'), score: evaluation.softSkillsScore, maxScore: 5, weight: 0.2 },
-    { name: t('progress', 'Progress (20%)'), score: evaluation.progressScore, maxScore: 5, weight: 0.2 },
+    { name: t('attitude', 'Attitude (20%)'), score: evaluation.attitudeScore, maxScore: 10, weight: 0.2 },
+    { name: t('professionalism', 'Professionalism (40%)'), score: evaluation.professionalismScore, maxScore: 10, weight: 0.4 },
+    { name: t('softSkills', 'Soft Skills (20%)'), score: evaluation.softSkillsScore, maxScore: 10, weight: 0.2 },
+    { name: t('progress', 'Progress (20%)'), score: evaluation.progressScore, maxScore: 10, weight: 0.2 },
   ] : [];
 
   const finalScore = rubricScores.reduce((sum: number, r: any) => sum + (r.score * r.weight), 0);
-  const percentage = Math.round((finalScore / 5) * 100);
+  const percentage = Math.round((finalScore / 10) * 100);
   const isPass = percentage >= 50;
 
   const getGrade = (pct: number) => {
@@ -98,7 +98,7 @@ export const EvaluationTab: React.FC = () => {
                   </span>
                 </div>
                 <p style={{ fontSize: 13, color: cc.textMuted, margin: 0, lineHeight: 1.6 }}>
-                  {t('finalScore', 'Final Score')}: {finalScore.toFixed(1)} / 5.0 {t('points', 'points')}
+                  {t('finalScore', 'Final Score')}: {finalScore.toFixed(1)} / 10.0 {t('points', 'points')}
                 </p>
                 <div style={{ marginTop: 12, height: 8, borderRadius: 4, background: cc.borderSubtle, overflow: 'hidden' }}>
                   <div style={{ width: `${percentage}%`, height: '100%', background: color, borderRadius: 4, transition: 'width 0.5s ease' }} />
