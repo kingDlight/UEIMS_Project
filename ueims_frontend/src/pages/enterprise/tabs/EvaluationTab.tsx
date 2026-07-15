@@ -69,10 +69,10 @@ const SliderRating: React.FC<{
   <div className="flex flex-col gap-2">
     <div className="flex justify-between items-center">
       <span className="text-[12px] text-slate-500 font-semibold">1 — Poor</span>
-      <span className="text-[12px] text-slate-500 font-semibold">5 — Excellent</span>
+      <span className="text-[12px] text-slate-500 font-semibold">10 — Excellent</span>
     </div>
     <div className="relative flex items-center">
-      {[1, 2, 3, 4, 5].map((n) => (
+      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
         <motion.div
           key={n}
           whileHover={readonly ? {} : { scale: 1.1 }}
@@ -144,12 +144,12 @@ const RubricCard: React.FC<{
         <div>
           <div className="flex justify-between mb-1.5">
             <span className="text-[11px] text-slate-500">Score</span>
-            <span className={`text-[13px] font-bold ${colors.text}`}>{score > 0 ? `${score}/5` : '—'}</span>
+            <span className={`text-[13px] font-bold ${colors.text}`}>{score > 0 ? `${score}/10` : '—'}</span>
           </div>
           <div className="h-1.5 rounded-full bg-slate-200 overflow-hidden">
             <motion.div
               initial={{ width: 0 }}
-              animate={{ width: score > 0 ? `${(score / 5) * 100}%` : '0%' }}
+              animate={{ width: score > 0 ? `${(score / 10) * 100}%` : '0%' }}
               transition={{ duration: 0.5, ease: [0.32, 0.72, 0, 1] }}
               className={`h-full rounded-full ${colors.bar}`}
             />
@@ -169,7 +169,7 @@ const EvaluationSummary: React.FC<{
 }> = ({ scores, comments }) => {
   const total = RUBRICS.reduce((sum, r) => {
     const score = scores[r.id] || 0;
-    return sum + (score / 5) * r.weight;
+    return sum + (score / 10) * r.weight;
   }, 0);
 
   const grade = total >= 90 ? 'A' : total >= 80 ? 'B' : total >= 70 ? 'C' : total >= 60 ? 'D' : 'F';
@@ -196,7 +196,7 @@ const EvaluationSummary: React.FC<{
              return (
             <div key={r.id} className={`flex-1 py-2 px-2.5 rounded-xl text-center ${c.bg} border ${c.border}`}>
               <div className={`text-[14px] font-extrabold ${c.text}`}>
-                {scores[r.id] > 0 ? `${scores[r.id]}/5` : '—'}
+                {scores[r.id] > 0 ? `${scores[r.id]}/10` : '—'}
               </div>
               <div className={`text-[9px] ${c.text} opacity-70 mt-0.5`}>{r.weight}%</div>
             </div>
@@ -471,7 +471,7 @@ export const EvaluationTab: React.FC = () => {
           Final Evaluation
         </h2>
         <p className="text-[13px] text-slate-500 m-0">
-          Rate each criterion on a scale of 1–5. Grades are weighted per rubric.
+          Rate each criterion on a scale of 1–10. Grades are weighted per rubric.
         </p>
       </div>
 
