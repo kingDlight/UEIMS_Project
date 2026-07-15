@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Spin, App } from 'antd';
+import { Spin, App, Select, Button } from 'antd';
 import { motion } from 'framer-motion';
-import { StarOutlined, LockOutlined, CheckCircleOutlined, EditOutlined, SaveOutlined, CloseOutlined } from '@ant-design/icons';
+import { StarOutlined, LockOutlined, CheckCircleOutlined, EditOutlined, SaveOutlined, CloseOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons';
 import { EnterpriseEvaluationService } from '@/services/EnterpriseEvaluationService';
 import { EnterpriseAssignmentService } from '@/services/EnterpriseAssignmentService';
 
@@ -476,27 +476,71 @@ export const EvaluationTab: React.FC = () => {
       </div>
 
       {/* Student selector */}
-      <div className="px-6 pb-5 flex gap-3 flex-wrap">
-        {students.map((student) => (
-          <motion.button
-            key={student.assignmentId}
-            whileHover={{ y: -2 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => setSelectedStudent(student)}
-            className={`px-4 py-2.5 rounded-2xl border-2 cursor-pointer font-sans shadow-sm transition-all text-[13px] flex items-center gap-2 ${
-              selectedStudent?.assignmentId === student.assignmentId
-                ? 'border-[#E67E22] bg-[#E67E22]/10 text-[#E67E22] font-bold shadow-[0_4px_12px_rgba(230,126,34,0.2)]'
-                : 'border-slate-200 bg-white text-slate-900 font-medium'
-            }`}
+      <div className="px-6 pb-5 flex items-center gap-3">
+        <Select
+          showSearch
+          value={selectedStudent?.assignmentId}
+          onChange={(value) => {
+            const student = students.find(s => s.assignmentId === value);
+            if (student) setSelectedStudent(student);
+          }}
+          style={{ width: 340, height: 48 }}
+          className="font-sans"
+          placeholder="Search student name or code..."
+          optionFilterProp="children"
+          filterOption={(input, option) =>
+            (option?.label ?? '').toString().toLowerCase().includes(input.toLowerCase()) || 
+            (option?.['data-code'] ?? '').toString().toLowerCase().includes(input.toLowerCase())
+          }
+          options={students.map(student => ({
+            value: student.assignmentId,
+            label: student.studentName,
+            'data-code': student.studentCode,
+            labelNode: (
+              <div className="flex items-center justify-between py-1">
+                <div>
+                  <div className="font-bold text-slate-800 leading-tight">{student.studentName}</div>
+                  <div className="text-[11px] text-slate-400 mt-0.5">{student.studentCode}</div>
+                </div>
+                {student.evaluationId && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 text-[10px] font-bold uppercase tracking-wide">
+                    <CheckCircleOutlined /> Done
+                  </span>
+                )}
+              </div>
+            )
+          }))}
+          optionRender={(option) => option.data.labelNode}
+        />
+
+        <div className="flex gap-2 ml-auto md:ml-0">
+          <Button 
+            disabled={!selectedStudent || students.findIndex(s => s.assignmentId === selectedStudent.assignmentId) === 0}
+            onClick={() => {
+              if (!selectedStudent) return;
+              const idx = students.findIndex(s => s.assignmentId === selectedStudent.assignmentId);
+              if (idx > 0) setSelectedStudent(students[idx - 1]);
+            }}
+            icon={<LeftOutlined />}
+            style={{ height: 48, borderRadius: 12, padding: '0 16px', fontWeight: 600 }}
+            className="flex items-center justify-center font-sans"
           >
-            <span>{student.studentName}</span>
-            {student.evaluationId && (
-              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 text-[10px] font-bold uppercase tracking-wide">
-                <CheckCircleOutlined /> Done
-              </span>
-            )}
-          </motion.button>
-        ))}
+            Previous
+          </Button>
+          <Button 
+            disabled={!selectedStudent || students.findIndex(s => s.assignmentId === selectedStudent.assignmentId) === students.length - 1}
+            onClick={() => {
+              if (!selectedStudent) return;
+              const idx = students.findIndex(s => s.assignmentId === selectedStudent.assignmentId);
+              if (idx < students.length - 1) setSelectedStudent(students[idx + 1]);
+            }}
+            type="primary"
+            style={{ height: 48, borderRadius: 12, padding: '0 16px', fontWeight: 600 }}
+            className="flex items-center justify-center font-sans bg-[#E67E22] hover:bg-[#D35400] border-none shadow-[0_4px_12px_rgba(230,126,34,0.2)]"
+          >
+            Next Student <RightOutlined />
+          </Button>
+        </div>
       </div>
 
       {selectedStudent && (
