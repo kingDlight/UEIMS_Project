@@ -206,7 +206,7 @@ public class EnterpriseEvaluationServiceImpl implements EnterpriseEvaluationServ
                         currentUser.getUserId(),
                         evaluation.getAssignment().getSemester().getSemesterId())
                 .ifPresent(eligible -> {
-                    if (eligible.getCurrentSemester() != null && eligible.getCurrentSemester() < 7) {
+                    if (eligible.getCurrentSemester() != null && eligible.getCurrentSemester() < 6) {
                         throw new AppException(ErrorCode.STUDENT_RESULT_ACCESS_DENIED);
                     }
                 });
