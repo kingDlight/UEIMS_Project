@@ -400,8 +400,8 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
               </a>
             </div>
             <div className="modern-nav-items desktop-only">
-              {/* Visible pills: first 7 items */}
-              {filteredNavItems.slice(0, 7).map((item) => {
+              {/* Visible pills: first 6 items */}
+              {filteredNavItems.slice(0, 6).map((item) => {
                 const isActive = activeTab === item.key;
                 return (
                   <button
@@ -417,8 +417,8 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
               })}
 
               {/* More dropdown: remaining items */}
-              {filteredNavItems.length > 7 && (() => {
-                const moreItems: MenuProps['items'] = filteredNavItems.slice(7).map((item) => ({
+              {filteredNavItems.length > 6 && (() => {
+                const moreItems: MenuProps['items'] = filteredNavItems.slice(6).map((item) => ({
                   key: item.key,
                   label: (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -429,7 +429,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
                   onClick: () => handleNavigate(item.key),
                 }));
 
-                const isMoreActive = filteredNavItems.slice(7).some((item) => activeTab === item.key);
+                const isMoreActive = filteredNavItems.slice(6).some((item) => activeTab === item.key);
 
                 return (
                   <Dropdown menu={{ items: moreItems }} trigger={['click']} placement="bottomRight">
