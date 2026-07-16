@@ -42,15 +42,15 @@ export const EvaluationTab: React.FC = () => {
   }
 
   const rubricScores = evaluation ? [
-    { name: t('attitude', 'Attitude (20%)'), score: evaluation.attitudeScore, maxScore: 10 },
-    { name: t('professionalism', 'Professionalism (40%)'), score: evaluation.professionalismScore, maxScore: 10 },
-    { name: t('softSkills', 'Soft Skills (20%)'), score: evaluation.softSkillsScore, maxScore: 10 },
-    { name: t('progress', 'Progress (20%)'), score: evaluation.progressScore, maxScore: 10 },
+    { name: t('attitude', 'Attitude (20%)'), score: evaluation.attitudeScore, maxScore: 10, weight: 0.2 },
+    { name: t('professionalism', 'Professionalism (40%)'), score: evaluation.professionalismScore, maxScore: 10, weight: 0.4 },
+    { name: t('softSkills', 'Soft Skills (20%)'), score: evaluation.softSkillsScore, maxScore: 10, weight: 0.2 },
+    { name: t('progress', 'Progress (20%)'), score: evaluation.progressScore, maxScore: 10, weight: 0.2 },
   ] : [];
 
-  const totalScore = rubricScores.reduce((sum: number, r: any) => sum + r.score, 0);
-  const maxScore = rubricScores.reduce((sum: number, r: any) => sum + r.maxScore, 0);
-  const percentage = Math.round((totalScore / maxScore) * 100);
+  const finalScore = rubricScores.reduce((sum: number, r: any) => sum + (r.score * r.weight), 0);
+  const percentage = Math.round((finalScore / 10) * 100);
+  const isPass = percentage >= 50;
 
   const getGrade = (pct: number) => {
     if (pct >= 90) return { grade: 'A', color: cc.success };
@@ -81,9 +81,24 @@ export const EvaluationTab: React.FC = () => {
                 <span style={{ fontSize: 12, fontWeight: 700, color: cc.textMuted, marginTop: 4 }}>{percentage}%</span>
               </div>
               <div style={{ flex: 1 }}>
-                <h3 style={{ fontSize: 18, fontWeight: 700, color: cc.text, margin: '0 0 8px' }}>{t('finalGrade', 'Final Grade')}: {grade}</h3>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <h3 style={{ fontSize: 18, fontWeight: 700, color: cc.text, margin: 0 }}>{t('finalGrade', 'Final Grade')}: {grade}</h3>
+                  <span style={{ 
+                    padding: '4px 12px', 
+                    borderRadius: 100, 
+                    fontSize: 12, 
+                    fontWeight: 800, 
+                    letterSpacing: '0.05em',
+                    textTransform: 'uppercase',
+                    color: isPass ? cc.success : cc.danger, 
+                    background: isPass ? `${cc.success}15` : `${cc.danger}15`,
+                    border: `1px solid ${isPass ? `${cc.success}30` : `${cc.danger}30`}`
+                  }}>
+                    {isPass ? 'PASS' : 'FAIL'}
+                  </span>
+                </div>
                 <p style={{ fontSize: 13, color: cc.textMuted, margin: 0, lineHeight: 1.6 }}>
-                  {t('totalScore', 'Total Score')}: {totalScore}/{maxScore} {t('points', 'points')}
+                  {t('finalScore', 'Final Score')}: {finalScore.toFixed(1)} / 10.0 {t('points', 'points')}
                 </p>
                 <div style={{ marginTop: 12, height: 8, borderRadius: 4, background: cc.borderSubtle, overflow: 'hidden' }}>
                   <div style={{ width: `${percentage}%`, height: '100%', background: color, borderRadius: 4, transition: 'width 0.5s ease' }} />

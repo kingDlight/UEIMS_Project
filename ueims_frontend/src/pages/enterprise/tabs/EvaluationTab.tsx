@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Spin, App } from 'antd';
+import { Spin, App, Select, Button } from 'antd';
 import { motion } from 'framer-motion';
-import { StarOutlined, LockOutlined, CheckCircleOutlined, EditOutlined, SaveOutlined, CloseOutlined } from '@ant-design/icons';
+import { StarOutlined, LockOutlined, CheckCircleOutlined, EditOutlined, SaveOutlined, CloseOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons';
 import { EnterpriseEvaluationService } from '@/services/EnterpriseEvaluationService';
 import { EnterpriseAssignmentService } from '@/services/EnterpriseAssignmentService';
 
@@ -69,10 +69,10 @@ const SliderRating: React.FC<{
   <div className="flex flex-col gap-2">
     <div className="flex justify-between items-center">
       <span className="text-[12px] text-slate-500 font-semibold">1 — Poor</span>
-      <span className="text-[12px] text-slate-500 font-semibold">5 — Excellent</span>
+      <span className="text-[12px] text-slate-500 font-semibold">10 — Excellent</span>
     </div>
     <div className="relative flex items-center">
-      {[1, 2, 3, 4, 5].map((n) => (
+      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
         <motion.div
           key={n}
           whileHover={readonly ? {} : { scale: 1.1 }}
@@ -144,12 +144,12 @@ const RubricCard: React.FC<{
         <div>
           <div className="flex justify-between mb-1.5">
             <span className="text-[11px] text-slate-500">Score</span>
-            <span className={`text-[13px] font-bold ${colors.text}`}>{score > 0 ? `${score}/5` : '—'}</span>
+            <span className={`text-[13px] font-bold ${colors.text}`}>{score > 0 ? `${score}/10` : '—'}</span>
           </div>
           <div className="h-1.5 rounded-full bg-slate-200 overflow-hidden">
             <motion.div
               initial={{ width: 0 }}
-              animate={{ width: score > 0 ? `${(score / 5) * 100}%` : '0%' }}
+              animate={{ width: score > 0 ? `${(score / 10) * 100}%` : '0%' }}
               transition={{ duration: 0.5, ease: [0.32, 0.72, 0, 1] }}
               className={`h-full rounded-full ${colors.bar}`}
             />
@@ -169,7 +169,7 @@ const EvaluationSummary: React.FC<{
 }> = ({ scores, comments }) => {
   const total = RUBRICS.reduce((sum, r) => {
     const score = scores[r.id] || 0;
-    return sum + (score / 5) * r.weight;
+    return sum + (score / 10) * r.weight;
   }, 0);
 
   const grade = total >= 90 ? 'A' : total >= 80 ? 'B' : total >= 70 ? 'C' : total >= 60 ? 'D' : 'F';
@@ -196,7 +196,7 @@ const EvaluationSummary: React.FC<{
              return (
             <div key={r.id} className={`flex-1 py-2 px-2.5 rounded-xl text-center ${c.bg} border ${c.border}`}>
               <div className={`text-[14px] font-extrabold ${c.text}`}>
-                {scores[r.id] > 0 ? `${scores[r.id]}/5` : '—'}
+                {scores[r.id] > 0 ? `${scores[r.id]}/10` : '—'}
               </div>
               <div className={`text-[9px] ${c.text} opacity-70 mt-0.5`}>{r.weight}%</div>
             </div>
@@ -471,32 +471,76 @@ export const EvaluationTab: React.FC = () => {
           Final Evaluation
         </h2>
         <p className="text-[13px] text-slate-500 m-0">
-          Rate each criterion on a scale of 1–5. Grades are weighted per rubric.
+          Rate each criterion on a scale of 1–10. Grades are weighted per rubric.
         </p>
       </div>
 
       {/* Student selector */}
-      <div className="px-6 pb-5 flex gap-3 flex-wrap">
-        {students.map((student) => (
-          <motion.button
-            key={student.assignmentId}
-            whileHover={{ y: -2 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => setSelectedStudent(student)}
-            className={`px-4 py-2.5 rounded-2xl border-2 cursor-pointer font-sans shadow-sm transition-all text-[13px] flex items-center gap-2 ${
-              selectedStudent?.assignmentId === student.assignmentId
-                ? 'border-[#E67E22] bg-[#E67E22]/10 text-[#E67E22] font-bold shadow-[0_4px_12px_rgba(230,126,34,0.2)]'
-                : 'border-slate-200 bg-white text-slate-900 font-medium'
-            }`}
+      <div className="px-6 pb-5 flex items-center gap-3">
+        <Select
+          showSearch
+          value={selectedStudent?.assignmentId}
+          onChange={(value) => {
+            const student = students.find(s => s.assignmentId === value);
+            if (student) setSelectedStudent(student);
+          }}
+          style={{ width: 340, height: 48 }}
+          className="font-sans"
+          placeholder="Search student name or code..."
+          optionFilterProp="children"
+          filterOption={(input, option) =>
+            (option?.label ?? '').toString().toLowerCase().includes(input.toLowerCase()) || 
+            (option?.['data-code'] ?? '').toString().toLowerCase().includes(input.toLowerCase())
+          }
+          options={students.map(student => ({
+            value: student.assignmentId,
+            label: student.studentName,
+            'data-code': student.studentCode,
+            labelNode: (
+              <div className="flex items-center justify-between py-1">
+                <div>
+                  <div className="font-bold text-slate-800 leading-tight">{student.studentName}</div>
+                  <div className="text-[11px] text-slate-400 mt-0.5">{student.studentCode}</div>
+                </div>
+                {student.evaluationId && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 text-[10px] font-bold uppercase tracking-wide">
+                    <CheckCircleOutlined /> Done
+                  </span>
+                )}
+              </div>
+            )
+          }))}
+          optionRender={(option) => option.data.labelNode}
+        />
+
+        <div className="flex gap-2 ml-auto md:ml-0">
+          <Button 
+            disabled={!selectedStudent || students.findIndex(s => s.assignmentId === selectedStudent.assignmentId) === 0}
+            onClick={() => {
+              if (!selectedStudent) return;
+              const idx = students.findIndex(s => s.assignmentId === selectedStudent.assignmentId);
+              if (idx > 0) setSelectedStudent(students[idx - 1]);
+            }}
+            icon={<LeftOutlined />}
+            style={{ height: 48, borderRadius: 12, padding: '0 16px', fontWeight: 600 }}
+            className="flex items-center justify-center font-sans"
           >
-            <span>{student.studentName}</span>
-            {student.evaluationId && (
-              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 text-[10px] font-bold uppercase tracking-wide">
-                <CheckCircleOutlined /> Done
-              </span>
-            )}
-          </motion.button>
-        ))}
+            Previous
+          </Button>
+          <Button 
+            disabled={!selectedStudent || students.findIndex(s => s.assignmentId === selectedStudent.assignmentId) === students.length - 1}
+            onClick={() => {
+              if (!selectedStudent) return;
+              const idx = students.findIndex(s => s.assignmentId === selectedStudent.assignmentId);
+              if (idx < students.length - 1) setSelectedStudent(students[idx + 1]);
+            }}
+            type="primary"
+            style={{ height: 48, borderRadius: 12, padding: '0 16px', fontWeight: 600 }}
+            className="flex items-center justify-center font-sans bg-[#E67E22] hover:bg-[#D35400] border-none shadow-[0_4px_12px_rgba(230,126,34,0.2)]"
+          >
+            Next Student <RightOutlined />
+          </Button>
+        </div>
       </div>
 
       {selectedStudent && (

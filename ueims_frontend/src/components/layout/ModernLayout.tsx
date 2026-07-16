@@ -400,8 +400,8 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
               </a>
             </div>
             <div className="modern-nav-items desktop-only">
-              {/* Visible pills: first 7 items */}
-              {filteredNavItems.slice(0, 7).map((item) => {
+              {/* Visible pills: first 5 items */}
+              {filteredNavItems.slice(0, 5).map((item) => {
                 const isActive = activeTab === item.key;
                 return (
                   <button
@@ -417,8 +417,8 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
               })}
 
               {/* More dropdown: remaining items */}
-              {filteredNavItems.length > 7 && (() => {
-                const moreItems: MenuProps['items'] = filteredNavItems.slice(7).map((item) => ({
+              {filteredNavItems.length > 5 && (() => {
+                const moreItems: MenuProps['items'] = filteredNavItems.slice(5).map((item) => ({
                   key: item.key,
                   label: (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -429,7 +429,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
                   onClick: () => handleNavigate(item.key),
                 }));
 
-                const isMoreActive = filteredNavItems.slice(7).some((item) => activeTab === item.key);
+                const isMoreActive = filteredNavItems.slice(5).some((item) => activeTab === item.key);
 
                 return (
                   <Dropdown menu={{ items: moreItems }} trigger={['click']} placement="bottomRight">
@@ -782,7 +782,20 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 4, background: '#f1f5f9', padding: '4px 10px', borderRadius: 100 }}>
                 <ShieldCheck size={14} color="#64748b" />
                 <span style={{ color: '#475569', fontSize: 12, fontWeight: 600, fontFamily: 'Inter, sans-serif' }}>
-                  {user?.roles?.map((r: any) => typeof r === 'string' ? r.replace('ROLE_', '') : r.roleName?.replace('ROLE_', '')).join(', ') || t('layout.userFallback', 'User')}
+                  {(() => {
+                    if (!user?.roles || !Array.isArray(user.roles)) return t('layout.userFallback', 'User');
+                    const roleNames = user.roles.map((r: any) => typeof r === 'string' ? r.replace('ROLE_', '') : r.roleName?.replace('ROLE_', ''));
+                    const mainRoles = ['STUDENT', 'TRAINING_MANAGER', 'ENTERPRISE', 'ADMIN'];
+                    const filtered = roleNames.filter((r: string) => mainRoles.includes(r));
+                    if (filtered.length === 0) return t('layout.userFallback', 'User');
+                    return filtered.map((r: string) => {
+                      if (r === 'STUDENT') return 'Student';
+                      if (r === 'TRAINING_MANAGER') return 'Training Manager';
+                      if (r === 'ENTERPRISE') return 'Enterprise';
+                      if (r === 'ADMIN') return 'Admin';
+                      return r;
+                    }).join(', ');
+                  })()}
                 </span>
               </div>
             </div>
