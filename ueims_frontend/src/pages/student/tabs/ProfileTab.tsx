@@ -17,7 +17,7 @@ import { cc } from '../constants';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCombinedProfileQuery } from '@/hooks/useStudentProfile';
 
-const BACKEND_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+const BACKEND_BASE = (process.env.VITE_API_URL || 'http://localhost:8080/api').replace(/\/api\/?$/, '');
 
 const resolveFileUrl = (url: string | undefined): string => {
   if (!url) return '';

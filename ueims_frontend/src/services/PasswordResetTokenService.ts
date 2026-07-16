@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8080/api/password-reset-tokens';
+const API_URL = `${process.env.VITE_API_URL || 'http://localhost:8080/api'}/password-reset-tokens`;
 
 export const PasswordResetTokenService = {
     getAll: () => axios.get(API_URL),

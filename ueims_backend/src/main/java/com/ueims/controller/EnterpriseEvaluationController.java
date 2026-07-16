@@ -36,8 +36,15 @@ public class EnterpriseEvaluationController {
     @GetMapping("/my-enterprise")
     @PreAuthorize("hasRole('ENTERPRISE')")
     public ResponseEntity<List<EnterpriseEvaluationDTO>> getByEnterprise() {
-        return ResponseEntity.ok(
-                service.findByEnterprise().stream().map(mapper::toDto).toList());
+        List<EnterpriseEvaluationDTO> list =
+                service.findByEnterprise().stream().map(mapper::toDto).toList();
+        System.out.println("GET BY ENTERPRISE: Returning " + list.size() + " evaluations.");
+        if (!list.isEmpty()) {
+            System.out.println(
+                    "FIRST EVALUATION DTO: evaluationId=" + list.get(0).getEvaluationId() + ", assignmentId="
+                            + list.get(0).getAssignmentId());
+        }
+        return ResponseEntity.ok(list);
     }
 
     @GetMapping("/my-evaluation")

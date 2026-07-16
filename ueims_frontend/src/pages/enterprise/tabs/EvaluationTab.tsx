@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Spin, App } from 'antd';
 import { motion } from 'framer-motion';
-import { StarOutlined, LockOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import { StarOutlined, LockOutlined, CheckCircleOutlined, EditOutlined, SaveOutlined, CloseOutlined } from '@ant-design/icons';
 import { EnterpriseEvaluationService } from '@/services/EnterpriseEvaluationService';
 import { EnterpriseAssignmentService } from '@/services/EnterpriseAssignmentService';
 
@@ -219,6 +219,9 @@ export const EvaluationTab: React.FC = () => {
   const [comments, setComments] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [savedScores, setSavedScores] = useState<Record<string, number>>({});
+  const [savedComments, setSavedComments] = useState('');
   const [existingEvaluation, setExistingEvaluation] = useState<ExistingEvaluation | null>(null);
 
   // Fetch placed students from applications
@@ -235,11 +238,13 @@ export const EvaluationTab: React.FC = () => {
 
         // Build a map: assignmentId -> existing evaluation
         const evalByAssignment = new Map<string, any>();
+        console.log("EVALUATIONS DATA:", evaluationsData);
         if (Array.isArray(evaluationsData)) {
           evaluationsData.forEach((ev: any) => {
             const aId = ev.assignmentId
               ?? ev.assignment?.assignmentId
               ?? ev.assignment?.id;
+            console.log("MAPPING EVALUATION:", ev.evaluationId, "TO ASSIGNMENT:", aId);
             if (aId) evalByAssignment.set(aId, ev);
           });
         }
@@ -306,16 +311,20 @@ export const EvaluationTab: React.FC = () => {
               overallComments: evalData.overallComments ?? evalData.comments ?? '',
               status: evalData.status ?? 'DRAFT',
             });
-            setScores({
+            const loadedScores = {
               attitude: evalData.attitudeScore ?? evalData.scores?.attitude ?? 0,
               professionalism: evalData.professionalismScore ?? evalData.scores?.professionalism ?? 0,
               softSkills: evalData.softSkillsScore ?? evalData.scores?.softSkills ?? 0,
               progress: evalData.progressScore ?? evalData.scores?.progress ?? 0,
-            });
-            setComments(evalData.overallComments ?? evalData.comments ?? '');
+            };
+            const loadedComments = evalData.overallComments ?? evalData.comments ?? '';
+            setScores(loadedScores);
+            setSavedScores(loadedScores);
+            setComments(loadedComments);
+            setSavedComments(loadedComments);
             // Once an evaluation exists for this assignment, treat it as submitted.
-            // Backend locks by default (BR-47) and forbids resubmission via isLocked check.
             setSubmitted(true);
+            setIsEditing(false);
           }
         } else {
           resetForm();
@@ -329,8 +338,11 @@ export const EvaluationTab: React.FC = () => {
 
   const resetForm = () => {
     setScores({});
+    setSavedScores({});
     setComments('');
+    setSavedComments('');
     setSubmitted(false);
+    setIsEditing(false);
     setExistingEvaluation(null);
   };
 
@@ -338,19 +350,25 @@ export const EvaluationTab: React.FC = () => {
     setScores(prev => ({ ...prev, [rubricId]: score }));
   };
 
-  const isReadOnly = submitted;
+  const handleCancelEdit = () => {
+    // Revert to last saved scores without hitting the API
+    setScores(savedScores);
+    setComments(savedComments);
+    setIsEditing(false);
+  };
+
+  const isReadOnly = submitted && !isEditing;
 
   const handleSubmit = async () => {
     if (!selectedStudent) return;
-    if (Object.values(scores).some(s => s === 0)) {
+    if (!RUBRICS.every(r => (scores[r.id] ?? 0) > 0)) {
       message.error('Please rate all 4 criteria before submitting.');
       return;
     }
     try {
       setSubmitting(true);
-      const payload = {
+      const updatePayload = {
         assignmentId: selectedStudent.assignmentId,
-        studentId: selectedStudent.studentCode,
         attitudeScore: scores.attitude,
         professionalismScore: scores.professionalism,
         softSkillsScore: scores.softSkills,
@@ -358,16 +376,25 @@ export const EvaluationTab: React.FC = () => {
         overallComments: comments,
       };
       if (existingEvaluation?.evaluationId) {
-        await EnterpriseEvaluationService.update(existingEvaluation.evaluationId, {
-          assignmentId: selectedStudent.assignmentId,
-          attitudeScore: scores.attitude,
-          professionalismScore: scores.professionalism,
-          softSkillsScore: scores.softSkills,
-          progressScore: scores.progress,
-          overallComments: comments,
-        });
+        await EnterpriseEvaluationService.update(existingEvaluation.evaluationId, updatePayload);
+        // Persist updated scores as the new "saved" snapshot
+        setSavedScores({ ...scores });
+        setSavedComments(comments);
+        setExistingEvaluation(prev =>
+          prev ? {
+            ...prev,
+            scores: {
+              attitude: scores.attitude,
+              professionalism: scores.professionalism,
+              softSkills: scores.softSkills,
+              progress: scores.progress,
+            },
+            overallComments: comments,
+          } : prev
+        );
+        message.success('Evaluation updated successfully!');
       } else {
-        await EnterpriseEvaluationService.create({
+        const res = await EnterpriseEvaluationService.create({
           assignmentId: selectedStudent.assignmentId,
           attitudeScore: scores.attitude,
           professionalismScore: scores.professionalism,
@@ -375,9 +402,40 @@ export const EvaluationTab: React.FC = () => {
           progressScore: scores.progress,
           overallComments: comments,
         });
+        // Store new evaluation id so future saves use PUT
+        const newEvalData = res.data?.result ?? res.data;
+        if (newEvalData) {
+          setExistingEvaluation({
+            evaluationId: newEvalData.evaluationId ?? newEvalData.id,
+            studentId: newEvalData.studentId ?? '',
+            studentName: selectedStudent.studentName,
+            scores: {
+              attitude: scores.attitude,
+              professionalism: scores.professionalism,
+              softSkills: scores.softSkills,
+              progress: scores.progress,
+            },
+            overallComments: comments,
+            status: newEvalData.status ?? 'SUBMITTED',
+          });
+          // Update the student list entry so the "Done" badge appears
+          setStudents(prev =>
+            prev.map(s =>
+              s.assignmentId === selectedStudent.assignmentId
+                ? { ...s, evaluationId: newEvalData.evaluationId ?? newEvalData.id }
+                : s
+            )
+          );
+          setSelectedStudent(prev =>
+            prev ? { ...prev, evaluationId: newEvalData.evaluationId ?? newEvalData.id } : prev
+          );
+        }
+        setSavedScores({ ...scores });
+        setSavedComments(comments);
+        message.success('Evaluation submitted successfully!');
       }
-      message.success('Evaluation submitted successfully!');
       setSubmitted(true);
+      setIsEditing(false);
     } catch (err: any) {
       message.error(err.response?.data?.message || 'Failed to submit evaluation.');
     } finally {
@@ -453,12 +511,31 @@ export const EvaluationTab: React.FC = () => {
                 </div>
                 <div className="text-[12px] text-slate-500 mt-0.5">{selectedStudent.jobTitle}</div>
               </div>
-              {isReadOnly && (
-                <div className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-emerald-50 border border-emerald-500/20">
-                  <CheckCircleOutlined className="text-emerald-500" />
-                  <span className="text-[12px] font-bold text-emerald-500">Submitted</span>
-                </div>
-              )}
+              <div className="flex items-center gap-2">
+                {submitted && !isEditing && (
+                  <div className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-emerald-50 border border-emerald-500/20">
+                    <CheckCircleOutlined className="text-emerald-500" />
+                    <span className="text-[12px] font-bold text-emerald-500">Submitted</span>
+                  </div>
+                )}
+                {submitted && !isEditing && (
+                  <motion.button
+                    whileHover={{ y: -2, boxShadow: '0 8px 20px rgba(230,126,34,0.18)' }}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => setIsEditing(true)}
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#E67E22]/10 border border-[#E67E22]/30 text-[#E67E22] text-[12px] font-bold cursor-pointer hover:bg-[#E67E22]/20 transition-all"
+                  >
+                    <EditOutlined />
+                    <span>Edit Evaluation</span>
+                  </motion.button>
+                )}
+                {isEditing && (
+                  <div className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-amber-50 border border-amber-400/30">
+                    <EditOutlined className="text-amber-500" />
+                    <span className="text-[12px] font-bold text-amber-500">Editing...</span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
@@ -501,21 +578,34 @@ export const EvaluationTab: React.FC = () => {
             </div>
           </div>
 
-          {/* Submit */}
+          {/* Submit / Save / Cancel buttons */}
           {!isReadOnly && (
-            <div className="px-6 flex justify-end">
+            <div className="px-6 flex justify-end gap-3">
+              {isEditing && (
+                <motion.button
+                  whileHover={{ y: -2 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={handleCancelEdit}
+                  disabled={submitting}
+                  className="flex items-center gap-2 px-6 py-3 rounded-2xl border-2 border-slate-200 bg-white font-bold text-[14px] text-slate-600 cursor-pointer transition-all hover:border-slate-300"
+                >
+                  <CloseOutlined />
+                  Cancel
+                </motion.button>
+              )}
               <motion.button
-                whileHover={Object.values(scores).some(s => s === 0) || submitting ? {} : { y: -2, boxShadow: '0 12px 28px rgba(230,126,34,0.22)' }}
-                whileTap={Object.values(scores).some(s => s === 0) || submitting ? {} : { scale: 0.98 }}
+                whileHover={!RUBRICS.every(r => (scores[r.id] ?? 0) > 0) || submitting ? {} : { y: -2, boxShadow: '0 12px 28px rgba(230,126,34,0.22)' }}
+                whileTap={!RUBRICS.every(r => (scores[r.id] ?? 0) > 0) || submitting ? {} : { scale: 0.98 }}
                 onClick={handleSubmit}
-                disabled={submitting || Object.values(scores).some(s => s === 0)}
-                className={`px-7 py-3 rounded-2xl border-none font-bold text-[14px] font-sans transition-all cursor-pointer ${
-                  submitting || Object.values(scores).some(s => s === 0)
+                disabled={submitting || !RUBRICS.every(r => (scores[r.id] ?? 0) > 0)}
+                className={`flex items-center gap-2 px-7 py-3 rounded-2xl border-none font-bold text-[14px] font-sans transition-all cursor-pointer ${
+                  submitting || !RUBRICS.every(r => (scores[r.id] ?? 0) > 0)
                     ? 'bg-slate-200 text-slate-400 opacity-70 cursor-not-allowed'
                     : 'bg-gradient-to-br from-[#E67E22] to-[#D35400] text-white shadow-[0_8px_22px_rgba(230,126,34,0.22)]'
                 }`}
               >
-                {submitting ? 'Submitting...' : 'Submit Evaluation'}
+                {isEditing ? <SaveOutlined /> : null}
+                {submitting ? (isEditing ? 'Saving...' : 'Submitting...') : (isEditing ? 'Save Changes' : 'Submit Evaluation')}
               </motion.button>
             </div>
           )}

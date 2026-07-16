@@ -217,16 +217,18 @@ public class StudentEnterpriseFeedbackServiceImpl implements StudentEnterpriseFe
                 row.createCell(0).setCellValue(rowIdx - 1);
                 row.createCell(1)
                         .setCellValue(
-                                fb.getStudent() != null
-                                        ? (fb.getStudent().getStudentCode() != null
-                                                ? fb.getStudent().getStudentCode()
+                                fb.getStudent() != null && fb.getStudent().getStudentProfile() != null
+                                        ? (fb.getStudent().getStudentProfile().getStudentCode() != null
+                                                ? fb.getStudent()
+                                                        .getStudentProfile()
+                                                        .getStudentCode()
                                                 : "")
                                         : "");
                 row.createCell(2)
                         .setCellValue(fb.getStudent() != null ? fb.getStudent().getFullName() : "");
                 row.createCell(3)
                         .setCellValue(
-                                fb.getEnterprise() != null ? fb.getEnterprise().getName() : "");
+                                fb.getEnterprise() != null ? fb.getEnterprise().getCompanyName() : "");
                 row.createCell(4).setCellValue(fb.getTrainingQualityScore() != null ? fb.getTrainingQualityScore() : 0);
                 row.createCell(5)
                         .setCellValue(fb.getSupervisorSupportScore() != null ? fb.getSupervisorSupportScore() : 0);

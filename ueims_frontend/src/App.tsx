@@ -6,7 +6,7 @@ import { router } from './routes/router';
 import { themeConfig } from './theme/themeConfig';
 import { useEffect } from 'react';
 
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '897941063217-m4ad237nr6aj0a866t4c816t0ep79oih.apps.googleusercontent.com';
+const GOOGLE_CLIENT_ID = process.env.VITE_GOOGLE_CLIENT_ID || '897941063217-m4ad237nr6aj0a866t4c816t0ep79oih.apps.googleusercontent.com';
 
 const queryClient = new QueryClient();
 
