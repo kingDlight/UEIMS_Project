@@ -100,7 +100,7 @@ export const StudentDashboard: React.FC = () => {
     // Semester 6: PLACED -> weekly reports + final report + schedule (in case they have past interviews); NOT PLACED -> job board + applications + schedule
     if (sem === 6) {
       if (hasPlacement) {
-        return navItems.filter(item => ['dashboard', 'profile', 'schedule', 'training-plan', 'reports', 'final-report', 'history'].includes(item.key));
+        return navItems.filter(item => ['dashboard', 'profile', 'schedule', 'training-plan', 'reports', 'final-report', 'evaluation', 'history'].includes(item.key));
       }
       return navItems.filter(item => ['dashboard', 'profile', 'jobs', 'applications', 'schedule', 'history'].includes(item.key));
     }

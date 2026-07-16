@@ -10,7 +10,13 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -85,6 +91,8 @@ class AuthenticationServiceTest {
 
     private AuthenticationService service;
 
+    private Validator validator;
+
     private final String signerKey = "1234567890123456789012345678901234567890123456789012345678901234";
     private User user;
     private String validToken;
@@ -145,6 +153,9 @@ class AuthenticationServiceTest {
 
         MockHttpServletRequest request = new MockHttpServletRequest();
         RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        validator = factory.getValidator();
     }
 
     private String generateTestToken(User user, String tokenType, long duration) throws Exception {
@@ -472,5 +483,35 @@ class AuthenticationServiceTest {
 
         AppException e = assertThrows(AppException.class, () -> service.authenticateWithGoogle(request));
         assertEquals(ErrorCode.UNAUTHENTICATED, e.getErrorCode());
+    }
+
+    @Test
+    void authenticate_whenUserNotFound_throwsException() {
+        AuthenticationRequest request = AuthenticationRequest.builder()
+                .email("notfound@fpt.edu.vn")
+                .password("Wrong123!")
+                .deviceId(DEV_ID)
+                .build();
+        when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.empty());
+
+        AppException e = assertThrows(AppException.class, () -> service.authenticate(request));
+        assertEquals(ErrorCode.USER_NOT_EXISTED, e.getErrorCode());
+    }
+
+    @Test
+    void authenticate_whenEmptyFields_validationFails() {
+        AuthenticationRequest request = AuthenticationRequest.builder()
+                .email("")
+                .password("")
+                .deviceId("")
+                .build();
+
+        Set<ConstraintViolation<AuthenticationRequest>> violations = validator.validate(request);
+
+        assertFalse(violations.isEmpty());
+        assertEquals(3, violations.size());
+        for (ConstraintViolation<AuthenticationRequest> violation : violations) {
+            assertEquals("FIELD_REQUIRED", violation.getMessage());
+        }
     }
 }
