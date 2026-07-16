@@ -124,162 +124,63 @@ const ReportCard = forwardRef<HTMLDivElement, ReportCardProps>((
 ) => {
   const [hovered, setHovered] = useState(false);
   const isPending = report.status === 'PENDING';
+  const cfg = STATUS_CONFIG[report.status] || STATUS_CONFIG.PENDING;
 
   return (
     <div
       ref={ref}
-     
-     
-     
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      style={{
-        background: st.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
-        border: `1px solid ${hovered ? st.border : st.borderSubtle}`,
-        borderRadius: st.radiusXl,
-        boxShadow: hovered ? st.shadowMd : st.shadowSm,
-        transform: hovered ? 'translateY(-1px)' : 'translateY(0)',
-        transition: 'all 0.25s cubic-bezier(0.32, 0.72, 0, 1)',
-        overflow: 'hidden',
-      }}
-     className="scroll-animate">
-      <div className="report-card-inner">
-        {/* Left: Checkbox */}
-        <div className="rc-checkbox" style={{ background: checked ? st.successMuted : 'transparent' }}>
-          <Checkbox checked={checked} onChange={() => onToggle(report.id)} />
-        </div>
-
-        {/* Middle: Card Content */}
-        <div className="rc-content">
-          {/* Card Header */}
-          <div className="rc-header">
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'nowrap', marginBottom: 3, maxWidth: '100%', minWidth: 0 }}>
-                <span style={{ fontSize: 14, fontWeight: 800, color: st.textPrimary, fontFamily: 'Inter, sans-serif', letterSpacing: '-0.01em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {report.studentName}
-                </span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 11, color: st.textMuted, fontFamily: 'Inter, sans-serif' }}>
-                  <Hash size={10} strokeWidth={2.5} />
-                  {report.studentCode}
-                </span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 11, color: st.textSecondary, fontFamily: 'Inter, sans-serif', fontWeight: 500 }}>
-                  <Building2 size={11} strokeWidth={2} color={st.brand} />
-                  {report.enterprise}
-                </span>
-                <span style={{ fontSize: 11, color: st.border }}>·</span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 11, color: st.textMuted, fontFamily: 'Inter, sans-serif' }}>
-                  <Calendar size={11} strokeWidth={2} />
-                  {report.weekLabel}
-                </span>
-                <span style={{ fontSize: 11, color: st.border }}>·</span>
-                <span style={{ fontSize: 11, color: st.textMuted, fontFamily: 'Inter, sans-serif', fontVariantNumeric: 'tabular-nums' }}>
-                  {report.hoursLogged}h logged
-                </span>
-              </div>
+      className="bg-white border border-slate-200 rounded-2xl p-4 transition-all hover:shadow-md flex flex-col"
+    >
+      {/* Top section: Checkbox and Status */}
+      <div className="flex justify-between items-start mb-3">
+        <div className="flex gap-3">
+          <div className="pt-0.5">
+            <Checkbox checked={checked} onChange={() => onToggle(report.id)} />
+          </div>
+          <div>
+            <div className="text-sm font-bold text-slate-900 leading-tight mb-0.5">
+              {report.studentName} <span className="text-slate-400 font-normal text-xs ml-1"># {report.studentCode}</span>
             </div>
-            <StatusBadge status={report.status} />
-          </div>
-
-          {/* Card Body — Report Snippet */}
-          <p style={{
-            fontSize: 12.5,
-            color: st.textSecondary,
-            margin: '0 0 10px',
-            lineHeight: 1.55,
-            fontFamily: 'Inter, sans-serif',
-          }}>
-            {report.summary}
-          </p>
-
-          {/* Card Footer — Timestamp */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 4,
-            fontSize: 10.5,
-            color: st.textMuted,
-            fontFamily: 'Inter, sans-serif',
-            fontVariantNumeric: 'tabular-nums',
-          }}>
-            <FileText size={10} strokeWidth={2} />
-            Submitted {new Date(report.submittedAt).toLocaleDateString('en-US', {
-              month: 'short', day: 'numeric', year: 'numeric',
-            })} at {new Date(report.submittedAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+            <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
+              <span className="flex items-center gap-1"><Building2 size={12} className="text-slate-400" /> {report.enterprise}</span>
+              <span>·</span>
+              <span className="flex items-center gap-1"><Calendar size={12} className="text-slate-400" /> {report.weekLabel}</span>
+            </div>
           </div>
         </div>
+        <span style={{ color: cfg.color, background: cfg.bg, border: `1px solid ${cfg.borderColor}` }} className="px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1">
+          {cfg.icon}
+          {cfg.label}
+        </span>
+      </div>
+      
+      {/* Middle: snippet */}
+      <div className="text-[13px] text-slate-600 mb-4 flex-1 line-clamp-2 leading-relaxed">
+        {report.summary || 'No summary available for this report.'}
+      </div>
 
-        {/* Right: Action Buttons */}
+      {/* Bottom: Date and Actions */}
+      <div className="flex justify-between items-end mt-auto pt-3 border-t border-slate-100">
+        <div className="text-[11px] text-slate-400 font-medium flex items-center gap-1.5">
+          <Clock size={12} />
+          {report.submittedAt ? new Date(report.submittedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}
+        </div>
+        
         {isPending && (
-          <div className="rc-actions">
+          <div className="flex gap-2">
             <button
-              aria-label={"Approve report for " + report.studentName}
               onClick={() => onApprove(report.id)}
-              style={{
-                width: '100%',
-                padding: '6px 10px',
-                borderRadius: st.radiusMd,
-                border: 'none',
-                background: st.success,
-                color: '#fff',
-                fontSize: 11.5,
-                fontWeight: 700,
-                fontFamily: 'Inter, sans-serif',
-                cursor: 'pointer',
-                transition: 'all 0.2s cubic-bezier(0.32, 0.72, 0, 1)',
-                boxShadow: '0 2px 8px rgba(16,185,129,0.25)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 4,
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.background = st.success;
-                (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-1px)';
-                (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 4px 12px rgba(16,185,129,0.35)';
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.background = st.success;
-                (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0)';
-                (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 2px 8px rgba(16,185,129,0.25)';
-              }}
+              className="bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 shadow-sm"
             >
-              <CheckCircle2 size={12} strokeWidth={2.5} />
-              Approve
+              <CheckCircle2 size={14} /> Approve
             </button>
             <button
-              aria-label={"Reject report for " + report.studentName}
               onClick={() => onReject(report.id)}
-              style={{
-                width: '100%',
-                padding: '6px 10px',
-                borderRadius: st.radiusMd,
-                border: `1px solid ${st.error}`,
-                background: 'transparent',
-                color: st.error,
-                fontSize: 11.5,
-                fontWeight: 700,
-                fontFamily: 'Inter, sans-serif',
-                cursor: 'pointer',
-                transition: 'all 0.2s cubic-bezier(0.32, 0.72, 0, 1)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 4,
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.background = st.error;
-                (e.currentTarget as HTMLButtonElement).style.color = '#fff';
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
-                (e.currentTarget as HTMLButtonElement).style.color = st.error;
-              }}
-              disabled={report.status !== 'PENDING'}
+              className="bg-white border border-red-200 text-red-500 hover:bg-red-50 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5"
             >
-              <AlertCircle size={12} strokeWidth={2.5} />
-              Reject
+              <AlertCircle size={14} /> Reject
             </button>
           </div>
         )}
@@ -788,8 +689,8 @@ export const WeeklyReportsTab: React.FC = () => {
 
           {/* Scrollable Card List */}
           <div
-            className="wr-scroll"
-            style={{ display: 'flex', flexDirection: 'column', gap: 10, maxHeight: 580, overflowY: 'auto', paddingRight: 2 }}
+            className="grid grid-cols-1 xl:grid-cols-2 gap-4 pb-10"
+            style={{ maxHeight: 650, overflowY: 'auto', paddingRight: 4, paddingBottom: 20 }}
           >
             
               {filteredReports.length === 0 ? (
