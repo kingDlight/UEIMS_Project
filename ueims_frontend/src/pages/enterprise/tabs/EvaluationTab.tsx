@@ -238,13 +238,13 @@ export const EvaluationTab: React.FC = () => {
 
         // Build a map: assignmentId -> existing evaluation
         const evalByAssignment = new Map<string, any>();
-        console.log("EVALUATIONS DATA:", evaluationsData);
+
         if (Array.isArray(evaluationsData)) {
           evaluationsData.forEach((ev: any) => {
             const aId = ev.assignmentId
               ?? ev.assignment?.assignmentId
               ?? ev.assignment?.id;
-            console.log("MAPPING EVALUATION:", ev.evaluationId, "TO ASSIGNMENT:", aId);
+
             if (aId) evalByAssignment.set(aId, ev);
           });
         }
