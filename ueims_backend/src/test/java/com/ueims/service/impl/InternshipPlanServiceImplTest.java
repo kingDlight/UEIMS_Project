@@ -135,10 +135,9 @@ class InternshipPlanServiceImplTest {
                 .thenReturn(Optional.empty());
         when(repository.save(any(InternshipPlan.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        InternshipPlanDTO dto = InternshipPlanDTO.builder()
-                .semesterId(semesterId)
-                .overallGoal("Test goal")
-                .build();
+        InternshipPlanDTO dto = new InternshipPlanDTO();
+        dto.setSemesterId(semesterId);
+        dto.setOverallGoal("Test goal");
 
         InternshipPlan result = service.upsertPlan(dto, enterpriseId);
 
@@ -166,10 +165,9 @@ class InternshipPlanServiceImplTest {
         when(repository.findByEnterprise_EnterpriseIdAndSemester_SemesterId(enterpriseId, semesterId))
                 .thenReturn(Optional.of(existing));
 
-        InternshipPlanDTO dto = InternshipPlanDTO.builder()
-                .semesterId(semesterId)
-                .overallGoal("Trying to modify")
-                .build();
+        InternshipPlanDTO dto = new InternshipPlanDTO();
+        dto.setSemesterId(semesterId);
+        dto.setOverallGoal("Trying to modify");
 
         com.ueims.exception.AppException e = org.junit.jupiter.api.Assertions.assertThrows(
                 com.ueims.exception.AppException.class, () -> service.upsertPlan(dto, enterpriseId));
@@ -197,10 +195,9 @@ class InternshipPlanServiceImplTest {
                 .thenReturn(Optional.of(rejected));
         when(repository.save(any(InternshipPlan.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        InternshipPlanDTO dto = InternshipPlanDTO.builder()
-                .semesterId(semesterId)
-                .overallGoal("Updated goal")
-                .build();
+        InternshipPlanDTO dto = new InternshipPlanDTO();
+        dto.setSemesterId(semesterId);
+        dto.setOverallGoal("Updated goal");
 
         InternshipPlan result = service.upsertPlan(dto, enterpriseId);
 
@@ -220,10 +217,9 @@ class InternshipPlanServiceImplTest {
         when(enterpriseRepository.findById(enterpriseId)).thenReturn(Optional.of(enterprise));
         when(semesterRepository.findById(semesterId)).thenReturn(Optional.of(semester));
 
-        InternshipPlanDTO dto = InternshipPlanDTO.builder()
-                .semesterId(semesterId)
-                .overallGoal("Test")
-                .build();
+        InternshipPlanDTO dto = new InternshipPlanDTO();
+        dto.setSemesterId(semesterId);
+        dto.setOverallGoal("Test");
 
         com.ueims.exception.AppException e = org.junit.jupiter.api.Assertions.assertThrows(
                 com.ueims.exception.AppException.class, () -> service.upsertPlan(dto, enterpriseId));
