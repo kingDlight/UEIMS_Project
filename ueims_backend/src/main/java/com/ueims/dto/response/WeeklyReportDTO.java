@@ -14,6 +14,7 @@ public class WeeklyReportDTO extends WeeklyReport {
     private String studentName;
     private String studentCode;
     private String studentEmail;
+    private String enterpriseName;
 
     public java.util.UUID getAssignmentId() {
         return assignmentId;
@@ -45,5 +46,13 @@ public class WeeklyReportDTO extends WeeklyReport {
 
     public void setStudentEmail(String studentEmail) {
         this.studentEmail = studentEmail;
+    }
+
+    public String getEnterpriseName() {
+        return enterpriseName;
+    }
+
+    public void setEnterpriseName(String enterpriseName) {
+        this.enterpriseName = enterpriseName;
     }
 }

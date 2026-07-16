@@ -77,7 +77,8 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public List<WeeklyReportDTO> findByEnterprise() {
         User currentUser = getCurrentUser();
-        if (currentUser.getEnterprise() == null) return List.of();
+        if (currentUser.getEnterprise() == null)
+            return List.of();
         List<WeeklyReport> reports = repository.findAll().stream()
                 .filter(r -> r.getAssignment() != null
                         && r.getAssignment().getEnterprise() != null
@@ -164,7 +165,7 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
         long currentWeek = ChronoUnit.WEEKS.between(startDate, LocalDate.now()) + 1;
 
         if (entity.getWeekNumber() != (int) currentWeek) {
-            throw new AppException(ErrorCode.APPLICATION_DEADLINE_EXPIRED);
+            throw new AppException(ErrorCode.INVALID_WEEK_REPORT_SUBMISSION);
         }
 
         entity.setAssignment(assignment);
@@ -218,8 +219,10 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
             existing.setLessonsLearned(HtmlSanitizer.sanitize(request.getLessonsLearned()));
         if (request.getPlanNextWeek() != null)
             existing.setPlanNextWeek(HtmlSanitizer.sanitize(request.getPlanNextWeek()));
-        if (request.getAttachmentUrls() != null) existing.setAttachmentUrls(request.getAttachmentUrls());
-        if (request.getStatus() != null) existing.setStatus(request.getStatus());
+        if (request.getAttachmentUrls() != null)
+            existing.setAttachmentUrls(request.getAttachmentUrls());
+        if (request.getStatus() != null)
+            existing.setStatus(request.getStatus());
         return repository.save(existing);
     }
 
@@ -265,7 +268,8 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
         }
 
         existing.setStatus("APPROVED");
-        if (feedback != null) existing.setFeedback(feedback);
+        if (feedback != null)
+            existing.setFeedback(feedback);
         WeeklyReport saved = repository.save(existing);
         try {
             notificationService.notifyWeeklyReportApproved(saved);
@@ -321,7 +325,8 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
 
     /**
      * Populate student info (name, code, email) onto DTOs.
-     * Falls back to assignment.student.user.fullName if EligibleStudent record not found.
+     * Falls back to assignment.student.user.fullName if EligibleStudent record not
+     * found.
      */
     public List<WeeklyReportDTO> enrichDtos(List<WeeklyReport> reports) {
         return reports.stream().map(this::enrichDto).toList();
@@ -360,6 +365,10 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
                     .orElse(null);
             if (eligible != null) {
                 dto.setStudentCode(eligible.getStudentCode());
+            }
+
+            if (report.getAssignment().getEnterprise() != null) {
+                dto.setEnterpriseName(report.getAssignment().getEnterprise().getCompanyName());
             }
         }
 

@@ -473,9 +473,9 @@ export const WeeklyReportsTab: React.FC = () => {
         const data = await WeeklyReportService.getAllReports();
         const mapped = data.map((r: any) => ({
           id: r.reportId,
-          studentName: r.assignment?.student?.user?.fullName || 'Unknown Student',
-          studentCode: r.assignment?.student?.studentCode || 'N/A',
-          enterprise: r.assignment?.enterprise?.companyName || 'Unknown Enterprise',
+          studentName: r.studentName || 'Unknown Student',
+          studentCode: r.studentCode || 'N/A',
+          enterprise: r.enterpriseName || 'Unknown Enterprise',
           weekNumber: r.weekNumber,
           weekLabel: `Week ${r.weekNumber}`,
           status: r.status,
