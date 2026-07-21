@@ -3,7 +3,10 @@ package com.ueims.service.impl;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -11,9 +14,12 @@ import org.springframework.stereotype.Service;
 
 import com.ueims.dto.request.WeeklyReportRequest;
 import com.ueims.dto.response.WeeklyReportDTO;
+import com.ueims.dto.response.WeeklyReportStatusDTO;
+import com.ueims.dto.response.WeeklyReportStatusSummaryDTO;
 import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
 import com.ueims.model.entity.EnterpriseAssignment;
+import com.ueims.model.entity.Semester;
 import com.ueims.model.entity.User;
 import com.ueims.model.entity.WeeklyReport;
 import com.ueims.repository.EligibleStudentRepository;
@@ -395,5 +401,119 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
         }
 
         return dto.build();
+    }
+
+    /**
+     * Tính toán trạng thái weekly report của SV hiện tại:
+     * - Lấy assignment ACTIVE của SV (mỗi SV chỉ có 1 assignment ACTIVE / kỳ).
+     * - Tính tuần hiện tại theo semester.startDate và CURRENT_DATE.
+     * - Tổng số tuần = floor((semester.endDate - startDate) / 7) + 1.
+     * - Với mỗi tuần đã qua (deadline < today), nếu chưa có report → status = MISSED, isOverdue=true.
+     * - Tuần hiện tại → deadline là CN sắp tới (tính theo ngày trong tuần).
+     * - Tuần tương lai → status = NOT_SUBMITTED nhưng isOverdue=false.
+     *
+     * Logic warning dashboard:
+     *   overdueCount > 0  → bật cờ cảnh báo "Bạn đã bỏ lỡ N tuần báo cáo"
+     *   pendingThisWeek > 0 → bật cờ "Tuần N sắp hết hạn"
+     */
+    @Override
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public WeeklyReportStatusSummaryDTO getMyWeeklyReportStatusSummary() {
+        User currentUser = getCurrentUser();
+
+        // Tìm assignment ACTIVE của SV
+        List<EnterpriseAssignment> assignments =
+                enterpriseAssignmentRepository.findByStudent_UserIdAndStatus(currentUser.getUserId(), "ACTIVE");
+
+        if (assignments.isEmpty()) {
+            return new WeeklyReportStatusSummaryDTO(null, 0, 0, 0, 0, 0, 0, List.of());
+        }
+
+        EnterpriseAssignment assignment = assignments.get(0);
+        Semester semester = assignment.getSemester();
+
+        if (semester == null || semester.getStartDate() == null || semester.getEndDate() == null) {
+            return new WeeklyReportStatusSummaryDTO(null, 0, 0, 0, 0, 0, 0, List.of());
+        }
+
+        // Tính tổng số tuần
+        long days = ChronoUnit.DAYS.between(semester.getStartDate(), semester.getEndDate());
+        int totalWeeks = (int) (days / 7) + 1;
+
+        // Tính tuần hiện tại
+        LocalDate today = LocalDate.now();
+        LocalDate semesterStart = semester.getStartDate();
+        int currentWeek;
+        if (today.isBefore(semesterStart)) {
+            currentWeek = 0; // chưa bắt đầu kỳ
+        } else {
+            long elapsedDays = ChronoUnit.DAYS.between(semesterStart, today);
+            currentWeek = (int) (elapsedDays / 7) + 1;
+            if (currentWeek > totalWeeks) currentWeek = totalWeeks;
+        }
+
+        // Lấy tất cả reports của assignment này, group theo week_number
+        List<WeeklyReport> myReports = repository.findByAssignment_AssignmentId(assignment.getAssignmentId());
+        Map<Integer, WeeklyReport> byWeek = new HashMap<>();
+        for (WeeklyReport r : myReports) {
+            byWeek.put(r.getWeekNumber(), r);
+        }
+
+        // Build danh sách tuần
+        List<WeeklyReportStatusDTO> weeks = new ArrayList<>();
+        int submittedCount = 0;
+        int approvedCount = 0;
+        int overdueCount = 0;
+        int pendingThisWeek = 0;
+
+        for (int w = 1; w <= totalWeeks; w++) {
+            LocalDate deadline = semesterStart.plusDays((long) (w - 1) * 7L);
+            // deadline luôn là CN của tuần đó (semester bắt đầu bằng CN trong hệ thống này)
+
+            WeeklyReport existing = byWeek.get(w);
+            String status;
+            String reportId = null;
+            boolean isPast = today.isAfter(deadline);
+            boolean isOverdue = false;
+            Long daysLate = null;
+
+            if (existing != null) {
+                status = existing.getStatus();
+                reportId = existing.getReportId() == null
+                        ? null
+                        : existing.getReportId().toString();
+
+                if ("SUBMITTED".equals(status) || "APPROVED".equals(status) || "REJECTED".equals(status)) {
+                    submittedCount++;
+                }
+                if ("APPROVED".equals(status)) {
+                    approvedCount++;
+                }
+            } else {
+                if (isPast) {
+                    status = "MISSED";
+                    isOverdue = true;
+                    overdueCount++;
+                    daysLate = ChronoUnit.DAYS.between(deadline, today);
+                } else {
+                    status = "NOT_SUBMITTED";
+                    if (w == currentWeek) {
+                        pendingThisWeek = 1;
+                    }
+                }
+            }
+
+            weeks.add(new WeeklyReportStatusDTO(w, status, deadline, isOverdue, isPast, daysLate, reportId));
+        }
+
+        return new WeeklyReportStatusSummaryDTO(
+                semester.getSemesterCode(),
+                totalWeeks,
+                currentWeek,
+                submittedCount,
+                approvedCount,
+                overdueCount,
+                pendingThisWeek,
+                weeks);
     }
 }

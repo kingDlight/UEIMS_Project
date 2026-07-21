@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ueims.dto.request.WeeklyReportRequest;
 import com.ueims.dto.response.WeeklyReportDTO;
+import com.ueims.dto.response.WeeklyReportStatusSummaryDTO;
 import com.ueims.mapper.WeeklyReportMapper;
 import com.ueims.service.WeeklyReportService;
 import com.ueims.util.HtmlSanitizer;
@@ -44,6 +45,16 @@ public class WeeklyReportController {
     @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<List<WeeklyReportDTO>> getMyReports() {
         return ResponseEntity.ok(service.findMyReportsDtos());
+    }
+
+    /**
+     * Tổng hợp trạng thái weekly report của SV hiện tại (dùng cho Dashboard cảnh báo).
+     * Trả về: tổng tuần, tuần hiện tại, số đã nộp/approved, số overdue, danh sách tuần.
+     */
+    @GetMapping("/my-status-summary")
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<WeeklyReportStatusSummaryDTO> getMyStatusSummary() {
+        return ResponseEntity.ok(service.getMyWeeklyReportStatusSummary());
     }
 
     @GetMapping("/by-enterprise")

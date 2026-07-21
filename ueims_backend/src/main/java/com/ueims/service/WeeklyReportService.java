@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.ueims.dto.response.WeeklyReportDTO;
+import com.ueims.dto.response.WeeklyReportStatusSummaryDTO;
 import com.ueims.model.entity.WeeklyReport;
 
 public interface WeeklyReportService {
@@ -40,4 +41,11 @@ public interface WeeklyReportService {
     void deleteById(UUID id);
 
     List<WeeklyReportDTO> enrichDtos(List<WeeklyReport> reports);
+
+    /**
+     * Tính trạng thái weekly report của SV hiện tại theo từng tuần trong kỳ.
+     * Trả về danh sách tuần 1..N với status (NOT_SUBMITTED / SUBMITTED / APPROVED / REJECTED / MISSED),
+     * deadline (Sunday), isOverdue, daysLate. Dùng cho dashboard cảnh báo.
+     */
+    WeeklyReportStatusSummaryDTO getMyWeeklyReportStatusSummary();
 }

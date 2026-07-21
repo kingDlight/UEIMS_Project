@@ -78,7 +78,7 @@ INSERT INTO users_roles (user_id, role_name) VALUES ('c0000000-0000-0000-0000-00
 -- SEMESTER (create as OPEN, then update to ACTIVE to satisfy state machine)
 -- ============================================================
 INSERT INTO semesters (semester_id, semester_code, name, start_date, end_date, weekly_report_deadline_day, weekly_report_deadline_time, final_report_deadline, status, created_by) VALUES
-    ('50000000-0000-0000-0000-000000000001', 'SP26', 'Spring 2026', '2026-03-01', '2026-07-31', 'SUNDAY', '23:59:00', '2026-08-05 23:59:00', 'OPEN', '00000000-0000-0000-0000-000000000002');
+    ('50000000-0000-0000-0000-000000000001', 'SP26', 'Spring 2026', '2026-03-01', '2026-05-31', 'SUNDAY', '23:59:00', '2026-05-31 23:59:00', 'OPEN', '00000000-0000-0000-0000-000000000002');
 UPDATE semesters SET status = 'ACTIVE' WHERE semester_id = '50000000-0000-0000-0000-000000000001';
 
 -- ============================================================
@@ -97,11 +97,11 @@ INSERT INTO semester_enterprises (semester_enterprise_id, semester_id, enterpris
 -- JOB POSTS
 -- ============================================================
 INSERT INTO job_posts (job_post_id, enterprise_id, semester_id, title, description, requirements, benefits, required_technologies, max_positions, application_deadline, status) VALUES
-    ('f0000000-0000-0000-0000-000000000001', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 'Java Backend Developer Intern', 'Develop backend modules for Momo payment platform using Java and Spring Boot.', 'Proficient in Java, understanding of Spring framework', 'Mentorship, flexible hours, certificate', 'Java, Spring Boot, MySQL', 20, '2026-07-15', 'OPEN');
+    ('f0000000-0000-0000-0000-000000000001', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 'Java Backend Developer Intern', 'Develop backend modules for Momo payment platform using Java and Spring Boot.', 'Proficient in Java, understanding of Spring framework', 'Mentorship, flexible hours, certificate', 'Java, Spring Boot, MySQL', 20, '2026-05-25', 'OPEN');
 INSERT INTO job_posts (job_post_id, enterprise_id, semester_id, title, description, requirements, benefits, required_technologies, max_positions, application_deadline, status) VALUES
-    ('f0000000-0000-0000-0000-000000000002', 'c0000000-0000-0000-0000-000000000002', '50000000-0000-0000-0000-000000000001', 'React Frontend Developer Intern', 'Build responsive web applications using React and TypeScript.', 'Experience with React, HTML, CSS', 'Agile environment, learning opportunities', 'React, TypeScript, CSS', 15, '2026-07-15', 'OPEN');
+    ('f0000000-0000-0000-0000-000000000002', 'c0000000-0000-0000-0000-000000000002', '50000000-0000-0000-0000-000000000001', 'React Frontend Developer Intern', 'Build responsive web applications using React and TypeScript.', 'Experience with React, HTML, CSS', 'Agile environment, learning opportunities', 'React, TypeScript, CSS', 15, '2026-05-25', 'OPEN');
 INSERT INTO job_posts (job_post_id, enterprise_id, semester_id, title, description, requirements, benefits, required_technologies, max_positions, application_deadline, status) VALUES
-    ('f0000000-0000-0000-0000-000000000003', 'c0000000-0000-0000-0000-000000000003', '50000000-0000-0000-0000-000000000001', 'Fullstack Developer Intern', 'Work on end-to-end features for Shopee Vietnam platform.', 'Basic fullstack knowledge', 'High-impact projects, team environment', 'Node.js, React, MongoDB', 10, '2026-07-15', 'OPEN');
+    ('f0000000-0000-0000-0000-000000000003', 'c0000000-0000-0000-0000-000000000003', '50000000-0000-0000-0000-000000000001', 'Fullstack Developer Intern', 'Work on end-to-end features for Shopee Vietnam platform.', 'Basic fullstack knowledge', 'High-impact projects, team environment', 'Node.js, React, MongoDB', 10, '2026-05-25', 'OPEN');
 
 -- ============================================================
 -- STUDENTS 1-5: ELIGIBLE (Semester 5-6), no applications yet
@@ -222,7 +222,7 @@ INSERT INTO student_profiles (user_id, student_code, university, major, gpa, ski
 INSERT INTO applications (application_id, job_post_id, student_id, cv_file_url, status, screening_note, screened_by, screened_at) VALUES
     ('a0000000-0000-0000-0000-000000000011', 'f0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000011', 'https://cv.example.com/se15011.pdf', 'INTERVIEW_SCHEDULED', 'Strong Java skills, good projects', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP);
 INSERT INTO interviews (interview_id, application_id, scheduled_datetime, duration_minutes, meeting_link, status, student_confirmed) VALUES
-    ('b0000000-0000-0000-0000-000000000011', 'a0000000-0000-0000-0000-000000000011', '2026-07-28 10:00:00', 45, 'https://meet.momo.vn/interview-11', 'SCHEDULED', FALSE);
+    ('b0000000-0000-0000-0000-000000000011', 'a0000000-0000-0000-0000-000000000011', '2026-04-15 10:00:00', 45, 'https://meet.momo.vn/interview-11', 'SCHEDULED', FALSE);
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
     ('d0000000-0000-0000-0000-000000000012', 'student12@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Nguyen Huu Son', 'ACTIVE', FALSE);
@@ -234,7 +234,7 @@ INSERT INTO student_profiles (user_id, student_code, university, major, gpa, ski
 INSERT INTO applications (application_id, job_post_id, student_id, cv_file_url, status, screening_note, screened_by, screened_at) VALUES
     ('a0000000-0000-0000-0000-000000000012', 'f0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000012', 'https://cv.example.com/se15012.pdf', 'INTERVIEW_SCHEDULED', 'Excellent GPA and portfolio', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP);
 INSERT INTO interviews (interview_id, application_id, scheduled_datetime, duration_minutes, meeting_link, status, student_confirmed) VALUES
-    ('b0000000-0000-0000-0000-000000000012', 'a0000000-0000-0000-0000-000000000012', '2026-07-28 14:00:00', 45, 'https://meet.momo.vn/interview-12', 'SCHEDULED', FALSE);
+    ('b0000000-0000-0000-0000-000000000012', 'a0000000-0000-0000-0000-000000000012', '2026-04-15 14:00:00', 45, 'https://meet.momo.vn/interview-12', 'SCHEDULED', FALSE);
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
     ('d0000000-0000-0000-0000-000000000013', 'student13@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Vo Minh Giang', 'ACTIVE', FALSE);
@@ -246,7 +246,7 @@ INSERT INTO student_profiles (user_id, student_code, university, major, gpa, ski
 INSERT INTO applications (application_id, job_post_id, student_id, cv_file_url, status, screening_note, screened_by, screened_at) VALUES
     ('a0000000-0000-0000-0000-000000000013', 'f0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000013', 'https://cv.example.com/se15013.pdf', 'INTERVIEW_SCHEDULED', 'Good technical knowledge', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP);
 INSERT INTO interviews (interview_id, application_id, scheduled_datetime, duration_minutes, meeting_link, status, student_confirmed) VALUES
-    ('b0000000-0000-0000-0000-000000000013', 'a0000000-0000-0000-0000-000000000013', '2026-07-29 09:00:00', 60, 'https://meet.momo.vn/interview-13', 'SCHEDULED', FALSE);
+    ('b0000000-0000-0000-0000-000000000013', 'a0000000-0000-0000-0000-000000000013', '2026-04-16 09:00:00', 60, 'https://meet.momo.vn/interview-13', 'SCHEDULED', FALSE);
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
     ('d0000000-0000-0000-0000-000000000014', 'student14@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Tran Thanh Nam', 'ACTIVE', FALSE);
@@ -258,7 +258,7 @@ INSERT INTO student_profiles (user_id, student_code, university, major, gpa, ski
 INSERT INTO applications (application_id, job_post_id, student_id, cv_file_url, status, screening_note, screened_by, screened_at) VALUES
     ('a0000000-0000-0000-0000-000000000014', 'f0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000014', 'https://cv.example.com/se15014.pdf', 'INTERVIEW_SCHEDULED', 'Solid backend experience', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP);
 INSERT INTO interviews (interview_id, application_id, scheduled_datetime, duration_minutes, meeting_link, status, student_confirmed) VALUES
-    ('b0000000-0000-0000-0000-000000000014', 'a0000000-0000-0000-0000-000000000014', '2026-07-29 14:00:00', 45, 'https://meet.momo.vn/interview-14', 'SCHEDULED', FALSE);
+    ('b0000000-0000-0000-0000-000000000014', 'a0000000-0000-0000-0000-000000000014', '2026-04-16 14:00:00', 45, 'https://meet.momo.vn/interview-14', 'SCHEDULED', FALSE);
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
     ('d0000000-0000-0000-0000-000000000015', 'student15@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Vu Thanh Giang', 'ACTIVE', FALSE);
@@ -270,7 +270,7 @@ INSERT INTO student_profiles (user_id, student_code, university, major, gpa, ski
 INSERT INTO applications (application_id, job_post_id, student_id, cv_file_url, status, screening_note, screened_by, screened_at) VALUES
     ('a0000000-0000-0000-0000-000000000015', 'f0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000015', 'https://cv.example.com/se15015.pdf', 'INTERVIEW_SCHEDULED', 'Good culture fit', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP);
 INSERT INTO interviews (interview_id, application_id, scheduled_datetime, duration_minutes, meeting_link, status, student_confirmed) VALUES
-    ('b0000000-0000-0000-0000-000000000015', 'a0000000-0000-0000-0000-000000000015', '2026-07-30 10:00:00', 45, 'https://meet.momo.vn/interview-15', 'SCHEDULED', FALSE);
+    ('b0000000-0000-0000-0000-000000000015', 'a0000000-0000-0000-0000-000000000015', '2026-04-17 10:00:00', 45, 'https://meet.momo.vn/interview-15', 'SCHEDULED', FALSE);
 
 -- ============================================================
 -- STUDENTS 16-20: MATCHED (interview passed, placement approved)
@@ -288,7 +288,7 @@ INSERT INTO student_profiles (user_id, student_code, university, major, gpa, ski
 INSERT INTO applications (application_id, job_post_id, student_id, cv_file_url, status, screening_note, screened_by, screened_at) VALUES
     ('a0000000-0000-0000-0000-000000000016', 'f0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000016', 'https://cv.example.com/se15016.pdf', 'ACCEPTED', 'Top candidate, excellent interview', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP);
 INSERT INTO interviews (interview_id, application_id, scheduled_datetime, duration_minutes, meeting_link, status, student_confirmed, result, result_note, decided_by, decided_at) VALUES
-    ('b0000000-0000-0000-0000-000000000016', 'a0000000-0000-0000-0000-000000000016', '2026-07-15 10:00:00', 45, 'https://meet.momo.vn/interview-16', 'COMPLETED', TRUE, 'PASS', 'Strong Java skills, great attitude', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP);
+    ('b0000000-0000-0000-0000-000000000016', 'a0000000-0000-0000-0000-000000000016', '2026-04-10 10:00:00', 45, 'https://meet.momo.vn/interview-16', 'COMPLETED', TRUE, 'PASS', 'Strong Java skills, great attitude', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP);
 INSERT INTO placement_applications (application_id, student_id, enterprise_id, semester_id, status, cover_letter, reviewed_by, reviewed_at) VALUES
     ('a0000000-0000-0000-0000-000000000016', 'd0000000-0000-0000-0000-000000000016', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 'APPROVED', 'I am eager to join Momo as a backend developer intern.', '00000000-0000-0000-0000-000000000002', CURRENT_TIMESTAMP);
 
@@ -302,7 +302,7 @@ INSERT INTO student_profiles (user_id, student_code, university, major, gpa, ski
 INSERT INTO applications (application_id, job_post_id, student_id, cv_file_url, status, screening_note, screened_by, screened_at) VALUES
     ('a0000000-0000-0000-0000-000000000017', 'f0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000017', 'https://cv.example.com/se15017.pdf', 'ACCEPTED', 'Good overall performance', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP);
 INSERT INTO interviews (interview_id, application_id, scheduled_datetime, duration_minutes, meeting_link, status, student_confirmed, result, result_note, decided_by, decided_at) VALUES
-    ('b0000000-0000-0000-0000-000000000017', 'a0000000-0000-0000-0000-000000000017', '2026-07-15 14:00:00', 45, 'https://meet.momo.vn/interview-17', 'COMPLETED', TRUE, 'PASS', 'Solid technical skills', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP);
+    ('b0000000-0000-0000-0000-000000000017', 'a0000000-0000-0000-0000-000000000017', '2026-04-10 14:00:00', 45, 'https://meet.momo.vn/interview-17', 'COMPLETED', TRUE, 'PASS', 'Solid technical skills', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP);
 INSERT INTO placement_applications (application_id, student_id, enterprise_id, semester_id, status, cover_letter, reviewed_by, reviewed_at) VALUES
     ('a0000000-0000-0000-0000-000000000017', 'd0000000-0000-0000-0000-000000000017', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 'APPROVED', 'Excited to intern at Momo.', '00000000-0000-0000-0000-000000000002', CURRENT_TIMESTAMP);
 
@@ -316,7 +316,7 @@ INSERT INTO student_profiles (user_id, student_code, university, major, gpa, ski
 INSERT INTO applications (application_id, job_post_id, student_id, cv_file_url, status, screening_note, screened_by, screened_at) VALUES
     ('a0000000-0000-0000-0000-000000000018', 'f0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000018', 'https://cv.example.com/se15018.pdf', 'ACCEPTED', 'Great interview performance', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP);
 INSERT INTO interviews (interview_id, application_id, scheduled_datetime, duration_minutes, meeting_link, status, student_confirmed, result, result_note, decided_by, decided_at) VALUES
-    ('b0000000-0000-0000-0000-000000000018', 'a0000000-0000-0000-0000-000000000018', '2026-07-16 09:00:00', 45, 'https://meet.momo.vn/interview-18', 'COMPLETED', TRUE, 'PASS', 'Good team fit', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP);
+    ('b0000000-0000-0000-0000-000000000018', 'a0000000-0000-0000-0000-000000000018', '2026-05-26 09:00:00', 45, 'https://meet.momo.vn/interview-18', 'COMPLETED', TRUE, 'PASS', 'Good team fit', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP);
 INSERT INTO placement_applications (application_id, student_id, enterprise_id, semester_id, status, cover_letter, reviewed_by, reviewed_at) VALUES
     ('a0000000-0000-0000-0000-000000000018', 'd0000000-0000-0000-0000-000000000018', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 'APPROVED', 'I want to learn from Momo team.', '00000000-0000-0000-0000-000000000002', CURRENT_TIMESTAMP);
 
@@ -330,7 +330,7 @@ INSERT INTO student_profiles (user_id, student_code, university, major, gpa, ski
 INSERT INTO applications (application_id, job_post_id, student_id, cv_file_url, status, screening_note, screened_by, screened_at) VALUES
     ('a0000000-0000-0000-0000-000000000019', 'f0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000019', 'https://cv.example.com/se15019.pdf', 'ACCEPTED', 'Strong problem-solving skills', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP);
 INSERT INTO interviews (interview_id, application_id, scheduled_datetime, duration_minutes, meeting_link, status, student_confirmed, result, result_note, decided_by, decided_at) VALUES
-    ('b0000000-0000-0000-0000-000000000019', 'a0000000-0000-0000-0000-000000000019', '2026-07-16 14:00:00', 45, 'https://meet.momo.vn/interview-19', 'COMPLETED', TRUE, 'PASS', 'Proactive learner', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP);
+    ('b0000000-0000-0000-0000-000000000019', 'a0000000-0000-0000-0000-000000000019', '2026-04-11 14:00:00', 45, 'https://meet.momo.vn/interview-19', 'COMPLETED', TRUE, 'PASS', 'Proactive learner', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP);
 INSERT INTO placement_applications (application_id, student_id, enterprise_id, semester_id, status, cover_letter, reviewed_by, reviewed_at) VALUES
     ('a0000000-0000-0000-0000-000000000019', 'd0000000-0000-0000-0000-000000000019', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 'APPROVED', 'Excited to join Momo internship.', '00000000-0000-0000-0000-000000000002', CURRENT_TIMESTAMP);
 
@@ -344,7 +344,7 @@ INSERT INTO student_profiles (user_id, student_code, university, major, gpa, ski
 INSERT INTO applications (application_id, job_post_id, student_id, cv_file_url, status, screening_note, screened_by, screened_at) VALUES
     ('a0000000-0000-0000-0000-000000000020', 'f0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000020', 'https://cv.example.com/se15020.pdf', 'ACCEPTED', 'Well-prepared and motivated', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP);
 INSERT INTO interviews (interview_id, application_id, scheduled_datetime, duration_minutes, meeting_link, status, student_confirmed, result, result_note, decided_by, decided_at) VALUES
-    ('b0000000-0000-0000-0000-000000000020', 'a0000000-0000-0000-0000-000000000020', '2026-07-17 10:00:00', 45, 'https://meet.momo.vn/interview-20', 'COMPLETED', TRUE, 'PASS', 'Good communication', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP);
+    ('b0000000-0000-0000-0000-000000000020', 'a0000000-0000-0000-0000-000000000020', '2026-04-12 10:00:00', 45, 'https://meet.momo.vn/interview-20', 'COMPLETED', TRUE, 'PASS', 'Good communication', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP);
 INSERT INTO placement_applications (application_id, student_id, enterprise_id, semester_id, status, cover_letter, reviewed_by, reviewed_at) VALUES
     ('a0000000-0000-0000-0000-000000000020', 'd0000000-0000-0000-0000-000000000020', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 'APPROVED', 'I am ready for Momo internship.', '00000000-0000-0000-0000-000000000002', CURRENT_TIMESTAMP);
 
@@ -470,15 +470,15 @@ INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, 
 INSERT INTO student_profiles (user_id, student_code, university, major, gpa, skills, cv_file_url) VALUES
     ('d0000000-0000-0000-0000-000000000026', 'DA15026', 'FPT University', 'Digital Art & Design', 5.5, '["Photoshop", "After Effects", "Motion Graphics"]'::jsonb, 'https://cv.example.com/da15026.pdf');
 INSERT INTO enterprise_assignments (assignment_id, enterprise_id, student_id, semester_id, supervisor_name, supervisor_email, assigned_by, status, start_date, end_date) VALUES
-    ('f0000000-0000-0000-0000-000000000026', 'c0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000026', '50000000-0000-0000-0000-000000000001', 'Sup Momo', 'sup@momo.vn', '00000000-0000-0000-0000-000000000002', 'COMPLETED', '2026-03-01', '2026-07-15');
+    ('f0000000-0000-0000-0000-000000000026', 'c0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000026', '50000000-0000-0000-0000-000000000001', 'Sup Momo', 'sup@momo.vn', '00000000-0000-0000-0000-000000000002', 'COMPLETED', '2026-03-01', '2026-05-25');
 INSERT INTO final_reports (final_report_id, assignment_id, file_url, file_size_bytes, submitted_at, is_late) VALUES
-    ('00000000-0000-0000-000c-000000000026', 'f0000000-0000-0000-0000-000000000026', 'https://reports.example.com/se15026_final.pdf', 1048576, '2026-07-15 23:00:00', FALSE);
+    ('00000000-0000-0000-000c-000000000026', 'f0000000-0000-0000-0000-000000000026', 'https://reports.example.com/se15026_final.pdf', 1048576, '2026-05-25 23:00:00', FALSE);
 INSERT INTO enterprise_evaluations (evaluation_id, assignment_id, attitude_score, professionalism_score, soft_skills_score, progress_score, overall_comments, is_locked, submitted_at) VALUES
-    ('00000000-0000-0000-000d-000000000026', 'f0000000-0000-0000-0000-000000000026', 8.00, 8.50, 8.00, 8.50, 'Good intern, consistent performance throughout.', TRUE, '2026-07-16 10:00:00');
+    ('00000000-0000-0000-000d-000000000026', 'f0000000-0000-0000-0000-000000000026', 8.00, 8.50, 8.00, 8.50, 'Good intern, consistent performance throughout.', TRUE, '2026-05-26 10:00:00');
 INSERT INTO final_grades (grade_id, student_id, tm_id, semester_id, enterprise_total_score, final_grade, overall_status, is_locked, graded_at) VALUES
-    ('00000000-0000-0000-000e-000000000026', 'd0000000-0000-0000-0000-000000000026', '00000000-0000-0000-0000-000000000002', '50000000-0000-0000-0000-000000000001', 8.36, 8.4, 'PASSED', TRUE, '2026-07-20 14:00:00');
+    ('00000000-0000-0000-000e-000000000026', 'd0000000-0000-0000-0000-000000000026', '00000000-0000-0000-0000-000000000002', '50000000-0000-0000-0000-000000000001', 8.36, 8.4, 'PASSED', TRUE, '2026-05-28 14:00:00');
 INSERT INTO student_enterprise_feedbacks (feedback_id, student_id, enterprise_id, semester_id, training_quality_score, supervisor_support_score, work_environment_score, overall_score, positive_feedback, improvement_feedback, submitted_at) VALUES
-    ('00000000-0000-0000-000f-000000000026', 'd0000000-0000-0000-0000-000000000026', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 5, 4, 5, 5, 'Great mentorship and learning environment at Momo.', 'Could improve on feedback turnaround time.', '2026-07-18 09:00:00');
+    ('00000000-0000-0000-000f-000000000026', 'd0000000-0000-0000-0000-000000000026', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 5, 4, 5, 5, 'Great mentorship and learning environment at Momo.', 'Could improve on feedback turnaround time.', '2026-05-27 09:00:00');
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
     ('d0000000-0000-0000-0000-000000000027', 'student27@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Nguyen Thanh Duc', 'ACTIVE', FALSE);
@@ -488,15 +488,15 @@ INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, 
 INSERT INTO student_profiles (user_id, student_code, university, major, gpa, skills, cv_file_url) VALUES
     ('d0000000-0000-0000-0000-000000000027', 'GD15027', 'FPT University', 'Graphic Design', 5.5, '["Figma", "Illustrator", "UI Design"]'::jsonb, 'https://cv.example.com/gd15027.pdf');
 INSERT INTO enterprise_assignments (assignment_id, enterprise_id, student_id, semester_id, supervisor_name, supervisor_email, assigned_by, status, start_date, end_date) VALUES
-    ('f0000000-0000-0000-0000-000000000027', 'c0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000027', '50000000-0000-0000-0000-000000000001', 'Sup Momo', 'sup@momo.vn', '00000000-0000-0000-0000-000000000002', 'COMPLETED', '2026-03-01', '2026-07-15');
+    ('f0000000-0000-0000-0000-000000000027', 'c0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000027', '50000000-0000-0000-0000-000000000001', 'Sup Momo', 'sup@momo.vn', '00000000-0000-0000-0000-000000000002', 'COMPLETED', '2026-03-01', '2026-05-25');
 INSERT INTO final_reports (final_report_id, assignment_id, file_url, file_size_bytes, submitted_at, is_late) VALUES
-    ('00000000-0000-0000-000c-000000000027', 'f0000000-0000-0000-0000-000000000027', 'https://reports.example.com/se15027_final.pdf', 1048576, '2026-07-15 22:30:00', FALSE);
+    ('00000000-0000-0000-000c-000000000027', 'f0000000-0000-0000-0000-000000000027', 'https://reports.example.com/se15027_final.pdf', 1048576, '2026-05-25 22:30:00', FALSE);
 INSERT INTO enterprise_evaluations (evaluation_id, assignment_id, attitude_score, professionalism_score, soft_skills_score, progress_score, overall_comments, is_locked, submitted_at) VALUES
-    ('00000000-0000-0000-000d-000000000027', 'f0000000-0000-0000-0000-000000000027', 7.50, 8.00, 7.50, 8.00, 'Solid performer, good team collaboration.', TRUE, '2026-07-16 11:00:00');
+    ('00000000-0000-0000-000d-000000000027', 'f0000000-0000-0000-0000-000000000027', 7.50, 8.00, 7.50, 8.00, 'Solid performer, good team collaboration.', TRUE, '2026-05-26 11:00:00');
 INSERT INTO final_grades (grade_id, student_id, tm_id, semester_id, enterprise_total_score, final_grade, overall_status, is_locked, graded_at) VALUES
-    ('00000000-0000-0000-000e-000000000027', 'd0000000-0000-0000-0000-000000000027', '00000000-0000-0000-0000-000000000002', '50000000-0000-0000-0000-000000000001', 7.85, 7.9, 'PASSED', TRUE, '2026-07-20 15:00:00');
+    ('00000000-0000-0000-000e-000000000027', 'd0000000-0000-0000-0000-000000000027', '00000000-0000-0000-0000-000000000002', '50000000-0000-0000-0000-000000000001', 7.85, 7.9, 'PASSED', TRUE, '2026-05-28 15:00:00');
 INSERT INTO student_enterprise_feedbacks (feedback_id, student_id, enterprise_id, semester_id, training_quality_score, supervisor_support_score, work_environment_score, overall_score, positive_feedback, improvement_feedback, submitted_at) VALUES
-    ('00000000-0000-0000-000f-000000000027', 'd0000000-0000-0000-0000-000000000027', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 4, 5, 4, 4, 'Good learning experience with supportive team at Momo.', 'More structured training curriculum needed.', '2026-07-18 10:00:00');
+    ('00000000-0000-0000-000f-000000000027', 'd0000000-0000-0000-0000-000000000027', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 4, 5, 4, 4, 'Good learning experience with supportive team at Momo.', 'More structured training curriculum needed.', '2026-05-27 10:00:00');
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
     ('d0000000-0000-0000-0000-000000000028', 'student28@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Ho Tuyet Linh', 'ACTIVE', FALSE);
@@ -506,15 +506,15 @@ INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, 
 INSERT INTO student_profiles (user_id, student_code, university, major, gpa, skills, cv_file_url) VALUES
     ('d0000000-0000-0000-0000-000000000028', 'DM15028', 'FPT University', 'Digital Marketing', 5.5, '["Facebook Ads", "Google Ads", "SEO"]'::jsonb, 'https://cv.example.com/dm15028.pdf');
 INSERT INTO enterprise_assignments (assignment_id, enterprise_id, student_id, semester_id, supervisor_name, supervisor_email, assigned_by, status, start_date, end_date) VALUES
-    ('f0000000-0000-0000-0000-000000000028', 'c0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000028', '50000000-0000-0000-0000-000000000001', 'Sup Momo', 'sup@momo.vn', '00000000-0000-0000-0000-000000000002', 'COMPLETED', '2026-03-01', '2026-07-15');
+    ('f0000000-0000-0000-0000-000000000028', 'c0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000028', '50000000-0000-0000-0000-000000000001', 'Sup Momo', 'sup@momo.vn', '00000000-0000-0000-0000-000000000002', 'COMPLETED', '2026-03-01', '2026-05-25');
 INSERT INTO final_reports (final_report_id, assignment_id, file_url, file_size_bytes, submitted_at, is_late) VALUES
-    ('00000000-0000-0000-000c-000000000028', 'f0000000-0000-0000-0000-000000000028', 'https://reports.example.com/se15028_final.pdf', 1048576, '2026-07-14 20:00:00', FALSE);
+    ('00000000-0000-0000-000c-000000000028', 'f0000000-0000-0000-0000-000000000028', 'https://reports.example.com/se15028_final.pdf', 1048576, '2026-05-24 20:00:00', FALSE);
 INSERT INTO enterprise_evaluations (evaluation_id, assignment_id, attitude_score, professionalism_score, soft_skills_score, progress_score, overall_comments, is_locked, submitted_at) VALUES
-    ('00000000-0000-0000-000d-000000000028', 'f0000000-0000-0000-0000-000000000028', 9.50, 9.50, 9.00, 9.50, 'Exceptional intern, exceeded all expectations. Highly recommended for hire.', TRUE, '2026-07-16 09:00:00');
+    ('00000000-0000-0000-000d-000000000028', 'f0000000-0000-0000-0000-000000000028', 9.50, 9.50, 9.00, 9.50, 'Exceptional intern, exceeded all expectations. Highly recommended for hire.', TRUE, '2026-05-26 09:00:00');
 INSERT INTO final_grades (grade_id, student_id, tm_id, semester_id, enterprise_total_score, final_grade, overall_status, is_locked, graded_at) VALUES
-    ('00000000-0000-0000-000e-000000000028', 'd0000000-0000-0000-0000-000000000028', '00000000-0000-0000-0000-000000000002', '50000000-0000-0000-0000-000000000001', 9.40, 9.4, 'PASSED', TRUE, '2026-07-20 16:00:00');
+    ('00000000-0000-0000-000e-000000000028', 'd0000000-0000-0000-0000-000000000028', '00000000-0000-0000-0000-000000000002', '50000000-0000-0000-0000-000000000001', 9.40, 9.4, 'PASSED', TRUE, '2026-05-28 16:00:00');
 INSERT INTO student_enterprise_feedbacks (feedback_id, student_id, enterprise_id, semester_id, training_quality_score, supervisor_support_score, work_environment_score, overall_score, positive_feedback, improvement_feedback, submitted_at) VALUES
-    ('00000000-0000-0000-000f-000000000028', 'd0000000-0000-0000-0000-000000000028', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 5, 5, 5, 5, 'Excellent internship program with great mentorship at Momo.', 'Everything was well organized.', '2026-07-18 11:00:00');
+    ('00000000-0000-0000-000f-000000000028', 'd0000000-0000-0000-0000-000000000028', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 5, 5, 5, 5, 'Excellent internship program with great mentorship at Momo.', 'Everything was well organized.', '2026-05-27 11:00:00');
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
     ('d0000000-0000-0000-0000-000000000029', 'student29@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Ngo Thanh Phong', 'ACTIVE', FALSE);
@@ -524,15 +524,15 @@ INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, 
 INSERT INTO student_profiles (user_id, student_code, university, major, gpa, skills, cv_file_url) VALUES
     ('d0000000-0000-0000-0000-000000000029', 'IS15029', 'FPT University', 'Information Security', 6.5, '["SIEM", "Splunk", "Penetration Testing"]'::jsonb, 'https://cv.example.com/is15029.pdf');
 INSERT INTO enterprise_assignments (assignment_id, enterprise_id, student_id, semester_id, supervisor_name, supervisor_email, assigned_by, status, start_date, end_date) VALUES
-    ('f0000000-0000-0000-0000-000000000029', 'c0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000029', '50000000-0000-0000-0000-000000000001', 'Sup Momo', 'sup@momo.vn', '00000000-0000-0000-0000-000000000002', 'COMPLETED', '2026-03-01', '2026-07-15');
+    ('f0000000-0000-0000-0000-000000000029', 'c0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000029', '50000000-0000-0000-0000-000000000001', 'Sup Momo', 'sup@momo.vn', '00000000-0000-0000-0000-000000000002', 'COMPLETED', '2026-03-01', '2026-05-25');
 INSERT INTO final_reports (final_report_id, assignment_id, file_url, file_size_bytes, submitted_at, is_late) VALUES
-    ('00000000-0000-0000-000c-000000000029', 'f0000000-0000-0000-0000-000000000029', 'https://reports.example.com/se15029_final.pdf', 1048576, '2026-07-15 21:00:00', FALSE);
+    ('00000000-0000-0000-000c-000000000029', 'f0000000-0000-0000-0000-000000000029', 'https://reports.example.com/se15029_final.pdf', 1048576, '2026-05-25 21:00:00', FALSE);
 INSERT INTO enterprise_evaluations (evaluation_id, assignment_id, attitude_score, professionalism_score, soft_skills_score, progress_score, overall_comments, is_locked, submitted_at) VALUES
-    ('00000000-0000-0000-000d-000000000029', 'f0000000-0000-0000-0000-000000000029', 7.00, 7.50, 7.00, 7.50, 'Met expectations, some areas for improvement.', TRUE, '2026-07-16 12:00:00');
+    ('00000000-0000-0000-000d-000000000029', 'f0000000-0000-0000-0000-000000000029', 7.00, 7.50, 7.00, 7.50, 'Met expectations, some areas for improvement.', TRUE, '2026-05-26 12:00:00');
 INSERT INTO final_grades (grade_id, student_id, tm_id, semester_id, enterprise_total_score, final_grade, overall_status, is_locked, graded_at) VALUES
-    ('00000000-0000-0000-000e-000000000029', 'd0000000-0000-0000-0000-000000000029', '00000000-0000-0000-0000-000000000002', '50000000-0000-0000-0000-000000000001', 7.40, 7.4, 'PASSED', TRUE, '2026-07-20 17:00:00');
+    ('00000000-0000-0000-000e-000000000029', 'd0000000-0000-0000-0000-000000000029', '00000000-0000-0000-0000-000000000002', '50000000-0000-0000-0000-000000000001', 7.40, 7.4, 'PASSED', TRUE, '2026-05-28 17:00:00');
 INSERT INTO student_enterprise_feedbacks (feedback_id, student_id, enterprise_id, semester_id, training_quality_score, supervisor_support_score, work_environment_score, overall_score, positive_feedback, improvement_feedback, submitted_at) VALUES
-    ('00000000-0000-0000-000f-000000000029', 'd0000000-0000-0000-0000-000000000029', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 4, 4, 3, 4, 'Good experience overall, learned a lot at Momo.', 'More regular feedback sessions needed.', '2026-07-18 12:00:00');
+    ('00000000-0000-0000-000f-000000000029', 'd0000000-0000-0000-0000-000000000029', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 4, 4, 3, 4, 'Good experience overall, learned a lot at Momo.', 'More regular feedback sessions needed.', '2026-05-27 12:00:00');
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
     ('d0000000-0000-0000-0000-000000000030', 'student30@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Vu Duc Yen', 'ACTIVE', FALSE);
@@ -542,15 +542,15 @@ INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, 
 INSERT INTO student_profiles (user_id, student_code, university, major, gpa, skills, cv_file_url) VALUES
     ('d0000000-0000-0000-0000-000000000030', 'DA15030', 'FPT University', 'Digital Art & Design', 6.5, '["Photoshop", "Illustrator", "Branding"]'::jsonb, 'https://cv.example.com/da15030.pdf');
 INSERT INTO enterprise_assignments (assignment_id, enterprise_id, student_id, semester_id, supervisor_name, supervisor_email, assigned_by, status, start_date, end_date) VALUES
-    ('f0000000-0000-0000-0000-000000000030', 'c0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000030', '50000000-0000-0000-0000-000000000001', 'Sup Momo', 'sup@momo.vn', '00000000-0000-0000-0000-000000000002', 'COMPLETED', '2026-03-01', '2026-07-15');
+    ('f0000000-0000-0000-0000-000000000030', 'c0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000030', '50000000-0000-0000-0000-000000000001', 'Sup Momo', 'sup@momo.vn', '00000000-0000-0000-0000-000000000002', 'COMPLETED', '2026-03-01', '2026-05-25');
 INSERT INTO final_reports (final_report_id, assignment_id, file_url, file_size_bytes, submitted_at, is_late) VALUES
-    ('00000000-0000-0000-000c-000000000030', 'f0000000-0000-0000-0000-000000000030', 'https://reports.example.com/se15030_final.pdf', 1048576, '2026-07-15 20:00:00', FALSE);
+    ('00000000-0000-0000-000c-000000000030', 'f0000000-0000-0000-0000-000000000030', 'https://reports.example.com/se15030_final.pdf', 1048576, '2026-05-25 20:00:00', FALSE);
 INSERT INTO enterprise_evaluations (evaluation_id, assignment_id, attitude_score, professionalism_score, soft_skills_score, progress_score, overall_comments, is_locked, submitted_at) VALUES
-    ('00000000-0000-0000-000d-000000000030', 'f0000000-0000-0000-0000-000000000030', 8.00, 8.50, 8.00, 8.00, 'Reliable and consistent performer.', TRUE, '2026-07-16 13:00:00');
+    ('00000000-0000-0000-000d-000000000030', 'f0000000-0000-0000-0000-000000000030', 8.00, 8.50, 8.00, 8.00, 'Reliable and consistent performer.', TRUE, '2026-05-26 13:00:00');
 INSERT INTO final_grades (grade_id, student_id, tm_id, semester_id, enterprise_total_score, final_grade, overall_status, is_locked, graded_at) VALUES
-    ('00000000-0000-0000-000e-000000000030', 'd0000000-0000-0000-0000-000000000030', '00000000-0000-0000-0000-000000000002', '50000000-0000-0000-0000-000000000001', 8.20, 8.2, 'PASSED', TRUE, '2026-07-20 18:00:00');
+    ('00000000-0000-0000-000e-000000000030', 'd0000000-0000-0000-0000-000000000030', '00000000-0000-0000-0000-000000000002', '50000000-0000-0000-0000-000000000001', 8.20, 8.2, 'PASSED', TRUE, '2026-05-28 18:00:00');
 INSERT INTO student_enterprise_feedbacks (feedback_id, student_id, enterprise_id, semester_id, training_quality_score, supervisor_support_score, work_environment_score, overall_score, positive_feedback, improvement_feedback, submitted_at) VALUES
-    ('00000000-0000-0000-000f-000000000030', 'd0000000-0000-0000-0000-000000000030', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 4, 5, 4, 4, 'Good project exposure and mentorship at Momo.', 'Could improve onboarding process.', '2026-07-18 13:00:00');
+    ('00000000-0000-0000-000f-000000000030', 'd0000000-0000-0000-0000-000000000030', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 4, 5, 4, 4, 'Good project exposure and mentorship at Momo.', 'Could improve onboarding process.', '2026-05-27 13:00:00');
 
 -- ============================================================
 -- STUDENTS 31-35: ELIGIBLE (various semesters, no activity)
@@ -604,7 +604,7 @@ INSERT INTO system_announcements (announcement_id, semester_id, title, content, 
 INSERT INTO system_announcements (announcement_id, semester_id, title, content, status, created_by, published_at, type, audience) VALUES
     ('00000000-0000-0001-0000-000000000002', '50000000-0000-0000-0000-000000000001', 'Weekly Report Deadline Reminder', 'Please remember to submit your weekly reports every Sunday by 23:59. Late submissions require Training Manager approval.', 'PUBLISHED', '00000000-0000-0000-0000-000000000002', '2026-03-08 09:00:00', 'SYSTEM_ANNOUNCEMENT', 'ALL');
 INSERT INTO system_announcements (announcement_id, semester_id, title, content, status, created_by, published_at, type, audience) VALUES
-    ('00000000-0000-0001-0000-000000000003', '50000000-0000-0000-0000-000000000001', 'Application Deadline Extended', 'The application deadline for Summer 2026 positions has been extended to July 15, 2026. Apply now!', 'PUBLISHED', '00000000-0000-0000-0000-000000000002', '2026-07-01 10:00:00', 'SYSTEM_ANNOUNCEMENT', 'STUDENT');
+    ('00000000-0000-0001-0000-000000000003', '50000000-0000-0000-0000-000000000001', 'Application Deadline Extended', 'The application deadline for Summer 2026 positions has been extended to July 15, 2026. Apply now!', 'PUBLISHED', '00000000-0000-0000-0000-000000000002', '2026-04-20 10:00:00', 'SYSTEM_ANNOUNCEMENT', 'STUDENT');
 INSERT INTO system_announcements (announcement_id, semester_id, title, content, status, created_by, type, audience) VALUES
     ('00000000-0000-0001-0000-000000000004', '50000000-0000-0000-0000-000000000001', 'Final Report Submission Guidelines', 'Please review the final report submission guidelines. Reports must be submitted by August 5, 2026.', 'DRAFT', '00000000-0000-0000-0000-000000000002', 'SYSTEM_ANNOUNCEMENT', 'STUDENT');
 
@@ -870,7 +870,7 @@ WHERE application_id = 'a0000000-0000-0000-0000-000000000013';
 
 -- New CONFIRMED interview (student14) — second-round interview, distinct interview_id from line 255
 INSERT INTO interviews (interview_id, application_id, scheduled_datetime, duration_minutes, meeting_link, status, student_confirmed, confirmed_at) VALUES
-    ('b0000000-0000-0000-0000-000000000021', 'a0000000-0000-0000-0000-000000000014', '2026-08-05 09:00:00', 45, 'https://meet.momo.vn/interview-14-new', 'CONFIRMED', TRUE, CURRENT_TIMESTAMP);
+    ('b0000000-0000-0000-0000-000000000021', 'a0000000-0000-0000-0000-000000000014', '2026-05-25 09:00:00', 45, 'https://meet.momo.vn/interview-14-new', 'CONFIRMED', TRUE, CURRENT_TIMESTAMP);
 
 -- ============================================================
 -- PART 7: INCIDENTS WITH ALL STATUSES (OPEN, UNDER_REVIEW, RESOLVED)
@@ -951,7 +951,7 @@ INSERT INTO audit_logs (user_id, action, target_entity, target_id, old_value, ne
     ('00000000-0000-0000-0000-000000000002', 'RESOLVE', 'incidents', '00000000-0000-0000-000b-000000000021', 'OPEN', 'RESOLVED', '192.168.1.100'),
     ('00000000-0000-0000-0000-000000000002', 'PUBLISH', 'final_grades', '00000000-0000-0000-000e-000000000026', 'LOCKED', 'PUBLISHED', '192.168.1.100'),
     ('d0000000-0000-0000-0000-000000000021', 'SUBMIT', 'weekly_reports', '00000000-0000-0000-0007-000000000021', 'NOT_SUBMITTED', 'SUBMITTED', '172.16.0.20'),
-    ('c0000000-0000-0000-0000-000000000011', 'SCHEDULE', 'interviews', 'b0000000-0000-0000-0000-000000000011', NULL, '{"scheduled_datetime":"2026-07-28 10:00:00"}', '10.0.0.50');
+    ('c0000000-0000-0000-0000-000000000011', 'SCHEDULE', 'interviews', 'b0000000-0000-0000-0000-000000000011', NULL, '{"scheduled_datetime":"2026-04-15 10:00:00"}', '10.0.0.50');
 
 -- ============================================================
 -- Re-enable all triggers and constraints
