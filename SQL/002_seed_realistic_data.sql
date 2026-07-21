@@ -40,7 +40,7 @@ CASCADE;
 -- SYSTEM ACCOUNTS
 -- ============================================================
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('00000000-0000-0000-0000-000000000001', 'admin@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'System Administrator', 'ACTIVE', FALSE);
+    ('00000000-0000-0000-0000-000000000001', 'dlmkjadragonbmg@gmail.com', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'System Administrator', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('00000000-0000-0000-0000-000000000001', 'ADMIN');
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
@@ -107,12 +107,12 @@ INSERT INTO job_posts (job_post_id, enterprise_id, semester_id, title, descripti
 -- STUDENTS 1-5: ELIGIBLE (Semester 5-6), no applications yet
 -- ============================================================
 
--- SE15001: demo student
+-- SE15001: mock student (kept generic so it doesn't clash with the real demo student SE15004)
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000001', 'dominhgiabao12@gmail.com', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Demo Student', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000001', 'student1@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Demo Student', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000001', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked) VALUES
-    ('e0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000001', 'SE15001', 'Demo Student', 'dominhgiabao12@gmail.com', 'Software Engineering', 6.78, 5, 'ELIGIBLE', FALSE);
+    ('e0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000001', 'SE15001', 'Demo Student', 'student1@fpt.edu.vn', 'Software Engineering', 6.78, 5, 'ELIGIBLE', FALSE);
 INSERT INTO student_profiles (user_id, student_code, university, major, gpa, skills, cv_file_url) VALUES
     ('d0000000-0000-0000-0000-000000000001', 'SE15001', 'FPT University', 'Software Engineering', 6.5, '["Java", "Spring Boot"]'::jsonb, 'https://cv.example.com/se15001.pdf');
 
@@ -136,10 +136,10 @@ INSERT INTO student_profiles (user_id, student_code, university, major, gpa, ski
 
 -- SE15004
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000004', 'student4@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Dang Thu Linh', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000004', 'dominhgiabao12@gmail.com', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Do Minh Gia Bao', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000004', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked) VALUES
-    ('e0000000-0000-0000-0000-000000000004', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000004', 'SE15004', 'Dang Thu Linh', 'student4@fpt.edu.vn', 'Software Engineering', 7.99, 5, 'ELIGIBLE', FALSE);
+    ('e0000000-0000-0000-0000-000000000004', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000004', 'SE15004', 'Do Minh Gia Bao', 'dominhgiabao12@gmail.com', 'Software Engineering', 7.99, 5, 'ELIGIBLE', FALSE);
 INSERT INTO student_profiles (user_id, student_code, university, major, gpa, skills, cv_file_url) VALUES
     ('d0000000-0000-0000-0000-000000000004', 'SE15004', 'FPT University', 'Software Engineering', 7.5, '["JavaScript", "Node.js"]'::jsonb, 'https://cv.example.com/se15004.pdf');
 
@@ -649,8 +649,9 @@ UPDATE users SET email = 'dominhgiabaobmg@gmail.com' WHERE user_id = '00000000-0
 -- Update email for Momo HR (account 11)
 UPDATE users SET email = 'dominhgiabaobmg1@gmail.com' WHERE user_id = 'c0000000-0000-0000-0000-000000000011';
 
--- Update email for FPT Software HR (account 12)
-UPDATE users SET email = 'dlmkjadragonbmg@gmail.com' WHERE user_id = 'c0000000-0000-0000-0000-000000000012';
+-- Update email for FPT Software HR (account 12) → mock (kept on @fsoft.com domain only)
+UPDATE users SET email = 'hr@fsoft.com' WHERE user_id = 'c0000000-0000-0000-0000-000000000012';
+UPDATE enterprises SET contact_person_email = 'hr@fsoft.com' WHERE enterprise_id = 'c0000000-0000-0000-0000-000000000002';
 
 -- Update email for Shopee HR (account 13)
 UPDATE users SET email = 'gogodlmkja21022006@gmail.com' WHERE user_id = 'c0000000-0000-0000-0000-000000000013';
