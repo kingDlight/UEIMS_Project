@@ -8,9 +8,8 @@ This folder contains the canonical SQL files for the UEIMS PostgreSQL database.
 SQL/
 ├── README.md                              ← this file
 ├── 001_create_schema.sql                  ← CANONICAL schema (run for fresh DB)
-├── 002_legacy_patches.sql                ← in-place upgrade for old DBs (run AFTER 001)
-├── 003_add_hours_logged_to_weekly_reports.sql  ← adds hours_logged column
-├── 016_seed_realistic_data.sql           ← optional: realistic demo data
+├── 002_seed_realistic_data.sql            ← optional: realistic demo data (run AFTER 001, BEFORE 003)
+├── 003_legacy_patches.sql                 ← in-place upgrade for old DBs (run AFTER 001 + 002)
 ├── 900_disable_interview_trigger.sql     ← ops toggle (disable a specific trigger)
 ├── 901_enable_interview_trigger.sql      ← ops toggle (re-enable)
 ├── TESTING_GUIDE.md                       ← testing documentation
@@ -26,21 +25,21 @@ SQL/
 ```bash
 createdb ueims
 psql -U postgres -d ueims -f 001_create_schema.sql
-psql -U postgres -d ueims -f 016_seed_realistic_data.sql   # optional demo data
+psql -U postgres -d ueims -f 002_seed_realistic_data.sql   # optional demo data
 ```
 
-That's it. **Do NOT run `002_legacy_patches.sql`** on a fresh DB — it targets
+That's it. **Do NOT run `003_legacy_patches.sql`** on a fresh DB — it targets
 older snapshots of `001` and is a **no-op** on the current schema.
 
 ### Upgrading an existing database (was created from an older 001)
 
 ```bash
 psql -U postgres -d ueims -f 001_create_schema.sql     # forward-compatible in most cases
-psql -U postgres -d ueims -f 002_legacy_patches.sql    # fixes triggers from pre-FIX-013/017/018/021
-psql -U postgres -d ueims -f 003_add_hours_logged_to_weekly_reports.sql   # optional, if feature is needed
+psql -U postgres -d ueims -f 002_seed_realistic_data.sql   # optional demo data
+psql -U postgres -d ueims -f 003_legacy_patches.sql    # fixes triggers from pre-FIX-013/017/018/021
 ```
 
-The `002_legacy_patches.sql` file consolidates these historical patches:
+The `003_legacy_patches.sql` file consolidates these historical patches:
 
 | Original file | Purpose | Merged into 002? |
 |---|---|---|
@@ -50,7 +49,7 @@ The `002_legacy_patches.sql` file consolidates these historical patches:
 | `021_fix_enterprise_assignment_student_status_trigger.sql` | Allow ELIGIBLE+ACCEPTED+MATCHED+OJT | ✅ |
 
 If your DB was created from `001` **after** all these fixes were merged into
-`001`, running `002` is a no-op (safe and idempotent).
+`001`, running `003` is a no-op (safe and idempotent).
 
 ## 🗑️ Legacy patches that were NO-OPS and have been deleted
 
@@ -99,5 +98,5 @@ but not required for normal operation:
 ## 🆘 Troubleshooting
 
 If you get an error like `column ... does not exist` after a fresh setup,
-you probably applied an older version of `001`. Run `002_legacy_patches.sql`
+you probably applied an older version of `001`. Run `003_legacy_patches.sql`
 to apply the latest trigger functions in-place.

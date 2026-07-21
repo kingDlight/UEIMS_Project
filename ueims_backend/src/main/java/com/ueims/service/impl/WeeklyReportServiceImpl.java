@@ -91,7 +91,8 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
     @Override
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public WeeklyReport findById(UUID id) {
-        WeeklyReport report = repository.findByIdWithAssignmentGraph(id)
+        WeeklyReport report = repository
+                .findByIdWithAssignmentGraph(id)
                 .orElseThrow(() -> new AppException(ErrorCode.FIELD_REQUIRED));
 
         User currentUser = getCurrentUser();
@@ -195,7 +196,8 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
     @Override
     @org.springframework.transaction.annotation.Transactional
     public WeeklyReport updateReport(UUID id, WeeklyReportRequest request) {
-        WeeklyReport existing = repository.findByIdWithAssignmentGraph(id)
+        WeeklyReport existing = repository
+                .findByIdWithAssignmentGraph(id)
                 .orElseThrow(() -> new AppException(ErrorCode.FIELD_REQUIRED));
 
         User currentUser = getCurrentUser();
@@ -251,7 +253,8 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
     @Override
     @org.springframework.transaction.annotation.Transactional
     public WeeklyReport approveReport(UUID id, String feedback) {
-        WeeklyReport existing = repository.findByIdWithAssignmentGraph(id)
+        WeeklyReport existing = repository
+                .findByIdWithAssignmentGraph(id)
                 .orElseThrow(() -> new AppException(ErrorCode.FIELD_REQUIRED));
         User currentUser = getCurrentUser();
 
@@ -286,7 +289,8 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
     @Override
     @org.springframework.transaction.annotation.Transactional
     public WeeklyReport rejectReport(UUID id, String feedback) {
-        WeeklyReport existing = repository.findByIdWithAssignmentGraph(id)
+        WeeklyReport existing = repository
+                .findByIdWithAssignmentGraph(id)
                 .orElseThrow(() -> new AppException(ErrorCode.FIELD_REQUIRED));
         User currentUser = getCurrentUser();
 
@@ -371,9 +375,10 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
                     && report.getAssignment().getSemester().getStartDate() != null
                     && report.getWeekNumber() != null
                     && report.getWeekNumber() > 0) {
-                java.time.LocalDate start =
-                        report.getAssignment().getSemester().getStartDate()
-                                .plusDays((long) (report.getWeekNumber() - 1) * 7);
+                java.time.LocalDate start = report.getAssignment()
+                        .getSemester()
+                        .getStartDate()
+                        .plusDays((long) (report.getWeekNumber() - 1) * 7);
                 dto.weekStartDate(start);
                 dto.weekEndDate(start.plusDays(6));
             }

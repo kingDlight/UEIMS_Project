@@ -1,5 +1,5 @@
 -- ============================================================
--- SEED DATA 016: Realistic Full-Stack Demo Data
+-- SEED DATA 002: Realistic Full-Stack Demo Data
 -- All UUIDs use valid hex characters only (0-9, a-f)
 -- Follows 001_create_schema.sql exactly
 -- Idempotent: safe to run multiple times
@@ -78,7 +78,7 @@ INSERT INTO users_roles (user_id, role_name) VALUES ('c0000000-0000-0000-0000-00
 -- SEMESTER (create as OPEN, then update to ACTIVE to satisfy state machine)
 -- ============================================================
 INSERT INTO semesters (semester_id, semester_code, name, start_date, end_date, weekly_report_deadline_day, weekly_report_deadline_time, final_report_deadline, status, created_by) VALUES
-    ('50000000-0000-0000-0000-000000000001', 'SP26', 'Summer 2026', '2026-03-01', '2026-07-31', 'SUNDAY', '23:59:00', '2026-08-05 23:59:00', 'OPEN', '00000000-0000-0000-0000-000000000002');
+    ('50000000-0000-0000-0000-000000000001', 'SP26', 'Spring 2026', '2026-03-01', '2026-07-31', 'SUNDAY', '23:59:00', '2026-08-05 23:59:00', 'OPEN', '00000000-0000-0000-0000-000000000002');
 UPDATE semesters SET status = 'ACTIVE' WHERE semester_id = '50000000-0000-0000-0000-000000000001';
 
 -- ============================================================
@@ -109,10 +109,10 @@ INSERT INTO job_posts (job_post_id, enterprise_id, semester_id, title, descripti
 
 -- SE15001: demo student
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
-    ('d0000000-0000-0000-0000-000000000001', 'demo.student@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Demo Student', 'ACTIVE', FALSE);
+    ('d0000000-0000-0000-0000-000000000001', 'dominhgiabao12@gmail.com', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Demo Student', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000001', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked) VALUES
-    ('e0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000001', 'SE15001', 'Demo Student', 'demo.student@fpt.edu.vn', 'Software Engineering', 6.78, 5, 'ELIGIBLE', FALSE);
+    ('e0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000001', 'SE15001', 'Demo Student', 'dominhgiabao12@gmail.com', 'Software Engineering', 6.78, 5, 'ELIGIBLE', FALSE);
 INSERT INTO student_profiles (user_id, student_code, university, major, gpa, skills, cv_file_url) VALUES
     ('d0000000-0000-0000-0000-000000000001', 'SE15001', 'FPT University', 'Software Engineering', 6.5, '["Java", "Spring Boot"]'::jsonb, 'https://cv.example.com/se15001.pdf');
 
@@ -738,10 +738,9 @@ INSERT INTO role_permissions (role_name, permission_name) VALUES
 -- PART 3: ADDITIONAL SEMESTERS (Multi-semester demo)
 -- ============================================================
 
--- SU26: Summer 2026 (ACTIVE) — second active semester for demo
+-- SU26: Summer 2026 (CLOSED) — historical semester kept for cross-semester demos
 INSERT INTO semesters (semester_id, semester_code, name, start_date, end_date, weekly_report_deadline_day, weekly_report_deadline_time, final_report_deadline, status, created_by) VALUES
-    ('50000000-0000-0000-0000-000000000002', 'SU26', 'Summer 2026', '2026-06-01', '2026-09-30', 'SUNDAY', '23:59:00', '2026-10-05 23:59:00', 'OPEN', '00000000-0000-0000-0000-000000000002');
-UPDATE semesters SET status = 'ACTIVE' WHERE semester_id = '50000000-0000-0000-0000-000000000002';
+    ('50000000-0000-0000-0000-000000000002', 'SU26', 'Summer 2026', '2026-06-01', '2026-09-30', 'SUNDAY', '23:59:00', '2026-10-05 23:59:00', 'CLOSED', '00000000-0000-0000-0000-000000000002');
 
 -- FA25: Fall 2025 (CLOSED) — historical semester for grade comparison demo
 INSERT INTO semesters (semester_id, semester_code, name, start_date, end_date, weekly_report_deadline_day, weekly_report_deadline_time, final_report_deadline, status, created_by) VALUES
