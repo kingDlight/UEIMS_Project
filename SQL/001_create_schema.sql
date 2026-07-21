@@ -962,6 +962,12 @@ COMMENT ON COLUMN enterprise_assignments.termination_reason IS 'Reason for assig
 COMMENT ON COLUMN enterprise_assignments.terminated_at IS 'The time when the assignment is terminated';
 COMMENT ON COLUMN enterprise_assignments.replaced_by_assignment_id IS 'A new assignment replaces this one (only if terminated due to replacement).';
 
+-- Profile enrichment columns (originally migration 019, now in 001)
+COMMENT ON COLUMN student_profiles.class_code    IS 'TM bulk-import enrichment';
+COMMENT ON COLUMN student_profiles.date_of_birth IS 'TM bulk-import enrichment';
+COMMENT ON COLUMN student_profiles.gender        IS 'TM bulk-import enrichment';
+COMMENT ON COLUMN student_profiles.address       IS 'TM bulk-import enrichment';
+
 -- TRIGGER: BR-54 — Verify Student is in Semester 5 or 6 to participate in active internship
 CREATE OR REPLACE FUNCTION enforce_student_internship_permission()
 RETURNS TRIGGER AS $$
@@ -1232,6 +1238,7 @@ CREATE TABLE weekly_reports (
     late_override_by UUID REFERENCES users(user_id),                  -- BR-56: TM override for late/early submissions
     plagiarism_score DECIMAL(5,4),                                    -- BR-58: RBL Jaccard Similarity Score (0.0000 - 1.0000)
     is_anomaly      BOOLEAN NOT NULL DEFAULT FALSE,                   -- BR-58: Red flag if score >= 0.85
+    hours_logged    INT CHECK (hours_logged IS NULL OR (hours_logged >= 0 AND hours_logged <= 168)),
     created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 

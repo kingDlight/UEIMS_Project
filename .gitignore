@@ -150,7 +150,10 @@ node_modules/
 *.class
 target/
 .claude
-*.md
+# Allow important README files despite the blanket *.md ignore below
+!README.md
+!*README.md
+!SQL/README.md
 .gitnexusignore
 .repomixignore
 .roo
@@ -185,6 +188,8 @@ uploads/
 **/uploads/
 **/uploads/avatars/
 SQL/generated_schema.sql
+SQL/_archive/
+SQL/debug_*.sql
 postman_collection_extracted/
 create_docx.js
 SQL/test.sql

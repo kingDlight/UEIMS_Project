@@ -88,7 +88,7 @@ public class WeeklyReportController {
     }
 
     @PutMapping("/{id}/approve")
-    @PreAuthorize("hasRole('ENTERPRISE') or hasRole('TRAINING_MANAGER')")
+    @PreAuthorize("hasRole('ENTERPRISE')")
     public ResponseEntity<WeeklyReportDTO> approve(
             @PathVariable UUID id, @RequestBody(required = false) WeeklyReportRequest feedback) {
         String fb = feedback == null ? null : feedback.getFeedback();
@@ -96,7 +96,7 @@ public class WeeklyReportController {
     }
 
     @PutMapping("/{id}/reject")
-    @PreAuthorize("hasRole('ENTERPRISE') or hasRole('TRAINING_MANAGER')")
+    @PreAuthorize("hasRole('ENTERPRISE')")
     public ResponseEntity<WeeklyReportDTO> reject(@PathVariable UUID id, @RequestBody WeeklyReportRequest request) {
         if (request == null
                 || request.getFeedback() == null

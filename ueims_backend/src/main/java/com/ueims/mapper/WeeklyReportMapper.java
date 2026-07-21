@@ -16,6 +16,9 @@ public interface WeeklyReportMapper {
     @Mapping(target = "studentName", ignore = true)
     @Mapping(target = "studentCode", ignore = true)
     @Mapping(target = "studentEmail", ignore = true)
+    @Mapping(target = "enterpriseName", ignore = true)
+    @Mapping(target = "weekStartDate", ignore = true)
+    @Mapping(target = "weekEndDate", ignore = true)
     WeeklyReportDTO toDto(WeeklyReport entity);
 
     @Mapping(target = "assignment.assignmentId", source = "assignmentId")

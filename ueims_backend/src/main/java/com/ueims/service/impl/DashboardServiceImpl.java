@@ -121,7 +121,7 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     private static final Set<String> SUBMITTED_STATUSES = Set.of("SUBMITTED", "APPROVED", "REJECTED");
-    private static final Set<String> PENDING_STATUSES = Set.of("DRAFT", "PENDING", "NOT_SUBMITTED");
+    private static final Set<String> PENDING_STATUSES = Set.of("NOT_SUBMITTED", "DRAFT");
 
     private CommandCenterSummaryDTO.WeeklyReportSummary getWeeklyReportSummary() {
         List<WeeklyReport> allReports = weeklyReportRepository.findAll();

@@ -1,17 +1,14 @@
 import React, { useState, useCallback, forwardRef } from 'react';
 import { useScrollAnimation } from '../../../hooks/useScrollAnimation';
-import { App, Checkbox } from 'antd';
+import { App, Modal, Spin } from 'antd';
 
 import {
-  CheckSquare,
   Clock,
-  AlertCircle,
-  CheckCircle2,
   FileText,
   Filter,
   Calendar,
   Building2,
-  Hash,
+  Eye,
 } from 'lucide-react';
 import { st } from './StatsTab';
 import { WeeklyReportService } from '@/services/WeeklyReportService';
@@ -30,6 +27,11 @@ function hexToRgba(hex: string, alpha: number): string {
 // ============================================================
 // TYPES
 // ============================================================
+// Backend can return any of: NOT_SUBMITTED, DRAFT, SUBMITTED, APPROVED, REJECTED.
+// We surface a small set in the UI; anything else falls back to "Pending".
+// ============================================================
+export type WeeklyReportStatus = 'SUBMITTED' | 'APPROVED' | 'REJECTED' | 'PENDING';
+
 export interface WeeklyReport {
   id: string;
   studentName: string;
@@ -37,26 +39,39 @@ export interface WeeklyReport {
   enterprise: string;
   weekNumber: number;
   weekLabel: string;
-  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  status: WeeklyReportStatus;
   submittedAt: string;
-  hoursLogged: number;
+  hoursLogged: number | null;
   summary: string;
 }
 
 const ALL_WEEKS = [
-  'Week 1 — Jun 2–8, 2026',
-  'Week 2 — Jun 9–15, 2026',
-  'Week 3 — Jun 16–22, 2026',
-  'Week 4 — Jun 23–29, 2026',
-  'Week 5 — Jun 30–Jul 6, 2026',
-  'Week 6 — Jul 7–13, 2026',
-  'Week 7 — Jul 14–20, 2026',
-  'Week 8 — Jul 21–27, 2026',
-  'Week 9 — Jul 28–Aug 3, 2026',
-  'Week 10 — Aug 4–10, 2026',
+  'Week 1',
+  'Week 2',
+  'Week 3',
+  'Week 4',
+  'Week 5',
+  'Week 6',
+  'Week 7',
+  'Week 8',
+  'Week 9',
+  'Week 10',
 ];
 
-const STATUS_CONFIG = {
+const STATUS_CONFIG: Record<WeeklyReportStatus, {
+  color: string;
+  bg: string;
+  borderColor: string;
+  icon: React.ReactNode;
+  label: string;
+}> = {
+  SUBMITTED: {
+    color: st.warning,
+    bg: hexToRgba(st.warning, 0.06),
+    borderColor: hexToRgba(st.warning, 0.20),
+    icon: <Clock size={12} strokeWidth={2.5} />,
+    label: 'Submitted',
+  },
   PENDING: {
     color: st.warning,
     bg: hexToRgba(st.warning, 0.06),
@@ -84,8 +99,7 @@ const STATUS_CONFIG = {
 // STATUS BADGE
 // ============================================================
 const StatusBadge: React.FC<{ status: WeeklyReport['status'] }> = ({ status }) => {
-  const { message } = App.useApp();
-  const cfg = STATUS_CONFIG[status];
+  const cfg = STATUS_CONFIG[status] ?? STATUS_CONFIG.PENDING;
   return (
     <span style={{
       display: 'inline-flex',
@@ -111,79 +125,54 @@ const StatusBadge: React.FC<{ status: WeeklyReport['status'] }> = ({ status }) =
 // ============================================================
 interface ReportCardProps {
   report: WeeklyReport;
-  checked: boolean;
-  onToggle: (id: string) => void;
-  onApprove: (id: string) => void;
-  onReject: (id: string) => void;
   index: number;
+  onViewDetail: (id: string) => void;
 }
 
 const ReportCard = forwardRef<HTMLDivElement, ReportCardProps>((
-  { report, checked, onToggle, onApprove, onReject, index },
+  { report, index, onViewDetail },
   ref,
 ) => {
-  const [hovered, setHovered] = useState(false);
-  const isPending = report.status === 'PENDING';
-  const cfg = STATUS_CONFIG[report.status] || STATUS_CONFIG.PENDING;
+  const cfg = STATUS_CONFIG[report.status] ?? STATUS_CONFIG.PENDING;
 
   return (
     <div
       ref={ref}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      className="bg-white border border-slate-200 rounded-2xl p-4 transition-all hover:shadow-md flex flex-col"
+      className="bg-white border border-slate-200 rounded-2xl p-4 transition-all hover:shadow-md hover:border-slate-300 flex flex-col cursor-pointer"
+      onClick={() => onViewDetail(report.id)}
     >
-      {/* Top section: Checkbox and Status */}
+      {/* Top: Student + Status */}
       <div className="flex justify-between items-start mb-3">
-        <div className="flex gap-3">
-          <div className="pt-0.5">
-            <Checkbox checked={checked} onChange={() => onToggle(report.id)} />
+        <div>
+          <div className="text-sm font-bold text-slate-900 leading-tight mb-0.5">
+            {report.studentName} <span className="text-slate-400 font-normal text-xs ml-1"># {report.studentCode}</span>
           </div>
-          <div>
-            <div className="text-sm font-bold text-slate-900 leading-tight mb-0.5">
-              {report.studentName} <span className="text-slate-400 font-normal text-xs ml-1"># {report.studentCode}</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
-              <span className="flex items-center gap-1"><Building2 size={12} className="text-slate-400" /> {report.enterprise}</span>
-              <span>·</span>
-              <span className="flex items-center gap-1"><Calendar size={12} className="text-slate-400" /> {report.weekLabel}</span>
-            </div>
+          <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
+            <span className="flex items-center gap-1"><Building2 size={12} className="text-slate-400" /> {report.enterprise}</span>
+            <span>·</span>
+            <span className="flex items-center gap-1"><Calendar size={12} className="text-slate-400" /> {report.weekLabel}</span>
           </div>
         </div>
-        <span style={{ color: cfg.color, background: cfg.bg, border: `1px solid ${cfg.borderColor}` }} className="px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1">
+        <span style={{ color: cfg.color, background: cfg.bg, border: `1px solid ${cfg.borderColor}` }} className="px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 shrink-0">
           {cfg.icon}
           {cfg.label}
         </span>
       </div>
-      
+
       {/* Middle: snippet */}
       <div className="text-[13px] text-slate-600 mb-4 flex-1 line-clamp-2 leading-relaxed">
         {report.summary || 'No summary available for this report.'}
       </div>
 
-      {/* Bottom: Date and Actions */}
+      {/* Bottom: Date + View detail */}
       <div className="flex justify-between items-end mt-auto pt-3 border-t border-slate-100">
         <div className="text-[11px] text-slate-400 font-medium flex items-center gap-1.5">
           <Clock size={12} />
-          {report.submittedAt ? new Date(report.submittedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}
+          {report.submittedAt ? new Date(report.submittedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Not submitted'}
         </div>
-        
-        {isPending && (
-          <div className="flex gap-2">
-            <button
-              onClick={() => onApprove(report.id)}
-              className="bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 shadow-sm"
-            >
-              <CheckCircle2 size={14} /> Approve
-            </button>
-            <button
-              onClick={() => onReject(report.id)}
-              className="bg-white border border-red-200 text-red-500 hover:bg-red-50 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5"
-            >
-              <AlertCircle size={14} /> Reject
-            </button>
-          </div>
-        )}
+        <span className="text-[11px] font-bold text-[#E67E22] flex items-center gap-1 group-hover:underline">
+          View detail <Eye size={12} />
+        </span>
       </div>
     </div>
   );
@@ -197,7 +186,7 @@ interface FilterSidebarProps {
   onWeekChange: (w: string) => void;
   checkedStatuses: Set<string>;
   onStatusToggle: (s: string) => void;
-  counts: { pending: number; approved: number; rejected: number };
+  counts: { submitted: number; approved: number; rejected: number };
 }
 
 const FilterSidebar: React.FC<FilterSidebarProps> = ({
@@ -247,12 +236,13 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
           Week
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          {ALL_WEEKS.map((w) => {
+          {ALL_WEEKS.map((w, idx) => {
+            const weekNum = idx + 1;
             const isSelected = selectedWeek === w;
             return (
               <button
                 key={w}
-                onClick={() => onWeekChange(isSelected ? '' : w)}
+                onClick={() => onWeekChange(isSelected ? '' : String(weekNum))}
                 style={{
                   display: 'block',
                   width: '100%',
@@ -295,7 +285,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           {([
-            { value: 'PENDING', label: 'Pending', count: counts.pending, cfg: STATUS_CONFIG.PENDING },
+            { value: 'SUBMITTED', label: 'Submitted', count: counts.submitted, cfg: STATUS_CONFIG.SUBMITTED },
             { value: 'APPROVED', label: 'Approved', count: counts.approved, cfg: STATUS_CONFIG.APPROVED },
             { value: 'REJECTED', label: 'Rejected', count: counts.rejected, cfg: STATUS_CONFIG.REJECTED },
           ] as const).map(({ value, label, count, cfg }) => {
@@ -367,68 +357,65 @@ export const WeeklyReportsTab: React.FC = () => {
   useScrollAnimation();
   const [reports, setReports] = useState<WeeklyReport[]>([]);
   const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // Normalize any backend status into one of our 4 UI buckets.
+  // Anything that isn't APPROVED/REJECTED is treated as "submitted/pending".
+  const normalizeStatus = (raw: string | undefined): WeeklyReportStatus => {
+    switch (raw) {
+      case 'APPROVED': return 'APPROVED';
+      case 'REJECTED': return 'REJECTED';
+      case 'SUBMITTED': return 'SUBMITTED';
+      default: return 'PENDING';
+    }
+  };
 
   React.useEffect(() => {
     const fetchReports = async () => {
       try {
         const data = await WeeklyReportService.getAllReports();
-        const mapped = data.map((r: any) => ({
+        const mapped = (Array.isArray(data) ? data : []).map((r: any) => ({
           id: r.reportId,
           studentName: r.studentName || 'Unknown Student',
           studentCode: r.studentCode || 'N/A',
           enterprise: r.enterpriseName || 'Unknown Enterprise',
           weekNumber: r.weekNumber,
           weekLabel: `Week ${r.weekNumber}`,
-          status: r.status,
-          submittedAt: r.submittedAt || new Date().toISOString(),
-          hoursLogged: 40,
+          status: normalizeStatus(r.status),
+          submittedAt: r.submittedAt || null,
+          hoursLogged: r.hoursLogged ?? null,
           summary: r.tasksCompleted || 'No summary provided',
         }));
         setReports(mapped);
-      } catch (err) {
-        console.error('Failed to fetch reports', err);
+        setErrorMsg(null);
+      } catch (err: any) {
+        const msg = err?.response?.data?.message ?? 'Failed to load weekly reports.';
+        setErrorMsg(msg);
+        void message.error({ content: msg, duration: 4 });
       } finally {
         setLoading(false);
       }
     };
     void fetchReports();
-  }, []);
-  const [selectedWeek, setSelectedWeek] = useState<string>('');
-  const [checkedStatuses, setCheckedStatuses] = useState<Set<string>>(new Set(['PENDING']));
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [batchLoading, setBatchLoading] = useState(false);
+  }, [message]);
 
-  // Derived filtered data
+  const [selectedWeek, setSelectedWeek] = useState<string>('');
+  const [checkedStatuses, setCheckedStatuses] = useState<Set<string>>(new Set(['SUBMITTED']));
+
+  // Filter by week number (parsed from selectedWeek) + status set.
   const filteredReports = reports.filter((r) => {
-    const matchWeek = !selectedWeek || r.weekLabel === selectedWeek;
+    const selectedWeekNum = selectedWeek ? Number(selectedWeek) : null;
+    const matchWeek = selectedWeekNum == null || r.weekNumber === selectedWeekNum;
     const matchStatus = checkedStatuses.size === 0 || checkedStatuses.has(r.status);
     return matchWeek && matchStatus;
   });
 
-  // Counts for sidebar
+  // Counts for sidebar — count actual UI-normalized buckets.
   const counts = {
-    pending: reports.filter((r) => r.status === 'PENDING').length,
+    submitted: reports.filter((r) => r.status === 'SUBMITTED').length,
     approved: reports.filter((r) => r.status === 'APPROVED').length,
     rejected: reports.filter((r) => r.status === 'REJECTED').length,
   };
-
-  // Toggle individual row checkbox
-  const toggleRow = useCallback((id: string) => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
-  }, []);
-
-  // Toggle select-all
-  const handleSelectAll = useCallback(() => {
-    if (selectedIds.size === filteredReports.length) {
-      setSelectedIds(new Set());
-    } else {
-      setSelectedIds(new Set(filteredReports.map((r) => r.id)));
-    }
-  }, [selectedIds, filteredReports]);
 
   // Toggle status filter checkbox
   const toggleStatus = useCallback((s: string) => {
@@ -439,64 +426,35 @@ export const WeeklyReportsTab: React.FC = () => {
     });
   }, []);
 
-  const [processingId, setProcessingId] = useState<string | null>(null);
+  // Training Manager is read-only here (UC-33 final grading review,
+  // UC-32 incident evidence, monitor). Clicking a card opens the detail
+  // modal which is the single affordance.
+  const [detailId, setDetailId] = useState<string | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailData, setDetailData] = useState<any | null>(null);
+  const [detailError, setDetailError] = useState<string | null>(null);
 
-  // Single approve
-  const handleApprove = useCallback(async (id: string) => {
-    if (processingId) return;
-    setProcessingId(id);
+  const openDetail = useCallback(async (id: string) => {
+    setDetailId(id);
+    setDetailLoading(true);
+    setDetailError(null);
+    setDetailData(null);
     try {
-      await WeeklyReportService.approveReport(id);
-      setReports((prev) => prev.map((r) => r.id === id ? { ...r, status: 'APPROVED' as const } : r));
-      void message.success({ content: 'Report approved.', key: id, duration: 2 });
-    } catch (err) {
-      void message.error({ content: 'Failed to approve report.', key: id });
+      const data = await WeeklyReportService.getReportById(id);
+      setDetailData(data);
+    } catch (err: any) {
+      const msg = err?.response?.data?.message ?? 'Failed to load report detail.';
+      setDetailError(msg);
     } finally {
-      setProcessingId(null);
+      setDetailLoading(false);
     }
-  }, [processingId]);
+  }, []);
 
-  // Single reject
-  const handleReject = useCallback(async (id: string) => {
-    if (processingId) return;
-    setProcessingId(id);
-    try {
-      await WeeklyReportService.rejectReport(id, 'Rejected by Training Manager');
-      setReports((prev) => prev.map((r) => r.id === id ? { ...r, status: 'REJECTED' as const } : r));
-      void message.warning({ content: 'Report rejected.', key: id, duration: 2 });
-    } catch (err) {
-      void message.error({ content: 'Failed to reject report.', key: id });
-    } finally {
-      setProcessingId(null);
-    }
-  }, [processingId]);
-
-  // Batch approve
-  const handleBatchApprove = useCallback(async () => {
-    if (selectedIds.size === 0) return;
-    setBatchLoading(true);
-    try {
-      await new Promise((r) => setTimeout(r, 800));
-      setReports((prev) => prev.map((r) => selectedIds.has(r.id) ? { ...r, status: 'APPROVED' as const } : r));
-      setSelectedIds(new Set());
-      void message.success({ content: `${selectedIds.size} report(s) approved.`, key: 'batch', duration: 2.5 });
-    } catch {
-      void message.error({ content: 'Failed to approve reports.', key: 'batch' });
-    } finally {
-      setBatchLoading(false);
-    }
-  }, [selectedIds]);
-
-  const batchDisabled = selectedIds.size === 0;
-  const allSelected = filteredReports.length > 0 && selectedIds.size === filteredReports.length;
-  const someSelected = selectedIds.size > 0 && selectedIds.size < filteredReports.length;
-
-  let batchApproveLabel = 'Batch Approve';
-  if (batchLoading) {
-    batchApproveLabel = 'Approving...';
-  } else if (selectedIds.size > 0) {
-    batchApproveLabel = 'Batch Approve (' + selectedIds.size + ')';
-  }
+  const closeDetail = useCallback(() => {
+    setDetailId(null);
+    setDetailData(null);
+    setDetailError(null);
+  }, []);
 
   return (
     <div className="wr-container" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -621,70 +579,16 @@ export const WeeklyReportsTab: React.FC = () => {
 
         {/* RIGHT: Report List */}
         <div style={{ flex: 1, minWidth: 0 }}>
-          {/* Toolbar: Select All + Batch Approve */}
+          {/* Simple counter */}
           <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
             marginBottom: 12,
             padding: '0 2px',
-            flexWrap: 'wrap',
-            gap: 8,
+            fontSize: 13,
+            fontWeight: 700,
+            color: st.textPrimary,
+            fontFamily: 'Inter, sans-serif',
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <Checkbox
-                checked={allSelected}
-                indeterminate={someSelected}
-                onChange={handleSelectAll}
-              />
-              <span style={{ fontSize: 13, fontWeight: 700, color: st.textPrimary, fontFamily: 'Inter, sans-serif' }}>
-                {filteredReports.length} Report{filteredReports.length !== 1 ? 's' : ''}
-              </span>
-              {selectedIds.size > 0 && (
-                <span style={{ fontSize: 12, color: st.textMuted, fontFamily: 'Inter, sans-serif' }}>
-                  · {selectedIds.size} selected
-                </span>
-              )}
-            </div>
-
-            {/* Solid Green Batch Approve Button */}
-            <button
-              disabled={batchDisabled || batchLoading}
-              onClick={handleBatchApprove}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 6,
-                padding: '8px 16px',
-                borderRadius: st.radiusMd,
-                border: batchDisabled ? `1px solid ${st.border}` : 'none',
-                background: batchDisabled ? 'transparent' : st.success,
-                color: batchDisabled ? st.textMuted : '#fff',
-                fontSize: 12.5,
-                fontWeight: 700,
-                fontFamily: 'Inter, sans-serif',
-                cursor: batchDisabled ? 'not-allowed' : 'pointer',
-                opacity: batchDisabled ? 0.55 : 1,
-                transition: 'all 0.2s cubic-bezier(0.32, 0.72, 0, 1)',
-                boxShadow: batchDisabled ? 'none' : '0 2px 8px rgba(16,185,129,0.25)',
-                pointerEvents: batchDisabled ? 'none' : 'auto',
-              }}
-              onMouseEnter={(e) => {
-                if (!batchDisabled && !batchLoading) {
-                  (e.currentTarget as HTMLButtonElement).style.background = st.success;
-                  (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-1px)';
-                  (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 4px 12px rgba(16,185,129,0.35)';
-                }
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.background = batchDisabled ? 'transparent' : st.success;
-                (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0)';
-                (e.currentTarget as HTMLButtonElement).style.boxShadow = batchDisabled ? 'none' : '0 2px 8px rgba(16,185,129,0.25)';
-              }}
-            >
-              <CheckSquare size={14} strokeWidth={2.5} />
-              {batchApproveLabel}
-            </button>
+            {filteredReports.length} Report{filteredReports.length !== 1 ? 's' : ''}
           </div>
 
           {/* Scrollable Card List */}
@@ -724,20 +628,106 @@ export const WeeklyReportsTab: React.FC = () => {
                   <ReportCard
                     key={report.id}
                     report={report}
-                    checked={selectedIds.has(report.id)}
-                    onToggle={toggleRow}
-                    onApprove={handleApprove}
-                    onReject={handleReject}
                     index={i}
+                    onViewDetail={openDetail}
                   />
                 ))
               )}
-            
+
           </div>
         </div>
       </div>
+
+      {/* Detail Modal (read-only, TM context: UC-33 / UC-32 / monitor) */}
+      <Modal
+        open={!!detailId}
+        onCancel={closeDetail}
+        footer={null}
+        width={720}
+        centered
+        title={
+          detailData ? (
+            <div style={{ fontFamily: 'Inter, sans-serif' }}>
+              <div style={{ fontSize: 16, fontWeight: 800, color: st.textPrimary }}>
+                {detailData.studentName ?? 'Student'} — Week {detailData.weekNumber}
+              </div>
+              <div style={{ fontSize: 12, color: st.textMuted, marginTop: 2 }}>
+                {detailData.enterpriseName ?? ''}
+              </div>
+            </div>
+          ) : null
+        }
+      >
+        {detailLoading ? (
+          <div style={{ padding: '40px 0', textAlign: 'center' }}>
+            <Spin />
+          </div>
+        ) : detailError ? (
+          <div style={{ padding: '20px 0', color: st.error, fontFamily: 'Inter, sans-serif', fontSize: 13 }}>
+            {detailError}
+          </div>
+        ) : detailData ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14, fontFamily: 'Inter, sans-serif' }}>
+            <DetailSection label="Tasks Completed" value={detailData.tasksCompleted} />
+            <DetailSection label="Issues / Challenges" value={detailData.issuesChallenges} />
+            <DetailSection label="Lessons Learned" value={detailData.lessonsLearned} />
+            <DetailSection label="Plan for Next Week" value={detailData.planNextWeek} />
+            <div style={{ display: 'flex', gap: 24, fontSize: 12, color: st.textSecondary, borderTop: `1px solid ${st.border}`, paddingTop: 12 }}>
+              <span>
+                <strong>Status:</strong>{' '}
+                {STATUS_CONFIG[detailData.status as WeeklyReportStatus]?.label
+                  ?? detailData.status
+                  ?? 'N/A'}
+              </span>
+              {detailData.hoursLogged != null && (
+                <span><strong>Hours logged:</strong> {detailData.hoursLogged}h</span>
+              )}
+              {detailData.submittedAt && (
+                <span>
+                  <strong>Submitted:</strong>{' '}
+                  {new Date(detailData.submittedAt).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}
+                </span>
+              )}
+            </div>
+            {detailData.feedback && (
+              <div style={{ padding: '10px 12px', background: st.neutralBg, borderRadius: 8, fontSize: 12.5, color: st.textSecondary }}>
+                <strong>Enterprise feedback:</strong> {detailData.feedback}
+              </div>
+            )}
+          </div>
+        ) : null}
+      </Modal>
     </div>
   );
 };
+
+const DetailSection: React.FC<{ label: string; value?: string }> = ({ label, value }) => (
+  <div>
+    <div style={{
+      fontSize: 10.5,
+      fontWeight: 700,
+      color: st.textMuted,
+      textTransform: 'uppercase',
+      letterSpacing: '0.08em',
+      marginBottom: 6,
+      fontFamily: 'Inter, sans-serif',
+    }}>
+      {label}
+    </div>
+    <div style={{
+      fontSize: 13,
+      color: st.textPrimary,
+      lineHeight: 1.6,
+      padding: '10px 12px',
+      background: st.neutralBg,
+      borderRadius: 8,
+      whiteSpace: 'pre-wrap',
+      wordBreak: 'break-word',
+      fontFamily: 'Inter, sans-serif',
+    }}>
+      {value && value.trim() ? value : <em style={{ color: st.textMuted }}>Not provided</em>}
+    </div>
+  </div>
+);
 
 export default WeeklyReportsTab;

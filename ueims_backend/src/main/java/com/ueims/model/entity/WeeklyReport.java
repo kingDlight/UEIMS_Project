@@ -64,4 +64,7 @@ public class WeeklyReport extends BaseEntity {
     @Column(name = "is_anomaly")
     @Builder.Default
     private Boolean isAnomaly = false;
+
+    @Column(name = "hours_logged")
+    private Integer hoursLogged;
 }

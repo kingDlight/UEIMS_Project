@@ -129,7 +129,8 @@ public enum ErrorCode {
             "Cannot mark interview as COMPLETED before the scheduled time has passed and a result is recorded",
             HttpStatus.BAD_REQUEST),
     JOB_POST_HAS_APPLICATIONS(1107, "Cannot delete a job post that has applications", HttpStatus.BAD_REQUEST),
-    INVALID_WEEK_REPORT_SUBMISSION(1108, "You can only submit or update reports for the current week", HttpStatus.BAD_REQUEST),
+    INVALID_WEEK_REPORT_SUBMISSION(
+            1108, "You can only submit or update reports for the current week", HttpStatus.BAD_REQUEST),
 
     // Account related
     USER_PERMANENTLY_LOCKED(

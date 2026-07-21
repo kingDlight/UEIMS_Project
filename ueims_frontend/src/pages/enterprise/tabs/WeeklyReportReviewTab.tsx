@@ -16,7 +16,7 @@ import { WeeklyReportService } from '@/services/WeeklyReportService';
 
 const { TextArea } = Input;
 
-type ReportStatus = 'NOT_SUBMITTED' | 'DRAFT' | 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED' | 'REVIEWED';
+type ReportStatus = 'NOT_SUBMITTED' | 'DRAFT' | 'SUBMITTED' | 'APPROVED' | 'REJECTED';
 
 interface WeeklyReport {
   reportId: string;
@@ -37,12 +37,11 @@ interface WeeklyReport {
 }
 
 const STATUS_META: Record<string, { label: string; color: string; bg: string; tagColor: string }> = {
-  PENDING_REVIEW: { label: 'Pending Review', color: 'text-amber-500', bg: 'bg-amber-500/10', tagColor: 'orange' },
+  SUBMITTED: { label: 'Pending Review', color: 'text-amber-500', bg: 'bg-amber-500/10', tagColor: 'orange' },
   APPROVED: { label: 'Approved', color: 'text-emerald-500', bg: 'bg-emerald-500/10', tagColor: 'success' },
   REJECTED: { label: 'Rejected', color: 'text-red-500', bg: 'bg-red-500/10', tagColor: 'error' },
   DRAFT: { label: 'Draft', color: 'text-slate-500', bg: 'bg-slate-500/10', tagColor: 'default' },
   NOT_SUBMITTED: { label: 'Not Submitted', color: 'text-slate-500', bg: 'bg-slate-500/10', tagColor: 'default' },
-  REVIEWED: { label: 'Reviewed', color: 'text-blue-500', bg: 'bg-blue-500/10', tagColor: 'processing' },
 };
 
 export const WeeklyReportReviewTab: React.FC = () => {
@@ -147,7 +146,7 @@ export const WeeklyReportReviewTab: React.FC = () => {
             className="w-44"
             options={[
               { value: 'ALL', label: 'All statuses' },
-              { value: 'PENDING_REVIEW', label: 'Pending Review' },
+              { value: 'SUBMITTED', label: 'Pending Review' },
               { value: 'APPROVED', label: 'Approved' },
               { value: 'REJECTED', label: 'Rejected' },
             ]}
@@ -172,7 +171,7 @@ export const WeeklyReportReviewTab: React.FC = () => {
       ) : (
         <div className="grid grid-cols-2 gap-3 px-6">
           {filtered.map(r => {
-            const meta = STATUS_META[r.status ?? 'PENDING_REVIEW'] ?? STATUS_META.PENDING_REVIEW;
+            const meta = STATUS_META[r.status ?? 'SUBMITTED'] ?? STATUS_META.SUBMITTED;
             const isAnomaly = (r.plagiarismScore ?? 0) >= 0.85;
             return (
               <div
@@ -213,8 +212,8 @@ export const WeeklyReportReviewTab: React.FC = () => {
         >
           <div className="flex flex-col gap-3.5 max-h-[480px] overflow-y-auto px-0.5 py-1">
             <div className="flex items-center justify-between gap-2">
-              <Tag color={(STATUS_META[selected.status ?? 'PENDING_REVIEW'] ?? STATUS_META.PENDING_REVIEW).tagColor}>
-                {(STATUS_META[selected.status ?? 'PENDING_REVIEW'] ?? STATUS_META.PENDING_REVIEW).label}
+              <Tag color={(STATUS_META[selected.status ?? 'SUBMITTED'] ?? STATUS_META.SUBMITTED).tagColor}>
+                {(STATUS_META[selected.status ?? 'SUBMITTED'] ?? STATUS_META.SUBMITTED).label}
               </Tag>
               {(selected.plagiarismScore ?? 0) >= 0.85 && (
                 <span className="px-2.5 py-1 rounded-lg bg-red-50 text-red-500 text-xs font-bold">
@@ -267,7 +266,7 @@ export const WeeklyReportReviewTab: React.FC = () => {
           {selected.status !== 'APPROVED' && (
             <div className="mt-4 pt-4 border-t border-slate-100">
               <div className="text-xs font-bold text-slate-500 mb-1.5">
-                Feedback / Comments {selected.status === 'PENDING_REVIEW' ? '(optional for Approve, required for Reject)' : ''}
+                Feedback / Comments {selected.status === 'SUBMITTED' ? '(optional for Approve, required for Reject)' : ''}
               </div>
               <TextArea
                 value={feedback}

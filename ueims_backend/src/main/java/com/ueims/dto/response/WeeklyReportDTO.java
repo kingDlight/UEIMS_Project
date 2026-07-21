@@ -1,58 +1,53 @@
 package com.ueims.dto.response;
 
-import com.ueims.model.entity.WeeklyReport;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+/**
+ * Plain DTO for WeeklyReport. Composition over inheritance: we deliberately do
+ * NOT extend {@link com.ueims.model.entity.WeeklyReport} so the JSON
+ * payload does not leak BaseEntity/audit fields, lazy proxies, or attachment
+ * payloads that the FE does not need.
+ *
+ * weekStartDate / weekEndDate are computed from semester.startDate and
+ * weekNumber (semester starts on week 1).
+ */
 @Data
+@Builder
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = true)
-public class WeeklyReportDTO extends WeeklyReport {
-    private java.util.UUID assignmentId;
+@AllArgsConstructor
+public class WeeklyReportDTO {
+    private UUID reportId;
+    private UUID assignmentId;
+
+    // Report content
+    private Integer weekNumber;
+    private LocalDate weekStartDate;
+    private LocalDate weekEndDate;
+    private Integer hoursLogged;
+
+    private String tasksCompleted;
+    private String issuesChallenges;
+    private String lessonsLearned;
+    private String planNextWeek;
+    private String attachmentUrls;
+
+    // Workflow
+    private String status;
+    private String feedback;
+    private LocalDateTime submittedAt;
+    private Double plagiarismScore;
+    private Boolean isAnomaly;
+
+    // Enrichment
     private String studentName;
     private String studentCode;
     private String studentEmail;
     private String enterpriseName;
-
-    public java.util.UUID getAssignmentId() {
-        return assignmentId;
-    }
-
-    public void setAssignmentId(java.util.UUID assignmentId) {
-        this.assignmentId = assignmentId;
-    }
-
-    public String getStudentName() {
-        return studentName;
-    }
-
-    public void setStudentName(String studentName) {
-        this.studentName = studentName;
-    }
-
-    public String getStudentCode() {
-        return studentCode;
-    }
-
-    public void setStudentCode(String studentCode) {
-        this.studentCode = studentCode;
-    }
-
-    public String getStudentEmail() {
-        return studentEmail;
-    }
-
-    public void setStudentEmail(String studentEmail) {
-        this.studentEmail = studentEmail;
-    }
-
-    public String getEnterpriseName() {
-        return enterpriseName;
-    }
-
-    public void setEnterpriseName(String enterpriseName) {
-        this.enterpriseName = enterpriseName;
-    }
 }

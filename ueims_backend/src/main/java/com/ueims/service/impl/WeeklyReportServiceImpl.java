@@ -13,7 +13,6 @@ import com.ueims.dto.request.WeeklyReportRequest;
 import com.ueims.dto.response.WeeklyReportDTO;
 import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
-import com.ueims.model.entity.EligibleStudent;
 import com.ueims.model.entity.EnterpriseAssignment;
 import com.ueims.model.entity.User;
 import com.ueims.model.entity.WeeklyReport;
@@ -51,7 +50,7 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
     @Override
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public List<WeeklyReportDTO> findAllDtos() {
-        return enrichDtos(findAll());
+        return enrichDtos(repository.findAllWithAssignmentGraph());
     }
 
     @Override
@@ -77,9 +76,8 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public List<WeeklyReportDTO> findByEnterprise() {
         User currentUser = getCurrentUser();
-        if (currentUser.getEnterprise() == null)
-            return List.of();
-        List<WeeklyReport> reports = repository.findAll().stream()
+        if (currentUser.getEnterprise() == null) return List.of();
+        List<WeeklyReport> reports = repository.findAllWithAssignmentGraph().stream()
                 .filter(r -> r.getAssignment() != null
                         && r.getAssignment().getEnterprise() != null
                         && currentUser
@@ -93,7 +91,8 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
     @Override
     @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public WeeklyReport findById(UUID id) {
-        WeeklyReport report = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.FIELD_REQUIRED));
+        WeeklyReport report = repository.findByIdWithAssignmentGraph(id)
+                .orElseThrow(() -> new AppException(ErrorCode.FIELD_REQUIRED));
 
         User currentUser = getCurrentUser();
         boolean isStaff = currentUser.getRoles().stream()
@@ -194,8 +193,10 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public WeeklyReport updateReport(UUID id, WeeklyReportRequest request) {
-        WeeklyReport existing = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.FIELD_REQUIRED));
+        WeeklyReport existing = repository.findByIdWithAssignmentGraph(id)
+                .orElseThrow(() -> new AppException(ErrorCode.FIELD_REQUIRED));
 
         User currentUser = getCurrentUser();
         if (!currentUser
@@ -204,10 +205,9 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
-        // BR-53: Weekly Report Edit Constraint (Only allow editing if DRAFT or
-        // REJECTED)
+        // BR-53: Weekly Report Edit Constraint (Only allow editing if DRAFT or REJECTED)
         String status = existing.getStatus();
-        if ("APPROVED".equals(status) || "PENDING_REVIEW".equals(status) || "REVIEWED".equals(status)) {
+        if ("APPROVED".equals(status) || "SUBMITTED".equals(status)) {
             throw new AppException(ErrorCode.APPLICATION_STATUS_CHANGED);
         }
 
@@ -219,10 +219,8 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
             existing.setLessonsLearned(HtmlSanitizer.sanitize(request.getLessonsLearned()));
         if (request.getPlanNextWeek() != null)
             existing.setPlanNextWeek(HtmlSanitizer.sanitize(request.getPlanNextWeek()));
-        if (request.getAttachmentUrls() != null)
-            existing.setAttachmentUrls(request.getAttachmentUrls());
-        if (request.getStatus() != null)
-            existing.setStatus(request.getStatus());
+        if (request.getAttachmentUrls() != null) existing.setAttachmentUrls(request.getAttachmentUrls());
+        if (request.getStatus() != null) existing.setStatus(request.getStatus());
         return repository.save(existing);
     }
 
@@ -253,7 +251,8 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
     @Override
     @org.springframework.transaction.annotation.Transactional
     public WeeklyReport approveReport(UUID id, String feedback) {
-        WeeklyReport existing = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.FIELD_REQUIRED));
+        WeeklyReport existing = repository.findByIdWithAssignmentGraph(id)
+                .orElseThrow(() -> new AppException(ErrorCode.FIELD_REQUIRED));
         User currentUser = getCurrentUser();
 
         // BR-29: ownership — enterprise must own the assignment
@@ -268,8 +267,7 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
         }
 
         existing.setStatus("APPROVED");
-        if (feedback != null)
-            existing.setFeedback(feedback);
+        if (feedback != null) existing.setFeedback(feedback);
         WeeklyReport saved = repository.save(existing);
         try {
             notificationService.notifyWeeklyReportApproved(saved);
@@ -288,7 +286,8 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
     @Override
     @org.springframework.transaction.annotation.Transactional
     public WeeklyReport rejectReport(UUID id, String feedback) {
-        WeeklyReport existing = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.FIELD_REQUIRED));
+        WeeklyReport existing = repository.findByIdWithAssignmentGraph(id)
+                .orElseThrow(() -> new AppException(ErrorCode.FIELD_REQUIRED));
         User currentUser = getCurrentUser();
 
         if (currentUser.getEnterprise() == null
@@ -324,54 +323,72 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
     }
 
     /**
-     * Populate student info (name, code, email) onto DTOs.
-     * Falls back to assignment.student.user.fullName if EligibleStudent record not
-     * found.
+     * Populate student + enterprise info, plus the materialized week range
+     * derived from semester.startDate and report.weekNumber.
+     *
+     * Fallback for studentCode: if no EligibleStudent record exists for this
+     * user/semester, leave the field null so the FE can show "N/A".
+     *
+     * Week math: week N starts at semester.startDate + (N-1)*7 days and ends
+     * +6 days. Both bounds are inclusive.
      */
     public List<WeeklyReportDTO> enrichDtos(List<WeeklyReport> reports) {
         return reports.stream().map(this::enrichDto).toList();
     }
 
     public WeeklyReportDTO enrichDto(WeeklyReport report) {
-        WeeklyReportDTO dto = new WeeklyReportDTO();
-        dto.setReportId(report.getReportId());
+        WeeklyReportDTO.WeeklyReportDTOBuilder dto = WeeklyReportDTO.builder()
+                .reportId(report.getReportId())
+                .weekNumber(report.getWeekNumber())
+                .tasksCompleted(report.getTasksCompleted())
+                .issuesChallenges(report.getIssuesChallenges())
+                .lessonsLearned(report.getLessonsLearned())
+                .planNextWeek(report.getPlanNextWeek())
+                .attachmentUrls(report.getAttachmentUrls())
+                .status(report.getStatus())
+                .feedback(report.getFeedback())
+                .submittedAt(report.getSubmittedAt())
+                .plagiarismScore(report.getPlagiarismScore())
+                .isAnomaly(report.getIsAnomaly())
+                .hoursLogged(report.getHoursLogged());
+
         if (report.getAssignment() != null) {
-            dto.setAssignmentId(report.getAssignment().getAssignmentId());
-        }
-        dto.setWeekNumber(report.getWeekNumber());
-        dto.setTasksCompleted(report.getTasksCompleted());
-        dto.setIssuesChallenges(report.getIssuesChallenges());
-        dto.setLessonsLearned(report.getLessonsLearned());
-        dto.setPlanNextWeek(report.getPlanNextWeek());
-        dto.setAttachmentUrls(report.getAttachmentUrls());
-        dto.setStatus(report.getStatus());
-        dto.setFeedback(report.getFeedback());
-        dto.setSubmittedAt(report.getSubmittedAt());
-        dto.setPlagiarismScore(report.getPlagiarismScore());
-        dto.setIsAnomaly(report.getIsAnomaly());
+            dto.assignmentId(report.getAssignment().getAssignmentId());
 
-        if (report.getAssignment() != null
-                && report.getAssignment().getStudent() != null
-                && report.getAssignment().getSemester() != null) {
-            User student = report.getAssignment().getStudent();
-            dto.setStudentName(student.getFullName());
-            dto.setStudentEmail(student.getEmail());
-
-            // Try to get student code from EligibleStudent table
-            EligibleStudent eligible = eligibleStudentRepository
-                    .findByUser_UserIdAndSemester_SemesterId(
-                            student.getUserId(),
-                            report.getAssignment().getSemester().getSemesterId())
-                    .orElse(null);
-            if (eligible != null) {
-                dto.setStudentCode(eligible.getStudentCode());
+            if (report.getAssignment().getStudent() != null) {
+                User student = report.getAssignment().getStudent();
+                dto.studentName(student.getFullName());
+                dto.studentEmail(student.getEmail());
             }
 
             if (report.getAssignment().getEnterprise() != null) {
-                dto.setEnterpriseName(report.getAssignment().getEnterprise().getCompanyName());
+                dto.enterpriseName(report.getAssignment().getEnterprise().getCompanyName());
+            }
+
+            // Derive weekStartDate / weekEndDate from semester.startDate + weekNumber.
+            // Only compute when both semester and weekNumber are present.
+            if (report.getAssignment().getSemester() != null
+                    && report.getAssignment().getSemester().getStartDate() != null
+                    && report.getWeekNumber() != null
+                    && report.getWeekNumber() > 0) {
+                java.time.LocalDate start =
+                        report.getAssignment().getSemester().getStartDate()
+                                .plusDays((long) (report.getWeekNumber() - 1) * 7);
+                dto.weekStartDate(start);
+                dto.weekEndDate(start.plusDays(6));
+            }
+
+            // Try to get student code from EligibleStudent table.
+            if (report.getAssignment().getStudent() != null
+                    && report.getAssignment().getSemester() != null) {
+                eligibleStudentRepository
+                        .findByUser_UserIdAndSemester_SemesterId(
+                                report.getAssignment().getStudent().getUserId(),
+                                report.getAssignment().getSemester().getSemesterId())
+                        .ifPresent(eligible -> dto.studentCode(eligible.getStudentCode()));
             }
         }
 
-        return dto;
+        return dto.build();
     }
 }
