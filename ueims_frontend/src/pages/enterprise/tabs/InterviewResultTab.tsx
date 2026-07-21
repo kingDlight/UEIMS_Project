@@ -131,23 +131,25 @@ export const InterviewResultTab: React.FC = () => {
             {pendingRows.map(r => (
               <div
                 key={r.interviewId}
-                className="grid grid-cols-[1fr_auto] gap-3 items-center bg-white border border-slate-200 rounded-xl px-4.5 py-3.5 hover:shadow-sm transition-shadow"
+                className="grid grid-cols-[minmax(0,1fr)_auto] gap-4 items-center bg-white border border-slate-200 rounded-2xl px-5 py-4 hover:shadow-sm transition-shadow"
               >
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-[14px] font-bold text-slate-900">{r.studentName ?? 'Student'}</span>
-                    <span className="text-[12px] text-slate-500">· {r.jobTitle ?? '—'}</span>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 mb-1 min-w-0">
+                    <span className="text-[14px] font-bold text-slate-900 truncate">{r.studentName ?? 'Student'}</span>
+                    <span className="text-[12px] text-slate-500 shrink-0">·</span>
+                    <span className="text-[12px] text-slate-500 truncate">{r.jobTitle ?? '—'}</span>
                   </div>
                   <div className="text-[12px] text-slate-500 flex items-center gap-1.5">
-                    <CalendarOutlined className="text-slate-400" /> {r.scheduledTime ? dayjs(r.scheduledTime).format('ddd, MMM D YYYY · HH:mm') : '—'}
+                    <CalendarOutlined className="text-slate-400" />
+                    <span className="truncate">{r.scheduledTime ? dayjs(r.scheduledTime).format('ddd, MMM D YYYY · HH:mm') : '—'}</span>
                   </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 shrink-0">
                   <Button
                     type="primary"
                     icon={<CheckCircleOutlined />}
                     onClick={() => { setDecisionOpen({ row: r, decision: 'PASS' }); setNotes(''); }}
-                    className="bg-emerald-500 border-emerald-500 rounded-xl font-bold"
+                    className="bg-emerald-500 border-emerald-500 rounded-xl font-bold hover:!bg-emerald-600 hover:!border-emerald-600"
                   >
                     Pass
                   </Button>

@@ -93,7 +93,7 @@ export const AssignedStudentsTab: React.FC = () => {
 
   return (
     <div className="pb-10 font-sans">
-      <div className="px-6 pb-5 flex items-center justify-between flex-wrap gap-3">
+      <div className="px-6 lg:px-12 xl:px-20 pb-5 flex items-center justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-xl font-extrabold text-slate-900 m-0 mb-1 tracking-tight">Assigned Students</h2>
           <p className="text-[13px] text-slate-500 m-0">Track students currently assigned to your enterprise</p>
@@ -123,14 +123,14 @@ export const AssignedStudentsTab: React.FC = () => {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="p-[60px] text-center text-slate-500 bg-white rounded-2xl border border-slate-200 mx-6">
+        <div className="p-[60px] text-center text-slate-500 bg-white rounded-2xl border border-slate-200 mx-6 lg:mx-12 xl:mx-20">
           <TeamOutlined className="text-[48px] mb-3 block" />
           <div className="text-[15px] font-semibold text-slate-900 mb-1">There are no students assigned to you at the moment.</div>
           <div className="text-[13px] text-slate-500">Once the Training Manager assigns students to your enterprise, they will appear here.</div>
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(340px,1fr))] gap-4 px-6">
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(340px,1fr))] gap-4 px-6 lg:px-12 xl:px-20">
             {paged.map(r => {
               const meta = STATUS_META[(r.status ?? 'ACTIVE').toUpperCase()] ?? STATUS_META.ACTIVE;
               const name = r.studentName ?? 'Student';

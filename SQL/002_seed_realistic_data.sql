@@ -282,9 +282,9 @@ INSERT INTO users (user_id, email, password_hash, full_name, status, must_change
     ('d0000000-0000-0000-0000-000000000016', 'student16@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Vo Thi Minh', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000016', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked) VALUES
-    ('e0000000-0000-0000-0000-000000000016', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000016', 'SE15016', 'Vo Thi Minh', 'student16@fpt.edu.vn', 'Software Engineering', 9.70, 5, 'MATCHED', FALSE);
+    ('e0000000-0000-0000-0000-000000000016', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000016', 'IS15016', 'Vo Thi Minh', 'student16@fpt.edu.vn', 'Information Security', 9.70, 5, 'MATCHED', FALSE);
 INSERT INTO student_profiles (user_id, student_code, university, major, gpa, skills, cv_file_url) VALUES
-    ('d0000000-0000-0000-0000-000000000016', 'SE15016', 'FPT University', 'Software Engineering', 7.5, '["Java", "Spring Boot"]'::jsonb, 'https://cv.example.com/se15016.pdf');
+    ('d0000000-0000-0000-0000-000000000016', 'IS15016', 'FPT University', 'Information Security', 7.5, '["OWASP", "Penetration Testing", "Burp Suite"]'::jsonb, 'https://cv.example.com/is15016.pdf');
 INSERT INTO applications (application_id, job_post_id, student_id, cv_file_url, status, screening_note, screened_by, screened_at) VALUES
     ('a0000000-0000-0000-0000-000000000016', 'f0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000016', 'https://cv.example.com/se15016.pdf', 'ACCEPTED', 'Top candidate, excellent interview', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP);
 INSERT INTO interviews (interview_id, application_id, scheduled_datetime, duration_minutes, meeting_link, status, student_confirmed, result, result_note, decided_by, decided_at) VALUES
@@ -296,9 +296,9 @@ INSERT INTO users (user_id, email, password_hash, full_name, status, must_change
     ('d0000000-0000-0000-0000-000000000017', 'student17@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Nguyen Minh Vinh', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000017', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked) VALUES
-    ('e0000000-0000-0000-0000-000000000017', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000017', 'SE15017', 'Nguyen Minh Vinh', 'student17@fpt.edu.vn', 'Software Engineering', 7.54, 5, 'MATCHED', FALSE);
+    ('e0000000-0000-0000-0000-000000000017', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000017', 'IS15017', 'Nguyen Minh Vinh', 'student17@fpt.edu.vn', 'Information Security', 7.54, 5, 'MATCHED', FALSE);
 INSERT INTO student_profiles (user_id, student_code, university, major, gpa, skills, cv_file_url) VALUES
-    ('d0000000-0000-0000-0000-000000000017', 'SE15017', 'FPT University', 'Software Engineering', 6.5, '["Java"]'::jsonb, 'https://cv.example.com/se15017.pdf');
+    ('d0000000-0000-0000-0000-000000000017', 'IS15017', 'FPT University', 'Information Security', 6.5, '["Network Security", "SIEM", "Splunk"]'::jsonb, 'https://cv.example.com/is15017.pdf');
 INSERT INTO applications (application_id, job_post_id, student_id, cv_file_url, status, screening_note, screened_by, screened_at) VALUES
     ('a0000000-0000-0000-0000-000000000017', 'f0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000017', 'https://cv.example.com/se15017.pdf', 'ACCEPTED', 'Good overall performance', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP);
 INSERT INTO interviews (interview_id, application_id, scheduled_datetime, duration_minutes, meeting_link, status, student_confirmed, result, result_note, decided_by, decided_at) VALUES
@@ -310,9 +310,9 @@ INSERT INTO users (user_id, email, password_hash, full_name, status, must_change
     ('d0000000-0000-0000-0000-000000000018', 'student18@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Ly Tuyet Thanh', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000018', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked) VALUES
-    ('e0000000-0000-0000-0000-000000000018', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000018', 'SE15018', 'Ly Tuyet Thanh', 'student18@fpt.edu.vn', 'Software Engineering', 8.56, 5, 'MATCHED', FALSE);
+    ('e0000000-0000-0000-0000-000000000018', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000018', 'DM15018', 'Ly Tuyet Thanh', 'student18@fpt.edu.vn', 'Digital Marketing', 8.56, 5, 'MATCHED', FALSE);
 INSERT INTO student_profiles (user_id, student_code, university, major, gpa, skills, cv_file_url) VALUES
-    ('d0000000-0000-0000-0000-000000000018', 'SE15018', 'FPT University', 'Software Engineering', 6.5, '["Java"]'::jsonb, 'https://cv.example.com/se15018.pdf');
+    ('d0000000-0000-0000-0000-000000000018', 'DM15018', 'FPT University', 'Digital Marketing', 6.5, '["SEO", "Google Ads", "Facebook Ads"]'::jsonb, 'https://cv.example.com/dm15018.pdf');
 INSERT INTO applications (application_id, job_post_id, student_id, cv_file_url, status, screening_note, screened_by, screened_at) VALUES
     ('a0000000-0000-0000-0000-000000000018', 'f0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000018', 'https://cv.example.com/se15018.pdf', 'ACCEPTED', 'Great interview performance', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP);
 INSERT INTO interviews (interview_id, application_id, scheduled_datetime, duration_minutes, meeting_link, status, student_confirmed, result, result_note, decided_by, decided_at) VALUES
@@ -324,9 +324,9 @@ INSERT INTO users (user_id, email, password_hash, full_name, status, must_change
     ('d0000000-0000-0000-0000-000000000019', 'student19@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Ngo Ngoc Xuan', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000019', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked) VALUES
-    ('e0000000-0000-0000-0000-000000000019', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000019', 'SE15019', 'Ngo Ngoc Xuan', 'student19@fpt.edu.vn', 'Software Engineering', 7.83, 5, 'MATCHED', FALSE);
+    ('e0000000-0000-0000-0000-000000000019', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000019', 'GD15019', 'Ngo Ngoc Xuan', 'student19@fpt.edu.vn', 'Graphic Design', 7.83, 5, 'MATCHED', FALSE);
 INSERT INTO student_profiles (user_id, student_code, university, major, gpa, skills, cv_file_url) VALUES
-    ('d0000000-0000-0000-0000-000000000019', 'SE15019', 'FPT University', 'Software Engineering', 6.5, '["Java"]'::jsonb, 'https://cv.example.com/se15019.pdf');
+    ('d0000000-0000-0000-0000-000000000019', 'GD15019', 'FPT University', 'Graphic Design', 6.5, '["Figma", "Adobe XD", "Illustrator"]'::jsonb, 'https://cv.example.com/gd15019.pdf');
 INSERT INTO applications (application_id, job_post_id, student_id, cv_file_url, status, screening_note, screened_by, screened_at) VALUES
     ('a0000000-0000-0000-0000-000000000019', 'f0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000019', 'https://cv.example.com/se15019.pdf', 'ACCEPTED', 'Strong problem-solving skills', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP);
 INSERT INTO interviews (interview_id, application_id, scheduled_datetime, duration_minutes, meeting_link, status, student_confirmed, result, result_note, decided_by, decided_at) VALUES
@@ -338,9 +338,9 @@ INSERT INTO users (user_id, email, password_hash, full_name, status, must_change
     ('d0000000-0000-0000-0000-000000000020', 'student20@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Huy Minh Xuan', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000020', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked) VALUES
-    ('e0000000-0000-0000-0000-000000000020', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000020', 'SE15020', 'Huy Minh Xuan', 'student20@fpt.edu.vn', 'Software Engineering', 7.23, 5, 'MATCHED', FALSE);
+    ('e0000000-0000-0000-0000-000000000020', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000020', 'DA15020', 'Huy Minh Xuan', 'student20@fpt.edu.vn', 'Digital Art & Design', 7.23, 5, 'MATCHED', FALSE);
 INSERT INTO student_profiles (user_id, student_code, university, major, gpa, skills, cv_file_url) VALUES
-    ('d0000000-0000-0000-0000-000000000020', 'SE15020', 'FPT University', 'Software Engineering', 7.5, '["Java"]'::jsonb, 'https://cv.example.com/se15020.pdf');
+    ('d0000000-0000-0000-0000-000000000020', 'DA15020', 'FPT University', 'Digital Art & Design', 7.5, '["Photoshop", "After Effects", "Motion Graphics"]'::jsonb, 'https://cv.example.com/da15020.pdf');
 INSERT INTO applications (application_id, job_post_id, student_id, cv_file_url, status, screening_note, screened_by, screened_at) VALUES
     ('a0000000-0000-0000-0000-000000000020', 'f0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000020', 'https://cv.example.com/se15020.pdf', 'ACCEPTED', 'Well-prepared and motivated', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP);
 INSERT INTO interviews (interview_id, application_id, scheduled_datetime, duration_minutes, meeting_link, status, student_confirmed, result, result_note, decided_by, decided_at) VALUES
@@ -357,9 +357,9 @@ INSERT INTO users (user_id, email, password_hash, full_name, status, must_change
     ('d0000000-0000-0000-0000-000000000021', 'student21@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Vu Huu Quan', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000021', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked, approved_at) VALUES
-    ('e0000000-0000-0000-0000-000000000021', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000021', 'SE15021', 'Vu Huu Quan', 'student21@fpt.edu.vn', 'Software Engineering', 8.06, 6, 'OJT', TRUE, CURRENT_TIMESTAMP);
+    ('e0000000-0000-0000-0000-000000000021', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000021', 'GD15021', 'Vu Huu Quan', 'student21@fpt.edu.vn', 'Graphic Design', 8.06, 6, 'OJT', TRUE, CURRENT_TIMESTAMP);
 INSERT INTO student_profiles (user_id, student_code, university, major, gpa, skills, cv_file_url) VALUES
-    ('d0000000-0000-0000-0000-000000000021', 'SE15021', 'FPT University', 'Software Engineering', 7.5, '["Java", "Spring Boot"]'::jsonb, 'https://cv.example.com/se15021.pdf');
+    ('d0000000-0000-0000-0000-000000000021', 'GD15021', 'FPT University', 'Graphic Design', 7.5, '["Figma", "Sketch", "Prototyping"]'::jsonb, 'https://cv.example.com/gd15021.pdf');
 INSERT INTO enterprise_assignments (assignment_id, enterprise_id, student_id, semester_id, supervisor_name, supervisor_email, assigned_by, status, start_date) VALUES
     ('f0000000-0000-0000-0000-000000000021', 'c0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000021', '50000000-0000-0000-0000-000000000001', 'Sup Momo', 'sup@momo.vn', '00000000-0000-0000-0000-000000000002', 'ACTIVE', '2026-03-15');
 -- internship_plans: commented out for demo purposes (TM wants to see fresh plan creation)
@@ -391,9 +391,9 @@ INSERT INTO users (user_id, email, password_hash, full_name, status, must_change
     ('d0000000-0000-0000-0000-000000000022', 'student22@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Ho Gia Quan', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000022', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked, approved_at) VALUES
-    ('e0000000-0000-0000-0000-000000000022', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000022', 'SE15022', 'Ho Gia Quan', 'student22@fpt.edu.vn', 'Software Engineering', 9.66, 6, 'OJT', TRUE, CURRENT_TIMESTAMP);
+    ('e0000000-0000-0000-0000-000000000022', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000022', 'IS15022', 'Ho Gia Quan', 'student22@fpt.edu.vn', 'Information Security', 9.66, 6, 'OJT', TRUE, CURRENT_TIMESTAMP);
 INSERT INTO student_profiles (user_id, student_code, university, major, gpa, skills, cv_file_url) VALUES
-    ('d0000000-0000-0000-0000-000000000022', 'SE15022', 'FPT University', 'Software Engineering', 7.5, '["Java", "Spring Boot"]'::jsonb, 'https://cv.example.com/se15022.pdf');
+    ('d0000000-0000-0000-0000-000000000022', 'IS15022', 'FPT University', 'Information Security', 7.5, '["Network Security", "Firewall", "IDS/IPS"]'::jsonb, 'https://cv.example.com/is15022.pdf');
 INSERT INTO enterprise_assignments (assignment_id, enterprise_id, student_id, semester_id, supervisor_name, supervisor_email, assigned_by, status, start_date) VALUES
     ('f0000000-0000-0000-0000-000000000022', 'c0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000022', '50000000-0000-0000-0000-000000000001', 'Sup Momo', 'sup@momo.vn', '00000000-0000-0000-0000-000000000002', 'ACTIVE', '2026-03-15');
 -- Student 22 dùng chung plan + items từ plan 00000000-0000-0000-0001-000000000020
@@ -410,9 +410,9 @@ INSERT INTO users (user_id, email, password_hash, full_name, status, must_change
     ('d0000000-0000-0000-0000-000000000023', 'student23@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Vu Duc Uyen', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000023', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked, approved_at) VALUES
-    ('e0000000-0000-0000-0000-000000000023', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000023', 'SE15023', 'Vu Duc Uyen', 'student23@fpt.edu.vn', 'Software Engineering', 9.17, 6, 'OJT', TRUE, CURRENT_TIMESTAMP);
+    ('e0000000-0000-0000-0000-000000000023', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000023', 'DM15023', 'Vu Duc Uyen', 'student23@fpt.edu.vn', 'Digital Marketing', 9.17, 6, 'OJT', TRUE, CURRENT_TIMESTAMP);
 INSERT INTO student_profiles (user_id, student_code, university, major, gpa, skills, cv_file_url) VALUES
-    ('d0000000-0000-0000-0000-000000000023', 'SE15023', 'FPT University', 'Software Engineering', 7.5, '["Java", "Spring Boot"]'::jsonb, 'https://cv.example.com/se15023.pdf');
+    ('d0000000-0000-0000-0000-000000000023', 'DM15023', 'FPT University', 'Digital Marketing', 7.5, '["Content Marketing", "Email Marketing", "Analytics"]'::jsonb, 'https://cv.example.com/dm15023.pdf');
 INSERT INTO enterprise_assignments (assignment_id, enterprise_id, student_id, semester_id, supervisor_name, supervisor_email, assigned_by, status, start_date) VALUES
     ('f0000000-0000-0000-0000-000000000023', 'c0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000023', '50000000-0000-0000-0000-000000000001', 'Sup Momo', 'sup@momo.vn', '00000000-0000-0000-0000-000000000002', 'ACTIVE', '2026-03-15');
 -- Student 23 dùng chung plan + items từ plan 00000000-0000-0000-0001-000000000020
@@ -444,9 +444,9 @@ INSERT INTO users (user_id, email, password_hash, full_name, status, must_change
     ('d0000000-0000-0000-0000-000000000025', 'student25@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Vu Thanh Son', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000025', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked, approved_at) VALUES
-    ('e0000000-0000-0000-0000-000000000025', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000025', 'SE15025', 'Vu Thanh Son', 'student25@fpt.edu.vn', 'Software Engineering', 6.91, 6, 'OJT', TRUE, CURRENT_TIMESTAMP);
+    ('e0000000-0000-0000-0000-000000000025', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000025', 'IS15025', 'Vu Thanh Son', 'student25@fpt.edu.vn', 'Information Security', 6.91, 6, 'OJT', TRUE, CURRENT_TIMESTAMP);
 INSERT INTO student_profiles (user_id, student_code, university, major, gpa, skills, cv_file_url) VALUES
-    ('d0000000-0000-0000-0000-000000000025', 'SE15025', 'FPT University', 'Software Engineering', 8.5, '["Java", "Spring Boot"]'::jsonb, 'https://cv.example.com/se15025.pdf');
+    ('d0000000-0000-0000-0000-000000000025', 'IS15025', 'FPT University', 'Information Security', 8.5, '["Cryptography", "OWASP", "Ethical Hacking"]'::jsonb, 'https://cv.example.com/is15025.pdf');
 INSERT INTO enterprise_assignments (assignment_id, enterprise_id, student_id, semester_id, supervisor_name, supervisor_email, assigned_by, status, start_date) VALUES
     ('f0000000-0000-0000-0000-000000000025', 'c0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000025', '50000000-0000-0000-0000-000000000001', 'Sup Momo', 'sup@momo.vn', '00000000-0000-0000-0000-000000000002', 'ACTIVE', '2026-03-15');
 -- Student 25 dùng chung plan + items từ plan 00000000-0000-0000-0001-000000000020
@@ -466,9 +466,9 @@ INSERT INTO users (user_id, email, password_hash, full_name, status, must_change
     ('d0000000-0000-0000-0000-000000000026', 'student26@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Do Thi Thanh', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000026', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked, approved_at) VALUES
-    ('e0000000-0000-0000-0000-000000000026', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000026', 'SE15026', 'Do Thi Thanh', 'student26@fpt.edu.vn', 'Software Engineering', 8.56, 7, 'OJT', TRUE, CURRENT_TIMESTAMP);
+    ('e0000000-0000-0000-0000-000000000026', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000026', 'DA15026', 'Do Thi Thanh', 'student26@fpt.edu.vn', 'Digital Art & Design', 8.56, 7, 'OJT', TRUE, CURRENT_TIMESTAMP);
 INSERT INTO student_profiles (user_id, student_code, university, major, gpa, skills, cv_file_url) VALUES
-    ('d0000000-0000-0000-0000-000000000026', 'SE15026', 'FPT University', 'Software Engineering', 5.5, '["Java", "Spring Boot"]'::jsonb, 'https://cv.example.com/se15026.pdf');
+    ('d0000000-0000-0000-0000-000000000026', 'DA15026', 'FPT University', 'Digital Art & Design', 5.5, '["Photoshop", "After Effects", "Motion Graphics"]'::jsonb, 'https://cv.example.com/da15026.pdf');
 INSERT INTO enterprise_assignments (assignment_id, enterprise_id, student_id, semester_id, supervisor_name, supervisor_email, assigned_by, status, start_date, end_date) VALUES
     ('f0000000-0000-0000-0000-000000000026', 'c0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000026', '50000000-0000-0000-0000-000000000001', 'Sup Momo', 'sup@momo.vn', '00000000-0000-0000-0000-000000000002', 'COMPLETED', '2026-03-01', '2026-07-15');
 INSERT INTO final_reports (final_report_id, assignment_id, file_url, file_size_bytes, submitted_at, is_late) VALUES
@@ -484,9 +484,9 @@ INSERT INTO users (user_id, email, password_hash, full_name, status, must_change
     ('d0000000-0000-0000-0000-000000000027', 'student27@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Nguyen Thanh Duc', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000027', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked, approved_at) VALUES
-    ('e0000000-0000-0000-0000-000000000027', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000027', 'SE15027', 'Nguyen Thanh Duc', 'student27@fpt.edu.vn', 'Software Engineering', 7.56, 7, 'OJT', TRUE, CURRENT_TIMESTAMP);
+    ('e0000000-0000-0000-0000-000000000027', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000027', 'GD15027', 'Nguyen Thanh Duc', 'student27@fpt.edu.vn', 'Graphic Design', 7.56, 7, 'OJT', TRUE, CURRENT_TIMESTAMP);
 INSERT INTO student_profiles (user_id, student_code, university, major, gpa, skills, cv_file_url) VALUES
-    ('d0000000-0000-0000-0000-000000000027', 'SE15027', 'FPT University', 'Software Engineering', 5.5, '["Java", "Spring Boot"]'::jsonb, 'https://cv.example.com/se15027.pdf');
+    ('d0000000-0000-0000-0000-000000000027', 'GD15027', 'FPT University', 'Graphic Design', 5.5, '["Figma", "Illustrator", "UI Design"]'::jsonb, 'https://cv.example.com/gd15027.pdf');
 INSERT INTO enterprise_assignments (assignment_id, enterprise_id, student_id, semester_id, supervisor_name, supervisor_email, assigned_by, status, start_date, end_date) VALUES
     ('f0000000-0000-0000-0000-000000000027', 'c0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000027', '50000000-0000-0000-0000-000000000001', 'Sup Momo', 'sup@momo.vn', '00000000-0000-0000-0000-000000000002', 'COMPLETED', '2026-03-01', '2026-07-15');
 INSERT INTO final_reports (final_report_id, assignment_id, file_url, file_size_bytes, submitted_at, is_late) VALUES
@@ -502,9 +502,9 @@ INSERT INTO users (user_id, email, password_hash, full_name, status, must_change
     ('d0000000-0000-0000-0000-000000000028', 'student28@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Ho Tuyet Linh', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000028', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked, approved_at) VALUES
-    ('e0000000-0000-0000-0000-000000000028', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000028', 'SE15028', 'Ho Tuyet Linh', 'student28@fpt.edu.vn', 'Software Engineering', 8.83, 7, 'OJT', TRUE, CURRENT_TIMESTAMP);
+    ('e0000000-0000-0000-0000-000000000028', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000028', 'DM15028', 'Ho Tuyet Linh', 'student28@fpt.edu.vn', 'Digital Marketing', 8.83, 7, 'OJT', TRUE, CURRENT_TIMESTAMP);
 INSERT INTO student_profiles (user_id, student_code, university, major, gpa, skills, cv_file_url) VALUES
-    ('d0000000-0000-0000-0000-000000000028', 'SE15028', 'FPT University', 'Software Engineering', 5.5, '["Java", "Spring Boot"]'::jsonb, 'https://cv.example.com/se15028.pdf');
+    ('d0000000-0000-0000-0000-000000000028', 'DM15028', 'FPT University', 'Digital Marketing', 5.5, '["Facebook Ads", "Google Ads", "SEO"]'::jsonb, 'https://cv.example.com/dm15028.pdf');
 INSERT INTO enterprise_assignments (assignment_id, enterprise_id, student_id, semester_id, supervisor_name, supervisor_email, assigned_by, status, start_date, end_date) VALUES
     ('f0000000-0000-0000-0000-000000000028', 'c0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000028', '50000000-0000-0000-0000-000000000001', 'Sup Momo', 'sup@momo.vn', '00000000-0000-0000-0000-000000000002', 'COMPLETED', '2026-03-01', '2026-07-15');
 INSERT INTO final_reports (final_report_id, assignment_id, file_url, file_size_bytes, submitted_at, is_late) VALUES
@@ -520,9 +520,9 @@ INSERT INTO users (user_id, email, password_hash, full_name, status, must_change
     ('d0000000-0000-0000-0000-000000000029', 'student29@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Ngo Thanh Phong', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000029', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked, approved_at) VALUES
-    ('e0000000-0000-0000-0000-000000000029', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000029', 'SE15029', 'Ngo Thanh Phong', 'student29@fpt.edu.vn', 'Software Engineering', 6.61, 7, 'OJT', TRUE, CURRENT_TIMESTAMP);
+    ('e0000000-0000-0000-0000-000000000029', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000029', 'IS15029', 'Ngo Thanh Phong', 'student29@fpt.edu.vn', 'Information Security', 6.61, 7, 'OJT', TRUE, CURRENT_TIMESTAMP);
 INSERT INTO student_profiles (user_id, student_code, university, major, gpa, skills, cv_file_url) VALUES
-    ('d0000000-0000-0000-0000-000000000029', 'SE15029', 'FPT University', 'Software Engineering', 6.5, '["Java", "Spring Boot"]'::jsonb, 'https://cv.example.com/se15029.pdf');
+    ('d0000000-0000-0000-0000-000000000029', 'IS15029', 'FPT University', 'Information Security', 6.5, '["SIEM", "Splunk", "Penetration Testing"]'::jsonb, 'https://cv.example.com/is15029.pdf');
 INSERT INTO enterprise_assignments (assignment_id, enterprise_id, student_id, semester_id, supervisor_name, supervisor_email, assigned_by, status, start_date, end_date) VALUES
     ('f0000000-0000-0000-0000-000000000029', 'c0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000029', '50000000-0000-0000-0000-000000000001', 'Sup Momo', 'sup@momo.vn', '00000000-0000-0000-0000-000000000002', 'COMPLETED', '2026-03-01', '2026-07-15');
 INSERT INTO final_reports (final_report_id, assignment_id, file_url, file_size_bytes, submitted_at, is_late) VALUES
@@ -538,9 +538,9 @@ INSERT INTO users (user_id, email, password_hash, full_name, status, must_change
     ('d0000000-0000-0000-0000-000000000030', 'student30@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Vu Duc Yen', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000030', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked, approved_at) VALUES
-    ('e0000000-0000-0000-0000-000000000030', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000030', 'SE15030', 'Vu Duc Yen', 'student30@fpt.edu.vn', 'Software Engineering', 7.89, 7, 'OJT', TRUE, CURRENT_TIMESTAMP);
+    ('e0000000-0000-0000-0000-000000000030', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000030', 'DA15030', 'Vu Duc Yen', 'student30@fpt.edu.vn', 'Digital Art & Design', 7.89, 7, 'OJT', TRUE, CURRENT_TIMESTAMP);
 INSERT INTO student_profiles (user_id, student_code, university, major, gpa, skills, cv_file_url) VALUES
-    ('d0000000-0000-0000-0000-000000000030', 'SE15030', 'FPT University', 'Software Engineering', 6.5, '["Java", "Spring Boot"]'::jsonb, 'https://cv.example.com/se15030.pdf');
+    ('d0000000-0000-0000-0000-000000000030', 'DA15030', 'FPT University', 'Digital Art & Design', 6.5, '["Photoshop", "Illustrator", "Branding"]'::jsonb, 'https://cv.example.com/da15030.pdf');
 INSERT INTO enterprise_assignments (assignment_id, enterprise_id, student_id, semester_id, supervisor_name, supervisor_email, assigned_by, status, start_date, end_date) VALUES
     ('f0000000-0000-0000-0000-000000000030', 'c0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000030', '50000000-0000-0000-0000-000000000001', 'Sup Momo', 'sup@momo.vn', '00000000-0000-0000-0000-000000000002', 'COMPLETED', '2026-03-01', '2026-07-15');
 INSERT INTO final_reports (final_report_id, assignment_id, file_url, file_size_bytes, submitted_at, is_late) VALUES
