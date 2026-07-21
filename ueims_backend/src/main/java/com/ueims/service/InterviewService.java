@@ -41,6 +41,19 @@ public interface InterviewService {
      */
     Interview backdateSchedule(UUID id, LocalDateTime newTime, String reason);
 
+    /**
+     * Demo-mode only: disable the BR-35 trigger {@code trg_interview_rules} on the
+     * {@code interviews} table so the demo can re-use any schedule time without
+     * waiting. Refuses with AppException unless {@code app.interview.demo-mode=true}.
+     */
+    void disableInterviewTrigger();
+
+    /**
+     * Re-enable the BR-35 trigger {@code trg_interview_rules} on {@code interviews}.
+     * Counterpart to {@link #disableInterviewTrigger()}; safe to call multiple times.
+     */
+    void enableInterviewTrigger();
+
     /** Propose 3 open time slots for the next 7 business days that don't overlap existing interviews. */
     List<java.time.LocalDateTime> proposeSlots(UUID applicationId);
 

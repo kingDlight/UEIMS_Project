@@ -34,12 +34,19 @@ export const InterviewService = {
       params: { result, notes },
     }),
 
-  // DEMO-MODE ONLY: move an interview's scheduled_datetime into the past so the
-  // "record result" flow can be exercised without waiting for real time. Backend
-  // enforces app.interview.demo-mode=true AND admin role AND a reason. Only the
-  // InterviewScheduleTab toolbar exposes this button when the build-time flag is on.
-  backdate: (id: string, newTime: string, reason: string) =>
-    api.post(`${API_URL}/${id}/backdate-schedule`, null, {
-      params: { newTime, reason },
-    }),
-};
+// DEMO-MODE ONLY: move an interview's scheduled_datetime into the past so the
+    // "record result" flow can be exercised without waiting for real time. Backend
+    // enforces app.interview.demo-mode=true AND a reason ≥10 chars. Available to
+    // ENTERPRISE (HR) for live demos, plus ADMIN/SYSTEM_ADMIN as a fallback.
+    backdate: (id: string, newTime: string, reason: string) =>
+      api.post(`${API_URL}/${id}/backdate-schedule`, null, {
+        params: { newTime, reason },
+      }),
+
+    // DEMO-MODE ONLY: toggle the BR-35 trigger on the interviews table. Used by
+    // the Enterprise toolbar during live presentations so any schedule time is
+    // accepted. Backend enforces app.interview.demo-mode=true; ADMINs can also
+    // call it but the UI button only lives on the Enterprise schedule page now.
+    disableTrigger: () => api.post(`${API_URL}/disable-trigger`),
+    enableTrigger: () => api.post(`${API_URL}/enable-trigger`),
+  };

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,6 +60,7 @@ public class InterviewServiceImpl implements InterviewService {
     // (see application.properties). Defaults to false so production builds have no
     // code path that bypasses BR-35.
     private final boolean demoMode;
+    private final JdbcTemplate jdbcTemplate;
 
     public InterviewServiceImpl(
             InterviewRepository repository,
@@ -73,6 +75,7 @@ public class InterviewServiceImpl implements InterviewService {
             NotificationService notificationService,
             ApplicationService applicationService,
             EnterpriseAssignmentService enterpriseAssignmentService,
+            JdbcTemplate jdbcTemplate,
             @Value("${app.interview.demo-mode:false}") boolean demoMode) {
         this.repository = repository;
         this.applicationRepository = applicationRepository;
@@ -86,6 +89,7 @@ public class InterviewServiceImpl implements InterviewService {
         this.notificationService = notificationService;
         this.applicationService = applicationService;
         this.enterpriseAssignmentService = enterpriseAssignmentService;
+        this.jdbcTemplate = jdbcTemplate;
         this.demoMode = demoMode;
         // Note: InternshipPlan không còn clone per-student — SV xem plan chung của DN qua
         // InternshipPlanService.findMyPlan().
@@ -544,6 +548,60 @@ public class InterviewServiceImpl implements InterviewService {
                 currentUser.getEmail(),
                 reason.trim());
         return saved;
+    }
+
+    @Override
+    @Transactional
+    public void disableInterviewTrigger() {
+        if (!demoMode) {
+            throw new AppException(
+                    ErrorCode.UNAUTHORIZED,
+                    "Trigger toggle is disabled. Set app.interview.demo-mode=true to allow demo flows.");
+        }
+        jdbcTemplate.execute("ALTER TABLE interviews DISABLE TRIGGER trg_interview_rules");
+        User currentUser = getCurrentUser();
+        log.warn(
+                "[trigger] trg_interview_rules DISABLED on interviews table by {} — re-enable via /api/interviews/enable-trigger",
+                currentUser.getEmail());
+        try {
+            auditLogRepository.save(AuditLog.builder()
+                    .user(currentUser)
+                    .action("DISABLE_TRIGGER")
+                    .targetEntity("Interview")
+                    .targetId(null)
+                    .oldValue("trg_interview_rules=ENABLED")
+                    .newValue("trg_interview_rules=DISABLED")
+                    .timestamp(LocalDateTime.now())
+                    .build());
+        } catch (Exception ex) {
+            log.warn("[trigger] Audit log insert failed: {}", ex.getMessage());
+        }
+    }
+
+    @Override
+    @Transactional
+    public void enableInterviewTrigger() {
+        if (!demoMode) {
+            throw new AppException(
+                    ErrorCode.UNAUTHORIZED,
+                    "Trigger toggle is disabled. Set app.interview.demo-mode=true to allow demo flows.");
+        }
+        jdbcTemplate.execute("ALTER TABLE interviews ENABLE TRIGGER trg_interview_rules");
+        User currentUser = getCurrentUser();
+        log.info("[trigger] trg_interview_rules re-enabled by {}", currentUser.getEmail());
+        try {
+            auditLogRepository.save(AuditLog.builder()
+                    .user(currentUser)
+                    .action("ENABLE_TRIGGER")
+                    .targetEntity("Interview")
+                    .targetId(null)
+                    .oldValue("trg_interview_rules=DISABLED")
+                    .newValue("trg_interview_rules=ENABLED")
+                    .timestamp(LocalDateTime.now())
+                    .build());
+        } catch (Exception ex) {
+            log.warn("[trigger] Audit log insert failed: {}", ex.getMessage());
+        }
     }
 
     @Override

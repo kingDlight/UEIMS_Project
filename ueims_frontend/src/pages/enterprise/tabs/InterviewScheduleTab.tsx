@@ -23,11 +23,12 @@ import {
   StopOutlined,
   SearchOutlined,
   HistoryOutlined,
+  ThunderboltOutlined,
+  SafetyCertificateOutlined,
 } from "@ant-design/icons";
 import dayjs, { Dayjs } from "dayjs";
 import { InterviewService } from "@/services/InterviewService";
 import { ApplicationService } from "@/services/ApplicationService";
-import { useAuthStore } from "@/stores/useAuthStore";
 
 const { TextArea } = Input;
 
@@ -122,7 +123,6 @@ export const InterviewScheduleTab: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
   const [backdateOpen, setBackdateOpen] = useState(false);
   const [backdateForm] = Form.useForm();
-  const user = useAuthStore((s) => s.user);
   const [applications, setApplications] = useState<any[]>([]);
   const [fetchingOptions, setFetchingOptions] = useState(false);
   const [form] = Form.useForm();
@@ -353,9 +353,47 @@ export const InterviewScheduleTab: React.FC = () => {
     }
   };
 
-  const isAdmin = (user?.roles ?? []).some(
-    (r) => r === "ADMIN" || r === "SYSTEM_ADMIN",
-  );
+  // Trigger toggle UI state — purely client-side until the next fetch confirms.
+  // Backend is the source of truth (ALTER TABLE actually runs).
+  const [triggerEnabled, setTriggerEnabled] = useState<boolean | null>(null);
+  const [togglingTrigger, setTogglingTrigger] = useState(false);
+
+  const handleToggleTrigger = async (nextState: "ENABLE" | "DISABLE") => {
+    const verb = nextState === "DISABLE" ? "disable" : "re-enable";
+    Modal.confirm({
+      title: `${verb.charAt(0).toUpperCase() + verb.slice(1)} the BR-35 interview trigger?`,
+      content: nextState === "DISABLE"
+        ? "This bypasses time/date validation on the interviews table so any schedule time is accepted. Use only for live demo presentations — the operation is logged."
+        : "Restores the BR-35 trigger so time/date validation is enforced again on the interviews table.",
+      okText: nextState === "DISABLE" ? "Disable (demo mode)" : "Re-enable",
+      okType: nextState === "DISABLE" ? "danger" : "primary",
+      cancelText: "Cancel",
+      onOk: async () => {
+        setTogglingTrigger(true);
+        try {
+          if (nextState === "DISABLE") {
+            await InterviewService.disableTrigger();
+          } else {
+            await InterviewService.enableTrigger();
+          }
+          setTriggerEnabled(nextState === "ENABLE");
+          message.success(
+            nextState === "DISABLE"
+              ? "Interview trigger DISABLED (demo)"
+              : "Interview trigger re-enabled",
+          );
+        } catch (err: any) {
+          const msg =
+            err?.response?.data?.message ||
+            err?.message ||
+            "Failed to toggle trigger";
+          message.error(msg);
+        } finally {
+          setTogglingTrigger(false);
+        }
+      },
+    });
+  };
 
   if (loading) {
     return (
@@ -399,7 +437,7 @@ export const InterviewScheduleTab: React.FC = () => {
           <Button icon={<ReloadOutlined />} onClick={fetchInterviews}>
             Refresh
           </Button>
-          {DEMO_MODE && isAdmin && (
+          {DEMO_MODE && (
             <Button
               icon={<HistoryOutlined />}
               onClick={() => {
@@ -410,6 +448,27 @@ export const InterviewScheduleTab: React.FC = () => {
             >
               Demo: Backdate
             </Button>
+          )}
+          {DEMO_MODE && (
+            triggerEnabled === false ? (
+              <Button
+                icon={<SafetyCertificateOutlined />}
+                loading={togglingTrigger}
+                onClick={() => handleToggleTrigger("ENABLE")}
+                className="border-emerald-500 text-emerald-600 hover:bg-emerald-50"
+              >
+                Re-enable Trigger
+              </Button>
+            ) : (
+              <Button
+                icon={<ThunderboltOutlined />}
+                loading={togglingTrigger}
+                onClick={() => handleToggleTrigger("DISABLE")}
+                className="border-rose-500 text-rose-600 hover:bg-rose-50"
+              >
+                Disable Trigger
+              </Button>
+            )
           )}
           <Button
             type="primary"

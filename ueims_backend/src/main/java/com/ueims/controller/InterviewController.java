@@ -155,7 +155,7 @@ public class InterviewController {
     // (is_backdated/backdated_by/backdated_at/backdated_reason). Production builds
     // have this flag off by default so the endpoint is a 403.
     @PostMapping("/{id}/backdate-schedule")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('SYSTEM_ADMIN')")
+    @PreAuthorize("hasRole('ENTERPRISE') or hasRole('ADMIN') or hasRole('SYSTEM_ADMIN')")
     public ResponseEntity<InterviewDTO> backdateSchedule(
             @PathVariable UUID id, @RequestParam("newTime") String newTime, @RequestParam("reason") String reason) {
 
@@ -169,5 +169,23 @@ public class InterviewController {
         }
 
         return ResponseEntity.ok(mapper.toDto(service.backdateSchedule(id, parsedTime, reason)));
+    }
+
+    // DEMO-MODE ONLY: disable the BR-35 trigger on the interviews table so the
+    // demo can re-use any schedule time without waiting. Enterprise HR uses this
+    // for live presentations; admins keep the legacy psql scripts (SQL/900) as a
+    // fallback. Refuses with 403 unless app.interview.demo-mode=true.
+    @PostMapping("/disable-trigger")
+    @PreAuthorize("hasRole('ENTERPRISE') or hasRole('ADMIN') or hasRole('SYSTEM_ADMIN')")
+    public ResponseEntity<Void> disableTrigger() {
+        service.disableInterviewTrigger();
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/enable-trigger")
+    @PreAuthorize("hasRole('ENTERPRISE') or hasRole('ADMIN') or hasRole('SYSTEM_ADMIN')")
+    public ResponseEntity<Void> enableTrigger() {
+        service.enableInterviewTrigger();
+        return ResponseEntity.noContent().build();
     }
 }
