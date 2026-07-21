@@ -1,7 +1,9 @@
 package com.ueims.service.impl;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -9,10 +11,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ueims.dto.response.InternshipPlanDTO;
+import com.ueims.dto.response.InternshipPlanRevisionDTO;
 import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
 import com.ueims.model.entity.Enterprise;
 import com.ueims.model.entity.InternshipPlan;
+import com.ueims.model.entity.InternshipPlanRevision;
 import com.ueims.model.entity.JobPost;
 import com.ueims.model.entity.Notification;
 import com.ueims.model.entity.Semester;
@@ -20,6 +24,7 @@ import com.ueims.model.entity.User;
 import com.ueims.repository.EnterpriseRepository;
 import com.ueims.repository.InternshipPlanItemRepository;
 import com.ueims.repository.InternshipPlanRepository;
+import com.ueims.repository.InternshipPlanRevisionRepository;
 import com.ueims.repository.JobPostRepository;
 import com.ueims.repository.SemesterRepository;
 import com.ueims.repository.UserRepository;
@@ -39,6 +44,7 @@ public class InternshipPlanServiceImpl implements InternshipPlanService {
 
     InternshipPlanRepository repository;
     InternshipPlanItemRepository itemRepository;
+    InternshipPlanRevisionRepository revisionRepository;
     EnterpriseRepository enterpriseRepository;
     SemesterRepository semesterRepository;
     JobPostRepository jobPostRepository;
@@ -55,11 +61,6 @@ public class InternshipPlanServiceImpl implements InternshipPlanService {
         return repository.findById(id).orElse(null);
     }
 
-    /**
-     * Plan SV có thể thấy:
-     * - status = APPROVED
-     * - SV có assignment ACTIVE ở đúng enterprise + semester của plan
-     */
     @Override
     @Transactional(readOnly = true)
     public InternshipPlan findMyPlan(UUID studentId) {
@@ -94,6 +95,26 @@ public class InternshipPlanServiceImpl implements InternshipPlanService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<InternshipPlanRevisionDTO> getRevisions(UUID planId) {
+        List<InternshipPlanRevision> rows = revisionRepository.findByPlanIdOrderByCreatedAtDesc(planId);
+
+        // Bulk-load actor names để tránh N+1
+        List<UUID> actorIds =
+                rows.stream().map(InternshipPlanRevision::getActorId).distinct().toList();
+        Map<UUID, String> nameMap = new HashMap<>();
+        for (User u : userRepository.findAllById(actorIds)) {
+            String name = u.getFullName();
+            if (name == null || name.isBlank()) name = u.getEmail();
+            nameMap.put(u.getUserId(), name);
+        }
+
+        return rows.stream()
+                .map(r -> InternshipPlanRevisionDTO.from(r, nameMap.getOrDefault(r.getActorId(), "Unknown")))
+                .toList();
+    }
+
+    @Override
     @Transactional
     public InternshipPlan approveMasterPlan(UUID planId, UUID reviewerId) {
         InternshipPlan plan = repository
@@ -111,11 +132,16 @@ public class InternshipPlanServiceImpl implements InternshipPlanService {
             throw new AppException(ErrorCode.SEMESTER_LOCKED_DATE);
         }
 
+        String fromStatus = plan.getStatus();
         plan.setStatus("APPROVED");
         plan.setApprovedBy(reviewer);
         plan.setApprovedAt(LocalDateTime.now());
+        plan.setLastReviewedBy(reviewer);
+        plan.setLastReviewedAt(LocalDateTime.now());
         plan.setRejectionReason(null);
         InternshipPlan saved = repository.save(plan);
+
+        logRevision(saved.getPlanId(), reviewerId, "TRAINING_MANAGER", "APPROVED", null, fromStatus, "APPROVED");
 
         // Notify enterprise
         if (plan.getEnterprise() != null) {
@@ -162,11 +188,17 @@ public class InternshipPlanServiceImpl implements InternshipPlanService {
         User reviewer =
                 userRepository.findById(reviewerId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
+        String fromStatus = plan.getStatus();
         plan.setStatus("REJECTED");
         plan.setRejectionReason(reason.trim());
         plan.setApprovedBy(reviewer);
         plan.setApprovedAt(LocalDateTime.now());
+        plan.setLastReviewedBy(reviewer);
+        plan.setLastReviewedAt(LocalDateTime.now());
         InternshipPlan saved = repository.save(plan);
+
+        logRevision(
+                saved.getPlanId(), reviewerId, "TRAINING_MANAGER", "REJECTED", reason.trim(), fromStatus, "REJECTED");
 
         // Notify enterprise
         if (plan.getEnterprise() != null) {
@@ -196,10 +228,12 @@ public class InternshipPlanServiceImpl implements InternshipPlanService {
     }
 
     /**
-     * Enterprise upsert plan (1 plan / DN / kỳ):
-     * - Nếu chưa có: tạo mới với status = PENDING_APPROVAL
-     * - Nếu đã có PENDING_APPROVAL hoặc REJECTED: update + reset về PENDING_APPROVAL
-     * - Nếu đã APPROVED: throw lỗi (giảng viên muốn strict, không cho sửa plan APPROVED)
+     * Enterprise upsert plan:
+     * - Chưa có                  → INSERT, action SUBMITTED, status = PENDING_APPROVAL.
+     * - Có + REJECTED            → UPDATE in-place, action REVISED, tăng revision_count,
+     *                              lưu revision_note, status = PENDING_APPROVAL, xoá rejection_reason.
+     * - Có + APPROVED            → throw lỗi.
+     * - Có + PENDING_APPROVAL    → UPDATE in-place, action REVISED (Enterprise sửa trước khi TM review).
      */
     @Override
     @Transactional
@@ -218,19 +252,17 @@ public class InternshipPlanServiceImpl implements InternshipPlanService {
             throw new AppException(ErrorCode.SEMESTER_LOCKED_DATE);
         }
 
-        // Optional jobPost (chỉ để tham chiếu, không bắt buộc)
+        // Optional jobPost
         JobPost jobPost = null;
         if (dto.getJobPostId() != null) {
             jobPost = jobPostRepository
                     .findById(dto.getJobPostId())
                     .orElseThrow(() -> new AppException(ErrorCode.RESOURCE_NOT_FOUND, "Job Post not found"));
 
-            // jobPost phải thuộc DN này
             if (!enterpriseId.equals(jobPost.getEnterprise().getEnterpriseId())) {
                 throw new AppException(ErrorCode.UNAUTHORIZED);
             }
 
-            // jobPost phải cùng semester
             if (!semester.getSemesterId().equals(jobPost.getSemester().getSemesterId())) {
                 throw new AppException(ErrorCode.RESOURCE_INVALID_STATE, "JobPost does not belong to this semester");
             }
@@ -241,6 +273,7 @@ public class InternshipPlanServiceImpl implements InternshipPlanService {
                 repository.findByEnterprise_EnterpriseIdAndSemester_SemesterId(enterpriseId, semester.getSemesterId());
 
         InternshipPlan saved;
+        String action;
         if (existingOpt.isPresent()) {
             InternshipPlan existing = existingOpt.get();
             if ("APPROVED".equals(existing.getStatus())) {
@@ -248,13 +281,26 @@ public class InternshipPlanServiceImpl implements InternshipPlanService {
                         ErrorCode.RESOURCE_INVALID_STATE,
                         "Cannot modify an APPROVED training plan. Please contact TM to make changes.");
             }
+
+            String fromStatus = existing.getStatus();
+            boolean wasRejected = "REJECTED".equals(fromStatus);
+
             existing.setOverallGoal(dto.getOverallGoal());
             existing.setStatus("PENDING_APPROVAL");
             existing.setRejectionReason(null);
             if (jobPost != null) {
                 existing.setJobPost(jobPost);
             }
+
+            // FIX 004: revision tracking — chỉ tăng count khi revise sau reject
+            if (wasRejected) {
+                existing.setRevisionCount(existing.getRevisionCount() == null ? 1 : existing.getRevisionCount() + 1);
+                existing.setLastRevisionAt(LocalDateTime.now());
+                existing.setRevisionNote(dto.getRevisionNote());
+            }
+
             saved = repository.save(existing);
+            action = wasRejected ? "REVISED" : "SUBMITTED";
         } else {
             InternshipPlan plan = InternshipPlan.builder()
                     .enterprise(enterprise)
@@ -262,19 +308,38 @@ public class InternshipPlanServiceImpl implements InternshipPlanService {
                     .jobPost(jobPost)
                     .overallGoal(dto.getOverallGoal())
                     .status("PENDING_APPROVAL")
+                    .revisionCount(0)
                     .build();
             saved = repository.save(plan);
+            action = "SUBMITTED";
         }
+
+        // Ghi audit log
+        logRevision(
+                saved.getPlanId(),
+                enterpriseId,
+                "ENTERPRISE",
+                action,
+                dto.getRevisionNote(),
+                existingOpt.map(InternshipPlan::getStatus).orElse(null),
+                "PENDING_APPROVAL");
 
         // Notify TM
         List<User> tms = userRepository.findActiveUsersByRoleName("TRAINING_MANAGER");
         for (User tm : tms) {
+            String verb = "REVISED".equals(action) ? "revised and re-submitted" : "submitted";
+            String title =
+                    "REVISED".equals(action) ? "Internship Plan Re-submitted" : "Internship Plan Pending Approval";
             Notification notif = Notification.builder()
                     .recipient(tm)
-                    .title("Internship Plan Pending Approval")
+                    .title(title)
                     .message("Enterprise " + enterprise.getCompanyName()
-                            + " has submitted a training plan for semester "
-                            + semester.getSemesterCode())
+                            + " has " + verb + " a training plan for semester "
+                            + semester.getSemesterCode()
+                            + (dto.getRevisionNote() != null
+                                            && !dto.getRevisionNote().isBlank()
+                                    ? ". Revision note: " + dto.getRevisionNote()
+                                    : ""))
                     .type("PLAN_PENDING")
                     .referenceEntity("InternshipPlan")
                     .referenceId(saved.getPlanId())
@@ -283,8 +348,9 @@ public class InternshipPlanServiceImpl implements InternshipPlanService {
         }
 
         log.info(
-                "Plan {} saved by enterprise {} for semester {}",
+                "Plan {} {} by enterprise {} for semester {}",
                 saved.getPlanId(),
+                action,
                 enterpriseId,
                 semester.getSemesterId());
         return saved;
@@ -293,5 +359,26 @@ public class InternshipPlanServiceImpl implements InternshipPlanService {
     @Override
     public void deleteById(UUID id) {
         repository.deleteById(id);
+    }
+
+    private void logRevision(
+            UUID planId,
+            UUID actorId,
+            String actorRole,
+            String action,
+            String note,
+            String fromStatus,
+            String toStatus) {
+        InternshipPlanRevision rev = InternshipPlanRevision.builder()
+                .planId(planId)
+                .actorId(actorId)
+                .actorRole(actorRole)
+                .action(action)
+                .note(note)
+                .fromStatus(fromStatus)
+                .toStatus(toStatus)
+                .createdAt(LocalDateTime.now())
+                .build();
+        revisionRepository.save(rev);
     }
 }

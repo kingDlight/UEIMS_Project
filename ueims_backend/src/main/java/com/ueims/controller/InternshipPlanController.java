@@ -9,6 +9,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.ueims.dto.response.InternshipPlanDTO;
+import com.ueims.dto.response.InternshipPlanRevisionDTO;
 import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
 import com.ueims.mapper.InternshipPlanMapper;
@@ -90,6 +91,16 @@ public class InternshipPlanController {
     @GetMapping("/{id}")
     public ResponseEntity<InternshipPlanDTO> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(mapper.toDto(service.findById(id)));
+    }
+
+    /**
+     * Lịch sử submit / revise / approve / reject của 1 plan.
+     * Enterprise xem của mình, TM xem tất cả.
+     */
+    @GetMapping("/{planId}/revisions")
+    @PreAuthorize("hasRole('ENTERPRISE') or hasRole('TRAINING_MANAGER')")
+    public ResponseEntity<List<InternshipPlanRevisionDTO>> getRevisions(@PathVariable UUID planId) {
+        return ResponseEntity.ok(service.getRevisions(planId));
     }
 
     /**

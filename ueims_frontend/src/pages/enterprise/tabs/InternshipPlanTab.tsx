@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Spin, App, Button, Input, Form, Empty, Popconfirm } from 'antd';
 import {
-  PlusOutlined,
   DeleteOutlined,
   SaveOutlined,
   ProjectOutlined,
@@ -29,6 +28,8 @@ interface PlanState {
   overallGoal?: string;
   status?: string;
   rejectionReason?: string;
+  revisionNote?: string;
+  revisionCount?: number;
   items: PlanItem[];
 }
 
@@ -76,6 +77,8 @@ export const InternshipPlanTab: React.FC = () => {
           overallGoal: data.overallGoal ?? '',
           status: data.status,
           rejectionReason: data.rejectionReason,
+          revisionNote: data.revisionNote ?? '',
+          revisionCount: data.revisionCount ?? 0,
           items: (data.tasks ?? data.items ?? []).map((it: any, idx: number) => ({
             planItemId: it.planItemId,
             weekNumber: it.weekNumber ?? idx + 1,
@@ -110,7 +113,10 @@ export const InternshipPlanTab: React.FC = () => {
   };
 
   const isReadOnly = useMemo(() => {
-    // Plan PENDING_APPROVAL hoặc APPROVED thì lock (APPROVED phải liên hệ TM).
+    // PENDING_APPROVAL: đã gửi, chờ TM xem → lock.
+    // APPROVED: TM đã pass → lock (phải liên hệ TM).
+    // REJECTED: Enterprise phải revise → KHÔNG lock.
+    // null/undefined: plan mới → cho edit.
     return plan.status === 'PENDING_APPROVAL' || plan.status === 'APPROVED';
   }, [plan.status]);
 
@@ -128,23 +134,7 @@ export const InternshipPlanTab: React.FC = () => {
       status: 'PENDING',
     }));
     setPlan((p) => ({ ...p, items: newItems }));
-    message.success(`Generated ${sundays.length} weeks based on semester duration.`);
-  };
-
-  const addItem = () => {
-    if (isReadOnly) return;
-    setPlan((p) => ({
-      ...p,
-      items: [
-        ...p.items,
-        {
-          weekNumber: p.items.length + 1,
-          taskDescription: '',
-          targetDate: null,
-          status: 'PENDING',
-        },
-      ],
-    }));
+    message.success(`Generated ${sundays.length} weeks (Sunday-based).`);
   };
 
   const removeItem = (idx: number) => {
@@ -186,6 +176,10 @@ export const InternshipPlanTab: React.FC = () => {
         overallGoal: plan.overallGoal ?? '',
       };
       if (plan.planId) planPayload.planId = plan.planId;
+      // FIX 004: gửi revision_note khi revise sau reject
+      if (plan.status === 'REJECTED' && plan.revisionNote && plan.revisionNote.trim()) {
+        planPayload.revisionNote = plan.revisionNote.trim();
+      }
       const saved = await InternshipPlanService.create(planPayload);
       const newPlanId = saved.data?.result?.planId ?? saved.data?.planId ?? plan.planId;
 
@@ -209,7 +203,8 @@ export const InternshipPlanTab: React.FC = () => {
           orderIndex: i,
         });
       }
-      message.success('Training plan has been saved and sent for approval.');
+      const verb = plan.status === 'REJECTED' ? 'revised and re-submitted' : 'submitted';
+      message.success(`Training plan has been ${verb} successfully.`);
       await fetchPlanForSemester(selectedSemester.semesterId);
     } catch (err: any) {
       message.error(err?.response?.data?.message ?? 'Failed to save plan.');
@@ -280,6 +275,11 @@ export const InternshipPlanTab: React.FC = () => {
                 </div>
                 <div className="text-[12px] text-slate-500">
                   Status: <strong className="uppercase">{plan.status || 'DRAFT'}</strong>
+                  {plan.revisionCount != null && plan.revisionCount > 0 && (
+                    <span className="ml-2 text-[#E67E22]">
+                      · Revised {plan.revisionCount} time{plan.revisionCount > 1 ? 's' : ''}
+                    </span>
+                  )}
                 </div>
               </div>
               <div className="flex gap-2">
@@ -298,7 +298,7 @@ export const InternshipPlanTab: React.FC = () => {
                   disabled={isReadOnly}
                   className="bg-[#E67E22] border-[#E67E22] rounded-xl font-bold hover:bg-[#D35400] hover:border-[#D35400]"
                 >
-                  Save & Submit
+                  {plan.status === 'REJECTED' ? 'Revise & Re-submit' : 'Save & Submit'}
                 </Button>
               </div>
             </div>
@@ -310,9 +310,38 @@ export const InternshipPlanTab: React.FC = () => {
               </div>
             )}
             {plan.status === 'REJECTED' && (
-              <div className="mb-3 px-3.5 py-2.5 bg-red-50 border border-red-500/30 rounded-xl text-[12px] text-red-600 flex items-center gap-2">
-                <LockOutlined /> <strong>Rejected:</strong> {plan.rejectionReason}
+              <div className="mb-3 px-3.5 py-2.5 bg-red-50 border border-red-500/30 rounded-xl text-[12px] text-red-600 flex items-start gap-2">
+                <LockOutlined className="mt-0.5" />
+                <div>
+                  <strong>Rejected by Training Manager:</strong>{' '}
+                  <span className="italic">"{plan.rejectionReason}"</span>
+                </div>
               </div>
+            )}
+
+            {!isReadOnly && plan.status === 'REJECTED' && (
+              <Form.Item
+                label={
+                  <span className="text-[12px] font-bold text-slate-700">
+                    Revision Note
+                    <span className="ml-2 text-slate-400 font-normal">
+                      — Tell TM what you changed and why
+                    </span>
+                  </span>
+                }
+                className="mb-4"
+                required
+              >
+                <TextArea
+                  value={plan.revisionNote ?? ''}
+                  onChange={(e) => setPlan((p) => ({ ...p, revisionNote: e.target.value }))}
+                  rows={2}
+                  maxLength={500}
+                  showCount
+                  placeholder="e.g. Adjusted Week 3 deadline and clarified supervisor responsibilities..."
+                  className="rounded-xl"
+                />
+              </Form.Item>
             )}
 
             <Form layout="vertical" disabled={isReadOnly}>
@@ -330,30 +359,19 @@ export const InternshipPlanTab: React.FC = () => {
 
               <div className="flex items-center justify-between mb-2">
                 <div className="text-[13px] font-bold text-slate-900">Weekly Tasks</div>
-                <div className="flex gap-2">
-                  <Button
-                    size="small"
-                    onClick={autoFillSundays}
-                    disabled={isReadOnly}
-                    className="rounded-xl"
-                  >
-                    Auto-Fill Sundays
-                  </Button>
-                  <Button
-                    size="small"
-                    icon={<PlusOutlined />}
-                    onClick={addItem}
-                    disabled={isReadOnly}
-                    className="rounded-xl"
-                  >
-                    Add Week
-                  </Button>
-                </div>
+                <Button
+                  size="small"
+                  onClick={autoFillSundays}
+                  disabled={isReadOnly}
+                  className="rounded-xl"
+                >
+                  Auto-Fill
+                </Button>
               </div>
 
               {plan.items.length === 0 ? (
                 <Empty
-                  description="No weekly items yet. Click 'Auto-Fill Sundays' to generate weeks."
+                  description="No weekly items yet. Click 'Auto-Fill' to generate weeks based on the semester."
                   image={Empty.PRESENTED_IMAGE_SIMPLE}
                 />
               ) : (

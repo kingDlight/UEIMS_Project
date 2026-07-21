@@ -9,8 +9,7 @@ import org.springframework.stereotype.Repository;
 import com.ueims.model.entity.InternshipPlanRevision;
 
 @Repository
-public interface InternshipPlanRevisionRepository
-        extends JpaRepository<InternshipPlanRevision, UUID> {
+public interface InternshipPlanRevisionRepository extends JpaRepository<InternshipPlanRevision, UUID> {
 
     List<InternshipPlanRevision> findByPlanIdOrderByCreatedAtDesc(UUID planId);
 }
