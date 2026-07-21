@@ -210,3 +210,5 @@ ueims_frontend/playwright/
 Dockerfile
 ueims_backend/.dockerignore
 ueims_frontend/.dockerignore
+.gemini_temp/
+*.md

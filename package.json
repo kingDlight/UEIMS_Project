@@ -10,11 +10,15 @@
   "dependencies": {
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.3",
+    "cheerio": "^1.2.0",
     "docx": "^9.7.1",
     "gitnexus": "^1.6.7",
     "image-size": "^2.0.2",
+    "mammoth": "^1.12.0",
     "newman": "^6.2.2",
+    "pdf-parse": "^2.4.5",
     "pg": "^8.22.0",
-    "recharts": "^3.8.1"
+    "recharts": "^3.8.1",
+    "word-extractor": "^1.0.4"
   }
 }

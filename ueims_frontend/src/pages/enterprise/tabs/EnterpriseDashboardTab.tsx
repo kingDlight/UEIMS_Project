@@ -425,7 +425,7 @@ const Last7DaysChart: React.FC<{ applications: ApplicationItem[] }> = ({ applica
         </span>
       </div>
       <div style={{ width: '100%', height: 200 }}>
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="99%" height="99%" initialDimension={{ width: 400, height: 200 }}>
           <BarChart data={data} margin={{ top: 8, right: 4, left: -24, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={cc.borderSubtle} />
             <XAxis

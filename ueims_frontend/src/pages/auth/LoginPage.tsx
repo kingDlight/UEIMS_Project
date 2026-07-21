@@ -38,7 +38,7 @@ export const LoginPage: React.FC = () => {
 
   const getRedirectPath = (roles: string[]): string => {
     if (!roles || roles.length === 0) return '/no-role';
-    if (roles.includes('ADMIN')) return '/admin/dashboard';
+    if (roles.includes('ADMIN') || roles.includes('SYSTEM_ADMIN')) return '/admin/dashboard';
     if (roles.includes('STUDENT')) return '/student/dashboard';
     if (roles.includes('ENTERPRISE')) return '/enterprise-dashboard';
     return '/training-manager/dashboard';
