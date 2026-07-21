@@ -144,7 +144,7 @@ export const AssignedStudentsTab: React.FC = () => {
               return (
                 <div
                   key={r.assignmentId}
-                  className="group bg-white border border-slate-200 rounded-2xl px-5 pt-5 pb-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-slate-300 transition-all"
+                  className="group bg-white border border-slate-200 rounded-2xl px-6 pt-6 pb-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-slate-300 transition-all"
                 >
                   <div className="flex items-center gap-3.5">
                     <div className="w-12 h-12 rounded-full bg-[#E67E22]/10 text-[#E67E22] ring-1 ring-[#E67E22]/15 flex items-center justify-center text-[13px] font-extrabold shrink-0">
@@ -159,25 +159,27 @@ export const AssignedStudentsTab: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="mt-4 pt-4 border-t border-dashed border-slate-200 grid grid-cols-2 gap-x-3 gap-y-3">
-                    <Field icon={<IdcardOutlined />} label="Student ID" value={r.studentCode ?? '—'} />
-                    <Field icon={<BookOutlined />} label="Major" value={r.major ?? '—'} />
-                    {r.supervisorName && (
-                      <Field
-                        icon={<UserOutlined />}
-                        label="Supervisor"
-                        value={r.supervisorName}
-                        fullWidth
-                      />
-                    )}
-                    {r.startDate && (
-                      <Field
-                        icon={<CalendarOutlined />}
-                        label="Period"
-                        value={`${dayjs(r.startDate).format('MMM D, YYYY')} – ${r.endDate ? dayjs(r.endDate).format('MMM D, YYYY') : '—'}`}
-                        fullWidth
-                      />
-                    )}
+                  <div className="mt-5 mx-[-8px] p-4 bg-slate-50/70 border border-slate-200 border-dashed rounded-xl">
+                    <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                      <Field icon={<IdcardOutlined />} label="Student ID" value={r.studentCode ?? '—'} />
+                      <Field icon={<BookOutlined />} label="Major" value={r.major ?? '—'} />
+                      {r.supervisorName && (
+                        <Field
+                          icon={<UserOutlined />}
+                          label="Supervisor"
+                          value={r.supervisorName}
+                          fullWidth
+                        />
+                      )}
+                      {r.startDate && (
+                        <Field
+                          icon={<CalendarOutlined />}
+                          label="Period"
+                          value={`${dayjs(r.startDate).format('MMM D, YYYY')} – ${r.endDate ? dayjs(r.endDate).format('MMM D, YYYY') : '—'}`}
+                          fullWidth
+                        />
+                      )}
+                    </div>
                   </div>
 
                   <div className="mt-4 flex justify-between items-center border-t border-slate-100 pt-3">
@@ -219,8 +221,8 @@ export const AssignedStudentsTab: React.FC = () => {
 };
 
 const Field: React.FC<{ icon: React.ReactNode; label: string; value: string; fullWidth?: boolean }> = ({ icon, label, value, fullWidth }) => (
-  <div className={fullWidth ? 'col-span-2' : ''}>
-    <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+  <div className={['min-w-0', fullWidth ? 'col-span-2' : ''].join(' ')}>
+    <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
       <span className="text-[#E67E22]">{icon}</span> {label}
     </div>
     <div className="text-[12.5px] font-semibold text-slate-900 break-words leading-snug">{value}</div>
