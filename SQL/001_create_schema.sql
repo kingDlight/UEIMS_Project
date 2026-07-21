@@ -1127,12 +1127,34 @@ CREATE TABLE internship_plans (
     rejection_reason    TEXT,
     approved_by         UUID REFERENCES users(user_id),
     approved_at         TIMESTAMP,
+    revision_note       TEXT,                                                -- FIX 004: Enterprise ghi lý do khi revise
+    revision_count      INT NOT NULL DEFAULT 0,                              -- FIX 004: số lần revise
+    last_revision_at    TIMESTAMP,                                           -- FIX 004: timestamp revise gần nhất
+    last_reviewed_by    UUID REFERENCES users(user_id),                      -- FIX 004: user review gần nhất
+    last_reviewed_at    TIMESTAMP,                                           -- FIX 004: timestamp review gần nhất
     created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at          TIMESTAMP,
 
     UNIQUE (enterprise_id, semester_id)                                    -- 1 plan / DN / kỳ
 );
+
+-- FIX 004: Audit log cho mỗi lần submit / revise / approve / reject
+CREATE TABLE internship_plan_revisions (
+    revision_id      UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    plan_id          UUID NOT NULL REFERENCES internship_plans(plan_id) ON DELETE CASCADE,
+    actor_id         UUID NOT NULL REFERENCES users(user_id),
+    actor_role       VARCHAR(30) NOT NULL,                                  -- ENTERPRISE | TRAINING_MANAGER
+    action           VARCHAR(30) NOT NULL
+                      CHECK (action IN ('SUBMITTED', 'REVISED', 'APPROVED', 'REJECTED')),
+    note             TEXT,
+    from_status      VARCHAR(30),
+    to_status        VARCHAR(30) NOT NULL,
+    created_at       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_plan_revisions_plan_id ON internship_plan_revisions(plan_id, created_at DESC);
+CREATE INDEX idx_plan_revisions_action  ON internship_plan_revisions(plan_id, action);
 
 CREATE INDEX idx_plan_enterprise_semester_status ON internship_plans(enterprise_id, semester_id, status);
 CREATE INDEX idx_plan_jobpost ON internship_plans(job_post_id);

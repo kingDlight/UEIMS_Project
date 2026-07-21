@@ -48,6 +48,23 @@ public class InternshipPlan extends BaseEntity {
     @Column(name = "approved_at")
     private java.time.LocalDateTime approvedAt;
 
+    @Column(name = "revision_note", columnDefinition = "TEXT")
+    private String revisionNote;
+
+    @Column(name = "revision_count", nullable = false)
+    @Builder.Default
+    private Integer revisionCount = 0;
+
+    @Column(name = "last_revision_at")
+    private java.time.LocalDateTime lastRevisionAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "last_reviewed_by")
+    private User lastReviewedBy;
+
+    @Column(name = "last_reviewed_at")
+    private java.time.LocalDateTime lastReviewedAt;
+
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "plan_id")
     private List<InternshipPlanItem> items;

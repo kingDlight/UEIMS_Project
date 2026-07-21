@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.ueims.dto.response.InternshipPlanDTO;
+import com.ueims.dto.response.InternshipPlanRevisionDTO;
 import com.ueims.model.entity.InternshipPlan;
 
 public interface InternshipPlanService {
@@ -33,11 +34,16 @@ public interface InternshipPlanService {
     InternshipPlan rejectMasterPlan(UUID planId, UUID reviewerId, String reason);
 
     /**
-     * Enterprise tạo hoặc update plan (upsert theo enterprise + semester).
-     * Vì UNIQUE constraint, nếu đã có plan PENDING_APPROVAL/APPROVED → update,
-     * nếu REJECTED → tạo mới (REJECTED cũ vẫn còn để audit).
+     * Enterprise tạo hoặc revise plan.
+     * - Nếu chưa có → INSERT mới (action SUBMITTED), status = PENDING_APPROVAL.
+     * - Nếu đã có và status = REJECTED → UPDATE in-place (action REVISED), tăng revision_count,
+     *   lưu revision_note, status = PENDING_APPROVAL, xoá rejection_reason cũ.
+     * - Nếu đã APPROVED → throw lỗi (không thể revise).
      */
     InternshipPlan upsertPlan(InternshipPlanDTO dto, UUID enterpriseId);
+
+    /** Lịch sử submit/revise/approve/reject của 1 plan. */
+    List<InternshipPlanRevisionDTO> getRevisions(UUID planId);
 
     void deleteById(UUID id);
 }
