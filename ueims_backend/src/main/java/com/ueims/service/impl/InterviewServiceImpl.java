@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +17,7 @@ import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
 import com.ueims.model.entity.Application;
 import com.ueims.model.entity.ApplicationStatus;
+import com.ueims.model.entity.AuditLog;
 import com.ueims.model.entity.Enterprise;
 import com.ueims.model.entity.EnterpriseAssignment;
 import com.ueims.model.entity.Interview;
@@ -23,6 +25,7 @@ import com.ueims.model.entity.PlacementApplication;
 import com.ueims.model.entity.Semester;
 import com.ueims.model.entity.User;
 import com.ueims.repository.ApplicationRepository;
+import com.ueims.repository.AuditLogRepository;
 import com.ueims.repository.EligibleStudentRepository;
 import com.ueims.repository.EnterpriseAssignmentRepository;
 import com.ueims.repository.InterviewRepository;
@@ -52,12 +55,19 @@ public class InterviewServiceImpl implements InterviewService {
     PlacementApplicationRepository placementApplicationRepository;
     EligibleStudentRepository eligibleStudentRepository;
     SemesterRepository semesterRepository;
+    AuditLogRepository auditLogRepository;
     MailService mailService;
     NotificationService notificationService;
     ApplicationService applicationService;
     EnterpriseAssignmentService enterpriseAssignmentService;
     // Note: InternshipPlan không còn clone per-student — SV xem plan chung của DN qua
     // InternshipPlanService.findMyPlan().
+
+    // Demo-mode flag — gates the backdate flow. Read from app.interview.demo-mode
+    // (see application.properties). Defaults to false so production builds have no
+    // code path that bypasses BR-35.
+    @Value("${app.interview.demo-mode:false}")
+    boolean demoMode;
 
     @Override
     @Transactional(readOnly = true)
@@ -448,6 +458,69 @@ public class InterviewServiceImpl implements InterviewService {
         } catch (Exception ex) {
             log.warn("[UC-43 43.2] Reschedule notification failed: {}", ex.getMessage());
         }
+        return saved;
+    }
+
+    @Override
+    @Transactional
+    public Interview backdateSchedule(UUID id, LocalDateTime newTime, String reason) {
+        if (!demoMode) {
+            log.warn("[backdate] Blocked: app.interview.demo-mode=false. Enable the flag to use this endpoint.");
+            throw new AppException(
+                    ErrorCode.UNAUTHORIZED,
+                    "Backdate is disabled. Set app.interview.demo-mode=true to allow demo / data-fix flows.");
+        }
+        if (newTime == null) {
+            throw new AppException(ErrorCode.MISSING_PARAMETER, "newTime is required");
+        }
+        if (reason == null || reason.trim().length() < 10) {
+            throw new AppException(
+                    ErrorCode.FIELD_REQUIRED, "backdatedReason must be at least 10 characters (audit trail).");
+        }
+        if (!newTime.isBefore(LocalDateTime.now())) {
+            throw new AppException(
+                    ErrorCode.INVALID_PARAMETER_FORMAT, "newTime must be in the past for backdate to make sense.");
+        }
+
+        Interview existing = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.INTERVIEW_NOT_FOUND));
+        User currentUser = getCurrentUser();
+
+        LocalDateTime oldTime = existing.getScheduledTime();
+
+        // Stamp the audit trail BEFORE the UPDATE so the trigger sees consistent fields.
+        existing.setIsBackdated(true);
+        existing.setBackdatedAt(LocalDateTime.now());
+        existing.setBackdatedBy(currentUser);
+        existing.setBackdatedReason(reason.trim());
+        existing.setScheduledTime(newTime);
+        existing.setUpdatedAt(LocalDateTime.now());
+        Interview saved = repository.saveAndFlush(existing);
+
+        // Manual audit log entry (the AOP aspect won't write backdated_* metadata).
+        try {
+            AuditLog logEntry = AuditLog.builder()
+                    .user(currentUser)
+                    .action("POST_BACKDATE_SCHEDULE")
+                    .targetEntity("Interview")
+                    .targetId(saved.getInterviewId())
+                    .oldValue("scheduled_datetime=" + oldTime)
+                    .newValue(
+                            "scheduled_datetime=" + newTime + "; is_backdated=true; backdated_reason=" + reason.trim())
+                    .timestamp(LocalDateTime.now())
+                    .build();
+            auditLogRepository.save(logEntry);
+        } catch (Exception ex) {
+            // Don't fail the whole operation if audit insert fails — DB trigger already enforces it.
+            log.warn("[backdate] Audit log insert failed: {}", ex.getMessage());
+        }
+
+        log.info(
+                "[backdate] Interview {} moved from {} to {} by {} (reason: {})",
+                id,
+                oldTime,
+                newTime,
+                currentUser.getEmail(),
+                reason.trim());
         return saved;
     }
 

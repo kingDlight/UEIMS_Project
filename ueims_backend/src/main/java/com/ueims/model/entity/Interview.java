@@ -63,4 +63,22 @@ public class Interview extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "decided_by")
     private User decidedBy;
+
+    // --- Backdate audit trail (demo only) ---
+    // Set by InterviewAdminController.backdateSchedule when an admin moves
+    // scheduled_datetime into the past under the demo flag. The BR-35 trigger
+    // will refuse the UPDATE unless all four fields are populated.
+    @Column(name = "is_backdated", nullable = false)
+    @Builder.Default
+    private Boolean isBackdated = false;
+
+    @Column(name = "backdated_at")
+    private LocalDateTime backdatedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "backdated_by")
+    private User backdatedBy;
+
+    @Column(name = "backdated_reason", columnDefinition = "TEXT")
+    private String backdatedReason;
 }

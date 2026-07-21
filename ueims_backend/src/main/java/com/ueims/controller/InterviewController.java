@@ -148,4 +148,26 @@ public class InterviewController {
                 .map(LocalDateTime::toString)
                 .toList());
     }
+
+    // DEMO-MODE ONLY: move an interview's scheduled_datetime into the past so the
+    // "record result" flow can be exercised without waiting for real time. The
+    // service enforces app.interview.demo-mode=true and writes a full audit trail
+    // (is_backdated/backdated_by/backdated_at/backdated_reason). Production builds
+    // have this flag off by default so the endpoint is a 403.
+    @PostMapping("/{id}/backdate-schedule")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('SYSTEM_ADMIN')")
+    public ResponseEntity<InterviewDTO> backdateSchedule(
+            @PathVariable UUID id, @RequestParam("newTime") String newTime, @RequestParam("reason") String reason) {
+
+        LocalDateTime parsedTime;
+        if (newTime.endsWith("Z")) {
+            parsedTime = java.time.Instant.parse(newTime)
+                    .atZone(java.time.ZoneId.of("UTC"))
+                    .toLocalDateTime();
+        } else {
+            parsedTime = LocalDateTime.parse(newTime);
+        }
+
+        return ResponseEntity.ok(mapper.toDto(service.backdateSchedule(id, parsedTime, reason)));
+    }
 }

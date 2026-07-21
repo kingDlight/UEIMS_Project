@@ -734,6 +734,15 @@ CREATE TABLE interviews (
     result_note     TEXT,
     decided_by      UUID REFERENCES users(user_id),
     decided_at      TIMESTAMP,
+    -- Audit trail for backdated schedules (demo only). When is_backdated = TRUE,
+    -- backdated_by + backdated_reason are REQUIRED (enforced in app layer + via
+    -- BR-35 trigger exception below). Keeps the BR-35 rule intact while letting
+    -- demo / data-fix flows move scheduled_datetime into the past without
+    -- disabling the trigger wholesale.
+    is_backdated         BOOLEAN     NOT NULL DEFAULT FALSE,
+    backdated_at         TIMESTAMP,
+    backdated_by         UUID        REFERENCES users(user_id),
+    backdated_reason     TEXT,
     created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -814,9 +823,22 @@ DECLARE
     has_overlap BOOLEAN;
 BEGIN
     -- 1. Validate that scheduled time is in the future on INSERT or when scheduled_datetime changes (BR-35)
+    --    EXCEPTION: backdated interview (demo / data-fix only) is allowed when
+    --    is_backdated = TRUE AND backdated_by is set AND backdated_reason is set.
+    --    The application layer is responsible for setting these audit fields and
+    --    for refusing the operation when the demo flag is disabled.
     IF TG_OP = 'INSERT' OR (TG_OP = 'UPDATE' AND OLD.scheduled_datetime != NEW.scheduled_datetime) THEN
         IF NEW.scheduled_datetime <= CURRENT_TIMESTAMP THEN
-            RAISE EXCEPTION 'Scheduled interview time must be in the future (BR-35).';
+            IF NOT (NEW.is_backdated = TRUE
+                    AND NEW.backdated_by IS NOT NULL
+                    AND NEW.backdated_reason IS NOT NULL
+                    AND LENGTH(NEW.backdated_reason) >= 10) THEN
+                RAISE EXCEPTION 'Scheduled interview time must be in the future (BR-35). Backdate requires is_backdated=true + backdated_by + backdated_reason (>=10 chars).';
+            END IF;
+            -- Auto-stamp backdated_at if backend forgot (defensive)
+            IF NEW.backdated_at IS NULL THEN
+                NEW.backdated_at := CURRENT_TIMESTAMP;
+            END IF;
         END IF;
     END IF;
 

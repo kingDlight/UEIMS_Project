@@ -66,11 +66,32 @@ on a current DB does nothing:
 
 ## 🔧 Operations
 
-- `900_disable_interview_trigger.sql` — disable a problematic trigger temporarily
-- `901_enable_interview_trigger.sql` — re-enable it
+- `900_disable_interview_trigger.sql` — **emergency fallback only**. Disables
+  `trg_interview_rules` wholesale so BR-35 stops blocking past-dated
+  `scheduled_datetime`. Use ONLY when the preferred backdate flow below
+  is not viable.
+- `901_enable_interview_trigger.sql` — re-enable after running 900
 
-Use these only for emergency debugging. The trigger guards BR-49 (interview
-confirmation immutability).
+### Preferred way to backdate an interview (demo / data-fix)
+
+Instead of disabling the trigger, call the application-layer endpoint:
+
+```
+POST /api/interviews/{id}/backdate-schedule?newTime=2026-07-15T10:00:00&reason=...
+```
+
+Requires:
+- Backend flag: `app.interview.demo-mode=true` in `application.properties`
+  (defaults to **false** in production builds — endpoint returns 403 otherwise)
+- Role: `ADMIN` or `SYSTEM_ADMIN`
+- Audit fields auto-stamped: `is_backdated`, `backdated_at`, `backdated_by`, `backdated_reason`
+- The BR-35 trigger has an exception that accepts the UPDATE only when all four
+  audit fields are present and `backdated_reason` is at least 10 characters.
+- A `POST_BACKDATE_SCHEDULE` row is also written to `audit_logs` for traceability.
+
+The frontend exposes this via the "Demo: Backdate" button in
+`InterviewScheduleTab`'s toolbar, visible only when the build-time `DEMO_MODE`
+flag in that file is `true` AND the current user has an admin role.
 
 ## 🧹 What's in `_archive/` (gitignored)
 
