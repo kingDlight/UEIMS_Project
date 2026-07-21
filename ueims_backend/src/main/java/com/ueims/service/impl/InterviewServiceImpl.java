@@ -38,36 +38,58 @@ import com.ueims.service.InterviewService;
 import com.ueims.service.MailService;
 import com.ueims.service.NotificationService;
 
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class InterviewServiceImpl implements InterviewService {
-    InterviewRepository repository;
-    ApplicationRepository applicationRepository;
-    UserRepository userRepository;
-    EnterpriseAssignmentRepository enterpriseAssignmentRepository;
-    PlacementApplicationRepository placementApplicationRepository;
-    EligibleStudentRepository eligibleStudentRepository;
-    SemesterRepository semesterRepository;
-    AuditLogRepository auditLogRepository;
-    MailService mailService;
-    NotificationService notificationService;
-    ApplicationService applicationService;
-    EnterpriseAssignmentService enterpriseAssignmentService;
-    // Note: InternshipPlan không còn clone per-student — SV xem plan chung của DN qua
-    // InternshipPlanService.findMyPlan().
-
+    private final InterviewRepository repository;
+    private final ApplicationRepository applicationRepository;
+    private final UserRepository userRepository;
+    private final EnterpriseAssignmentRepository enterpriseAssignmentRepository;
+    private final PlacementApplicationRepository placementApplicationRepository;
+    private final EligibleStudentRepository eligibleStudentRepository;
+    private final SemesterRepository semesterRepository;
+    private final AuditLogRepository auditLogRepository;
+    private final MailService mailService;
+    private final NotificationService notificationService;
+    private final ApplicationService applicationService;
+    private final EnterpriseAssignmentService enterpriseAssignmentService;
     // Demo-mode flag — gates the backdate flow. Read from app.interview.demo-mode
     // (see application.properties). Defaults to false so production builds have no
     // code path that bypasses BR-35.
-    @Value("${app.interview.demo-mode:false}")
-    boolean demoMode;
+    private final boolean demoMode;
+
+    public InterviewServiceImpl(
+            InterviewRepository repository,
+            ApplicationRepository applicationRepository,
+            UserRepository userRepository,
+            EnterpriseAssignmentRepository enterpriseAssignmentRepository,
+            PlacementApplicationRepository placementApplicationRepository,
+            EligibleStudentRepository eligibleStudentRepository,
+            SemesterRepository semesterRepository,
+            AuditLogRepository auditLogRepository,
+            MailService mailService,
+            NotificationService notificationService,
+            ApplicationService applicationService,
+            EnterpriseAssignmentService enterpriseAssignmentService,
+            @Value("${app.interview.demo-mode:false}") boolean demoMode) {
+        this.repository = repository;
+        this.applicationRepository = applicationRepository;
+        this.userRepository = userRepository;
+        this.enterpriseAssignmentRepository = enterpriseAssignmentRepository;
+        this.placementApplicationRepository = placementApplicationRepository;
+        this.eligibleStudentRepository = eligibleStudentRepository;
+        this.semesterRepository = semesterRepository;
+        this.auditLogRepository = auditLogRepository;
+        this.mailService = mailService;
+        this.notificationService = notificationService;
+        this.applicationService = applicationService;
+        this.enterpriseAssignmentService = enterpriseAssignmentService;
+        this.demoMode = demoMode;
+        // Note: InternshipPlan không còn clone per-student — SV xem plan chung của DN qua
+        // InternshipPlanService.findMyPlan().
+    }
 
     @Override
     @Transactional(readOnly = true)
