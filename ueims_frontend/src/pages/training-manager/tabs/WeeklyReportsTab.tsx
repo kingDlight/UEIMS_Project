@@ -1,6 +1,6 @@
 import React, { useState, useCallback, forwardRef } from 'react';
 import { useScrollAnimation } from '../../../hooks/useScrollAnimation';
-import { App, Modal, Spin } from 'antd';
+import { Modal, Spin, Input, App, Button } from 'antd';
 
 import {
   Clock,
@@ -9,6 +9,12 @@ import {
   Calendar,
   Building2,
   Eye,
+  AlertCircle,
+  AlertOctagon,
+  CheckSquare,
+  CheckCircle2,
+  ScrollText,
+  ShieldCheck,
 } from 'lucide-react';
 import { st } from './StatsTab';
 import { WeeklyReportService } from '@/services/WeeklyReportService';
@@ -43,6 +49,9 @@ export interface WeeklyReport {
   submittedAt: string;
   hoursLogged: number | null;
   summary: string;
+  plagiarismScore: number | null;     // FIX 006-B: BR-58
+  isAnomaly: boolean;                 // FIX 006-B: BR-58
+  lateOverriddenBy: string | null;    // FIX 006-C: BR-56
 }
 
 const ALL_WEEKS = [
@@ -142,15 +151,39 @@ const ReportCard = forwardRef<HTMLDivElement, ReportCardProps>((
       onClick={() => onViewDetail(report.id)}
     >
       {/* Top: Student + Status */}
-      <div className="flex justify-between items-start mb-3">
-        <div>
-          <div className="text-sm font-bold text-slate-900 leading-tight mb-0.5">
+      <div className="flex justify-between items-start mb-3 gap-2">
+        <div style={{ minWidth: 0 }}>
+          <div className="text-sm font-bold text-slate-900 leading-tight mb-0.5 truncate">
             {report.studentName} <span className="text-slate-400 font-normal text-xs ml-1"># {report.studentCode}</span>
           </div>
-          <div className="flex items-center gap-2 text-xs text-slate-500 font-medium">
+          <div className="flex items-center gap-2 text-xs text-slate-500 font-medium flex-wrap">
             <span className="flex items-center gap-1"><Building2 size={12} className="text-slate-400" /> {report.enterprise}</span>
             <span>·</span>
             <span className="flex items-center gap-1"><Calendar size={12} className="text-slate-400" /> {report.weekLabel}</span>
+            {/* FIX 006-B: anomaly badge */}
+            {report.isAnomaly && (
+              <span style={{
+                display: 'inline-flex', alignItems: 'center', gap: 3,
+                padding: '1px 6px', borderRadius: 999,
+                background: '#FEE2E2', color: '#B91C1C', border: '1px solid #FCA5A5',
+                fontSize: 10, fontWeight: 700,
+              }} title={`Plagiarism score: ${(report.plagiarismScore ?? 0).toFixed(2)}`}>
+                <AlertOctagon size={10} strokeWidth={2.5} />
+                ANOMALY
+              </span>
+            )}
+            {/* FIX 006-C: late override badge */}
+            {report.lateOverriddenBy && (
+              <span style={{
+                display: 'inline-flex', alignItems: 'center', gap: 3,
+                padding: '1px 6px', borderRadius: 999,
+                background: '#DBEAFE', color: '#1D4ED8', border: '1px solid #93C5FD',
+                fontSize: 10, fontWeight: 700,
+              }} title="TM override for late submission">
+                <ShieldCheck size={10} strokeWidth={2.5} />
+                LATE OVERRIDE
+              </span>
+            )}
           </div>
         </div>
         <span style={{ color: cfg.color, background: cfg.bg, border: `1px solid ${cfg.borderColor}` }} className="px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 shrink-0">
@@ -186,11 +219,14 @@ interface FilterSidebarProps {
   onWeekChange: (w: string) => void;
   checkedStatuses: Set<string>;
   onStatusToggle: (s: string) => void;
-  counts: { submitted: number; approved: number; rejected: number };
+  counts: { submitted: number; approved: number; rejected: number; anomaly: number };
+  onlyAnomaly: boolean;
+  onToggleAnomaly: () => void;
 }
 
 const FilterSidebar: React.FC<FilterSidebarProps> = ({
   selectedWeek, onWeekChange, checkedStatuses, onStatusToggle, counts,
+  onlyAnomaly, onToggleAnomaly,
 }) => {
   return (
     <div style={{
@@ -345,6 +381,74 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
           })}
         </div>
       </div>
+
+      {/* FIX 006-B: Anomaly quick filter (BR-58 plagiarism) */}
+      <div style={{ padding: '14px 14px', borderTop: `1px solid ${st.borderSubtle}` }}>
+        <div style={{
+          fontSize: 10.5,
+          fontWeight: 700,
+          color: st.textMuted,
+          textTransform: 'uppercase',
+          letterSpacing: '0.08em',
+          marginBottom: 10,
+          fontFamily: 'Inter, sans-serif',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 5,
+        }}>
+          <AlertOctagon size={11} strokeWidth={2.5} />
+          Suspicious
+        </div>
+        <button
+          onClick={onToggleAnomaly}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            width: '100%',
+            textAlign: 'left',
+            padding: '7px 10px',
+            borderRadius: st.radiusMd,
+            border: onlyAnomaly ? `1px solid #FCA5A5` : `1px solid transparent`,
+            background: onlyAnomaly ? '#FEE2E2' : 'transparent',
+            color: onlyAnomaly ? '#B91C1C' : st.textSecondary,
+            fontSize: 11.5,
+            fontWeight: onlyAnomaly ? 700 : 500,
+            fontFamily: 'Inter, sans-serif',
+            cursor: 'pointer',
+            transition: 'all 0.15s ease',
+          }}
+        >
+          <div style={{
+            width: 14,
+            height: 14,
+            borderRadius: 3,
+            border: `1.5px solid ${onlyAnomaly ? '#B91C1C' : st.border}`,
+            background: onlyAnomaly ? '#B91C1C' : 'transparent',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+            transition: 'all 0.15s ease',
+          }}>
+            {onlyAnomaly && (
+              <svg width="8" height="6" viewBox="0 0 8 6" fill="none">
+                <path d="M1 3L3 5L7 1" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            )}
+          </div>
+          <span style={{ flex: 1 }}>Anomaly only</span>
+          <span style={{
+            fontSize: 10.5,
+            fontWeight: 800,
+            fontVariantNumeric: 'tabular-nums',
+            fontFamily: 'Inter, sans-serif',
+            color: counts.anomaly > 0 ? '#B91C1C' : st.textMuted,
+          }}>
+            {counts.anomaly}
+          </span>
+        </button>
+      </div>
     </div>
   );
 };
@@ -385,6 +489,9 @@ export const WeeklyReportsTab: React.FC = () => {
           submittedAt: r.submittedAt || null,
           hoursLogged: r.hoursLogged ?? null,
           summary: r.tasksCompleted || 'No summary provided',
+          plagiarismScore: r.plagiarismScore ?? null,
+          isAnomaly: Boolean(r.isAnomaly),
+          lateOverriddenBy: r.lateOverrideBy ?? null,
         }));
         setReports(mapped);
         setErrorMsg(null);
@@ -401,13 +508,15 @@ export const WeeklyReportsTab: React.FC = () => {
 
   const [selectedWeek, setSelectedWeek] = useState<string>('');
   const [checkedStatuses, setCheckedStatuses] = useState<Set<string>>(new Set(['SUBMITTED']));
+  const [onlyAnomaly, setOnlyAnomaly] = useState<boolean>(false);
 
-  // Filter by week number (parsed from selectedWeek) + status set.
+  // Filter by week number (parsed from selectedWeek) + status set + anomaly toggle.
   const filteredReports = reports.filter((r) => {
     const selectedWeekNum = selectedWeek ? Number(selectedWeek) : null;
     const matchWeek = selectedWeekNum == null || r.weekNumber === selectedWeekNum;
     const matchStatus = checkedStatuses.size === 0 || checkedStatuses.has(r.status);
-    return matchWeek && matchStatus;
+    const matchAnomaly = !onlyAnomaly || r.isAnomaly;
+    return matchWeek && matchStatus && matchAnomaly;
   });
 
   // Counts for sidebar — count actual UI-normalized buckets.
@@ -415,6 +524,7 @@ export const WeeklyReportsTab: React.FC = () => {
     submitted: reports.filter((r) => r.status === 'SUBMITTED').length,
     approved: reports.filter((r) => r.status === 'APPROVED').length,
     rejected: reports.filter((r) => r.status === 'REJECTED').length,
+    anomaly: reports.filter((r) => r.isAnomaly).length,
   };
 
   // Toggle status filter checkbox
@@ -433,6 +543,46 @@ export const WeeklyReportsTab: React.FC = () => {
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailData, setDetailData] = useState<any | null>(null);
   const [detailError, setDetailError] = useState<string | null>(null);
+  const [overrideReason, setOverrideReason] = useState('');
+  const [overrideLoading, setOverrideLoading] = useState(false);
+
+  const handleOverrideLate = useCallback(async () => {
+    if (!detailId || !overrideReason.trim()) {
+      void message.warning('Please provide a reason for the override.');
+      return;
+    }
+    setOverrideLoading(true);
+    try {
+      await WeeklyReportService.overrideLateSubmission(detailId, overrideReason.trim());
+      void message.success('Late submission overridden.');
+      // Refresh detail
+      const fresh = await WeeklyReportService.getReportById(detailId);
+      setDetailData(fresh);
+      setOverrideReason('');
+      // Refresh list so badge appears
+      const data = await WeeklyReportService.getAllReports();
+      const mapped = (Array.isArray(data) ? data : []).map((r: any) => ({
+        id: r.reportId,
+        studentName: r.studentName || 'Unknown Student',
+        studentCode: r.studentCode || 'N/A',
+        enterprise: r.enterpriseName || 'Unknown Enterprise',
+        weekNumber: r.weekNumber,
+        weekLabel: `Week ${r.weekNumber}`,
+        status: normalizeStatus(r.status),
+        submittedAt: r.submittedAt || null,
+        hoursLogged: r.hoursLogged ?? null,
+        summary: r.tasksCompleted || 'No summary provided',
+        plagiarismScore: r.plagiarismScore ?? null,
+        isAnomaly: Boolean(r.isAnomaly),
+        lateOverriddenBy: r.lateOverrideBy ?? null,
+      }));
+      setReports(mapped);
+    } catch (err: any) {
+      void message.error(err?.response?.data?.message ?? 'Failed to override late submission.');
+    } finally {
+      setOverrideLoading(false);
+    }
+  }, [detailId, overrideReason, message]);
 
   const openDetail = useCallback(async (id: string) => {
     setDetailId(id);
@@ -574,6 +724,8 @@ export const WeeklyReportsTab: React.FC = () => {
             checkedStatuses={checkedStatuses}
             onStatusToggle={toggleStatus}
             counts={counts}
+            onlyAnomaly={onlyAnomaly}
+            onToggleAnomaly={() => setOnlyAnomaly((v) => !v)}
           />
         </div>
 
@@ -668,11 +820,41 @@ export const WeeklyReportsTab: React.FC = () => {
           </div>
         ) : detailData ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14, fontFamily: 'Inter, sans-serif' }}>
+            {/* FIX 006-B/C: Plagiarism + Late Override badges */}
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              {detailData.plagiarismScore != null && (
+                <span style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 4,
+                  padding: '4px 10px', borderRadius: 999,
+                  background: detailData.isAnomaly ? '#FEE2E2' : st.neutralBg,
+                  color: detailData.isAnomaly ? '#B91C1C' : st.textSecondary,
+                  border: `1px solid ${detailData.isAnomaly ? '#FCA5A5' : st.border}`,
+                  fontSize: 11, fontWeight: 700,
+                }}>
+                  <AlertOctagon size={11} strokeWidth={2.5} />
+                  Plagiarism score: {Number(detailData.plagiarismScore).toFixed(2)}
+                  {detailData.isAnomaly && ' · ANOMALY'}
+                </span>
+              )}
+              {detailData.lateOverrideBy && (
+                <span style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 4,
+                  padding: '4px 10px', borderRadius: 999,
+                  background: '#DBEAFE', color: '#1D4ED8',
+                  border: '1px solid #93C5FD',
+                  fontSize: 11, fontWeight: 700,
+                }}>
+                  <ShieldCheck size={11} strokeWidth={2.5} />
+                  Late submission overridden by TM
+                </span>
+              )}
+            </div>
+
             <DetailSection label="Tasks Completed" value={detailData.tasksCompleted} />
             <DetailSection label="Issues / Challenges" value={detailData.issuesChallenges} />
             <DetailSection label="Lessons Learned" value={detailData.lessonsLearned} />
             <DetailSection label="Plan for Next Week" value={detailData.planNextWeek} />
-            <div style={{ display: 'flex', gap: 24, fontSize: 12, color: st.textSecondary, borderTop: `1px solid ${st.border}`, paddingTop: 12 }}>
+            <div style={{ display: 'flex', gap: 24, fontSize: 12, color: st.textSecondary, borderTop: `1px solid ${st.border}`, paddingTop: 12, flexWrap: 'wrap' }}>
               <span>
                 <strong>Status:</strong>{' '}
                 {STATUS_CONFIG[detailData.status as WeeklyReportStatus]?.label
@@ -692,6 +874,38 @@ export const WeeklyReportsTab: React.FC = () => {
             {detailData.feedback && (
               <div style={{ padding: '10px 12px', background: st.neutralBg, borderRadius: 8, fontSize: 12.5, color: st.textSecondary }}>
                 <strong>Enterprise feedback:</strong> {detailData.feedback}
+              </div>
+            )}
+
+            {/* FIX 006-C: TM Override Late action */}
+            {!detailData.lateOverrideBy && (
+              <div style={{ borderTop: `1px solid ${st.border}`, paddingTop: 12, marginTop: 4 }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: st.textMuted, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
+                  Training Manager Actions
+                </div>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                  <Input.TextArea
+                    placeholder="Reason for override (e.g. 'Server outage 03/15 — approved grace period')"
+                    value={overrideReason}
+                    onChange={(e) => setOverrideReason(e.target.value)}
+                    rows={2}
+                    style={{ flex: 1, minWidth: 240 }}
+                    maxLength={300}
+                  />
+                  <Button
+                    type="primary"
+                    icon={<ShieldCheck size={14} />}
+                    loading={overrideLoading}
+                    disabled={!overrideReason.trim()}
+                    onClick={handleOverrideLate}
+                    style={{ background: '#1D4ED8', borderColor: '#1D4ED8' }}
+                  >
+                    Override Late
+                  </Button>
+                </div>
+                <div style={{ fontSize: 11, color: st.textMuted, marginTop: 6 }}>
+                  Mark this report as accepted despite being past the deadline (BR-56).
+                </div>
               </div>
             )}
           </div>

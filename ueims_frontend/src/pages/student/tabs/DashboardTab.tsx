@@ -18,9 +18,11 @@ import {
   Mail,
 } from 'lucide-react';
 import { Spin } from 'antd';
+import dayjs from 'dayjs';
 import { StudentDashboardService, type StudentDashboardStats } from '@/services/StudentDashboardService';
 import { OjtStatusService, type OjtStatusResponse } from '@/services/OjtStatusService';
 import { OjtStatusBadge } from '../components/OjtStatusBadge';
+import { WeeklyReportService, type WeeklyReportStatusSummary, type WeeklyReportStatusWeek } from '@/services/WeeklyReportService';
 
 export interface DashboardTabProps {
   currentSemester: number;
@@ -621,6 +623,198 @@ const ReportPipelineRow: React.FC<{ stats: StudentDashboardStats; onNavigate: (r
 };
 
 // ============================================================
+// SECTION: WEEKLY REPORT WARNING (FIX 005)
+// Hiển thị cảnh báo khi SV trễ hạn weekly report, dựa trên training plan timeline
+// ============================================================
+const WeeklyReportWarningWidget: React.FC<{
+  summary: WeeklyReportStatusSummary;
+  onNavigate: (route: string) => void;
+}> = ({ summary, onNavigate }) => {
+  const { t } = useTranslation(['studentDashboard']);
+
+  // Không có assignment ACTIVE → không hiển thị
+  if (summary.totalWeeks === 0) return null;
+
+  const hasOverdue = summary.overdueCount > 0;
+  const hasPendingThisWeek = summary.pendingThisWeek > 0;
+
+  // Tìm tuần trễ hạn (status = MISSED)
+  const missedWeeks = summary.weeks.filter((w) => w.status === 'MISSED');
+  const currentWeekData = summary.weeks.find((w) => w.weekNumber === summary.currentWeek);
+
+  // Màu cảnh báo
+  const accentColor = hasOverdue ? cc.error : cc.warning;
+  const accentBg = hasOverdue ? hexToRgba(cc.error, 0.05) : hexToRgba(cc.warning, 0.05);
+  const accentBorder = hasOverdue ? cc.error : cc.warning;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
+      style={{ marginBottom: 16 }}
+    >
+      <CardWrapper
+        style={{
+          padding: 22,
+          background: accentBg,
+          border: `1px solid ${hexToRgba(accentBorder, 0.25)}`,
+          borderLeft: `4px solid ${accentColor}`,
+        }}
+      >
+        <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+          <div
+            style={{
+              width: 48,
+              height: 48,
+              borderRadius: cc.radiusFull,
+              background: hasOverdue ? hexToRgba(cc.error, 0.12) : hexToRgba(cc.warning, 0.12),
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: accentColor,
+              flexShrink: 0,
+            }}
+          >
+            <AlertTriangle size={24} />
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div
+              style={{
+                fontSize: 16,
+                fontWeight: 700,
+                color: cc.textPrimary,
+                marginBottom: 6,
+              }}
+            >
+              {hasOverdue
+                ? t('weeklyReportOverdue', 'You have missed {{count}} weekly report(s)!', {
+                    count: summary.overdueCount,
+                  })
+                : hasPendingThisWeek
+                  ? t('weeklyReportPending', 'Week {{week}} report is due soon', { week: summary.currentWeek })
+                  : t('weeklyReportOnTrack', 'You are on track with weekly reports')}
+            </div>
+
+            <div
+              style={{
+                fontSize: 13,
+                color: cc.textSecondary,
+                lineHeight: 1.7,
+                marginBottom: 14,
+              }}
+            >
+              {hasOverdue
+                ? t(
+                    'weeklyReportOverdueDesc',
+                    'You did not submit your weekly report(s) for the following weeks. Please submit them as soon as possible to stay on track with the training plan.',
+                  )
+                : hasPendingThisWeek
+                  ? t(
+                      'weeklyReportPendingDesc',
+                      'You have not submitted your weekly report for Week {{week}}. Deadline: {{deadline}}.',
+                      {
+                        week: summary.currentWeek,
+                        deadline: currentWeekData?.deadline
+                          ? dayjs(currentWeekData.deadline).format('MMM D, YYYY')
+                          : 'Sunday',
+                      },
+                    )
+                  : t(
+                      'weeklyReportOnTrackDesc',
+                      'You have submitted {{count}} of {{total}} weekly reports for {{semester}}.',
+                      {
+                        count: summary.submittedCount,
+                        total: summary.totalWeeks,
+                        semester: summary.semesterCode ?? 'this semester',
+                      },
+                    )}
+            </div>
+
+            {/* List of missed weeks as chips */}
+            {hasOverdue && missedWeeks.length > 0 && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
+                {missedWeeks.map((w) => (
+                  <div
+                    key={w.weekNumber}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 6,
+                      padding: '5px 10px',
+                      borderRadius: cc.radiusFull,
+                      background: hexToRgba(cc.error, 0.1),
+                      border: `1px solid ${hexToRgba(cc.error, 0.3)}`,
+                      fontSize: 12,
+                      fontWeight: 600,
+                      color: cc.error,
+                    }}
+                  >
+                    <Clock size={12} />
+                    Week {w.weekNumber} ({w.daysLate ?? 0}d late)
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Progress strip showing all weeks */}
+            <div style={{ display: 'flex', gap: 3, marginBottom: 14 }}>
+              {summary.weeks.map((w) => (
+                <div
+                  key={w.weekNumber}
+                  title={`Week ${w.weekNumber} — ${w.status}${w.isOverdue ? ` (${w.daysLate}d late)` : ''}`}
+                  style={{
+                    flex: 1,
+                    height: 6,
+                    borderRadius: 3,
+                    background: getWeekColor(w, cc),
+                    minWidth: 0,
+                  }}
+                />
+              ))}
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+              <span style={{ fontSize: 12, color: cc.textMuted }}>
+                {t('progressText', 'Week {{current}} of {{total}} · Submitted {{submitted}}', {
+                  current: summary.currentWeek,
+                  total: summary.totalWeeks,
+                  submitted: summary.submittedCount,
+                })}
+              </span>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <CTAButton variant="ghost" size="sm" icon={false} onClick={() => onNavigate('reports')}>
+                  {t('viewReports', 'View Reports')}
+                </CTAButton>
+                {hasOverdue || hasPendingThisWeek ? (
+                  <CTAButton
+                    variant={hasOverdue ? 'red' : 'amber'}
+                    size="sm"
+                    icon={false}
+                    onClick={() => onNavigate('reports')}
+                  >
+                    {hasOverdue ? t('submitMissingNow', 'Submit Missing Now') : t('submitThisWeek', 'Submit Week {{week}}', { week: summary.currentWeek })}
+                  </CTAButton>
+                ) : null}
+              </div>
+            </div>
+          </div>
+        </div>
+      </CardWrapper>
+    </motion.div>
+  );
+};
+
+function getWeekColor(w: WeeklyReportStatusWeek, cc: any): string {
+  if (w.status === 'APPROVED') return cc.success;
+  if (w.status === 'SUBMITTED') return cc.info;
+  if (w.status === 'REJECTED') return cc.warning;
+  if (w.status === 'MISSED' || w.isOverdue) return cc.error;
+  // NOT_SUBMITTED
+  return cc.border;
+}
+
+// ============================================================
 // SECTION: RECENT ACTIVITY
 // ============================================================
 const RecentActivityCard: React.FC<{ onNavigate: (route: string) => void, activities: any[] }> = ({ onNavigate, activities }) => {
@@ -747,6 +941,7 @@ export const StudentDashboardTab: React.FC<DashboardTabProps> = ({ currentSemest
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [ojtStatus, setOjtStatus] = useState<OjtStatusResponse | null>(null);
+  const [weeklyReportStatus, setWeeklyReportStatus] = useState<WeeklyReportStatusSummary | null>(null);
   const [stats, setStats] = useState<StudentDashboardStats>({
     applications: 0,
     interviews: 0,
@@ -781,15 +976,19 @@ export const StudentDashboardTab: React.FC<DashboardTabProps> = ({ currentSemest
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const [statsData, ojtStatusData] = await Promise.allSettled([
+        const [statsData, ojtStatusData, weeklyStatusData] = await Promise.allSettled([
           StudentDashboardService.getStats(),
           OjtStatusService.getMyOjtStatus(),
+          WeeklyReportService.getMyStatusSummary(),
         ]);
         if (statsData.status === 'fulfilled') {
           setStats(statsData.value);
         }
         if (ojtStatusData.status === 'fulfilled') {
           setOjtStatus(ojtStatusData.value);
+        }
+        if (weeklyStatusData.status === 'fulfilled') {
+          setWeeklyReportStatus(weeklyStatusData.value);
         }
       } catch (e) {
         console.error(e);
@@ -849,6 +1048,11 @@ export const StudentDashboardTab: React.FC<DashboardTabProps> = ({ currentSemest
                     contactName={ojtStatus.contactSupportName}
                     daysUntilDeadline={ojtStatus.daysUntilDeadline}
                   />
+                )}
+
+                {/* Weekly Report Warning — show whenever SV có assignment ACTIVE */}
+                {weeklyReportStatus && weeklyReportStatus.totalWeeks > 0 && (
+                  <WeeklyReportWarningWidget summary={weeklyReportStatus} onNavigate={handleNavigate} />
                 )}
               </div>
 

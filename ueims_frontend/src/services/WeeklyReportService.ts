@@ -2,6 +2,27 @@ import { api } from './api';
 
 const API_URL = '/weekly-reports';
 
+export interface WeeklyReportStatusWeek {
+  weekNumber: number;
+  status: 'NOT_SUBMITTED' | 'SUBMITTED' | 'APPROVED' | 'REJECTED' | 'MISSED';
+  deadline: string;          // YYYY-MM-DD
+  isOverdue: boolean;
+  isPast: boolean;
+  daysLate: number | null;
+  reportId: string | null;
+}
+
+export interface WeeklyReportStatusSummary {
+  semesterCode: string | null;
+  totalWeeks: number;
+  currentWeek: number;
+  submittedCount: number;
+  approvedCount: number;
+  overdueCount: number;
+  pendingThisWeek: number;
+  weeks: WeeklyReportStatusWeek[];
+}
+
 export const WeeklyReportService = {
   getAll: () => api.get(API_URL),
   getAllReports: async () => {
@@ -11,6 +32,13 @@ export const WeeklyReportService = {
   getById: (id: string) => api.get(`${API_URL}/${id}`),
   getMyReports: async () => {
     const response = await api.get('/weekly-reports/my-reports');
+    return response.data.result || response.data;
+  },
+  /**
+   * Lấy tổng hợp trạng thái weekly report của SV hiện tại để cảnh báo trên dashboard.
+   */
+  getMyStatusSummary: async (): Promise<WeeklyReportStatusSummary> => {
+    const response = await api.get('/weekly-reports/my-status-summary');
     return response.data.result || response.data;
   },
   getReportById: async (id: string) => {
@@ -39,6 +67,14 @@ export const WeeklyReportService = {
   rejectReport: async (id: string, feedback: string) => {
     const response = await api.put(`/weekly-reports/${id}/reject`, { feedback });
     return response.data.result || response.data;
-  }
+  },
+  /**
+   * FIX 006-C: TM override for late submission (BR-56).
+   * Marks the report as accepted despite being past the deadline.
+   */
+  overrideLateSubmission: async (id: string, reason: string) => {
+    const response = await api.post(`/weekly-reports/${id}/override-late`, { reason });
+    return response.data.result || response.data;
+  },
 };
 
