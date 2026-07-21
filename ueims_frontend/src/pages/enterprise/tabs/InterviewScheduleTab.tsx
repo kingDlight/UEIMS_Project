@@ -445,9 +445,8 @@ export const InterviewScheduleTab: React.FC = () => {
                 setBackdateOpen(true);
               }}
               className="border-amber-500 text-amber-600 hover:bg-amber-50"
-            >
-              Demo: Backdate
-            </Button>
+              title="Demo: Backdate"
+            />
           )}
           {DEMO_MODE && (
             triggerEnabled === false ? (
@@ -456,18 +455,16 @@ export const InterviewScheduleTab: React.FC = () => {
                 loading={togglingTrigger}
                 onClick={() => handleToggleTrigger("ENABLE")}
                 className="border-emerald-500 text-emerald-600 hover:bg-emerald-50"
-              >
-                Re-enable Trigger
-              </Button>
+                title="Re-enable Trigger"
+              />
             ) : (
               <Button
                 icon={<ThunderboltOutlined />}
                 loading={togglingTrigger}
                 onClick={() => handleToggleTrigger("DISABLE")}
                 className="border-rose-500 text-rose-600 hover:bg-rose-50"
-              >
-                Disable Trigger
-              </Button>
+                title="Disable Trigger"
+              />
             )
           )}
           <Button
