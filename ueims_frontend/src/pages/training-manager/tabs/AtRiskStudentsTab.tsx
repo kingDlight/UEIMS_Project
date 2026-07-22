@@ -212,6 +212,8 @@ export const AtRiskStudentsTab: React.FC = () => {
       dataIndex: 'priorityScore',
       key: 'priorityScore',
       width: 140,
+      sorter: (a: AtRiskStudent, b: AtRiskStudent) => (a.priorityScore || 0) - (b.priorityScore || 0),
+      defaultSortOrder: 'descend' as const,
       render: (score: number) => <PriorityBar score={score} />,
     },
     {
@@ -244,8 +246,9 @@ export const AtRiskStudentsTab: React.FC = () => {
       title: 'DAYS AT RISK',
       dataIndex: 'daysAtRisk',
       key: 'daysAtRisk',
-      width: 100,
+      width: 110,
       align: 'center' as const,
+      sorter: (a: AtRiskStudent, b: AtRiskStudent) => (a.daysAtRisk || 0) - (b.daysAtRisk || 0),
       render: (days: number) => (
         <span style={{
           fontSize: 13, fontWeight: 700,
