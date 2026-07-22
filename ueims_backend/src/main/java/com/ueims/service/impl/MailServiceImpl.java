@@ -338,6 +338,17 @@ public class MailServiceImpl implements MailService {
             helper.setSubject(subject);
             helper.setText(htmlBody, true);
 
+            // Headers giúp Gmail/Spam filter đẩy vào Inbox thay vì Spam:
+            // - List-Unsubscribe: tuân thủ RFC 8058
+            // - X-Mailer: nhận diện là transactional mail
+            // - Precedence: bulk
+            // - Priority: normal (không urgent = giảm spam score)
+            message.setHeader("List-Unsubscribe", "<mailto:" + to + "?subject=unsubscribe>");
+            message.setHeader("X-Mailer", "UEIMS Mailer 1.0");
+            message.setHeader("Precedence", "bulk");
+            message.setHeader("Priority", "normal");
+            message.setHeader("X-Priority", "3 (Normal)");
+
             ClassPathResource logoFile = new ClassPathResource("logo_ueims.png");
             helper.addInline("logoImage", logoFile);
 
