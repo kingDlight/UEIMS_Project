@@ -58,7 +58,10 @@ public class JobPostServiceImpl implements JobPostService {
     @Override
     @Transactional(readOnly = true)
     public List<JobPost> findActive() {
-        List<JobPost> activeJobs = repository.findByStatusAndSemester_StatusAndDeletedAtIsNull("OPEN", "ACTIVE");
+        // BR-30 + deadline filter: students only see OPEN posts whose deadline is
+        // still in the future. Expired posts are intentionally hidden so the student
+        // job board doesn't accumulate stale listings from past semesters.
+        List<JobPost> activeJobs = repository.findActiveForStudents(LocalDate.now());
 
         try {
             User currentUser = getCurrentUser();
