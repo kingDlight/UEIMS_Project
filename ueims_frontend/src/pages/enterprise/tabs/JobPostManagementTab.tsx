@@ -175,13 +175,20 @@ export const JobPostManagementTab: React.FC = () => {
 
   const openEdit = (post: JobPost) => {
     setEditingPost(post);
+    // BR-49: when editing, surface the *current* applied count so the form
+    // starts from a sensible value and the floor (min) prevents the enterprise
+    // from reducing positions below the number of students who already hold a
+    // slot. Without this floor, "17 applied / 20 quota" → edit to 10 would make
+    // 7 students orphan their application and break the "applied ≤ positions"
+    // invariant on every subsequent list call.
+    const taken = post.currentApplicationCount ?? 0;
     form.setFieldsValue({
       title: post.title,
       description: post.description,
       requirements: post.requirements,
       benefits: post.benefits,
       requiredSkills: post.requiredSkills,
-      positionsCount: post.positionsCount,
+      positionsCount: Math.max(post.positionsCount, taken),
       applicationDeadline: dayjs(post.applicationDeadline),
       semesterId: post.semester?.semesterId,
     });
@@ -400,12 +407,8 @@ export const JobPostManagementTab: React.FC = () => {
                       <div className="flex items-center gap-2 text-xs text-slate-600">
                         <TeamOutlined className="text-[#E67E22]" />
                         <span>
-                          <strong>
-                            {post.currentApplicationCount != null
-                              ? `${post.currentApplicationCount}/${post.positionsCount}`
-                              : `${post.positionsCount}`}
-                          </strong>{' '}
-                          position{post.positionsCount > 1 ? 's' : ''} filled
+                          <strong>{post.currentApplicationCount ?? 0}</strong> / {post.positionsCount}{' '}
+                          applied
                         </span>
                       </div>
                       {post.semester && (
@@ -511,8 +514,17 @@ export const JobPostManagementTab: React.FC = () => {
               </Select>
             </Form.Item>
             <Form.Item name="positionsCount" label="Positions" rules={[{ required: true, message: 'Number of positions is required' }]}>
-              <InputNumber min={1} max={100} className="w-full" />
+              <InputNumber
+                min={editingPost ? Math.max(1, editingPost.currentApplicationCount ?? 0) : 1}
+                max={1000}
+                className="w-full"
+              />
             </Form.Item>
+            {editingPost && (editingPost.currentApplicationCount ?? 0) > 0 && (
+              <div className="-mt-4 mb-4 text-xs text-slate-500">
+                {editingPost.currentApplicationCount} student{editingPost.currentApplicationCount! > 1 ? 's have' : ' has'} already applied. Positions cannot be reduced below that count.
+              </div>
+            )}
             <div className="col-span-full">
               <Form.Item name="applicationDeadline" label="Application Deadline" rules={[{ required: true, message: 'Deadline is required' }]}>
                 <DatePicker
