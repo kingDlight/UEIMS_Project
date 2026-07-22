@@ -52,10 +52,14 @@ public class JobPostPositionsMigration implements CommandLineRunner {
             // Constraint name auto-generated as job_posts_max_positions_check.
             jdbc.execute("ALTER TABLE job_posts " + "DROP CONSTRAINT IF EXISTS job_posts_max_positions_check");
 
+            // FIX 049 status filter must match the actual enum values, otherwise
+            // the count is off and backfilled max_positions drifts from the
+            // service-layer truth (which uses ApplicationStatus.REJECTED,
+            // SCREENING_REJECTED, WITHDRAWN).
             jdbc.update("UPDATE job_posts jp SET max_positions = GREATEST(0, jp.max_positions - "
                     + "COALESCE((SELECT COUNT(*) FROM applications a "
                     + "WHERE a.job_post_id = jp.job_post_id "
-                    + "AND a.status NOT IN ('WITHDRAWN','REJECTED_BY_STUDENT','WITHDRAWN_BY_SYSTEM') "
+                    + "AND a.status NOT IN ('REJECTED','SCREENING_REJECTED','WITHDRAWN') "
                     + "AND a.deleted_at IS NULL), 0))");
 
             jdbc.execute("CREATE OR REPLACE FUNCTION jobpost_apply_decrement() "
