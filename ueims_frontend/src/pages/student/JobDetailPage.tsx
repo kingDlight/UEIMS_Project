@@ -10,7 +10,6 @@ import {
   ClockCircleOutlined,
   WarningOutlined,
   SendOutlined,
-  CloseCircleOutlined,
   BankOutlined,
   ContactsOutlined,
   MailOutlined,
@@ -254,16 +253,6 @@ export const JobDetailPage: React.FC = () => {
             <SmallBadge label={job.status === 'OPEN' ? t('open', 'Open') : t('closed', 'Closed')} variant={job.status === 'OPEN' ? 'success' : 'neutral'} />
           </div>
 
-          {/* Expired banner */}
-          {isExpired(job.applicationDeadline) && (
-            <div style={{ padding: 14, borderRadius: cc.radiusMd, background: cc.dangerMuted, marginBottom: 18, display: 'flex', alignItems: 'center', gap: 10 }}>
-              <CloseCircleOutlined style={{ fontSize: 16, color: cc.danger }} />
-              <span style={{ fontSize: 13, color: cc.dangerText, fontWeight: 600 }}>
-                {t('deadlineExpiredNotice', 'The application deadline for this job has passed. New applications are no longer accepted.')}
-              </span>
-            </div>
-          )}
-
           {/* Chips */}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
             {enterprise?.address && (
@@ -401,7 +390,7 @@ export const JobDetailPage: React.FC = () => {
           fullWidth
           icon={applied || appliedJobIds.has(job.jobPostId) ? null : <SendOutlined />}
           onClick={getApplyButtonAction}
-          disabled={getApplyButtonState() === 'applied'}
+          disabled={getApplyButtonState() === 'applied' || getApplyButtonState() === 'expired'}
           loading={applying}
         >
           {getApplyButtonLabel()}
