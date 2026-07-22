@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Table, App, Button, Segmented, Input, Select } from 'antd';
+import { Table, App, Button, Segmented, Input, Select, Modal } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { Download, AlertTriangle, RefreshCw, Mail, UserCheck, Mail as MailIcon, Info } from 'lucide-react';
+import { Download, AlertTriangle, RefreshCw, Mail, UserCheck, Mail as MailIcon, Eye, X, Calendar, Briefcase, AlertCircle } from 'lucide-react';
 import { AtRiskStudentService } from '@/services/AtRiskStudentService';
 import { SemesterService } from '@/services/SemesterService';
 import type { AtRiskStudent } from '../types';
@@ -54,6 +54,7 @@ export const AtRiskStudentsTab: React.FC = () => {
   const [activeSemesterId, setActiveSemesterId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>('ALL');
   const [searchKeyword, setSearchKeyword] = useState('');
+  const [detailRecord, setDetailRecord] = useState<AtRiskStudent | null>(null);
 
   const fetchData = useCallback(async () => {
     if (!activeSemesterId) return;
@@ -160,8 +161,20 @@ export const AtRiskStudentsTab: React.FC = () => {
       title: 'FULL NAME',
       dataIndex: 'studentName',
       key: 'studentName',
-      render: (name: string) => (
-        <span style={{ fontSize: 13.5, fontWeight: 600, color: st.textPrimary }}>{name || '—'}</span>
+      render: (name: string, record: AtRiskStudent) => (
+        <button
+          onClick={() => setDetailRecord(record)}
+          style={{
+            background: 'none', border: 'none', padding: 0, cursor: 'pointer',
+            fontSize: 13.5, fontWeight: 600, color: st.textPrimary,
+            fontFamily: 'Inter, sans-serif',
+            display: 'inline-flex', alignItems: 'center', gap: 4,
+          }}
+          title="Click to view risk details"
+        >
+          {name || '—'}
+          <Eye size={12} color={st.textMuted} strokeWidth={2} />
+        </button>
       ),
     },
     {
@@ -193,17 +206,6 @@ export const AtRiskStudentsTab: React.FC = () => {
           </span>
         );
       },
-    },
-    {
-      title: 'RISK REASON',
-      dataIndex: 'riskReason',
-      key: 'riskReason',
-      width: 280,
-      render: (reason: string) => (
-        <span style={{ fontSize: 12.5, color: st.textSecondary, lineHeight: 1.4 }} title={reason}>
-          {reason ? (reason.length > 60 ? reason.slice(0, 60) + '…' : reason) : '—'}
-        </span>
-      ),
     },
     {
       title: 'PRIORITY',
@@ -256,20 +258,11 @@ export const AtRiskStudentsTab: React.FC = () => {
     {
       title: 'ACTIONS',
       key: 'actions',
-      width: 180,
+      width: 100,
       fixed: 'right' as const,
+      align: 'center' as const,
       render: (_: unknown, record: AtRiskStudent) => (
-        <div style={{ display: 'flex', gap: 6 }}>
-          {record.riskCategory === 'UNPLACED' && (
-            <Button
-              size="small"
-              icon={<UserCheck size={12} />}
-              style={{ borderRadius: st.radiusMd, fontWeight: 600, fontSize: 11 }}
-              onClick={() => message.info('Manual Match: coming soon')}
-            >
-              Match
-            </Button>
-          )}
+        <div style={{ display: 'flex', gap: 4, justifyContent: 'center' }}>
           <Button
             size="small"
             icon={<MailIcon size={12} />}
@@ -280,14 +273,6 @@ export const AtRiskStudentsTab: React.FC = () => {
             }}
           >
             Email
-          </Button>
-          <Button
-            size="small"
-            icon={<Info size={12} />}
-            style={{ borderRadius: st.radiusMd, fontWeight: 600, fontSize: 11 }}
-            onClick={() => message.info(`Detail: ${record.riskReason}`)}
-          >
-            Detail
           </Button>
         </div>
       ),
@@ -390,7 +375,7 @@ export const AtRiskStudentsTab: React.FC = () => {
           dataSource={filteredStudents}
           loading={loading}
           pagination={{ pageSize: 15, showSizeChanger: true }}
-          scroll={{ x: 1100 }}
+          scroll={{ x: 900 }}
           locale={{
             emptyText: (
               <div style={{ textAlign: 'center', padding: '48px 24px', color: st.textMuted }}>
@@ -404,6 +389,163 @@ export const AtRiskStudentsTab: React.FC = () => {
           }}
         />
       </div>
+
+      {/* Risk Details Modal */}
+      <Modal
+        open={!!detailRecord}
+        onCancel={() => setDetailRecord(null)}
+        footer={null}
+        width={560}
+        centered
+        closeIcon={<X size={18} strokeWidth={2} />}
+        title={
+          detailRecord ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{
+                width: 36, height: 36, borderRadius: 10,
+                background: st.errorMuted,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <AlertCircle size={20} color={st.error} strokeWidth={2.2} />
+              </div>
+              <div>
+                <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 15, fontWeight: 700, color: st.textPrimary, lineHeight: 1.2 }}>
+                  Risk Details
+                </div>
+                <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 11.5, color: st.textMuted, marginTop: 2 }}>
+                  {detailRecord.studentName} · {detailRecord.studentCode}
+                </div>
+              </div>
+            </div>
+          ) : null
+        }
+      >
+        {detailRecord && (
+          <div style={{ fontFamily: 'Inter, sans-serif', paddingTop: 8 }}>
+            {/* Risk Category + Priority */}
+            <div style={{ display: 'flex', gap: 10, marginBottom: 18 }}>
+              {(() => {
+                const cat = detailRecord.riskCategory || '';
+                const style = RISK_CATEGORY_COLORS[cat] || { bg: st.neutralBg, text: st.textMuted, border: st.border };
+                return (
+                  <span style={{
+                    fontSize: 11, fontWeight: 700, letterSpacing: '0.04em',
+                    color: style.text, background: style.bg,
+                    border: `1px solid ${style.border}`,
+                    padding: '4px 10px', borderRadius: 999,
+                  }}>
+                    {RISK_CATEGORY_LABELS[cat] || cat || 'UNKNOWN'}
+                  </span>
+                );
+              })()}
+              <span style={{
+                fontSize: 11, fontWeight: 700,
+                color: (detailRecord.priorityScore || 0) >= 80 ? st.error :
+                       (detailRecord.priorityScore || 0) >= 50 ? st.warning : st.success,
+                background: (detailRecord.priorityScore || 0) >= 80 ? st.errorMuted :
+                            (detailRecord.priorityScore || 0) >= 50 ? st.warningMuted : st.successMuted,
+                border: '1px solid transparent',
+                padding: '4px 10px', borderRadius: 999,
+              }}>
+                Priority {detailRecord.priorityScore || 0}
+              </span>
+              <span style={{
+                fontSize: 11, fontWeight: 700,
+                color: (detailRecord.daysAtRisk || 0) >= 14 ? st.error :
+                       (detailRecord.daysAtRisk || 0) >= 7 ? st.warning : st.textPrimary,
+                background: st.neutralBg,
+                padding: '4px 10px', borderRadius: 999,
+              }}>
+                {detailRecord.daysAtRisk || 0} days at risk
+              </span>
+            </div>
+
+            {/* Risk Reason (full text) */}
+            <div style={{
+              background: st.errorMuted,
+              border: `1px solid #FECACA`,
+              borderRadius: st.radiusLg,
+              padding: '14px 16px',
+              marginBottom: 18,
+            }}>
+              <div style={{ fontSize: 10.5, fontWeight: 700, color: st.error, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>
+                Risk Reason
+              </div>
+              <div style={{ fontSize: 13.5, color: st.textPrimary, lineHeight: 1.55 }}>
+                {detailRecord.riskReason || 'No reason provided.'}
+              </div>
+            </div>
+
+            {/* Stats Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 18 }}>
+              <div style={{
+                background: st.neutralBg, border: `1px solid ${st.border}`,
+                borderRadius: st.radiusMd, padding: '12px 14px',
+              }}>
+                <div style={{ fontSize: 11, color: st.textMuted, fontWeight: 600, marginBottom: 4 }}>Missed Reports</div>
+                <div style={{ fontSize: 22, fontWeight: 800, color: (detailRecord.missedReports || 0) > 0 ? st.error : st.textPrimary, lineHeight: 1 }}>
+                  {detailRecord.missedReports || 0}
+                </div>
+              </div>
+              <div style={{
+                background: st.neutralBg, border: `1px solid ${st.border}`,
+                borderRadius: st.radiusMd, padding: '12px 14px',
+              }}>
+                <div style={{ fontSize: 11, color: st.textMuted, fontWeight: 600, marginBottom: 4 }}>Rejected</div>
+                <div style={{ fontSize: 22, fontWeight: 800, color: (detailRecord.rejectedReports || 0) > 0 ? st.error : st.textPrimary, lineHeight: 1 }}>
+                  {detailRecord.rejectedReports || 0}
+                </div>
+              </div>
+              <div style={{
+                background: st.neutralBg, border: `1px solid ${st.border}`,
+                borderRadius: st.radiusMd, padding: '12px 14px',
+              }}>
+                <div style={{ fontSize: 11, color: st.textMuted, fontWeight: 600, marginBottom: 4 }}>Applications</div>
+                <div style={{ fontSize: 22, fontWeight: 800, color: st.textPrimary, lineHeight: 1 }}>
+                  {detailRecord.applicationCount || 0}
+                </div>
+              </div>
+            </div>
+
+            {/* Enterprise / Supervisor */}
+            <div style={{
+              background: st.neutralBg, border: `1px solid ${st.border}`,
+              borderRadius: st.radiusLg, padding: '14px 16px',
+              display: 'flex', flexDirection: 'column', gap: 10,
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Briefcase size={14} color={st.textMuted} strokeWidth={2} />
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 10.5, color: st.textMuted, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Enterprise</div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: st.textPrimary, marginTop: 2 }}>
+                    {detailRecord.companyName || '—'}
+                  </div>
+                </div>
+              </div>
+              {detailRecord.supervisorName && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingTop: 10, borderTop: `1px solid ${st.borderSubtle}` }}>
+                  <UserCheck size={14} color={st.textMuted} strokeWidth={2} />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 10.5, color: st.textMuted, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Supervisor</div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: st.textPrimary, marginTop: 2 }}>
+                      {detailRecord.supervisorName}
+                    </div>
+                  </div>
+                </div>
+              )}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingTop: 10, borderTop: `1px solid ${st.borderSubtle}` }}>
+                <Calendar size={14} color={st.textMuted} strokeWidth={2} />
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 10.5, color: st.textMuted, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Semester</div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: st.textPrimary, marginTop: 2 }}>
+                    {detailRecord.semesterCode}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };
