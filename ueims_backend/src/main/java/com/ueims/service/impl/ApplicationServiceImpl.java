@@ -197,7 +197,11 @@ public class ApplicationServiceImpl implements ApplicationService {
             if (max != expected) {
                 log.warn(
                         "[FIX 049] DRIFT on job_post {}: positionsCount={}, original={}, taken={}, expected={}. Repairing.",
-                        jobPost.getJobPostId(), max, original, taken, expected);
+                        jobPost.getJobPostId(),
+                        max,
+                        original,
+                        taken,
+                        expected);
                 jobPost.setPositionsCount(expected);
                 jobPostRepository.save(jobPost);
                 max = expected;
@@ -206,7 +210,10 @@ public class ApplicationServiceImpl implements ApplicationService {
         if (max <= 0) {
             log.info(
                     "[FIX 049] BLOCK apply on job_post {}: open positions={} (status={}, deadline={}, original={}).",
-                    jobPost.getJobPostId(), max, jobPost.getStatus(), jobPost.getApplicationDeadline(),
+                    jobPost.getJobPostId(),
+                    max,
+                    jobPost.getStatus(),
+                    jobPost.getApplicationDeadline(),
                     jobPost.getOriginalMaxPositions());
             throw new AppException(ErrorCode.JOB_POST_FULL);
         }

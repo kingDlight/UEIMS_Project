@@ -42,7 +42,9 @@ public class JobPostServiceImpl implements JobPostService {
     @Override
     @Transactional(readOnly = true)
     public List<JobPost> findAll() {
-        return repository.findAllByDeletedAtIsNull();
+        List<JobPost> posts = repository.findAllByDeletedAtIsNull();
+        populateFillState(posts);
+        return posts;
     }
 
     @Override
@@ -78,6 +80,12 @@ public class JobPostServiceImpl implements JobPostService {
         activeJobs = activeJobs.stream()
                 .filter(p -> p.getPositionsCount() != null && p.getPositionsCount() > 0)
                 .toList();
+
+        // FIX 049: populate `currentApplicationCount` so the FE can render
+        // "N positions open (M applied)". Without this call the student board
+        // shows `(0 applied)` even on posts that already have applications
+        // because the field is `@Transient` and not auto-computed.
+        populateFillState(activeJobs);
 
         try {
             User currentUser = getCurrentUser();
