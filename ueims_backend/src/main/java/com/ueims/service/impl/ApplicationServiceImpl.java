@@ -165,19 +165,49 @@ public class ApplicationServiceImpl implements ApplicationService {
         if (jobPost.getApplicationDeadline() != null && LocalDate.now().isAfter(jobPost.getApplicationDeadline())) {
             throw new AppException(ErrorCode.APPLICATION_DEADLINE_EXPIRED);
         }
-        // BR-49: a seat is reserved the moment a student applies (no CV screening
-        // required), so block further applications the second the post hits its cap.
-        // FIX 049: `positionsCount` is the runtime open-positions count auto-
+        // FIX 049: `positionsCount` is the runtime OPEN-positions count, auto-
         // maintained by triggers (= original - taken). When it reaches 0 the
-        // post is full — block any further application. We do an authoritative
-        // re-count rather than trusting the value blindly, so concurrent apply
-        // calls can't overshoot even if the trigger lags.
+        // post is full — block any further application.
+        //
+        // We deliberately do NOT do a second `taken >= max` check here. That
+        // check made sense under the old "max = total historical quota"
+        // semantic, but under the new semantic it double-counts: max already
+        // equals (original - taken), so the value we read IS the answer. A
+        // second check would always trip the moment any student has applied.
+        //
+        // Example of the bug we removed:
+        //   original=20, taken=18  →  trigger set max=2
+        //   validateJobPost reads max=2, taken=18  →  18 >= 2  →  REJECT
+        //   but max=2 means "2 slots open", apply should be ALLOWED.
+        //
+        // The authoritative race-safe guard is the `max <= 0` check + the
+        // trigger that decrements atomically. Concurrent apply calls can race
+        // past the read but the trigger still enforces `max >= 0`, and we
+        // get an under-count / 0-cap, never an over-application.
         int max = jobPost.getPositionsCount() == null ? 0 : jobPost.getPositionsCount();
-        if (max <= 0) {
-            throw new AppException(ErrorCode.JOB_POST_FULL);
+        // FIX 049 self-heal: defensive guard against DB drift (e.g. trigger
+        // missing after a fresh seed, or `original_max_positions` not yet
+        // backfilled). If max is negative or wildly out-of-sync with
+        // (original - taken), trust the source-of-truth recompute and write
+        // it back so subsequent calls see a consistent value.
+        if (jobPost.getOriginalMaxPositions() != null) {
+            long taken = repository.countActiveApplicationsForJob(jobPost.getJobPostId());
+            int original = jobPost.getOriginalMaxPositions();
+            int expected = Math.max(0, original - (int) Math.min(taken, original));
+            if (max != expected) {
+                log.warn(
+                        "[FIX 049] DRIFT on job_post {}: positionsCount={}, original={}, taken={}, expected={}. Repairing.",
+                        jobPost.getJobPostId(), max, original, taken, expected);
+                jobPost.setPositionsCount(expected);
+                jobPostRepository.save(jobPost);
+                max = expected;
+            }
         }
-        long taken = repository.countActiveApplicationsForJob(jobPost.getJobPostId());
-        if (taken >= max) {
+        if (max <= 0) {
+            log.info(
+                    "[FIX 049] BLOCK apply on job_post {}: open positions={} (status={}, deadline={}, original={}).",
+                    jobPost.getJobPostId(), max, jobPost.getStatus(), jobPost.getApplicationDeadline(),
+                    jobPost.getOriginalMaxPositions());
             throw new AppException(ErrorCode.JOB_POST_FULL);
         }
     }
