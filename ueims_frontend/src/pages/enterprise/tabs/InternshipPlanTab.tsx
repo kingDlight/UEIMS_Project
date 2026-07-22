@@ -182,6 +182,16 @@ export const InternshipPlanTab: React.FC = () => {
         return;
       }
     }
+    // Revising after a TM reject: the enterprise must tell TM what changed.
+    // Without a note the resubmission becomes opaque and the audit trail
+    // loses the reason for each revision cycle.
+    if (plan.status === 'REJECTED') {
+      const note = (plan.revisionNote ?? '').trim();
+      if (note.length < 5) {
+        message.warning('Please write a revision note (at least 5 characters) telling TM what you changed.');
+        return;
+      }
+    }
     setSaving(true);
     try {
       const planPayload: any = {
@@ -344,6 +354,16 @@ export const InternshipPlanTab: React.FC = () => {
                 }
                 className="mb-4"
                 required
+                rules={[
+                  {
+                    required: true,
+                    message: 'Please tell TM what you changed in this revision.',
+                  },
+                  {
+                    min: 5,
+                    message: 'Revision note must be at least 5 characters.',
+                  },
+                ]}
               >
                 <TextArea
                   value={plan.revisionNote ?? ''}

@@ -198,6 +198,44 @@ export const InternshipPlanApprovalsTab: React.FC = () => {
                 <div className="text-base text-slate-800">{viewingPlan.semesterCode || '—'}</div>
               </div>
             </div>
+            <div className="mb-4 grid grid-cols-2 gap-4">
+              <div>
+                <div className="text-xs text-slate-500 font-bold uppercase">Revision Count</div>
+                <div className="text-sm text-slate-700">
+                  {viewingPlan.revisionCount ?? 0}
+                </div>
+              </div>
+              <div>
+                <div className="text-xs text-slate-500 font-bold uppercase">Status</div>
+                <div className="text-sm text-slate-700">{viewingPlan.status?.replace('_', ' ')}</div>
+              </div>
+            </div>
+
+            {/* FIX: TM previously could not see WHY the previous resubmission
+                happened. Show the enterprise's revision note (what they
+                changed) when present, plus the TM's own rejection reason
+                if this plan went through a reject cycle. */}
+            {viewingPlan.revisionNote && (
+              <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                <div className="text-xs text-amber-700 font-bold uppercase mb-1">
+                  Enterprise Revision Note
+                </div>
+                <div className="text-sm text-slate-700 whitespace-pre-wrap">
+                  {viewingPlan.revisionNote}
+                </div>
+              </div>
+            )}
+            {viewingPlan.rejectionReason && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                <div className="text-xs text-red-700 font-bold uppercase mb-1">
+                  Previous Rejection Reason (by TM)
+                </div>
+                <div className="text-sm text-slate-700 whitespace-pre-wrap">
+                  {viewingPlan.rejectionReason}
+                </div>
+              </div>
+            )}
+
             <div className="mb-6 p-4 bg-slate-50 rounded-lg border border-slate-200">
               <div className="text-xs text-slate-500 font-bold uppercase mb-1">Overall Goal</div>
               <div className="text-sm text-slate-700 whitespace-pre-wrap">

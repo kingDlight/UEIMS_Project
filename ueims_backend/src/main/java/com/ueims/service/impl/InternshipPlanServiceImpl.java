@@ -254,6 +254,19 @@ public class InternshipPlanServiceImpl implements InternshipPlanService {
         if (goal.isEmpty()) {
             throw new AppException(ErrorCode.FIELD_REQUIRED, "Overall goal is required");
         }
+        // FIX: when revising after a TM reject the enterprise must explain what
+        // changed and why — without this TM is forced to guess and the audit
+        // log loses the context behind each resubmission. First-time submissions
+        // don't require a note (nothing has been changed).
+        Optional<InternshipPlan> existingForNote =
+                repository.findByEnterprise_EnterpriseIdAndSemester_SemesterId(enterpriseId, semester.getSemesterId());
+        boolean isResubmit = existingForNote.isPresent()
+                && "REJECTED".equals(existingForNote.get().getStatus());
+        String revisionNote = dto.getRevisionNote() == null ? "" : dto.getRevisionNote().trim();
+        if (isResubmit && revisionNote.isEmpty()) {
+            throw new AppException(
+                    ErrorCode.FIELD_REQUIRED, "Revision note is required when resubmitting after a rejection");
+        }
 
         // Validate semester
         Semester semester = semesterRepository
