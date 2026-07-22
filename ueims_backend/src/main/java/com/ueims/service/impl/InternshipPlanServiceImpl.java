@@ -30,6 +30,7 @@ import com.ueims.repository.SemesterRepository;
 import com.ueims.repository.UserRepository;
 import com.ueims.service.InternshipPlanService;
 import com.ueims.service.NotificationService;
+import com.ueims.service.UserService;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -50,6 +51,7 @@ public class InternshipPlanServiceImpl implements InternshipPlanService {
     JobPostRepository jobPostRepository;
     UserRepository userRepository;
     NotificationService notificationService;
+    UserService userService;
 
     @Override
     public List<InternshipPlan> findAll() {
@@ -314,10 +316,14 @@ public class InternshipPlanServiceImpl implements InternshipPlanService {
             action = "SUBMITTED";
         }
 
-        // Ghi audit log
+        // Ghi audit log — actor_id must reference users.user_id, not the
+        // enterprise_id. Previously this passed `enterpriseId` which violated
+        // FK `internship_plan_revisions_actor_id_fkey` because enterprise IDs
+        // are a separate namespace and not present in the users table.
+        UUID actorUserId = userService.getCurrentUserId();
         logRevision(
                 saved.getPlanId(),
-                enterpriseId,
+                actorUserId,
                 "ENTERPRISE",
                 action,
                 dto.getRevisionNote(),
