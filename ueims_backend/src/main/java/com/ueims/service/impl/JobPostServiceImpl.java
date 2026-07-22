@@ -170,20 +170,24 @@ public class JobPostServiceImpl implements JobPostService {
 
         long taken = applicationRepository.countActiveApplicationsForJob(id);
 
-        // FIX 049: `positionsCount` is the runtime open-positions count, auto-
-        // maintained by triggers (`= original - taken`). When the enterprise
-        // edits, they specify the desired open count; we set `original` so the
-        // trigger-derived runtime equals what they asked for. We also refuse
-        // edits that would push open below the number of students who hold a
-        // slot — otherwise we'd orphan live applications.
+        // FIX 049: `positionsCount` is the desired OPEN slots after this edit
+        // (how many MORE students the enterprise wants to accept, not the
+        // total historical quota). The service computes
+        //   `original = new + taken`
+        // so the trigger-maintained runtime equals what the enterprise asked.
+        //
+        // Negative values are nonsense → reject. Zero is valid ("no more
+        // applications, I've reached my desired cap of taken"). We do NOT
+        // reject when the new open is below `taken` because that would force
+        // the enterprise to type a "total" instead of "open" — exactly the
+        // UX confusion this commit removes. Live applications are NEVER
+        // affected: they remain valid regardless of what open count is set
+        // because trigger maintains `original >= taken`.
         if (request.getPositionsCount() != null) {
-            if (request.getPositionsCount() < taken) {
-                throw new AppException(ErrorCode.JOB_POST_REDUCE_BELOW_FILLED);
+            if (request.getPositionsCount() < 0) {
+                throw new AppException(ErrorCode.INVALID_PARAMETER_FORMAT);
             }
-            int desiredOriginal = (int) Math.min(
-                Integer.MAX_VALUE,
-                (long) request.getPositionsCount() + taken
-            );
+            int desiredOriginal = (int) Math.min(Integer.MAX_VALUE, (long) request.getPositionsCount() + taken);
             existing.setOriginalMaxPositions(desiredOriginal);
             existing.setPositionsCount((int) (desiredOriginal - taken));
         }

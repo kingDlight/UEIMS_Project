@@ -38,26 +38,21 @@ public class JobPostPositionsMigration implements CommandLineRunner {
         try {
             log.info("[FIX 049] Applying job_posts.max_positions semantics migration...");
 
-            jdbc.execute("ALTER TABLE job_posts "
-                    + "ADD COLUMN IF NOT EXISTS original_max_positions INT");
+            jdbc.execute("ALTER TABLE job_posts " + "ADD COLUMN IF NOT EXISTS original_max_positions INT");
 
             Integer nullCount = jdbc.queryForObject(
-                    "SELECT COUNT(*) FROM job_posts WHERE original_max_positions IS NULL",
-                    Integer.class);
+                    "SELECT COUNT(*) FROM job_posts WHERE original_max_positions IS NULL", Integer.class);
             if (nullCount != null && nullCount > 0) {
                 jdbc.update("UPDATE job_posts SET original_max_positions = max_positions "
                         + "WHERE original_max_positions IS NULL");
             }
-            jdbc.execute("ALTER TABLE job_posts "
-                    + "ALTER COLUMN original_max_positions SET NOT NULL");
+            jdbc.execute("ALTER TABLE job_posts " + "ALTER COLUMN original_max_positions SET NOT NULL");
 
             // Drop legacy >0 check so runtime count can drop to 0 (full).
             // Constraint name auto-generated as job_posts_max_positions_check.
-            jdbc.execute("ALTER TABLE job_posts "
-                    + "DROP CONSTRAINT IF EXISTS job_posts_max_positions_check");
+            jdbc.execute("ALTER TABLE job_posts " + "DROP CONSTRAINT IF EXISTS job_posts_max_positions_check");
 
-            jdbc.update(
-                    "UPDATE job_posts jp SET max_positions = GREATEST(0, jp.max_positions - "
+            jdbc.update("UPDATE job_posts jp SET max_positions = GREATEST(0, jp.max_positions - "
                     + "COALESCE((SELECT COUNT(*) FROM applications a "
                     + "WHERE a.job_post_id = jp.job_post_id "
                     + "AND a.status NOT IN ('WITHDRAWN','REJECTED_BY_STUDENT','WITHDRAWN_BY_SYSTEM') "
@@ -109,8 +104,7 @@ public class JobPostPositionsMigration implements CommandLineRunner {
 
             log.info("[FIX 049] job_posts.max_positions migration applied successfully.");
         } catch (Exception e) {
-            log.warn("[FIX 049] migration skipped or failed (likely already applied): {}",
-                    e.getMessage());
+            log.warn("[FIX 049] migration skipped or failed (likely already applied): {}", e.getMessage());
         }
     }
 }

@@ -518,23 +518,40 @@ export const JobPostManagementTab: React.FC = () => {
                 ))}
               </Select>
             </Form.Item>
-            <Form.Item name="positionsCount" label="Open positions" rules={[{ required: true, message: 'Number of positions is required' }]}>
+            <Form.Item
+              name="positionsCount"
+              label="Open positions"
+              rules={[{ required: true, message: 'Number of open positions is required' }]}
+              extra={
+                <span className="text-xs">
+                  {(() => {
+                    if (editingPost) {
+                      const applied = editingPost.currentApplicationCount ?? 0;
+                      const currentOpen = editingPost.positionsCount ?? 0;
+                      const total = applied + currentOpen;
+                      return (
+                        <>
+                          Currently <strong>{applied}</strong> student{applied !== 1 ? 's have' : ' has'} applied
+                          out of <strong>{total}</strong> total quota ({currentOpen} open).{' '}
+                          Type a number to set <strong>how many MORE students</strong> you want
+                          to accept — <strong>0</strong> closes new applications but keeps existing ones.
+                        </>
+                      );
+                    }
+                    return 'How many students you want to accept in total. You can change this anytime — increase or decrease the cap as long as you don\'t go below existing applicants.';
+                  })()}
+                </span>
+              }
+            >
               <InputNumber
                 min={0}
                 max={1000}
                 className="w-full"
+                addonAfter={
+                  <span className="text-slate-500 text-xs">slots open</span>
+                }
               />
             </Form.Item>
-            {editingPost && (
-              <div className="-mt-4 mb-4 text-xs text-slate-500">
-                How many slots are currently <strong>open</strong> for new applications. The original quota is {editingPost.positionsCount + (editingPost.currentApplicationCount ?? 0)} ({(editingPost.currentApplicationCount ?? 0)} already applied). Type the new open count directly — no math required.
-              </div>
-            )}
-            {!editingPost && (
-              <div className="-mt-4 mb-4 text-xs text-slate-500">
-                How many positions you want open for students. You can change this anytime after posting.
-              </div>
-            )}
             <div className="col-span-full">
               <Form.Item name="applicationDeadline" label="Application Deadline" rules={[{ required: true, message: 'Deadline is required' }]}>
                 <DatePicker
