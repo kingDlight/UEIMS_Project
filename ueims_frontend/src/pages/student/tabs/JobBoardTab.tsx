@@ -150,8 +150,8 @@ export const JobBoardTab: React.FC = () => {
         <>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 20 }}>
             {paginatedJobs.map((job, index) => (
-              <motion.div key={job.jobPostId || index} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: index * 0.05 }}>
-                <NeuSurface style={{ padding: 20, cursor: 'pointer', transition: 'all 0.2s' }} onClick={() => navigate(`/job/${job.jobPostId}`)}>
+              <motion.div key={job.jobPostId || index} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: index * 0.05 }} style={{ height: '100%' }}>
+                <NeuSurface style={{ padding: 20, cursor: 'pointer', transition: 'all 0.2s', height: '100%', display: 'flex', flexDirection: 'column' }} onClick={() => navigate(`/job/${job.jobPostId}`)}>
                   <div style={{ display: 'flex', gap: 12, marginBottom: 14 }}>
                     <div style={{ width: 48, height: 48, borderRadius: cc.radiusMd, background: hexToRgba(cc.primary, 0.08), display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.primary, fontSize: 20, fontWeight: 700, flexShrink: 0 }}>
                       {job.enterpriseName?.charAt(0) || 'E'}
@@ -166,7 +166,7 @@ export const JobBoardTab: React.FC = () => {
                     {job.maxPositions && <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: cc.textMuted }}><TeamOutlined style={{ fontSize: 12 }} />{job.maxPositions} {t('positions', 'positions')}</span>}
                   </div>
                   <p style={{ fontSize: 13, color: cc.textMuted, margin: '0 0 14px', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{job.description || t('jobDescription', 'Job description...')}</p>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 14, borderTop: `1px solid ${cc.borderSubtle}` }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 14, borderTop: `1px solid ${cc.borderSubtle}`, marginTop: 'auto' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                       {appliedJobIds.has(job.jobPostId) && <SmallBadge label={t('applied', 'Applied')} variant="info" />}
                       <SmallBadge label={job.status === 'OPEN' ? t('open', 'Open') : t('closed', 'Closed')} variant={job.status === 'OPEN' ? 'success' : 'neutral'} />
