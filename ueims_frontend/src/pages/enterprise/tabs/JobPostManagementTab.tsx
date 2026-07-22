@@ -407,8 +407,13 @@ export const JobPostManagementTab: React.FC = () => {
                       <div className="flex items-center gap-2 text-xs text-slate-600">
                         <TeamOutlined className="text-[#E67E22]" />
                         <span>
-                          <strong>{post.currentApplicationCount ?? 0}</strong> / {post.positionsCount}{' '}
-                          applied
+                          <strong>
+                            {(post.positionsCount ?? 0) - (post.currentApplicationCount ?? 0)}
+                          </strong>{' '}
+                          of {post.positionsCount} position{post.positionsCount > 1 ? 's' : ''} open
+                          <span className="text-slate-400 ml-1">
+                            ({post.currentApplicationCount ?? 0} applied)
+                          </span>
                         </span>
                       </div>
                       {post.semester && (
@@ -513,7 +518,7 @@ export const JobPostManagementTab: React.FC = () => {
                 ))}
               </Select>
             </Form.Item>
-            <Form.Item name="positionsCount" label="Positions" rules={[{ required: true, message: 'Number of positions is required' }]}>
+            <Form.Item name="positionsCount" label="Open positions" rules={[{ required: true, message: 'Number of positions is required' }]}>
               <InputNumber
                 min={editingPost ? Math.max(1, editingPost.currentApplicationCount ?? 0) : 1}
                 max={1000}
@@ -522,7 +527,12 @@ export const JobPostManagementTab: React.FC = () => {
             </Form.Item>
             {editingPost && (editingPost.currentApplicationCount ?? 0) > 0 && (
               <div className="-mt-4 mb-4 text-xs text-slate-500">
-                {editingPost.currentApplicationCount} student{editingPost.currentApplicationCount! > 1 ? 's have' : ' has'} already applied. Positions cannot be reduced below that count.
+                {editingPost.currentApplicationCount} student{editingPost.currentApplicationCount! > 1 ? 's have' : ' has'} already applied — open positions cannot drop below that count.
+              </div>
+            )}
+            {!editingPost && (
+              <div className="-mt-4 mb-4 text-xs text-slate-500">
+                Total slots you want to open. You can extend this later when students fail screening.
               </div>
             )}
             <div className="col-span-full">
