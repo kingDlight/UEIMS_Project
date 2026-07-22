@@ -276,7 +276,7 @@ export const ReportsTab: React.FC = () => {
         filename = `OJT_Placement_Summary_${semester}.xlsx`;
       } else if (template.id === 'tpl-2') {
         // Final GPA & Evaluation — PDF
-        response = await apiClient.get('/final-grade/export/pdf', {
+        response = await apiClient.get('/final-grades/export/pdf', {
           responseType: 'arraybuffer',
         });
         filename = `Final_GPA_Evaluation_${semester}.pdf`;
