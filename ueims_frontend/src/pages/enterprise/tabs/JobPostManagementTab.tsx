@@ -175,12 +175,11 @@ export const JobPostManagementTab: React.FC = () => {
 
   const openEdit = (post: JobPost) => {
     setEditingPost(post);
-    // BR-49: when editing, surface the *current* applied count so the form
-    // starts from a sensible value and the floor (min) prevents the enterprise
-    // from reducing positions below the number of students who already hold a
-    // slot. Without this floor, "17 applied / 20 quota" → edit to 10 would make
-    // 7 students orphan their application and break the "applied ≤ positions"
-    // invariant on every subsequent list call.
+    // `positionsCount` IS the current number of open positions — the same value
+    // the enterprise originally posted. It is not a "historical quota" we must
+    // add onto; the enterprise can edit it freely to whatever they want open
+    // right now (BR-49). The only floor is the number of students who already
+    // hold a slot — we cannot reopen fewer than we have committed.
     const taken = post.currentApplicationCount ?? 0;
     form.setFieldsValue({
       title: post.title,
@@ -188,7 +187,7 @@ export const JobPostManagementTab: React.FC = () => {
       requirements: post.requirements,
       benefits: post.benefits,
       requiredSkills: post.requiredSkills,
-      positionsCount: Math.max(post.positionsCount, taken),
+      positionsCount: post.positionsCount,
       applicationDeadline: dayjs(post.applicationDeadline),
       semesterId: post.semester?.semesterId,
     });
@@ -527,12 +526,12 @@ export const JobPostManagementTab: React.FC = () => {
             </Form.Item>
             {editingPost && (editingPost.currentApplicationCount ?? 0) > 0 && (
               <div className="-mt-4 mb-4 text-xs text-slate-500">
-                {editingPost.currentApplicationCount} student{editingPost.currentApplicationCount! > 1 ? 's have' : ' has'} already applied — open positions cannot drop below that count.
+                {editingPost.currentApplicationCount} student{editingPost.currentApplicationCount! > 1 ? 's have' : ' has'} already applied — keep this number ≥ {editingPost.currentApplicationCount}.
               </div>
             )}
             {!editingPost && (
               <div className="-mt-4 mb-4 text-xs text-slate-500">
-                Total slots you want to open. You can extend this later when students fail screening.
+                How many positions are open for students to apply. You can change this anytime after posting.
               </div>
             )}
             <div className="col-span-full">
