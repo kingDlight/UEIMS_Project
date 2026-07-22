@@ -245,6 +245,16 @@ public class InternshipPlanServiceImpl implements InternshipPlanService {
                 .findById(enterpriseId)
                 .orElseThrow(() -> new AppException(ErrorCode.ENTERPRISE_NOT_FOUND));
 
+        // Validate required fields — an empty training plan is meaningless and
+        // previously slipped through, allowing the enterprise to "Save & Submit"
+        // a blank plan and instantly move it into PENDING_APPROVAL. TM would
+        // then have nothing to review. Items are sent by the FE via a separate
+        // service (InternshipPlanItemService.create) and are validated there.
+        String goal = dto.getOverallGoal() == null ? "" : dto.getOverallGoal().trim();
+        if (goal.isEmpty()) {
+            throw new AppException(ErrorCode.FIELD_REQUIRED, "Overall goal is required");
+        }
+
         // Validate semester
         Semester semester = semesterRepository
                 .findById(dto.getSemesterId())

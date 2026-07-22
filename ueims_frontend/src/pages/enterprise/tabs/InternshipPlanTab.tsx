@@ -159,6 +159,19 @@ export const InternshipPlanTab: React.FC = () => {
       message.warning('This plan is read-only (pending approval or already approved).');
       return;
     }
+    // Validate overall goal is non-empty (mirrors backend FIELD_REQUIRED check).
+    // Without this guard the backend would accept a blank plan and the
+    // "Save & Submit" button would silently succeed, leaving TM with nothing
+    // to review.
+    const goal = (plan.overallGoal ?? '').trim();
+    if (!goal) {
+      message.warning('Please enter the overall goal before submitting.');
+      return;
+    }
+    if (plan.items.length === 0) {
+      message.warning('Please add at least one weekly task before submitting.');
+      return;
+    }
     for (const it of plan.items) {
       if (!it.taskDescription || !it.taskDescription.trim()) {
         message.warning('Each week must have a Task Description.');
