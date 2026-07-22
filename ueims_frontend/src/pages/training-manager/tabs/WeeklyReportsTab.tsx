@@ -270,24 +270,48 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
         }}>
           <Calendar size={11} strokeWidth={2.5} />
           Week
+          {selectedWeek && (
+            <button
+              onClick={() => onWeekChange('')}
+              style={{
+                marginLeft: 'auto',
+                padding: '2px 8px',
+                borderRadius: 999,
+                border: `1px solid ${st.border}`,
+                background: st.neutralBg,
+                color: st.textSecondary,
+                fontSize: 9.5,
+                fontWeight: 700,
+                textTransform: 'none',
+                letterSpacing: '0.02em',
+                fontFamily: 'Inter, sans-serif',
+                cursor: 'pointer',
+              }}
+              title="Clear week filter"
+            >
+              Clear
+            </button>
+          )}
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           {ALL_WEEKS.map((w, idx) => {
             const weekNum = idx + 1;
-            const isSelected = selectedWeek === w;
+            const isSelected = selectedWeek === String(weekNum);
             return (
               <button
                 key={w}
                 onClick={() => onWeekChange(isSelected ? '' : String(weekNum))}
                 style={{
-                  display: 'block',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
                   width: '100%',
                   textAlign: 'left',
                   padding: '7px 10px',
                   borderRadius: st.radiusMd,
-                  border: 'none',
-                  background: isSelected ? st.brandSubtle : 'transparent',
-                  color: isSelected ? st.brand : st.textSecondary,
+                  border: isSelected ? `1px solid #BFDBFE` : `1px solid transparent`,
+                  background: isSelected ? '#EFF6FF' : 'transparent',
+                  color: isSelected ? '#1D4ED8' : st.textSecondary,
                   fontSize: 11.5,
                   fontWeight: isSelected ? 700 : 500,
                   fontFamily: 'Inter, sans-serif',
@@ -295,7 +319,32 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
                   transition: 'all 0.15s ease',
                 }}
               >
-                {w}
+                {/* Custom radio indicator (matching Anomaly chip style) */}
+                <div style={{
+                  width: 14,
+                  height: 14,
+                  borderRadius: '50%',
+                  border: `1.5px solid ${isSelected ? '#1D4ED8' : st.border}`,
+                  background: isSelected ? '#1D4ED8' : 'transparent',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                  transition: 'all 0.15s ease',
+                }}>
+                  {isSelected && (
+                    <div style={{
+                      width: 5,
+                      height: 5,
+                      borderRadius: '50%',
+                      background: '#fff',
+                    }} />
+                  )}
+                </div>
+                <span style={{ flex: 1 }}>{w}</span>
+                {isSelected && (
+                  <CheckCircle2 size={12} strokeWidth={2.5} style={{ color: '#1D4ED8' }} />
+                )}
               </button>
             );
           })}
@@ -744,49 +793,46 @@ export const WeeklyReportsTab: React.FC = () => {
           </div>
 
           {/* Scrollable Card List */}
-          <div
-            className="grid grid-cols-1 xl:grid-cols-2 gap-4 pb-10"
-            style={{ maxHeight: 650, overflowY: 'auto', paddingRight: 4, paddingBottom: 20 }}
-          >
-            
-              {filteredReports.length === 0 ? (
-                <div
-                  key="empty"
-                 
-                 
-                 
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: '60px 24px',
-                    background: st.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
-                    border: `1px dashed ${st.border}`,
-                    borderRadius: st.radiusXl,
-                    gap: 8,
-                  }}
-                 className="scroll-animate">
-                  <FileText size={40} strokeWidth={1.5} style={{ color: st.border }} />
-                  <div style={{ fontSize: 14, fontWeight: 700, color: st.textSecondary, fontFamily: 'Inter, sans-serif' }}>
-                    No reports found
-                  </div>
-                  <div style={{ fontSize: 12.5, color: st.textMuted, fontFamily: 'Inter, sans-serif', textAlign: 'center' }}>
-                    Try adjusting the week or status filters
-                  </div>
-                </div>
-              ) : (
-                filteredReports.map((report, i) => (
-                  <ReportCard
-                    key={report.id}
-                    report={report}
-                    index={i}
-                    onViewDetail={openDetail}
-                  />
-                ))
-              )}
-
-          </div>
+          {filteredReports.length === 0 ? (
+            <div
+              key="empty"
+              className="scroll-animate"
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '60px 24px',
+                background: st.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+                border: `1px dashed ${st.border}`,
+                borderRadius: st.radiusXl,
+                gap: 8,
+                minHeight: 320,
+              }}
+            >
+              <FileText size={40} strokeWidth={1.5} style={{ color: st.border }} />
+              <div style={{ fontSize: 14, fontWeight: 700, color: st.textSecondary, fontFamily: 'Inter, sans-serif' }}>
+                No reports found
+              </div>
+              <div style={{ fontSize: 12.5, color: st.textMuted, fontFamily: 'Inter, sans-serif', textAlign: 'center', maxWidth: 320 }}>
+                Try adjusting the week, status, or anomaly filters in the sidebar.
+              </div>
+            </div>
+          ) : (
+            <div
+              className="grid grid-cols-1 xl:grid-cols-2 gap-4 pb-10"
+              style={{ maxHeight: 650, overflowY: 'auto', paddingRight: 4, paddingBottom: 20 }}
+            >
+              {filteredReports.map((report, i) => (
+                <ReportCard
+                  key={report.id}
+                  report={report}
+                  index={i}
+                  onViewDetail={openDetail}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

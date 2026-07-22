@@ -231,7 +231,7 @@ const ActionButtons: React.FC<{
           onClick={() => onViewContract(record)}
           className="px-3 py-1.5 rounded-md border-none bg-transparent text-[#94A3B8] text-[11.5px] font-semibold font-sans cursor-pointer whitespace-nowrap transition-colors duration-150 ease-in-out hover:text-[#64748B]"
         >
-          View Contract
+          View Details
         </button>
       </div>
     );

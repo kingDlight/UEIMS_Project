@@ -10,7 +10,6 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -144,9 +143,9 @@ public class ExcelExportServiceImpl implements ExcelExportService {
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public ResponseEntity<byte[]> exportFinalGrades() {
-        List<FinalGrade> grades =
-                finalGradeRepository.findAll(PageRequest.of(0, 10000)).getContent();
+        List<FinalGrade> grades = finalGradeRepository.findAllWithStudentGraph();
 
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Final Grades");
@@ -183,9 +182,9 @@ public class ExcelExportServiceImpl implements ExcelExportService {
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public ResponseEntity<byte[]> exportFinalGradesPdf() {
-        List<FinalGrade> grades =
-                finalGradeRepository.findAll(PageRequest.of(0, 10000)).getContent();
+        List<FinalGrade> grades = finalGradeRepository.findAllWithStudentGraph();
 
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             Document document = new Document();
@@ -215,6 +214,8 @@ public class ExcelExportServiceImpl implements ExcelExportService {
                     .body(outputStream.toByteArray());
 
         } catch (IOException | DocumentException e) {
+            org.slf4j.LoggerFactory.getLogger(ExcelExportServiceImpl.class)
+                    .error("exportFinalGradesPdf failed: {}", e.getMessage(), e);
             return ResponseEntity.internalServerError().build();
         }
     }
