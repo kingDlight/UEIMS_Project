@@ -167,13 +167,18 @@ public class ApplicationServiceImpl implements ApplicationService {
         }
         // BR-49: a seat is reserved the moment a student applies (no CV screening
         // required), so block further applications the second the post hits its cap.
-        // Without this guard, students 101+ would overshoot positionsCount even
-        // though the list endpoint already filters the post out of the board.
-        if (jobPost.getPositionsCount() != null && jobPost.getPositionsCount() > 0) {
-            long taken = repository.countActiveApplicationsForJob(jobPost.getJobPostId());
-            if (taken >= jobPost.getPositionsCount()) {
-                throw new AppException(ErrorCode.JOB_POST_FULL);
-            }
+        // FIX 049: `positionsCount` is the runtime open-positions count auto-
+        // maintained by triggers (= original - taken). When it reaches 0 the
+        // post is full — block any further application. We do an authoritative
+        // re-count rather than trusting the value blindly, so concurrent apply
+        // calls can't overshoot even if the trigger lags.
+        int max = jobPost.getPositionsCount() == null ? 0 : jobPost.getPositionsCount();
+        if (max <= 0) {
+            throw new AppException(ErrorCode.JOB_POST_FULL);
+        }
+        long taken = repository.countActiveApplicationsForJob(jobPost.getJobPostId());
+        if (taken >= max) {
+            throw new AppException(ErrorCode.JOB_POST_FULL);
         }
     }
 

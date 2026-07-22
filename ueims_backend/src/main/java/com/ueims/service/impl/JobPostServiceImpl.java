@@ -69,19 +69,14 @@ public class JobPostServiceImpl implements JobPostService {
         // job board doesn't accumulate stale listings from past semesters.
         List<JobPost> activeJobs = repository.findActiveForStudents(LocalDate.now());
 
-        // BR-49: drop posts that already hit their max_positions cap. The slot is
-        // reserved the moment a student applies (no CV screening required), so the
-        // board must hide a post the second the last seat is taken — otherwise a
-        // 101st student could squeeze in and silently overshoot the limit.
-        // We re-query the count per post (cheap, indexed on job_post_id) instead of
-        // relying on entity state, because positionsCount can change between the
-        // list query and this filter step.
+        // BR-49: drop posts that already hit their max_positions cap. With
+        // FIX 049 semantics `max_positions` is the runtime open-positions count
+        // maintained by triggers (= original - taken). A post is full when it
+        // hits 0, not when it equals the original quota. Keep students from
+        // seeing fully-booked posts so they don't waste time on a listing that
+        // will reject their application at submission.
         activeJobs = activeJobs.stream()
-                .filter(p -> {
-                    long taken = applicationRepository.countActiveApplicationsForJob(p.getJobPostId());
-                    int max = p.getPositionsCount() == null ? 0 : p.getPositionsCount();
-                    return taken < max;
-                })
+                .filter(p -> p.getPositionsCount() != null && p.getPositionsCount() > 0)
                 .toList();
 
         try {
@@ -98,13 +93,18 @@ public class JobPostServiceImpl implements JobPostService {
      * Populates {@code currentApplicationCount} + {@code full} on every post in the
      * list. Used by enterprise views so the "Full" badge / remaining seats are
      * visible without an extra round-trip from the frontend.
+     *
+     * <p>FIX 049: with the trigger-maintained semantics, {@code positionsCount}
+     * is already the runtime open count. {@code full} is just {@code taken >= originalMax},
+     * but we derive it from the live {@code positionsCount} so a transient drift
+     * between triggers doesn't mis-render the badge.
      */
     private void populateFillState(List<JobPost> posts) {
         for (JobPost p : posts) {
             long taken = applicationRepository.countActiveApplicationsForJob(p.getJobPostId());
-            int max = p.getPositionsCount() == null ? 0 : p.getPositionsCount();
+            int open = p.getPositionsCount() == null ? 0 : p.getPositionsCount();
             p.setCurrentApplicationCount(taken);
-            p.setFull(taken >= max);
+            p.setFull(open <= 0);
         }
     }
 
@@ -115,9 +115,11 @@ public class JobPostServiceImpl implements JobPostService {
                 .findWithEnterpriseByJobPostId(id)
                 .orElseThrow(() -> new AppException(ErrorCode.JOB_POST_NOT_FOUND));
         long taken = applicationRepository.countActiveApplicationsForJob(post.getJobPostId());
-        int max = post.getPositionsCount() == null ? 0 : post.getPositionsCount();
+        int open = post.getPositionsCount() == null ? 0 : post.getPositionsCount();
         post.setCurrentApplicationCount(taken);
-        post.setFull(taken >= max);
+        // FIX 049: a post is "Full" when its runtime open count reaches 0,
+        // not when taken >= original quota.
+        post.setFull(open <= 0);
         return post;
     }
 

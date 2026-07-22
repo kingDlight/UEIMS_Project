@@ -51,6 +51,11 @@ public class JobPostPositionsMigration implements CommandLineRunner {
             jdbc.execute("ALTER TABLE job_posts "
                     + "ALTER COLUMN original_max_positions SET NOT NULL");
 
+            // Drop legacy >0 check so runtime count can drop to 0 (full).
+            // Constraint name auto-generated as job_posts_max_positions_check.
+            jdbc.execute("ALTER TABLE job_posts "
+                    + "DROP CONSTRAINT IF EXISTS job_posts_max_positions_check");
+
             jdbc.update(
                     "UPDATE job_posts jp SET max_positions = GREATEST(0, jp.max_positions - "
                     + "COALESCE((SELECT COUNT(*) FROM applications a "
@@ -60,8 +65,7 @@ public class JobPostPositionsMigration implements CommandLineRunner {
 
             jdbc.execute("CREATE OR REPLACE FUNCTION jobpost_apply_decrement() "
                     + "RETURNS TRIGGER AS $$ BEGIN "
-                    + "IF NEW.deleted_at IS NULL "
-                    + "AND NEW.status NOT IN ('WITHDRAWN','REJECTED_BY_STUDENT','WITHDRAWN_BY_SYSTEM') THEN "
+                    + "IF NEW.deleted_at IS NULL AND NEW.status <> 'WITHDRAWN' THEN "
                     + "UPDATE job_posts SET max_positions = GREATEST(0, max_positions - 1) "
                     + "WHERE job_post_id = NEW.job_post_id; END IF; RETURN NEW; "
                     + "END; $$ LANGUAGE plpgsql");
@@ -72,10 +76,8 @@ public class JobPostPositionsMigration implements CommandLineRunner {
 
             jdbc.execute("CREATE OR REPLACE FUNCTION jobpost_apply_increment() "
                     + "RETURNS TRIGGER AS $$ BEGIN "
-                    + "IF OLD.deleted_at IS NULL "
-                    + "AND OLD.status NOT IN ('WITHDRAWN','REJECTED_BY_STUDENT','WITHDRAWN_BY_SYSTEM') "
-                    + "AND (NEW.deleted_at IS NOT NULL "
-                    + "OR NEW.status IN ('WITHDRAWN','REJECTED_BY_STUDENT','WITHDRAWN_BY_SYSTEM')) THEN "
+                    + "IF OLD.deleted_at IS NULL AND OLD.status <> 'WITHDRAWN' "
+                    + "AND (NEW.deleted_at IS NOT NULL OR NEW.status = 'WITHDRAWN') THEN "
                     + "UPDATE job_posts SET max_positions = "
                     + "LEAST(original_max_positions, max_positions + 1) "
                     + "WHERE job_post_id = OLD.job_post_id; END IF; RETURN NEW; "
@@ -85,6 +87,25 @@ public class JobPostPositionsMigration implements CommandLineRunner {
             jdbc.execute("CREATE TRIGGER trg_application_increment "
                     + "AFTER UPDATE OF status, deleted_at ON applications "
                     + "FOR EACH ROW EXECUTE FUNCTION jobpost_apply_increment()");
+
+            jdbc.execute("CREATE OR REPLACE FUNCTION jobpost_apply_reactivate() "
+                    + "RETURNS TRIGGER AS $$ DECLARE current_taken BIGINT; BEGIN "
+                    + "IF (OLD.deleted_at IS NOT NULL OR OLD.status = 'WITHDRAWN') "
+                    + "AND NEW.deleted_at IS NULL AND NEW.status <> 'WITHDRAWN' THEN "
+                    + "SELECT COUNT(*) INTO current_taken FROM applications a "
+                    + "WHERE a.job_post_id = NEW.job_post_id "
+                    + "AND a.deleted_at IS NULL AND a.status <> 'WITHDRAWN' "
+                    + "AND a.application_id <> NEW.application_id; "
+                    + "current_taken := current_taken + 1; "
+                    + "UPDATE job_posts SET max_positions = "
+                    + "GREATEST(0, original_max_positions - current_taken) "
+                    + "WHERE job_post_id = NEW.job_post_id; END IF; RETURN NEW; "
+                    + "END; $$ LANGUAGE plpgsql");
+
+            jdbc.execute("DROP TRIGGER IF EXISTS trg_application_reactivate ON applications");
+            jdbc.execute("CREATE TRIGGER trg_application_reactivate "
+                    + "AFTER UPDATE OF status, deleted_at ON applications "
+                    + "FOR EACH ROW EXECUTE FUNCTION jobpost_apply_reactivate()");
 
             log.info("[FIX 049] job_posts.max_positions migration applied successfully.");
         } catch (Exception e) {

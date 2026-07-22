@@ -297,6 +297,10 @@ WHERE original_max_positions IS NULL;
 ALTER TABLE job_posts
     ALTER COLUMN original_max_positions SET NOT NULL;
 
+-- Drop the legacy >0 check so the runtime count can drop to 0 (full).
+ALTER TABLE job_posts
+    DROP CONSTRAINT IF EXISTS job_posts_max_positions_check;
+
 -- 2. Backfill max_positions = max(0, original - taken) for legacy rows.
 --    After this step, existing rows render correctly under the new semantic.
 UPDATE job_posts jp
@@ -314,9 +318,9 @@ SET max_positions = GREATEST(
 -- 3a. Trigger: when a NEW active application is created, decrement max_positions.
 CREATE OR REPLACE FUNCTION jobpost_apply_decrement() RETURNS TRIGGER AS $$
 BEGIN
-    -- Only decrement for new rows that count as active
-    IF NEW.deleted_at IS NULL
-       AND NEW.status NOT IN ('WITHDRAWN', 'REJECTED_BY_STUDENT', 'WITHDRAWN_BY_SYSTEM') THEN
+    -- Only decrement for new rows that count as active.
+    -- Active = NOT WITHDRAWN (the only terminal state in the schema).
+    IF NEW.deleted_at IS NULL AND NEW.status <> 'WITHDRAWN' THEN
         UPDATE job_posts
         SET max_positions = GREATEST(0, max_positions - 1)
         WHERE job_post_id = NEW.job_post_id;
@@ -331,15 +335,15 @@ CREATE TRIGGER trg_application_decrement
     FOR EACH ROW
     EXECUTE FUNCTION jobpost_apply_decrement();
 
--- 3b. Trigger: when an application is withdrawn / soft-deleted / status-flipped,
+-- 3b. Trigger: when an application is withdrawn / soft-deleted,
 -- increment max_positions back up so the post re-opens.
+-- Also handles the BR-26 undo case: revive from WITHDRAWN back to PENDING
+-- (no slot accounting change — slot was already counted when first inserted).
 CREATE OR REPLACE FUNCTION jobpost_apply_increment() RETURNS TRIGGER AS $$
 BEGIN
-    -- Old row was active; new row is no longer active → return the slot
-    IF OLD.deleted_at IS NULL
-       AND OLD.status NOT IN ('WITHDRAWN', 'REJECTED_BY_STUDENT', 'WITHDRAWN_BY_SYSTEM')
-       AND (NEW.deleted_at IS NOT NULL
-            OR NEW.status IN ('WITHDRAWN', 'REJECTED_BY_STUDENT', 'WITHDRAWN_BY_SYSTEM')) THEN
+    -- Old row was active; new row is now terminal → return the slot.
+    IF OLD.deleted_at IS NULL AND OLD.status <> 'WITHDRAWN'
+       AND (NEW.deleted_at IS NOT NULL OR NEW.status = 'WITHDRAWN') THEN
         UPDATE job_posts
         SET max_positions = LEAST(original_max_positions, max_positions + 1)
         WHERE job_post_id = OLD.job_post_id;
@@ -353,6 +357,40 @@ CREATE TRIGGER trg_application_increment
     AFTER UPDATE OF status, deleted_at ON applications
     FOR EACH ROW
     EXECUTE FUNCTION jobpost_apply_increment();
+
+-- 3c. Trigger: when a soft-deleted/withdrawn application is REVIVED
+-- (e.g. BR-26 undo cascade: WITHDRAWN → PENDING), decrement max_positions
+-- again because the slot is now occupied again. Recomputes from scratch
+-- against the source-of-truth (original - taken) so the invariant always
+-- holds even after BR-26 cascades.
+CREATE OR REPLACE FUNCTION jobpost_apply_reactivate() RETURNS TRIGGER AS $$
+DECLARE current_taken BIGINT;
+BEGIN
+    -- Revive = was terminal (withdrawn or soft-deleted), now active again.
+    IF (OLD.deleted_at IS NOT NULL OR OLD.status = 'WITHDRAWN')
+       AND NEW.deleted_at IS NULL
+       AND NEW.status <> 'WITHDRAWN' THEN
+        SELECT COUNT(*) INTO current_taken
+        FROM applications a
+        WHERE a.job_post_id = NEW.job_post_id
+          AND a.deleted_at IS NULL
+          AND a.status <> 'WITHDRAWN'
+          AND a.application_id <> NEW.application_id;
+        current_taken := current_taken + 1;  -- the reviving row itself
+
+        UPDATE job_posts
+        SET max_positions = GREATEST(0, original_max_positions - current_taken)
+        WHERE job_post_id = NEW.job_post_id;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_application_reactivate ON applications;
+CREATE TRIGGER trg_application_reactivate
+    AFTER UPDATE OF status, deleted_at ON applications
+    FOR EACH ROW
+    EXECUTE FUNCTION jobpost_apply_reactivate();
 
 COMMENT ON COLUMN job_posts.max_positions IS
     'FIX 049: current number of OPEN positions (runtime, auto-maintained by triggers). Was: total historical quota.';

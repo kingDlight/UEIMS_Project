@@ -181,6 +181,8 @@ export const JobDetailPage: React.FC = () => {
     if (applied || appliedJobIds.has(job?.jobPostId)) return 'applied';
     if (job?.status !== 'OPEN') return 'closed';
     if (isExpired(job?.applicationDeadline)) return 'expired';
+    // FIX 049: positionsCount is now the runtime open count; full <= 0 = full.
+    if ((job?.positionsCount ?? 0) <= 0) return 'full';
     if (currentSemester < 5) return 'browse';
     if (!hasCv) return 'nocv';
     return 'apply';
@@ -192,6 +194,7 @@ export const JobDetailPage: React.FC = () => {
       case 'applied': return t('applied', 'Applied');
       case 'closed': return t('applicationsClosed', 'Applications Closed');
       case 'expired': return t('deadlineExpired', 'Deadline Expired');
+      case 'full': return t('positionFull', 'Position Full');
       case 'browse': return t('browseOnly', 'Browse Only');
       case 'nocv': return t('cvRequired', 'CV Required');
       default: return t('applyNow', 'Apply Now');
@@ -205,6 +208,7 @@ export const JobDetailPage: React.FC = () => {
     if (state === 'nocv') { message.warning('Please upload your CV in Profile before applying.'); return; }
     if (state === 'closed') { message.error('This job posting is no longer accepting applications.'); return; }
     if (state === 'expired') { message.error('This job posting has reached its deadline.'); return; }
+    if (state === 'full') { message.warning('This position is fully booked. Please check other openings.'); return; }
     handleApply();
   };
 

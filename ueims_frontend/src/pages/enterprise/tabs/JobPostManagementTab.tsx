@@ -59,14 +59,15 @@ const STATUS_COLORS: Record<string, { color: string; bg: string; borderColor: st
   FULL: { color: 'text-orange-700', bg: 'bg-orange-500/10', borderColor: 'border-orange-500/40', label: 'Full' },
 };
 
-// BR-49: a post is "Full" the moment currentApplicationCount reaches positionsCount.
-// Surfaces the cap state alongside OPEN/CLOSED so enterprises can extend positions
-// via edit without leaving a stale OPEN board listing.
+// BR-49: a post is "Full" the moment its runtime open count reaches 0.
+// FIX 049: `positionsCount` is the runtime open-positions count, so the
+// authoritative check is simply `positionsCount <= 0`. We also keep the
+// `full` flag the backend populates as a fast-path so enterprise views
+// don't need to round-trip a separate count.
 const isFullPost = (post: JobPost): boolean => {
   if (post.status !== 'OPEN') return false;
   if (post.full === true) return true;
-  if (post.currentApplicationCount == null) return false;
-  return post.currentApplicationCount >= post.positionsCount;
+  return (post.positionsCount ?? 0) <= 0;
 };
 
 // Derived status: deadline-aware. Stored status OPEN + past deadline => EXPIRED.
