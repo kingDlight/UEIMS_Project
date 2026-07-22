@@ -261,7 +261,7 @@ export const AtRiskStudentsTab: React.FC = () => {
     {
       title: 'ACTIONS',
       key: 'actions',
-      width: 100,
+      width: 110,
       fixed: 'right' as const,
       align: 'center' as const,
       render: (_: unknown, record: AtRiskStudent) => (
@@ -270,9 +270,82 @@ export const AtRiskStudentsTab: React.FC = () => {
             size="small"
             icon={<MailIcon size={12} />}
             style={{ borderRadius: st.radiusMd, fontWeight: 600, fontSize: 11 }}
+            disabled={!record.studentEmail}
+            title={record.studentEmail ? `Send alert to ${record.studentEmail}` : 'No email on file'}
             onClick={() => {
-              const subject = encodeURIComponent(`[UEIMS] At-Risk: ${record.studentName} (${record.studentCode})`);
-              window.location.href = `mailto:?subject=${subject}`;
+              const target = record.studentEmail;
+              if (!target) {
+                message.warning('Student has no email on file');
+                return;
+              }
+              Modal.confirm({
+                title: (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                    <AlertCircle size={16} color={st.error} strokeWidth={2.2} />
+                    Send At-Risk alert?
+                  </span>
+                ),
+                icon: null,
+                content: (
+                  <div style={{ paddingTop: 6, fontFamily: 'Inter, sans-serif' }}>
+                    <p style={{ margin: '0 0 12px', fontSize: 13.5, color: st.textSecondary, lineHeight: 1.55 }}>
+                      Are you sure you want to send an alert email to
+                      {' '}<strong style={{ color: st.textPrimary }}>{record.studentName}</strong>{' '}
+                      (<span style={{ fontFamily: 'monospace', color: st.textPrimary }}>{record.studentCode}</span>)?
+                    </p>
+                    <div style={{
+                      background: st.neutralBg,
+                      border: `1px solid ${st.border}`,
+                      borderRadius: st.radiusMd,
+                      padding: '10px 12px',
+                      display: 'flex', alignItems: 'center', gap: 8,
+                      marginBottom: 12,
+                    }}>
+                      <Mail size={14} color={st.textMuted} strokeWidth={2} />
+                      <span style={{ fontSize: 13, fontWeight: 600, color: st.textPrimary, fontFamily: 'monospace' }}>
+                        {target}
+                      </span>
+                    </div>
+                    <div style={{
+                      background: st.errorMuted,
+                      border: '1px solid #FECACA',
+                      borderRadius: st.radiusMd,
+                      padding: '10px 12px',
+                      display: 'flex', gap: 8,
+                    }}>
+                      <AlertCircle size={14} color={st.error} strokeWidth={2} style={{ flexShrink: 0, marginTop: 2 }} />
+                      <div style={{ fontSize: 12, color: st.error, lineHeight: 1.45 }}>
+                        <strong>Risk:</strong> {RISK_CATEGORY_LABELS[record.riskCategory || ''] || record.riskCategory || 'UNKNOWN'} ·
+                        {' '}<strong>Priority:</strong> {record.priorityScore || 0}/100 ·
+                        {' '}<strong>Reason:</strong> {record.riskReason || '—'}
+                      </div>
+                    </div>
+                  </div>
+                ),
+                okText: 'Yes, send email',
+                cancelText: 'No',
+                okButtonProps: {
+                  icon: <MailIcon size={12} />,
+                  style: { background: st.textPrimary, borderColor: st.textPrimary, fontWeight: 600 },
+                },
+                cancelButtonProps: { style: { fontWeight: 600 } },
+                centered: true,
+                async onOk() {
+                  if (!activeSemesterId) return;
+                  try {
+                    const res = await AtRiskStudentService.sendAlertEmail(
+                      record.studentId,
+                      activeSemesterId
+                    );
+                    message.success(res.message || `Alert email sent to ${target}`);
+                  } catch (err: unknown) {
+                    const msg =
+                      (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+                      'Failed to send alert email';
+                    message.error(msg);
+                  }
+                },
+              });
             }}
           >
             Email

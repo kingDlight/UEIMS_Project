@@ -1,5 +1,8 @@
 package com.ueims.service.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import jakarta.mail.internet.MimeMessage;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -195,6 +198,102 @@ public class MailServiceImpl implements MailService {
         } catch (Exception e) {
             log.warn("[IncidentEmail] Failed: {}", e.getMessage());
         }
+    }
+
+    // ===== At-Risk Student Alert (UC-37) =====
+    @Async("mailTaskExecutor")
+    public void sendAtRiskAlertMail(
+            String to,
+            String fullName,
+            String studentCode,
+            String riskCategory,
+            String riskCategoryLabel,
+            String riskReason,
+            String semesterCode,
+            Integer priorityScore,
+            Integer daysAtRisk,
+            Integer missedReports,
+            Integer rejectedReports,
+            String companyName,
+            String supervisorName) {
+
+        String loginUrl = appBaseUrl + PATH_LOGIN;
+        String subject = buildAtRiskSubject(riskCategoryLabel, studentCode);
+
+        Context ctx = new Context();
+        ctx.setVariable(VAR_FULL_NAME, fullName);
+        ctx.setVariable(VAR_SUBJECT, subject);
+        ctx.setVariable(VAR_LOGIN_URL, loginUrl);
+        ctx.setVariable("studentCode", studentCode);
+        ctx.setVariable("riskCategory", riskCategory);
+        ctx.setVariable("riskCategoryLabel", riskCategoryLabel);
+        ctx.setVariable("riskReason", riskReason);
+        ctx.setVariable("semesterCode", semesterCode);
+        ctx.setVariable("priorityScore", priorityScore == null ? 0 : priorityScore);
+        ctx.setVariable("daysAtRisk", daysAtRisk == null ? 0 : daysAtRisk);
+        ctx.setVariable("missedReports", missedReports == null ? 0 : missedReports);
+        ctx.setVariable("rejectedReports", rejectedReports == null ? 0 : rejectedReports);
+        ctx.setVariable("companyName", companyName);
+        ctx.setVariable("supervisorName", supervisorName);
+        ctx.setVariable(
+                "recommendations",
+                buildAtRiskRecommendations(riskCategory, daysAtRisk, missedReports, rejectedReports, companyName));
+
+        String html = templateEngine.process("at-risk-alert", ctx);
+        sendHtml(to, subject, html);
+
+        log.info("Email cảnh báo At-Risk [{}] đã được gửi đến: {} ({})", riskCategory, to, studentCode);
+    }
+
+    private String buildAtRiskSubject(String riskCategoryLabel, String studentCode) {
+        String label =
+                (riskCategoryLabel == null || riskCategoryLabel.isBlank()) ? "At-Risk Student" : riskCategoryLabel;
+        String code = (studentCode == null || studentCode.isBlank()) ? "" : " — " + studentCode;
+        return "[" + label + "] Cảnh báo tình trạng thực tập" + code + " — UEIMS";
+    }
+
+    private List<String> buildAtRiskRecommendations(
+            String riskCategory,
+            Integer daysAtRisk,
+            Integer missedReports,
+            Integer rejectedReports,
+            String companyName) {
+        List<String> actions = new ArrayList<>();
+        if ("UNPLACED".equalsIgnoreCase(riskCategory)) {
+            actions.add("Đăng nhập UEIMS để xem danh sách doanh nghiệp đang tuyển phù hợp với chuyên ngành của bạn.");
+            actions.add("Cập nhật CV và hồ sơ cá nhân nếu đã quá 30 ngày — nhà tuyển dụng ưu tiên hồ sơ mới nhất.");
+            actions.add("Ứng tuyển ít nhất 3 doanh nghiệp mỗi tuần cho đến khi được tiếp nhận.");
+            actions.add(
+                    (daysAtRisk != null && daysAtRisk >= 14)
+                            ? "Bạn đã quá thời hạn 14 ngày — Training Manager sẽ chủ động liên hệ hỗ trợ trong 48 giờ tới."
+                            : "Nếu sau 7 ngày vẫn chưa có placement, vui lòng liên hệ Training Manager để được hỗ trợ.");
+        } else if ("REPORT".equalsIgnoreCase(riskCategory) || "DEADLINE".equalsIgnoreCase(riskCategory)) {
+            actions.add("Đăng nhập UEIMS ngay và nộp báo cáo tuần còn thiếu trong vòng 24 giờ.");
+            int missed = missedReports == null ? 0 : missedReports;
+            int rejected = rejectedReports == null ? 0 : rejectedReports;
+            if (missed > 0) {
+                actions.add("Bạn đang thiếu " + missed + " báo cáo — nộp bù đầy đủ trước khi kỳ học kết thúc.");
+            }
+            if (rejected > 0) {
+                actions.add("Có " + rejected
+                        + " báo cáo bị từ chối — đọc lại nhận xét từ Supervisor và chỉnh sửa trước khi nộp lại.");
+            }
+            if (companyName != null && !companyName.isBlank()) {
+                actions.add(
+                        "Liên hệ người hướng dẫn tại " + companyName + " nếu bạn gặp khó khăn trong tuần thực tập.");
+            }
+            actions.add("Lập kế hoạch nộp báo cáo trước 23:59 Chủ nhật hàng tuần để tránh bị tính là trễ hạn.");
+        } else if ("BLOCKED".equalsIgnoreCase(riskCategory)) {
+            actions.add("Đăng nhập UEIMS và vào mục \"Thông báo\" để xem lý do OJT bị hủy cụ thể.");
+            actions.add(
+                    "Liên hệ Training Manager trong vòng 3 ngày làm việc để được hướng dẫn khắc phục hoặc đăng ký lại.");
+            actions.add(
+                    "Nếu bạn cho rằng quyết định hủy là sai sót, vui lòng gửi khiếu nại kèm bằng chứng qua email hỗ trợ.");
+        } else {
+            actions.add("Đăng nhập UEIMS để kiểm tra chi tiết tình trạng thực tập hiện tại.");
+            actions.add("Liên hệ Training Manager nếu bạn cần hỗ trợ thêm.");
+        }
+        return actions;
     }
 
     private void sendInterviewEmail(Interview interview, String template, String subject, String extra) {

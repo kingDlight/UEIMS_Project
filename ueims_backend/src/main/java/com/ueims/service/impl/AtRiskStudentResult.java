@@ -17,6 +17,7 @@ public class AtRiskStudentResult {
     private UUID studentId;
     private String studentName;
     private String studentCode;
+    private String studentEmail;
     private UUID semesterId;
     private String semesterCode;
     private String supervisorName;

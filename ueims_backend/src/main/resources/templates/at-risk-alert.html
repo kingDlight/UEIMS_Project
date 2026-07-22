@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="format-detection" content="telephone=no, date=no, address=no, email=no" />
+  <meta name="x-apple-disable-message-reformatting" />
+  <title th:text="${subject}">UEIMS - At-Risk Student Alert</title>
+
+  <meta name="color-scheme" content="light dark" />
+  <meta name="supported-color-schemes" content="light dark" />
+  <style>
+    @media (prefers-color-scheme: dark) {
+      body, table[bgcolor="#FFFFFF"], td[bgcolor="#FFFFFF"] { background-color: #222222 !important; }
+      h1, p, span, strong, td { color: #F9FAFB !important; }
+      .bg-gray-dark { background-color: #333333 !important; border-color: #444444 !important; }
+      .text-orange { color: #E96500 !important; }
+      .btn-vml table, .btn-vml td { background-color: #E96500 !important; }
+      .btn-vml a { color: #FFFFFF !important; }
+      .text-danger { color: #EF4444 !important; }
+      .text-warning { color: #F59E0B !important; }
+      .text-info    { color: #3B82F6 !important; }
+      .text-success { color: #10B981 !important; }
+      .text-muted { color: #9CA3AF !important; }
+      .bg-muted { background-color: #2A2A2A !important; }
+    }
+  </style>
+</head>
+<body style="margin:0; padding:0; background-color:#FFFFFF; font-family:'Times New Roman', Times, serif;">
+  <!-- PREHEADER -->
+  <div style="display:none; max-height:0; overflow:hidden; font-size:1px; line-height:1px; color:#ffffff; opacity:0;">
+    Cảnh báo tình trạng thực tập — UEIMS
+  </div>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#FFFFFF">
+    <tr>
+      <td align="center" style="padding:38px 16px 34px;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="width:100%; max-width:600px; margin:0 auto;">
+          <!-- BRAND -->
+          <tr>
+            <td align="center" style="padding:0 0 28px;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td align="center" style="vertical-align:middle; padding-right:10px;">
+                    <img src="cid:logoImage" alt="UEIMS Logo" style="width:34px; height:34px; display:block; border:none; color:#E96500; font-family:Arial, Helvetica, sans-serif; font-size:12px; font-weight:bold; text-align:center; line-height:34px;" />
+                  </td>
+                  <td align="left" style="vertical-align:middle;">
+                    <span style="font-family:'Times New Roman', Times, serif; font-size:22px; line-height:26px; font-weight:700; letter-spacing:3px; color:#E96500;" class="text-orange">
+                      UEIMS
+                    </span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- MAIN CONTENT -->
+          <tr>
+            <td style="padding:0 40px;">
+
+              <h1 style="margin:0; font-family:'Times New Roman', Times, serif; font-size:30px; line-height:36px; font-weight:700; color:#111827; text-align:center;">
+                Xin chào <span th:text="${fullName}">Sinh viên</span>,
+              </h1>
+
+              <!-- Category Heading (dynamic color) -->
+              <p th:switch="${riskCategory}"
+                 style="margin:12px 0 0; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:18px; font-weight:700; text-align:center;">
+                <span th:case="'UNPLACED'" style="color:#F59E0B;" class="text-warning">Cảnh báo: Chưa có doanh nghiệp thực tập.</span>
+                <span th:case="'REPORT'"   style="color:#3B82F6;" class="text-info">Cảnh báo: Báo cáo tuần bị trễ.</span>
+                <span th:case="'DEADLINE'" style="color:#8B5CF6;" class="text-warning">Cảnh báo: Nguy cơ không đạt OJT.</span>
+                <span th:case="'BLOCKED'"  style="color:#EF4444;" class="text-danger">Thông báo: OJT của bạn đã bị hủy.</span>
+                <span th:case="*"          style="color:#EF4444;" class="text-danger">Cảnh báo từ Training Manager.</span>
+              </p>
+
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:22px 0 0;">
+                <tr>
+                  <td style="border-top:1px solid #E5E7EB; font-size:0; line-height:0;">&nbsp;</td>
+                </tr>
+              </table>
+
+              <!-- Greeting + risk reason summary -->
+              <p style="margin:22px 0 0; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:20px; font-weight:400; color:#6B7280; text-align:center;">
+                Hệ thống UEIMS nhận thấy bạn đang thuộc nhóm
+                <strong th:text="${riskCategoryLabel}" style="color:#111827;">Risk Category</strong>
+                trong học kỳ
+                <strong th:text="${semesterCode}" style="color:#111827;">SU25</strong>.
+              </p>
+
+              <p th:if="${riskReason != null and riskReason != ''}"
+                 style="margin:18px 0 0; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:20px; font-weight:400; color:#6B7280; text-align:center;">
+                <strong style="color:#111827;">Chi tiết:</strong>
+                <span th:text="${riskReason}">Risk reason text</span>
+              </p>
+
+              <!-- KPI table -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                     style="margin:24px 0 0; border-collapse:separate; border-spacing:0; border:1px solid #E5E7EB; border-radius:12px; overflow:hidden;"
+                     class="bg-gray-dark">
+                <tr>
+                  <td style="padding:14px 18px; background:#F9FAFB; border-bottom:1px solid #E5E7EB;"
+                      class="bg-muted">
+                    <span style="font-family:'Times New Roman', Times, serif; font-size:11px; line-height:14px; font-weight:700; color:#6B7280; text-transform:uppercase; letter-spacing:0.08em;"
+                          class="text-muted">Tình trạng hiện tại của bạn</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="padding:16px 18px; background:#FFFFFF;" class="bg-muted">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td style="padding:6px 0; font-family:'Times New Roman', Times, serif; font-size:13px; color:#374151;" width="55%">
+                          <strong>Mức độ ưu tiên:</strong>
+                        </td>
+                        <td style="padding:6px 0; font-family:'Times New Roman', Times, serif; font-size:13px; color:#111827; text-align:right;">
+                          <span th:text="${priorityScore} + ' / 100'">0 / 100</span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding:6px 0; font-family:'Times New Roman', Times, serif; font-size:13px; color:#374151;">
+                          <strong>Số ngày tình trạng kéo dài:</strong>
+                        </td>
+                        <td style="padding:6px 0; font-family:'Times New Roman', Times, serif; font-size:13px; color:#111827; text-align:right;">
+                          <span th:text="${daysAtRisk}">0</span>&nbsp;ngày
+                        </td>
+                      </tr>
+                      <tr th:if="${missedReports != null and missedReports > 0}">
+                        <td style="padding:6px 0; font-family:'Times New Roman', Times, serif; font-size:13px; color:#374151;">
+                          <strong>Số báo cáo chưa nộp:</strong>
+                        </td>
+                        <td style="padding:6px 0; font-family:'Times New Roman', Times, serif; font-size:13px; color:#EF4444; font-weight:700; text-align:right;" class="text-danger">
+                          <span th:text="${missedReports}">0</span>&nbsp;báo cáo
+                        </td>
+                      </tr>
+                      <tr th:if="${rejectedReports != null and rejectedReports > 0}">
+                        <td style="padding:6px 0; font-family:'Times New Roman', Times, serif; font-size:13px; color:#374151;">
+                          <strong>Số báo cáo bị từ chối:</strong>
+                        </td>
+                        <td style="padding:6px 0; font-family:'Times New Roman', Times, serif; font-size:13px; color:#EF4444; font-weight:700; text-align:right;" class="text-danger">
+                          <span th:text="${rejectedReports}">0</span>&nbsp;báo cáo
+                        </td>
+                      </tr>
+                      <tr th:if="${companyName != null and companyName != ''}">
+                        <td style="padding:6px 0; font-family:'Times New Roman', Times, serif; font-size:13px; color:#374151;">
+                          <strong>Doanh nghiệp thực tập:</strong>
+                        </td>
+                        <td style="padding:6px 0; font-family:'Times New Roman', Times, serif; font-size:13px; color:#111827; text-align:right;">
+                          <span th:text="${companyName}">—</span>
+                        </td>
+                      </tr>
+                      <tr th:if="${supervisorName != null and supervisorName != ''}">
+                        <td style="padding:6px 0; font-family:'Times New Roman', Times, serif; font-size:13px; color:#374151;">
+                          <strong>Người hướng dẫn:</strong>
+                        </td>
+                        <td style="padding:6px 0; font-family:'Times New Roman', Times, serif; font-size:13px; color:#111827; text-align:right;">
+                          <span th:text="${supervisorName}">—</span>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Recommendation list (per category) -->
+              <p style="margin:26px 0 0; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:20px; font-weight:700; color:#111827;">
+                Bạn cần làm gì tiếp theo?
+              </p>
+
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 0;">
+                <tr th:each="action, iter : ${recommendations}">
+                  <td width="22" valign="top" style="padding:6px 0;">
+                    <span th:text="${iter.count} + '.'"
+                          style="font-family:'Times New Roman', Times, serif; font-size:13px; line-height:20px; font-weight:700; color:#E96500;"
+                          class="text-orange"></span>
+                  </td>
+                  <td style="padding:6px 0 6px 8px; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:20px; color:#6B7280;">
+                    <span th:text="${action}">Recommendation</span>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- CTA -->
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:26px auto 0;" class="btn-vml">
+                <tr>
+                  <td align="center">
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-radius:999px; background-color:#E96500;">
+                      <tr>
+                        <td align="center" style="border-radius:999px; background-color:#E96500;">
+                          <a th:href="${loginUrl}" target="_blank"
+                             style="display:inline-block; padding:12px 22px; min-width:180px; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:16px; font-weight:800; color:#FFFFFF; text-align:center; text-decoration:none; border-radius:999px; background-color:#E96500;">
+                            Đăng nhập UEIMS ngay
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin:18px 0 0; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:20px; font-weight:400; color:#6B7280; text-align:center;">
+                Nếu bạn cho rằng thông tin này không chính xác, vui lòng liên hệ ngay với Training Manager để được hỗ trợ.
+              </p>
+
+              <p style="margin:22px 0 0; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:20px; font-weight:700; color:#6B7280; text-align:center;">
+                Trân trọng,
+              </p>
+              <p style="margin:4px 0 0; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:20px; font-weight:700; color:#E96500; text-align:center;" class="text-orange">
+                Team UEIMS
+              </p>
+
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:26px 0 0;">
+                <tr>
+                  <td style="border-top:1px solid #F3F4F6; font-size:0; line-height:0;">&nbsp;</td>
+                </tr>
+              </table>
+
+              <p style="margin:12px 0 0; font-family:'Times New Roman', Times, serif; font-size:11px; line-height:16px; color:#9CA3AF; text-align:center;" class="text-muted">
+                Cần hỗ trợ? Liên hệ <a href="mailto:ueims.support@fpt.edu.vn" style="color:#E96500; font-weight:700; text-decoration:none;" class="text-orange">ueims.support@fpt.edu.vn</a>
+              </p>
+
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

@@ -189,6 +189,7 @@ export type AtRiskStudent = {
   studentId: string;
   studentName: string;
   studentCode: string;
+  studentEmail?: string;
   semesterId: string;
   semesterCode: string;
   supervisorName?: string;

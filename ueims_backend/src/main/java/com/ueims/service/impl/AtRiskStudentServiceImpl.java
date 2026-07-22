@@ -14,10 +14,12 @@ import org.springframework.transaction.annotation.Transactional;
 import com.ueims.model.entity.EligibleStudent;
 import com.ueims.model.entity.EnterpriseAssignment;
 import com.ueims.model.entity.Semester;
+import com.ueims.model.entity.User;
 import com.ueims.model.entity.WeeklyReport;
 import com.ueims.repository.EligibleStudentRepository;
 import com.ueims.repository.EnterpriseAssignmentRepository;
 import com.ueims.repository.SemesterRepository;
+import com.ueims.repository.UserRepository;
 import com.ueims.repository.WeeklyReportRepository;
 import com.ueims.service.AtRiskStudentService;
 
@@ -36,6 +38,7 @@ public class AtRiskStudentServiceImpl implements AtRiskStudentService {
     EnterpriseAssignmentRepository enterpriseAssignmentRepository;
     SemesterRepository semesterRepository;
     WeeklyReportRepository weeklyReportRepository;
+    UserRepository userRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -109,6 +112,7 @@ public class AtRiskStudentServiceImpl implements AtRiskStudentService {
                     .studentId(es.getUser() != null ? es.getUser().getUserId() : null)
                     .studentName(es.getFullName())
                     .studentCode(es.getStudentCode())
+                    .studentEmail(resolveEmail(es.getUser(), es.getEmail()))
                     .semesterId(semester.getSemesterId())
                     .semesterCode(semester.getSemesterCode())
                     .supervisorName(null)
@@ -177,6 +181,7 @@ public class AtRiskStudentServiceImpl implements AtRiskStudentService {
                             ea.getStudent() != null && ea.getStudent().getStudentProfile() != null
                                     ? ea.getStudent().getStudentProfile().getStudentCode()
                                     : "—")
+                    .studentEmail(ea.getStudent() != null ? ea.getStudent().getEmail() : null)
                     .semesterId(semester.getSemesterId())
                     .semesterCode(semester.getSemesterCode())
                     .supervisorName(ea.getSupervisorName())
@@ -212,6 +217,7 @@ public class AtRiskStudentServiceImpl implements AtRiskStudentService {
                     .studentId(es.getUser() != null ? es.getUser().getUserId() : null)
                     .studentName(es.getFullName())
                     .studentCode(es.getStudentCode())
+                    .studentEmail(resolveEmail(es.getUser(), es.getEmail()))
                     .semesterId(semester.getSemesterId())
                     .semesterCode(semester.getSemesterCode())
                     .supervisorName(null)
@@ -239,5 +245,24 @@ public class AtRiskStudentServiceImpl implements AtRiskStudentService {
     @Override
     public int scanAndSendLateWarnings(UUID semesterId, Integer weekNumber, String userId) {
         return 0;
+    }
+
+    /**
+     * Best-effort lookup of a student's email. Priority:
+     * 1) User entity directly attached to the student
+     * 2) EligibleStudent.email column (denormalized copy)
+     * 3) UserRepository lookup by studentId (last resort)
+     */
+    private String resolveEmail(User user, String eligibleEmailFallback) {
+        if (user != null && user.getEmail() != null && !user.getEmail().isBlank()) {
+            return user.getEmail();
+        }
+        if (eligibleEmailFallback != null && !eligibleEmailFallback.isBlank()) {
+            return eligibleEmailFallback;
+        }
+        if (user != null && user.getUserId() != null) {
+            return userRepository.findById(user.getUserId()).map(User::getEmail).orElse(null);
+        }
+        return null;
     }
 }

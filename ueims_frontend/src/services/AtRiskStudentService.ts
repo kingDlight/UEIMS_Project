@@ -23,4 +23,15 @@ export const AtRiskStudentService = {
     });
     return response.data;
   },
+  sendAlertEmail: async (
+    studentId: string,
+    semesterId: string
+  ): Promise<{ code: number; message: string }> => {
+    const response = await api.post(
+      `/at-risk-students/${studentId}/send-alert`,
+      {},
+      { params: { semesterId } }
+    );
+    return response.data;
+  },
 };
