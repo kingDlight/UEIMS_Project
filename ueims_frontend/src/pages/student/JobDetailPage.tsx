@@ -263,9 +263,11 @@ export const JobDetailPage: React.FC = () => {
             {job.positionsCount != null && (
               <span style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 14px', borderRadius: cc.radiusFull, background: cc.neutralBg, border: `1px solid ${cc.border}`, fontSize: 13, color: cc.textSecondary, fontWeight: 500 }}>
                 <TeamOutlined style={{ fontSize: 12 }} />
-                {job.currentApplicationCount != null
-                  ? `${job.positionsCount - job.currentApplicationCount} of ${job.positionsCount} ${t('positionsOpen', 'positions open')}`
-                  : `${job.positionsCount} ${t('positions', 'positions')}`}
+                {(() => {
+                  const taken = job.currentApplicationCount ?? 0;
+                  const open = Math.max(0, job.positionsCount - taken);
+                  return `${open} ${open === 1 ? t('positionOpen', 'position') : t('positionsOpen', 'positions')} open`;
+                })()}
               </span>
             )}
             {job.requiredSkills && (() => {

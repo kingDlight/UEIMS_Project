@@ -135,6 +135,10 @@ public enum ErrorCode {
             1109,
             "This job posting has reached its maximum number of applications and is no longer accepting new applicants",
             HttpStatus.BAD_REQUEST),
+    JOB_POST_REDUCE_BELOW_FILLED(
+            1110,
+            "Cannot reduce open positions below the number of students who have already applied",
+            HttpStatus.BAD_REQUEST),
 
     // Account related
     USER_PERMANENTLY_LOCKED(

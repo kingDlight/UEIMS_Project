@@ -165,6 +165,15 @@ public class JobPostServiceImpl implements JobPostService {
         validateOwnership(existing);
         validateSemesterStatus(existing.getSemester()); // BR-30
 
+        // FIX 049: max_positions is now the runtime open-positions count.
+        // Refuse edits that would drop it below the number of students who
+        // already hold a slot — otherwise we orphan live applications.
+        long taken = applicationRepository.countActiveApplicationsForJob(id);
+        if (request.getPositionsCount() != null
+                && request.getPositionsCount() < taken) {
+            throw new AppException(ErrorCode.JOB_POST_REDUCE_BELOW_FILLED);
+        }
+
         existing.setTitle(request.getTitle());
         existing.setDescription(request.getDescription());
         existing.setRequirements(request.getRequirements());

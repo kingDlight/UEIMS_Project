@@ -262,3 +262,35 @@ BEGIN
     RAISE NOTICE '=== 002_legacy_patches.sql applied successfully ===';
     RAISE NOTICE 'If upgrading from a pre-FIX-013/017/018/021 database, all four legacy fixes are now active.';
 END $$;
+
+
+-- ============================================================================
+-- FIX 049: max_positions semantics change
+-- ----------------------------------------------------------------------------
+-- `job_posts.max_positions` is being redefined from "total historical quota"
+-- to "current open positions runtime". The previous "0 / 18 filled" view
+-- confused enterprise users because the historical quota had no operational
+-- meaning after applications started arriving. Going forward:
+--   - max_positions = number of slots currently OPEN for new applications
+--   - When students fill slots, the applications table count rises but
+--     max_positions stays put (runtime); enterprise can decrement or
+--     extend it via edit without manual math.
+-- This migration one-shot-recalculates max_positions = max(0, quota - taken)
+-- so existing rows render correctly under the new semantics.
+-- Idempotent (uses GREATEST so re-running is safe).
+-- ============================================================================
+
+UPDATE job_posts jp
+SET max_positions = GREATEST(
+    0,
+    jp.max_positions - COALESCE((
+        SELECT COUNT(*)
+        FROM applications a
+        WHERE a.job_post_id = jp.job_post_id
+          AND a.status NOT IN ('WITHDRAWN', 'REJECTED_BY_STUDENT', 'WITHDRAWN_BY_SYSTEM')
+          AND a.deleted_at IS NULL
+    ), 0)
+);
+
+COMMENT ON COLUMN job_posts.max_positions IS
+    'FIX 049: current number of OPEN positions (runtime, editable). Was: total historical quota.';

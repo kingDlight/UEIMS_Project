@@ -167,8 +167,8 @@ export const JobBoardTab: React.FC = () => {
                       <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: cc.textMuted }}>
                         <TeamOutlined style={{ fontSize: 12 }} />
                         {job.currentApplicationCount != null
-                          ? `${job.positionsCount - job.currentApplicationCount} of ${job.positionsCount} ${t('positionsOpen', 'positions open')}`
-                          : `${job.positionsCount} ${t('positions', 'positions')}`}
+                          ? `${job.positionsCount - job.currentApplicationCount} ${job.positionsCount - job.currentApplicationCount === 1 ? 'position' : 'positions'} open`
+                          : `${job.positionsCount} ${job.positionsCount === 1 ? 'position' : 'positions'}`}
                       </span>
                     )}
                   </div>

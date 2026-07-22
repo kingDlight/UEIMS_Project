@@ -409,7 +409,7 @@ export const JobPostManagementTab: React.FC = () => {
                           <strong>
                             {(post.positionsCount ?? 0) - (post.currentApplicationCount ?? 0)}
                           </strong>{' '}
-                          of {post.positionsCount} position{post.positionsCount > 1 ? 's' : ''} open
+                          position{((post.positionsCount ?? 0) - (post.currentApplicationCount ?? 0)) !== 1 ? 's' : ''} open
                           <span className="text-slate-400 ml-1">
                             ({post.currentApplicationCount ?? 0} applied)
                           </span>
@@ -524,9 +524,9 @@ export const JobPostManagementTab: React.FC = () => {
                 className="w-full"
               />
             </Form.Item>
-            {editingPost && (editingPost.currentApplicationCount ?? 0) > 0 && (
+            {editingPost && (
               <div className="-mt-4 mb-4 text-xs text-slate-500">
-                {editingPost.currentApplicationCount} student{editingPost.currentApplicationCount! > 1 ? 's have' : ' has'} already applied — keep this number ≥ {editingPost.currentApplicationCount}.
+                Currently <strong>{editingPost.currentApplicationCount ?? 0}</strong> student{(editingPost.currentApplicationCount ?? 0) !== 1 ? 's have' : ' has'} applied. Set this to the number of open positions you want available right now — type the new total directly (no math required).
               </div>
             )}
             {!editingPost && (
