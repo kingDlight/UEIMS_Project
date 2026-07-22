@@ -407,9 +407,9 @@ export const JobPostManagementTab: React.FC = () => {
                         <TeamOutlined className="text-[#E67E22]" />
                         <span>
                           <strong>
-                            {(post.positionsCount ?? 0) - (post.currentApplicationCount ?? 0)}
+                            {Math.max(0, (post.positionsCount ?? 0) - (post.currentApplicationCount ?? 0))}
                           </strong>{' '}
-                          position{((post.positionsCount ?? 0) - (post.currentApplicationCount ?? 0)) !== 1 ? 's' : ''} open
+                          position{Math.max(0, (post.positionsCount ?? 0) - (post.currentApplicationCount ?? 0)) !== 1 ? 's' : ''} open
                           <span className="text-slate-400 ml-1">
                             ({post.currentApplicationCount ?? 0} applied)
                           </span>
