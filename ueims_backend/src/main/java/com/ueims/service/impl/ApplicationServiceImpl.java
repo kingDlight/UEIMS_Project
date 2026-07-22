@@ -165,6 +165,16 @@ public class ApplicationServiceImpl implements ApplicationService {
         if (jobPost.getApplicationDeadline() != null && LocalDate.now().isAfter(jobPost.getApplicationDeadline())) {
             throw new AppException(ErrorCode.APPLICATION_DEADLINE_EXPIRED);
         }
+        // BR-49: a seat is reserved the moment a student applies (no CV screening
+        // required), so block further applications the second the post hits its cap.
+        // Without this guard, students 101+ would overshoot positionsCount even
+        // though the list endpoint already filters the post out of the board.
+        if (jobPost.getPositionsCount() != null && jobPost.getPositionsCount() > 0) {
+            long taken = applicationRepository.countActiveApplicationsForJob(jobPost.getJobPostId());
+            if (taken >= jobPost.getPositionsCount()) {
+                throw new AppException(ErrorCode.JOB_POST_FULL);
+            }
+        }
     }
 
     private void validateStudentEligibility(User student, JobPost jobPost) {

@@ -52,6 +52,21 @@ public interface ApplicationRepository extends JpaRepository<Application, UUID> 
     long countByStudent_UserIdAndStatusNotAndDeletedAtIsNull(UUID studentId, ApplicationStatus status);
 
     /**
+     * Counts active (non-terminal) applications for a single job post.
+     * Active = PENDING, SCREENING_PASSED, INTERVIEW_SCHEDULED, ACCEPTED
+     * Excludes terminal statuses: REJECTED, SCREENING_REJECTED, WITHDRAWN
+     * — withdrawn / rejected applications free up the slot.
+     *
+     * <p>Used to enforce {@code max_positions}: a job is "full" when this count
+     * reaches its positionsCount. Apply is blocked past that point.
+     */
+    @Query("SELECT COUNT(a) FROM Application a "
+            + "WHERE a.jobPost.jobPostId = :jobPostId "
+            + "AND a.deletedAt IS NULL "
+            + "AND a.status NOT IN ('REJECTED', 'SCREENING_REJECTED', 'WITHDRAWN')")
+    long countActiveApplicationsForJob(@Param("jobPostId") UUID jobPostId);
+
+    /**
      * Counts only active (non-terminal) applications for a student.
      * Active = PENDING, SCREENING_PASSED, INTERVIEW_SCHEDULED, ACCEPTED
      * Excludes terminal statuses: REJECTED, SCREENING_REJECTED, WITHDRAWN

@@ -39,6 +39,8 @@ interface JobPost {
   benefits?: string;
   requiredSkills?: string;
   positionsCount: number;
+  currentApplicationCount?: number;
+  full?: boolean;
   applicationDeadline: string;
   status: string;
   semester?: Semester;
@@ -54,15 +56,29 @@ const STATUS_COLORS: Record<string, { color: string; bg: string; borderColor: st
   PENDING: { color: 'text-amber-500', bg: 'bg-amber-500/10', borderColor: 'border-amber-500/30', label: 'Pending' },
   DRAFT: { color: 'text-slate-500', bg: 'bg-slate-500/10', borderColor: 'border-slate-500/30', label: 'Draft' },
   EXPIRED: { color: 'text-red-700', bg: 'bg-red-500/15', borderColor: 'border-red-500/40', label: 'Expired' },
+  FULL: { color: 'text-orange-700', bg: 'bg-orange-500/10', borderColor: 'border-orange-500/40', label: 'Full' },
+};
+
+// BR-49: a post is "Full" the moment currentApplicationCount reaches positionsCount.
+// Surfaces the cap state alongside OPEN/CLOSED so enterprises can extend positions
+// via edit without leaving a stale OPEN board listing.
+const isFullPost = (post: JobPost): boolean => {
+  if (post.status !== 'OPEN') return false;
+  if (post.full === true) return true;
+  if (post.currentApplicationCount == null) return false;
+  return post.currentApplicationCount >= post.positionsCount;
 };
 
 // Derived status: deadline-aware. Stored status OPEN + past deadline => EXPIRED.
+// FULL takes priority over EXPIRED for visual clarity — if a post is both full
+// and past-deadline, "Full" is what an enterprise should act on first.
 const isExpiredPost = (post: JobPost): boolean => {
   if (post.status !== 'OPEN' || !post.applicationDeadline) return false;
   return new Date(post.applicationDeadline) < new Date();
 };
 
 const effectiveStatus = (post: JobPost): string => {
+  if (isFullPost(post)) return 'FULL';
   return isExpiredPost(post) ? 'EXPIRED' : post.status;
 };
 
@@ -383,7 +399,14 @@ export const JobPostManagementTab: React.FC = () => {
                     <div className="p-3 px-4.5 flex flex-col gap-2 flex-1">
                       <div className="flex items-center gap-2 text-xs text-slate-600">
                         <TeamOutlined className="text-[#E67E22]" />
-                        <span><strong>{post.positionsCount}</strong> position{post.positionsCount > 1 ? 's' : ''}</span>
+                        <span>
+                          <strong>
+                            {post.currentApplicationCount != null
+                              ? `${post.currentApplicationCount}/${post.positionsCount}`
+                              : `${post.positionsCount}`}
+                          </strong>{' '}
+                          position{post.positionsCount > 1 ? 's' : ''} filled
+                        </span>
                       </div>
                       {post.semester && (
                         <div className="flex items-center gap-2 text-xs text-slate-600">
@@ -421,17 +444,23 @@ export const JobPostManagementTab: React.FC = () => {
                         size="small"
                         icon={post.status === 'OPEN' ? <PoweroffOutlined /> : <ReloadOutlined />}
                         onClick={() => requestToggle(post)}
-                        disabled={isExpiredPost(post)}
-                        title={isExpiredPost(post) ? 'Cannot toggle — deadline has passed' : undefined}
-                        className={`rounded-xl flex-1 font-bold ${
+                        disabled={isExpiredPost(post) || isFullPost(post)}
+                        title={
                           isExpiredPost(post)
+                            ? 'Cannot toggle — deadline has passed'
+                            : isFullPost(post)
+                            ? 'Full — edit to add more positions or close the post'
+                            : undefined
+                        }
+                        className={`rounded-xl flex-1 font-bold ${
+                          isExpiredPost(post) || isFullPost(post)
                             ? 'text-slate-400 border-slate-200 bg-slate-50'
                             : post.status === 'OPEN'
                             ? 'text-red-500 border-red-500/30 bg-red-50 hover:bg-red-100 hover:border-red-500/50'
                             : 'text-emerald-500 border-emerald-500/30 bg-emerald-50 hover:bg-emerald-100 hover:border-emerald-500/50'
                         }`}
                       >
-                        {isExpiredPost(post) ? 'Expired' : post.status === 'OPEN' ? 'Close' : 'Reopen'}
+                        {isExpiredPost(post) ? 'Expired' : isFullPost(post) ? 'Full' : post.status === 'OPEN' ? 'Close' : 'Reopen'}
                       </Button>
                     </div>
                   </motion.div>

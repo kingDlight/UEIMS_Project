@@ -77,4 +77,20 @@ public class JobPost extends BaseEntity {
 
     @Transient
     private Boolean isHighlyRecommended;
+
+    /**
+     * Number of non-terminal applications currently held against this post.
+     * Populated by {@code JobPostService} for both student and enterprise views so
+     * the UI can show "Full" / remaining seats and the student job board can hide
+     * fully-booked posts.
+     */
+    @Transient
+    private Long currentApplicationCount;
+
+    /**
+     * Convenience flag — true when {@code currentApplicationCount >= positionsCount}.
+     * Computed in the service layer; the entity stays a pure data holder.
+     */
+    @Transient
+    private Boolean full;
 }

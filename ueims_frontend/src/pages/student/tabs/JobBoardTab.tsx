@@ -163,7 +163,14 @@ export const JobBoardTab: React.FC = () => {
                   </div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
                     {job.location && <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: cc.textMuted }}><EnvironmentOutlined style={{ fontSize: 12 }} />{job.location}</span>}
-                    {job.maxPositions && <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: cc.textMuted }}><TeamOutlined style={{ fontSize: 12 }} />{job.maxPositions} {t('positions', 'positions')}</span>}
+                    {job.positionsCount != null && (
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: cc.textMuted }}>
+                        <TeamOutlined style={{ fontSize: 12 }} />
+                        {job.currentApplicationCount != null
+                          ? `${job.positionsCount - job.currentApplicationCount}/${job.positionsCount} ${t('positionsLeft', 'left')}`
+                          : `${job.positionsCount} ${t('positions', 'positions')}`}
+                      </span>
+                    )}
                   </div>
                   <p style={{ fontSize: 13, color: cc.textMuted, margin: '0 0 14px', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{job.description || t('jobDescription', 'Job description...')}</p>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 14, borderTop: `1px solid ${cc.borderSubtle}`, marginTop: 'auto' }}>

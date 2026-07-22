@@ -131,6 +131,10 @@ public enum ErrorCode {
     JOB_POST_HAS_APPLICATIONS(1107, "Cannot delete a job post that has applications", HttpStatus.BAD_REQUEST),
     INVALID_WEEK_REPORT_SUBMISSION(
             1108, "You can only submit or update reports for the current week", HttpStatus.BAD_REQUEST),
+    JOB_POST_FULL(
+            1109,
+            "This job posting has reached its maximum number of applications and is no longer accepting new applicants",
+            HttpStatus.BAD_REQUEST),
 
     // Account related
     USER_PERMANENTLY_LOCKED(

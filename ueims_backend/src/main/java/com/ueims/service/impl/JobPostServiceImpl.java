@@ -52,8 +52,13 @@ public class JobPostServiceImpl implements JobPostService {
         if (currentUser.getEnterprise() == null) {
             return java.util.Collections.emptyList();
         }
-        return repository.findByEnterprise_EnterpriseId(
+        List<JobPost> posts = repository.findByEnterprise_EnterpriseId(
                 currentUser.getEnterprise().getEnterpriseId());
+        // BR-49: tell enterprises which posts are full so they can decide to
+        // extend positions via edit. Required so they don't accidentally leave
+        // a "stale OPEN" post lying around that students can't apply to.
+        populateFillState(posts);
+        return posts;
     }
 
     @Override
@@ -63,6 +68,21 @@ public class JobPostServiceImpl implements JobPostService {
         // still in the future. Expired posts are intentionally hidden so the student
         // job board doesn't accumulate stale listings from past semesters.
         List<JobPost> activeJobs = repository.findActiveForStudents(LocalDate.now());
+
+        // BR-49: drop posts that already hit their max_positions cap. The slot is
+        // reserved the moment a student applies (no CV screening required), so the
+        // board must hide a post the second the last seat is taken — otherwise a
+        // 101st student could squeeze in and silently overshoot the limit.
+        // We re-query the count per post (cheap, indexed on job_post_id) instead of
+        // relying on entity state, because positionsCount can change between the
+        // list query and this filter step.
+        activeJobs = activeJobs.stream()
+                .filter(p -> {
+                    long taken = applicationRepository.countActiveApplicationsForJob(p.getJobPostId());
+                    int max = p.getPositionsCount() == null ? 0 : p.getPositionsCount();
+                    return taken < max;
+                })
+                .toList();
 
         try {
             User currentUser = getCurrentUser();
@@ -74,12 +94,31 @@ public class JobPostServiceImpl implements JobPostService {
         return activeJobs;
     }
 
+    /**
+     * Populates {@code currentApplicationCount} + {@code full} on every post in the
+     * list. Used by enterprise views so the "Full" badge / remaining seats are
+     * visible without an extra round-trip from the frontend.
+     */
+    private void populateFillState(List<JobPost> posts) {
+        for (JobPost p : posts) {
+            long taken = applicationRepository.countActiveApplicationsForJob(p.getJobPostId());
+            int max = p.getPositionsCount() == null ? 0 : p.getPositionsCount();
+            p.setCurrentApplicationCount(taken);
+            p.setFull(taken >= max);
+        }
+    }
+
     @Override
     @Transactional(readOnly = true)
     public JobPost findById(UUID id) {
-        return repository
+        JobPost post = repository
                 .findWithEnterpriseByJobPostId(id)
                 .orElseThrow(() -> new AppException(ErrorCode.JOB_POST_NOT_FOUND));
+        long taken = applicationRepository.countActiveApplicationsForJob(post.getJobPostId());
+        int max = post.getPositionsCount() == null ? 0 : post.getPositionsCount();
+        post.setCurrentApplicationCount(taken);
+        post.setFull(taken >= max);
+        return post;
     }
 
     @Override
