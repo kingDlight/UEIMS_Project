@@ -519,19 +519,19 @@ export const JobPostManagementTab: React.FC = () => {
             </Form.Item>
             <Form.Item name="positionsCount" label="Open positions" rules={[{ required: true, message: 'Number of positions is required' }]}>
               <InputNumber
-                min={editingPost ? Math.max(1, editingPost.currentApplicationCount ?? 0) : 1}
+                min={0}
                 max={1000}
                 className="w-full"
               />
             </Form.Item>
             {editingPost && (
               <div className="-mt-4 mb-4 text-xs text-slate-500">
-                Currently <strong>{editingPost.currentApplicationCount ?? 0}</strong> student{(editingPost.currentApplicationCount ?? 0) !== 1 ? 's have' : ' has'} applied. Set this to the number of open positions you want available right now — type the new total directly (no math required).
+                How many slots are currently <strong>open</strong> for new applications. The original quota is {editingPost.positionsCount + (editingPost.currentApplicationCount ?? 0)} ({(editingPost.currentApplicationCount ?? 0)} already applied). Type the new open count directly — no math required.
               </div>
             )}
             {!editingPost && (
               <div className="-mt-4 mb-4 text-xs text-slate-500">
-                How many positions are open for students to apply. You can change this anytime after posting.
+                How many positions you want open for students. You can change this anytime after posting.
               </div>
             )}
             <div className="col-span-full">

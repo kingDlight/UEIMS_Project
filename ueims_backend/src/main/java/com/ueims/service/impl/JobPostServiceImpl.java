@@ -150,6 +150,7 @@ public class JobPostServiceImpl implements JobPostService {
                 .benefits(request.getBenefits())
                 .requiredSkills(request.getRequiredSkills())
                 .positionsCount(request.getPositionsCount())
+                .originalMaxPositions(request.getPositionsCount())
                 .applicationDeadline(request.getApplicationDeadline())
                 .status(request.getStatus() != null ? request.getStatus() : "OPEN")
                 .createdBy(currentUser)
@@ -165,13 +166,24 @@ public class JobPostServiceImpl implements JobPostService {
         validateOwnership(existing);
         validateSemesterStatus(existing.getSemester()); // BR-30
 
-        // FIX 049: max_positions is now the runtime open-positions count.
-        // Refuse edits that would drop it below the number of students who
-        // already hold a slot — otherwise we orphan live applications.
         long taken = applicationRepository.countActiveApplicationsForJob(id);
-        if (request.getPositionsCount() != null
-                && request.getPositionsCount() < taken) {
-            throw new AppException(ErrorCode.JOB_POST_REDUCE_BELOW_FILLED);
+
+        // FIX 049: `positionsCount` is the runtime open-positions count, auto-
+        // maintained by triggers (`= original - taken`). When the enterprise
+        // edits, they specify the desired open count; we set `original` so the
+        // trigger-derived runtime equals what they asked for. We also refuse
+        // edits that would push open below the number of students who hold a
+        // slot — otherwise we'd orphan live applications.
+        if (request.getPositionsCount() != null) {
+            if (request.getPositionsCount() < taken) {
+                throw new AppException(ErrorCode.JOB_POST_REDUCE_BELOW_FILLED);
+            }
+            int desiredOriginal = (int) Math.min(
+                Integer.MAX_VALUE,
+                (long) request.getPositionsCount() + taken
+            );
+            existing.setOriginalMaxPositions(desiredOriginal);
+            existing.setPositionsCount((int) (desiredOriginal - taken));
         }
 
         existing.setTitle(request.getTitle());
@@ -179,7 +191,6 @@ public class JobPostServiceImpl implements JobPostService {
         existing.setRequirements(request.getRequirements());
         existing.setBenefits(request.getBenefits());
         existing.setRequiredSkills(request.getRequiredSkills());
-        existing.setPositionsCount(request.getPositionsCount());
         existing.setApplicationDeadline(request.getApplicationDeadline());
         // BR-29: Cho phép Enterprise điều chỉnh trạng thái (OPEN/CLOSED...)
         if (request.getStatus() != null) {

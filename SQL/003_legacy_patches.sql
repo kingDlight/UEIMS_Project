@@ -275,11 +275,30 @@ END $$;
 --   - When students fill slots, the applications table count rises but
 --     max_positions stays put (runtime); enterprise can decrement or
 --     extend it via edit without manual math.
--- This migration one-shot-recalculates max_positions = max(0, quota - taken)
--- so existing rows render correctly under the new semantics.
--- Idempotent (uses GREATEST so re-running is safe).
+-- This migration:
+--   1. Adds `original_max_positions` snapshot column (immutable after create)
+--   2. Backfills it from the legacy `max_positions` value
+--   3. Recalculates `max_positions` so the visible UI matches the new semantic
+--   4. Installs triggers so future applications keep the invariant intact:
+--        INSERT application → max_positions -= 1
+--        DELETE/WITHDRAW     → max_positions += 1
+--      Only decrements if max_positions > 0 (over-applications don't go negative)
+-- Idempotent (uses GREATEST + DROP IF EXISTS).
 -- ============================================================================
 
+-- 1. Snapshot column for the immutable original quota
+ALTER TABLE job_posts
+    ADD COLUMN IF NOT EXISTS original_max_positions INT;
+
+UPDATE job_posts
+SET original_max_positions = max_positions
+WHERE original_max_positions IS NULL;
+
+ALTER TABLE job_posts
+    ALTER COLUMN original_max_positions SET NOT NULL;
+
+-- 2. Backfill max_positions = max(0, original - taken) for legacy rows.
+--    After this step, existing rows render correctly under the new semantic.
 UPDATE job_posts jp
 SET max_positions = GREATEST(
     0,
@@ -292,5 +311,50 @@ SET max_positions = GREATEST(
     ), 0)
 );
 
+-- 3a. Trigger: when a NEW active application is created, decrement max_positions.
+CREATE OR REPLACE FUNCTION jobpost_apply_decrement() RETURNS TRIGGER AS $$
+BEGIN
+    -- Only decrement for new rows that count as active
+    IF NEW.deleted_at IS NULL
+       AND NEW.status NOT IN ('WITHDRAWN', 'REJECTED_BY_STUDENT', 'WITHDRAWN_BY_SYSTEM') THEN
+        UPDATE job_posts
+        SET max_positions = GREATEST(0, max_positions - 1)
+        WHERE job_post_id = NEW.job_post_id;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_application_decrement ON applications;
+CREATE TRIGGER trg_application_decrement
+    AFTER INSERT ON applications
+    FOR EACH ROW
+    EXECUTE FUNCTION jobpost_apply_decrement();
+
+-- 3b. Trigger: when an application is withdrawn / soft-deleted / status-flipped,
+-- increment max_positions back up so the post re-opens.
+CREATE OR REPLACE FUNCTION jobpost_apply_increment() RETURNS TRIGGER AS $$
+BEGIN
+    -- Old row was active; new row is no longer active → return the slot
+    IF OLD.deleted_at IS NULL
+       AND OLD.status NOT IN ('WITHDRAWN', 'REJECTED_BY_STUDENT', 'WITHDRAWN_BY_SYSTEM')
+       AND (NEW.deleted_at IS NOT NULL
+            OR NEW.status IN ('WITHDRAWN', 'REJECTED_BY_STUDENT', 'WITHDRAWN_BY_SYSTEM')) THEN
+        UPDATE job_posts
+        SET max_positions = LEAST(original_max_positions, max_positions + 1)
+        WHERE job_post_id = OLD.job_post_id;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_application_increment ON applications;
+CREATE TRIGGER trg_application_increment
+    AFTER UPDATE OF status, deleted_at ON applications
+    FOR EACH ROW
+    EXECUTE FUNCTION jobpost_apply_increment();
+
 COMMENT ON COLUMN job_posts.max_positions IS
-    'FIX 049: current number of OPEN positions (runtime, editable). Was: total historical quota.';
+    'FIX 049: current number of OPEN positions (runtime, auto-maintained by triggers). Was: total historical quota.';
+COMMENT ON COLUMN job_posts.original_max_positions IS
+    'FIX 049: immutable original quota snapshot taken at job-post creation.';

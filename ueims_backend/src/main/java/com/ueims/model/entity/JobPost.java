@@ -57,6 +57,16 @@ public class JobPost extends BaseEntity {
     @NotNull(message = "Positions count is mandatory")
     private Integer positionsCount;
 
+    /**
+     * FIX 049: immutable snapshot of the original quota set when this job post
+     * was first created. The runtime {@code positionsCount} is auto-maintained
+     * by triggers (decrement on apply, increment on withdraw), bounded above by
+     * this snapshot so the post never re-opens more slots than originally
+     * authorised.
+     */
+    @Column(name = "original_max_positions", nullable = false)
+    private Integer originalMaxPositions;
+
     @Column(name = "application_deadline", nullable = false)
     @NotNull(message = "Application deadline is mandatory")
     private java.time.LocalDate applicationDeadline;
