@@ -42,25 +42,51 @@ public class JobPostPositionsMigration implements CommandLineRunner {
 
             Integer nullCount = jdbc.queryForObject(
                     "SELECT COUNT(*) FROM job_posts WHERE original_max_positions IS NULL", Integer.class);
-            if (nullCount != null && nullCount > 0) {
-                jdbc.update("UPDATE job_posts SET original_max_positions = max_positions "
-                        + "WHERE original_max_positions IS NULL");
+
+            // FIX 049: detect whether the migration has already been applied.
+            // The trigger `trg_application_decrement` is the source of truth —
+            // if it exists, the column backfill + max_positions recalc have
+            // already run on a previous boot, and re-running them would
+            // double-count `taken` against the trigger-maintained runtime
+            // value, silently collapsing every post to 0 on each restart.
+            boolean alreadyApplied;
+            try {
+                Integer triggerCount = jdbc.queryForObject(
+                        "SELECT COUNT(*) FROM pg_trigger WHERE tgname = 'trg_application_decrement'",
+                        Integer.class);
+                alreadyApplied = triggerCount != null && triggerCount > 0;
+            } catch (Exception e) {
+                alreadyApplied = false;
             }
-            jdbc.execute("ALTER TABLE job_posts " + "ALTER COLUMN original_max_positions SET NOT NULL");
 
-            // Drop legacy >0 check so runtime count can drop to 0 (full).
-            // Constraint name auto-generated as job_posts_max_positions_check.
-            jdbc.execute("ALTER TABLE job_posts " + "DROP CONSTRAINT IF EXISTS job_posts_max_positions_check");
+            if (!alreadyApplied || (nullCount != null && nullCount > 0)) {
+                // First-time / pre-trigger state: column still holds the original
+                // quota and we need to recalculate to the new "open slots" semantic.
+                if (nullCount != null && nullCount > 0) {
+                    jdbc.update("UPDATE job_posts SET original_max_positions = max_positions "
+                            + "WHERE original_max_positions IS NULL");
+                }
+                jdbc.execute("ALTER TABLE job_posts "
+                        + "ALTER COLUMN original_max_positions SET NOT NULL");
 
-            // FIX 049 status filter must match the actual enum values, otherwise
-            // the count is off and backfilled max_positions drifts from the
-            // service-layer truth (which uses ApplicationStatus.REJECTED,
-            // SCREENING_REJECTED, WITHDRAWN).
-            jdbc.update("UPDATE job_posts jp SET max_positions = GREATEST(0, jp.max_positions - "
-                    + "COALESCE((SELECT COUNT(*) FROM applications a "
-                    + "WHERE a.job_post_id = jp.job_post_id "
-                    + "AND a.status NOT IN ('REJECTED','SCREENING_REJECTED','WITHDRAWN') "
-                    + "AND a.deleted_at IS NULL), 0))");
+                // Drop legacy >0 check so runtime count can drop to 0 (full).
+                // Constraint name auto-generated as job_posts_max_positions_check.
+                jdbc.execute("ALTER TABLE job_posts "
+                        + "DROP CONSTRAINT IF EXISTS job_posts_max_positions_check");
+
+                // FIX 049 status filter must match the actual enum values,
+                // otherwise the count is off and backfilled max_positions drifts
+                // from the service-layer truth (which uses
+                // ApplicationStatus.REJECTED, SCREENING_REJECTED, WITHDRAWN).
+                jdbc.update("UPDATE job_posts jp SET max_positions = GREATEST(0, jp.max_positions - "
+                        + "COALESCE((SELECT COUNT(*) FROM applications a "
+                        + "WHERE a.job_post_id = jp.job_post_id "
+                        + "AND a.status NOT IN ('REJECTED','SCREENING_REJECTED','WITHDRAWN') "
+                        + "AND a.deleted_at IS NULL), 0))");
+            } else {
+                log.info("[FIX 049] triggers already installed, skipping max_positions recalc "
+                        + "(re-running would double-count `taken` against the trigger-maintained value).");
+            }
 
             jdbc.execute("CREATE OR REPLACE FUNCTION jobpost_apply_decrement() "
                     + "RETURNS TRIGGER AS $$ BEGIN "
