@@ -170,7 +170,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         // Without this guard, students 101+ would overshoot positionsCount even
         // though the list endpoint already filters the post out of the board.
         if (jobPost.getPositionsCount() != null && jobPost.getPositionsCount() > 0) {
-            long taken = applicationRepository.countActiveApplicationsForJob(jobPost.getJobPostId());
+            long taken = repository.countActiveApplicationsForJob(jobPost.getJobPostId());
             if (taken >= jobPost.getPositionsCount()) {
                 throw new AppException(ErrorCode.JOB_POST_FULL);
             }
