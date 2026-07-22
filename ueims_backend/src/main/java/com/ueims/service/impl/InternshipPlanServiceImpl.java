@@ -245,6 +245,12 @@ public class InternshipPlanServiceImpl implements InternshipPlanService {
                 .findById(enterpriseId)
                 .orElseThrow(() -> new AppException(ErrorCode.ENTERPRISE_NOT_FOUND));
 
+        // Validate semester — must happen before any check that needs the
+        // semester id (e.g. looking up the existing plan for resubmit logic).
+        Semester semester = semesterRepository
+                .findById(dto.getSemesterId())
+                .orElseThrow(() -> new AppException(ErrorCode.SEMESTER_NOT_FOUND));
+
         // Validate required fields — an empty training plan is meaningless and
         // previously slipped through, allowing the enterprise to "Save & Submit"
         // a blank plan and instantly move it into PENDING_APPROVAL. TM would
@@ -262,16 +268,12 @@ public class InternshipPlanServiceImpl implements InternshipPlanService {
                 repository.findByEnterprise_EnterpriseIdAndSemester_SemesterId(enterpriseId, semester.getSemesterId());
         boolean isResubmit = existingForNote.isPresent()
                 && "REJECTED".equals(existingForNote.get().getStatus());
-        String revisionNote = dto.getRevisionNote() == null ? "" : dto.getRevisionNote().trim();
+        String revisionNote =
+                dto.getRevisionNote() == null ? "" : dto.getRevisionNote().trim();
         if (isResubmit && revisionNote.isEmpty()) {
             throw new AppException(
                     ErrorCode.FIELD_REQUIRED, "Revision note is required when resubmitting after a rejection");
         }
-
-        // Validate semester
-        Semester semester = semesterRepository
-                .findById(dto.getSemesterId())
-                .orElseThrow(() -> new AppException(ErrorCode.SEMESTER_NOT_FOUND));
 
         if ("LOCKED".equals(semester.getStatus())) {
             throw new AppException(ErrorCode.SEMESTER_LOCKED_DATE);
