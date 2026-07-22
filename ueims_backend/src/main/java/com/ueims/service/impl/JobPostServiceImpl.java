@@ -132,6 +132,12 @@ public class JobPostServiceImpl implements JobPostService {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
+        // FIX 049: reject negative values defensively in case the DTO validator
+        // is bypassed. Zero is valid (post starts full / closed for new apps).
+        if (request.getPositionsCount() != null && request.getPositionsCount() < 0) {
+            throw new AppException(ErrorCode.JOB_POST_NEGATIVE_POSITIONS);
+        }
+
         // BR-30: Kiểm tra trạng thái Semester trước khi tạo mới
         if (request.getSemester() == null || request.getSemester().getSemesterId() == null) {
             throw new AppException(ErrorCode.FIELD_REQUIRED);
@@ -185,7 +191,7 @@ public class JobPostServiceImpl implements JobPostService {
         // because trigger maintains `original >= taken`.
         if (request.getPositionsCount() != null) {
             if (request.getPositionsCount() < 0) {
-                throw new AppException(ErrorCode.INVALID_PARAMETER_FORMAT);
+                throw new AppException(ErrorCode.JOB_POST_NEGATIVE_POSITIONS);
             }
             int desiredOriginal = (int) Math.min(Integer.MAX_VALUE, (long) request.getPositionsCount() + taken);
             existing.setOriginalMaxPositions(desiredOriginal);

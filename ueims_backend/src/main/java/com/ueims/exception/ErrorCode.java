@@ -139,6 +139,10 @@ public enum ErrorCode {
             1110,
             "Cannot reduce open positions below the number of students who have already applied",
             HttpStatus.BAD_REQUEST),
+    JOB_POST_NEGATIVE_POSITIONS(
+            1111,
+            "Open positions cannot be negative. Use 0 to close new applications.",
+            HttpStatus.BAD_REQUEST),
 
     // Account related
     USER_PERMANENTLY_LOCKED(

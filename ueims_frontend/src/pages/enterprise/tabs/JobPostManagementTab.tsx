@@ -221,7 +221,11 @@ export const JobPostManagementTab: React.FC = () => {
       await fetchPosts();
     } catch (err: any) {
       if (err.errorFields) {
-        message.error('Please complete all required fields.');
+        // First failing field's message is the most actionable for the user.
+        const firstField = err.errorFields[0];
+        const inlineMsg =
+          firstField?.errors?.[0] || 'Please complete all required fields.';
+        message.error(inlineMsg);
       } else {
         message.error(err.response?.data?.message || 'Failed to save job post.');
       }
@@ -523,7 +527,33 @@ export const JobPostManagementTab: React.FC = () => {
             <Form.Item
               name="positionsCount"
               label="Open positions"
-              rules={[{ required: true, message: 'Number of open positions is required' }]}
+              // FIX 049: inline validation for negative values. Backend also
+              // rejects defensively (`JOB_POST_NEGATIVE_POSITIONS`), but a
+              // client-side check gives immediate feedback next to the field
+              // instead of a generic toast after round-trip.
+              rules={[
+                { required: true, message: 'Number of open positions is required' },
+                {
+                  validator: (_rule, value) => {
+                    if (value === null || value === undefined || value === '') {
+                      return Promise.resolve();
+                    }
+                    const n = Number(value);
+                    if (!Number.isInteger(n)) {
+                      return Promise.reject(new Error('Open positions must be a whole number.'));
+                    }
+                    if (n < 0) {
+                      return Promise.reject(
+                        new Error('Open positions cannot be negative — use 0 to close new applications.')
+                      );
+                    }
+                    if (n > 1000) {
+                      return Promise.reject(new Error('Open positions cannot exceed 1000.'));
+                    }
+                    return Promise.resolve();
+                  },
+                },
+              ]}
               extra={
                 <span className="text-xs">
                   {(() => {
