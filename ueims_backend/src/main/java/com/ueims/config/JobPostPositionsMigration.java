@@ -52,8 +52,7 @@ public class JobPostPositionsMigration implements CommandLineRunner {
             boolean alreadyApplied;
             try {
                 Integer triggerCount = jdbc.queryForObject(
-                        "SELECT COUNT(*) FROM pg_trigger WHERE tgname = 'trg_application_decrement'",
-                        Integer.class);
+                        "SELECT COUNT(*) FROM pg_trigger WHERE tgname = 'trg_application_decrement'", Integer.class);
                 alreadyApplied = triggerCount != null && triggerCount > 0;
             } catch (Exception e) {
                 alreadyApplied = false;
@@ -66,13 +65,11 @@ public class JobPostPositionsMigration implements CommandLineRunner {
                     jdbc.update("UPDATE job_posts SET original_max_positions = max_positions "
                             + "WHERE original_max_positions IS NULL");
                 }
-                jdbc.execute("ALTER TABLE job_posts "
-                        + "ALTER COLUMN original_max_positions SET NOT NULL");
+                jdbc.execute("ALTER TABLE job_posts " + "ALTER COLUMN original_max_positions SET NOT NULL");
 
                 // Drop legacy >0 check so runtime count can drop to 0 (full).
                 // Constraint name auto-generated as job_posts_max_positions_check.
-                jdbc.execute("ALTER TABLE job_posts "
-                        + "DROP CONSTRAINT IF EXISTS job_posts_max_positions_check");
+                jdbc.execute("ALTER TABLE job_posts " + "DROP CONSTRAINT IF EXISTS job_posts_max_positions_check");
 
                 // FIX 049 status filter must match the actual enum values,
                 // otherwise the count is off and backfilled max_positions drifts
