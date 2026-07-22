@@ -3,6 +3,7 @@ package com.ueims.service;
 import java.util.List;
 import java.util.UUID;
 
+import com.ueims.dto.response.TmWeeklyReportOverviewDTO;
 import com.ueims.dto.response.WeeklyReportDTO;
 import com.ueims.dto.response.WeeklyReportStatusSummaryDTO;
 import com.ueims.model.entity.WeeklyReport;
@@ -40,6 +41,14 @@ public interface WeeklyReportService {
 
     void deleteById(UUID id);
 
+    /**
+     * FIX 006-C: BR-56 — TM override cho weekly report nộp trễ.
+     * Set late_override_by = currentUser.id, lưu reason vào feedback (append).
+     */
+    WeeklyReport overrideLateSubmission(UUID id, String reason);
+
+    WeeklyReportDTO overrideLateAndEnrich(UUID id, String reason);
+
     List<WeeklyReportDTO> enrichDtos(List<WeeklyReport> reports);
 
     /**
@@ -48,4 +57,10 @@ public interface WeeklyReportService {
      * deadline (Sunday), isOverdue, daysLate. Dùng cho dashboard cảnh báo.
      */
     WeeklyReportStatusSummaryDTO getMyWeeklyReportStatusSummary();
+
+    /**
+     * FIX 006-A: Tổng hợp weekly report trên toàn kỳ cho Training Manager.
+     * Trả về thống kê overdue + anomaly + week distribution.
+     */
+    TmWeeklyReportOverviewDTO getTmOverview(java.util.UUID semesterId);
 }

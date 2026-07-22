@@ -47,6 +47,7 @@ The `003_legacy_patches.sql` file consolidates these historical patches:
 | `017_fix_trigger_logic.sql` | Allow MATCHED→OJT + ACCEPTED status + semesters 5 AND 6 | ✅ |
 | `018_fix_br49_interview_confirm_reversal.sql` | Allow resetting `student_confirmed` with reason | ✅ |
 | `021_fix_enterprise_assignment_student_status_trigger.sql` | Allow ELIGIBLE+ACCEPTED+MATCHED+OJT | ✅ |
+| `006_weekly_report_anomaly_late_override.sql` | Anomaly badge + TM late override endpoints (BR-58/56) | ✅ |
 
 If your DB was created from `001` **after** all these fixes were merged into
 `001`, running `003` is a no-op (safe and idempotent).

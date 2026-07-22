@@ -67,4 +67,7 @@ public class WeeklyReport extends BaseEntity {
 
     @Column(name = "hours_logged")
     private Integer hoursLogged;
+
+    @Column(name = "late_override_by")
+    private java.util.UUID lateOverrideBy;
 }

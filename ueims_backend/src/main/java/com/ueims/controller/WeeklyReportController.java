@@ -17,8 +17,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ueims.dto.request.WeeklyReportRequest;
+import com.ueims.dto.response.TmWeeklyReportOverviewDTO;
 import com.ueims.dto.response.WeeklyReportDTO;
 import com.ueims.dto.response.WeeklyReportStatusSummaryDTO;
+import com.ueims.exception.AppException;
 import com.ueims.mapper.WeeklyReportMapper;
 import com.ueims.service.WeeklyReportService;
 import com.ueims.util.HtmlSanitizer;
@@ -55,6 +57,18 @@ public class WeeklyReportController {
     @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<WeeklyReportStatusSummaryDTO> getMyStatusSummary() {
         return ResponseEntity.ok(service.getMyWeeklyReportStatusSummary());
+    }
+
+    /**
+     * FIX 006-A: Tổng hợp weekly report toàn kỳ cho Training Manager.
+     * Trả về: distribution theo tuần, danh sách SV overdue, danh sách report anomaly.
+     * Nếu không truyền semesterId → lấy ACTIVE semester.
+     */
+    @GetMapping("/tm-overview")
+    @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('ADMIN') or hasRole('SYSTEM_ADMIN')")
+    public ResponseEntity<TmWeeklyReportOverviewDTO> getTmOverview(
+            @org.springframework.web.bind.annotation.RequestParam(required = false) UUID semesterId) {
+        return ResponseEntity.ok(service.getTmOverview(semesterId));
     }
 
     @GetMapping("/by-enterprise")
@@ -122,5 +136,22 @@ public class WeeklyReportController {
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         service.deleteById(id);
         return ResponseEntity.ok().build();
+    }
+
+    /**
+     * FIX 006-C: BR-56 — Training Manager override cho weekly report nộp trễ.
+     * Đánh dấu một report là được chấp nhận dù đã quá deadline.
+     * Trigger BR-56 sẽ verify override_by là TRAINING_MANAGER (hoặc ADMIN).
+     */
+    @PostMapping("/{id}/override-late")
+    @PreAuthorize("hasRole('TRAINING_MANAGER') or hasRole('ADMIN') or hasRole('SYSTEM_ADMIN')")
+    public ResponseEntity<WeeklyReportDTO> overrideLate(
+            @PathVariable UUID id,
+            @org.springframework.web.bind.annotation.RequestBody java.util.Map<String, String> body) {
+        String reason = body == null ? null : body.get("reason");
+        if (reason == null || reason.isBlank()) {
+            throw new AppException(com.ueims.exception.ErrorCode.FIELD_REQUIRED);
+        }
+        return ResponseEntity.ok(service.overrideLateAndEnrich(id, reason));
     }
 }

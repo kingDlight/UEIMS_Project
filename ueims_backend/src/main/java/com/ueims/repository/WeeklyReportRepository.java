@@ -38,4 +38,22 @@ public interface WeeklyReportRepository extends JpaRepository<WeeklyReport, UUID
             + "LEFT JOIN FETCH a.enterprise "
             + "WHERE wr.reportId = :id")
     java.util.Optional<WeeklyReport> findByIdWithAssignmentGraph(@Param("id") UUID id);
+
+    @Query("SELECT DISTINCT wr FROM WeeklyReport wr "
+            + "JOIN FETCH wr.assignment a "
+            + "LEFT JOIN FETCH a.student "
+            + "LEFT JOIN FETCH a.semester "
+            + "LEFT JOIN FETCH a.enterprise "
+            + "WHERE a.semester.semesterId = :semesterId")
+    List<WeeklyReport> findAllBySemesterIdWithGraph(@Param("semesterId") UUID semesterId);
+
+    @Query("SELECT DISTINCT wr FROM WeeklyReport wr "
+            + "JOIN FETCH wr.assignment a "
+            + "LEFT JOIN FETCH a.student "
+            + "LEFT JOIN FETCH a.semester "
+            + "LEFT JOIN FETCH a.enterprise "
+            + "WHERE a.semester.semesterId = :semesterId "
+            + "AND wr.isAnomaly = true "
+            + "ORDER BY wr.plagiarismScore DESC")
+    List<WeeklyReport> findAnomaliesBySemesterId(@Param("semesterId") UUID semesterId);
 }

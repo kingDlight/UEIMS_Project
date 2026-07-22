@@ -44,6 +44,7 @@ public class WeeklyReportDTO {
     private LocalDateTime submittedAt;
     private Double plagiarismScore;
     private Boolean isAnomaly;
+    private UUID lateOverrideBy; // FIX 006-C: BR-56 — NULL means no override yet
 
     // Enrichment
     private String studentName;
