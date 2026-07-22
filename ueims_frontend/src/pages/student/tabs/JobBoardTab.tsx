@@ -169,7 +169,11 @@ export const JobBoardTab: React.FC = () => {
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 14, borderTop: `1px solid ${cc.borderSubtle}` }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                       {appliedJobIds.has(job.jobPostId) && <SmallBadge label={t('applied', 'Applied')} variant="info" />}
-                      <SmallBadge label={job.status === 'OPEN' ? 'Open' : 'Closed'} variant={job.status === 'OPEN' ? 'success' : 'neutral'} />
+                      {job.applicationDeadline && new Date(job.applicationDeadline) < new Date() ? (
+                        <SmallBadge label={t('expired', 'Expired')} variant="error" />
+                      ) : (
+                        <SmallBadge label={job.status === 'OPEN' ? t('open', 'Open') : t('closed', 'Closed')} variant={job.status === 'OPEN' ? 'success' : 'neutral'} />
+                      )}
                     </div>
                     <CTAButton variant="ghost" size="sm" icon={<RightOutlined />} onClick={(e) => { e?.stopPropagation(); navigate(`/job/${job.jobPostId}`); }}>{t('viewDetails', 'View details')}</CTAButton>
                   </div>

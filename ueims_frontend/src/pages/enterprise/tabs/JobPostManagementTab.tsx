@@ -53,9 +53,21 @@ const STATUS_COLORS: Record<string, { color: string; bg: string; borderColor: st
   CLOSED: { color: 'text-red-500', bg: 'bg-red-500/10', borderColor: 'border-red-500/30', label: 'Closed' },
   PENDING: { color: 'text-amber-500', bg: 'bg-amber-500/10', borderColor: 'border-amber-500/30', label: 'Pending' },
   DRAFT: { color: 'text-slate-500', bg: 'bg-slate-500/10', borderColor: 'border-slate-500/30', label: 'Draft' },
+  EXPIRED: { color: 'text-red-700', bg: 'bg-red-500/15', borderColor: 'border-red-500/40', label: 'Expired' },
 };
 
-const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
+// Derived status: deadline-aware. Stored status OPEN + past deadline => EXPIRED.
+const isExpiredPost = (post: JobPost): boolean => {
+  if (post.status !== 'OPEN' || !post.applicationDeadline) return false;
+  return new Date(post.applicationDeadline) < new Date();
+};
+
+const effectiveStatus = (post: JobPost): string => {
+  return isExpiredPost(post) ? 'EXPIRED' : post.status;
+};
+
+const StatusBadge: React.FC<{ post: JobPost }> = ({ post }) => {
+  const status = effectiveStatus(post);
   const cfg = STATUS_COLORS[status] || STATUS_COLORS.DRAFT;
   return (
     <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider border ${cfg.bg} ${cfg.color} ${cfg.borderColor}`}>
@@ -232,7 +244,7 @@ export const JobPostManagementTab: React.FC = () => {
       const matchesSearch = !searchTerm ||
         post.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         post.description?.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesStatus = statusFilter === 'ALL' || post.status === statusFilter;
+      const matchesStatus = statusFilter === 'ALL' || effectiveStatus(post) === statusFilter;
       return matchesSearch && matchesStatus;
     });
   }, [posts, searchTerm, statusFilter]);
@@ -297,6 +309,7 @@ export const JobPostManagementTab: React.FC = () => {
                 { value: 'ALL', label: 'All statuses' },
                 { value: 'OPEN', label: 'Open' },
                 { value: 'CLOSED', label: 'Closed' },
+                { value: 'EXPIRED', label: 'Expired' },
                 { value: 'PENDING', label: 'Pending' },
                 { value: 'DRAFT', label: 'Draft' },
               ]}
@@ -359,7 +372,7 @@ export const JobPostManagementTab: React.FC = () => {
                         <h3 className="text-[15px] font-bold text-slate-900 m-0 leading-tight flex-1">
                           {post.title}
                         </h3>
-                        <StatusBadge status={post.status} />
+                        <StatusBadge post={post} />
                       </div>
                       <div className="text-xs text-slate-500 leading-relaxed line-clamp-2">
                         {post.description}
@@ -408,13 +421,17 @@ export const JobPostManagementTab: React.FC = () => {
                         size="small"
                         icon={post.status === 'OPEN' ? <PoweroffOutlined /> : <ReloadOutlined />}
                         onClick={() => requestToggle(post)}
+                        disabled={isExpiredPost(post)}
+                        title={isExpiredPost(post) ? 'Cannot toggle — deadline has passed' : undefined}
                         className={`rounded-xl flex-1 font-bold ${
-                          post.status === 'OPEN'
+                          isExpiredPost(post)
+                            ? 'text-slate-400 border-slate-200 bg-slate-50'
+                            : post.status === 'OPEN'
                             ? 'text-red-500 border-red-500/30 bg-red-50 hover:bg-red-100 hover:border-red-500/50'
                             : 'text-emerald-500 border-emerald-500/30 bg-emerald-50 hover:bg-emerald-100 hover:border-emerald-500/50'
                         }`}
                       >
-                        {post.status === 'OPEN' ? 'Close' : 'Reopen'}
+                        {isExpiredPost(post) ? 'Expired' : post.status === 'OPEN' ? 'Close' : 'Reopen'}
                       </Button>
                     </div>
                   </motion.div>
@@ -521,7 +538,7 @@ export const JobPostManagementTab: React.FC = () => {
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-3">
               <h2 className="text-xl font-extrabold text-slate-900 m-0 flex-1">{viewingPost.title}</h2>
-              <StatusBadge status={viewingPost.status} />
+              <StatusBadge post={viewingPost} />
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200">

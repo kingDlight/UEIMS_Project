@@ -146,8 +146,8 @@ export const JobDetailPage: React.FC = () => {
   const handleApply = async () => {
     if (!job) return;
 
-    if (job.applicationDeadline && new Date(job.applicationDeadline) < new Date()) {
-      message.error('This job posting has reached its deadline.');
+    if (isExpired(job.applicationDeadline)) {
+      message.error(t('jobDeadlineReached', 'This job posting has reached its deadline.'));
       return;
     }
 
@@ -173,9 +173,15 @@ export const JobDetailPage: React.FC = () => {
     }
   };
 
+  const isExpired = (deadline?: string | null) => {
+    if (!deadline) return false;
+    return new Date(deadline) < new Date();
+  };
+
   const getApplyButtonState = () => {
     if (applied || appliedJobIds.has(job?.jobPostId)) return 'applied';
     if (job?.status !== 'OPEN') return 'closed';
+    if (isExpired(job?.applicationDeadline)) return 'expired';
     if (currentSemester < 5) return 'browse';
     if (!hasCv) return 'nocv';
     return 'apply';
@@ -186,6 +192,7 @@ export const JobDetailPage: React.FC = () => {
     switch (state) {
       case 'applied': return t('applied', 'Applied');
       case 'closed': return t('applicationsClosed', 'Applications Closed');
+      case 'expired': return t('deadlineExpired', 'Deadline Expired');
       case 'browse': return t('browseOnly', 'Browse Only');
       case 'nocv': return t('cvRequired', 'CV Required');
       default: return t('applyNow', 'Apply Now');
@@ -198,6 +205,7 @@ export const JobDetailPage: React.FC = () => {
     if (state === 'browse') { message.warning('Browse only mode enabled for your semester.'); return; }
     if (state === 'nocv') { message.warning('Please upload your CV in Profile before applying.'); return; }
     if (state === 'closed') { message.error('This job posting is no longer accepting applications.'); return; }
+    if (state === 'expired') { message.error('This job posting has reached its deadline.'); return; }
     handleApply();
   };
 
@@ -245,6 +253,16 @@ export const JobDetailPage: React.FC = () => {
             </div>
             <SmallBadge label={job.status === 'OPEN' ? t('open', 'Open') : t('closed', 'Closed')} variant={job.status === 'OPEN' ? 'success' : 'neutral'} />
           </div>
+
+          {/* Expired banner */}
+          {isExpired(job.applicationDeadline) && (
+            <div style={{ padding: 14, borderRadius: cc.radiusMd, background: cc.dangerMuted, marginBottom: 18, display: 'flex', alignItems: 'center', gap: 10 }}>
+              <CloseCircleOutlined style={{ fontSize: 16, color: cc.danger }} />
+              <span style={{ fontSize: 13, color: cc.dangerText, fontWeight: 600 }}>
+                {t('deadlineExpiredNotice', 'The application deadline for this job has passed. New applications are no longer accepted.')}
+              </span>
+            </div>
+          )}
 
           {/* Chips */}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
