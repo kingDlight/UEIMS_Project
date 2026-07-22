@@ -167,9 +167,11 @@ export const JobBoardTab: React.FC = () => {
                       <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: cc.textMuted }}>
                         <TeamOutlined style={{ fontSize: 12 }} />
                         {(() => {
+                          // FIX 049: positionsCount is the runtime open count,
+                          // already maintained by triggers. Render directly.
+                          const open = Math.max(0, job.positionsCount);
                           const taken = job.currentApplicationCount ?? 0;
-                          const open = Math.max(0, job.positionsCount - taken);
-                          return `${open} ${open === 1 ? 'position' : 'positions'} open`;
+                          return `${open} ${open === 1 ? 'position' : 'positions'} open (${taken} applied)`;
                         })()}
                       </span>
                     )}

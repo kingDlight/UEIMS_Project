@@ -407,10 +407,12 @@ export const JobPostManagementTab: React.FC = () => {
                       <div className="flex items-center gap-2 text-xs text-slate-600">
                         <TeamOutlined className="text-[#E67E22]" />
                         <span>
-                          <strong>
-                            {Math.max(0, (post.positionsCount ?? 0) - (post.currentApplicationCount ?? 0))}
-                          </strong>{' '}
-                          position{Math.max(0, (post.positionsCount ?? 0) - (post.currentApplicationCount ?? 0)) !== 1 ? 's' : ''} open
+                          {/* FIX 049: `positionsCount` IS the runtime open
+                              count (auto-maintained by triggers), so we render
+                              it directly. Subtracting currentApplicationCount
+                              again would double-count. */}
+                          <strong>{Math.max(0, post.positionsCount ?? 0)}</strong>{' '}
+                          position{Math.max(0, post.positionsCount ?? 0) !== 1 ? 's' : ''} open
                           <span className="text-slate-400 ml-1">
                             ({post.currentApplicationCount ?? 0} applied)
                           </span>
@@ -610,8 +612,15 @@ export const JobPostManagementTab: React.FC = () => {
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
-                <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Positions</div>
-                <div className="text-[14px] font-semibold text-slate-900">{viewingPost.positionsCount}</div>
+                <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Open positions</div>
+                {/* FIX 049: positionsCount is the runtime open count; show
+                    total quota too so enterprise can see "open / total". */}
+                <div className="text-[14px] font-semibold text-slate-900">
+                  {Math.max(0, viewingPost.positionsCount ?? 0)}
+                  <span className="text-slate-400 font-normal text-xs ml-1">
+                    / {(viewingPost.positionsCount ?? 0) + (viewingPost.currentApplicationCount ?? 0)} total
+                  </span>
+                </div>
               </div>
               <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
                 <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Deadline</div>
