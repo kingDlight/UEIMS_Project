@@ -18,11 +18,14 @@ import com.ueims.dto.request.StudentProfileUpdateRequest;
 import com.ueims.dto.response.MyProfileResponse;
 import com.ueims.exception.AppException;
 import com.ueims.exception.ErrorCode;
+import com.ueims.model.entity.EligibleStudent;
+import com.ueims.model.entity.Semester;
 import com.ueims.model.entity.StudentProfile;
 import com.ueims.model.entity.User;
 import com.ueims.repository.ApplicationRepository;
 import com.ueims.repository.EligibleStudentRepository;
 import com.ueims.repository.EnterpriseAssignmentRepository;
+import com.ueims.repository.SemesterRepository;
 import com.ueims.repository.StudentProfileRepository;
 import com.ueims.repository.UserRepository;
 import com.ueims.service.StudentProfileService;
@@ -44,6 +47,7 @@ public class StudentProfileServiceImpl implements StudentProfileService {
     ApplicationRepository applicationRepository;
     EnterpriseAssignmentRepository enterpriseAssignmentRepository;
     EligibleStudentRepository eligibleStudentRepository;
+    SemesterRepository semesterRepository;
 
     private User getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -261,14 +265,30 @@ public class StudentProfileServiceImpl implements StudentProfileService {
                 .portfolioUrl(profile.getPortfolioUrl())
                 .bio(profile.getBio());
 
-        if (latestEligible.isPresent()) {
-            var eligible = latestEligible.get();
-            builder.currentSemester(eligible.getCurrentSemester())
-                    .gpa(eligible.getGpa())
-                    .ojtStatus(eligible.getStatus());
-            if (eligible.getSemester() != null) {
-                builder.semesterName(eligible.getSemester().getName())
-                        .semesterCode(eligible.getSemester().getSemesterCode());
+        // FIX 2026-07-23: ưu tiên lấy currentSemester từ eligible_student của
+        // ACTIVE semester (giống logic OjtStatusService). Tránh tình trạng SV đang
+        // kỳ 5 (eligible_student của kỳ ACTIVE) lại nhận currentSemester = 6 vì
+        // eligible_student mới nhất (theo imported_at) thuộc kỳ tương lai.
+        EligibleStudent primaryEligible = null;
+
+        Semester activeSemester =
+                semesterRepository.findByStatus("ACTIVE").stream().findFirst().orElse(null);
+        if (activeSemester != null) {
+            primaryEligible = eligibleStudentRepository
+                    .findByUser_UserIdAndSemester_SemesterId(user.getUserId(), activeSemester.getSemesterId())
+                    .orElse(null);
+        }
+        if (primaryEligible == null) {
+            primaryEligible = latestEligible.orElse(null);
+        }
+
+        if (primaryEligible != null) {
+            builder.currentSemester(primaryEligible.getCurrentSemester())
+                    .gpa(primaryEligible.getGpa())
+                    .ojtStatus(primaryEligible.getStatus());
+            if (primaryEligible.getSemester() != null) {
+                builder.semesterName(primaryEligible.getSemester().getName())
+                        .semesterCode(primaryEligible.getSemester().getSemesterCode());
             }
         }
 
