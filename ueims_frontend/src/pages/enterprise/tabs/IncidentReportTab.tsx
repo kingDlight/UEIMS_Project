@@ -75,28 +75,58 @@ export const IncidentReportTab: React.FC = () => {
   const fetchAll = async () => {
     setLoading(true);
     try {
-      const [a, i] = await Promise.allSettled([
-        EnterpriseAssignmentService.getMyEnterpriseAssignments(),
-        // The Incident service may not have a list-by-enterprise endpoint; we'll fetch all and filter
-        IncidentService.getAll().catch(() => ({ data: { result: [] } })),
+      // Use Promise.all so a failure on one endpoint surfaces immediately
+      // (Promise.allSettled silently swallows auth refresh issues). Each
+      // service call has its own .catch as a defensive fallback.
+      const [a, i] = await Promise.all([
+        EnterpriseAssignmentService.getMyEnterpriseAssignments().catch((err) => {
+          console.warn('[Incidents] failed to load assignments', err);
+          return { data: [] as any };
+        }),
+        IncidentService.getAll().catch((err) => {
+          console.warn('[Incidents] failed to load incidents', err);
+          return { data: [] as any };
+        }),
       ]);
-      const aData: Assignment[] = a.status === 'fulfilled'
-        ? (a.value.data?.result ?? a.value.data ?? [])
-        : [];
-      setAssignments(Array.isArray(aData) ? aData : []);
 
-      const allIncidents: Incident[] = i.status === 'fulfilled'
-        ? (i.value.data?.result ?? (Array.isArray(i.value.data) ? i.value.data : []))
-        : [];
+      // Axios returns response.data as the parsed body; backend hands us a
+      // bare JSON array for both endpoints (no ApiResponse wrapper).
+      const extractList = <T,>(payload: any): T[] => {
+        if (Array.isArray(payload)) return payload as T[];
+        if (payload?.result && Array.isArray(payload.result)) return payload.result as T[];
+        if (payload?.data && Array.isArray(payload.data)) return payload.data as T[];
+        if (payload?.data?.result && Array.isArray(payload.data.result)) return payload.data.result as T[];
+        return [];
+      };
+
+      const aData: Assignment[] = extractList<Assignment>(a?.data ?? a);
+      setAssignments(aData);
+
+      const allIncidents: Incident[] = extractList<Incident>(i?.data ?? i);
+      // BE service.findAll() already filters by currentUser.enterprise for
+      // ENTERPRISE role — every incident returned belongs to this enterprise.
+      // We still keep the studentId cross-check as a defensive guard, but it
+      // must NOT silently swallow incidents whose studentId doesn't match the
+      // assignment lookup (some assignments are returned without studentId
+      // populated by the BE).
       const studentIds = new Set(
-        (Array.isArray(aData) ? aData : []).map((x: any) => x.studentId ?? x.student?.userId)
+        aData
+          .map((x: any) => x.studentId ?? x.student?.userId ?? x.student?.id)
+          .filter(Boolean)
+          .map(String)
       );
-      setIncidents(
-        (Array.isArray(allIncidents) ? allIncidents : []).filter(inc =>
-          studentIds.has(inc.studentId) || true // include all for now, server already filters via @PreAuthorize
-        )
-      );
+      const visibleIncidents = allIncidents.filter((inc) => {
+        if (!inc.studentId) return true;
+        return studentIds.size === 0 || studentIds.has(String(inc.studentId));
+      });
+      console.debug('[Incidents] fetched', {
+        total: allIncidents.length,
+        visible: visibleIncidents.length,
+        studentIds: Array.from(studentIds),
+      });
+      setIncidents(visibleIncidents);
     } catch (err: any) {
+      console.error('[Incidents] fetchAll failed', err);
       message.error(err?.response?.data?.message ?? 'Failed to load data.');
     } finally {
       setLoading(false);
