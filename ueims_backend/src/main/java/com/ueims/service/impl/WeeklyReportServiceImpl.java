@@ -500,21 +500,28 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
             return new WeeklyReportStatusSummaryDTO(null, 0, 0, 0, 0, 0, 0, List.of());
         }
 
-        // Tính tổng số tuần
-        long days = ChronoUnit.DAYS.between(semester.getStartDate(), semester.getEndDate());
-        int totalWeeks = (int) (days / 7) + 1;
-
-        // Tính tuần hiện tại
-        LocalDate today = LocalDate.now();
-        LocalDate semesterStart = semester.getStartDate();
-        int currentWeek;
-        if (today.isBefore(semesterStart)) {
-            currentWeek = 0; // chưa bắt đầu kỳ
-        } else {
-            long elapsedDays = ChronoUnit.DAYS.between(semesterStart, today);
-            currentWeek = (int) (elapsedDays / 7) + 1;
-            if (currentWeek > totalWeeks) currentWeek = totalWeeks;
+        // FIX 2026-07-23: SV đăng ký OJT ở kỳ hiện tại (pass interview kỳ trước) sẽ có
+        // assignment.ACTIVE trỏ về semester tương lai. Trước kỳ thực tập thực sự bắt
+        // đầu (assignment.start_date), SV chưa có nghĩa vụ nộp weekly reports.
+        // Tín hiệu "đang trong giai đoạn thực tập" dùng assignment.start_date
+        // (nếu có), fallback về semester.start_date.
+        java.time.LocalDate ojtAnchorDate =
+                assignment.getStartDate() != null ? assignment.getStartDate() : semester.getStartDate();
+        java.time.LocalDate today = java.time.LocalDate.now();
+        if (today.isBefore(ojtAnchorDate)) {
+            // Chưa đến ngày bắt đầu OJT → không có nghĩa vụ nộp, không hiển thị cảnh báo
+            return new WeeklyReportStatusSummaryDTO(semester.getSemesterCode(), 0, 0, 0, 0, 0, 0, List.of());
         }
+
+        // Tính tổng số tuần
+        long days = ChronoUnit.DAYS.between(ojtAnchorDate, semester.getEndDate());
+        int totalWeeks = (int) Math.max(1, (days / 7) + 1);
+
+        // Tính tuần hiện tại dựa trên anchor (assignment.start_date)
+        int currentWeek;
+        long elapsedDays = ChronoUnit.DAYS.between(ojtAnchorDate, today);
+        currentWeek = (int) (elapsedDays / 7) + 1;
+        if (currentWeek > totalWeeks) currentWeek = totalWeeks;
 
         // Lấy tất cả reports của assignment này, group theo week_number
         List<WeeklyReport> myReports = repository.findByAssignment_AssignmentId(assignment.getAssignmentId());
@@ -531,7 +538,7 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
         int pendingThisWeek = 0;
 
         for (int w = 1; w <= totalWeeks; w++) {
-            LocalDate deadline = semesterStart.plusDays((long) (w - 1) * 7L);
+            LocalDate deadline = ojtAnchorDate.plusDays((long) (w - 1) * 7L);
             // deadline luôn là CN của tuần đó (semester bắt đầu bằng CN trong hệ thống này)
 
             WeeklyReport existing = byWeek.get(w);
