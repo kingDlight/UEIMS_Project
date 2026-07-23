@@ -1050,8 +1050,10 @@ export const StudentDashboardTab: React.FC<DashboardTabProps> = ({ currentSemest
                   />
                 )}
 
-                {/* Weekly Report Warning — show whenever SV có assignment ACTIVE */}
-                {weeklyReportStatus && weeklyReportStatus.totalWeeks > 0 && (
+                {/* Weekly Report Warning — chỉ hiện khi SV kỳ 6 đang thực tập thực sự
+                    (isSemester6 + hasActivePlacement). Tránh báo "missed reports" cho
+                    SV kỳ 5 chưa đến kỳ thực tập. */}
+                {isSemester6 && hasActivePlacement && weeklyReportStatus && weeklyReportStatus.totalWeeks > 0 && (
                   <WeeklyReportWarningWidget summary={weeklyReportStatus} onNavigate={handleNavigate} />
                 )}
               </div>
