@@ -89,6 +89,7 @@ public class EnterpriseAssignmentServiceImpl implements EnterpriseAssignmentServ
 
     @Override
     public EnterpriseAssignment save(EnterpriseAssignment entity) {
+        validateAssignment(entity);
         return repository.save(entity);
     }
 
@@ -118,7 +119,39 @@ public class EnterpriseAssignmentServiceImpl implements EnterpriseAssignmentServ
         }
 
         mapper.updateEntity(dto, existing);
+        validateAssignment(existing);
         return repository.save(existing);
+    }
+
+    /**
+     * BR-UC45: Khi assignment đang ACTIVE (SV đã được phân công thực tế), phải có đầy đủ
+     * supervisor name + start_date + end_date để DN theo dõi timeline thực tập
+     * và cho SV biết ai là người hướng dẫn. Tránh trường hợp tạo/sửa thiếu data
+     * → card hiển thị ở My Students bị sơ sái.
+     */
+    private void validateAssignment(EnterpriseAssignment ea) {
+        if (ea == null || ea.getStatus() == null) {
+            return;
+        }
+        if (!"ACTIVE".equalsIgnoreCase(ea.getStatus())) {
+            return;
+        }
+        if (ea.getSupervisorName() == null || ea.getSupervisorName().isBlank()) {
+            throw new AppException(ErrorCode.INVALID_REQUEST,
+                    "Supervisor name is required when assignment status is ACTIVE.");
+        }
+        if (ea.getStartDate() == null) {
+            throw new AppException(ErrorCode.INVALID_REQUEST,
+                    "Start date is required when assignment status is ACTIVE.");
+        }
+        if (ea.getEndDate() == null) {
+            throw new AppException(ErrorCode.INVALID_REQUEST,
+                    "End date is required when assignment status is ACTIVE.");
+        }
+        if (ea.getEndDate().isBefore(ea.getStartDate())) {
+            throw new AppException(ErrorCode.INVALID_REQUEST,
+                    "End date must be on or after start date.");
+        }
     }
 
     @Override

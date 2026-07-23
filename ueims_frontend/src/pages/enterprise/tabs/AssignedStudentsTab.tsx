@@ -163,22 +163,23 @@ export const AssignedStudentsTab: React.FC = () => {
                     <div className="grid grid-cols-2 gap-x-6 gap-y-4">
                       <Field icon={<IdcardOutlined />} label="Student ID" value={r.studentCode ?? '—'} />
                       <Field icon={<BookOutlined />} label="Major" value={r.major ?? '—'} />
-                      {r.supervisorName && (
-                        <Field
-                          icon={<UserOutlined />}
-                          label="Supervisor"
-                          value={r.supervisorName}
-                          fullWidth
-                        />
-                      )}
-                      {r.startDate && (
-                        <Field
-                          icon={<CalendarOutlined />}
-                          label="Period"
-                          value={`${dayjs(r.startDate).format('MMM D, YYYY')} – ${r.endDate ? dayjs(r.endDate).format('MMM D, YYYY') : '—'}`}
-                          fullWidth
-                        />
-                      )}
+                      <Field
+                        icon={<UserOutlined />}
+                        label="Supervisor"
+                        value={r.supervisorName || 'Not assigned yet'}
+                        subValue={r.supervisorEmail || r.supervisorPhone || undefined}
+                        fullWidth
+                      />
+                      <Field
+                        icon={<CalendarOutlined />}
+                        label="Period"
+                        value={
+                          r.startDate
+                            ? `${dayjs(r.startDate).format('MMM D, YYYY')} – ${r.endDate ? dayjs(r.endDate).format('MMM D, YYYY') : '—'}`
+                            : 'Not scheduled yet'
+                        }
+                        fullWidth
+                      />
                     </div>
                   </div>
 
@@ -220,11 +221,14 @@ export const AssignedStudentsTab: React.FC = () => {
   );
 };
 
-const Field: React.FC<{ icon: React.ReactNode; label: string; value: string; fullWidth?: boolean }> = ({ icon, label, value, fullWidth }) => (
+const Field: React.FC<{ icon: React.ReactNode; label: string; value: string; subValue?: string; fullWidth?: boolean }> = ({ icon, label, value, subValue, fullWidth }) => (
   <div className={['min-w-0', fullWidth ? 'col-span-2' : ''].join(' ')}>
     <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
       <span className="text-[#E67E22]">{icon}</span> {label}
     </div>
     <div className="text-[12.5px] font-semibold text-slate-900 break-words leading-snug">{value}</div>
+    {subValue && (
+      <div className="text-[11.5px] text-slate-500 break-words leading-snug mt-0.5">{subValue}</div>
+    )}
   </div>
 );
