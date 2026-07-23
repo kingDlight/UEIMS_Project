@@ -1,0 +1,319 @@
+// =============================================================
+// UEIMS - OVERVIEW SCHEMA (Cross-module only)
+// dbdiagram.io (DBML)
+// Rule: chi giu anchor + bang co Ref di/den module khac
+// Bang chi noi rieng trong 1 module -> bo, xem file module rieng
+// =============================================================
+
+// =====================================================
+// ANCHOR TABLES (auth, semesters, recruitment — referenced by everyone)
+// =====================================================
+Table users {
+  user_id UUID [PK]
+  email VARCHAR(255) [UNIQUE, NOT NULL]
+  full_name VARCHAR(255) [NOT NULL]
+  status VARCHAR(20) [DEFAULT: 'ACTIVE']
+  enterprise_id UUID
+  created_at TIMESTAMP
+  deleted_at TIMESTAMP
+}
+
+Table roles {
+  role_name VARCHAR(50) [PK]
+  description VARCHAR(500)
+}
+
+Table users_roles {
+  user_id UUID [PK]
+  role_name VARCHAR(50) [PK]
+}
+
+Table enterprises {
+  enterprise_id UUID [PK]
+  company_name VARCHAR(500) [NOT NULL]
+  approval_status VARCHAR(20) [DEFAULT: 'PENDING']
+  approved_by UUID
+}
+
+Table semesters {
+  semester_id UUID [PK]
+  semester_code VARCHAR(20) [UNIQUE, NOT NULL]
+  name VARCHAR(255) [NOT NULL]
+  start_date DATE
+  end_date DATE
+  status VARCHAR(20) [DEFAULT: 'DRAFT']
+  created_by UUID
+}
+
+
+// =====================================================
+// M2 ↔ M1/M3 (cross-module)
+// =====================================================
+Table eligible_students {
+  eligible_id UUID [PK]
+  semester_id UUID
+  user_id UUID
+  student_code VARCHAR(20) [NOT NULL]
+  full_name VARCHAR(255) [NOT NULL]
+  major VARCHAR(255) [NOT NULL]
+  status VARCHAR(20) [DEFAULT: 'ELIGIBLE']
+  is_locked BOOLEAN
+  current_semester INT
+}
+
+Table semester_enterprises {
+  semester_enterprise_id UUID [PK]
+  semester_id UUID
+  enterprise_id UUID
+  status VARCHAR(20) [DEFAULT: 'PENDING']
+  reviewed_by UUID
+}
+
+
+// =====================================================
+// M3 (Enterprise & Recruitment — cross with M1/M2/M5)
+// =====================================================
+Table job_posts {
+  job_post_id UUID [PK]
+  enterprise_id UUID
+  semester_id UUID
+  title VARCHAR(500) [NOT NULL]
+  status VARCHAR(20) [DEFAULT: 'OPEN']
+  created_by UUID
+}
+
+Table applications {
+  application_id UUID [PK]
+  job_post_id UUID
+  student_id UUID
+  status VARCHAR(30) [DEFAULT: 'PENDING']
+  withdrawn_by_application_id UUID
+}
+
+Table placement_applications {
+  application_id UUID [PK]
+  student_id UUID
+  enterprise_id UUID
+  semester_id UUID
+  status VARCHAR(20) [DEFAULT: 'PENDING_APPROVAL']
+  reviewed_by UUID
+  replaces_application_id UUID
+}
+
+Table interviews {
+  interview_id UUID [PK]
+  application_id UUID
+  scheduled_datetime TIMESTAMP
+  status VARCHAR(20) [DEFAULT: 'SCHEDULED']
+  result VARCHAR(10)
+  decided_by UUID
+}
+
+
+// =====================================================
+// M4 (Student Profile — cross with M1)
+// =====================================================
+Table student_profiles {
+  profile_id UUID [PK]
+  user_id UUID [UNIQUE]
+  student_code VARCHAR(20)
+  university VARCHAR(255)
+  major VARCHAR(255)
+  gpa DECIMAL(4,2)
+}
+
+
+// =====================================================
+// M5 (Internship — center hub, cross with M1/M2/M3)
+// =====================================================
+Table enterprise_assignments {
+  assignment_id UUID [PK]
+  enterprise_id UUID
+  student_id UUID
+  semester_id UUID
+  supervisor_name VARCHAR(255)
+  status VARCHAR(20) [DEFAULT: 'ACTIVE']
+  start_date DATE
+  end_date DATE
+  replaced_by_assignment_id UUID
+}
+
+Table internship_plans {
+  plan_id UUID [PK]
+  enterprise_id UUID
+  semester_id UUID
+  job_post_id UUID
+  status VARCHAR(30) [DEFAULT: 'PENDING_APPROVAL']
+  approved_by UUID
+}
+
+Table enterprise_evaluations {
+  evaluation_id UUID [PK]
+  assignment_id UUID [UNIQUE]
+  total_score DECIMAL(4,2)
+  is_locked BOOLEAN
+}
+
+
+// =====================================================
+// M6 (Weekly & Final Reports — cross with M5)
+// =====================================================
+Table weekly_reports {
+  report_id UUID [PK]
+  assignment_id UUID
+  week_number INT
+  status VARCHAR(20) [DEFAULT: 'NOT_SUBMITTED']
+  submitted_at TIMESTAMP
+  plagiarism_score DECIMAL(5,4)
+  is_anomaly BOOLEAN
+  late_override_by UUID
+}
+
+Table report_feedbacks {
+  feedback_id UUID [PK]
+  report_id UUID
+  reviewer_id UUID
+  action VARCHAR(20)
+}
+
+Table final_reports {
+  final_report_id UUID [PK]
+  assignment_id UUID [UNIQUE]
+  file_url VARCHAR(1000)
+  submitted_at TIMESTAMP
+  is_late BOOLEAN
+}
+
+
+// =====================================================
+// M7 (Incident & Grading — cross with M1/M2/M5)
+// =====================================================
+Table incidents {
+  incident_id UUID [PK]
+  assignment_id UUID
+  reported_by UUID
+  category VARCHAR(50)
+  status VARCHAR(20) [DEFAULT: 'OPEN']
+  resolved_by UUID
+}
+
+Table training_warnings {
+  warning_id UUID [PK]
+  tm_id UUID
+  student_id UUID
+  semester_id UUID
+  week_number INT
+  warning_message TEXT
+}
+
+Table final_grades {
+  grade_id UUID [PK]
+  student_id UUID
+  tm_id UUID
+  semester_id UUID
+  final_grade DECIMAL(3,1)
+  overall_status VARCHAR(20)
+  is_locked BOOLEAN
+  cancelled_by UUID
+}
+
+
+// =====================================================
+// M8 (Notifications — cross with users + all entities)
+// =====================================================
+Table notifications {
+  notification_id UUID [PK]
+  recipient_id UUID
+  type VARCHAR(30)
+  reference_entity VARCHAR(100)
+  reference_id UUID
+  is_read BOOLEAN
+}
+
+
+// =====================================================
+// M9 (Feedback — cross with M1/M2/M3)
+// =====================================================
+Table student_enterprise_feedbacks {
+  feedback_id UUID [PK]
+  student_id UUID
+  enterprise_id UUID
+  semester_id UUID
+  overall_score INT
+  submitted_at TIMESTAMP
+}
+
+
+// =============================================================
+// CROSS-MODULE RELATIONSHIPS
+// =============================================================
+
+// ----- Anchor relationships (M1) -----
+Ref: users.enterprise_id > enterprises.enterprise_id
+Ref: users_roles.user_id > users.user_id
+Ref: users_roles.role_name > roles.role_name
+Ref: semesters.created_by > users.user_id
+Ref: enterprises.approved_by > users.user_id
+
+// ----- M2 ↔ M1/M3 -----
+Ref: eligible_students.user_id > users.user_id
+Ref: eligible_students.semester_id > semesters.semester_id
+Ref: semester_enterprises.semester_id > semesters.semester_id
+Ref: semester_enterprises.enterprise_id > enterprises.enterprise_id
+Ref: semester_enterprises.reviewed_by > users.user_id
+
+// ----- M3 internal cross-module -----
+Ref: job_posts.enterprise_id > enterprises.enterprise_id
+Ref: job_posts.semester_id > semesters.semester_id
+Ref: job_posts.created_by > users.user_id
+Ref: applications.job_post_id > job_posts.job_post_id
+Ref: applications.student_id > users.user_id
+Ref: applications.withdrawn_by_application_id > applications.application_id
+Ref: placement_applications.student_id > users.user_id
+Ref: placement_applications.enterprise_id > enterprises.enterprise_id
+Ref: placement_applications.semester_id > semesters.semester_id
+Ref: placement_applications.reviewed_by > users.user_id
+Ref: placement_applications.replaces_application_id > placement_applications.application_id
+Ref: interviews.application_id > applications.application_id
+Ref: interviews.decided_by > users.user_id
+
+// ----- M4 ↔ M1 -----
+Ref: student_profiles.user_id > users.user_id
+
+// ----- M5 (TRUNG TAM OJT) -----
+Ref: enterprise_assignments.enterprise_id > enterprises.enterprise_id
+Ref: enterprise_assignments.student_id > users.user_id
+Ref: enterprise_assignments.semester_id > semesters.semester_id
+Ref: enterprise_assignments.replaced_by_assignment_id > enterprise_assignments.assignment_id
+Ref: internship_plans.enterprise_id > enterprises.enterprise_id
+Ref: internship_plans.semester_id > semesters.semester_id
+Ref: internship_plans.job_post_id > job_posts.job_post_id
+Ref: internship_plans.approved_by > users.user_id
+Ref: enterprise_evaluations.assignment_id - enterprise_assignments.assignment_id
+
+// ----- M6 → M5 -----
+Ref: weekly_reports.assignment_id > enterprise_assignments.assignment_id
+Ref: weekly_reports.late_override_by > users.user_id
+Ref: report_feedbacks.report_id > weekly_reports.report_id
+Ref: report_feedbacks.reviewer_id > users.user_id
+Ref: final_reports.assignment_id - enterprise_assignments.assignment_id
+
+// ----- M7 → M1/M2/M5 -----
+Ref: incidents.assignment_id > enterprise_assignments.assignment_id
+Ref: incidents.reported_by > users.user_id
+Ref: incidents.resolved_by > users.user_id
+Ref: training_warnings.tm_id > users.user_id
+Ref: training_warnings.student_id > users.user_id
+Ref: training_warnings.semester_id > semesters.semester_id
+Ref: final_grades.student_id > users.user_id
+Ref: final_grades.tm_id > users.user_id
+Ref: final_grades.semester_id > semesters.semester_id
+Ref: final_grades.cancelled_by > users.user_id
+
+// ----- M8 → M1 -----
+Ref: notifications.recipient_id > users.user_id
+
+// ----- M9 → M1/M2/M3 -----
+Ref: student_enterprise_feedbacks.student_id > users.user_id
+Ref: student_enterprise_feedbacks.enterprise_id > enterprises.enterprise_id
+Ref: student_enterprise_feedbacks.semester_id > semesters.semester_id

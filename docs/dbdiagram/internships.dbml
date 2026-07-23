@@ -1,0 +1,321 @@
+// =============================================================
+// MODULE 5: INTERNSHIP TRAINING & SUPERVISION (ENTERPRISE)
+// Covers: UC-51 → UC-57  |  BR-38 → BR-44
+// dbdiagram.io (DBML)
+// =============================================================
+
+Table enterprise_assignments {
+  assignment_id UUID [PK, DEFAULT: `gen_random_uuid()`]
+  enterprise_id UUID [NOT NULL]
+  student_id UUID [NOT NULL]
+  semester_id UUID [NOT NULL]
+  supervisor_name VARCHAR(255)
+  supervisor_email VARCHAR(255)
+  supervisor_phone VARCHAR(20)
+  assigned_by UUID [NOT NULL]
+  status VARCHAR(20) [DEFAULT: 'ACTIVE']
+  assigned_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+  created_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+  updated_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+  start_date DATE
+  end_date DATE
+  termination_reason TEXT
+  terminated_at TIMESTAMP
+  replaced_by_assignment_id UUID
+
+  Note: '''
+  Trigger 022: 1 student <= 1 ACTIVE assignment at any time
+  BR-54 student must be semester 5 or 6
+  '''
+}
+
+Table internship_plans {
+  plan_id UUID [PK, DEFAULT: `gen_random_uuid()`]
+  enterprise_id UUID [NOT NULL]
+  semester_id UUID [NOT NULL]
+  job_post_id UUID
+  overall_goal TEXT
+  status VARCHAR(30) [DEFAULT: 'PENDING_APPROVAL']
+  rejection_reason TEXT
+  approved_by UUID
+  approved_at TIMESTAMP
+  revision_note TEXT
+  revision_count INT [DEFAULT: 0]
+  last_revision_at TIMESTAMP
+  last_reviewed_by UUID
+  last_reviewed_at TIMESTAMP
+  created_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+  updated_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+  deleted_at TIMESTAMP
+
+  Note: '1 plan / 1 enterprise / 1 semester'
+}
+
+Table internship_plan_revisions {
+  revision_id UUID [PK, DEFAULT: `gen_random_uuid()`]
+  plan_id UUID [NOT NULL]
+  actor_id UUID [NOT NULL]
+  actor_role VARCHAR(30) [NOT NULL]
+  action VARCHAR(30) [NOT NULL]
+  note TEXT
+  from_status VARCHAR(30)
+  to_status VARCHAR(30) [NOT NULL]
+  created_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+}
+
+Table internship_plan_items {
+  plan_item_id UUID [PK, DEFAULT: `gen_random_uuid()`]
+  plan_id UUID [NOT NULL]
+  week_number INT [NOT NULL]
+  task_description TEXT [NOT NULL]
+  training_objective TEXT
+  target_date DATE [NOT NULL]
+  status VARCHAR(20) [DEFAULT: 'PENDING']
+  order_index INT [DEFAULT: 0]
+  created_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+  updated_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+
+  Note: '''
+  BR-38 task_description mandatory
+  BR-39 target_date must be within semester
+  '''
+}
+
+Table enterprise_evaluations {
+  evaluation_id UUID [PK, DEFAULT: `gen_random_uuid()`]
+  assignment_id UUID [NOT NULL, UNIQUE]
+  attitude_score DECIMAL(4,2) [NOT NULL]
+  professionalism_score DECIMAL(4,2) [NOT NULL]
+  soft_skills_score DECIMAL(4,2) [NOT NULL]
+  progress_score DECIMAL(4,2) [NOT NULL]
+  version BIGINT [DEFAULT: 0]
+  total_score DECIMAL(4,2)
+  overall_comments TEXT
+  is_locked BOOLEAN [DEFAULT: TRUE]
+  submitted_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+  created_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+  updated_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+
+  Note: '''
+  BR-43 GENERATED: attitude*0.2 + professionalism*0.4 + soft*0.2 + progress*0.2
+  BR-44 lock after submission
+  '''
+}
+
+
+// =============================================================
+// MODULE 6: WEEKLY REPORTS & FINAL REPORT
+// Covers: UC-58 → UC-62  |  BR-40, BR-50, BR-51, BR-56, BR-58
+// (Da gop vao day – cung module voi enterprise_assignments)
+// =============================================================
+
+Table weekly_reports {
+  report_id UUID [PK, DEFAULT: `gen_random_uuid()`]
+  assignment_id UUID [NOT NULL]
+  week_number INT [NOT NULL]
+  tasks_completed TEXT
+  issues_challenges TEXT
+  lessons_learned TEXT
+  plan_next_week TEXT
+  attachment_urls JSONB
+  status VARCHAR(20) [DEFAULT: 'NOT_SUBMITTED']
+  feedback TEXT
+  submitted_at TIMESTAMP
+  late_override_by UUID
+  plagiarism_score DECIMAL(5,4)
+  is_anomaly BOOLEAN [DEFAULT: FALSE]
+  hours_logged INT
+  created_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+  updated_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+
+  Note: '''
+  BR-56 only current week
+  BR-58 RBL Jaccard 0-1
+  is_anomaly if plagiarism_score >= 0.85
+  '''
+}
+
+Table report_feedbacks {
+  feedback_id UUID [PK, DEFAULT: `gen_random_uuid()`]
+  report_id UUID [NOT NULL]
+  reviewer_id UUID [NOT NULL]
+  feedback_text TEXT
+  action VARCHAR(20) [NOT NULL]
+  created_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+  updated_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+
+  Note: 'BR-40 feedback_text mandatory when REJECTED'
+}
+
+Table final_reports {
+  final_report_id UUID [PK, DEFAULT: `gen_random_uuid()`]
+  assignment_id UUID [NOT NULL, UNIQUE]
+  file_url VARCHAR(1000) [NOT NULL]
+  file_size_bytes INT [NOT NULL]
+  submitted_at TIMESTAMP [NOT NULL]
+  is_late BOOLEAN [DEFAULT: FALSE]
+  created_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+  updated_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+
+  Note: '''
+  BR-50 PDF only
+  BR-51 deadline check
+  '''
+}
+
+
+// =============================================================
+// MODULE 7: INCIDENT MANAGEMENT & FINAL GRADING
+// Covers: UC-63 → UC-66  |  BR-25, BR-26, BR-27, BR-41
+// (Da gop vao day – cung module voi internship)
+// =============================================================
+
+Table incidents {
+  incident_id UUID [PK, DEFAULT: `gen_random_uuid()`]
+  assignment_id UUID [NOT NULL]
+  reported_by UUID [NOT NULL]
+  category VARCHAR(50) [NOT NULL]
+  description TEXT [NOT NULL]
+  evidence_urls JSONB
+  status VARCHAR(20) [DEFAULT: 'OPEN']
+  resolution_note TEXT
+  resolved_by UUID
+  resolved_at TIMESTAMP
+  created_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+  updated_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+
+  Note: '''
+  BR-41 category + description mandatory
+  BR-26 resolution_note mandatory when RESOLVED
+  '''
+}
+
+Table training_warnings {
+  warning_id UUID [PK, DEFAULT: `gen_random_uuid()`]
+  tm_id UUID [NOT NULL]
+  student_id UUID [NOT NULL]
+  semester_id UUID [NOT NULL]
+  week_number INT [NOT NULL]
+  warning_message TEXT [NOT NULL]
+  sent_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+
+  Note: 'BR-25 SV phai MISS report moi warning duoc'
+}
+
+Table final_grades {
+  grade_id UUID [PK, DEFAULT: `gen_random_uuid()`]
+  student_id UUID [NOT NULL]
+  tm_id UUID [NOT NULL]
+  semester_id UUID [NOT NULL]
+  enterprise_total_score DECIMAL(4,2)
+  final_grade DECIMAL(3,1) [NOT NULL]
+  overall_status VARCHAR(20) [NOT NULL]
+  is_locked BOOLEAN [DEFAULT: TRUE]
+  cancelled_reason TEXT
+  cancelled_by UUID
+  cancelled_at TIMESTAMP
+  graded_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+  created_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+  updated_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+
+  Note: '''
+  BR-27 final_grade 0.0 - 10.0
+  Unique (student_id, semester_id)
+  '''
+}
+
+
+// =============================================================
+// MODULE 8: NOTIFICATIONS (Cross-cutting)
+// (Da gop vao day – 1 bang don, reference_id tro toi nhieu entity)
+// =============================================================
+
+Table notifications {
+  notification_id UUID [PK, DEFAULT: `gen_random_uuid()`]
+  recipient_id UUID [NOT NULL]
+  title VARCHAR(500) [NOT NULL]
+  message TEXT [NOT NULL]
+  type VARCHAR(30) [NOT NULL]
+  reference_entity VARCHAR(100)
+  reference_id UUID
+  is_read BOOLEAN [DEFAULT: FALSE]
+  created_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+  updated_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+
+  Note: 'Cross-cutting: reference_id tro toi gan nhu moi entity nghiep vu'
+}
+
+
+// =============================================================
+// MODULE 9: INTERNAL FEEDBACK
+// (Da gop vao day – cung module voi internship)
+// =============================================================
+
+Table student_enterprise_feedbacks {
+  feedback_id UUID [PK, DEFAULT: `gen_random_uuid()`]
+  student_id UUID [NOT NULL]
+  enterprise_id UUID [NOT NULL]
+  semester_id UUID [NOT NULL]
+
+  training_quality_score INT [NOT NULL]
+  supervisor_support_score INT [NOT NULL]
+  work_environment_score INT [NOT NULL]
+  overall_score INT [NOT NULL]
+
+  positive_feedback TEXT
+  improvement_feedback TEXT
+  additional_comments TEXT
+
+  submitted_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+  created_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+  updated_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+
+  Note: '''
+  BR-55 1-5 rating
+  BR-53 unique (student, enterprise, semester)
+  BR-54 chi SV ky 7-9 moi submit
+  '''
+}
+
+
+// =============================================================
+// RELATIONSHIPS
+// =============================================================
+
+// --- Internal 05+06 (cac bang deu nam trong file nay) ---
+Ref: enterprise_assignments.replaced_by_assignment_id > enterprise_assignments.assignment_id
+Ref: internship_plan_revisions.plan_id > internship_plans.plan_id
+Ref: internship_plan_items.plan_id > internship_plans.plan_id
+Ref: enterprise_evaluations.assignment_id - enterprise_assignments.assignment_id
+Ref: report_feedbacks.report_id > weekly_reports.report_id
+
+// --- Cross-module Refs (bang users/enterprises/semesters/job_posts/enterprise_assignments nam o file khac) ---
+//  Xem 00_overview.dbml cho cac Ref nay:
+//  enterprise_assignments.enterprise_id    -> enterprises.enterprise_id
+//  enterprise_assignments.student_id       -> users.user_id
+//  enterprise_assignments.semester_id     -> semesters.semester_id
+//  enterprise_assignments.assigned_by      -> users.user_id
+//  internship_plans.enterprise_id         -> enterprises.enterprise_id
+//  internship_plans.semester_id           -> semesters.semester_id
+//  internship_plans.job_post_id            -> job_posts.job_post_id
+//  internship_plans.approved_by            -> users.user_id
+//  internship_plans.last_reviewed_by      -> users.user_id
+//  internship_plan_revisions.actor_id      -> users.user_id
+//  weekly_reports.assignment_id          -> enterprise_assignments.assignment_id
+//  weekly_reports.late_override_by      -> users.user_id
+//  report_feedbacks.reviewer_id           -> users.user_id
+//  final_reports.assignment_id          - enterprise_assignments.assignment_id
+//  incidents.assignment_id              -> enterprise_assignments.assignment_id
+//  incidents.reported_by              -> users.user_id
+//  incidents.resolved_by              -> users.user_id
+//  training_warnings.tm_id            -> users.user_id
+//  training_warnings.student_id       -> users.user_id
+//  training_warnings.semester_id      -> semesters.semester_id
+//  final_grades.student_id            -> users.user_id
+//  final_grades.tm_id                 -> users.user_id
+//  final_grades.semester_id           -> semesters.semester_id
+//  final_grades.cancelled_by          -> users.user_id
+//  notifications.recipient_id         -> users.user_id
+//  student_enterprise_feedbacks.student_id   -> users.user_id
+//  student_enterprise_feedbacks.enterprise_id -> enterprises.enterprise_id
+//  student_enterprise_feedbacks.semester_id  -> semesters.semester_id

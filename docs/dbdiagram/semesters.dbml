@@ -1,0 +1,121 @@
+// =============================================================
+// MODULE 2: SEMESTER & TRAINING MANAGEMENT
+// Covers: UC-14 → UC-30  |  BR-08 → BR-28
+// dbdiagram.io (DBML)
+// =============================================================
+
+Table semesters {
+  semester_id UUID [PK, DEFAULT: `gen_random_uuid()`]
+  semester_code VARCHAR(20) [UNIQUE, NOT NULL]
+  name VARCHAR(255) [NOT NULL]
+  start_date DATE [NOT NULL]
+  end_date DATE [NOT NULL]
+  weekly_report_deadline_day VARCHAR(10) [DEFAULT: 'SUNDAY']
+  weekly_report_deadline_time TIME [DEFAULT: '23:59:00']
+  final_report_deadline TIMESTAMP
+  status VARCHAR(20) [DEFAULT: 'DRAFT']
+  created_by UUID [NOT NULL]
+  created_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+  updated_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+  deleted_at TIMESTAMP
+
+  Note: '''
+  BR-08 unique code
+  BR-51 final report deadline
+  Status: DRAFT -> OPEN -> ACTIVE -> CLOSED -> LOCKED (BR-10, BR-13)
+  '''
+}
+
+Table eligible_students {
+  eligible_id UUID [PK, DEFAULT: `gen_random_uuid()`]
+  semester_id UUID [NOT NULL]
+  user_id UUID
+  student_code VARCHAR(20) [NOT NULL]
+  full_name VARCHAR(255) [NOT NULL]
+  email VARCHAR(255)
+  major VARCHAR(255) [NOT NULL]
+  gpa DECIMAL(4,2)
+  current_semester INT
+  status VARCHAR(20) [DEFAULT: 'ELIGIBLE']
+  is_locked BOOLEAN [DEFAULT: FALSE]
+  imported_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+  approved_at TIMESTAMP
+  cancelled_reason TEXT
+  cancelled_by UUID
+  deferred_reason TEXT
+  deferred_by UUID
+  deferred_at TIMESTAMP
+  created_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+  updated_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+
+  Note: '''
+  BR-17 mandatory student_code/full_name/major
+  BR-19 GPA thang 10
+  BR-21 lock when OJT
+  BR-54 semester 5-6 access
+  '''
+}
+
+Table eligible_student_status_history {
+  history_id UUID [PK, DEFAULT: `gen_random_uuid()`]
+  eligible_id UUID [NOT NULL]
+  old_status VARCHAR(20)
+  new_status VARCHAR(20) [NOT NULL]
+  changed_by UUID
+  reason TEXT
+  changed_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+}
+
+Table system_announcements {
+  announcement_id UUID [PK, DEFAULT: `gen_random_uuid()`]
+  semester_id UUID
+  title VARCHAR(500) [NOT NULL]
+  content TEXT [NOT NULL]
+  status VARCHAR(20) [DEFAULT: 'DRAFT']
+  created_by UUID [NOT NULL]
+  published_at TIMESTAMP
+  created_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+  updated_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+  deleted_at TIMESTAMP
+  type VARCHAR(30) [DEFAULT: 'SYSTEM_ANNOUNCEMENT']
+  audience VARCHAR(30) [DEFAULT: 'ALL']
+  target_role VARCHAR(30)
+}
+
+Table semester_enterprises {
+  semester_enterprise_id UUID [PK, DEFAULT: `gen_random_uuid()`]
+  semester_id UUID [NOT NULL]
+  enterprise_id UUID [NOT NULL]
+  status VARCHAR(20) [DEFAULT: 'PENDING']
+  rejection_reason TEXT
+  reviewed_by UUID
+  reviewed_at TIMESTAMP
+  registered_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+  created_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+  updated_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+  deleted_at TIMESTAMP
+
+  Note: 'rejection_reason mandatory when REJECTED'
+}
+
+
+// =============================================================
+// RELATIONSHIPS
+// =============================================================
+
+// --- Internal M2 (bang cung nam trong file 02) ---
+Ref: eligible_students.semester_id > semesters.semester_id
+Ref: eligible_student_status_history.eligible_id > eligible_students.eligible_id
+Ref: system_announcements.semester_id > semesters.semester_id
+Ref: semester_enterprises.semester_id > semesters.semester_id
+
+// --- Cross-module Refs (cac bang users/enterprises nam o file khac) ---
+//  Xem 00_overview.dbml cho cac Ref nay:
+//  semesters.created_by               -> users.user_id
+//  eligible_students.user_id          -> users.user_id
+//  eligible_students.cancelled_by     -> users.user_id
+//  eligible_students.deferred_by      -> users.user_id
+//  eligible_student_status_history.changed_by -> users.user_id
+//  system_announcements.created_by    -> users.user_id
+//  semester_enterprises.enterprise_id -> enterprises.enterprise_id
+//  semester_enterprises.reviewed_by   -> users.user_id

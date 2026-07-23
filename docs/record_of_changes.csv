@@ -1,0 +1,12 @@
+Date,A*,In charge,Change Description
+06/01/2026,A,Do Minh Gia Bao,"Created the initial draft of the SRS document. Defined Product Overview, Target Audience, and system Actors."
+06/08/2026,M,Do Minh Gia Bao,"Updated authentication and user management module per UC-01 to UC-13 (roles, permissions, JWT, lockout)."
+06/15/2026,M,Nguyen Tran Gia Bao,"Added semester lifecycle management (UC-14 to UC-21) with eligible student roster and approval workflow (BR-17, BR-19, BR-54)."
+06/22/2026,M,Nguyen Tran Gia Bao,"Refined eligible student import flow and status history audit trail."
+06/29/2026,M,Huynh Minh Huan,"Added enterprise onboarding and approval process (UC-31 to UC-34, BR-15) plus job post and application module (UC-35 to UC-37, BR-31, BR-45)."
+07/06/2026,M,Huynh Minh Huan,"Updated job post management and application flow with PDF CV upload and screening decision."
+07/13/2026,M,Nguyen Duy Quang,"Added interview scheduling module with back-date support (UC-38 to UC-40, BR-35, BR-37) and placement application workflow (UC-41, BR-46)."
+07/20/2026,M,Nguyen Duy Quang,"Refined placement self-replace workflow and reviewed timeline constraints."
+07/27/2026,D,Le Van Minh Tri,"Removed legacy draft placeholder for weekly report anomalies per BR-58 cleanup."
+08/03/2026,A,Le Van Minh Tri,"Added enterprise assignment hub, internship plan module with weekly tasks (UC-51 to UC-54, BR-38, BR-39), and weekly report submission with RBL plagiarism detection (UC-58 to UC-60, BR-56, BR-58)."
+,,,*A - Added M - Modified D - Deleted

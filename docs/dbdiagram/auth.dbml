@@ -1,0 +1,172 @@
+// =============================================================
+// MODULE 1: AUTHENTICATION & USER MANAGEMENT
+// Covers: UC-01 → UC-13  |  BR-01 → BR-07
+// dbdiagram.io (DBML)
+// =============================================================
+
+Table roles {
+  role_name VARCHAR(50) [PK]
+  description VARCHAR(500)
+  is_active BOOLEAN [DEFAULT: TRUE]
+  created_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+  updated_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+  Note: '4 actor roles: ADMIN, TRAINING_MANAGER, ENTERPRISE, STUDENT'
+}
+
+Table permissions {
+  permission_name VARCHAR(100) [PK]
+  description VARCHAR(500)
+  created_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+  updated_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+}
+
+Table role_permissions {
+  role_name VARCHAR(50) [PK]
+  permission_name VARCHAR(100) [PK]
+}
+
+Table users {
+  user_id UUID [PK, DEFAULT: `gen_random_uuid()`]
+  email VARCHAR(255) [UNIQUE, NOT NULL]
+  password_hash VARCHAR(255) [NOT NULL]
+  full_name VARCHAR(255) [NOT NULL]
+  avatar_url VARCHAR(1000)
+  auth_provider VARCHAR(20) [DEFAULT: 'LOCAL']
+  phone VARCHAR(20)
+  status VARCHAR(20) [DEFAULT: 'ACTIVE']
+  failed_login_attempts INT [DEFAULT: 0]
+  locked_until TIMESTAMP
+  must_change_password BOOLEAN [DEFAULT: TRUE]
+  password_changed_at TIMESTAMP
+  enterprise_id UUID
+  last_login_at TIMESTAMP
+  created_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+  updated_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+  deleted_at TIMESTAMP
+
+  Note: '''
+  BR-05 unique email
+  BR-01 lock 5 failed
+  BR-01 lock 30 min
+  BR-04 force change first login
+  FK to enterprises (set for ENTERPRISE role)
+  soft delete
+  '''
+}
+
+Table users_roles {
+  user_id UUID [PK]
+  role_name VARCHAR(50)
+}
+
+Table invalidated_tokens {
+  token_id VARCHAR(255) [PK]
+  expires_at TIMESTAMP [NOT NULL]
+  invalidated_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+
+  Note: 'JWT jti blacklist'
+}
+
+Table password_reset_tokens {
+  token_id UUID [PK, DEFAULT: `gen_random_uuid()`]
+  user_id UUID [NOT NULL]
+  token_hash VARCHAR(255) [NOT NULL]
+  expires_at TIMESTAMP [NOT NULL]
+  is_used BOOLEAN [DEFAULT: FALSE]
+  created_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+  updated_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+}
+
+Table audit_logs {
+  log_id UUID [PK, DEFAULT: `gen_random_uuid()`]
+  user_id UUID
+  action VARCHAR(100) [NOT NULL]
+  target_entity VARCHAR(100)
+  target_id UUID
+  old_value TEXT
+  new_value TEXT
+  ip_address VARCHAR(45)
+  user_agent VARCHAR(500)
+  timestamp TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+
+  Note: 'BR-07 immutable append-only'
+}
+
+Table user_sessions {
+  token_id VARCHAR(36) [PK]
+  email VARCHAR(100) [NOT NULL]
+  last_activity TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+  expires_at TIMESTAMP [NOT NULL]
+  device_id VARCHAR(255) [NOT NULL]
+
+  Note: 'BR-02 single-device login'
+}
+
+Table request_logs {
+  id UUID [PK]
+  user_id UUID
+  user_email VARCHAR(255)
+  session_id VARCHAR(255)
+  http_method VARCHAR(10) [NOT NULL]
+  endpoint VARCHAR(500) [NOT NULL]
+  status_code INTEGER
+  ip_address VARCHAR(45)
+  user_agent VARCHAR(500)
+  response_time_ms BIGINT
+  timestamp TIMESTAMP [NOT NULL]
+}
+
+Table student_profiles {
+  profile_id UUID [PK, DEFAULT: `gen_random_uuid()`]
+  user_id UUID [NOT NULL, UNIQUE]
+  student_code VARCHAR(20) [UNIQUE]
+  university VARCHAR(255)
+  major VARCHAR(255)
+  gpa DECIMAL(4,2)
+  skills JSONB
+  bio TEXT
+  cv_file_url VARCHAR(1000)
+  cv_file_size INT
+  cv_file_name VARCHAR(255)
+  linkedin_url VARCHAR(500)
+  github_url VARCHAR(500)
+  portfolio_url VARCHAR(500)
+  class_code VARCHAR(50)
+  date_of_birth DATE
+  gender VARCHAR(20)
+  address VARCHAR(500)
+  created_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+  updated_at TIMESTAMP [DEFAULT: `CURRENT_TIMESTAMP`]
+  deleted_at TIMESTAMP
+
+  Note: '''
+  BR-31 PDF only
+  BR-45 max 5MB
+  BR-19 GPA thang 10
+  '''
+}
+
+
+// =============================================================
+// RELATIONSHIPS
+// =============================================================
+
+// role <-> permission (many-to-many)
+Ref: role_permissions.role_name > roles.role_name
+Ref: role_permissions.permission_name > permissions.permission_name
+
+// users <-> roles (BR-06 single role)
+Ref: users_roles.user_id > users.user_id
+Ref: users_roles.role_name > roles.role_name
+
+// users.enterprise_id -> enterprises (cross-module, xem 00_overview.dbml)
+// File 01 chi co M1, khong co bang enterprises -> Ref o file overview
+
+// password reset, audit, request logs, sessions all reference users
+Ref: password_reset_tokens.user_id > users.user_id
+Ref: audit_logs.user_id > users.user_id
+Ref: user_sessions.email > users.email
+Ref: request_logs.user_id > users.user_id
+
+// student profile (1:1 extension of users)
+Ref: student_profiles.user_id > users.user_id

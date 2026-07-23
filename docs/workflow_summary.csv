@@ -1,0 +1,31 @@
+No,Workflow,Primary Role(s),Trigger
+1,Sign in,All,Open the application
+2,Sign out,All,Top-right profile menu → Sign out
+3,Reset password,All with valid email,Forgot password? on the login screen
+4,Manage profile,All,Top-right profile menu → Profile
+5,Manage users and roles,ADMIN,Sidebar → Users
+6,Manage role-permission matrix,ADMIN,Sidebar → Roles & Permissions
+7,Manage semesters,TM,Sidebar → Semesters
+8,Manage eligible students,TM,Sidebar → Eligible Students
+9,Approve enterprises,TM,Sidebar → Enterprise Approvals
+10,Approve job posts,TM,Sidebar → Job Post Approvals
+11,Approve internship plans,TM,Sidebar → Plan Approvals
+12,Issue training warning,TM,Sidebar → Warnings
+13,Finalize final grades,TM,Sidebar → Final Grades
+14,Register enterprise,ENTERPRISE,Sidebar → Company Profile (first time)
+15,Manage company profile,ENTERPRISE,Sidebar → Company Profile
+16,Create and manage job posts,ENTERPRISE,Sidebar → Job Posts
+17,Screen candidates,ENTERPRISE,Sidebar → Applications
+18,Schedule interviews,ENTERPRISE,Sidebar → Interviews
+19,Confirm placement,ENTERPRISE,Sidebar → Placement
+20,Create internship plan,ENTERPRISE,Sidebar → Internship Plans
+21,Submit student evaluation,ENTERPRISE,Sidebar → Evaluations
+22,Build profile and CV,STUDENT,Sidebar → My Profile / My CV
+23,Browse and apply for jobs,STUDENT,Sidebar → Job Listings
+24,Track applications,STUDENT,Sidebar → My Applications
+25,View interview schedule,STUDENT,Sidebar → My Interviews
+26,Accept placement,STUDENT,Sidebar → My Placement
+27,Submit weekly report,STUDENT,Sidebar → Weekly Reports
+28,Submit final report,STUDENT,Sidebar → Final Report
+29,Submit enterprise feedback,STUDENT,Sidebar → My Feedback
+30,Manage notifications,All,Top bar bell icon

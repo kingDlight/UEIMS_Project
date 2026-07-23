@@ -1,0 +1,103 @@
+No,Table,Description
+01,roles,"Defines the actor roles available in the system (ADMIN, TRAINING_MANAGER, ENTERPRISE, STUDENT). Roles drive authorization across every feature.
+- Primary keys: role_name
+- Foreign keys: (none)"
+02,permissions,"Catalog of fine-grained permission strings granted to roles (e.g. WEEKLY_REPORT_SUBMIT, GRADE_FINALIZE).
+- Primary keys: permission_name
+- Foreign keys: (none)"
+03,role_permissions,"Many-to-many junction between roles and permissions. A role is granted any number of permissions and a permission may belong to multiple roles.
+- Primary keys: role_name; permission_name
+- Foreign keys: role_name -> roles.role_name; permission_name -> permissions.permission_name"
+04,users,"Master account record. Holds credentials, profile basics, lockout state, and soft-delete flag. enterprise_id is set only when the user has the ENTERPRISE role.
+- Primary keys: user_id
+- Foreign keys: enterprise_id -> enterprises.enterprise_id (optional, set when role is ENTERPRISE)"
+05,users_roles,"Assigns each user to exactly one role (BR-06 single-role policy).
+- Primary keys: user_id
+- Foreign keys: user_id -> users.user_id; role_name -> roles.role_name"
+06,invalidated_tokens,"JWT identifier (jti) blacklist. Once a token is invalidated here it cannot be reused even if not yet expired.
+- Primary keys: token_id
+- Foreign keys: (none - recipient identity is implicit in the JWT, not stored)"
+07,password_reset_tokens,"One-time tokens issued for the forgot password flow. Token value is stored as a hash; is_used flips to TRUE after consumption.
+- Primary keys: token_id
+- Foreign keys: user_id -> users.user_id"
+08,audit_logs,"Immutable, append-only audit trail. Captures who performed which action against which entity, with before/after payloads and request metadata.
+- Primary keys: log_id
+- Foreign keys: user_id -> users.user_id (nullable - some system actions have no actor)"
+09,user_sessions,"Tracks the currently active session per email to enforce single-device login (BR-02). Stale sessions are upserted on each successful authentication.
+- Primary keys: token_id
+- Foreign keys: email -> users.email"
+10,request_logs,"Captures every HTTP request hitting the API for observability - method, endpoint, status, response time, and identity context.
+- Primary keys: id
+- Foreign keys: user_id -> users.user_id (nullable - anonymous traffic)"
+11,student_profiles,"One-to-one extension of users containing student-only data: CV, academic info, social links, and demographic fields.
+- Primary keys: profile_id
+- Foreign keys: user_id -> users.user_id (unique)"
+12,semesters,"Master record for each academic semester/term. Drives weekly report deadlines, final report deadlines, and lifecycle transitions (DRAFT -> OPEN -> ACTIVE -> CLOSED -> LOCKED).
+- Primary keys: semester_id
+- Foreign keys: created_by -> users.user_id"
+13,eligible_students,"Roster of students authorised to participate in the internship program for the current semester. Status drives whether the student is ELIGIBLE, APPROVED, DEFERRED, CANCELLED, etc.
+- Primary keys: eligible_id
+- Foreign keys: semester_id -> semesters.semester_id; user_id -> users.user_id (nullable until student registers); cancelled_by -> users.user_id; deferred_by -> users.user_id"
+14,eligible_student_status_history,"Append-only audit log of every status transition on an eligible student (for compliance and rollbacks).
+- Primary keys: history_id
+- Foreign keys: eligible_id -> eligible_students.eligible_id; changed_by -> users.user_id"
+15,system_announcements,"Broadcasts (system messages, policy updates, banner notices). Can be scoped to the whole system, a semester, or a specific role.
+- Primary keys: announcement_id
+- Foreign keys: semester_id -> semesters.semester_id (nullable); created_by -> users.user_id"
+16,semester_enterprises,"Many-to-many between semesters and enterprises with per-semester participation status (PENDING -> APPROVED/REJECTED).
+- Primary keys: semester_enterprise_id
+- Foreign keys: semester_id -> semesters.semester_id; enterprise_id -> enterprises.enterprise_id; reviewed_by -> users.user_id"
+17,enterprises,"Company profile: contact, tax code, industry, size, and approval state. PENDING companies cannot post jobs or accept interns until approved by a Training Manager.
+- Primary keys: enterprise_id
+- Foreign keys: approved_by -> users.user_id"
+18,job_posts,"Internship job listings created by enterprises. status (OPEN/CLOSED) controls visibility; original_max_positions snapshots quota at creation time for analytics.
+- Primary keys: job_post_id
+- Foreign keys: enterprise_id -> enterprises.enterprise_id; semester_id -> semesters.semester_id; created_by -> users.user_id"
+19,applications,"Student applications to a specific job_post. Carries the CV file (PDF), screening decision, and withdraw chain (withdrawn_by_application_id allows historical reference to the predecessor row).
+- Primary keys: application_id
+- Foreign keys: job_post_id -> job_posts.job_post_id; student_id -> users.user_id; screened_by -> users.user_id; withdrawn_by_application_id -> applications.application_id (self-ref, nullable)"
+20,placement_applications,"Final placement decisions (the match between a student and an enterprise for a semester). Replaces previous placement when a swap occurs (self-referential replaces_application_id).
+- Primary keys: application_id
+- Foreign keys: student_id -> users.user_id; enterprise_id -> enterprises.enterprise_id; semester_id -> semesters.semester_id; reviewed_by -> users.user_id; created_by -> users.user_id; updated_by -> users.user_id; replaces_application_id -> placement_applications.application_id (self-ref, nullable)"
+21,interviews,"Scheduled interviews between enterprises and candidates. Carries schedule, location/link, result, and back-dating metadata for late entries.
+- Primary keys: interview_id
+- Foreign keys: application_id -> applications.application_id; decided_by -> users.user_id; backdated_by -> users.user_id"
+22,enterprise_assignments,"The central hub of the internship domain. Each row is a student-enterprise pair for a specific semester. Trigger 022 enforces one ACTIVE assignment per student. replaced_by_assignment_id chains swap assignments.
+- Primary keys: assignment_id
+- Foreign keys: enterprise_id -> enterprises.enterprise_id; student_id -> users.user_id; semester_id -> semesters.semester_id; assigned_by -> users.user_id; replaced_by_assignment_id -> enterprise_assignments.assignment_id (self-ref, nullable)"
+23,internship_plans,"Per-enterprise, per-semester internship plan describing the overall goal and high-level structure. Each plan is one-to-many with internship_plan_items (weekly tasks).
+- Primary keys: plan_id
+- Foreign keys: enterprise_id -> enterprises.enterprise_id; semester_id -> semesters.semester_id; job_post_id -> job_posts.job_post_id (optional link to originating listing); approved_by -> users.user_id; last_reviewed_by -> users.user_id"
+24,internship_plan_revisions,"Immutable audit trail of every state change on a plan (SUBMIT, APPROVE, REJECT, REQUEST_REVISION) with actor role and free-form note.
+- Primary keys: revision_id
+- Foreign keys: plan_id -> internship_plans.plan_id; actor_id -> users.user_id"
+25,internship_plan_items,"Weekly tasks inside a plan (week_number, task_description, target_date, status). Status is updated as the supervisor marks weekly progress.
+- Primary keys: plan_item_id
+- Foreign keys: plan_id -> internship_plans.plan_id"
+26,enterprise_evaluations,"Enterprise-side evaluation of a student at the end of the assignment. total_score is GENERATED from the four component scores (attitude*0.2 + professionalism*0.4 + soft*0.2 + progress*0.2). Locks after submission.
+- Primary keys: evaluation_id
+- Foreign keys: assignment_id -> enterprise_assignments.assignment_id (unique - one-per-assignment)"
+27,weekly_reports,"Per-week report submitted by the student for a given assignment. Fields cover tasks completed, challenges, lessons, next-week plan, attachments, hours logged, and plagiarism/anomaly scoring.
+- Primary keys: report_id
+- Foreign keys: assignment_id -> enterprise_assignments.assignment_id; late_override_by -> users.user_id"
+28,report_feedbacks,"Reviewer (supervisor/TM) feedback attached to a weekly report. Multiple rows per report possible (one per review action). action encodes APPROVE / REJECT / REQUEST_REVISION.
+- Primary keys: feedback_id
+- Foreign keys: report_id -> weekly_reports.report_id; reviewer_id -> users.user_id"
+29,final_reports,"End-of-internship PDF report submitted once per assignment. is_late is set when submitted after the semester deadline.
+- Primary keys: final_report_id
+- Foreign keys: assignment_id -> enterprise_assignments.assignment_id (unique)"
+30,incidents,"Incident reports raised against an assignment (e.g. misconduct, policy violation). Carries evidence URLs, resolution status, and resolution note (mandatory once RESOLVED).
+- Primary keys: incident_id
+- Foreign keys: assignment_id -> enterprise_assignments.assignment_id; reported_by -> users.user_id; resolved_by -> users.user_id"
+31,training_warnings,"Formal warnings issued by a Training Manager to a student within a specific week. Triggered only when a student has missed a weekly report submission.
+- Primary keys: warning_id
+- Foreign keys: tm_id -> users.user_id; student_id -> users.user_id; semester_id -> semesters.semester_id"
+32,final_grades,"Final grade for a student per semester, locked by default once issued. enterprise_total_score is captured separately from the composite final_grade for transparency; overall_status drives pass/fail.
+- Primary keys: grade_id
+- Foreign keys: student_id -> users.user_id (unique with semester_id); tm_id -> users.user_id; semester_id -> semesters.semester_id; cancelled_by -> users.user_id"
+33,notifications,"Cross-cutting in-app notification feed. reference_entity + reference_id can point at any business entity (weekly_report, final_grade, interview, etc.) so clients can deep-link.
+- Primary keys: notification_id
+- Foreign keys: recipient_id -> users.user_id; reference_id -> varies (polymorphic, see reference_entity)"
+34,student_enterprise_feedbacks,"End-of-internship feedback the student submits about the enterprise (only students in semester 7-9, once per student-enterprise-semester tuple). Captures four 1-to-5 rating dimensions plus free-form comments.
+- Primary keys: feedback_id
+- Foreign keys: student_id -> users.user_id (unique with enterprise_id, semester_id); enterprise_id -> enterprises.enterprise_id; semester_id -> semesters.semester_id"

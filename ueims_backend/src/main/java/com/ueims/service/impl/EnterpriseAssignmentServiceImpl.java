@@ -137,20 +137,18 @@ public class EnterpriseAssignmentServiceImpl implements EnterpriseAssignmentServ
             return;
         }
         if (ea.getSupervisorName() == null || ea.getSupervisorName().isBlank()) {
-            throw new AppException(ErrorCode.INVALID_REQUEST,
-                    "Supervisor name is required when assignment status is ACTIVE.");
+            throw new AppException(
+                    ErrorCode.INVALID_REQUEST, "Supervisor name is required when assignment status is ACTIVE.");
         }
         if (ea.getStartDate() == null) {
-            throw new AppException(ErrorCode.INVALID_REQUEST,
-                    "Start date is required when assignment status is ACTIVE.");
+            throw new AppException(
+                    ErrorCode.INVALID_REQUEST, "Start date is required when assignment status is ACTIVE.");
         }
         if (ea.getEndDate() == null) {
-            throw new AppException(ErrorCode.INVALID_REQUEST,
-                    "End date is required when assignment status is ACTIVE.");
+            throw new AppException(ErrorCode.INVALID_REQUEST, "End date is required when assignment status is ACTIVE.");
         }
         if (ea.getEndDate().isBefore(ea.getStartDate())) {
-            throw new AppException(ErrorCode.INVALID_REQUEST,
-                    "End date must be on or after start date.");
+            throw new AppException(ErrorCode.INVALID_REQUEST, "End date must be on or after start date.");
         }
     }
 
