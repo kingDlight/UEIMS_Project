@@ -48,6 +48,15 @@ public class PlacementApplication extends BaseEntity {
     @Builder.Default
     private String status = "PENDING_APPROVAL";
 
+    /**
+     * Nguồn tạo application:
+     *   SELF_SOURCED   = SV tự apply qua Portal Student
+     *   SYSTEM_MATCHED = TM/hệ thống tạo (auto-match, manual-match, interview pass)
+     */
+    @Column(name = "source", nullable = false, length = 20)
+    @Builder.Default
+    private String source = "SELF_SOURCED";
+
     @Column(name = "cover_letter", columnDefinition = "TEXT")
     private String coverLetter;
 

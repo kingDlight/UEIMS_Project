@@ -123,6 +123,9 @@ public interface PlacementApplicationRepository extends JpaRepository<PlacementA
 			(SELECT pa6.is_replacement FROM placement_applications pa6
 			WHERE pa6.student_id = u.user_id AND pa6.semester_id = sem.semester_id
 			ORDER BY pa6.created_at DESC LIMIT 1) AS is_replacement,
+			(SELECT pa7.source FROM placement_applications pa7
+			WHERE pa7.student_id = u.user_id AND pa7.semester_id = sem.semester_id
+			ORDER BY pa7.created_at DESC LIMIT 1) AS source,
 			es.deferred_reason  AS deferred_reason,
 			(SELECT u2.full_name FROM users u2 WHERE u2.user_id = es.deferred_by) AS deferred_by_name,
 			es.deferred_at      AS deferred_at

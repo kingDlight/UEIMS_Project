@@ -48,6 +48,14 @@ public class OjtPlacementViewDTO {
     String coverLetter;
     LocalDateTime applicationCreatedAt;
 
+    /**
+     * Nguồn tạo application mới nhất:
+     *   SELF_SOURCED   = SV tự apply
+     *   SYSTEM_MATCHED = TM/hệ thống tạo (auto-match, manual-match, interview pass)
+     * Null nếu SV chưa có application nào.
+     */
+    String source;
+
     // Self-Replace flag: TRUE nếu application mới nhất là replacement request
     Boolean isReplacement;
 

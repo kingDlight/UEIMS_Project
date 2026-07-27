@@ -49,6 +49,8 @@ export interface OjtPlacementView {
     applicationId?: string;
     applicationStatus?: string;
     coverLetter?: string;
+    /** SELF_SOURCED | SYSTEM_MATCHED (null nếu SV chưa có application) */
+    source?: 'SELF_SOURCED' | 'SYSTEM_MATCHED' | null;
     applicationCreatedAt?: string;
     isReplacement?: boolean;
 }

@@ -740,6 +740,7 @@ public class InterviewServiceImpl implements InterviewService {
                 .enterprise(enterprise)
                 .semester(semester)
                 .status("APPROVED")
+                .source("SYSTEM_MATCHED")
                 .coverLetter("[Interview Pass] Auto-placed after passing interview with " + enterprise.getCompanyName())
                 .reviewedBy(currentUser())
                 .reviewedAt(LocalDateTime.now())

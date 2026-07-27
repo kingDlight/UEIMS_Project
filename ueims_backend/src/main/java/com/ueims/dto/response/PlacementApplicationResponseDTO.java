@@ -30,6 +30,7 @@ public class PlacementApplicationResponseDTO {
 
     // Workflow
     String status;
+    String source;
     String coverLetter;
     String rejectionReason;
 

@@ -81,19 +81,20 @@ interface PlacementRecord extends OjtPlacementView {
 
 // ============================================================
 // SOURCE DETECTION
-// placement_applications row được tạo bởi 1 trong 4 actor:
-//   - SV tự apply → coverLetter do SV viết, không prefix
-//   - TM manual match → coverLetter bắt đầu '[Manual Match by TM]'
-//   - TM auto match → coverLetter bắt đầu '[Auto-Match]'
-//   - Interview pass workflow → coverLetter bắt đầu '[Interview Pass]'
+// Ưu tiên dùng cột `source` từ backend (đã được persist vào DB).
+// Fallback parse coverLetter prefix cho row cũ chưa được backfill.
 // Nếu không có applicationId → UNSOURCED (SV chưa có placement_application).
 // ============================================================
 function detectSource(item: OjtPlacementView): SourceType {
   if (!item.applicationId) return 'UNSOURCED';
+  if (item.source === 'SELF_SOURCED') return 'SELF_SOURCED';
+  if (item.source === 'SYSTEM_MATCHED') return 'SYSTEM_MATCHED';
+  // Fallback cho row legacy chưa được backfill source:
   const cl = item.coverLetter ?? '';
   if (cl.startsWith('[Manual Match by TM]')) return 'SYSTEM_MATCHED';
   if (cl.startsWith('[Auto-Match]')) return 'SYSTEM_MATCHED';
   if (cl.startsWith('[Interview Pass]')) return 'SYSTEM_MATCHED';
+  if (cl.startsWith('[Legacy:')) return 'SYSTEM_MATCHED';
   return 'SELF_SOURCED';
 }
 

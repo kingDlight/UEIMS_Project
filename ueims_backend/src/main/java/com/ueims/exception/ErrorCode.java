@@ -195,7 +195,7 @@ public enum ErrorCode {
             1083, "Rejection reason is required and must be at least 5 characters", HttpStatus.BAD_REQUEST),
     STUDENT_NOT_ELIGIBLE_FOR_PLACEMENT(
             1084,
-            "Student must be ACCEPTED or MATCHED in eligible_students before applying for placement",
+            "Student must be ELIGIBLE, ACCEPTED, MATCHED, or OJT in eligible_students before applying for placement",
             HttpStatus.BAD_REQUEST),
     ENTERPRISE_NOT_APPROVED(1085, "Enterprise must be APPROVED before students can apply", HttpStatus.BAD_REQUEST),
     NO_ACTIVE_SEMESTER(

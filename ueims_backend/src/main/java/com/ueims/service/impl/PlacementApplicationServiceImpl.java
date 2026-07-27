@@ -87,7 +87,7 @@ public class PlacementApplicationServiceImpl implements PlacementApplicationServ
                 .findByUser_UserIdAndSemester_SemesterId(studentId, semester.getSemesterId())
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_ELIGIBLE_FOR_PLACEMENT));
 
-        if (!List.of("ACCEPTED", "MATCHED", "OJT").contains(eligible.getStatus())) {
+        if (!List.of("ELIGIBLE", "ACCEPTED", "MATCHED", "OJT").contains(eligible.getStatus())) {
             throw new AppException(ErrorCode.STUDENT_NOT_ELIGIBLE_FOR_PLACEMENT);
         }
 
@@ -130,6 +130,7 @@ public class PlacementApplicationServiceImpl implements PlacementApplicationServ
                 .enterprise(enterprise)
                 .semester(semester)
                 .status("PENDING_APPROVAL")
+                .source("SELF_SOURCED")
                 .coverLetter(request.getCoverLetter())
                 .isReplacement(isReplacement);
 
@@ -325,11 +326,13 @@ public class PlacementApplicationServiceImpl implements PlacementApplicationServ
             String workflowStatus = (String) row[6];
             String applicationStatus = (String) row[11];
             String coverLetter = (String) row[12];
+            String source = (String) row[14];
             log.info(
-                    "[OJTVIEW-DEBUG] student={} workflow={} appStatus={} coverLetterPrefix=\"{}\"",
+                    "[OJTVIEW-DEBUG] student={} workflow={} appStatus={} source={} coverLetterPrefix=\"{}\"",
                     studentCode,
                     workflowStatus,
                     applicationStatus,
+                    source == null ? "<null>" : source,
                     coverLetter == null ? "<null>" : coverLetter.substring(0, Math.min(40, coverLetter.length())));
             OjtPlacementViewDTO.OjtPlacementViewDTOBuilder builder = OjtPlacementViewDTO.builder()
                     .studentId(toUuid(row[0]))
@@ -346,9 +349,10 @@ public class PlacementApplicationServiceImpl implements PlacementApplicationServ
                     .applicationStatus((String) row[11])
                     .coverLetter((String) row[12])
                     .isReplacement(toBoolean(row[13]))
-                    .deferredReason((String) row[14])
-                    .deferredByName((String) row[15])
-                    .deferredAt(toLocalDateTime(row[16]));
+                    .source((String) row[14])
+                    .deferredReason((String) row[15])
+                    .deferredByName((String) row[16])
+                    .deferredAt(toLocalDateTime(row[17]));
             result.add(builder.build());
         }
         return result;
@@ -390,7 +394,7 @@ public class PlacementApplicationServiceImpl implements PlacementApplicationServ
                 .findByUser_UserIdAndSemester_SemesterId(student.getUserId(), semester.getSemesterId())
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_ELIGIBLE_FOR_PLACEMENT));
 
-        if (!List.of("ACCEPTED", "MATCHED", "OJT").contains(eligible.getStatus())) {
+        if (!List.of("ELIGIBLE", "ACCEPTED", "MATCHED", "OJT").contains(eligible.getStatus())) {
             throw new AppException(ErrorCode.STUDENT_NOT_ELIGIBLE_FOR_PLACEMENT);
         }
 
@@ -421,6 +425,7 @@ public class PlacementApplicationServiceImpl implements PlacementApplicationServ
                 .enterprise(enterprise)
                 .semester(semester)
                 .status("APPROVED")
+                .source("SYSTEM_MATCHED")
                 .coverLetter(
                         request.getNote() != null
                                 ? "[Manual Match by TM] " + request.getNote()
@@ -559,6 +564,7 @@ public class PlacementApplicationServiceImpl implements PlacementApplicationServ
                     .enterprise(bestEnt)
                     .semester(semester)
                     .status("PENDING_APPROVAL")
+                    .source("SYSTEM_MATCHED")
                     .coverLetter("[Auto-Match] " + bestReason + " (score: " + String.format("%.1f", bestScore) + ")")
                     .isReplacement(false)
                     .build();
