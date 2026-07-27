@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useScrollAnimation } from '../../../hooks/useScrollAnimation';
-import { Table, Progress } from 'antd';
+import { Table, Progress, Select } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import {
   PieChart,
@@ -24,7 +24,7 @@ import {
   Users,
 } from 'lucide-react';
 import { DashboardService } from '@/services/DashboardService';
-import { SemesterService } from '@/services/SemesterService';
+import { SemesterService, type SemesterResponse } from '@/services/SemesterService';
 import { EnterpriseService } from '@/services/EnterpriseService';
 
 // ============================================================
@@ -226,49 +226,83 @@ export const StatsTab: React.FC = () => {
   const [placementData, setPlacementData] = useState<any[]>(DEFAULT_PLACEMENT_DATA);
   const [gpaData, setGpaData] = useState<any[]>(DEFAULT_GPA_DATA);
   const [majorTableData, setMajorTableData] = useState<any[]>(MAJOR_TABLE_DATA);
-  
+
   const [summaryData, setSummaryData] = useState<any>(null);
   const [totalEnterprises, setTotalEnterprises] = useState<number>(0);
 
+  // Semester selector (mirrors the Enterprise analytics pattern)
+  const [semesters, setSemesters] = useState<SemesterResponse[]>([]);
+  const [selectedSemester, setSelectedSemester] = useState<string>('');
+
+  // Load semester list + enterprises once on mount
   useEffect(() => {
-    const fetchStats = async () => {
+    const bootstrap = async () => {
       try {
-        const activeSemester = await SemesterService.getActiveSemester();
-        if (activeSemester?.semesterId) {
-          const placementRes = await DashboardService.getEmploymentRateChart(activeSemester.semesterId);
-          if (placementRes && placementRes.length > 0) {
-            setPlacementData(placementRes.map((r: any) => ({
-              name: r.label,
-              value: Number(r.value),
-              color: r.label === 'Placed' ? cc.success : cc.warning
-            })));
-          }
+        const list = await SemesterService.getAllSemesters();
+        setSemesters(list);
 
-          const gpaRes = await DashboardService.getGradeDistributionChart(activeSemester.semesterId);
-          if (gpaRes && gpaRes.length > 0) {
-            setGpaData(gpaRes.map((r: any) => ({ major: r.label, avgGpa: Number(r.value) })));
-          }
-          
-          const majorRes = await DashboardService.getMajorDistributionChart(activeSemester.semesterId);
-          if (majorRes && majorRes.length > 0) {
-             // map major data to table
-             setMajorTableData(majorRes.map((r: any, idx: number) => ({
-                key: String(idx), major: r.label, total: Number(r.value), placed: Math.floor(Number(r.value) * 0.9), rate: 90, avgGpa: 3.2
-             })));
-          }
-
-          const summary = await DashboardService.getCommandCenterSummary();
-          if (summary) setSummaryData(summary);
-        }
+        // Default = ACTIVE semester; otherwise most recent by code
+        const active = list.find((s) => s.status === 'ACTIVE');
+        const fallback =
+          active ??
+          [...list].sort((a, b) => (b.semesterCode || '').localeCompare(a.semesterCode || ''))[0];
+        if (fallback) setSelectedSemester(fallback.semesterId);
 
         const enterprises = await EnterpriseService.getAllEnterprises();
         setTotalEnterprises(enterprises.length);
       } catch (err) {
-        console.error('Failed to load stats', err);
+        console.error('Failed to bootstrap stats', err);
       }
     };
-    void fetchStats();
+    void bootstrap();
   }, []);
+
+  // Refetch semester-scoped charts whenever selection changes
+  useEffect(() => {
+    if (!selectedSemester) return;
+    const fetchCharts = async () => {
+      try {
+        const [placementRes, gpaRes, majorRes, summary] = await Promise.all([
+          DashboardService.getEmploymentRateChart(selectedSemester),
+          DashboardService.getGradeDistributionChart(selectedSemester),
+          DashboardService.getMajorDistributionChart(selectedSemester),
+          DashboardService.getCommandCenterSummary(),
+        ]);
+
+        if (placementRes && placementRes.length > 0) {
+          setPlacementData(
+            placementRes.map((r: any) => ({
+              name: r.label,
+              value: Number(r.value),
+              color: r.label === 'Placed' ? cc.success : cc.warning,
+            })),
+          );
+        }
+
+        if (gpaRes && gpaRes.length > 0) {
+          setGpaData(gpaRes.map((r: any) => ({ major: r.label, avgGpa: Number(r.value) })));
+        }
+
+        if (majorRes && majorRes.length > 0) {
+          setMajorTableData(
+            majorRes.map((r: any, idx: number) => ({
+              key: String(idx),
+              major: r.label,
+              total: Number(r.value),
+              placed: Math.floor(Number(r.value) * 0.9),
+              rate: 90,
+              avgGpa: 3.2,
+            })),
+          );
+        }
+
+        if (summary) setSummaryData(summary);
+      } catch (err) {
+        console.error('Failed to load stats for semester', selectedSemester, err);
+      }
+    };
+    void fetchCharts();
+  }, [selectedSemester]);
 
   const pipeline = summaryData?.pipeline || { eligible: 1, placed: 0, applied: 0 };
   const totalEligible = pipeline.eligible > 0 ? pipeline.eligible : 1;
@@ -384,13 +418,28 @@ trailColor={cc.borderSubtle}
       `}</style>
 
       {/* Page Header */}
-      <div style={{ marginBottom: 20 }}>
-        <h2 style={{ fontSize: 20, fontWeight: 800, color: cc.textPrimary, margin: 0, letterSpacing: '-0.01em' }}>
-          Statistics &amp; Analytics
-        </h2>
-        <p style={{ fontSize: 13, color: cc.textMuted, margin: '4px 0 0' }}>
-          OJT placement performance, GPA distribution, and enterprise participation
-        </p>
+      <div style={{ marginBottom: 20, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+        <div>
+          <h2 style={{ fontSize: 20, fontWeight: 800, color: cc.textPrimary, margin: 0, letterSpacing: '-0.01em' }}>
+            Statistics &amp; Analytics
+          </h2>
+          <p style={{ fontSize: 13, color: cc.textMuted, margin: '4px 0 0' }}>
+            OJT placement performance, GPA distribution, and enterprise participation
+          </p>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span style={{ fontSize: 12, color: cc.textSecondary, fontWeight: 600 }}>Semester:</span>
+          <Select
+            value={selectedSemester || undefined}
+            onChange={(val) => setSelectedSemester(val)}
+            style={{ minWidth: 240 }}
+            placeholder="Select semester"
+            options={semesters.map((s) => ({
+              value: s.semesterId,
+              label: `${s.name}${s.status === 'ACTIVE' ? ' (Active)' : ''}`,
+            }))}
+          />
+        </div>
       </div>
 
       {/* Metric Cards */}
@@ -406,7 +455,7 @@ trailColor={cc.borderSubtle}
         {/* LEFT: Donut Chart */}
         <div style={{ background: cc.surface, backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: `1px solid ${cc.border}`, borderRadius: cc.radiusLg, boxShadow: cc.shadowSm, padding: 20 }}>
           <div style={{ fontSize: 13.5, fontWeight: 700, color: cc.textPrimary, marginBottom: 4 }}>Placement Overview</div>
-          <div style={{ fontSize: 12, color: cc.textMuted, marginBottom: 20 }}>Placed vs. still searching — current semester</div>
+          <div style={{ fontSize: 12, color: cc.textMuted, marginBottom: 20 }}>Placed vs. still searching — selected semester</div>
           <div style={{ width: '100%', height: 220, minHeight: 0 }}>
             <ResponsiveContainer width="99%" height="99%" initialDimension={{ width: 400, height: 220 }}>
               <PieChart>
