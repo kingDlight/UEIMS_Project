@@ -68,13 +68,33 @@ type WorkflowStatus =
   | 'COMPLETED'
   | 'CANCELLED';
 
+type SourceType = 'SELF_SOURCED' | 'SYSTEM_MATCHED' | 'UNSOURCED';
+
 interface PlacementRecord extends OjtPlacementView {
   targetRole?: string;
   key: string;
   avatar: string;
-  source: 'SELF_SOURCED' | 'SYSTEM_MATCHED';
+  source: SourceType;
   enterpriseInitials: string | null;
   enterpriseColor: string | null;
+}
+
+// ============================================================
+// SOURCE DETECTION
+// placement_applications row được tạo bởi 1 trong 4 actor:
+//   - SV tự apply → coverLetter do SV viết, không prefix
+//   - TM manual match → coverLetter bắt đầu '[Manual Match by TM]'
+//   - TM auto match → coverLetter bắt đầu '[Auto-Match]'
+//   - Interview pass workflow → coverLetter bắt đầu '[Interview Pass]'
+// Nếu không có applicationId → UNSOURCED (SV chưa có placement_application).
+// ============================================================
+function detectSource(item: OjtPlacementView): SourceType {
+  if (!item.applicationId) return 'UNSOURCED';
+  const cl = item.coverLetter ?? '';
+  if (cl.startsWith('[Manual Match by TM]')) return 'SYSTEM_MATCHED';
+  if (cl.startsWith('[Auto-Match]')) return 'SYSTEM_MATCHED';
+  if (cl.startsWith('[Interview Pass]')) return 'SYSTEM_MATCHED';
+  return 'SELF_SOURCED';
 }
 
 // ============================================================
@@ -295,11 +315,34 @@ export const OJTTab: React.FC = () => {
       const mapped: PlacementRecord[] = rows.map((item) => {
         const entName = item.enterpriseName ?? null;
         const entColor = entName ? getEnterpriseColor(entName) : null;
+        // #region agent log
+        try {
+          const cl = (item.coverLetter ?? '').substring(0, 60);
+          fetch('http://127.0.0.1:7689/ingest/85060117-28a9-450a-b776-759dca15ff5a', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': 'cb12c5' },
+            body: JSON.stringify({
+              sessionId: 'cb12c5',
+              hypothesisId: 'H1',
+              location: 'OJTTab.tsx:295',
+              message: 'source-mapping-debug',
+              data: {
+                studentCode: item.studentCode,
+                workflowStatus: item.workflowStatus,
+                hasApplicationId: !!item.applicationId,
+                applicationStatus: item.applicationStatus,
+                coverLetterPrefix: cl,
+              },
+              timestamp: Date.now(),
+            }),
+          }).catch(() => {});
+        } catch {}
+        // #endregion
         return {
           ...item,
           key: `${item.studentId}__${item.semesterId}`,
           avatar: (item.studentName ?? 'ST').substring(0, 2).toUpperCase(),
-          source: item.applicationId ? 'SELF_SOURCED' : 'SYSTEM_MATCHED',
+          source: detectSource(item),
           enterpriseInitials: entName ? entName.substring(0, 2).toUpperCase() : null,
           enterpriseColor: entColor?.color ?? null,
         };
@@ -535,21 +578,29 @@ export const OJTTab: React.FC = () => {
       key: 'source',
       align: 'left' as const,
       width: 135,
-      render: (_: unknown, record: PlacementRecord) => (
-        <div style={row}>
-          <span style={{
-            display: 'inline-flex', alignItems: 'center',
-            padding: '2px 7px', borderRadius: 6,
-            backgroundColor: record.source === 'SELF_SOURCED' ? hexToRgba(cc.info, 0.06) : hexToRgba(cc.purple, 0.06),
-            border: `1px solid ${record.source === 'SELF_SOURCED' ? hexToRgba(cc.info, 0.25) : hexToRgba(cc.purple, 0.25)}`,
-            color: record.source === 'SELF_SOURCED' ? cc.info : cc.purple,
-            fontSize: 10, fontWeight: 700, fontFamily: 'Inter, sans-serif',
-            whiteSpace: 'nowrap',
-          }}>
-            {record.source === 'SELF_SOURCED' ? 'Self-Sourced' : 'System-Matched'}
-          </span>
-        </div>
-      ),
+      render: (_: unknown, record: PlacementRecord) => {
+        const sourceCfg: Record<SourceType, { label: string; bg: string; border: string; color: string }> = {
+          SELF_SOURCED:   { label: 'Self-Sourced',   bg: hexToRgba(cc.info, 0.06),    border: hexToRgba(cc.info, 0.25),    color: cc.info },
+          SYSTEM_MATCHED: { label: 'System-Matched', bg: hexToRgba(cc.purple, 0.06),  border: hexToRgba(cc.purple, 0.25),  color: cc.purple },
+          UNSOURCED:      { label: '—',              bg: hexToRgba(cc.neutral, 0.06), border: hexToRgba(cc.neutral, 0.25), color: cc.textMuted },
+        };
+        const cfg = sourceCfg[record.source];
+        return (
+          <div style={row}>
+            <span style={{
+              display: 'inline-flex', alignItems: 'center',
+              padding: '2px 7px', borderRadius: 6,
+              backgroundColor: cfg.bg,
+              border: `1px solid ${cfg.border}`,
+              color: cfg.color,
+              fontSize: 10, fontWeight: 700, fontFamily: 'Inter, sans-serif',
+              whiteSpace: 'nowrap',
+            }}>
+              {cfg.label}
+            </span>
+          </div>
+        );
+      },
     },
     {
       title: <HeaderBadge>Enterprise</HeaderBadge>,
@@ -783,7 +834,7 @@ export const OJTTab: React.FC = () => {
                     p.studentName || '',
                     p.major || '',
                     p.targetRole || '',
-                    p.source === 'SELF_SOURCED' ? 'Self-Sourced' : 'System-Matched',
+                    p.source === 'SELF_SOURCED' ? 'Self-Sourced' : p.source === 'SYSTEM_MATCHED' ? 'System-Matched' : '—',
                     p.enterpriseName || '',
                     p.workflowStatus || ''
                   ]);
