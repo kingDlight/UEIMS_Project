@@ -130,15 +130,20 @@ public class EligibleStudentServiceImpl implements EligibleStudentService {
             }
         }
 
-        // Guard: OJT → non-OJT admin-only rule
+        // Guard: OJT → non-OJT admin-only rule (except OJT → COMPLETED for sem 7+ graduates)
         if ("OJT".equals(existing.getStatus()) && !"OJT".equals(newStatus)) {
-            var authentication = org.springframework.security.core.context.SecurityContextHolder.getContext()
-                    .getAuthentication();
-            boolean isAdmin = authentication != null
-                    && authentication.getAuthorities().stream()
-                            .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-            if (!isAdmin) {
-                throw new AppException(ErrorCode.ADMIN_INTERVENTION_REQUIRED);
+            boolean graduatingToCompleted = "COMPLETED".equals(newStatus)
+                    && existing.getCurrentSemester() != null
+                    && existing.getCurrentSemester() >= 7;
+            if (!graduatingToCompleted) {
+                var authentication = org.springframework.security.core.context.SecurityContextHolder.getContext()
+                        .getAuthentication();
+                boolean isAdmin = authentication != null
+                        && authentication.getAuthorities().stream()
+                                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+                if (!isAdmin) {
+                    throw new AppException(ErrorCode.ADMIN_INTERVENTION_REQUIRED);
+                }
             }
         }
 

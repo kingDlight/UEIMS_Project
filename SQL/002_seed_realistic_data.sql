@@ -479,7 +479,7 @@ INSERT INTO users (user_id, email, password_hash, full_name, status, must_change
     ('d0000000-0000-0000-0000-000000000026', 'student26@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Do Thi Thanh', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000026', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked, approved_at) VALUES
-    ('e0000000-0000-0000-0000-000000000026', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000026', 'DA15026', 'Do Thi Thanh', 'student26@fpt.edu.vn', 'Digital Art & Design', 8.56, 7, 'OJT', TRUE, CURRENT_TIMESTAMP);
+    ('e0000000-0000-0000-0000-000000000026', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000026', 'DA15026', 'Do Thi Thanh', 'student26@fpt.edu.vn', 'Digital Art & Design', 8.56, 7, 'COMPLETED', TRUE, CURRENT_TIMESTAMP);
 INSERT INTO student_profiles (user_id, student_code, university, major, gpa, skills, cv_file_url) VALUES
     ('d0000000-0000-0000-0000-000000000026', 'DA15026', 'FPT University', 'Digital Art & Design', 5.5, '["Photoshop", "After Effects", "Motion Graphics"]'::jsonb, 'https://cv.example.com/da15026.pdf');
 INSERT INTO enterprise_assignments (assignment_id, enterprise_id, student_id, semester_id, supervisor_name, supervisor_email, assigned_by, status, start_date, end_date) VALUES
@@ -497,7 +497,7 @@ INSERT INTO users (user_id, email, password_hash, full_name, status, must_change
     ('d0000000-0000-0000-0000-000000000027', 'student27@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Nguyen Thanh Duc', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000027', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked, approved_at) VALUES
-    ('e0000000-0000-0000-0000-000000000027', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000027', 'GD15027', 'Nguyen Thanh Duc', 'student27@fpt.edu.vn', 'Graphic Design', 7.56, 7, 'OJT', TRUE, CURRENT_TIMESTAMP);
+    ('e0000000-0000-0000-0000-000000000027', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000027', 'GD15027', 'Nguyen Thanh Duc', 'student27@fpt.edu.vn', 'Graphic Design', 7.56, 7, 'COMPLETED', TRUE, CURRENT_TIMESTAMP);
 INSERT INTO student_profiles (user_id, student_code, university, major, gpa, skills, cv_file_url) VALUES
     ('d0000000-0000-0000-0000-000000000027', 'GD15027', 'FPT University', 'Graphic Design', 5.5, '["Figma", "Illustrator", "UI Design"]'::jsonb, 'https://cv.example.com/gd15027.pdf');
 INSERT INTO enterprise_assignments (assignment_id, enterprise_id, student_id, semester_id, supervisor_name, supervisor_email, assigned_by, status, start_date, end_date) VALUES
@@ -515,7 +515,7 @@ INSERT INTO users (user_id, email, password_hash, full_name, status, must_change
     ('d0000000-0000-0000-0000-000000000028', 'student28@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Ho Tuyet Linh', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000028', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked, approved_at) VALUES
-    ('e0000000-0000-0000-0000-000000000028', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000028', 'DM15028', 'Ho Tuyet Linh', 'student28@fpt.edu.vn', 'Digital Marketing', 8.83, 7, 'OJT', TRUE, CURRENT_TIMESTAMP);
+    ('e0000000-0000-0000-0000-000000000028', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000028', 'DM15028', 'Ho Tuyet Linh', 'student28@fpt.edu.vn', 'Digital Marketing', 8.83, 7, 'COMPLETED', TRUE, CURRENT_TIMESTAMP);
 INSERT INTO student_profiles (user_id, student_code, university, major, gpa, skills, cv_file_url) VALUES
     ('d0000000-0000-0000-0000-000000000028', 'DM15028', 'FPT University', 'Digital Marketing', 5.5, '["Facebook Ads", "Google Ads", "SEO"]'::jsonb, 'https://cv.example.com/dm15028.pdf');
 INSERT INTO enterprise_assignments (assignment_id, enterprise_id, student_id, semester_id, supervisor_name, supervisor_email, assigned_by, status, start_date, end_date) VALUES
@@ -533,7 +533,7 @@ INSERT INTO users (user_id, email, password_hash, full_name, status, must_change
     ('d0000000-0000-0000-0000-000000000029', 'student29@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Ngo Thanh Phong', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000029', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked, approved_at) VALUES
-    ('e0000000-0000-0000-0000-000000000029', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000029', 'IS15029', 'Ngo Thanh Phong', 'student29@fpt.edu.vn', 'Information Security', 6.61, 7, 'OJT', TRUE, CURRENT_TIMESTAMP);
+    ('e0000000-0000-0000-0000-000000000029', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000029', 'IS15029', 'Ngo Thanh Phong', 'student29@fpt.edu.vn', 'Information Security', 6.61, 7, 'COMPLETED', TRUE, CURRENT_TIMESTAMP);
 INSERT INTO student_profiles (user_id, student_code, university, major, gpa, skills, cv_file_url) VALUES
     ('d0000000-0000-0000-0000-000000000029', 'IS15029', 'FPT University', 'Information Security', 6.5, '["SIEM", "Splunk", "Penetration Testing"]'::jsonb, 'https://cv.example.com/is15029.pdf');
 INSERT INTO enterprise_assignments (assignment_id, enterprise_id, student_id, semester_id, supervisor_name, supervisor_email, assigned_by, status, start_date, end_date) VALUES
@@ -551,7 +551,7 @@ INSERT INTO users (user_id, email, password_hash, full_name, status, must_change
     ('d0000000-0000-0000-0000-000000000030', 'student30@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Vu Duc Yen', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000030', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked, approved_at) VALUES
-    ('e0000000-0000-0000-0000-000000000030', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000030', 'DA15030', 'Vu Duc Yen', 'student30@fpt.edu.vn', 'Digital Art & Design', 7.89, 7, 'OJT', TRUE, CURRENT_TIMESTAMP);
+    ('e0000000-0000-0000-0000-000000000030', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000030', 'DA15030', 'Vu Duc Yen', 'student30@fpt.edu.vn', 'Digital Art & Design', 7.89, 7, 'COMPLETED', TRUE, CURRENT_TIMESTAMP);
 INSERT INTO student_profiles (user_id, student_code, university, major, gpa, skills, cv_file_url) VALUES
     ('d0000000-0000-0000-0000-000000000030', 'DA15030', 'FPT University', 'Digital Art & Design', 6.5, '["Photoshop", "Illustrator", "Branding"]'::jsonb, 'https://cv.example.com/da15030.pdf');
 INSERT INTO enterprise_assignments (assignment_id, enterprise_id, student_id, semester_id, supervisor_name, supervisor_email, assigned_by, status, start_date, end_date) VALUES
@@ -1281,13 +1281,12 @@ INSERT INTO final_grades (student_id, tm_id, semester_id, enterprise_total_score
 -- on every eligible_student row so DB and UI labels stay in sync forever.
 --
 -- Invariants applied:
---   * current_semester <= 4            -> NOT_YET_ELIGIBLE   (UI: "Not Eligible")
+--   * current_semester <= 4            -> NOT_YET_ELIGIBLE   (UI: "Pre-Registration")
 --   * current_semester BETWEEN 5 AND 6:
 --       gpa <  5.0                    -> NOT_ELIGIBLE        (UI: "Not Eligible")
 --       gpa >= 5.0                    -> ELIGIBLE
 --   * current_semester >= 7            -> COMPLETED           (UI: "Completed")
--- Rows already PENDING/ACCEPTED/MATCHED/OJT/CANCELLED are left as-is
--- because they are mid-workflow, not raw eligibility states.
+-- CANCELLED rows are left untouched.
 -- ============================================================
 UPDATE eligible_students
 SET status = 'NOT_YET_ELIGIBLE'
@@ -1309,7 +1308,8 @@ WHERE current_semester BETWEEN 5 AND 6
 UPDATE eligible_students
 SET status = 'COMPLETED'
 WHERE current_semester >= 7
-  AND status NOT IN ('COMPLETED', 'CANCELLED', 'OJT', 'PENDING', 'ACCEPTED', 'MATCHED');
+  AND status <> 'CANCELLED'
+  AND status <> 'COMPLETED';
 
 -- Re-enable all triggers and constraints
 -- ============================================================

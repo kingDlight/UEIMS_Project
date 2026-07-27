@@ -43,8 +43,9 @@ public class EligibleStudentUpdateRequest {
 
     @Size(max = 20)
     @Pattern(
-            regexp = "^(ELIGIBLE|NOT_ELIGIBLE|PENDING|ACCEPTED|MATCHED|OJT|CANCELLED)$",
-            message = "Status must be one of: ELIGIBLE, NOT_ELIGIBLE, PENDING, ACCEPTED, MATCHED, OJT, CANCELLED")
+            regexp = "^(NOT_YET_ELIGIBLE|ELIGIBLE|NOT_ELIGIBLE|PENDING|ACCEPTED|MATCHED|OJT|COMPLETED|CANCELLED)$",
+            message =
+                    "Status must be one of: NOT_YET_ELIGIBLE, ELIGIBLE, NOT_ELIGIBLE, PENDING, ACCEPTED, MATCHED, OJT, COMPLETED, CANCELLED")
     private String status;
 
     @Size(max = 1000, message = "CANCEL_REASON_INVALID_LENGTH")

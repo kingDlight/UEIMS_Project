@@ -196,18 +196,31 @@ const OJT_STATUS: Record<string, OJTStatusConfig> = {
  */
 function resolveStatusKey(r: { status?: string | null; currentSemester: number; gpa?: number }): OJT_STATUS_KEY {
   const raw = (r.status ?? '').trim();
+
+  if (raw === 'NOT_YET_ELIGIBLE') {
+    return 'PRE_REGISTRATION';
+  }
+  if (raw === 'COMPLETED') {
+    return 'COMPLETED';
+  }
+  if (raw === 'OJT' && r.currentSemester >= 7) {
+    return 'COMPLETED';
+  }
+
   let key: OJT_STATUS_KEY = 'ELIGIBLE';
   if (raw && OJT_STATUS_VALUES.includes(raw as OJT_STATUS_KEY)) {
     key = raw as OJT_STATUS_KEY;
   }
-  
+
   // Transform ELIGIBLE to PRE_REGISTRATION, COMPLETED or NOT_QUALIFIED based on semester and GPA
   if (key === 'ELIGIBLE') {
     if (r.currentSemester < 5) {
       return 'PRE_REGISTRATION';
-    } else if (r.currentSemester >= 7) {
+    }
+    if (r.currentSemester >= 7) {
       return 'COMPLETED';
-    } else if (r.gpa != null && r.gpa < 5.0) {
+    }
+    if (r.gpa != null && r.gpa < 5.0) {
       return 'NOT_QUALIFIED';
     }
   }
@@ -486,13 +499,26 @@ const StudentDetailModal: React.FC<{
 // ============================================================
 // EDIT STUDENT MODAL
 // ============================================================
-const ALL_STATUS_OPTIONS: { value: OJT_STATUS_KEY; label: string }[] = [
-  { value: 'ELIGIBLE',  label: 'Eligible' },
+type DbStudentStatus =
+  | 'NOT_YET_ELIGIBLE'
+  | 'ELIGIBLE'
+  | 'NOT_ELIGIBLE'
+  | 'PENDING'
+  | 'ACCEPTED'
+  | 'MATCHED'
+  | 'OJT'
+  | 'COMPLETED'
+  | 'CANCELLED';
+
+const ALL_STATUS_OPTIONS: { value: DbStudentStatus; label: string }[] = [
+  { value: 'NOT_YET_ELIGIBLE', label: 'Pre-Registration' },
+  { value: 'ELIGIBLE', label: 'Eligible' },
   { value: 'NOT_ELIGIBLE', label: 'Not Eligible' },
-  { value: 'PENDING',   label: 'Pending' },
-  { value: 'ACCEPTED',  label: 'Accepted' },
-  { value: 'MATCHED',   label: 'Matched' },
-  { value: 'OJT',       label: 'OJT' },
+  { value: 'PENDING', label: 'Pending' },
+  { value: 'ACCEPTED', label: 'Accepted' },
+  { value: 'MATCHED', label: 'Matched' },
+  { value: 'OJT', label: 'In OJT' },
+  { value: 'COMPLETED', label: 'Completed' },
   { value: 'CANCELLED', label: 'Cancelled' },
 ];
 
@@ -503,29 +529,46 @@ const ALL_STATUS_OPTIONS: { value: OJT_STATUS_KEY; label: string }[] = [
  * the user understands why a transition is blocked.
  */
 function getAllowedStatusOptions(currentStatus: string | null | undefined): {
-  value: OJT_STATUS_KEY;
+  value: DbStudentStatus;
   label: string;
   disabled: boolean;
   reason: string;
 }[] {
   const cur = (currentStatus ?? 'ELIGIBLE').trim() || 'ELIGIBLE';
+  const lifecycle: DbStudentStatus[] = ['NOT_YET_ELIGIBLE', 'ELIGIBLE', 'NOT_ELIGIBLE', 'COMPLETED'];
+
   return ALL_STATUS_OPTIONS.map((o) => {
     if (o.value === cur) return { ...o, disabled: false, reason: 'Current status' };
-    // CANCELLED is terminal
     if (cur === 'CANCELLED') {
       return { ...o, disabled: true, reason: 'Cancelled is terminal' };
     }
-    // OJT -> non-CANCELLED is admin-only; we still surface it but mark disabled
-    // (backend enforces admin role).
-    if (cur === 'OJT' && o.value !== 'CANCELLED') {
+    if (cur === 'COMPLETED' && o.value !== 'CANCELLED') {
+      return { ...o, disabled: o.value !== 'COMPLETED', reason: 'Completed is terminal' };
+    }
+    if (lifecycle.includes(cur as DbStudentStatus) && lifecycle.includes(o.value)) {
+      return { ...o, disabled: false, reason: '' };
+    }
+    if (lifecycle.includes(cur as DbStudentStatus)) {
+      if (o.value === 'PENDING' && cur === 'ELIGIBLE') {
+        return { ...o, disabled: false, reason: '' };
+      }
+      if (['PENDING', 'ACCEPTED', 'MATCHED', 'OJT'].includes(o.value)) {
+        return { ...o, disabled: true, reason: 'Start from Eligible → Pending first' };
+      }
+      if (o.value === 'CANCELLED') {
+        return { ...o, disabled: false, reason: '' };
+      }
+      return { ...o, disabled: false, reason: '' };
+    }
+    if (cur === 'OJT' && o.value === 'COMPLETED') {
+      return { ...o, disabled: false, reason: '' };
+    }
+    if (cur === 'OJT' && o.value !== 'CANCELLED' && o.value !== 'COMPLETED') {
       return { ...o, disabled: true, reason: 'Only admin can roll back an OJT' };
     }
-    // OJT requires ACCEPTED or MATCHED (BR-22)
     if (o.value === 'OJT' && cur !== 'ACCEPTED' && cur !== 'MATCHED') {
       return { ...o, disabled: true, reason: 'OJT requires ACCEPTED or MATCHED' };
     }
-    // Workflow forward chain: ELIGIBLE -> PENDING -> ACCEPTED -> MATCHED
-    // Allow backward 1 step (DN re-apply) but not arbitrary jumps.
     const chain: Record<string, number> = {
       ELIGIBLE: 0, PENDING: 1, ACCEPTED: 2, MATCHED: 3, OJT: 4, CANCELLED: 5,
     };
@@ -550,7 +593,7 @@ const EditStudentModal: React.FC<{
   const [form] = Form.useForm();
   const { message } = App.useApp();
   const [saving, setSaving] = useState(false);
-  const [chosenStatus, setChosenStatus] = useState<OJT_STATUS_KEY>('ELIGIBLE');
+  const [chosenStatus, setChosenStatus] = useState<DbStudentStatus>('ELIGIBLE');
 
   useEffect(() => {
     if (open && student) {
@@ -561,11 +604,11 @@ const EditStudentModal: React.FC<{
         major: student.major,
         gpa: typeof student.gpa === 'number' ? student.gpa : Number(student.gpa) || 0,
         currentSemester: student.currentSemester,
-        status: (student.status as OJT_STATUS_KEY) ?? 'ELIGIBLE',
+        status: (student.status as DbStudentStatus) ?? 'ELIGIBLE',
         cancelledReason: student.cancelledReason ?? '',
       });
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setChosenStatus((student.status as OJT_STATUS_KEY) ?? 'ELIGIBLE');
+      setChosenStatus((student.status as DbStudentStatus) ?? 'ELIGIBLE');
     }
   }, [open, student, form]);
 
@@ -721,7 +764,7 @@ const EditStudentModal: React.FC<{
             <Select
               size="large"
               value={chosenStatus}
-              onChange={(v) => setChosenStatus(v as OJT_STATUS_KEY)}
+              onChange={(v) => setChosenStatus(v as DbStudentStatus)}
               options={statusOptions.map((o) => ({
                 value: o.value,
                 label: o.label,
