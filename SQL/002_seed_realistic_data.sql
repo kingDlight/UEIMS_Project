@@ -77,9 +77,12 @@ INSERT INTO users_roles (user_id, role_name) VALUES ('c0000000-0000-0000-0000-00
 -- ============================================================
 -- SEMESTER (create as OPEN, then update to ACTIVE to satisfy state machine)
 -- ============================================================
+-- SP26 is created as OPEN then immediately CLOSED (historical semester).
+-- Historical records (final_grades, completed eligible_students, etc.) remain under SP26.
+-- Active records are migrated to FA26 in the MIGRATION block at end of file.
 INSERT INTO semesters (semester_id, semester_code, name, start_date, end_date, weekly_report_deadline_day, weekly_report_deadline_time, final_report_deadline, status, created_by) VALUES
     ('50000000-0000-0000-0000-000000000001', 'SP26', 'Spring 2026', '2026-01-01', '2026-04-08', 'SUNDAY', '23:59:00', '2026-04-15 23:59:00', 'OPEN', '00000000-0000-0000-0000-000000000002');
-UPDATE semesters SET status = 'ACTIVE' WHERE semester_id = '50000000-0000-0000-0000-000000000001';
+UPDATE semesters SET status = 'CLOSED' WHERE semester_id = '50000000-0000-0000-0000-000000000001';
 
 -- ============================================================
 -- SEMESTER ENTERPRISES
@@ -771,9 +774,11 @@ INSERT INTO semesters (semester_id, semester_code, name, start_date, end_date, w
 INSERT INTO semesters (semester_id, semester_code, name, start_date, end_date, weekly_report_deadline_day, weekly_report_deadline_time, final_report_deadline, status, created_by) VALUES
     ('50000000-0000-0000-0000-000000000003', 'FA25', 'Fall 2025', '2025-09-01', '2025-12-07', 'SUNDAY', '23:59:00', '2025-12-14 23:59:00', 'CLOSED', '00000000-0000-0000-0000-000000000002');
 
--- FA26: Fall 2026 (DRAFT, awaiting TM activation) — see 004_fix_semester_dates.sql for full layout.
+-- FA26: Fall 2026 — 98-day window (14 weeks). start_date..end_date inclusive = 2026-08-19..2026-11-24.
 INSERT INTO semesters (semester_id, semester_code, name, start_date, end_date, weekly_report_deadline_day, weekly_report_deadline_time, final_report_deadline, status, created_by) VALUES
-    ('50000000-0000-0000-0000-000000000005', 'FA26', 'Fall 2026', '2026-08-19', '2026-11-25', 'SUNDAY', '23:59:00', '2026-12-02 23:59:00', 'DRAFT', '00000000-0000-0000-0000-000000000002');
+    ('50000000-0000-0000-0000-000000000005', 'FA26', 'Fall 2026', '2026-08-19', '2026-11-24', 'SUNDAY', '23:59:00', '2026-12-01 23:59:00', 'OPEN', '00000000-0000-0000-0000-000000000002');
+-- Activate FA26 as the current operating semester (matches SP26 era transition: SP26 closed → FA26 active).
+UPDATE semesters SET status = 'ACTIVE' WHERE semester_id = '50000000-0000-0000-0000-000000000005';
 
 -- SP27: Spring 2027 (DRAFT, future semester) — see 004_fix_semester_dates.sql for full layout.
 INSERT INTO semesters (semester_id, semester_code, name, start_date, end_date, weekly_report_deadline_day, weekly_report_deadline_time, final_report_deadline, status, created_by) VALUES
@@ -984,6 +989,285 @@ INSERT INTO audit_logs (user_id, action, target_entity, target_id, old_value, ne
     ('00000000-0000-0000-0000-000000000002', 'PUBLISH', 'final_grades', '00000000-0000-0000-000e-000000000026', 'LOCKED', 'PUBLISHED', '192.168.1.100'),
     ('d0000000-0000-0000-0000-000000000021', 'SUBMIT', 'weekly_reports', '00000000-0000-0000-0007-000000000021', 'NOT_SUBMITTED', 'SUBMITTED', '172.16.0.20'),
     ('c0000000-0000-0000-0000-000000000011', 'SCHEDULE', 'interviews', 'b0000000-0000-0000-0000-000000000011', NULL, '{"scheduled_datetime":"2026-04-15 10:00:00"}', '10.0.0.50');
+
+-- ============================================================
+-- PART 13: MIGRATE ACTIVE RECORDS FROM SP26 → FA26
+-- ============================================================
+-- Rationale: SP26 is now CLOSED (historical). All forward-looking
+-- operational data (open enrollments, open postings, pending
+-- applications, internship plans, announcements) must point to FA26
+-- so the live system reflects the current semester.
+--
+-- Safety rules:
+--   * SP26 historical records (locked/completed) STAY at SP26.
+--   * Eligible students with is_locked = TRUE (OJT/COMPLETED) → NOT migrated.
+--   * Final grades with is_locked = TRUE (already graded) → NOT migrated.
+--   * Trigger `prevent_locked_student_edit` / `prevent_locked_grade_edit`
+--     would raise an exception if we touched locked rows, so we filter them out.
+--   * Unique constraints on FA26 are guaranteed safe because FA26 starts empty.
+
+-- 1. Enterprise registration mapping (DN ↔ kỳ) — no lock filter, always migrate.
+UPDATE semester_enterprises
+SET semester_id = '50000000-0000-0000-0000-000000000005'::UUID
+WHERE semester_id = '50000000-0000-0000-0000-000000000001'::UUID;
+
+-- 2. Open job postings — migrate only OPEN postings. CLOSED/EXPIRED stay at SP26.
+UPDATE job_posts
+SET semester_id = '50000000-0000-0000-0000-000000000005'::UUID
+WHERE semester_id = '50000000-0000-0000-0000-000000000001'::UUID
+  AND status = 'OPEN';
+
+-- 3. Eligible students — only unlocked records move. Locked (OJT) students stay at SP26.
+UPDATE eligible_students
+SET semester_id = '50000000-0000-0000-0000-000000000005'::UUID
+WHERE semester_id = '50000000-0000-0000-0000-000000000001'::UUID
+  AND is_locked = FALSE;
+
+-- 4. Placement applications — migrate only PENDING_APPROVAL. Decided (APPROVED/REJECTED/WITHDRAWN) stay at SP26.
+UPDATE placement_applications
+SET semester_id = '50000000-0000-0000-0000-000000000005'::UUID
+WHERE semester_id = '50000000-0000-0000-0000-000000000001'::UUID
+  AND status = 'PENDING_APPROVAL';
+
+-- 5. Internship plans — migrate regardless of status (PENDING_APPROVAL/APPROVED/REJECTED).
+--    Rationale: plan lifecycle is tied to the operating semester (FA26) for review continuity.
+UPDATE internship_plans
+SET semester_id = '50000000-0000-0000-0000-000000000005'::UUID
+WHERE semester_id = '50000000-0000-0000-0000-000000000001'::UUID;
+
+-- 6. System announcements — migrate PUBLISHED + DRAFT so TM can re-publish under FA26.
+--    ARCHIVED announcements stay at SP26.
+UPDATE system_announcements
+SET semester_id = '50000000-0000-0000-0000-000000000005'::UUID
+WHERE semester_id = '50000000-0000-0000-0000-000000000001'::UUID
+  AND status IN ('PUBLISHED', 'DRAFT');
+
+-- 7. Final grades — only unlocked (not yet finalized) grades move. Locked grades stay at SP26.
+UPDATE final_grades
+SET semester_id = '50000000-0000-0000-0000-000000000005'::UUID
+WHERE semester_id = '50000000-0000-0000-0000-000000000001'::UUID
+  AND is_locked = FALSE;
+
+-- 8. Student feedback — no lock filter (no is_locked column). Migrate all SP26 feedbacks to FA26
+--    so they remain visible under the operating semester.
+UPDATE student_enterprise_feedbacks
+SET semester_id = '50000000-0000-0000-0000-000000000005'::UUID
+WHERE semester_id = '50000000-0000-0000-0000-000000000001'::UUID;
+
+-- 9. Enterprise assignments — migrate only ACTIVE. COMPLETED/TERMINATED stay at SP26 as history.
+--    UNIQUE(student_id, semester_id) is safe because FA26 starts empty.
+UPDATE enterprise_assignments
+SET semester_id = '50000000-0000-0000-0000-000000000005'::UUID
+WHERE semester_id = '50000000-0000-0000-0000-000000000001'::UUID
+  AND status = 'ACTIVE';
+
+-- ============================================================
+-- PART 14: FA26 JOB POSTINGS (20 jobs across 4 enterprises)
+-- ============================================================
+-- Rationale: SP26 has only 3 OPEN postings. To exercise the
+-- "max 3 active applications per student" rule (BR-XX in
+-- ApplicationServiceImpl) and the BR-26 cascade-WITHDRAW flow,
+-- we need a richer catalogue under FA26.
+--
+-- UUIDs  f0000000-...-00000000-00000000xxxx  are FA26-only (do not
+-- collide with SP26 jobs 0001-0003 already migrated above).
+-- application_deadline 2026-11-15  is well after today (2026-07-28)
+-- so BR-48 validate_withdrawal_deadline still passes.
+
+INSERT INTO job_posts (job_post_id, enterprise_id, semester_id, title, description, requirements, benefits, required_technologies, max_positions, application_deadline, status, created_by) VALUES
+    -- Momo (c0000000-0000-0000-0000-000000000001) — 5 postings
+    ('f0000000-0000-0000-0000-000000000101', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000005', 'Senior Java Backend Developer Intern', 'Design and implement core payment microservices for Momo wallet platform using Java 17 and Spring Boot 3.', 'Strong Java OOP, Spring Boot, REST API design, MySQL/PostgreSQL, Git', '1-on-1 mentorship, flexible working hours, internship certificate, possible full-time offer', 'Java 17, Spring Boot 3, MySQL, Redis, Kafka', 8, '2026-11-15', 'OPEN', 'c0000000-0000-0000-0000-000000000011'),
+    ('f0000000-0000-0000-0000-000000000102', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000005', 'React Frontend Developer Intern', 'Build responsive customer-facing web apps for Momo merchant dashboard.', 'React 18, TypeScript, HTML5, CSS3, REST API consumption', 'Modern frontend stack, design system contribution, mentorship', 'React 18, TypeScript, Vite, Tailwind CSS', 6, '2026-11-15', 'OPEN', 'c0000000-0000-0000-0000-000000000011'),
+    ('f0000000-0000-0000-0000-000000000103', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000005', 'Android Mobile Developer Intern (Kotlin)', 'Develop features for Momo Android app using Kotlin and Jetpack Compose.', 'Kotlin basics, Android SDK, REST API consumption', 'Real product impact, latest Android stack, mentor pair-programming', 'Kotlin, Jetpack Compose, Android SDK, Retrofit', 4, '2026-11-15', 'OPEN', 'c0000000-0000-0000-0000-000000000011'),
+    ('f0000000-0000-0000-0000-000000000104', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000005', 'Data Engineer Intern', 'Build ETL pipelines and data marts for Momo analytics platform.', 'SQL, Python, basic ETL concepts', 'Big data tooling exposure, mentor from data team', 'Python, SQL, Airflow, BigQuery', 3, '2026-11-15', 'OPEN', 'c0000000-0000-0000-0000-000000000011'),
+    ('f0000000-0000-0000-0000-000000000105', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000005', 'DevOps / SRE Intern', 'Operate CI/CD pipelines and Kubernetes clusters for Momo services.', 'Linux, Docker, basic scripting, willing to learn K8s', 'Production-grade infra exposure, on-call shadowing', 'Docker, Kubernetes, GitLab CI, Prometheus', 2, '2026-11-15', 'OPEN', 'c0000000-0000-0000-0000-000000000011'),
+
+    -- FPT Software (c0000000-0000-0000-0000-000000000002) — 5 postings
+    ('f0000000-0000-0000-0000-000000000201', 'c0000000-0000-0000-0000-000000000002', '50000000-0000-0000-0000-000000000005', '.NET Backend Developer Intern', 'Build enterprise APIs for FPT Software global clients using .NET 8.', 'C#, ASP.NET Core, Entity Framework, SQL Server', 'International project exposure, English-speaking team, Agile', 'C#, .NET 8, EF Core, SQL Server', 10, '2026-11-15', 'OPEN', 'c0000000-0000-0000-0000-000000000012'),
+    ('f0000000-0000-0000-0000-000000000202', 'c0000000-0000-0000-0000-000000000002', '50000000-0000-0000-0000-000000000005', 'Angular Frontend Developer Intern', 'Develop internal admin dashboards for FPT Software ERP suite.', 'Angular 17+, TypeScript, RxJS, REST APIs', 'Enterprise-scale codebase, design system team access', 'Angular 17, TypeScript, NgRx, RxJS', 8, '2026-11-15', 'OPEN', 'c0000000-0000-0000-0000-000000000012'),
+    ('f0000000-0000-0000-0000-000000000203', 'c0000000-0000-0000-0000-000000000002', '50000000-0000-0000-0000-000000000005', 'Fullstack Developer Intern (MEAN)', 'Deliver full features across Node.js + Angular stack for FPT Software clients.', 'Node.js, Express, Angular, MongoDB basics', 'Pair programming with senior devs, weekly tech talks', 'Node.js, Express, Angular, MongoDB', 6, '2026-11-15', 'OPEN', 'c0000000-0000-0000-0000-000000000012'),
+    ('f0000000-0000-0000-0000-000000000204', 'c0000000-0000-0000-0000-000000000002', '50000000-0000-0000-0000-000000000005', 'Automation QA Intern', 'Write end-to-end and API automation tests for FPT Software products.', 'Java or Python basics, Selenium or REST Assured familiarity', 'QA tooling investment, ISTQB foundation prep', 'Java, Selenium, REST Assured, Postman', 4, '2026-11-15', 'OPEN', 'c0000000-0000-0000-0000-000000000012'),
+    ('f0000000-0000-0000-0000-000000000205', 'c0000000-0000-0000-0000-000000000002', '50000000-0000-0000-0000-000000000005', 'AI / Machine Learning Intern', 'Prototype LLM-powered features for FPT Software internal copilots.', 'Python, basic ML/NLP concepts, eager to learn LLM tooling', 'GPU access, dedicated ML mentor, paper reading group', 'Python, PyTorch, HuggingFace, LangChain', 3, '2026-11-15', 'OPEN', 'c0000000-0000-0000-0000-000000000012'),
+
+    -- Shopee Vietnam (c0000000-0000-0000-0000-000000000003) — 5 postings
+    ('f0000000-0000-0000-0000-000000000301', 'c0000000-0000-0000-0000-000000000003', '50000000-0000-0000-0000-000000000005', 'Golang Backend Developer Intern', 'Build high-throughput order & payment services for Shopee Vietnam.', 'Go basics, REST/gRPC, MySQL, Redis', 'Microservices at scale, real production traffic exposure', 'Go 1.22, gRPC, MySQL, Redis, Kafka', 8, '2026-11-15', 'OPEN', 'c0000000-0000-0000-0000-000000000013'),
+    ('f0000000-0000-0000-0000-000000000302', 'c0000000-0000-0000-0000-000000000003', '50000000-0000-0000-0000-000000000005', 'Frontend Developer Intern (Vue.js)', 'Ship Shopee seller-center features using Vue 3.', 'Vue 2/3, JavaScript/TypeScript, HTML, CSS', 'High-impact consumer product, performance-focused team', 'Vue 3, TypeScript, Vite, Pinia', 6, '2026-11-15', 'OPEN', 'c0000000-0000-0000-0000-000000000013'),
+    ('f0000000-0000-0000-0000-000000000303', 'c0000000-0000-0000-0000-000000000003', '50000000-0000-0000-0000-000000000005', 'Data Analyst Intern', 'Build dashboards and growth analyses for Shopee Vietnam ops.', 'SQL, Excel/Google Sheets, basic statistics', 'Analytics-first culture, leadership exposure', 'SQL, Python, BigQuery, Looker', 4, '2026-11-15', 'OPEN', 'c0000000-0000-0000-0000-000000000013'),
+    ('f0000000-0000-0000-0000-000000000304', 'c0000000-0000-0000-0000-000000000003', '50000000-0000-0000-0000-000000000005', 'Application Security Intern', 'Run SAST/DAST scans and review code for Shopee payment flows.', 'OWASP Top 10 awareness, any programming language', 'Security guild mentorship, CTF team access', 'Burp Suite, OWASP ZAP, Java/Go basics', 2, '2026-11-15', 'OPEN', 'c0000000-0000-0000-0000-000000000013'),
+    ('f0000000-0000-0000-0000-000000000305', 'c0000000-0000-0000-0000-000000000003', '50000000-0000-0000-0000-000000000005', 'Site Reliability Engineering Intern', 'Operate Shopee Vietnam production clusters and on-call rotations.', 'Linux, networking basics, willing to learn monitoring stacks', 'Real on-call shadowing, infra-as-code exposure', 'Linux, Prometheus, Grafana, Terraform', 2, '2026-11-15', 'OPEN', 'c0000000-0000-0000-0000-000000000013'),
+
+    -- VNG Corporation (c0000000-0000-0000-0000-000000000004) — 5 postings
+    ('f0000000-0000-0000-0000-000000000401', 'c0000000-0000-0000-0000-000000000004', '50000000-0000-0000-0000-000000000005', 'Game Developer Intern (Unity)', 'Build gameplay features for VNG mobile game titles using Unity 2022.', 'C#, Unity basics, OOP', 'Real shipped game exposure, art team collaboration', 'Unity 2022, C#, Shader Graph, Addressables', 5, '2026-11-15', 'OPEN', 'c0000000-0000-0000-0000-000000000014'),
+    ('f0000000-0000-0000-0000-000000000402', 'c0000000-0000-0000-0000-000000000004', '50000000-0000-0000-0000-000000000005', 'Backend Developer Intern (Zalo)', 'Develop messaging platform features for Zalo.', 'Java/Go basics, distributed systems curiosity', 'Massive-scale messaging infra, on-site HCM office', 'Java, Spring Boot, Kafka, Cassandra', 6, '2026-11-15', 'OPEN', 'c0000000-0000-0000-0000-000000000014'),
+    ('f0000000-0000-0000-0000-000000000403', 'c0000000-0000-0000-0000-000000000005', '50000000-0000-0000-0000-000000000005', 'Frontend Developer Intern (Zalo)', 'Build Zalo web mini-program features with React.', 'React, TypeScript, HTML/CSS', 'High-traffic consumer product, mobile web expertise', 'React 18, TypeScript, WebSocket, Redux', 4, '2026-11-15', 'OPEN', 'c0000000-0000-0000-0000-000000000014'),
+    ('f0000000-0000-0000-0000-000000000404', 'c0000000-0000-0000-0000-000000000004', '50000000-0000-0000-0000-000000000005', 'AI Engineer Intern (NLP/LLM)', 'Train and evaluate LLM models for VNG Vietnamese-language products.', 'Python, ML basics, NLP exposure a plus', 'GPU cluster, Vietnamese-NLP mentor, publication path', 'Python, PyTorch, HuggingFace, vLLM', 3, '2026-11-15', 'OPEN', 'c0000000-0000-0000-0000-000000000014'),
+    ('f0000000-0000-0000-0000-000000000405', 'c0000000-0000-0000-0000-000000000004', '50000000-0000-0000-0000-000000000005', 'Cloud Engineer Intern', 'Operate VNG multi-cloud infrastructure (AWS + GCP).', 'Linux, networking, basic scripting', 'Multi-cloud exposure, cert sponsorship (AWS/GCP)', 'Terraform, AWS, GCP, Ansible', 2, '2026-11-15', 'OPEN', 'c0000000-0000-0000-0000-000000000014');
+
+-- ============================================================
+-- PART 15: FA26 APPLICATIONS — test scenarios for BR-26 cascade
+-- ============================================================
+-- After PART 13 migration, students SE15001..SE15015 (is_locked=FALSE)
+-- are eligible under FA26. SV d0000000-...-001/005/008 are picked
+-- here to demonstrate the 3-application limit and BR-26 cascade
+-- (SV pass CV at 1 enterprise → remaining apps auto-WITHDRAWN).
+--
+-- These inserts run while session_replication_role = 'replica'
+-- (triggers off), so we can directly set WITHDRAWN-with-tracking on
+-- the cascade targets (ApplicationServiceImpl normally does this in
+-- Java, but we are seeding test data, not testing the Java flow).
+--
+-- Scenario A: SV001 has 3 PENDING applications (max-limit reached,
+--              next apply() call must throw MAX_APPLICATIONS_LIMIT_REACHED).
+-- Scenario B: SV005 has 1 ACCEPTED + 2 WITHDRAWN (BR-26 cascade result).
+-- Scenario C: SV008 has 1 INTERVIEW_SCHEDULED + 2 PENDING (mid-flow).
+--
+-- NB: WITHDRAWN rows are excluded from
+--     uq_active_application(job_post_id, student_id) WHERE status != 'WITHDRAWN'
+-- so re-applying to the same job later still works.
+
+-- Scenario A: SV001 — 3 PENDING (max-limit edge case)
+INSERT INTO applications (application_id, job_post_id, student_id, cv_file_url, status, cover_letter, screened_by, screened_at) VALUES
+    ('a0000000-0000-0000-0000-00000000a101', 'f0000000-0000-0000-0000-000000000101', 'd0000000-0000-0000-0000-000000000001', 'https://cv.example.com/se15001-f26.pdf', 'PENDING', 'Strong interest in Momo payment microservices; built similar projects with Spring Boot.', NULL, NULL),
+    ('a0000000-0000-0000-0000-00000000a102', 'f0000000-0000-0000-0000-000000000201', 'd0000000-0000-0000-0000-000000000001', 'https://cv.example.com/se15001-f26.pdf', 'PENDING', 'Interested in FPT enterprise .NET stack; 2 years C# coursework.', NULL, NULL),
+    ('a0000000-0000-0000-0000-00000000a103', 'f0000000-0000-0000-0000-000000000301', 'd0000000-0000-0000-0000-000000000001', 'https://cv.example.com/se15001-f26.pdf', 'PENDING', 'Want to learn Go at Shopee scale; eager to contribute to order pipeline.', NULL, NULL);
+
+-- Scenario B: SV005 — 1 ACCEPTED + 2 WITHDRAWN (BR-26 cascade demo)
+-- Application a101 is the "winning" app (status ACCEPTED).
+-- Applications a102 and a103 are cascade-WITHDRAWN, with
+-- withdrawn_by_application_id pointing back to a101.
+INSERT INTO applications (application_id, job_post_id, student_id, cv_file_url, status, cover_letter, screened_by, screened_at, withdrawn_at, withdrawn_by_application_id, previous_status) VALUES
+    ('a0000000-0000-0000-0000-00000000b101', 'f0000000-0000-0000-0000-000000000102', 'd0000000-0000-0000-0000-000000000005', 'https://cv.example.com/se15005-f26.pdf', 'ACCEPTED', 'Frontend passion with strong React fundamentals; built 3 production-grade SPAs.', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP, NULL, NULL, NULL),
+    ('a0000000-0000-0000-0000-00000000b102', 'f0000000-0000-0000-0000-000000000202', 'd0000000-0000-0000-0000-000000000005', 'https://cv.example.com/se15005-f26.pdf', 'WITHDRAWN', 'Interested in Angular enterprise dashboards.', NULL, NULL, CURRENT_TIMESTAMP, 'a0000000-0000-0000-0000-00000000b101', 'PENDING'),
+    ('a0000000-0000-0000-0000-00000000b103', 'f0000000-0000-0000-0000-000000000302', 'd0000000-0000-0000-0000-000000000005', 'https://cv.example.com/se15005-f26.pdf', 'WITHDRAWN', 'Interested in Vue 3 + Shopee consumer scale.', NULL, NULL, CURRENT_TIMESTAMP, 'a0000000-0000-0000-0000-00000000b101', 'PENDING');
+
+-- Scenario C: SV008 — 1 INTERVIEW_SCHEDULED + 2 PENDING
+INSERT INTO applications (application_id, job_post_id, student_id, cv_file_url, status, screening_note, screened_by, screened_at) VALUES
+    ('a0000000-0000-0000-0000-00000000c101', 'f0000000-0000-0000-0000-000000000103', 'd0000000-0000-0000-0000-000000000008', 'https://cv.example.com/se15008-f26.pdf', 'INTERVIEW_SCHEDULED', 'Strong Kotlin fundamentals, clear motivation.', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP),
+    ('a0000000-0000-0000-0000-00000000c102', 'f0000000-0000-0000-0000-000000000203', 'd0000000-0000-0000-0000-000000000008', 'https://cv.example.com/se15008-f26.pdf', 'PENDING', NULL, NULL, NULL),
+    ('a0000000-0000-0000-0000-00000000c103', 'f0000000-0000-0000-0000-000000000303', 'd0000000-0000-0000-0000-000000000008', 'https://cv.example.com/se15008-f26.pdf', 'PENDING', NULL, NULL, NULL);
+
+-- ============================================================
+-- PART 16: HISTORICAL SEMESTERS 2022-2024 (CLOSED, with finalized grades)
+-- ============================================================
+-- Rationale: diversify the system with realistic closed-semester
+-- history. Each semester is ~14 weeks (98-day window, same as
+-- SP26/SU26/FA26). status = CLOSED so no live flow touches them.
+-- Two new students per semester (PAST batch, different cohort)
+-- carry finalized PASSED grades for history dashboards.
+--
+-- New student UUID range: d0000000-...-000000000046 .. -000000000063
+--   SP22: 046, 047    SU22: 048, 049    FA22: 04a, 04b
+--   SP23: 04c, 04d    SU23: 04e, 04f    FA23: 050, 051
+--   SP24: 052, 053    SU24: 054, 055    FA24: 056, 057
+--
+-- NB: This block runs while session_replication_role = 'replica'
+-- (triggers off), so INSERT into eligible_students + final_grades
+-- for CLOSED semesters is allowed.
+
+-- -------- 9 closed semesters (2022-2024) --------
+-- Same day-of-year window as the 2026 semesters (SP26/SU26/FA26),
+-- re-used for 2022, 2023, 2024. Note: 2024 is a leap year, so
+-- the SP24 window (Jan 1..Apr 8) covers 99 days inclusive instead
+-- of 98 — same dates as the 2026 family on purpose.
+INSERT INTO semesters (semester_id, semester_code, name, start_date, end_date, weekly_report_deadline_day, weekly_report_deadline_time, final_report_deadline, status, created_by) VALUES
+    ('50000000-0000-0000-0000-000000000006', 'SP22', 'Spring 2022', '2022-01-01', '2022-04-08', 'SUNDAY', '23:59:00', '2022-04-15 23:59:00', 'CLOSED', '00000000-0000-0000-0000-000000000002'),
+    ('50000000-0000-0000-0000-000000000007', 'SU22', 'Summer 2022', '2022-04-30', '2022-08-05', 'SUNDAY', '23:59:00', '2022-08-12 23:59:00', 'CLOSED', '00000000-0000-0000-0000-000000000002'),
+    ('50000000-0000-0000-0000-000000000008', 'FA22', 'Fall 2022',   '2022-08-19', '2022-11-24', 'SUNDAY', '23:59:00', '2022-12-01 23:59:00', 'CLOSED', '00000000-0000-0000-0000-000000000002'),
+    ('50000000-0000-0000-0000-000000000009', 'SP23', 'Spring 2023', '2023-01-01', '2023-04-08', 'SUNDAY', '23:59:00', '2023-04-15 23:59:00', 'CLOSED', '00000000-0000-0000-0000-000000000002'),
+    ('50000000-0000-0000-0000-00000000000a', 'SU23', 'Summer 2023', '2023-04-30', '2023-08-05', 'SUNDAY', '23:59:00', '2023-08-12 23:59:00', 'CLOSED', '00000000-0000-0000-0000-000000000002'),
+    ('50000000-0000-0000-0000-00000000000b', 'FA23', 'Fall 2023',   '2023-08-19', '2023-11-24', 'SUNDAY', '23:59:00', '2023-12-01 23:59:00', 'CLOSED', '00000000-0000-0000-0000-000000000002'),
+    ('50000000-0000-0000-0000-00000000000c', 'SP24', 'Spring 2024', '2024-01-01', '2024-04-07', 'SUNDAY', '23:59:00', '2024-04-14 23:59:00', 'CLOSED', '00000000-0000-0000-0000-000000000002'),
+    ('50000000-0000-0000-0000-00000000000d', 'SU24', 'Summer 2024', '2024-04-30', '2024-08-05', 'SUNDAY', '23:59:00', '2024-08-12 23:59:00', 'CLOSED', '00000000-0000-0000-0000-000000000002'),
+    ('50000000-0000-0000-0000-00000000000e', 'FA24', 'Fall 2024',   '2024-08-19', '2024-11-24', 'SUNDAY', '23:59:00', '2024-12-01 23:59:00', 'CLOSED', '00000000-0000-0000-0000-000000000002');
+
+-- -------- 18 historical students (users + STUDENT role) --------
+INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
+    ('d0000000-0000-0000-0000-000000000046', 'student46@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Tran Van Khoa',     'ACTIVE', FALSE),
+    ('d0000000-0000-0000-0000-000000000047', 'student47@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Pham Thi Lan',      'ACTIVE', FALSE),
+    ('d0000000-0000-0000-0000-000000000048', 'student48@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Le Van Hung',       'ACTIVE', FALSE),
+    ('d0000000-0000-0000-0000-000000000049', 'student49@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Nguyen Thi Mai',    'ACTIVE', FALSE),
+    ('d0000000-0000-0000-0000-00000000004a', 'student50@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Hoang Van Nam',     'ACTIVE', FALSE),
+    ('d0000000-0000-0000-0000-00000000004b', 'student51@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Vu Thi Hong',       'ACTIVE', FALSE),
+    ('d0000000-0000-0000-0000-00000000004c', 'student52@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Bui Van Long',      'ACTIVE', FALSE),
+    ('d0000000-0000-0000-0000-00000000004d', 'student53@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Phan Thi Hoa',      'ACTIVE', FALSE),
+    ('d0000000-0000-0000-0000-00000000004e', 'student54@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Do Van Cuong',      'ACTIVE', FALSE),
+    ('d0000000-0000-0000-0000-00000000004f', 'student55@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Trinh Thi Lan',     'ACTIVE', FALSE),
+    ('d0000000-0000-0000-0000-000000000050', 'student56@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Dang Van Quang',    'ACTIVE', FALSE),
+    ('d0000000-0000-0000-0000-000000000051', 'student57@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Ly Thi Thuy',       'ACTIVE', FALSE),
+    ('d0000000-0000-0000-0000-000000000052', 'student58@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Ngo Van Phuc',      'ACTIVE', FALSE),
+    ('d0000000-0000-0000-0000-000000000053', 'student59@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Vu Thi Binh',       'ACTIVE', FALSE),
+    ('d0000000-0000-0000-0000-000000000054', 'student60@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Tran Van Duc',      'ACTIVE', FALSE),
+    ('d0000000-0000-0000-0000-000000000055', 'student61@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Bui Thi Lan',       'ACTIVE', FALSE),
+    ('d0000000-0000-0000-0000-000000000056', 'student62@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Pham Van Tuan',     'ACTIVE', FALSE),
+    ('d0000000-0000-0000-0000-000000000057', 'student63@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Hoang Thi Ngoc',    'ACTIVE', FALSE);
+
+INSERT INTO users_roles (user_id, role_name)
+SELECT user_id, 'STUDENT' FROM users
+WHERE user_id IN (
+    'd0000000-0000-0000-0000-000000000046','d0000000-0000-0000-0000-000000000047',
+    'd0000000-0000-0000-0000-000000000048','d0000000-0000-0000-0000-000000000049',
+    'd0000000-0000-0000-0000-00000000004a','d0000000-0000-0000-0000-00000000004b',
+    'd0000000-0000-0000-0000-00000000004c','d0000000-0000-0000-0000-00000000004d',
+    'd0000000-0000-0000-0000-00000000004e','d0000000-0000-0000-0000-00000000004f',
+    'd0000000-0000-0000-0000-000000000050','d0000000-0000-0000-0000-000000000051',
+    'd0000000-0000-0000-0000-000000000052','d0000000-0000-0000-0000-000000000053',
+    'd0000000-0000-0000-0000-000000000054','d0000000-0000-0000-0000-000000000055',
+    'd0000000-0000-0000-0000-000000000056','d0000000-0000-0000-0000-000000000057'
+);
+
+-- -------- eligible_students: OJT (completed cohorts) --------
+INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked, approved_at) VALUES
+    ('e0000000-0000-0000-0000-000000000046', '50000000-0000-0000-0000-000000000006', 'd0000000-0000-0000-0000-000000000046', 'SE15046', 'Tran Van Khoa',    'student46@fpt.edu.vn', 'Software Engineering', 7.85, 6, 'OJT', TRUE, '2022-02-15 10:00:00'),
+    ('e0000000-0000-0000-0000-000000000047', '50000000-0000-0000-0000-000000000006', 'd0000000-0000-0000-0000-000000000047', 'SE15047', 'Pham Thi Lan',     'student47@fpt.edu.vn', 'Software Engineering', 8.12, 6, 'OJT', TRUE, '2022-02-15 10:00:00'),
+    ('e0000000-0000-0000-0000-000000000048', '50000000-0000-0000-0000-000000000007', 'd0000000-0000-0000-0000-000000000048', 'SE15048', 'Le Van Hung',      'student48@fpt.edu.vn', 'Software Engineering', 7.42, 6, 'OJT', TRUE, '2022-06-15 10:00:00'),
+    ('e0000000-0000-0000-0000-000000000049', '50000000-0000-0000-0000-000000000007', 'd0000000-0000-0000-0000-000000000049', 'SE15049', 'Nguyen Thi Mai',   'student49@fpt.edu.vn', 'Information Security', 8.55, 6, 'OJT', TRUE, '2022-06-15 10:00:00'),
+    ('e0000000-0000-0000-0000-00000000004a', '50000000-0000-0000-0000-000000000008', 'd0000000-0000-0000-0000-00000000004a', 'SE1504a', 'Hoang Van Nam',    'student50@fpt.edu.vn', 'Software Engineering', 7.78, 6, 'OJT', TRUE, '2022-09-25 10:00:00'),
+    ('e0000000-0000-0000-0000-00000000004b', '50000000-0000-0000-0000-000000000008', 'd0000000-0000-0000-0000-00000000004b', 'SE1504b', 'Vu Thi Hong',      'student51@fpt.edu.vn', 'Digital Marketing',    8.34, 6, 'OJT', TRUE, '2022-09-25 10:00:00'),
+    ('e0000000-0000-0000-0000-00000000004c', '50000000-0000-0000-0000-000000000009', 'd0000000-0000-0000-0000-00000000004c', 'SE1504c', 'Bui Van Long',     'student52@fpt.edu.vn', 'Software Engineering', 8.05, 6, 'OJT', TRUE, '2023-02-15 10:00:00'),
+    ('e0000000-0000-0000-0000-00000000004d', '50000000-0000-0000-0000-000000000009', 'd0000000-0000-0000-0000-00000000004d', 'SE1504d', 'Phan Thi Hoa',     'student53@fpt.edu.vn', 'Graphic Design',       7.92, 6, 'OJT', TRUE, '2023-02-15 10:00:00'),
+    ('e0000000-0000-0000-0000-00000000004e', '50000000-0000-0000-0000-00000000000a', 'd0000000-0000-0000-0000-00000000004e', 'SE1504e', 'Do Van Cuong',     'student54@fpt.edu.vn', 'Software Engineering', 7.66, 6, 'OJT', TRUE, '2023-06-15 10:00:00'),
+    ('e0000000-0000-0000-0000-00000000004f', '50000000-0000-0000-0000-00000000000a', 'd0000000-0000-0000-0000-00000000004f', 'SE1504f', 'Trinh Thi Lan',    'student55@fpt.edu.vn', 'Information Security', 8.21, 6, 'OJT', TRUE, '2023-06-15 10:00:00'),
+    ('e0000000-0000-0000-0000-000000000050', '50000000-0000-0000-0000-00000000000b', 'd0000000-0000-0000-0000-000000000050', 'SE15050', 'Dang Van Quang',   'student56@fpt.edu.vn', 'Software Engineering', 7.95, 6, 'OJT', TRUE, '2023-09-25 10:00:00'),
+    ('e0000000-0000-0000-0000-000000000051', '50000000-0000-0000-0000-00000000000b', 'd0000000-0000-0000-0000-000000000051', 'SE15051', 'Ly Thi Thuy',      'student57@fpt.edu.vn', 'Digital Art & Design', 8.43, 6, 'OJT', TRUE, '2023-09-25 10:00:00'),
+    ('e0000000-0000-0000-0000-000000000052', '50000000-0000-0000-0000-00000000000c', 'd0000000-0000-0000-0000-000000000052', 'SE15052', 'Ngo Van Phuc',     'student58@fpt.edu.vn', 'Software Engineering', 7.81, 6, 'OJT', TRUE, '2024-02-15 10:00:00'),
+    ('e0000000-0000-0000-0000-000000000053', '50000000-0000-0000-0000-00000000000c', 'd0000000-0000-0000-0000-000000000053', 'SE15053', 'Vu Thi Binh',      'student59@fpt.edu.vn', 'Information Security', 8.27, 6, 'OJT', TRUE, '2024-02-15 10:00:00'),
+    ('e0000000-0000-0000-0000-000000000054', '50000000-0000-0000-0000-00000000000d', 'd0000000-0000-0000-0000-000000000054', 'SE15054', 'Tran Van Duc',     'student60@fpt.edu.vn', 'Software Engineering', 7.73, 6, 'OJT', TRUE, '2024-06-15 10:00:00'),
+    ('e0000000-0000-0000-0000-000000000055', '50000000-0000-0000-0000-00000000000d', 'd0000000-0000-0000-0000-000000000055', 'SE15055', 'Bui Thi Lan',      'student61@fpt.edu.vn', 'Digital Marketing',    8.16, 6, 'OJT', TRUE, '2024-06-15 10:00:00'),
+    ('e0000000-0000-0000-0000-000000000056', '50000000-0000-0000-0000-00000000000e', 'd0000000-0000-0000-0000-000000000056', 'SE15056', 'Pham Van Tuan',    'student62@fpt.edu.vn', 'Software Engineering', 7.89, 6, 'OJT', TRUE, '2024-09-25 10:00:00'),
+    ('e0000000-0000-0000-0000-000000000057', '50000000-0000-0000-0000-00000000000e', 'd0000000-0000-0000-0000-000000000057', 'SE15057', 'Hoang Thi Ngoc',   'student63@fpt.edu.vn', 'Graphic Design',       8.38, 6, 'OJT', TRUE, '2024-09-25 10:00:00');
+
+-- -------- semester_enterprises: 4 enterprises × 9 semesters (APPROVED, all reviewed) --------
+-- gen_random_uuid() lets the DB assign semester_enterprise_id.
+-- Pattern: 4 enterprises (c0000000-...-001..-004) × 9 semesters.
+INSERT INTO semester_enterprises (semester_id, enterprise_id, registration_status, reviewed_by, reviewed_at)
+SELECT s.semester_id, e.enterprise_id, 'APPROVED', '00000000-0000-0000-0000-000000000002'::UUID, CURRENT_TIMESTAMP
+FROM semesters s
+CROSS JOIN enterprises e
+WHERE s.semester_code IN ('SP22','SU22','FA22','SP23','SU23','FA23','SP24','SU24','FA24')
+  AND e.approval_status = 'APPROVED';
+
+-- -------- final_grades: 2 PASSED students per semester (locked history) --------
+-- tm_id = training manager (00000000-...-002).
+-- graded_at staggered by semester end to look realistic.
+INSERT INTO final_grades (student_id, tm_id, semester_id, enterprise_total_score, final_grade, overall_status, is_locked, graded_at) VALUES
+    ('d0000000-0000-0000-0000-000000000046', '00000000-0000-0000-0000-000000000002', '50000000-0000-0000-0000-000000000006', 8.20, 8.4, 'PASSED', TRUE, '2022-04-28 14:00:00'),
+    ('d0000000-0000-0000-0000-000000000047', '00000000-0000-0000-0000-000000000002', '50000000-0000-0000-0000-000000000006', 8.65, 8.7, 'PASSED', TRUE, '2022-04-28 14:30:00'),
+    ('d0000000-0000-0000-0000-000000000048', '00000000-0000-0000-0000-000000000002', '50000000-0000-0000-0000-000000000007', 7.85, 7.9, 'PASSED', TRUE, '2022-08-26 10:00:00'),
+    ('d0000000-0000-0000-0000-000000000049', '00000000-0000-0000-0000-000000000002', '50000000-0000-0000-0000-000000000007', 8.95, 9.0, 'PASSED', TRUE, '2022-08-26 10:30:00'),
+    ('d0000000-0000-0000-0000-00000000004a', '00000000-0000-0000-0000-000000000002', '50000000-0000-0000-0000-000000000008', 8.10, 8.2, 'PASSED', TRUE, '2022-12-06 11:00:00'),
+    ('d0000000-0000-0000-0000-00000000004b', '00000000-0000-0000-0000-000000000002', '50000000-0000-0000-0000-000000000008', 8.75, 8.8, 'PASSED', TRUE, '2022-12-06 11:30:00'),
+    ('d0000000-0000-0000-0000-00000000004c', '00000000-0000-0000-0000-000000000002', '50000000-0000-0000-0000-000000000009', 8.45, 8.5, 'PASSED', TRUE, '2023-04-28 13:00:00'),
+    ('d0000000-0000-0000-0000-00000000004d', '00000000-0000-0000-0000-000000000002', '50000000-0000-0000-0000-000000000009', 8.25, 8.3, 'PASSED', TRUE, '2023-04-28 13:30:00'),
+    ('d0000000-0000-0000-0000-00000000004e', '00000000-0000-0000-0000-000000000002', '50000000-0000-0000-0000-00000000000a', 8.00, 8.1, 'PASSED', TRUE, '2023-08-26 09:30:00'),
+    ('d0000000-0000-0000-0000-00000000004f', '00000000-0000-0000-0000-000000000002', '50000000-0000-0000-0000-00000000000a', 8.65, 8.7, 'PASSED', TRUE, '2023-08-26 10:00:00'),
+    ('d0000000-0000-0000-0000-000000000050', '00000000-0000-0000-0000-000000000002', '50000000-0000-0000-0000-00000000000b', 8.35, 8.4, 'PASSED', TRUE, '2023-12-06 11:00:00'),
+    ('d0000000-0000-0000-0000-000000000051', '00000000-0000-0000-0000-000000000002', '50000000-0000-0000-0000-00000000000b', 8.85, 8.9, 'PASSED', TRUE, '2023-12-06 11:30:00'),
+    ('d0000000-0000-0000-0000-000000000052', '00000000-0000-0000-0000-000000000002', '50000000-0000-0000-0000-00000000000c', 8.15, 8.2, 'PASSED', TRUE, '2024-04-28 13:00:00'),
+    ('d0000000-0000-0000-0000-000000000053', '00000000-0000-0000-0000-000000000002', '50000000-0000-0000-0000-00000000000c', 8.70, 8.7, 'PASSED', TRUE, '2024-04-28 13:30:00'),
+    ('d0000000-0000-0000-0000-000000000054', '00000000-0000-0000-0000-000000000002', '50000000-0000-0000-0000-00000000000d', 8.05, 8.1, 'PASSED', TRUE, '2024-08-26 09:30:00'),
+    ('d0000000-0000-0000-0000-000000000055', '00000000-0000-0000-0000-000000000002', '50000000-0000-0000-0000-00000000000d', 8.55, 8.6, 'PASSED', TRUE, '2024-08-26 10:00:00'),
+    ('d0000000-0000-0000-0000-000000000056', '00000000-0000-0000-0000-000000000002', '50000000-0000-0000-0000-00000000000e', 8.20, 8.3, 'PASSED', TRUE, '2024-12-06 11:00:00'),
+    ('d0000000-0000-0000-0000-000000000057', '00000000-0000-0000-0000-000000000002', '50000000-0000-0000-0000-00000000000e', 8.80, 8.8, 'PASSED', TRUE, '2024-12-06 11:30:00');
 
 -- ============================================================
 -- Re-enable all triggers and constraints
