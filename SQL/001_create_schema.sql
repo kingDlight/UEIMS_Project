@@ -245,7 +245,7 @@ CREATE TABLE eligible_students (
     gpa             DECIMAL(4,2),                                    -- BR-17, BR-19: 0.00 - 10.00 (thang 10)
     current_semester INT NOT NULL CHECK (current_semester BETWEEN 1 AND 9), -- BR-54: Semester-based access
     status          VARCHAR(20) NOT NULL DEFAULT 'ELIGIBLE'
-                    CHECK (status IN ('ELIGIBLE','NOT_ELIGIBLE','PENDING','ACCEPTED','MATCHED','OJT','CANCELLED')),
+                    CHECK (status IN ('ELIGIBLE','NOT_ELIGIBLE','NOT_YET_ELIGIBLE','PENDING','ACCEPTED','MATCHED','OJT','CANCELLED','COMPLETED')),
     is_locked       BOOLEAN NOT NULL DEFAULT FALSE,                  -- BR-21
     imported_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     approved_at     TIMESTAMP,
@@ -257,7 +257,7 @@ CREATE TABLE eligible_students (
     created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT chk_gpa_minimum CHECK (gpa >= 5.0 AND gpa <= 10.0),                  -- BR-19
+    CONSTRAINT chk_gpa_range CHECK (gpa >= 0.0 AND gpa <= 10.0),                      -- BR-19: range guard; eligibility (<5 → NOT_ELIGIBLE) is decided at service layer
     CONSTRAINT uq_student_semester UNIQUE (semester_id, student_code),
     -- BR-23: Cancelled must have reason + who cancelled
     CONSTRAINT chk_cancel_audit CHECK (
@@ -360,7 +360,7 @@ CREATE TABLE IF NOT EXISTS eligible_student_status_history (
     eligible_id    UUID NOT NULL REFERENCES eligible_students(eligible_id) ON DELETE CASCADE,
     old_status     VARCHAR(20),
     new_status     VARCHAR(20) NOT NULL
-                   CHECK (new_status IN ('ELIGIBLE', 'PENDING', 'ACCEPTED', 'MATCHED', 'OJT', 'CANCELLED')),
+                   CHECK (new_status IN ('ELIGIBLE', 'NOT_YET_ELIGIBLE', 'PENDING', 'ACCEPTED', 'MATCHED', 'OJT', 'CANCELLED', 'COMPLETED')),
     changed_by     UUID REFERENCES users(user_id),
     reason         TEXT,
     changed_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP

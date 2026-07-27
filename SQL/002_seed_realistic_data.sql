@@ -587,7 +587,7 @@ INSERT INTO users (user_id, email, password_hash, full_name, status, must_change
     ('d0000000-0000-0000-0000-000000000031', 'student31@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Duong Minh Khanh', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000031', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked) VALUES
-    ('e0000000-0000-0000-0000-000000000031', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000031', 'SE15031', 'Duong Minh Khanh', 'student31@fpt.edu.vn', 'Software Engineering', 8.17, 8, 'ELIGIBLE', FALSE);
+    ('e0000000-0000-0000-0000-000000000031', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000031', 'SE15031', 'Duong Minh Khanh', 'student31@fpt.edu.vn', 'Software Engineering', 8.17, 8, 'COMPLETED', FALSE);
 INSERT INTO student_profiles (user_id, student_code, university, major, gpa, skills, cv_file_url) VALUES
     ('d0000000-0000-0000-0000-000000000031', 'SE15031', 'FPT University', 'Software Engineering', 6.5, '["Java", "Spring Boot"]'::jsonb, 'https://cv.example.com/se15031.pdf');
 
@@ -595,7 +595,7 @@ INSERT INTO users (user_id, email, password_hash, full_name, status, must_change
     ('d0000000-0000-0000-0000-000000000032', 'student32@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Do Xuan Quan', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000032', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked) VALUES
-    ('e0000000-0000-0000-0000-000000000032', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000032', 'SE15032', 'Do Xuan Quan', 'student32@fpt.edu.vn', 'Software Engineering', 9.22, 9, 'ELIGIBLE', FALSE);
+    ('e0000000-0000-0000-0000-000000000032', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000032', 'SE15032', 'Do Xuan Quan', 'student32@fpt.edu.vn', 'Software Engineering', 9.22, 9, 'COMPLETED', FALSE);
 INSERT INTO student_profiles (user_id, student_code, university, major, gpa, skills, cv_file_url) VALUES
     ('d0000000-0000-0000-0000-000000000032', 'SE15032', 'FPT University', 'Software Engineering', 6.5, '["Java", "Spring Boot"]'::jsonb, 'https://cv.example.com/se15032.pdf');
 
@@ -603,7 +603,7 @@ INSERT INTO users (user_id, email, password_hash, full_name, status, must_change
     ('d0000000-0000-0000-0000-000000000033', 'student33@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Vo Huu Yen', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000033', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked) VALUES
-    ('e0000000-0000-0000-0000-000000000033', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000033', 'SE15033', 'Vo Huu Yen', 'student33@fpt.edu.vn', 'Software Engineering', 8.87, 1, 'ELIGIBLE', FALSE);
+    ('e0000000-0000-0000-0000-000000000033', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000033', 'SE15033', 'Vo Huu Yen', 'student33@fpt.edu.vn', 'Software Engineering', 8.87, 1, 'NOT_YET_ELIGIBLE', FALSE);
 INSERT INTO student_profiles (user_id, student_code, university, major, gpa, skills, cv_file_url) VALUES
     ('d0000000-0000-0000-0000-000000000033', 'SE15033', 'FPT University', 'Software Engineering', 7.5, '["Java", "Spring Boot"]'::jsonb, 'https://cv.example.com/se15033.pdf');
 
@@ -611,7 +611,7 @@ INSERT INTO users (user_id, email, password_hash, full_name, status, must_change
     ('d0000000-0000-0000-0000-000000000034', 'student34@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Ho Xuan Linh', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000034', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked) VALUES
-    ('e0000000-0000-0000-0000-000000000034', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000034', 'SE15034', 'Ho Xuan Linh', 'student34@fpt.edu.vn', 'Software Engineering', 7.10, 7, 'ELIGIBLE', FALSE);
+    ('e0000000-0000-0000-0000-000000000034', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000034', 'SE15034', 'Ho Xuan Linh', 'student34@fpt.edu.vn', 'Software Engineering', 7.10, 7, 'COMPLETED', FALSE);
 INSERT INTO student_profiles (user_id, student_code, university, major, gpa, skills, cv_file_url) VALUES
     ('d0000000-0000-0000-0000-000000000034', 'SE15034', 'FPT University', 'Software Engineering', 7.5, '["Java", "Spring Boot"]'::jsonb, 'https://cv.example.com/se15034.pdf');
 
@@ -619,7 +619,7 @@ INSERT INTO users (user_id, email, password_hash, full_name, status, must_change
     ('d0000000-0000-0000-0000-000000000035', 'student35@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Bui Xuan Phong', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000035', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked) VALUES
-    ('e0000000-0000-0000-0000-000000000035', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000035', 'SE15035', 'Bui Xuan Phong', 'student35@fpt.edu.vn', 'Software Engineering', 6.80, 1, 'ELIGIBLE', FALSE);
+    ('e0000000-0000-0000-0000-000000000035', '50000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000035', 'SE15035', 'Bui Xuan Phong', 'student35@fpt.edu.vn', 'Software Engineering', 6.80, 1, 'NOT_YET_ELIGIBLE', FALSE);
 INSERT INTO student_profiles (user_id, student_code, university, major, gpa, skills, cv_file_url) VALUES
     ('d0000000-0000-0000-0000-000000000035', 'SE15035', 'FPT University', 'Software Engineering', 8.5, '["Java", "Spring Boot"]'::jsonb, 'https://cv.example.com/se15035.pdf');
 
@@ -766,17 +766,22 @@ INSERT INTO role_permissions (role_name, permission_name) VALUES
 -- PART 3: ADDITIONAL SEMESTERS (Multi-semester demo)
 -- ============================================================
 
--- SU26: Summer 2026 (DRAFT, awaiting TM activation) — see 004_fix_semester_dates.sql for full layout.
+-- SU26: Summer 2026 — historical/completed (CLOSED). Time-compressed for demo: 2026-04-30..2026-07-17.
+-- Original end_date was 2026-08-05; shortened to 2026-07-17 so the window ends ~1 week before FA26 starts.
+-- Kept as a previous-semester artifact so the multi-semester UI shows it as a completed row.
 INSERT INTO semesters (semester_id, semester_code, name, start_date, end_date, weekly_report_deadline_day, weekly_report_deadline_time, final_report_deadline, status, created_by) VALUES
-    ('50000000-0000-0000-0000-000000000002', 'SU26', 'Summer 2026', '2026-04-30', '2026-08-05', 'SUNDAY', '23:59:00', '2026-08-12 23:59:00', 'DRAFT', '00000000-0000-0000-0000-000000000002');
+    ('50000000-0000-0000-0000-000000000002', 'SU26', 'Summer 2026', '2026-04-30', '2026-07-17', 'SUNDAY', '23:59:00', '2026-07-19 23:59:00', 'CLOSED', '00000000-0000-0000-0000-000000000002');
 
 -- FA25: Fall 2025 (CLOSED) — historical semester for grade comparison demo.
 INSERT INTO semesters (semester_id, semester_code, name, start_date, end_date, weekly_report_deadline_day, weekly_report_deadline_time, final_report_deadline, status, created_by) VALUES
     ('50000000-0000-0000-0000-000000000003', 'FA25', 'Fall 2025', '2025-09-01', '2025-12-07', 'SUNDAY', '23:59:00', '2025-12-14 23:59:00', 'CLOSED', '00000000-0000-0000-0000-000000000002');
 
--- FA26: Fall 2026 — 98-day window (14 weeks). start_date..end_date inclusive = 2026-08-19..2026-11-24.
+-- FA26: Fall 2026 — 98-day window (14 weeks). start_date..end_date inclusive = 2026-07-20..2026-10-19.
+-- Time-shifted for demo: week-1 starts Monday 2026-07-20 (one week ago from today 2026-07-28 Tue),
+-- so we are now in week 2; weekly report deadline is Tuesday 23:59, allowing live demo submission today.
+-- Final report deadline = end_date + 7 days = 2026-10-26.
 INSERT INTO semesters (semester_id, semester_code, name, start_date, end_date, weekly_report_deadline_day, weekly_report_deadline_time, final_report_deadline, status, created_by) VALUES
-    ('50000000-0000-0000-0000-000000000005', 'FA26', 'Fall 2026', '2026-08-19', '2026-11-24', 'SUNDAY', '23:59:00', '2026-12-01 23:59:00', 'OPEN', '00000000-0000-0000-0000-000000000002');
+    ('50000000-0000-0000-0000-000000000005', 'FA26', 'Fall 2026', '2026-07-20', '2026-10-19', 'TUESDAY', '23:59:00', '2026-10-26 23:59:00', 'OPEN', '00000000-0000-0000-0000-000000000002');
 -- Activate FA26 as the current operating semester (matches SP26 era transition: SP26 closed → FA26 active).
 UPDATE semesters SET status = 'ACTIVE' WHERE semester_id = '50000000-0000-0000-0000-000000000005';
 
@@ -795,22 +800,23 @@ INSERT INTO semester_enterprises (semester_enterprise_id, semester_id, enterpris
 -- ============================================================
 
 -- NOT_ELIGIBLE students (SE15036-37) for eligibility rejection demo
--- NOTE: chk_gpa_minimum requires gpa >= 5.0, so NOT_ELIGIBLE here means "missing certifications" not low GPA
+-- (chk_gpa_range only enforces 0.0..10.0; "GPA < 5 → NOT_ELIGIBLE" is a BR-19 business rule evaluated at the service layer)
+-- Real seed below intentionally uses sub-5 GPAs so the NOT_ELIGIBLE demo case is honest, not a workaround.
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
     ('d0000000-0000-0000-0000-000000000036', 'student36@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Tran Van Khoa', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000036', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked) VALUES
-    ('e0000000-0000-0000-0000-000000000036', '50000000-0000-0000-0000-000000000002', 'd0000000-0000-0000-0000-000000000036', 'SE15036', 'Tran Van Khoa', 'student36@fpt.edu.vn', 'Software Engineering', 5.50, 5, 'NOT_ELIGIBLE', FALSE);
+    ('e0000000-0000-0000-0000-000000000036', '50000000-0000-0000-0000-000000000002', 'd0000000-0000-0000-0000-000000000036', 'SE15036', 'Tran Van Khoa', 'student36@fpt.edu.vn', 'Software Engineering', 4.50, 5, 'NOT_ELIGIBLE', FALSE);
 INSERT INTO student_profiles (user_id, student_code, university, major, gpa, skills) VALUES
-    ('d0000000-0000-0000-0000-000000000036', 'SE15036', 'FPT University', 'Software Engineering', 5.5, '["Java"]'::jsonb);
+    ('d0000000-0000-0000-0000-000000000036', 'SE15036', 'FPT University', 'Software Engineering', 4.5, '["Java"]'::jsonb);
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
     ('d0000000-0000-0000-0000-000000000037', 'student37@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Nguyen Thi Lan', 'ACTIVE', FALSE);
 INSERT INTO users_roles (user_id, role_name) VALUES ('d0000000-0000-0000-0000-000000000037', 'STUDENT');
 INSERT INTO eligible_students (eligible_id, semester_id, user_id, student_code, full_name, email, major, gpa, current_semester, status, is_locked) VALUES
-    ('e0000000-0000-0000-0000-000000000037', '50000000-0000-0000-0000-000000000002', 'd0000000-0000-0000-0000-000000000037', 'SE15037', 'Nguyen Thi Lan', 'student37@fpt.edu.vn', 'Software Engineering', 5.20, 5, 'NOT_ELIGIBLE', FALSE);
+    ('e0000000-0000-0000-0000-000000000037', '50000000-0000-0000-0000-000000000002', 'd0000000-0000-0000-0000-000000000037', 'SE15037', 'Nguyen Thi Lan', 'student37@fpt.edu.vn', 'Software Engineering', 4.20, 5, 'NOT_ELIGIBLE', FALSE);
 INSERT INTO student_profiles (user_id, student_code, university, major, gpa, skills) VALUES
-    ('d0000000-0000-0000-0000-000000000037', 'SE15037', 'FPT University', 'Software Engineering', 5.2, '["Python"]'::jsonb);
+    ('d0000000-0000-0000-0000-000000000037', 'SE15037', 'FPT University', 'Software Engineering', 4.2, '["Python"]'::jsonb);
 
 -- ACCEPTED students (SE15038) for ACCEPTED status demo
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
@@ -1099,7 +1105,7 @@ INSERT INTO job_posts (job_post_id, enterprise_id, semester_id, title, descripti
     -- VNG Corporation (c0000000-0000-0000-0000-000000000004) — 5 postings
     ('f0000000-0000-0000-0000-000000000401', 'c0000000-0000-0000-0000-000000000004', '50000000-0000-0000-0000-000000000005', 'Game Developer Intern (Unity)', 'Build gameplay features for VNG mobile game titles using Unity 2022.', 'C#, Unity basics, OOP', 'Real shipped game exposure, art team collaboration', 'Unity 2022, C#, Shader Graph, Addressables', 5, '2026-11-15', 'OPEN', 'c0000000-0000-0000-0000-000000000014'),
     ('f0000000-0000-0000-0000-000000000402', 'c0000000-0000-0000-0000-000000000004', '50000000-0000-0000-0000-000000000005', 'Backend Developer Intern (Zalo)', 'Develop messaging platform features for Zalo.', 'Java/Go basics, distributed systems curiosity', 'Massive-scale messaging infra, on-site HCM office', 'Java, Spring Boot, Kafka, Cassandra', 6, '2026-11-15', 'OPEN', 'c0000000-0000-0000-0000-000000000014'),
-    ('f0000000-0000-0000-0000-000000000403', 'c0000000-0000-0000-0000-000000000005', '50000000-0000-0000-0000-000000000005', 'Frontend Developer Intern (Zalo)', 'Build Zalo web mini-program features with React.', 'React, TypeScript, HTML/CSS', 'High-traffic consumer product, mobile web expertise', 'React 18, TypeScript, WebSocket, Redux', 4, '2026-11-15', 'OPEN', 'c0000000-0000-0000-0000-000000000014'),
+    ('f0000000-0000-0000-0000-000000000403', 'c0000000-0000-0000-0000-000000000004', '50000000-0000-0000-0000-000000000005', 'Frontend Developer Intern (Zalo)', 'Build Zalo web mini-program features with React.', 'React, TypeScript, HTML/CSS', 'High-traffic consumer product, mobile web expertise', 'React 18, TypeScript, WebSocket, Redux', 4, '2026-11-15', 'OPEN', 'c0000000-0000-0000-0000-000000000014'),
     ('f0000000-0000-0000-0000-000000000404', 'c0000000-0000-0000-0000-000000000004', '50000000-0000-0000-0000-000000000005', 'AI Engineer Intern (NLP/LLM)', 'Train and evaluate LLM models for VNG Vietnamese-language products.', 'Python, ML basics, NLP exposure a plus', 'GPU cluster, Vietnamese-NLP mentor, publication path', 'Python, PyTorch, HuggingFace, vLLM', 3, '2026-11-15', 'OPEN', 'c0000000-0000-0000-0000-000000000014'),
     ('f0000000-0000-0000-0000-000000000405', 'c0000000-0000-0000-0000-000000000004', '50000000-0000-0000-0000-000000000005', 'Cloud Engineer Intern', 'Operate VNG multi-cloud infrastructure (AWS + GCP).', 'Linux, networking, basic scripting', 'Multi-cloud exposure, cert sponsorship (AWS/GCP)', 'Terraform, AWS, GCP, Ansible', 2, '2026-11-15', 'OPEN', 'c0000000-0000-0000-0000-000000000014');
 
@@ -1126,7 +1132,7 @@ INSERT INTO job_posts (job_post_id, enterprise_id, semester_id, title, descripti
 -- so re-applying to the same job later still works.
 
 -- Scenario A: SV001 — 3 PENDING (max-limit edge case)
-INSERT INTO applications (application_id, job_post_id, student_id, cv_file_url, status, cover_letter, screened_by, screened_at) VALUES
+INSERT INTO applications (application_id, job_post_id, student_id, cv_file_url, status, screening_note, screened_by, screened_at) VALUES
     ('a0000000-0000-0000-0000-00000000a101', 'f0000000-0000-0000-0000-000000000101', 'd0000000-0000-0000-0000-000000000001', 'https://cv.example.com/se15001-f26.pdf', 'PENDING', 'Strong interest in Momo payment microservices; built similar projects with Spring Boot.', NULL, NULL),
     ('a0000000-0000-0000-0000-00000000a102', 'f0000000-0000-0000-0000-000000000201', 'd0000000-0000-0000-0000-000000000001', 'https://cv.example.com/se15001-f26.pdf', 'PENDING', 'Interested in FPT enterprise .NET stack; 2 years C# coursework.', NULL, NULL),
     ('a0000000-0000-0000-0000-00000000a103', 'f0000000-0000-0000-0000-000000000301', 'd0000000-0000-0000-0000-000000000001', 'https://cv.example.com/se15001-f26.pdf', 'PENDING', 'Want to learn Go at Shopee scale; eager to contribute to order pipeline.', NULL, NULL);
@@ -1135,7 +1141,7 @@ INSERT INTO applications (application_id, job_post_id, student_id, cv_file_url, 
 -- Application a101 is the "winning" app (status ACCEPTED).
 -- Applications a102 and a103 are cascade-WITHDRAWN, with
 -- withdrawn_by_application_id pointing back to a101.
-INSERT INTO applications (application_id, job_post_id, student_id, cv_file_url, status, cover_letter, screened_by, screened_at, withdrawn_at, withdrawn_by_application_id, previous_status) VALUES
+INSERT INTO applications (application_id, job_post_id, student_id, cv_file_url, status, screening_note, screened_by, screened_at, withdrawn_at, withdrawn_by_application_id, previous_status) VALUES
     ('a0000000-0000-0000-0000-00000000b101', 'f0000000-0000-0000-0000-000000000102', 'd0000000-0000-0000-0000-000000000005', 'https://cv.example.com/se15005-f26.pdf', 'ACCEPTED', 'Frontend passion with strong React fundamentals; built 3 production-grade SPAs.', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP, NULL, NULL, NULL),
     ('a0000000-0000-0000-0000-00000000b102', 'f0000000-0000-0000-0000-000000000202', 'd0000000-0000-0000-0000-000000000005', 'https://cv.example.com/se15005-f26.pdf', 'WITHDRAWN', 'Interested in Angular enterprise dashboards.', NULL, NULL, CURRENT_TIMESTAMP, 'a0000000-0000-0000-0000-00000000b101', 'PENDING'),
     ('a0000000-0000-0000-0000-00000000b103', 'f0000000-0000-0000-0000-000000000302', 'd0000000-0000-0000-0000-000000000005', 'https://cv.example.com/se15005-f26.pdf', 'WITHDRAWN', 'Interested in Vue 3 + Shopee consumer scale.', NULL, NULL, CURRENT_TIMESTAMP, 'a0000000-0000-0000-0000-00000000b101', 'PENDING');
@@ -1270,6 +1276,41 @@ INSERT INTO final_grades (student_id, tm_id, semester_id, enterprise_total_score
     ('d0000000-0000-0000-0000-000000000057', '00000000-0000-0000-0000-000000000002', '50000000-0000-0000-0000-00000000000e', 8.80, 8.8, 'PASSED', TRUE, '2024-12-06 11:30:00');
 
 -- ============================================================
+-- ============================================================
+-- Post-seed audit: enforce the BR-19 / semester-based eligibility invariants
+-- on every eligible_student row so DB and UI labels stay in sync forever.
+--
+-- Invariants applied:
+--   * current_semester <= 4            -> NOT_YET_ELIGIBLE   (UI: "Not Eligible")
+--   * current_semester BETWEEN 5 AND 6:
+--       gpa <  5.0                    -> NOT_ELIGIBLE        (UI: "Not Eligible")
+--       gpa >= 5.0                    -> ELIGIBLE
+--   * current_semester >= 7            -> COMPLETED           (UI: "Completed")
+-- Rows already PENDING/ACCEPTED/MATCHED/OJT/CANCELLED are left as-is
+-- because they are mid-workflow, not raw eligibility states.
+-- ============================================================
+UPDATE eligible_students
+SET status = 'NOT_YET_ELIGIBLE'
+WHERE current_semester <= 4
+  AND status IN ('ELIGIBLE', 'NOT_ELIGIBLE');
+
+UPDATE eligible_students
+SET status = 'NOT_ELIGIBLE'
+WHERE current_semester BETWEEN 5 AND 6
+  AND gpa < 5.0
+  AND status = 'ELIGIBLE';
+
+UPDATE eligible_students
+SET status = 'ELIGIBLE'
+WHERE current_semester BETWEEN 5 AND 6
+  AND gpa >= 5.0
+  AND status = 'NOT_ELIGIBLE';
+
+UPDATE eligible_students
+SET status = 'COMPLETED'
+WHERE current_semester >= 7
+  AND status NOT IN ('COMPLETED', 'CANCELLED', 'OJT', 'PENDING', 'ACCEPTED', 'MATCHED');
+
 -- Re-enable all triggers and constraints
 -- ============================================================
 SET session_replication_role = 'origin';
