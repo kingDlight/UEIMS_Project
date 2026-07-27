@@ -25,11 +25,11 @@ const STATUS_CONFIG: Record<OjtStatus, {
   defaultColor: string;
   pulse: boolean;
 }> = {
-  NOT_APPLICABLE:       { icon: <HelpCircle size={12} />,   label: 'ĐANG HỌC KỲ THƯỜNG',      defaultColor: '#9CA3AF', pulse: false },
-  PREPARING:            { icon: <Clock size={12} />,         label: 'ĐANG CHUẨN BỊ OJT',         defaultColor: '#3B82F6', pulse: false },
-  ELIGIBLE_NO_PLACEMENT:{ icon: <AlertTriangle size={12} />, label: 'ACTION REQUIRED',             defaultColor: '#F59E0B', pulse: true  },
-  APPLIED:              { icon: <Briefcase size={12} />,      label: 'ĐÃ NỘP HỒ SƠ',             defaultColor: '#8B5CF6', pulse: false },
-  MATCHING_IN_PROGRESS: { icon: <RefreshCw size={12} />,     label: 'ĐANG XỬ LÝ MATCH',          defaultColor: '#E67E22', pulse: true  },
+  NOT_APPLICABLE:       { icon: <HelpCircle size={12} />,   label: 'REGULAR SEMESTER',          defaultColor: '#9CA3AF', pulse: false },
+  PREPARING:            { icon: <Clock size={12} />,         label: 'PREPARING FOR OJT',         defaultColor: '#3B82F6', pulse: false },
+  ELIGIBLE_NO_PLACEMENT:{ icon: <AlertTriangle size={12} />, label: 'ACTION REQUIRED',           defaultColor: '#F59E0B', pulse: true  },
+  APPLIED:              { icon: <Briefcase size={12} />,     label: 'APPLICATION SUBMITTED',     defaultColor: '#8B5CF6', pulse: false },
+  MATCHING_IN_PROGRESS: { icon: <RefreshCw size={12} />,     label: 'MATCH IN PROGRESS',         defaultColor: '#E67E22', pulse: true  },
   PLACED:               { icon: <CheckCircle size={12} />,   label: 'OJT IN PROGRESS',            defaultColor: '#10B981', pulse: false },
   AT_RISK:              { icon: <ShieldAlert size={12} />,    label: 'AT RISK — ACTION REQUIRED',  defaultColor: '#EF4444', pulse: true  },
   BLOCKED:              { icon: <XCircle size={12} />,       label: 'BLOCKED',                    defaultColor: '#991B1B', pulse: true  },

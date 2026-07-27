@@ -237,7 +237,7 @@ public class ApplicationServiceImpl implements ApplicationService {
             throw new AppException(ErrorCode.STUDENT_NOT_ELIGIBLE);
         }
 
-        // [FIX A-01] Kiểm tra duplicate đúng: chỉ chặn nếu có application chưa kết thúc
+        // [FIX A-01] Correct duplicate check: only block if there is an active application that has not ended
         // Terminal statuses: WITHDRAWN, REJECTED, SCREENING_REJECTED
         boolean hasActiveApplication =
                 repository.existsByJobPost_JobPostIdAndStudent_UserIdAndStatusNotInAndDeletedAtIsNull(
@@ -307,8 +307,7 @@ public class ApplicationServiceImpl implements ApplicationService {
             throw new AppException(ErrorCode.APPLICATION_DEADLINE_EXPIRED);
         }
 
-        // 3. E2: [FIX A-04] Cho phép withdraw khi PENDING hoặc SCREENING_PASSED (trước
-        // deadline)
+        // 3. E2: [FIX A-04] Allow withdrawal when PENDING or SCREENING_PASSED (before deadline)
         if (application.getStatus() != ApplicationStatus.PENDING
                 && application.getStatus() != ApplicationStatus.SCREENING_PASSED) {
             throw new AppException(ErrorCode.APPLICATION_STATUS_CHANGED);
@@ -327,12 +326,12 @@ public class ApplicationServiceImpl implements ApplicationService {
         Application application =
                 repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.APPLICATION_NOT_FOUND));
 
-        // BR-33: Chỉ cho phép lọc nếu đang ở trạng thái PENDING
+        // BR-33: Only allow screening if the application is in PENDING status
         if (application.getStatus() != ApplicationStatus.PENDING) {
             throw new AppException(ErrorCode.APPLICATION_STATUS_CHANGED);
         }
 
-        // Kiểm tra quyền: Chỉ Enterprise sở hữu JobPost này mới được lọc CV
+        // Permission check: only the Enterprise owning this JobPost can screen CVs
         User currentUser = getCurrentUser();
         if (currentUser.getEnterprise() == null
                 || application.getJobPost() == null
@@ -345,7 +344,7 @@ public class ApplicationServiceImpl implements ApplicationService {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
-        // Đảm bảo chỉ được chuyển sang các trạng thái hợp lệ của vòng lọc CV
+        // Only allow transition to valid screening-round statuses
         if (request.getStatus() != ApplicationStatus.SCREENING_PASSED
                 && request.getStatus() != ApplicationStatus.SCREENING_REJECTED) {
             throw new AppException(ErrorCode.INVALID_PARAMETER_FORMAT);
@@ -356,7 +355,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         if (request.getStatus() == ApplicationStatus.SCREENING_REJECTED) {
             application.setRejectionReason(request.getRejectionReason());
         } else {
-            // Đảm bảo xóa lý do cũ nếu trạng thái là PASSED
+            // Clear the previous reason when the new status is PASSED
             application.setRejectionReason(null);
         }
 
@@ -436,7 +435,7 @@ public class ApplicationServiceImpl implements ApplicationService {
         }
 
         if (request.getInterviewDate() != null && !request.getInterviewDate().isEmpty()) {
-            // [FIX A-05] Catch DateTimeParseException thay vì để HTTP 500
+            // [FIX A-05] Catch DateTimeParseException instead of letting it bubble up as HTTP 500
             try {
                 application.setInterviewDate(java.time.LocalDateTime.parse(
                         request.getInterviewDate(), java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME));
@@ -563,9 +562,9 @@ public class ApplicationServiceImpl implements ApplicationService {
                     : "another opportunity";
             Notification n = Notification.builder()
                     .recipient(withdrawnApp.getStudent())
-                    .title("Đơn ứng tuyển đã được rút tự động")
+                    .title("Application Withdrawn Automatically")
                     .message(String.format(
-                            "Đơn ứng tuyển \"%s\" của bạn đã được rút vì bạn đã được chọn cho \"%s\" (%s).",
+                            "Your application for \"%s\" was withdrawn because you have been selected for \"%s\" (%s).",
                             jobTitle, triggerJobTitle, reason == null ? "BR-26" : reason))
                     .type("GENERAL")
                     .referenceEntity("Application")
@@ -716,9 +715,9 @@ public class ApplicationServiceImpl implements ApplicationService {
 
             Notification n = Notification.builder()
                     .recipient(revivedApp.getStudent())
-                    .title("Đơn ứng tuyển đã được khôi phục")
+                    .title("Application Reinstated")
                     .message(String.format(
-                            "Đơn ứng tuyển \"%s\" của bạn đã được khôi phục sau khi enterprise hủy offer tại \"%s\".",
+                            "Your application for \"%s\" has been reinstated after the enterprise cancelled the offer at \"%s\".",
                             jobTitle, triggerJobTitle))
                     .type("GENERAL")
                     .referenceEntity("Application")

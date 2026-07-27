@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -25,9 +25,9 @@
   </style>
 </head>
 <body style="margin:0; padding:0; background-color:#FFFFFF; font-family:'Times New Roman', Times, serif;">
-  <!-- PREHEADER (Ẩn trên giao diện, chỉ hiện ở Inbox) -->
+  <!-- PREHEADER (Hidden in UI, only visible in Inbox preview) -->
   <div style="display:none; max-height:0; overflow:hidden; font-size:1px; line-height:1px; color:#ffffff; opacity:0;">
-    Chào mừng bạn đến với UEIMS. Thông tin tài khoản của bạn đã được tạo.
+    Welcome to UEIMS. Your account has been created.
   </div>
 
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#FFFFFF">
@@ -64,11 +64,11 @@
             <td style="padding:0 40px;">
 
               <h1 style="margin:0; font-family:'Times New Roman', Times, serif; font-size:30px; line-height:36px; font-weight:700; color:#111827; text-align:center;">
-                Chào mừng, <span th:text="${fullName}">Nguyen Van A</span>
+                Welcome, <span th:text="${fullName}">Nguyen Van A</span>
               </h1>
 
               <p style="margin:12px 0 0; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:18px; font-weight:700; color:#111827; text-align:center;">
-                Tài khoản UEIMS của bạn đã được tạo.
+                Your UEIMS account has been created.
               </p>
 
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:22px 0 0;">
@@ -78,7 +78,7 @@
               </table>
 
               <p style="margin:22px 0 0; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:20px; font-weight:400; color:#6B7280; text-align:center;">
-                Bạn nhận email này vì Quản trị viên đã tạo tài khoản UEIMS cho bạn. Vui lòng đăng nhập bằng thông tin bên dưới và đổi mật khẩu ngay sau lần đăng nhập đầu tiên.
+                You are receiving this email because an administrator has created a UEIMS account for you. Please log in with the credentials below and change your password immediately after your first login.
               </p>
 
               <!-- Credentials -->
@@ -86,13 +86,13 @@
                 <tr>
                   <td style="padding:14px 16px; border:1px solid #F3F4F6; background-color:#FAFAFA;" class="bg-gray-dark">
                     <p style="margin:0 0 8px; font-family:'Times New Roman', Times, serif; font-size:12px; line-height:16px; color:#6B7280;">
-                      Email đăng nhập
+                      Login Email
                     </p>
                     <p style="margin:0 0 14px; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:18px; color:#111827; font-weight:700; word-break:break-all;" th:text="${email}">
                       a.nguyen@example.com
                     </p>
                     <p style="margin:0 0 8px; font-family:'Times New Roman', Times, serif; font-size:12px; line-height:16px; color:#6B7280;">
-                      Mật khẩu tạm thời
+                      Temporary Password
                     </p>
                     <p style="margin:0; font-family:'Times New Roman', Times, serif; font-size:16px; line-height:20px; color:#111827; font-weight:700; letter-spacing:1px;" th:text="${tempPassword}">
                       TmpP@ss123
@@ -108,7 +108,7 @@
                     <!--[if mso]>
                       <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${loginUrl}" style="height:40px;v-text-anchor:middle;width:180px;" arcsize="50%" stroke="f" fillcolor="#E96500">
                         <w:anchorlock/>
-                        <center style="color:#ffffff;font-family:'Times New Roman', Times, serif;font-size:13px;font-weight:bold;">Đăng nhập UEIMS</center>
+                        <center style="color:#ffffff;font-family:'Times New Roman', Times, serif;font-size:13px;font-weight:bold;">Log in to UEIMS</center>
                       </v:roundrect>
                     <![endif]-->
                     <!--[if !mso]><!-->
@@ -116,7 +116,7 @@
                       <tr>
                         <td align="center" style="border-radius:999px; background-color:#E96500;">
                           <a href="#" th:href="${loginUrl}" target="_blank" style="display:inline-block; padding:12px 22px; min-width:180px; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:16px; font-weight:800; color:#FFFFFF; text-align:center; text-decoration:none; border-radius:999px; background-color:#E96500;">
-                            Đăng nhập UEIMS
+                            Log in to UEIMS
                           </a>
                         </td>
                       </tr>
@@ -127,7 +127,7 @@
               </table>
 
               <p style="margin:22px 0 0; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:20px; font-weight:700; color:#6B7280; text-align:center;">
-                Trân trọng,
+                Best regards,
               </p>
               <p style="margin:4px 0 0; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:20px; font-weight:700; color:#E96500; text-align:center;" class="text-orange">
                 Team UEIMS
@@ -140,7 +140,7 @@
               </table>
 
               <p style="margin:14px 0 0; font-family:'Times New Roman', Times, serif; font-size:11px; line-height:16px; color:#9CA3AF; text-align:center;" class="text-muted">
-                Cần hỗ trợ? Liên hệ <a href="mailto:ueims.support@fpt.edu.vn" style="color:#E96500; font-weight:700; text-decoration:none;" class="text-orange">ueims.support@fpt.edu.vn</a>
+                Need help? Contact <a href="mailto:ueims.support@fpt.edu.vn" style="color:#E96500; font-weight:700; text-decoration:none;" class="text-orange">ueims.support@fpt.edu.vn</a>
               </p>
 
             </td>

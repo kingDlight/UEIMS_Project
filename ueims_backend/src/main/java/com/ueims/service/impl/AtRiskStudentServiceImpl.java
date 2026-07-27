@@ -75,7 +75,7 @@ public class AtRiskStudentServiceImpl implements AtRiskStudentService {
     }
 
     // ============================================================
-    // Nhóm 1: UNPLACED — eligible nhưng chưa có assignment
+    // Group 1: UNPLACED — eligible but no assignment yet
     // ============================================================
     private List<AtRiskStudentResult> findUnplacedAtRisk(Semester semester) {
         List<AtRiskStudentResult> results = new ArrayList<>();
@@ -102,10 +102,10 @@ public class AtRiskStudentServiceImpl implements AtRiskStudentService {
             int priorityScore = daysAtRisk >= 14 ? 90 : daysAtRisk >= 7 ? 70 : 50;
 
             String reason = daysAtRisk >= 14
-                    ? "Đã 14+ ngày chưa có placement sau khi được duyệt OJT"
+                    ? "14+ days without placement after OJT approval"
                     : daysAtRisk >= 7
-                            ? "Đã 7+ ngày chưa có placement sau khi được duyệt OJT"
-                            : "Đủ điều kiện OJT nhưng chưa có doanh nghiệp tiếp nhận";
+                            ? "7+ days without placement after OJT approval"
+                            : "OJT-eligible but no enterprise has accepted this student yet";
 
             results.add(AtRiskStudentResult.builder()
                     .assignmentId(null)
@@ -134,7 +134,7 @@ public class AtRiskStudentServiceImpl implements AtRiskStudentService {
     }
 
     // ============================================================
-    // Nhóm 2: REPORT MISSED — đã placed nhưng miss reports
+    // Group 2: REPORT MISSED — placed but missing reports
     // ============================================================
     private List<AtRiskStudentResult> findReportMissedAtRisk(Semester semester) {
         List<AtRiskStudentResult> results = new ArrayList<>();
@@ -166,12 +166,12 @@ public class AtRiskStudentServiceImpl implements AtRiskStudentService {
             int priorityScore = Math.min(100, 30 + missed * 10 + rejected * 5);
 
             String reason = rejected >= 3
-                    ? "3+ báo cáo bị từ chối — cần xem xét lại tiến độ"
+                    ? "3+ reports rejected — progress review required"
                     : rejected >= 2
-                            ? "2 báo cáo bị từ chối — vui lòng chỉnh sửa và nộp lại"
+                            ? "2 reports rejected — please revise and resubmit"
                             : missed >= 3
-                                    ? "Missed " + missed + " báo cáo tuần — nguy cơ không đạt OJT"
-                                    : "Missed " + missed + " báo cáo tuần gần đây";
+                                    ? "Missed " + missed + " weekly report(s) — risk of failing OJT"
+                                    : "Missed " + missed + " recent weekly report(s)";
 
             results.add(AtRiskStudentResult.builder()
                     .assignmentId(assignmentId)
@@ -203,7 +203,7 @@ public class AtRiskStudentServiceImpl implements AtRiskStudentService {
     }
 
     // ============================================================
-    // Nhóm 3: BLOCKED — bị cancelled
+    // Group 3: BLOCKED — OJT cancelled
     // ============================================================
     private List<AtRiskStudentResult> findBlockedAtRisk(Semester semester) {
         List<AtRiskStudentResult> results = new ArrayList<>();
@@ -228,8 +228,8 @@ public class AtRiskStudentServiceImpl implements AtRiskStudentService {
                     .riskReason(
                             es.getCancelledReason() != null
                                             && !es.getCancelledReason().isBlank()
-                                    ? "Bị hủy OJT: " + es.getCancelledReason()
-                                    : "OJT bị hủy bởi phòng Đào tạo")
+                                    ? "OJT cancelled: " + es.getCancelledReason()
+                                    : "OJT cancelled by the Training Office")
                     .priorityScore(100)
                     .daysAtRisk(0)
                     .applicationCount(0)

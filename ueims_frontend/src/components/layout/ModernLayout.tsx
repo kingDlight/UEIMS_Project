@@ -362,7 +362,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
       setPickerOpen(false);
     } catch (e) {
       console.error('Failed to set avatar', e);
-      alert('Không thể cập nhật avatar');
+      alert('Failed to update avatar');
     }
   };
 
@@ -758,7 +758,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
 
               <button
                 onClick={openPicker}
-                title="Chọn từ thư viện"
+                title="Select from library"
                 style={{
                   position: 'absolute', bottom: 0, right: 0, width: 26, height: 26, borderRadius: '50%',
                   background: '#fff', border: '1px solid #e2e8f0', boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
@@ -986,9 +986,9 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
           >
             <div style={{ padding: '20px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div>
-                <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: '#0f172a' }}>Chọn ảnh từ thư viện</h3>
+                <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: '#0f172a' }}>Select Avatar from Library</h3>
                 <p style={{ margin: '4px 0 0', fontSize: 13, color: '#64748b' }}>
-                  Thả file ảnh vào thư mục <code style={{ background: '#f1f5f9', padding: '1px 6px', borderRadius: 4 }}>ueims_backend/uploads/avatars/</code> rồi chọn bên dưới
+                  Drop image files into the folder <code style={{ background: '#f1f5f9', padding: '1px 6px', borderRadius: 4 }}>ueims_backend/uploads/avatars/</code> then pick one below
                 </p>
               </div>
               <button
@@ -1001,11 +1001,11 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
 
             <div style={{ flex: 1, overflowY: 'auto', padding: 20, background: '#f8fafc' }}>
               {pickerLoading ? (
-                <div style={{ textAlign: 'center', padding: 40, color: '#64748b' }}>Đang tải...</div>
+                <div style={{ textAlign: 'center', padding: 40, color: '#64748b' }}>Loading...</div>
               ) : availableAvatars.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: 40, color: '#94a3b8' }}>
                   <Search size={32} style={{ opacity: 0.4, marginBottom: 8 }} />
-                  <p style={{ margin: 0, fontSize: 14 }}>Chưa có ảnh nào trong thư viện</p>
+                  <p style={{ margin: 0, fontSize: 14 }}>No avatars available in the library yet</p>
                 </div>
               ) : (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 12 }}>
@@ -1047,7 +1047,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
                   background: '#fff', color: '#475569', cursor: 'pointer', fontSize: 14
                 }}
               >
-                Đóng
+                Close
               </button>
             </div>
           </div>

@@ -82,7 +82,7 @@ public class TrainingWarningServiceImpl implements TrainingWarningService {
             warning.setTm(tm);
             warning.setStudent(student);
             warning.setWeekNumber(weekNumber);
-            warning.setWarningMessage("Bạn chưa nộp báo cáo tuần " + weekNumber + " đúng hạn.");
+            warning.setWarningMessage("You have not submitted your week " + weekNumber + " report on time.");
 
             warningsToSave.add(warning);
 

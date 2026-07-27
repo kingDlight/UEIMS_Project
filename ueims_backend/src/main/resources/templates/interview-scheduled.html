@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -25,9 +25,9 @@
   </style>
 </head>
 <body style="margin:0; padding:0; background-color:#FFFFFF; font-family:'Times New Roman', Times, serif;">
-  <!-- PREHEADER (Ẩn trên giao diện, chỉ hiện ở Inbox) -->
+  <!-- PREHEADER (Hidden in UI, only visible in Inbox preview) -->
   <div style="display:none; max-height:0; overflow:hidden; font-size:1px; line-height:1px; color:#ffffff; opacity:0;">
-    Bạn có một buổi phỏng vấn mới được lên lịch.
+    A new interview has been scheduled for you.
   </div>
 
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#FFFFFF">
@@ -62,11 +62,11 @@
             <td style="padding:0 40px;">
 
               <h1 style="margin:0; font-family:'Times New Roman', Times, serif; font-size:30px; line-height:36px; font-weight:700; color:#111827; text-align:center;">
-                Xin chào <span th:text="${fullName}">Student</span>,
+                Hello <span th:text="${fullName}">Student</span>,
               </h1>
 
               <p style="margin:12px 0 0; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:18px; font-weight:700; color:#111827; text-align:center;">
-                Bạn có một buổi phỏng vấn mới được lên lịch.
+                A new interview has been scheduled for you.
               </p>
 
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:22px 0 0;">
@@ -80,20 +80,20 @@
                 <tr>
                   <td style="padding:14px 16px; border:1px solid #F3F4F6; background-color:#FAFAFA;" class="bg-gray-dark">
                     <p style="margin:0 0 8px; font-family:'Times New Roman', Times, serif; font-size:12px; line-height:16px; color:#6B7280;">
-                      Vị trí
+                      Position
                     </p>
                     <p style="margin:0 0 14px; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:18px; color:#111827; font-weight:700; word-break:break-all;" th:text="${jobTitle}">
                       -
                     </p>
                     <p style="margin:0 0 8px; font-family:'Times New Roman', Times, serif; font-size:12px; line-height:16px; color:#6B7280;">
-                      Thời gian
+                      Scheduled Time
                     </p>
                     <p style="margin:0 0 14px; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:18px; color:#111827; font-weight:700; word-break:break-all;" th:text="${#temporals.format(scheduledTime,'dd/MM/yyyy HH:mm')}">
                       -
                     </p>
                     <div th:if="${location}">
                       <p style="margin:0 0 8px; font-family:'Times New Roman', Times, serif; font-size:12px; line-height:16px; color:#6B7280;">
-                        Địa điểm
+                        Location
                       </p>
                       <p style="margin:0 0 14px; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:20px; color:#111827; font-weight:700;" th:text="${location}">
                         -
@@ -101,7 +101,7 @@
                     </div>
                     <div th:if="${meetingLink}">
                       <p style="margin:0 0 8px; font-family:'Times New Roman', Times, serif; font-size:12px; line-height:16px; color:#6B7280;">
-                        Link họp
+                        Meeting Link
                       </p>
                       <p style="margin:0; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:20px; color:#111827; font-weight:700;">
                         <a href="#" th:href="${meetingLink}" th:text="${meetingLink}" style="color:#E96500;" class="text-orange">link</a>
@@ -112,11 +112,11 @@
               </table>
 
               <p style="margin:18px 0 0; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:20px; font-weight:400; color:#6B7280; text-align:center;">
-                Vui lòng đăng nhập UEIMS để xác nhận tham dự.
+                Please log in to UEIMS to confirm your attendance.
               </p>
 
               <p style="margin:22px 0 0; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:20px; font-weight:700; color:#6B7280; text-align:center;">
-                Trân trọng,
+                Best regards,
               </p>
               <p style="margin:4px 0 0; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:20px; font-weight:700; color:#E96500; text-align:center;" class="text-orange">
                 Team UEIMS
@@ -129,7 +129,7 @@
               </table>
 
               <p style="margin:12px 0 0; font-family:'Times New Roman', Times, serif; font-size:11px; line-height:16px; color:#9CA3AF; text-align:center;" class="text-muted">
-                Cần hỗ trợ? Liên hệ <a href="mailto:ueims.support@fpt.edu.vn" style="color:#E96500; font-weight:700; text-decoration:none;" class="text-orange">ueims.support@fpt.edu.vn</a>
+                Need help? Contact <a href="mailto:ueims.support@fpt.edu.vn" style="color:#E96500; font-weight:700; text-decoration:none;" class="text-orange">ueims.support@fpt.edu.vn</a>
               </p>
 
             </td>

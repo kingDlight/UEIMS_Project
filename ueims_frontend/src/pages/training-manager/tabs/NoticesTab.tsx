@@ -525,7 +525,7 @@ export const NoticesTab: React.FC = () => {
               }}
             >
               {record.content.slice(0, 55)}
-              {record.content.length > 55 ? 'Ã¢â¬Â¦' : ''}
+              {record.content.length > 55 ? '...' : ''}
             </div>
           </div>
         </div>

@@ -389,10 +389,10 @@ const NoPlacementAlert: React.FC<{
 
   const handleContactSupport = () => {
     if (contactEmail) {
-      const subject = encodeURIComponent('[UEIMS] Yêu cầu hỗ trợ OJT');
+      const subject = encodeURIComponent('[UEIMS] OJT Support Request');
       window.location.href = `mailto:${contactEmail}?subject=${subject}`;
     } else {
-      window.location.href = 'mailto:training-office@ueims.edu.vn?subject=[UEIMS] Yêu cầu hỗ trợ OJT';
+      window.location.href = 'mailto:training-office@ueims.edu.vn?subject=[UEIMS] OJT Support Request';
     }
   };
 
@@ -431,7 +431,7 @@ const NoPlacementAlert: React.FC<{
                 marginBottom: 14,
               }}>
                 <Clock size={12} />
-                Còn {daysUntilDeadline} ngày đến hạn kết thúc kỳ
+                {daysUntilDeadline} day(s) until semester deadline
               </div>
             )}
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -439,7 +439,7 @@ const NoPlacementAlert: React.FC<{
                 {t('visitJobBoard', 'Visit Job Board')}
               </CTAButton>
               <CTAButton variant="ghost" size="md" icon={<Mail size={13} />} onClick={handleContactSupport}>
-                {contactName ? `Liên hệ ${contactName}` : t('contactSupport', 'Contact Support')}
+                {contactName ? `Contact ${contactName}` : t('contactSupport', 'Contact Support')}
               </CTAButton>
             </div>
           </div>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -25,9 +25,9 @@
   </style>
 </head>
 <body style="margin:0; padding:0; background-color:#FFFFFF; font-family:'Times New Roman', Times, serif;">
-  <!-- PREHEADER (Ẩn trên giao diện, chỉ hiện ở Inbox) -->
+  <!-- PREHEADER (Hidden in UI, only visible in Inbox preview) -->
   <div style="display:none; max-height:0; overflow:hidden; font-size:1px; line-height:1px; color:#ffffff; opacity:0;">
-    Chúc mừng! Bạn đã vượt qua vòng phỏng vấn.
+    Congratulations! You have passed the interview round.
   </div>
 
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#FFFFFF">
@@ -62,11 +62,11 @@
             <td style="padding:0 40px;">
 
               <h1 style="margin:0; font-family:'Times New Roman', Times, serif; font-size:30px; line-height:36px; font-weight:700; color:#111827; text-align:center;">
-                Xin chào <span th:text="${fullName}">Student</span>,
+                Hello <span th:text="${fullName}">Student</span>,
               </h1>
 
               <p style="margin:12px 0 0; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:18px; font-weight:700; color:#111827; text-align:center;">
-                Kết quả phỏng vấn.
+                Interview Result.
               </p>
 
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:22px 0 0;">
@@ -76,15 +76,15 @@
               </table>
 
               <p style="margin:22px 0 0; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:20px; font-weight:400; color:#6B7280; text-align:center;">
-                <strong style="color:#28a745;" class="text-success">Chúc mừng bạn!</strong> Bạn đã xuất sắc vượt qua vòng phỏng vấn.
+                <strong style="color:#28a745;" class="text-success">Congratulations!</strong> You have successfully passed the interview round.
               </p>
 
               <p style="margin:18px 0 0; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:20px; font-weight:400; color:#6B7280; text-align:center;">
-                Doanh nghiệp sẽ liên hệ bạn về các bước tiếp theo của chương trình thực tập.
+                The enterprise will reach out to you with the next steps of the internship program.
               </p>
 
               <p style="margin:22px 0 0; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:20px; font-weight:700; color:#6B7280; text-align:center;">
-                Trân trọng,
+                Best regards,
               </p>
               <p style="margin:4px 0 0; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:20px; font-weight:700; color:#E96500; text-align:center;" class="text-orange">
                 Team UEIMS
@@ -97,7 +97,7 @@
               </table>
 
               <p style="margin:12px 0 0; font-family:'Times New Roman', Times, serif; font-size:11px; line-height:16px; color:#9CA3AF; text-align:center;" class="text-muted">
-                Cần hỗ trợ? Liên hệ <a href="mailto:ueims.support@fpt.edu.vn" style="color:#E96500; font-weight:700; text-decoration:none;" class="text-orange">ueims.support@fpt.edu.vn</a>
+                Need help? Contact <a href="mailto:ueims.support@fpt.edu.vn" style="color:#E96500; font-weight:700; text-decoration:none;" class="text-orange">ueims.support@fpt.edu.vn</a>
               </p>
 
             </td>

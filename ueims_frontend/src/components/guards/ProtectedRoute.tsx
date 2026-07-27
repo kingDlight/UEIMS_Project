@@ -69,7 +69,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRoles }) 
           color: '#E67E22',
         }}
       >
-        Đang xác thực phiên đăng nhập...
+        Authenticating your session…
       </div>
     );
   }

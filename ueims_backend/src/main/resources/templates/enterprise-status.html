@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -25,9 +25,9 @@
   </style>
 </head>
 <body style="margin:0; padding:0; background-color:#FFFFFF; font-family:'Times New Roman', Times, serif;">
-  <!-- PREHEADER (Ẩn trên giao diện, chỉ hiện ở Inbox) -->
+  <!-- PREHEADER (Hidden in UI, only visible in Inbox preview) -->
   <div style="display:none; max-height:0; overflow:hidden; font-size:1px; line-height:1px; color:#ffffff; opacity:0;">
-    Thông báo trạng thái hồ sơ doanh nghiệp của bạn trên hệ thống UEIMS.
+    Update on your enterprise registration status in UEIMS.
   </div>
 
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#FFFFFF">
@@ -62,11 +62,11 @@
             <td style="padding:0 40px;">
 
               <h1 style="margin:0; font-family:'Times New Roman', Times, serif; font-size:30px; line-height:36px; font-weight:700; color:#111827; text-align:center;">
-                Kính gửi <span th:text="${fullName}">Doanh nghiệp</span>,
+                Dear <span th:text="${fullName}">Enterprise</span>,
               </h1>
 
               <p style="margin:12px 0 0; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:18px; font-weight:700; color:#111827; text-align:center;">
-                Thông báo trạng thái hồ sơ doanh nghiệp.
+                Enterprise Registration Status Update.
               </p>
 
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:22px 0 0;">
@@ -76,24 +76,24 @@
               </table>
 
               <p style="margin:22px 0 0; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:20px; font-weight:400; color:#6B7280; text-align:center;">
-                Hồ sơ đăng ký doanh nghiệp của quý công ty trên hệ thống UEIMS đã được xử lý.<br>
-                Trạng thái hiện tại: <strong th:text="${status}" th:style="${status == 'APPROVED' || status == 'approved' ? 'color: #28a745;' : 'color: #dc3545;'}">APPROVED</strong>
+                Your enterprise registration on UEIMS has been processed.<br>
+                Current status: <strong th:text="${status}" th:style="${status == 'APPROVED' || status == 'approved' ? 'color: #28a745;' : 'color: #dc3545;'}">APPROVED</strong>
               </p>
 
               <div th:if="${status == 'REJECTED' || status == 'rejected'}">
                 <p style="margin:18px 0 0; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:20px; font-weight:700; color:#111827; text-align:center;">
-                  Lý do từ chối:
+                  Reason for rejection:
                 </p>
                 <p style="margin:4px 0 0; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:20px; font-weight:400; color:#dc3545; text-align:center;" class="text-danger" th:text="${reason}"></p>
                 <p style="margin:18px 0 0; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:20px; font-weight:400; color:#6B7280; text-align:center;">
-                  Vui lòng đăng nhập vào hệ thống để chỉnh sửa hồ sơ và gửi lại yêu cầu xét duyệt.
+                  Please log in to UEIMS to update your profile and resubmit your application for review.
                 </p>
               </div>
 
               <div th:if="${status == 'APPROVED' || status == 'approved'}">
                 <p style="margin:18px 0 0; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:20px; font-weight:400; color:#6B7280; text-align:center;">
-                  Chúc mừng quý doanh nghiệp! Hồ sơ của quý công ty đã được phê duyệt thành công.
-                  Quý công ty đã có thể đăng nhập vào hệ thống để bắt đầu đăng tin tuyển dụng và quản lý thực tập sinh.
+                  Congratulations! Your enterprise profile has been approved.
+                  You can now log in to UEIMS to start posting job listings and managing interns.
                 </p>
               </div>
 
@@ -104,7 +104,7 @@
                     <!--[if mso]>
                       <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${loginUrl}" style="height:40px;v-text-anchor:middle;width:180px;" arcsize="50%" stroke="f" fillcolor="#E96500">
                         <w:anchorlock/>
-                        <center style="color:#ffffff;font-family:'Times New Roman', Times, serif;font-size:13px;font-weight:bold;">Đăng nhập hệ thống</center>
+                        <center style="color:#ffffff;font-family:'Times New Roman', Times, serif;font-size:13px;font-weight:bold;">Log in to UEIMS</center>
                       </v:roundrect>
                     <![endif]-->
                     <!--[if !mso]><!-->
@@ -112,7 +112,7 @@
                       <tr>
                         <td align="center" style="border-radius:999px; background-color:#E96500;">
                           <a href="#" th:href="${loginUrl}" target="_blank" style="display:inline-block; padding:12px 22px; min-width:180px; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:16px; font-weight:800; color:#FFFFFF; text-align:center; text-decoration:none; border-radius:999px; background-color:#E96500;">
-                            Đăng nhập hệ thống
+                            Log in to UEIMS
                           </a>
                         </td>
                       </tr>
@@ -123,7 +123,7 @@
               </table>
 
               <p style="margin:22px 0 0; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:20px; font-weight:700; color:#6B7280; text-align:center;">
-                Trân trọng,
+                Best regards,
               </p>
               <p style="margin:4px 0 0; font-family:'Times New Roman', Times, serif; font-size:13px; line-height:20px; font-weight:700; color:#E96500; text-align:center;" class="text-orange">
                 Team UEIMS
@@ -136,7 +136,7 @@
               </table>
 
               <p style="margin:12px 0 0; font-family:'Times New Roman', Times, serif; font-size:11px; line-height:16px; color:#9CA3AF; text-align:center;" class="text-muted">
-                Cần hỗ trợ? Liên hệ <a href="mailto:ueims.support@fpt.edu.vn" style="color:#E96500; font-weight:700; text-decoration:none;" class="text-orange">ueims.support@fpt.edu.vn</a>
+                Need help? Contact <a href="mailto:ueims.support@fpt.edu.vn" style="color:#E96500; font-weight:700; text-decoration:none;" class="text-orange">ueims.support@fpt.edu.vn</a>
               </p>
 
             </td>

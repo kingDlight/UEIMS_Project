@@ -122,7 +122,7 @@ public class AuthenticationService {
             handleFailedLogin(user);
         }
 
-        // Đăng nhập thành công → Reset bộ đếm
+        // Successful login → reset attempt counter
         if (user.getFailedLoginAttempts() > 0) {
             userRepository.updateLoginAttemptsAndStatus(user.getUserId(), 0, user.getStatus(), null);
         }

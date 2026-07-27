@@ -27,7 +27,8 @@ public class EnterpriseRegistrationController {
         registrationService.register(request);
         return ApiResponse.<Void>builder()
                 .code(1036)
-                .message("Đăng ký thành công. Tài khoản sẽ được kích hoạt sau khi Training Manager phê duyệt.")
+                .message(
+                        "Registration successful. Your account will be activated after the Training Manager approves it.")
                 .build();
     }
 }

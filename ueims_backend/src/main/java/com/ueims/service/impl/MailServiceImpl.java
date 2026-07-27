@@ -42,11 +42,11 @@ public class MailServiceImpl implements MailService {
     @NonFinal
     String appBaseUrl;
 
-    // ===== Password Reset (VI) =====
+    // ===== Password Reset =====
     @Async("mailTaskExecutor")
     public void sendPasswordResetMail(String to, String fullName, String token) {
         String resetUrl = appBaseUrl + "/reset-password?token=" + token;
-        String subject = "Yêu cầu đặt lại mật khẩu — UEIMS";
+        String subject = "Password Reset Request — UEIMS";
 
         Context ctx = new Context();
         ctx.setVariable(VAR_FULL_NAME, fullName);
@@ -56,14 +56,14 @@ public class MailServiceImpl implements MailService {
         String html = templateEngine.process("password-reset", ctx);
         sendHtml(to, subject, html);
 
-        log.info("Email đặt lại mật khẩu đã được gửi đến: {}", to);
+        log.info("Password reset email sent to: {}", to);
     }
 
-    // ===== Welcome Email (VI) =====
+    // ===== Welcome Email =====
     @Async("mailTaskExecutor")
     public void sendWelcomeMail(String to, String fullName, String tempPassword) {
         String loginUrl = appBaseUrl + PATH_LOGIN;
-        String subject = "Chào mừng bạn đến với UEIMS";
+        String subject = "Welcome to UEIMS";
 
         Context ctx = new Context();
         ctx.setVariable(VAR_FULL_NAME, fullName);
@@ -75,7 +75,7 @@ public class MailServiceImpl implements MailService {
         String html = templateEngine.process("welcome", ctx);
         sendHtml(to, subject, html);
 
-        log.info("Email chào mừng đã được gửi đến: {}", to);
+        log.info("Welcome email sent to: {}", to);
     }
 
     /**
@@ -86,7 +86,7 @@ public class MailServiceImpl implements MailService {
     @Async("mailTaskExecutor")
     public void sendRosterWelcomeMail(String to, String fullName, String tempPassword) {
         String loginUrl = appBaseUrl + PATH_LOGIN;
-        String subject = "Tài khoản UEIMS của bạn đã được tạo — UEIMS";
+        String subject = "Your UEIMS Account Has Been Created — UEIMS";
 
         Context ctx = new Context();
         ctx.setVariable(VAR_FULL_NAME, fullName);
@@ -98,14 +98,14 @@ public class MailServiceImpl implements MailService {
         String html = templateEngine.process("welcome", ctx);
         sendHtml(to, subject, html);
 
-        log.info("Email thông báo tài khoản roster đã được gửi đến: {}", to);
+        log.info("Roster account creation email sent to: {}", to);
     }
 
-    // ===== Password Changed (VI) =====
+    // ===== Password Changed =====
     @Async("mailTaskExecutor")
     public void sendPasswordChangedMail(String to, String fullName, String changedAt) {
         String loginUrl = appBaseUrl + PATH_LOGIN;
-        String subject = "Mật khẩu đã được thay đổi — UEIMS";
+        String subject = "Your Password Has Been Changed — UEIMS";
 
         Context ctx = new Context();
         ctx.setVariable(VAR_FULL_NAME, fullName);
@@ -116,14 +116,14 @@ public class MailServiceImpl implements MailService {
         String html = templateEngine.process("password-changed", ctx);
         sendHtml(to, subject, html);
 
-        log.info("Email thông báo đổi mật khẩu đã được gửi đến: {}", to);
+        log.info("Password changed notification email sent to: {}", to);
     }
 
-    // ===== Late Report Warning (VI) =====
+    // ===== Late Report Warning =====
     @Async("mailTaskExecutor")
     public void sendLateReportWarningMail(String to, String fullName, Integer weekNumber) {
         String loginUrl = appBaseUrl + PATH_LOGIN;
-        String subject = "Cảnh báo: Trễ hạn nộp báo cáo tuần " + weekNumber + " — UEIMS";
+        String subject = "Warning: Late Weekly Report Submission — Week " + weekNumber + " — UEIMS";
 
         Context ctx = new Context();
         ctx.setVariable(VAR_FULL_NAME, fullName);
@@ -134,13 +134,13 @@ public class MailServiceImpl implements MailService {
         String html = templateEngine.process("late-report-warning", ctx);
         sendHtml(to, subject, html);
 
-        log.info("Email cảnh báo trễ báo cáo tuần {} đã được gửi đến: {}", weekNumber, to);
+        log.info("Late weekly report warning for week {} sent to: {}", weekNumber, to);
     }
 
     // ===== Enterprise Status Notification (UC-19) =====
     @Async("mailTaskExecutor")
     public void sendEnterpriseStatusNotification(String to, String contactPerson, String status, String reason) {
-        String subject = "Thông báo kết quả duyệt hồ sơ doanh nghiệp — UEIMS";
+        String subject = "Enterprise Registration Review Result — UEIMS";
         String loginUrl = appBaseUrl + PATH_LOGIN;
 
         Context ctx = new Context();
@@ -150,27 +150,26 @@ public class MailServiceImpl implements MailService {
         ctx.setVariable(VAR_LOGIN_URL, loginUrl);
         ctx.setVariable(VAR_SUBJECT, subject);
 
-        // Giả định bạn sẽ tạo template enterprise-status.html trong folder templates
         String html = templateEngine.process("enterprise-status", ctx);
         sendHtml(to, subject, html);
 
-        log.info("Email thông báo trạng thái {} đã được gửi tới doanh nghiệp: {}", status, to);
+        log.info("Enterprise status notification ({}) sent to: {}", status, to);
     }
 
     // ===== Interview notifications (UC-43 / UC-44) =====
     @Async("mailTaskExecutor")
     public void sendInterviewScheduled(Interview interview) {
-        sendInterviewEmail(interview, "interview-scheduled", "Lịch phỏng vấn mới — UEIMS", null);
+        sendInterviewEmail(interview, "interview-scheduled", "New Interview Scheduled — UEIMS", null);
     }
 
     @Async("mailTaskExecutor")
     public void sendInterviewRescheduled(Interview interview) {
-        sendInterviewEmail(interview, "interview-rescheduled", "Lịch phỏng vấn đã được dời — UEIMS", null);
+        sendInterviewEmail(interview, "interview-rescheduled", "Interview Rescheduled — UEIMS", null);
     }
 
     @Async("mailTaskExecutor")
     public void sendInterviewCanceled(Interview interview, String reason) {
-        sendInterviewEmail(interview, "interview-canceled", "Lịch phỏng vấn đã bị hủy — UEIMS", reason);
+        sendInterviewEmail(interview, "interview-canceled", "Interview Canceled — UEIMS", reason);
     }
 
     @Async("mailTaskExecutor")
@@ -178,7 +177,7 @@ public class MailServiceImpl implements MailService {
         sendInterviewEmail(
                 interview,
                 "PASS".equalsIgnoreCase(result) ? "interview-result-pass" : "interview-result-fail",
-                "Kết quả phỏng vấn — UEIMS",
+                "Interview Result — UEIMS",
                 notes);
     }
 
@@ -190,11 +189,11 @@ public class MailServiceImpl implements MailService {
             if (reporterEmail == null) return;
             Context ctx = new Context();
             ctx.setVariable(VAR_FULL_NAME, incident.getReportedBy().getFullName());
-            ctx.setVariable(VAR_SUBJECT, "Sự cố đã được ghi nhận — UEIMS");
+            ctx.setVariable(VAR_SUBJECT, "Incident Report Received — UEIMS");
             ctx.setVariable("category", incident.getCategory());
             ctx.setVariable("description", incident.getDescription());
             String html = templateEngine.process("incident-reported", ctx);
-            sendHtml(reporterEmail, "Sự cố đã được ghi nhận — UEIMS", html);
+            sendHtml(reporterEmail, "Incident Report Received — UEIMS", html);
         } catch (Exception e) {
             log.warn("[IncidentEmail] Failed: {}", e.getMessage());
         }
@@ -242,14 +241,14 @@ public class MailServiceImpl implements MailService {
         String html = templateEngine.process("at-risk-alert", ctx);
         sendHtml(to, subject, html);
 
-        log.info("Email cảnh báo At-Risk [{}] đã được gửi đến: {} ({})", riskCategory, to, studentCode);
+        log.info("At-Risk alert email [{}] sent to: {} ({})", riskCategory, to, studentCode);
     }
 
     private String buildAtRiskSubject(String riskCategoryLabel, String studentCode) {
         String label =
                 (riskCategoryLabel == null || riskCategoryLabel.isBlank()) ? "At-Risk Student" : riskCategoryLabel;
         String code = (studentCode == null || studentCode.isBlank()) ? "" : " — " + studentCode;
-        return "[" + label + "] Cảnh báo tình trạng thực tập" + code + " — UEIMS";
+        return "[" + label + "] Internship Status Alert" + code + " — UEIMS";
     }
 
     private List<String> buildAtRiskRecommendations(
@@ -260,38 +259,40 @@ public class MailServiceImpl implements MailService {
             String companyName) {
         List<String> actions = new ArrayList<>();
         if ("UNPLACED".equalsIgnoreCase(riskCategory)) {
-            actions.add("Đăng nhập UEIMS để xem danh sách doanh nghiệp đang tuyển phù hợp với chuyên ngành của bạn.");
-            actions.add("Cập nhật CV và hồ sơ cá nhân nếu đã quá 30 ngày — nhà tuyển dụng ưu tiên hồ sơ mới nhất.");
-            actions.add("Ứng tuyển ít nhất 3 doanh nghiệp mỗi tuần cho đến khi được tiếp nhận.");
+            actions.add("Log in to UEIMS to browse enterprises currently hiring in your major.");
+            actions.add(
+                    "Refresh your CV and personal profile if it has not been updated in 30+ days — recruiters prioritize the latest profiles.");
+            actions.add("Apply to at least 3 enterprises every week until you secure a placement.");
             actions.add(
                     (daysAtRisk != null && daysAtRisk >= 14)
-                            ? "Bạn đã quá thời hạn 14 ngày — Training Manager sẽ chủ động liên hệ hỗ trợ trong 48 giờ tới."
-                            : "Nếu sau 7 ngày vẫn chưa có placement, vui lòng liên hệ Training Manager để được hỗ trợ.");
+                            ? "You have exceeded the 14-day placement deadline — a Training Manager will proactively reach out within the next 48 hours."
+                            : "If you remain unplaced after 7 days, please contact your Training Manager for support.");
         } else if ("REPORT".equalsIgnoreCase(riskCategory) || "DEADLINE".equalsIgnoreCase(riskCategory)) {
-            actions.add("Đăng nhập UEIMS ngay và nộp báo cáo tuần còn thiếu trong vòng 24 giờ.");
+            actions.add("Log in to UEIMS now and submit any missing weekly report within 24 hours.");
             int missed = missedReports == null ? 0 : missedReports;
             int rejected = rejectedReports == null ? 0 : rejectedReports;
             if (missed > 0) {
-                actions.add("Bạn đang thiếu " + missed + " báo cáo — nộp bù đầy đủ trước khi kỳ học kết thúc.");
+                actions.add("You are missing " + missed + " report(s) — submit all of them before the semester ends.");
             }
             if (rejected > 0) {
-                actions.add("Có " + rejected
-                        + " báo cáo bị từ chối — đọc lại nhận xét từ Supervisor và chỉnh sửa trước khi nộp lại.");
+                actions.add("You have " + rejected
+                        + " report(s) rejected — review your supervisor's feedback and revise before resubmitting.");
             }
             if (companyName != null && !companyName.isBlank()) {
-                actions.add(
-                        "Liên hệ người hướng dẫn tại " + companyName + " nếu bạn gặp khó khăn trong tuần thực tập.");
+                actions.add("Reach out to your supervisor at " + companyName
+                        + " if you face any difficulty during the internship week.");
             }
-            actions.add("Lập kế hoạch nộp báo cáo trước 23:59 Chủ nhật hàng tuần để tránh bị tính là trễ hạn.");
+            actions.add("Plan to submit your weekly report before 23:59 every Sunday to avoid being marked as late.");
         } else if ("BLOCKED".equalsIgnoreCase(riskCategory)) {
-            actions.add("Đăng nhập UEIMS và vào mục \"Thông báo\" để xem lý do OJT bị hủy cụ thể.");
             actions.add(
-                    "Liên hệ Training Manager trong vòng 3 ngày làm việc để được hướng dẫn khắc phục hoặc đăng ký lại.");
+                    "Log in to UEIMS and check the \"Notices\" section to see the specific reason your OJT was cancelled.");
             actions.add(
-                    "Nếu bạn cho rằng quyết định hủy là sai sót, vui lòng gửi khiếu nại kèm bằng chứng qua email hỗ trợ.");
+                    "Contact your Training Manager within 3 business days for guidance on how to remediate or re-register.");
+            actions.add(
+                    "If you believe the cancellation decision was made in error, please submit an appeal with supporting evidence to the support email.");
         } else {
-            actions.add("Đăng nhập UEIMS để kiểm tra chi tiết tình trạng thực tập hiện tại.");
-            actions.add("Liên hệ Training Manager nếu bạn cần hỗ trợ thêm.");
+            actions.add("Log in to UEIMS to check the detailed status of your current internship.");
+            actions.add("Contact your Training Manager if you need further assistance.");
         }
         return actions;
     }
@@ -338,11 +339,11 @@ public class MailServiceImpl implements MailService {
             helper.setSubject(subject);
             helper.setText(htmlBody, true);
 
-            // Headers giúp Gmail/Spam filter đẩy vào Inbox thay vì Spam:
-            // - List-Unsubscribe: tuân thủ RFC 8058
-            // - X-Mailer: nhận diện là transactional mail
+            // Headers help Gmail/Spam filters route the message to Inbox instead of Spam:
+            // - List-Unsubscribe: complies with RFC 8058
+            // - X-Mailer: identifies the message as transactional mail
             // - Precedence: bulk
-            // - Priority: normal (không urgent = giảm spam score)
+            // - Priority: normal (not urgent = lower spam score)
             message.setHeader("List-Unsubscribe", "<mailto:" + to + "?subject=unsubscribe>");
             message.setHeader("X-Mailer", "UEIMS Mailer 1.0");
             message.setHeader("Precedence", "bulk");
@@ -354,11 +355,11 @@ public class MailServiceImpl implements MailService {
 
             javaMailSender.send(message);
         } catch (Exception e) {
-            log.error("Gửi email thất bại đến {}: {}", to, e.getMessage());
-            // Log body để debug
+            log.error("Failed to send email to {}: {}", to, e.getMessage());
+            // Log body to help with debugging
             log.warn("=== EMAIL BODY (fallback log) ===");
-            log.warn("Gửi đến: {}", to);
-            log.warn("Tiêu đề: {}", subject);
+            log.warn("To: {}", to);
+            log.warn("Subject: {}", subject);
             log.warn("Body:\n{}", htmlBody);
             log.warn("==================================");
         }

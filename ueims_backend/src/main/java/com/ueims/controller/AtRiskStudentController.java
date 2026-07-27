@@ -118,9 +118,9 @@ public class AtRiskStudentController {
     private static final java.util.Map<String, String> RISK_CATEGORY_LABEL = new java.util.HashMap<>();
 
     static {
-        RISK_CATEGORY_LABEL.put("UNPLACED", "Chưa có doanh nghiệp thực tập");
-        RISK_CATEGORY_LABEL.put("REPORT", "Trễ báo cáo thực tập");
-        RISK_CATEGORY_LABEL.put("DEADLINE", "Nguy cơ không đạt OJT");
-        RISK_CATEGORY_LABEL.put("BLOCKED", "OJT bị hủy");
+        RISK_CATEGORY_LABEL.put("UNPLACED", "Unplaced");
+        RISK_CATEGORY_LABEL.put("REPORT", "Weekly Reports Missed");
+        RISK_CATEGORY_LABEL.put("DEADLINE", "Deadline Risk");
+        RISK_CATEGORY_LABEL.put("BLOCKED", "OJT Cancelled");
     }
 }

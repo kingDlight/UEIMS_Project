@@ -187,8 +187,8 @@ public class NotificationServiceImpl implements NotificationService {
         notifyStudent(
                 interview,
                 "INTERVIEW_SCHEDULED",
-                "Lịch phỏng vấn mới",
-                "Bạn có buổi phỏng vấn mới. Vui lòng đăng nhập để xác nhận.");
+                "New Interview Scheduled",
+                "You have a new interview scheduled. Please log in to confirm your attendance.");
     }
 
     @Override
@@ -198,8 +198,8 @@ public class NotificationServiceImpl implements NotificationService {
         notifyStudent(
                 interview,
                 "INTERVIEW_RESCHEDULED",
-                "Lịch phỏng vấn đã được dời",
-                "Lịch phỏng vấn của bạn đã được cập nhật. Vui lòng kiểm tra thời gian mới.");
+                "Interview Rescheduled",
+                "Your interview has been rescheduled. Please check the new time.");
     }
 
     @Override
@@ -209,20 +209,20 @@ public class NotificationServiceImpl implements NotificationService {
         notifyStudent(
                 interview,
                 "INTERVIEW_CANCELED",
-                "Lịch phỏng vấn đã bị hủy",
-                "Buổi phỏng vấn của bạn đã bị hủy. Vui lòng liên hệ doanh nghiệp.");
+                "Interview Canceled",
+                "Your interview has been canceled. Please contact the enterprise.");
     }
 
     @Override
     @org.springframework.transaction.annotation.Transactional(
             propagation = org.springframework.transaction.annotation.Propagation.REQUIRES_NEW)
     public void notifyInterviewResult(Interview interview) {
-        String result = "PASS".equals(interview.getResult()) ? "ĐẬU" : "RỚT";
+        String result = "PASS".equals(interview.getResult()) ? "PASS" : "FAIL";
         notifyStudent(
                 interview,
                 "INTERVIEW_RESULT",
-                "Kết quả phỏng vấn: " + result,
-                "Đã có kết quả phỏng vấn. Vui lòng kiểm tra chi tiết trên hệ thống.");
+                "Interview Result: " + result,
+                "Your interview result is now available. Please check the details on UEIMS.");
     }
 
     @Override
@@ -240,8 +240,8 @@ public class NotificationServiceImpl implements NotificationService {
             Notification saved = repository.save(Notification.builder()
                     .recipient(student)
                     .type("WEEKLY_REPORT_APPROVED")
-                    .title("Báo cáo tuần đã được duyệt")
-                    .message("Báo cáo tuần của bạn đã được doanh nghiệp phê duyệt.")
+                    .title("Weekly Report Approved")
+                    .message("Your weekly report has been approved by the enterprise.")
                     .isRead(false)
                     .build());
             pushCreated(saved);
@@ -265,8 +265,8 @@ public class NotificationServiceImpl implements NotificationService {
             Notification saved = repository.save(Notification.builder()
                     .recipient(student)
                     .type("WEEKLY_REPORT_REJECTED")
-                    .title("Báo cáo tuần cần chỉnh sửa")
-                    .message("Báo cáo tuần của bạn đã bị từ chối. Lý do: " + feedback)
+                    .title("Weekly Report Needs Revision")
+                    .message("Your weekly report has been rejected. Reason: " + feedback)
                     .isRead(false)
                     .build());
             pushCreated(saved);
@@ -291,8 +291,8 @@ public class NotificationServiceImpl implements NotificationService {
                             Notification saved = repository.save(Notification.builder()
                                     .recipient(tm)
                                     .type("INCIDENT")
-                                    .title("Sự cố mới từ doanh nghiệp")
-                                    .message("Một sự cố mới đã được báo cáo: " + incident.getCategory())
+                                    .title("New Incident Reported")
+                                    .message("A new incident has been reported: " + incident.getCategory())
                                     .isRead(false)
                                     .build());
                             pushCreated(saved);
