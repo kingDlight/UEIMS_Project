@@ -291,6 +291,8 @@ INSERT INTO interviews (interview_id, application_id, scheduled_datetime, durati
     ('b0000000-0000-0000-0000-000000000016', 'a0000000-0000-0000-0000-000000000016', '2026-04-10 10:00:00', 45, 'https://meet.momo.vn/interview-16', 'COMPLETED', TRUE, 'PASS', 'Strong Java skills, great attitude', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP);
 INSERT INTO placement_applications (application_id, student_id, enterprise_id, semester_id, status, cover_letter, reviewed_by, reviewed_at) VALUES
     ('a0000000-0000-0000-0000-000000000016', 'd0000000-0000-0000-0000-000000000016', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 'APPROVED', 'I am eager to join Momo as a backend developer intern.', '00000000-0000-0000-0000-000000000002', CURRENT_TIMESTAMP);
+INSERT INTO enterprise_assignments (assignment_id, enterprise_id, student_id, semester_id, supervisor_name, supervisor_email, assigned_by, status, start_date) VALUES
+    ('f0000000-0000-0000-0000-000000000016', 'c0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000016', '50000000-0000-0000-0000-000000000001', 'Sup Momo', 'sup@momo.vn', '00000000-0000-0000-0000-000000000002', 'ACTIVE', '2026-03-01');
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
     ('d0000000-0000-0000-0000-000000000017', 'student17@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Nguyen Minh Vinh', 'ACTIVE', FALSE);
@@ -305,6 +307,8 @@ INSERT INTO interviews (interview_id, application_id, scheduled_datetime, durati
     ('b0000000-0000-0000-0000-000000000017', 'a0000000-0000-0000-0000-000000000017', '2026-04-10 14:00:00', 45, 'https://meet.momo.vn/interview-17', 'COMPLETED', TRUE, 'PASS', 'Solid technical skills', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP);
 INSERT INTO placement_applications (application_id, student_id, enterprise_id, semester_id, status, cover_letter, reviewed_by, reviewed_at) VALUES
     ('a0000000-0000-0000-0000-000000000017', 'd0000000-0000-0000-0000-000000000017', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 'APPROVED', 'Excited to intern at Momo.', '00000000-0000-0000-0000-000000000002', CURRENT_TIMESTAMP);
+INSERT INTO enterprise_assignments (assignment_id, enterprise_id, student_id, semester_id, supervisor_name, supervisor_email, assigned_by, status, start_date) VALUES
+    ('f0000000-0000-0000-0000-000000000017', 'c0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000017', '50000000-0000-0000-0000-000000000001', 'Sup Momo', 'sup@momo.vn', '00000000-0000-0000-0000-000000000002', 'ACTIVE', '2026-03-01');
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
     ('d0000000-0000-0000-0000-000000000018', 'student18@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Ly Tuyet Thanh', 'ACTIVE', FALSE);
@@ -319,6 +323,8 @@ INSERT INTO interviews (interview_id, application_id, scheduled_datetime, durati
     ('b0000000-0000-0000-0000-000000000018', 'a0000000-0000-0000-0000-000000000018', '2026-05-26 09:00:00', 45, 'https://meet.momo.vn/interview-18', 'COMPLETED', TRUE, 'PASS', 'Good team fit', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP);
 INSERT INTO placement_applications (application_id, student_id, enterprise_id, semester_id, status, cover_letter, reviewed_by, reviewed_at) VALUES
     ('a0000000-0000-0000-0000-000000000018', 'd0000000-0000-0000-0000-000000000018', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 'APPROVED', 'I want to learn from Momo team.', '00000000-0000-0000-0000-000000000002', CURRENT_TIMESTAMP);
+INSERT INTO enterprise_assignments (assignment_id, enterprise_id, student_id, semester_id, supervisor_name, supervisor_email, assigned_by, status, start_date) VALUES
+    ('f0000000-0000-0000-0000-000000000018', 'c0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000018', '50000000-0000-0000-0000-000000000001', 'Sup Momo', 'sup@momo.vn', '00000000-0000-0000-0000-000000000002', 'ACTIVE', '2026-03-01');
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
     ('d0000000-0000-0000-0000-000000000019', 'student19@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Ngo Ngoc Xuan', 'ACTIVE', FALSE);
@@ -333,6 +339,8 @@ INSERT INTO interviews (interview_id, application_id, scheduled_datetime, durati
     ('b0000000-0000-0000-0000-000000000019', 'a0000000-0000-0000-0000-000000000019', '2026-04-11 14:00:00', 45, 'https://meet.momo.vn/interview-19', 'COMPLETED', TRUE, 'PASS', 'Proactive learner', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP);
 INSERT INTO placement_applications (application_id, student_id, enterprise_id, semester_id, status, cover_letter, reviewed_by, reviewed_at) VALUES
     ('a0000000-0000-0000-0000-000000000019', 'd0000000-0000-0000-0000-000000000019', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 'APPROVED', 'Excited to join Momo internship.', '00000000-0000-0000-0000-000000000002', CURRENT_TIMESTAMP);
+INSERT INTO enterprise_assignments (assignment_id, enterprise_id, student_id, semester_id, supervisor_name, supervisor_email, assigned_by, status, start_date) VALUES
+    ('f0000000-0000-0000-0000-000000000019', 'c0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000019', '50000000-0000-0000-0000-000000000001', 'Sup Momo', 'sup@momo.vn', '00000000-0000-0000-0000-000000000002', 'ACTIVE', '2026-03-01');
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
     ('d0000000-0000-0000-0000-000000000020', 'student20@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Huy Minh Xuan', 'ACTIVE', FALSE);
@@ -347,6 +355,8 @@ INSERT INTO interviews (interview_id, application_id, scheduled_datetime, durati
     ('b0000000-0000-0000-0000-000000000020', 'a0000000-0000-0000-0000-000000000020', '2026-04-12 10:00:00', 45, 'https://meet.momo.vn/interview-20', 'COMPLETED', TRUE, 'PASS', 'Good communication', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP);
 INSERT INTO placement_applications (application_id, student_id, enterprise_id, semester_id, status, cover_letter, reviewed_by, reviewed_at) VALUES
     ('a0000000-0000-0000-0000-000000000020', 'd0000000-0000-0000-0000-000000000020', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 'APPROVED', 'I am ready for Momo internship.', '00000000-0000-0000-0000-000000000002', CURRENT_TIMESTAMP);
+INSERT INTO enterprise_assignments (assignment_id, enterprise_id, student_id, semester_id, supervisor_name, supervisor_email, assigned_by, status, start_date) VALUES
+    ('f0000000-0000-0000-0000-000000000020', 'c0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000020', '50000000-0000-0000-0000-000000000001', 'Sup Momo', 'sup@momo.vn', '00000000-0000-0000-0000-000000000002', 'ACTIVE', '2026-03-01');
 
 -- ============================================================
 -- STUDENTS 21-25: OJT ACTIVE (Sem 6, enterprise_assignment ACTIVE)
