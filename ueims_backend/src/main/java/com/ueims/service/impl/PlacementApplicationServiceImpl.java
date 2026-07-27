@@ -321,6 +321,16 @@ public class PlacementApplicationServiceImpl implements PlacementApplicationServ
         List<Object[]> rows = applicationRepository.findOjtPlacementView();
         List<OjtPlacementViewDTO> result = new ArrayList<>();
         for (Object[] row : rows) {
+            String studentCode = (String) row[2];
+            String workflowStatus = (String) row[6];
+            String applicationStatus = (String) row[11];
+            String coverLetter = (String) row[12];
+            log.info(
+                    "[OJTVIEW-DEBUG] student={} workflow={} appStatus={} coverLetterPrefix=\"{}\"",
+                    studentCode,
+                    workflowStatus,
+                    applicationStatus,
+                    coverLetter == null ? "<null>" : coverLetter.substring(0, Math.min(40, coverLetter.length())));
             OjtPlacementViewDTO.OjtPlacementViewDTOBuilder builder = OjtPlacementViewDTO.builder()
                     .studentId(toUuid(row[0]))
                     .studentName((String) row[1])
