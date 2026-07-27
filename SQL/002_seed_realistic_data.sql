@@ -78,7 +78,7 @@ INSERT INTO users_roles (user_id, role_name) VALUES ('c0000000-0000-0000-0000-00
 -- SEMESTER (create as OPEN, then update to ACTIVE to satisfy state machine)
 -- ============================================================
 INSERT INTO semesters (semester_id, semester_code, name, start_date, end_date, weekly_report_deadline_day, weekly_report_deadline_time, final_report_deadline, status, created_by) VALUES
-    ('50000000-0000-0000-0000-000000000001', 'SP26', 'Spring 2026', '2026-03-01', '2026-05-31', 'SUNDAY', '23:59:00', '2026-05-31 23:59:00', 'OPEN', '00000000-0000-0000-0000-000000000002');
+    ('50000000-0000-0000-0000-000000000001', 'SP26', 'Spring 2026', '2026-01-01', '2026-04-08', 'SUNDAY', '23:59:00', '2026-04-15 23:59:00', 'OPEN', '00000000-0000-0000-0000-000000000002');
 UPDATE semesters SET status = 'ACTIVE' WHERE semester_id = '50000000-0000-0000-0000-000000000001';
 
 -- ============================================================
@@ -289,8 +289,8 @@ INSERT INTO applications (application_id, job_post_id, student_id, cv_file_url, 
     ('a0000000-0000-0000-0000-000000000016', 'f0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000016', 'https://cv.example.com/se15016.pdf', 'ACCEPTED', 'Top candidate, excellent interview', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP);
 INSERT INTO interviews (interview_id, application_id, scheduled_datetime, duration_minutes, meeting_link, status, student_confirmed, result, result_note, decided_by, decided_at) VALUES
     ('b0000000-0000-0000-0000-000000000016', 'a0000000-0000-0000-0000-000000000016', '2026-04-10 10:00:00', 45, 'https://meet.momo.vn/interview-16', 'COMPLETED', TRUE, 'PASS', 'Strong Java skills, great attitude', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP);
-INSERT INTO placement_applications (application_id, student_id, enterprise_id, semester_id, status, cover_letter, reviewed_by, reviewed_at) VALUES
-    ('a0000000-0000-0000-0000-000000000016', 'd0000000-0000-0000-0000-000000000016', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 'APPROVED', 'I am eager to join Momo as a backend developer intern.', '00000000-0000-0000-0000-000000000002', CURRENT_TIMESTAMP);
+INSERT INTO placement_applications (application_id, student_id, enterprise_id, semester_id, status, source, cover_letter, reviewed_by, reviewed_at) VALUES
+    ('a0000000-0000-0000-0000-000000000016', 'd0000000-0000-0000-0000-000000000016', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 'APPROVED', 'SYSTEM_MATCHED', '[Interview Pass] Auto-placed after passing interview with Momo', '00000000-0000-0000-0000-000000000002', CURRENT_TIMESTAMP);
 INSERT INTO enterprise_assignments (assignment_id, enterprise_id, student_id, semester_id, supervisor_name, supervisor_email, assigned_by, status, start_date) VALUES
     ('f0000000-0000-0000-0000-000000000016', 'c0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000016', '50000000-0000-0000-0000-000000000001', 'Sup Momo', 'sup@momo.vn', '00000000-0000-0000-0000-000000000002', 'ACTIVE', '2026-03-01');
 
@@ -305,8 +305,8 @@ INSERT INTO applications (application_id, job_post_id, student_id, cv_file_url, 
     ('a0000000-0000-0000-0000-000000000017', 'f0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000017', 'https://cv.example.com/se15017.pdf', 'ACCEPTED', 'Good overall performance', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP);
 INSERT INTO interviews (interview_id, application_id, scheduled_datetime, duration_minutes, meeting_link, status, student_confirmed, result, result_note, decided_by, decided_at) VALUES
     ('b0000000-0000-0000-0000-000000000017', 'a0000000-0000-0000-0000-000000000017', '2026-04-10 14:00:00', 45, 'https://meet.momo.vn/interview-17', 'COMPLETED', TRUE, 'PASS', 'Solid technical skills', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP);
-INSERT INTO placement_applications (application_id, student_id, enterprise_id, semester_id, status, cover_letter, reviewed_by, reviewed_at) VALUES
-    ('a0000000-0000-0000-0000-000000000017', 'd0000000-0000-0000-0000-000000000017', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 'APPROVED', 'Excited to intern at Momo.', '00000000-0000-0000-0000-000000000002', CURRENT_TIMESTAMP);
+INSERT INTO placement_applications (application_id, student_id, enterprise_id, semester_id, status, source, cover_letter, reviewed_by, reviewed_at) VALUES
+    ('a0000000-0000-0000-0000-000000000017', 'd0000000-0000-0000-0000-000000000017', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 'APPROVED', 'SYSTEM_MATCHED', '[Interview Pass] Auto-placed after passing interview with Momo', '00000000-0000-0000-0000-000000000002', CURRENT_TIMESTAMP);
 INSERT INTO enterprise_assignments (assignment_id, enterprise_id, student_id, semester_id, supervisor_name, supervisor_email, assigned_by, status, start_date) VALUES
     ('f0000000-0000-0000-0000-000000000017', 'c0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000017', '50000000-0000-0000-0000-000000000001', 'Sup Momo', 'sup@momo.vn', '00000000-0000-0000-0000-000000000002', 'ACTIVE', '2026-03-01');
 
@@ -321,8 +321,8 @@ INSERT INTO applications (application_id, job_post_id, student_id, cv_file_url, 
     ('a0000000-0000-0000-0000-000000000018', 'f0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000018', 'https://cv.example.com/se15018.pdf', 'ACCEPTED', 'Great interview performance', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP);
 INSERT INTO interviews (interview_id, application_id, scheduled_datetime, duration_minutes, meeting_link, status, student_confirmed, result, result_note, decided_by, decided_at) VALUES
     ('b0000000-0000-0000-0000-000000000018', 'a0000000-0000-0000-0000-000000000018', '2026-05-26 09:00:00', 45, 'https://meet.momo.vn/interview-18', 'COMPLETED', TRUE, 'PASS', 'Good team fit', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP);
-INSERT INTO placement_applications (application_id, student_id, enterprise_id, semester_id, status, cover_letter, reviewed_by, reviewed_at) VALUES
-    ('a0000000-0000-0000-0000-000000000018', 'd0000000-0000-0000-0000-000000000018', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 'APPROVED', 'I want to learn from Momo team.', '00000000-0000-0000-0000-000000000002', CURRENT_TIMESTAMP);
+INSERT INTO placement_applications (application_id, student_id, enterprise_id, semester_id, status, source, cover_letter, reviewed_by, reviewed_at) VALUES
+    ('a0000000-0000-0000-0000-000000000018', 'd0000000-0000-0000-0000-000000000018', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 'APPROVED', 'SYSTEM_MATCHED', '[Interview Pass] Auto-placed after passing interview with Momo', '00000000-0000-0000-0000-000000000002', CURRENT_TIMESTAMP);
 INSERT INTO enterprise_assignments (assignment_id, enterprise_id, student_id, semester_id, supervisor_name, supervisor_email, assigned_by, status, start_date) VALUES
     ('f0000000-0000-0000-0000-000000000018', 'c0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000018', '50000000-0000-0000-0000-000000000001', 'Sup Momo', 'sup@momo.vn', '00000000-0000-0000-0000-000000000002', 'ACTIVE', '2026-03-01');
 
@@ -337,8 +337,8 @@ INSERT INTO applications (application_id, job_post_id, student_id, cv_file_url, 
     ('a0000000-0000-0000-0000-000000000019', 'f0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000019', 'https://cv.example.com/se15019.pdf', 'ACCEPTED', 'Strong problem-solving skills', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP);
 INSERT INTO interviews (interview_id, application_id, scheduled_datetime, duration_minutes, meeting_link, status, student_confirmed, result, result_note, decided_by, decided_at) VALUES
     ('b0000000-0000-0000-0000-000000000019', 'a0000000-0000-0000-0000-000000000019', '2026-04-11 14:00:00', 45, 'https://meet.momo.vn/interview-19', 'COMPLETED', TRUE, 'PASS', 'Proactive learner', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP);
-INSERT INTO placement_applications (application_id, student_id, enterprise_id, semester_id, status, cover_letter, reviewed_by, reviewed_at) VALUES
-    ('a0000000-0000-0000-0000-000000000019', 'd0000000-0000-0000-0000-000000000019', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 'APPROVED', 'Excited to join Momo internship.', '00000000-0000-0000-0000-000000000002', CURRENT_TIMESTAMP);
+INSERT INTO placement_applications (application_id, student_id, enterprise_id, semester_id, status, source, cover_letter, reviewed_by, reviewed_at) VALUES
+    ('a0000000-0000-0000-0000-000000000019', 'd0000000-0000-0000-0000-000000000019', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 'APPROVED', 'SYSTEM_MATCHED', '[Interview Pass] Auto-placed after passing interview with Momo', '00000000-0000-0000-0000-000000000002', CURRENT_TIMESTAMP);
 INSERT INTO enterprise_assignments (assignment_id, enterprise_id, student_id, semester_id, supervisor_name, supervisor_email, assigned_by, status, start_date) VALUES
     ('f0000000-0000-0000-0000-000000000019', 'c0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000019', '50000000-0000-0000-0000-000000000001', 'Sup Momo', 'sup@momo.vn', '00000000-0000-0000-0000-000000000002', 'ACTIVE', '2026-03-01');
 
@@ -353,8 +353,8 @@ INSERT INTO applications (application_id, job_post_id, student_id, cv_file_url, 
     ('a0000000-0000-0000-0000-000000000020', 'f0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000020', 'https://cv.example.com/se15020.pdf', 'ACCEPTED', 'Well-prepared and motivated', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP);
 INSERT INTO interviews (interview_id, application_id, scheduled_datetime, duration_minutes, meeting_link, status, student_confirmed, result, result_note, decided_by, decided_at) VALUES
     ('b0000000-0000-0000-0000-000000000020', 'a0000000-0000-0000-0000-000000000020', '2026-04-12 10:00:00', 45, 'https://meet.momo.vn/interview-20', 'COMPLETED', TRUE, 'PASS', 'Good communication', 'c0000000-0000-0000-0000-000000000011', CURRENT_TIMESTAMP);
-INSERT INTO placement_applications (application_id, student_id, enterprise_id, semester_id, status, cover_letter, reviewed_by, reviewed_at) VALUES
-    ('a0000000-0000-0000-0000-000000000020', 'd0000000-0000-0000-0000-000000000020', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 'APPROVED', 'I am ready for Momo internship.', '00000000-0000-0000-0000-000000000002', CURRENT_TIMESTAMP);
+INSERT INTO placement_applications (application_id, student_id, enterprise_id, semester_id, status, source, cover_letter, reviewed_by, reviewed_at) VALUES
+    ('a0000000-0000-0000-0000-000000000020', 'd0000000-0000-0000-0000-000000000020', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 'APPROVED', 'SYSTEM_MATCHED', '[Interview Pass] Auto-placed after passing interview with Momo', '00000000-0000-0000-0000-000000000002', CURRENT_TIMESTAMP);
 INSERT INTO enterprise_assignments (assignment_id, enterprise_id, student_id, semester_id, supervisor_name, supervisor_email, assigned_by, status, start_date) VALUES
     ('f0000000-0000-0000-0000-000000000020', 'c0000000-0000-0000-0000-000000000001', 'd0000000-0000-0000-0000-000000000020', '50000000-0000-0000-0000-000000000001', 'Sup Momo', 'sup@momo.vn', '00000000-0000-0000-0000-000000000002', 'ACTIVE', '2026-03-01');
 
@@ -562,6 +562,20 @@ INSERT INTO final_grades (grade_id, student_id, tm_id, semester_id, enterprise_t
 INSERT INTO student_enterprise_feedbacks (feedback_id, student_id, enterprise_id, semester_id, training_quality_score, supervisor_support_score, work_environment_score, overall_score, positive_feedback, improvement_feedback, submitted_at) VALUES
     ('00000000-0000-0000-000f-000000000030', 'd0000000-0000-0000-0000-000000000030', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 4, 5, 4, 4, 'Good project exposure and mentorship at Momo.', 'Could improve onboarding process.', '2026-05-27 13:00:00');
 
+-- Placement applications cho SV 21-30 (legacy: TM tạo assignment trực tiếp, không qua workflow).
+-- Trước đây bị thiếu, source column hiển thị "—" → fix bằng cách insert row SYSTEM_MATCHED.
+INSERT INTO placement_applications (application_id, student_id, enterprise_id, semester_id, status, source, cover_letter, reviewed_by, reviewed_at, is_replacement) VALUES
+    ('a0000000-0000-0000-0000-000000000021', 'd0000000-0000-0000-0000-000000000021', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 'APPROVED', 'SYSTEM_MATCHED', '[Legacy: TM created assignment directly]', '00000000-0000-0000-0000-000000000002', '2026-03-15 00:00:00', FALSE),
+    ('a0000000-0000-0000-0000-000000000022', 'd0000000-0000-0000-0000-000000000022', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 'APPROVED', 'SYSTEM_MATCHED', '[Legacy: TM created assignment directly]', '00000000-0000-0000-0000-000000000002', '2026-03-15 00:00:00', FALSE),
+    ('a0000000-0000-0000-0000-000000000023', 'd0000000-0000-0000-0000-000000000023', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 'APPROVED', 'SYSTEM_MATCHED', '[Legacy: TM created assignment directly]', '00000000-0000-0000-0000-000000000002', '2026-03-15 00:00:00', FALSE),
+    ('a0000000-0000-0000-0000-000000000024', 'd0000000-0000-0000-0000-000000000024', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 'APPROVED', 'SYSTEM_MATCHED', '[Legacy: TM created assignment directly]', '00000000-0000-0000-0000-000000000002', '2026-03-15 00:00:00', FALSE),
+    ('a0000000-0000-0000-0000-000000000025', 'd0000000-0000-0000-0000-000000000025', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 'APPROVED', 'SYSTEM_MATCHED', '[Legacy: TM created assignment directly]', '00000000-0000-0000-0000-000000000002', '2026-03-15 00:00:00', FALSE),
+    ('a0000000-0000-0000-0000-000000000026', 'd0000000-0000-0000-0000-000000000026', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 'APPROVED', 'SYSTEM_MATCHED', '[Legacy: TM created assignment directly]', '00000000-0000-0000-0000-000000000002', '2026-03-01 00:00:00', FALSE),
+    ('a0000000-0000-0000-0000-000000000027', 'd0000000-0000-0000-0000-000000000027', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 'APPROVED', 'SYSTEM_MATCHED', '[Legacy: TM created assignment directly]', '00000000-0000-0000-0000-000000000002', '2026-03-01 00:00:00', FALSE),
+    ('a0000000-0000-0000-0000-000000000028', 'd0000000-0000-0000-0000-000000000028', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 'APPROVED', 'SYSTEM_MATCHED', '[Legacy: TM created assignment directly]', '00000000-0000-0000-0000-000000000002', '2026-03-01 00:00:00', FALSE),
+    ('a0000000-0000-0000-0000-000000000029', 'd0000000-0000-0000-0000-000000000029', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 'APPROVED', 'SYSTEM_MATCHED', '[Legacy: TM created assignment directly]', '00000000-0000-0000-0000-000000000002', '2026-03-01 00:00:00', FALSE),
+    ('a0000000-0000-0000-0000-000000000030', 'd0000000-0000-0000-0000-000000000030', 'c0000000-0000-0000-0000-000000000001', '50000000-0000-0000-0000-000000000001', 'APPROVED', 'SYSTEM_MATCHED', '[Legacy: TM created assignment directly]', '00000000-0000-0000-0000-000000000002', '2026-03-01 00:00:00', FALSE);
+
 -- ============================================================
 -- STUDENTS 31-35: ELIGIBLE (various semesters, no activity)
 -- ============================================================
@@ -749,13 +763,21 @@ INSERT INTO role_permissions (role_name, permission_name) VALUES
 -- PART 3: ADDITIONAL SEMESTERS (Multi-semester demo)
 -- ============================================================
 
--- SU26: Summer 2026 (CLOSED) — historical semester kept for cross-semester demos
+-- SU26: Summer 2026 (DRAFT, awaiting TM activation) — see 004_fix_semester_dates.sql for full layout.
 INSERT INTO semesters (semester_id, semester_code, name, start_date, end_date, weekly_report_deadline_day, weekly_report_deadline_time, final_report_deadline, status, created_by) VALUES
-    ('50000000-0000-0000-0000-000000000002', 'SU26', 'Summer 2026', '2026-06-01', '2026-09-30', 'SUNDAY', '23:59:00', '2026-10-05 23:59:00', 'CLOSED', '00000000-0000-0000-0000-000000000002');
+    ('50000000-0000-0000-0000-000000000002', 'SU26', 'Summer 2026', '2026-04-30', '2026-08-05', 'SUNDAY', '23:59:00', '2026-08-12 23:59:00', 'DRAFT', '00000000-0000-0000-0000-000000000002');
 
--- FA25: Fall 2025 (CLOSED) — historical semester for grade comparison demo
+-- FA25: Fall 2025 (CLOSED) — historical semester for grade comparison demo.
 INSERT INTO semesters (semester_id, semester_code, name, start_date, end_date, weekly_report_deadline_day, weekly_report_deadline_time, final_report_deadline, status, created_by) VALUES
-    ('50000000-0000-0000-0000-000000000003', 'FA25', 'Fall 2025', '2025-08-01', '2025-12-31', 'SUNDAY', '23:59:00', '2026-01-05 23:59:00', 'CLOSED', '00000000-0000-0000-0000-000000000002');
+    ('50000000-0000-0000-0000-000000000003', 'FA25', 'Fall 2025', '2025-09-01', '2025-12-07', 'SUNDAY', '23:59:00', '2025-12-14 23:59:00', 'CLOSED', '00000000-0000-0000-0000-000000000002');
+
+-- FA26: Fall 2026 (DRAFT, awaiting TM activation) — see 004_fix_semester_dates.sql for full layout.
+INSERT INTO semesters (semester_id, semester_code, name, start_date, end_date, weekly_report_deadline_day, weekly_report_deadline_time, final_report_deadline, status, created_by) VALUES
+    ('50000000-0000-0000-0000-000000000005', 'FA26', 'Fall 2026', '2026-08-19', '2026-11-25', 'SUNDAY', '23:59:00', '2026-12-02 23:59:00', 'DRAFT', '00000000-0000-0000-0000-000000000002');
+
+-- SP27: Spring 2027 (DRAFT, future semester) — see 004_fix_semester_dates.sql for full layout.
+INSERT INTO semesters (semester_id, semester_code, name, start_date, end_date, weekly_report_deadline_day, weekly_report_deadline_time, final_report_deadline, status, created_by) VALUES
+    ('50000000-0000-0000-0000-000000000004', 'SP27', 'Spring 2027', '2027-01-01', '2027-04-08', 'SUNDAY', '23:59:00', '2027-04-15 23:59:00', 'DRAFT', '00000000-0000-0000-0000-000000000002');
 
 -- Register enterprises for SU26
 INSERT INTO semester_enterprises (semester_enterprise_id, semester_id, enterprise_id, registration_status, reviewed_by, reviewed_at) VALUES

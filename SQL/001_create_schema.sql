@@ -679,6 +679,14 @@ CREATE TABLE IF NOT EXISTS placement_applications (
     is_replacement     BOOLEAN NOT NULL DEFAULT FALSE,
     replaces_application_id UUID    REFERENCES placement_applications(application_id) ON DELETE SET NULL,
 
+    -- Workflow source: SELF_SOURCED = SV tự apply (Portal Student);
+    --                  SYSTEM_MATCHED = TM/hệ thống tạo (auto-match, manual-match, interview pass).
+    -- Default SELF_SOURCED để an toàn cho row insert bởi SV từ Portal.
+    source             VARCHAR(20) NOT NULL DEFAULT 'SELF_SOURCED',
+    CONSTRAINT chk_placement_app_source CHECK (
+        source IN ('SELF_SOURCED', 'SYSTEM_MATCHED')
+    ),
+
     -- 1 SV chỉ được apply 1 lần vào 1 DN trong cùng 1 kỳ
     CONSTRAINT uq_placement_app_per_student_enterprise_semester
         UNIQUE (student_id, enterprise_id, semester_id)
