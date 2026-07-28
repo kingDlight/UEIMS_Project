@@ -25,6 +25,7 @@ import { EnterpriseAssignmentService } from '@/services/EnterpriseAssignmentServ
 import { useStudentProfileQuery } from '@/hooks/useStudentProfile';
 import { ModernLayout } from '@/components/layout/ModernLayout';
 import { navItems, cc, hexToRgba } from './constants';
+import { resolveEnterpriseLogo, enterpriseInitials } from '@/utils/enterpriseLogo';
 
 const CTAButton: React.FC<{
   children: React.ReactNode;
@@ -244,10 +245,21 @@ export const JobDetailPage: React.FC = () => {
             <div style={{ display: 'flex', gap: 16 }}>
               <div style={{
                 width: 68, height: 68, borderRadius: cc.radiusLg,
-                background: cc.primaryMuted, display: 'flex', alignItems: 'center',
-                justifyContent: 'center', color: cc.primary, fontSize: 28, fontWeight: 800, flexShrink: 0
+                background: hexToRgba(cc.primary, 0.08), display: 'flex', alignItems: 'center',
+                justifyContent: 'center', color: cc.primary, fontSize: 24, fontWeight: 800, flexShrink: 0,
+                overflow: 'hidden'
               }}>
-                {enterprise?.companyName?.charAt(0) || 'E'}
+                {(() => {
+                  const logoUrl = resolveEnterpriseLogo(enterprise?.companyName, enterprise?.logoUrl);
+                  return logoUrl ? (
+                    <img
+                      src={logoUrl}
+                      alt={enterprise?.companyName || 'Enterprise'}
+                      style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                      onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+                    />
+                  ) : enterpriseInitials(enterprise?.companyName);
+                })()}
               </div>
               <div>
                 <h1 style={{ fontSize: 22, fontWeight: 800, color: cc.textPrimary, margin: '0 0 4px', letterSpacing: '-0.01em' }}>{job.title}</h1>
