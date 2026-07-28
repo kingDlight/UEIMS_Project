@@ -20,6 +20,7 @@ import {
   ExclamationCircleOutlined,
 } from '@ant-design/icons';
 import { api } from '@/services/api';
+import { resolveEnterpriseLogo, enterpriseInitials } from '@/utils/enterpriseLogo';
 
 // ============================================================
 // TYPES
@@ -378,8 +379,6 @@ export const EnterpriseProfileTab: React.FC = () => {
     );
   }
 
-  const initials = (profile.companyName || 'EN').substring(0, 2).toUpperCase();
-
   return (
     <div className="pb-10 font-sans">
       <div className="max-w-[1200px] mx-auto px-6">
@@ -434,14 +433,21 @@ export const EnterpriseProfileTab: React.FC = () => {
         >
           {/* Company Hero */}
           <div className="bg-gradient-to-br from-[#E67E22]/40 to-[#D35400] px-7 py-8 text-white flex items-center gap-5">
-            {profile.logoUrl ? (
-              <img src={profile.logoUrl} alt="logo"
-                className="w-[84px] h-[84px] rounded-2xl bg-white object-contain p-2 shadow-md" />
-            ) : (
-              <div className="w-[84px] h-[84px] rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-2xl font-extrabold text-white border-2 border-white/30">
-                {initials}
-              </div>
-            )}
+            {(() => {
+              const resolvedLogo = resolveEnterpriseLogo(profile.companyName, profile.logoUrl);
+              return resolvedLogo ? (
+                <img src={resolvedLogo} alt="logo"
+                  className="w-[84px] h-[84px] rounded-2xl bg-white object-contain p-2 shadow-md"
+                  onError={(e) => {
+                    // Fallback to initials if the CDN URL fails to load
+                    (e.currentTarget as HTMLImageElement).style.display = 'none';
+                  }} />
+              ) : (
+                <div className="w-[84px] h-[84px] rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-2xl font-extrabold text-white border-2 border-white/30">
+                  {enterpriseInitials(profile.companyName)}
+                </div>
+              );
+            })()}
             <div className="flex-1 min-w-0">
               <h1 className="text-2xl font-extrabold m-0 mb-1.5 tracking-tight">{profile.companyName}</h1>
               <div className="flex items-center gap-2.5 flex-wrap">

@@ -87,6 +87,13 @@ public class WeeklyReportController {
     @PostMapping
     @PreAuthorize("hasRole('STUDENT')")
     public ResponseEntity<WeeklyReportDTO> create(@Valid @RequestBody WeeklyReportDTO dto) {
+        // #region agent log H0
+        org.slf4j.LoggerFactory.getLogger(WeeklyReportController.class)
+                .info(
+                        "[WEEKLY-DEBUG] H0 create request weekNumber={} assignmentId={}",
+                        dto.getWeekNumber(),
+                        dto.getAssignmentId());
+        // #endregion
         com.ueims.model.entity.WeeklyReport entity = mapper.toEntity(dto);
         if (dto.getAssignmentId() != null) {
             com.ueims.model.entity.EnterpriseAssignment assignment = new com.ueims.model.entity.EnterpriseAssignment();

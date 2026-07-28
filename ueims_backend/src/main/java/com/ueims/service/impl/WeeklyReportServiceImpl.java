@@ -147,6 +147,7 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public WeeklyReport save(WeeklyReport entity) {
         User currentUser = getCurrentUser();
 
@@ -181,7 +182,51 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
         entity.setAssignment(assignment);
         entity.setStatus("SUBMITTED");
         entity.setSubmittedAt(LocalDateTime.now());
-        WeeklyReport saved = repository.save(entity);
+        // Default anomaly flag to false for new submissions. The plagiarism pass below
+        // may overwrite this with true if the similarity score crosses the BR-58 threshold.
+        if (entity.getIsAnomaly() == null) {
+            entity.setIsAnomaly(false);
+        }
+
+        // #region agent log H1/H2/H3
+        log.info(
+                "[WEEKLY-DEBUG] save pre-flush student={} assignmentId={} semesterId={} semStatus={} semStart={} weekNumber={} currentWeek={}",
+                currentUser.getUserId(),
+                assignment.getAssignmentId(),
+                assignment.getSemester() == null
+                        ? "null"
+                        : assignment.getSemester().getSemesterId(),
+                assignment.getSemester() == null
+                        ? "null"
+                        : assignment.getSemester().getStatus(),
+                startDate,
+                entity.getWeekNumber(),
+                currentWeek);
+        // #endregion
+
+        WeeklyReport saved;
+        try {
+            saved = repository.saveAndFlush(entity);
+        } catch (org.springframework.dao.DataIntegrityViolationException ex) {
+            // #region agent log H2
+            log.error(
+                    "[WEEKLY-DEBUG] H2 DataIntegrityViolation rootCause={}",
+                    ex.getMostSpecificCause() == null
+                            ? "null"
+                            : ex.getMostSpecificCause().getMessage());
+            // #endregion
+            throw ex;
+        } catch (org.springframework.dao.DataAccessException ex) {
+            // #region agent log H1
+            log.error(
+                    "[WEEKLY-DEBUG] H1 DataAccessException rootCause={}",
+                    ex.getMostSpecificCause() == null
+                            ? "null"
+                            : ex.getMostSpecificCause().getMessage());
+            // #endregion
+            throw ex;
+        }
+
         // BR-58: run plagiarism check asynchronously after submission
         try {
             double maxScore = plagiarismService.computeMaxSimilarity(saved);
@@ -190,7 +235,7 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
             if (Boolean.TRUE.equals(saved.getIsAnomaly())) {
                 log.info("[BR-58] Weekly report {} flagged as ANOMALY (score={})", saved.getReportId(), maxScore);
             }
-            repository.save(saved);
+            saved = repository.saveAndFlush(saved);
         } catch (Exception ex) {
             log.warn("[BR-58] Plagiarism check failed: {}", ex.getMessage());
         }
@@ -410,6 +455,12 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
     }
 
     public WeeklyReportDTO enrichDto(WeeklyReport report) {
+        // #region agent log H4
+        log.info(
+                "[WEEKLY-DEBUG] H4 enrichDto entry reportId={} assignmentId={}",
+                report.getReportId(),
+                report.getAssignment() == null ? "null" : report.getAssignment().getAssignmentId());
+        // #endregion
         WeeklyReportDTO.WeeklyReportDTOBuilder dto = WeeklyReportDTO.builder()
                 .reportId(report.getReportId())
                 .weekNumber(report.getWeekNumber())

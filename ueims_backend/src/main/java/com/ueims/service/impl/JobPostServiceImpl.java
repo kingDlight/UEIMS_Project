@@ -44,6 +44,7 @@ public class JobPostServiceImpl implements JobPostService {
     public List<JobPost> findAll() {
         List<JobPost> posts = repository.findAllByDeletedAtIsNull();
         populateFillState(posts);
+        populateEnterpriseSnapshots(posts);
         return posts;
     }
 
@@ -60,6 +61,7 @@ public class JobPostServiceImpl implements JobPostService {
         // extend positions via edit. Required so they don't accidentally leave
         // a "stale OPEN" post lying around that students can't apply to.
         populateFillState(posts);
+        populateEnterpriseSnapshots(posts);
         return posts;
     }
 
@@ -86,6 +88,7 @@ public class JobPostServiceImpl implements JobPostService {
         // shows `(0 applied)` even on posts that already have applications
         // because the field is `@Transient` and not auto-computed.
         populateFillState(activeJobs);
+        populateEnterpriseSnapshots(activeJobs);
 
         try {
             User currentUser = getCurrentUser();
@@ -116,6 +119,19 @@ public class JobPostServiceImpl implements JobPostService {
         }
     }
 
+    /**
+     * Populates the transient {@code enterpriseName} / {@code enterpriseLogoUrl}
+     * fields on every post in the list so the FE can render the enterprise label
+     * and logo on job cards. The repository fetches the {@code enterprise}
+     * association eagerly via {@link org.springframework.data.jpa.repository.EntityGraph},
+     * so this is safe to call inside the active transaction.
+     */
+    private void populateEnterpriseSnapshots(List<JobPost> posts) {
+        for (JobPost p : posts) {
+            p.populateEnterpriseSnapshot();
+        }
+    }
+
     @Override
     @Transactional(readOnly = true)
     public JobPost findById(UUID id) {
@@ -128,6 +144,7 @@ public class JobPostServiceImpl implements JobPostService {
         // FIX 049: a post is "Full" when its runtime open count reaches 0,
         // not when taken >= original quota.
         post.setFull(open <= 0);
+        post.populateEnterpriseSnapshot();
         return post;
     }
 
@@ -171,7 +188,7 @@ public class JobPostServiceImpl implements JobPostService {
                 .status(request.getStatus() != null ? request.getStatus() : "OPEN")
                 .createdBy(currentUser)
                 .build();
-
+        entity.populateEnterpriseSnapshot();
         return repository.save(entity);
     }
 
@@ -216,6 +233,7 @@ public class JobPostServiceImpl implements JobPostService {
         if (request.getStatus() != null) {
             existing.setStatus(request.getStatus());
         }
+        existing.populateEnterpriseSnapshot();
         return repository.save(existing);
     }
 
@@ -245,6 +263,7 @@ public class JobPostServiceImpl implements JobPostService {
             throw new AppException(ErrorCode.INVALID_PARAMETER_FORMAT);
         }
         existing.setStatus(upper);
+        existing.populateEnterpriseSnapshot();
         return repository.save(existing);
     }
 

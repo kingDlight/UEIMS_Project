@@ -5,6 +5,7 @@ import java.util.Objects;
 
 import jakarta.validation.ConstraintViolation;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.security.access.AccessDeniedException;
@@ -49,6 +50,28 @@ public class GlobalExceptionHandler {
         // Extract the readable DB trigger message (after "ERROR: ")
         String userMessage = message != null && message.contains(ERROR_PREFIX)
                 ? message.substring(message.indexOf(ERROR_PREFIX) + ERROR_PREFIX.length())
+                        .split("\n")[0]
+                : errorCode.getMessage();
+        return ResponseEntity.status(errorCode.getStatusCode())
+                .body(ApiResponse.<Void>builder()
+                        .code(errorCode.getCode())
+                        .message(userMessage)
+                        .build());
+    }
+
+    @ExceptionHandler(value = DataAccessException.class)
+    ResponseEntity<ApiResponse<Void>> handlingDataAccessException(DataAccessException exception) {
+        Throwable root = exception.getMostSpecificCause();
+        String rootMsg = root != null ? root.getMessage() : exception.getMessage();
+        // #region agent log H-ROOT
+        log.error(
+                "[WEEKLY-DEBUG] H-ROOT DataAccessException type={} rootMsg={}",
+                exception.getClass().getSimpleName(),
+                rootMsg);
+        // #endregion
+        ErrorCode errorCode = ErrorCode.DATA_INTEGRITY_VIOLATION;
+        String userMessage = rootMsg != null && rootMsg.contains(ERROR_PREFIX)
+                ? rootMsg.substring(rootMsg.indexOf(ERROR_PREFIX) + ERROR_PREFIX.length())
                         .split("\n")[0]
                 : errorCode.getMessage();
         return ResponseEntity.status(errorCode.getStatusCode())

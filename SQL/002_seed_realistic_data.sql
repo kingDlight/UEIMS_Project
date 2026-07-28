@@ -397,6 +397,14 @@ INSERT INTO enterprise_evaluations (evaluation_id, assignment_id, attitude_score
     ('00000000-0000-0000-0009-000000000021', 'f0000000-0000-0000-0000-000000000021', 8.50, 9.00, 8.00, 8.50, 'Excellent intern, proactive and quick learner.', TRUE, CURRENT_TIMESTAMP);
 INSERT INTO training_warnings (warning_id, tm_id, student_id, semester_id, week_number, warning_message, sent_at) VALUES
     ('00000000-0000-0000-000a-000000000021', '00000000-0000-0000-0000-000000000002', 'd0000000-0000-0000-0000-000000000021', '50000000-0000-0000-0000-000000000001', 4, 'Weekly report for week 4 has not been submitted. Please submit by deadline.', CURRENT_TIMESTAMP);
+
+-- Weekly reports tuần 5-8 cho SV 21 (Software Engineering, Momo, ACTIVE)
+INSERT INTO weekly_reports (report_id, assignment_id, week_number, tasks_completed, issues_challenges, lessons_learned, plan_next_week, status, submitted_at, feedback) VALUES
+    ('00000000-0000-0000-0011-000000000021', 'f0000000-0000-0000-0000-000000000021', 5, 'Built end-to-end feature module with REST API, database migration, and unit tests', 'Mocking external services required careful setup', 'Practiced test-driven development and dependency injection', 'Add integration tests with real DB container', 'APPROVED', '2026-04-18', 'Excellent module completion!'),
+    ('00000000-0000-0000-0012-000000000021', 'f0000000-0000-0000-0000-000000000021', 6, 'Set up CI/CD pipeline with GitHub Actions running tests on every push', 'YAML syntax debugging took longer than expected', 'Learned workflow composition and secrets management', 'Configure deploy to staging on merge to main', 'APPROVED', '2026-04-25', 'Pipeline works smoothly!'),
+    ('00000000-0000-0000-0013-000000000021', 'f0000000-0000-0000-0000-000000000021', 7, 'Containerized backend service with multi-stage Docker build, reduced image size 60 percent', 'Layer caching optimization', 'Learned Docker best practices for Java applications', 'Add observability stack', 'APPROVED', '2026-05-02', 'Clean Docker setup!'),
+    ('00000000-0000-0000-0014-000000000021', 'f0000000-0000-0000-0000-000000000021', 8, 'Wired structured logging, Prometheus metrics, and Grafana dashboard for the service', 'Cardinality explosion on user-id label caused initial outage', 'Learned label design discipline and metric scoping', 'Prepare final demo and handoff', 'SUBMITTED', '2026-05-09', NULL);
+
 INSERT INTO incidents (incident_id, assignment_id, reported_by, category, description, status, resolution_note, resolved_by, resolved_at) VALUES
     ('00000000-0000-0000-000b-000000000021', 'f0000000-0000-0000-0000-000000000021', 'c0000000-0000-0000-0000-000000000011', 'PROLONGED_ABSENCE', 'Student was absent for 3 consecutive days without prior notice.', 'RESOLVED', 'Student had a family emergency. Has submitted leave request and made up the work.', '00000000-0000-0000-0000-000000000002', CURRENT_TIMESTAMP);
 
@@ -416,6 +424,15 @@ INSERT INTO weekly_reports (report_id, assignment_id, week_number, tasks_complet
     ('00000000-0000-0000-0005-000000000022', 'f0000000-0000-0000-0000-000000000022', 2, 'Designed database schema, started implementation', 'None', 'Learned database best practices', 'API development', 'APPROVED', '2026-03-28', 'Great work on the schema!');
 INSERT INTO weekly_reports (report_id, assignment_id, week_number, tasks_completed, issues_challenges, lessons_learned, plan_next_week, status, submitted_at) VALUES
     ('00000000-0000-0000-0007-000000000022', 'f0000000-0000-0000-0000-000000000022', 3, 'Implemented backend APIs for user module', 'Minor optimization needed', 'Learned API design patterns', 'Write unit tests', 'SUBMITTED', '2026-04-04');
+
+-- Weekly reports tuần 5-8 cho SV 22 (Information Security, Momo, ACTIVE)
+INSERT INTO weekly_reports (report_id, assignment_id, week_number, tasks_completed, issues_challenges, lessons_learned, plan_next_week, status, submitted_at, feedback) VALUES
+    ('00000000-0000-0000-0010-000000000022', 'f0000000-0000-0000-0000-000000000022', 4, 'Conducted security review of payment flow, documented 7 findings', 'Distinguishing severity vs priority required team discussion', 'Practiked CVSS scoring and risk prioritization', 'Propose mitigation tickets to engineering', 'APPROVED', '2026-04-11', 'Strong security mindset!'),
+    ('00000000-0000-0000-0011-000000000022', 'f0000000-0000-0000-0000-000000000022', 5, 'Coordinated rollout of WebAuthn-based passwordless login to internal staff', 'Browser compatibility issues for older Safari versions', 'Learned FIDO2 protocol and cross-browser testing strategy', 'Monitor adoption and write playbook', 'APPROVED', '2026-04-18', 'Forward-thinking solution!'),
+    ('00000000-0000-0000-0012-000000000022', 'f0000000-0000-0000-0000-000000000022', 6, 'Built SIEM detection rules for suspicious transaction patterns', 'False positive tuning on legitimate high-value transfers', 'Learned detection-as-code approach with Sigma rules', 'Add threat intel feed integration', 'APPROVED', '2026-04-25', 'Sharp detection logic!'),
+    ('00000000-0000-0000-0013-000000000022', 'f0000000-0000-0000-0000-000000000022', 7, 'Integrated MISP threat intel feed and automated IOC enrichment pipeline', 'Schema mapping between MISP and internal SOC', 'Learned STIX/TAXII standards', 'Build automated response playbooks', 'APPROVED', '2026-05-02', 'Mature security engineering!'),
+    ('00000000-0000-0000-0014-000000000022', 'f0000000-0000-0000-0000-000000000022', 8, 'Drafted incident response playbook covering ransomware, BEC, and credential theft scenarios', 'Aligning playbook with existing runbooks', 'Practiced tabletop exercise facilitation', 'Final handoff and exit presentation', 'SUBMITTED', '2026-05-09', NULL);
+
 INSERT INTO enterprise_evaluations (evaluation_id, assignment_id, attitude_score, professionalism_score, soft_skills_score, progress_score, overall_comments, is_locked, submitted_at) VALUES
     ('00000000-0000-0000-0009-000000000022', 'f0000000-0000-0000-0000-000000000022', 9.00, 9.50, 9.00, 9.00, 'Outstanding performance, highly recommended.', TRUE, CURRENT_TIMESTAMP);
 
@@ -435,6 +452,13 @@ INSERT INTO weekly_reports (report_id, assignment_id, week_number, tasks_complet
     ('00000000-0000-0000-0005-000000000023', 'f0000000-0000-0000-0000-000000000023', 2, 'Started feature development, first PR submitted', 'Code review feedback to address', 'Learned code review process', 'Address code review comments', 'APPROVED', '2026-03-28', 'Good first PR!');
 INSERT INTO weekly_reports (report_id, assignment_id, week_number, tasks_completed, issues_challenges, lessons_learned, plan_next_week, status, submitted_at) VALUES
     ('00000000-0000-0000-0007-000000000023', 'f0000000-0000-0000-0000-000000000023', 3, 'Feature implementation ongoing, addressing review comments', 'Time management challenge', 'Learned agile workflow', 'Complete feature and testing', 'SUBMITTED', '2026-04-04');
+
+-- Weekly reports tuần 5-8 cho SV 23 (Digital Marketing, Momo, ACTIVE)
+INSERT INTO weekly_reports (report_id, assignment_id, week_number, tasks_completed, issues_challenges, lessons_learned, plan_next_week, status, submitted_at, feedback) VALUES
+    ('00000000-0000-0000-0011-000000000023', 'f0000000-0000-0000-0000-000000000023', 5, 'Launched summer campaign across Facebook, TikTok and email channels', 'Creative fatigue after first week', 'Learned iteration cadence on ad creative', 'A/B test new audience segments', 'APPROVED', '2026-04-18', 'Solid launch!'),
+    ('00000000-0000-0000-0012-000000000023', 'f0000000-0000-0000-0000-000000000023', 6, 'Built A/B testing framework with statistical significance tracking', 'Sample size calculation for low-traffic landing pages', 'Learned power analysis and confidence intervals', 'Roll out to all marketing campaigns', 'APPROVED', '2026-04-25', 'Rigorous methodology!'),
+    ('00000000-0000-0000-0013-000000000023', 'f0000000-0000-0000-0000-000000000023', 7, 'Analyzed funnel drop-off, redesigned landing page boosting conversion 22 percent', 'Cross-functional alignment with design team', 'Learned conversion rate optimization discipline', 'Document playbook for future campaigns', 'APPROVED', '2026-05-02', 'Great CRO work!'),
+    ('00000000-0000-0000-0014-000000000023', 'f0000000-0000-0000-0000-000000000023', 8, 'Produced end-of-internship playbook covering acquisition, retention and measurement frameworks', 'Balancing depth vs breadth of coverage', 'Practiced writing for cross-functional audience', 'Final handoff to growth team', 'SUBMITTED', '2026-05-09', NULL);
 
 INSERT INTO users (user_id, email, password_hash, full_name, status, must_change_password) VALUES
     ('d0000000-0000-0000-0000-000000000024', 'student24@fpt.edu.vn', '$2b$10$9iIyzMRccX/e5dRyLbgK3.11HHtAVrHrRSWNEhe.VnM/GFi3Aep8O', 'Huy Huu Yen', 'ACTIVE', FALSE);
@@ -469,6 +493,28 @@ INSERT INTO weekly_reports (report_id, assignment_id, week_number, tasks_complet
     ('00000000-0000-0000-0005-000000000025', 'f0000000-0000-0000-0000-000000000025', 2, 'Feature implementation started', 'Git workflow questions', 'Learned Git branching strategy', 'Continue feature dev', 'APPROVED', '2026-03-28', 'Good progress!');
 INSERT INTO weekly_reports (report_id, assignment_id, week_number, tasks_completed, issues_challenges, lessons_learned, plan_next_week, status, submitted_at) VALUES
     ('00000000-0000-0000-0007-000000000025', 'f0000000-0000-0000-0000-000000000025', 3, 'Feature implementation ongoing', 'Scope creep management', 'Learned sprint management', 'Complete feature', 'SUBMITTED', '2026-04-04');
+
+-- Weekly reports tuần 4-8 cho SV 24 (Software Engineering, Momo, ACTIVE)
+INSERT INTO weekly_reports (report_id, assignment_id, week_number, tasks_completed, issues_challenges, lessons_learned, plan_next_week, status, submitted_at, feedback) VALUES
+    ('00000000-0000-0000-0010-000000000024', 'f0000000-0000-0000-0000-000000000024', 4, 'Completed user story for notification module', 'Timezone handling edge cases tricky', 'Deepened understanding of java.time API', 'Integrate notification with user service', 'APPROVED', '2026-04-11', 'Solid work on edge cases!'),
+    ('00000000-0000-0000-0011-000000000024', 'f0000000-0000-0000-0000-000000000024', 5, 'Refactored authentication module following security best practices. Removed deprecated token validation. Added comprehensive unit tests covering edge cases. Updated API documentation. Performance improved by 35 percent. Team reviewed code and approved pull request.', 'Initial confusion around refresh token rotation strategy', 'Practiced OWASP security guidelines and JWT lifecycle management', 'Move to authorization layer', 'APPROVED', '2026-04-18', 'Excellent refactor!'),
+    ('00000000-0000-0000-0012-000000000024', 'f0000000-0000-0000-0000-000000000024', 6, 'Implemented role-based access control middleware', 'Granular permission matrix was complex', 'Learned about attribute-based access control patterns', 'Add audit logging for sensitive operations', 'APPROVED', '2026-04-25', 'Great RBAC design!'),
+    ('00000000-0000-0000-0013-000000000024', 'f0000000-0000-0000-0000-000000000024', 7, 'Built audit logging pipeline shipping events to data lake', 'Backpressure handling during peak hours', 'Learned Kafka consumer group tuning', 'Build dashboard for security team', 'APPROVED', '2026-05-02', 'Production-grade work!'),
+    ('00000000-0000-0000-0014-000000000024', 'f0000000-0000-0000-0000-000000000024', 8, 'Delivered security analytics dashboard with charts and anomaly detection rules', 'D3.js rendering performance for large datasets', 'Learned data visualization optimization techniques', 'Wrap up documentation and handoff', 'SUBMITTED', '2026-05-09', NULL);
+
+-- Weekly reports tuần 4-8 cho SV 25 (Information Security, Momo, ACTIVE)
+INSERT INTO weekly_reports (report_id, assignment_id, week_number, tasks_completed, issues_challenges, lessons_learned, plan_next_week, status, submitted_at, feedback) VALUES
+    ('00000000-0000-0000-0010-000000000025', 'f0000000-0000-0000-0000-000000000025', 4, 'Threat model review for payment gateway', 'Difficulty mapping data flows across services', 'Practiced STRIDE methodology on production system', 'Document mitigation plan for top risks', 'APPROVED', '2026-04-11', 'Thorough analysis!'),
+    ('00000000-0000-0000-0011-000000000025', 'f0000000-0000-0000-0000-000000000025', 5, 'Refactored authentication module following security best practices. Removed deprecated token validation. Added comprehensive unit tests covering edge cases. Updated API documentation. Performance improved by 30 percent. Team reviewed code and approved pull request.', 'Initial confusion around refresh token rotation strategy', 'Practiced OWASP security guidelines and JWT lifecycle management', 'Move to authorization layer', 'SUBMITTED', '2026-04-18', NULL),
+    ('00000000-0000-0000-0012-000000000025', 'f0000000-0000-0000-0000-000000000025', 6, 'Ran penetration tests on staging environment, found 3 medium vulnerabilities', 'Test environment did not mirror production config', 'Learned to design more representative staging setups', 'Prepare remediation patches', 'APPROVED', '2026-04-25', 'Sharp eye for issues!'),
+    ('00000000-0000-0000-0013-000000000025', 'f0000000-0000-0000-0000-000000000025', 7, 'Coordinated patch deployment with engineering teams', 'Communication across teams added delay', 'Learned incident response coordination workflow', 'Run regression suite and finalize report', 'APPROVED', '2026-05-02', 'Well coordinated!'),
+    ('00000000-0000-0000-0014-000000000025', 'f0000000-0000-0000-0000-000000000025', 8, 'Finalized security assessment report with executive summary and prioritized remediation backlog', 'Distilling technical findings for executive audience', 'Practiced security report writing for non-technical stakeholders', 'Present findings to leadership', 'SUBMITTED', '2026-05-09', NULL);
+
+-- Mid-internship evaluations cho SV 23, 24, 25 (Momo, ACTIVE, kỳ 6) để HR test tính năng đánh giá.
+INSERT INTO enterprise_evaluations (evaluation_id, assignment_id, attitude_score, professionalism_score, soft_skills_score, progress_score, overall_comments, is_locked, submitted_at) VALUES
+    ('00000000-0000-0000-0009-000000000023', 'f0000000-0000-0000-0000-000000000023', 8.00, 8.50, 8.00, 7.50, 'Mid-internship check: solid progress on marketing campaigns.', TRUE, '2026-04-05 10:00:00'),
+    ('00000000-0000-0000-0009-000000000024', 'f0000000-0000-0000-0000-000000000024', 9.00, 9.00, 8.50, 8.50, 'Mid-internship check: bug-fixing skills stand out.', TRUE, '2026-04-05 11:00:00'),
+    ('00000000-0000-0000-0009-000000000025', 'f0000000-0000-0000-0000-000000000025', 7.50, 8.00, 7.50, 8.00, 'Mid-internship check: learning fast, ownership of security module.', TRUE, '2026-04-05 12:00:00');
 
 -- ============================================================
 -- STUDENTS 26-30: OJT COMPLETED (Sem 7, assignment COMPLETED)
@@ -966,9 +1012,9 @@ INSERT INTO final_grades (grade_id, student_id, tm_id, semester_id, enterprise_t
 INSERT INTO weekly_reports (report_id, assignment_id, week_number, status) VALUES
     ('00000000-0000-0000-0010-000000000021', 'f0000000-0000-0000-0000-000000000021', 4, 'NOT_SUBMITTED');
 
--- student22 week 4 NOT_SUBMITTED
-INSERT INTO weekly_reports (report_id, assignment_id, week_number, status) VALUES
-    ('00000000-0000-0000-0010-000000000022', 'f0000000-0000-0000-0000-000000000022', 4, 'NOT_SUBMITTED');
+-- student22 week 4 NOT_SUBMITTED (skipped: SV 22 already has week 4 APPROVED at line 430)
+-- INSERT INTO weekly_reports (report_id, assignment_id, week_number, status) VALUES
+--     ('00000000-0000-0000-0010-000000000022', 'f0000000-0000-0000-0000-000000000022', 4, 'NOT_SUBMITTED');
 
 -- student23 week 4 NOT_SUBMITTED
 INSERT INTO weekly_reports (report_id, assignment_id, week_number, status) VALUES
@@ -979,7 +1025,7 @@ INSERT INTO weekly_reports (report_id, assignment_id, week_number, status) VALUE
 -- ============================================================
 
 INSERT INTO training_warnings (warning_id, tm_id, student_id, semester_id, week_number, warning_message, sent_at) VALUES
-    ('00000000-0000-0000-000a-000000000022', '00000000-0000-0000-0000-000000000002', 'd0000000-0000-0000-0000-000000000022', '50000000-0000-0000-0000-000000000001', 4, 'Weekly report for week 4 has not been submitted. Please submit by deadline.', CURRENT_TIMESTAMP),
+    -- SV 22 warning removed: SV 22 has week 4 APPROVED at line 430 (see comment block at Part 10)
     ('00000000-0000-0000-000a-000000000023', '00000000-0000-0000-0000-000000000002', 'd0000000-0000-0000-0000-000000000023', '50000000-0000-0000-0000-000000000001', 4, 'Weekly report for week 4 has not been submitted. Immediate submission required.', CURRENT_TIMESTAMP);
 
 -- ============================================================

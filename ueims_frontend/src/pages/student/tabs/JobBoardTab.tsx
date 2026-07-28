@@ -11,6 +11,7 @@ import { ApplicationService } from '@/services/ApplicationService';
 import { useStudentProfileQuery } from '@/hooks/useStudentProfile';
 import { useActiveJobsQuery, useMyApplicationsIdsQuery } from '@/hooks/useStudentDashboardQueries';
 import { cc, hexToRgba } from '../constants';
+import { resolveEnterpriseLogo, enterpriseInitials } from '@/utils/enterpriseLogo';
 
 const CTAButton: React.FC<{
   children: React.ReactNode;
@@ -153,9 +154,23 @@ export const JobBoardTab: React.FC = () => {
               <motion.div key={job.jobPostId || index} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: index * 0.05 }} style={{ height: '100%' }}>
                 <NeuSurface style={{ padding: 20, cursor: 'pointer', transition: 'all 0.2s', height: '100%', display: 'flex', flexDirection: 'column' }} onClick={() => navigate(`/job/${job.jobPostId}`)}>
                   <div style={{ display: 'flex', gap: 12, marginBottom: 14 }}>
-                    <div style={{ width: 48, height: 48, borderRadius: cc.radiusMd, background: hexToRgba(cc.primary, 0.08), display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.primary, fontSize: 20, fontWeight: 700, flexShrink: 0 }}>
-                      {job.enterpriseName?.charAt(0) || 'E'}
-                    </div>
+                    {(() => {
+                      const logoUrl = resolveEnterpriseLogo(job.enterpriseName, job.enterpriseLogoUrl);
+                      return (
+                        <div style={{ width: 48, height: 48, borderRadius: cc.radiusMd, background: hexToRgba(cc.primary, 0.08), display: 'flex', alignItems: 'center', justifyContent: 'center', color: cc.primary, fontSize: 18, fontWeight: 700, flexShrink: 0, overflow: 'hidden' }}>
+                          {logoUrl ? (
+                            <img
+                              src={logoUrl}
+                              alt={job.enterpriseName || 'Enterprise'}
+                              style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                              onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+                            />
+                          ) : (
+                            enterpriseInitials(job.enterpriseName)
+                          )}
+                        </div>
+                      );
+                    })()}
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <h4 style={{ fontSize: 14, fontWeight: 600, color: cc.textPrimary, margin: '0 0 2px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{job.title || t('internshipPosition', 'Internship Position')}</h4>
                       <p style={{ fontSize: 12, color: cc.textMuted, margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{job.enterpriseName || t('company', 'Company')}</p>

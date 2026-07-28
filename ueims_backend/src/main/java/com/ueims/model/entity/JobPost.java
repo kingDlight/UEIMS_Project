@@ -9,6 +9,7 @@ import jakarta.validation.constraints.NotNull;
 import org.hibernate.annotations.SQLRestriction;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.*;
 
@@ -103,4 +104,35 @@ public class JobPost extends BaseEntity {
      */
     @Transient
     private Boolean full;
+
+    /**
+     * Convenience snapshot of {@code enterprise.companyName} so the FE can render the
+     * enterprise label on job cards without hydrating the full {@link Enterprise}
+     * object. Populated by {@code JobPostService} via {@link #populateEnterpriseSnapshot()}.
+     */
+    @Transient
+    @JsonProperty("enterpriseName")
+    private String enterpriseName;
+
+    /**
+     * Convenience snapshot of {@code enterprise.logoUrl} for the student job board
+     * and enterprise job-post card so the FE can render the logo image. Populated by
+     * {@code JobPostService} via {@link #populateEnterpriseSnapshot()}.
+     */
+    @Transient
+    @JsonProperty("enterpriseLogoUrl")
+    private String enterpriseLogoUrl;
+
+    /**
+     * Populates the transient {@code enterpriseName} / {@code enterpriseLogoUrl}
+     * fields from the lazily-loaded {@link #enterprise} association. Safe to call
+     * even when {@code enterprise} has not been initialised (returns silently).
+     */
+    public void populateEnterpriseSnapshot() {
+        if (this.enterprise == null) {
+            return;
+        }
+        this.enterpriseName = this.enterprise.getCompanyName();
+        this.enterpriseLogoUrl = this.enterprise.getLogoUrl();
+    }
 }
