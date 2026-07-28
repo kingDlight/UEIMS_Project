@@ -223,6 +223,11 @@ export const JobDetailPage: React.FC = () => {
 
   if (!job) return null;
 
+  // Flat snapshots populated by JobPostService.populateEnterpriseSnapshot()
+  // (the nested `enterprise` field is suppressed by @JsonBackReference, so the
+  // job detail page must read from these top-level fields instead).
+  const enterpriseName = job.enterpriseName;
+  const enterpriseLogoUrl = job.enterpriseLogoUrl;
   const enterprise = job.enterprise;
 
   const filteredNavItems = getFilteredNavItems(currentSemester, hasActivePlacement);
@@ -250,20 +255,20 @@ export const JobDetailPage: React.FC = () => {
                 overflow: 'hidden'
               }}>
                 {(() => {
-                  const logoUrl = resolveEnterpriseLogo(enterprise?.companyName, enterprise?.logoUrl);
+                  const logoUrl = resolveEnterpriseLogo(enterpriseName, enterpriseLogoUrl);
                   return logoUrl ? (
                     <img
                       src={logoUrl}
-                      alt={enterprise?.companyName || 'Enterprise'}
+                      alt={enterpriseName || 'Enterprise'}
                       style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                       onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
                     />
-                  ) : enterpriseInitials(enterprise?.companyName);
+                  ) : enterpriseInitials(enterpriseName);
                 })()}
               </div>
               <div>
                 <h1 style={{ fontSize: 22, fontWeight: 800, color: cc.textPrimary, margin: '0 0 4px', letterSpacing: '-0.01em' }}>{job.title}</h1>
-                <p style={{ fontSize: 15, color: cc.textMuted, margin: 0, fontWeight: 500 }}>{enterprise?.companyName || '—'}</p>
+                <p style={{ fontSize: 15, color: cc.textMuted, margin: 0, fontWeight: 500 }}>{enterpriseName || '—'}</p>
               </div>
             </div>
             <SmallBadge label={job.status === 'OPEN' ? t('open', 'Open') : t('closed', 'Closed')} variant={job.status === 'OPEN' ? 'success' : 'neutral'} />
