@@ -1344,16 +1344,18 @@ BEGIN
         curr_week := ((CURRENT_DATE - sem_start) / 7) + 1;
 
         -- Check submission window
-        IF NEW.week_number != curr_week THEN
+        -- Allow: current week and any past week (catch-up for students who missed deadline).
+        -- Block: only future weeks. Future submissions require Training Manager override (BR-56).
+        IF NEW.week_number > curr_week THEN
             IF NEW.late_override_by IS NULL THEN
-                RAISE EXCEPTION 'Weekly report submission is restricted to the current active week (Week %). Report week is %. Late/early submissions require Training Manager override (BR-56).', curr_week, NEW.week_number;
+                RAISE EXCEPTION 'Weekly report submission is restricted to the current week or past weeks (Current: Week %). Future weeks require Training Manager override (BR-56).', curr_week;
             ELSE
                 -- Verify TM override role
                 IF NOT EXISTS (
                     SELECT 1 FROM users_roles
                     WHERE user_id = NEW.late_override_by AND role_name = 'TRAINING_MANAGER'
                 ) THEN
-                    RAISE EXCEPTION 'Invalid override: The user authorizing this late submission is not a Training Manager.';
+                    RAISE EXCEPTION 'Invalid override: The user authorizing this early submission is not a Training Manager.';
                 END IF;
             END IF;
         END IF;

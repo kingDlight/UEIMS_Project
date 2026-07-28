@@ -172,10 +172,16 @@ public class WeeklyReportServiceImpl implements WeeklyReportService {
         }
 
         // BR-52: Weekly Report Submission Window
+        // Allow submission for the current week and any past week (so students who
+        // missed a deadline can still catch up). Only future weeks are blocked.
         LocalDate startDate = assignment.getSemester().getStartDate();
         long currentWeek = ChronoUnit.WEEKS.between(startDate, LocalDate.now()) + 1;
+        Integer submittedWeek = entity.getWeekNumber();
 
-        if (entity.getWeekNumber() != (int) currentWeek) {
+        if (submittedWeek == null || submittedWeek < 1) {
+            throw new AppException(ErrorCode.INVALID_WEEK_REPORT_SUBMISSION);
+        }
+        if (submittedWeek > (int) currentWeek) {
             throw new AppException(ErrorCode.INVALID_WEEK_REPORT_SUBMISSION);
         }
 
